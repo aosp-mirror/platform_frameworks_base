@@ -49,6 +49,7 @@ import org.mockito.stubbing.Answer;
 import java.io.File;
 import java.util.Arrays;
 
+@SuppressWarnings("SynchronizeOnNonFinalField")
 public class BatteryUsageStatsRule implements TestRule {
     public static final BatteryUsageStatsQuery POWER_PROFILE_MODEL_ONLY =
             new BatteryUsageStatsQuery.Builder()
@@ -71,6 +72,8 @@ public class BatteryUsageStatsRule implements TestRule {
     private int mDisplayCount = -1;
     private int mPerUidModemModel = -1;
     private NetworkStats mNetworkStats;
+    private boolean[] mSupportedStandardBuckets;
+    private String[] mCustomPowerComponentNames;
 
     public BatteryUsageStatsRule() {
         this(0, null);
@@ -102,6 +105,11 @@ public class BatteryUsageStatsRule implements TestRule {
         mBatteryStats = new MockBatteryStatsImpl(mMockClock, mHistoryDir, mHandler);
         mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.setCpuScalingPolicies(new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
+        synchronized (mBatteryStats) {
+            mBatteryStats.initEnergyConsumerStatsLocked(mSupportedStandardBuckets,
+                    mCustomPowerComponentNames);
+        }
+        mBatteryStats.informThatAllExternalStatsAreFlushed();
 
         mBatteryStats.onSystemReady();
 
@@ -230,13 +238,15 @@ public class BatteryUsageStatsRule implements TestRule {
     /** Call only after setting the power profile information. */
     public BatteryUsageStatsRule initMeasuredEnergyStatsLocked(
             String[] customPowerComponentNames) {
-        final boolean[] supportedStandardBuckets =
-                new boolean[EnergyConsumerStats.NUMBER_STANDARD_POWER_BUCKETS];
-        Arrays.fill(supportedStandardBuckets, true);
-        synchronized (mBatteryStats) {
-            mBatteryStats.initEnergyConsumerStatsLocked(supportedStandardBuckets,
-                    customPowerComponentNames);
-            mBatteryStats.informThatAllExternalStatsAreFlushed();
+        mCustomPowerComponentNames = customPowerComponentNames;
+        mSupportedStandardBuckets = new boolean[EnergyConsumerStats.NUMBER_STANDARD_POWER_BUCKETS];
+        Arrays.fill(mSupportedStandardBuckets, true);
+        if (mBatteryStats != null) {
+            synchronized (mBatteryStats) {
+                mBatteryStats.initEnergyConsumerStatsLocked(mSupportedStandardBuckets,
+                        mCustomPowerComponentNames);
+                mBatteryStats.informThatAllExternalStatsAreFlushed();
+            }
         }
         return this;
     }

@@ -13,11 +13,13 @@ com.android.internal.os.BatteryStatsHistoryIterator
 com.android.internal.os.Clock
 com.android.internal.os.LongArrayMultiStateCounter
 com.android.internal.os.LongArrayMultiStateCounter$LongArrayContainer
+com.android.internal.os.LongMultiStateCounter
 com.android.internal.os.MonotonicClock
 com.android.internal.os.PowerProfile
 com.android.internal.os.PowerStats
 com.android.internal.os.PowerStats$Descriptor
 com.android.internal.os.RuntimeInit
+com.android.internal.power.EnergyConsumerStats
 com.android.internal.power.ModemPowerProfile
 
 android.util.AtomicFile
@@ -54,6 +56,7 @@ android.os.BatteryUsageStats
 android.os.BatteryUsageStatsQuery
 android.os.Binder
 android.os.Binder$IdentitySupplier
+android.os.BluetoothBatteryStats
 android.os.Broadcaster
 android.os.Build
 android.os.BundleMerger
@@ -83,12 +86,15 @@ android.os.TestLooperManager
 android.os.ThreadLocalWorkSource
 android.os.TimestampedValue
 android.os.Trace
+android.os.UserBatteryConsumer
+android.os.UserBatteryConsumer$Builder
 android.os.UidBatteryConsumer
 android.os.UidBatteryConsumer$Builder
 android.os.UserHandle
 android.os.UserManager
 android.os.VibrationAttributes
 android.os.VibrationAttributes$Builder
+android.os.WakeLockStats
 android.os.WorkSource
 
 android.content.ClipData
@@ -159,6 +165,7 @@ android.app.Instrumentation
 
 android.metrics.LogMaker
 
+android.view.Display
 android.view.Display$HdrCapabilities
 android.view.Display$Mode
 android.view.DisplayInfo
@@ -169,7 +176,6 @@ android.telephony.ModemActivityInfo
 android.telephony.ServiceState
 
 com.android.server.LocalServices
-com.android.server.power.stats.BatteryStatsImpl
 
 com.android.internal.util.BitUtils
 com.android.internal.util.BitwiseInputStream
@@ -192,6 +198,7 @@ com.android.internal.util.QuickSelect
 com.android.internal.util.RingBuffer
 com.android.internal.util.StringPool
 
+com.android.internal.os.BackgroundThread
 com.android.internal.os.BinderCallHeavyHitterWatcher
 com.android.internal.os.BinderDeathDispatcher
 com.android.internal.os.BinderfsStatsReader

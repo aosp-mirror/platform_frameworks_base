@@ -52,6 +52,7 @@ import java.util.regex.Pattern;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
+@android.platform.test.annotations.IgnoreUnderRavenwood
 public class CpuPowerStatsCollectorValidationTest {
     @Rule
     public final CheckFlagsRule mCheckFlagsRule =

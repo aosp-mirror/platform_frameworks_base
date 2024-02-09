@@ -143,6 +143,16 @@ public class LongArrayMultiStateCounter_host {
             updateValue(values, timestampMs);
         }
 
+        public void addCounts(long[] delta) {
+            if (!mEnabled) {
+                return;
+            }
+
+            for (int i = 0; i < mArrayLength; i++) {
+                mStates[mCurrentState].mCounter[i] += delta[i];
+            }
+        }
+
         public void getValues(long[] values, int state) {
             System.arraycopy(mStates[state].mCounter, 0, values, 0, mArrayLength);
         }
@@ -329,6 +339,10 @@ public class LongArrayMultiStateCounter_host {
             long timestampMs) {
         getInstance(instanceId).incrementValues(
                 LongArrayContainer_host.getInstance(containerInstanceId), timestampMs);
+    }
+
+    public static void native_addCounts(long instanceId, long containerInstanceId) {
+        getInstance(instanceId).addCounts(LongArrayContainer_host.getInstance(containerInstanceId));
     }
 
     public static void native_getCounts(long instanceId, long containerInstanceId, int state) {

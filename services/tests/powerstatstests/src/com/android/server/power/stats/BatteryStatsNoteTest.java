@@ -28,6 +28,10 @@ import static com.android.server.power.stats.BatteryStatsImpl.ExternalStatsSync.
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
@@ -40,6 +44,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.ActivityStatsTechSpecificInfo;
 import android.telephony.Annotation;
@@ -50,7 +55,6 @@ import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.util.MutableInt;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.view.Display;
@@ -63,8 +67,8 @@ import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
 import com.android.server.power.stats.BatteryStatsImpl.DualTimer;
 
-import junit.framework.TestCase;
-
+import org.junit.Rule;
+import org.junit.Test;
 import org.mockito.Mock;
 
 import java.util.ArrayList;
@@ -78,7 +82,14 @@ import java.util.function.IntConsumer;
  * Test various BatteryStatsImpl noteStart methods.
  */
 @SuppressWarnings("GuardedBy")
-public class BatteryStatsNoteTest extends TestCase {
+@SmallTest
+public class BatteryStatsNoteTest {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private static final String TAG = BatteryStatsNoteTest.class.getSimpleName();
 
     private static final int UID = 10500;
@@ -96,7 +107,7 @@ public class BatteryStatsNoteTest extends TestCase {
     /**
      * Test BatteryStatsImpl.Uid.noteBluetoothScanResultLocked.
      */
-    @SmallTest
+    @Test
     public void testNoteBluetoothScanResultLocked() throws Exception {
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(new MockClock());
         bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
@@ -125,7 +136,7 @@ public class BatteryStatsNoteTest extends TestCase {
     /**
      * Test BatteryStatsImpl.Uid.noteStartWakeLocked.
      */
-    @SmallTest
+    @Test
     public void testNoteStartWakeLocked() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -155,7 +166,7 @@ public class BatteryStatsNoteTest extends TestCase {
     /**
      * Test BatteryStatsImpl.Uid.noteStartWakeLocked for an isolated uid.
      */
-    @SmallTest
+    @Test
     public void testNoteStartWakeLocked_isolatedUid() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
@@ -197,7 +208,7 @@ public class BatteryStatsNoteTest extends TestCase {
      * Test BatteryStatsImpl.Uid.noteStartWakeLocked for an isolated uid, with a race where the
      * isolated uid is removed from batterystats before the wakelock has been stopped.
      */
-    @SmallTest
+    @Test
     public void testNoteStartWakeLocked_isolatedUidRace() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
@@ -241,7 +252,7 @@ public class BatteryStatsNoteTest extends TestCase {
     /**
      * Test BatteryStatsImpl.Uid.noteLongPartialWakelockStart for an isolated uid.
      */
-    @SmallTest
+    @Test
     public void testNoteLongPartialWakelockStart_isolatedUid() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
@@ -296,7 +307,7 @@ public class BatteryStatsNoteTest extends TestCase {
     /**
      * Test BatteryStatsImpl.Uid.noteLongPartialWakelockStart for an isolated uid.
      */
-    @SmallTest
+    @Test
     public void testNoteLongPartialWakelockStart_isolatedUidRace() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
@@ -354,7 +365,7 @@ public class BatteryStatsNoteTest extends TestCase {
     /**
      * Test BatteryStatsImpl.noteUidProcessStateLocked.
      */
-    @SmallTest
+    @Test
     public void testNoteUidProcessStateLocked() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -441,7 +452,7 @@ public class BatteryStatsNoteTest extends TestCase {
     /**
      * Test BatteryStatsImpl.updateTimeBasesLocked.
      */
-    @SmallTest
+    @Test
     public void testUpdateTimeBasesLocked() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -465,7 +476,7 @@ public class BatteryStatsNoteTest extends TestCase {
     /**
      * Test BatteryStatsImpl.noteScreenStateLocked sets timebases and screen states correctly.
      */
-    @SmallTest
+    @Test
     public void testNoteScreenStateLocked() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -512,7 +523,7 @@ public class BatteryStatsNoteTest extends TestCase {
      * Test BatteryStatsImpl.noteScreenStateLocked sets timebases and screen states correctly for
      * multi display devices
      */
-    @SmallTest
+    @Test
     public void testNoteScreenStateLocked_multiDisplay() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -606,7 +617,7 @@ public class BatteryStatsNoteTest extends TestCase {
      * Off             -------       ----------------------
      * Doze                                ----------------
      */
-    @SmallTest
+    @Test
     public void testNoteScreenStateTimersLocked() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -656,7 +667,7 @@ public class BatteryStatsNoteTest extends TestCase {
      * Test BatteryStatsImpl.noteScreenStateLocked updates timers correctly for multi display
      * devices.
      */
-    @SmallTest
+    @Test
     public void testNoteScreenStateTimersLocked_multiDisplay() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -807,7 +818,7 @@ public class BatteryStatsNoteTest extends TestCase {
     /**
      * Test BatteryStatsImpl.noteScreenBrightnessLocked updates timers correctly.
      */
-    @SmallTest
+    @Test
     public void testScreenBrightnessLocked_multiDisplay() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -929,7 +940,7 @@ public class BatteryStatsNoteTest extends TestCase {
         checkScreenBrightnesses(overallExpected, perDisplayExpected, bi, bk.currentTimeMs);
     }
 
-    @SmallTest
+    @Test
     public void testAlarmStartAndFinishLocked() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -967,7 +978,7 @@ public class BatteryStatsNoteTest extends TestCase {
         assertThat(iterator.next()).isNull();
     }
 
-    @SmallTest
+    @Test
     public void testAlarmStartAndFinishLocked_workSource() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -1013,7 +1024,7 @@ public class BatteryStatsNoteTest extends TestCase {
         assertEquals(500, item.eventTag.uid);
     }
 
-    @SmallTest
+    @Test
     public void testNoteWakupAlarmLocked() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -1031,7 +1042,7 @@ public class BatteryStatsNoteTest extends TestCase {
         assertEquals(1, pkg.getWakeupAlarmStats().size());
     }
 
-    @SmallTest
+    @Test
     public void testNoteWakupAlarmLocked_workSource_uid() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -1064,7 +1075,7 @@ public class BatteryStatsNoteTest extends TestCase {
         assertEquals(1, pkg.getWakeupAlarmStats().size());
     }
 
-    @SmallTest
+    @Test
     public void testNoteWakupAlarmLocked_workSource_workChain() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -1090,7 +1101,7 @@ public class BatteryStatsNoteTest extends TestCase {
         assertEquals(0, pkg.getWakeupAlarmStats().size());
     }
 
-    @SmallTest
+    @Test
     public void testNoteGpsChanged() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -1114,7 +1125,7 @@ public class BatteryStatsNoteTest extends TestCase {
         assertFalse(t.isRunningLocked());
     }
 
-    @SmallTest
+    @Test
     public void testNoteGpsChanged_workSource() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -1138,7 +1149,7 @@ public class BatteryStatsNoteTest extends TestCase {
         assertFalse(t.isRunningLocked());
     }
 
-    @SmallTest
+    @Test
     public void testUpdateDisplayMeasuredEnergyStatsLocked() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -1223,7 +1234,7 @@ public class BatteryStatsNoteTest extends TestCase {
         checkMeasuredCharge("H", uid1, blame1, uid2, blame2, globalDoze, bi);
     }
 
-    @SmallTest
+    @Test
     public void testUpdateCustomMeasuredEnergyStatsLocked_neverCalled() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -1237,7 +1248,7 @@ public class BatteryStatsNoteTest extends TestCase {
         checkCustomBatteryConsumption("0", 0, 0, uid1, 0, 0, uid2, 0, 0, bi);
     }
 
-    @SmallTest
+    @Test
     public void testUpdateCustomMeasuredEnergyStatsLocked() {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -1314,7 +1325,7 @@ public class BatteryStatsNoteTest extends TestCase {
                 "D", totalBlameA, totalBlameB, uid1, blame1A, blame1B, uid2, blame2A, blame2B, bi);
     }
 
-    @SmallTest
+    @Test
     public void testGetPerStateActiveRadioDurationMs_noModemActivity() {
         final MockClock clock = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
@@ -1470,7 +1481,7 @@ public class BatteryStatsNoteTest extends TestCase {
                 expectedTxDurationsMs, bi, state.currentTimeMs);
     }
 
-    @SmallTest
+    @Test
     public void testGetPerStateActiveRadioDurationMs_initialModemActivity() {
         final MockClock clock = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
@@ -1612,7 +1623,7 @@ public class BatteryStatsNoteTest extends TestCase {
                 expectedTxDurationsMs, bi, state.currentTimeMs);
     }
 
-    @SmallTest
+    @Test
     public void testGetPerStateActiveRadioDurationMs_withModemActivity() {
         final MockClock clock = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
@@ -1852,7 +1863,7 @@ public class BatteryStatsNoteTest extends TestCase {
                 expectedTxDurationsMs, bi, state.currentTimeMs);
     }
 
-    @SmallTest
+    @Test
     public void testGetPerStateActiveRadioDurationMs_withSpecificInfoModemActivity() {
         final MockClock clock = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
@@ -2145,19 +2156,19 @@ public class BatteryStatsNoteTest extends TestCase {
                 expectedTxDurationsMs, bi, state.currentTimeMs);
     }
 
-    @SmallTest
+    @Test
     @SuppressWarnings("GuardedBy")
     public void testProcStateSyncScheduling_mobileRadioActiveState() {
         final MockClock clock = new MockClock(); // holds realtime and uptime in ms
         final MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clock);
-        final MutableInt lastProcStateChangeFlags = new MutableInt(0);
+        final int[] lastProcStateChangeFlags = new int[1];
 
         MockBatteryStatsImpl.DummyExternalStatsSync externalStatsSync =
                 new MockBatteryStatsImpl.DummyExternalStatsSync() {
                     @Override
                     public void scheduleSyncDueToProcessStateChange(int flags,
                             long delayMillis) {
-                        lastProcStateChangeFlags.value = flags;
+                        lastProcStateChangeFlags[0] = flags;
                     }
                 };
 
@@ -2170,19 +2181,19 @@ public class BatteryStatsNoteTest extends TestCase {
         bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH, curr,
                 UID);
 
-        lastProcStateChangeFlags.value = 0;
+        lastProcStateChangeFlags[0] = 0;
         clock.realtime = clock.uptime = 2002;
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
 
         final int allProcFlags = BatteryStatsImpl.ExternalStatsSync.UPDATE_ON_PROC_STATE_CHANGE;
-        assertEquals(allProcFlags, lastProcStateChangeFlags.value);
+        assertEquals(allProcFlags, lastProcStateChangeFlags[0]);
 
         // Note mobile radio is off.
         curr = 1000L * (clock.realtime = clock.uptime = 3003);
         bi.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_LOW, curr,
                 UID);
 
-        lastProcStateChangeFlags.value = 0;
+        lastProcStateChangeFlags[0] = 0;
         clock.realtime = clock.uptime = 4004;
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
 
@@ -2190,10 +2201,10 @@ public class BatteryStatsNoteTest extends TestCase {
                 & ~BatteryStatsImpl.ExternalStatsSync.UPDATE_RADIO;
         assertEquals(
                 "An inactive radio should not be queried on proc state change",
-                noRadioProcFlags, lastProcStateChangeFlags.value);
+                noRadioProcFlags, lastProcStateChangeFlags[0]);
     }
 
-    @SmallTest
+    @Test
     public void testNoteMobileRadioPowerStateLocked() {
         long curr;
         boolean update;
@@ -2243,7 +2254,7 @@ public class BatteryStatsNoteTest extends TestCase {
                 update);
     }
 
-    @SmallTest
+    @Test
     public void testNoteMobileRadioPowerStateLocked_rateLimited() {
         long curr;
         boolean update;

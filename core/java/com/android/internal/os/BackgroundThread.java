@@ -27,6 +27,7 @@ import java.util.concurrent.Executor;
 /**
  * Shared singleton background thread for each process.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class BackgroundThread extends HandlerThread {
     private static final long SLOW_DISPATCH_THRESHOLD_MS = 10_000;
     private static final long SLOW_DELIVERY_THRESHOLD_MS = 30_000;
