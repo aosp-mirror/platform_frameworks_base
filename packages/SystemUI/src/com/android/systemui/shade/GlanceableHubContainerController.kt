@@ -35,6 +35,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.kotlin.collectFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Controller that's responsible for the glanceable hub container view and its touch handling.
@@ -105,13 +106,9 @@ constructor(
      */
     private var shadeShowing = false
 
-    /** Returns true if the glanceable hub is enabled and the container view can be created. */
-    fun isEnabled(): Boolean {
-        return communalInteractor.isCommunalEnabled && isComposeAvailable()
-    }
-
-    /** Returns a {@link StateFlow} that tracks whether communal hub is available. */
-    fun communalAvailable(): Flow<Boolean> = communalInteractor.isCommunalAvailable
+    /** Returns a flow that tracks whether communal hub is available. */
+    fun communalAvailable(): Flow<Boolean> =
+        if (isComposeAvailable()) communalInteractor.isCommunalAvailable else flowOf(false)
 
     /**
      * Creates the container view containing the glanceable hub UI.
@@ -127,9 +124,6 @@ constructor(
     /** Override for testing. */
     @VisibleForTesting
     internal fun initView(containerView: View): View {
-        if (!isEnabled()) {
-            throw RuntimeException("Glanceable hub is not enabled")
-        }
         if (communalContainerView != null) {
             throw RuntimeException("Communal view has already been initialized")
         }

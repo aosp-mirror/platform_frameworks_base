@@ -488,7 +488,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             return
         }
 
-        whenever(mGlanceableHubContainerController.isEnabled()).thenReturn(true)
+        whenever(mGlanceableHubContainerController.communalAvailable())
+            .thenReturn(MutableStateFlow(true))
 
         val mockCommunalView = mock(View::class.java)
         whenever(mGlanceableHubContainerController.initView(any<Context>()))
@@ -513,7 +514,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             return
         }
 
-        whenever(mGlanceableHubContainerController.isEnabled()).thenReturn(false)
         whenever(mGlanceableHubContainerController.communalAvailable())
             .thenReturn(MutableStateFlow(false))
 

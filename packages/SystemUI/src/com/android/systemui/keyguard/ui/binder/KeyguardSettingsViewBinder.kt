@@ -22,7 +22,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.common.ui.binder.TextViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
@@ -115,7 +115,7 @@ object KeyguardSettingsViewBinder {
         activityStarter.postStartActivityDismissingKeyguard(
             WallpaperPickerIntentUtils.getIntent(view.context, LAUNCH_SOURCE_KEYGUARD),
             /* delay= */ 0,
-            /* animationController= */ ActivityLaunchAnimator.Controller.fromView(view),
+            /* animationController= */ ActivityTransitionAnimator.Controller.fromView(view),
             /* customMessage= */ view.context.getString(R.string.keyguard_unlock_to_customize_ls)
         )
     }

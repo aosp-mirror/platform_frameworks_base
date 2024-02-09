@@ -37,10 +37,10 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -68,7 +68,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
-    private ActivityLaunchAnimator.Controller mAnimationController;
+    private ActivityTransitionAnimator.Controller mAnimationController;
     @Captor
     private ArgumentCaptor<GetWalletCardsRequest> mRequestCaptor;
     @Captor
@@ -219,7 +219,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     public void getQuickAccessUiIntent_hasCards_noPendingIntent_startsWalletActivity() {
         mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, true);
         verify(mActivityStarter).startActivity(mIntentCaptor.capture(), eq(true),
-                any(ActivityLaunchAnimator.Controller.class), eq(true));
+                any(ActivityTransitionAnimator.Controller.class), eq(true));
         Intent intent = mIntentCaptor.getValue();
         assertEquals(intent.getAction(), Intent.ACTION_VIEW);
         assertEquals(
@@ -231,7 +231,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     public void getQuickAccessUiIntent_noCards_noPendingIntent_startsWalletActivity() {
         mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, false);
         verify(mActivityStarter).postStartActivityDismissingKeyguard(mIntentCaptor.capture(), eq(0),
-                any(ActivityLaunchAnimator.Controller.class));
+                any(ActivityTransitionAnimator.Controller.class));
         Intent intent = mIntentCaptor.getValue();
         assertEquals(intent.getAction(), Intent.ACTION_VIEW);
         assertEquals(
@@ -254,7 +254,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
         }).when(mQuickAccessWalletClient).getWalletPendingIntent(any(), any());
         mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, true);
         verify(mActivityStarter).postStartActivityDismissingKeyguard(mPendingIntentCaptor.capture(),
-                any(ActivityLaunchAnimator.Controller.class));
+                any(ActivityTransitionAnimator.Controller.class));
         PendingIntent pendingIntent = mPendingIntentCaptor.getValue();
         Intent intent = pendingIntent.getIntent();
         assertEquals(intent.getAction(), Intent.ACTION_VIEW);

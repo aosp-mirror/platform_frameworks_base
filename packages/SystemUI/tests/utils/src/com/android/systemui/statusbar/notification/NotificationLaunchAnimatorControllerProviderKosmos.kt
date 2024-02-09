@@ -19,5 +19,5 @@ package com.android.systemui.statusbar.notification
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
-var Kosmos.notificationLaunchAnimatorControllerProvider by
+var Kosmos.notificationTransitionAnimatorControllerProvider by
     Kosmos.Fixture { mock<NotificationLaunchAnimatorControllerProvider>() }

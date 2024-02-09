@@ -18,6 +18,7 @@ package android.app.admin;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.LOCK_DEVICE;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL;
@@ -6415,10 +6416,10 @@ public class DevicePolicyManager {
      * (PIN, pattern, or password). This API is intended for use only by device admins.
      * <p>
      * From version {@link android.os.Build.VERSION_CODES#R} onwards, the caller must either have
-     * the LOCK_DEVICE permission or the device must have the device admin feature; if neither is
-     * true, then the method will return without completing any action. Before version
-     * {@link android.os.Build.VERSION_CODES#R}, the device needed the device admin feature,
-     * regardless of the caller's permissions.
+     * the LOCK_DEVICE permission or the device must have the
+     * device admin feature; if neither is true, then the method will return without completing
+     * any action. Before version {@link android.os.Build.VERSION_CODES#R},
+     * the device needed the device admin feature, regardless of the caller's permissions.
      * <p>
      * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      * to be able to call this method; if it has not, a security exception will be thrown.
@@ -6438,7 +6439,8 @@ public class DevicePolicyManager {
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      */
-    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK, conditional = true)
+    @SuppressLint("RequiresPermission")
+    @RequiresPermission(value = LOCK_DEVICE, conditional = true)
     public void lockNow() {
         lockNow(0);
     }
@@ -6449,14 +6451,13 @@ public class DevicePolicyManager {
      * <p>
      * This method secures the device in response to an urgent situation, such as a lost or stolen
      * device. After this method is called, the device must be unlocked using strong authentication
-     * (PIN, pattern, or password). This API is for use only by device admins and holders of the
-     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK} permission.
+     * (PIN, pattern, or password). This API is intended for use only by device admins.
      * <p>
      * From version {@link android.os.Build.VERSION_CODES#R} onwards, the caller must either have
-     * the LOCK_DEVICE permission or the device must have the device admin feature; if neither is
-     * true, then the method will return without completing any action. Before version
-     * {@link android.os.Build.VERSION_CODES#R}, the device needed the device admin feature,
-     * regardless of the caller's permissions.
+     * the LOCK_DEVICE permission or the device must have the
+     * device admin feature; if neither is true, then the method will return without completing any
+     * action. Before version {@link android.os.Build.VERSION_CODES#R}, the device needed the device
+     * admin feature, regardless of the caller's permissions.
      * <p>
      * A calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK}
      * to be able to call this method; if it has not, a security exception will be thrown.
@@ -6485,7 +6486,7 @@ public class DevicePolicyManager {
      * @param flags May be 0 or {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} and the does not hold
-     *             the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK} permission, or
+     *             the {@link android.Manifest.permission#LOCK_DEVICE} permission, or
      *             the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is passed by an
      *             application that is not a profile owner of a managed profile.
      * @throws IllegalArgumentException if the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is
@@ -6494,7 +6495,7 @@ public class DevicePolicyManager {
      *             flag is passed when {@link #getStorageEncryptionStatus} does not return
      *             {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
      */
-    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK, conditional = true)
+    @RequiresPermission(value = LOCK_DEVICE, conditional = true)
     public void lockNow(@LockNowFlag int flags) {
         if (mService != null) {
             try {

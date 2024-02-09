@@ -87,7 +87,7 @@ import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
-import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorController;
+import com.android.systemui.statusbar.notification.NotificationTransitionAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -2343,7 +2343,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             // top. Otherwise, we just take the top directly.
             float expandProgress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
                     params.getProgress(0,
-                            NotificationLaunchAnimatorController.ANIMATION_DURATION_TOP_ROUNDING));
+                            NotificationTransitionAnimatorController
+                                    .ANIMATION_DURATION_TOP_ROUNDING));
             int startTop = params.getStartNotificationTop();
             top = (int) Math.min(MathUtils.lerp(startTop, params.getTop(), expandProgress),
                     startTop);

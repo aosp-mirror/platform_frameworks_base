@@ -184,7 +184,7 @@ public class BubbleExpandedView extends LinearLayout {
     private boolean mIsOverflow;
     private boolean mIsClipping;
 
-    private BubbleController mController;
+    private BubbleExpandedViewManager mManager;
     private BubbleStackView mStackView;
     private BubblePositioner mPositioner;
 
@@ -261,7 +261,7 @@ public class BubbleExpandedView extends LinearLayout {
                     // the bubble again so we'll just remove it.
                     Log.w(TAG, "Exception while displaying bubble: " + getBubbleKey()
                             + ", " + e.getMessage() + "; removing bubble");
-                    mController.removeBubble(getBubbleKey(), Bubbles.DISMISS_INVALID_INTENT);
+                    mManager.removeBubble(getBubbleKey(), Bubbles.DISMISS_INVALID_INTENT);
                 }
             });
             mInitialized = true;
@@ -281,7 +281,7 @@ public class BubbleExpandedView extends LinearLayout {
 
             if (mBubble != null && mBubble.isAppBubble()) {
                 // Let the controller know sooner what the taskId is.
-                mController.setAppBubbleTaskId(mBubble.getKey(), mTaskId);
+                mManager.setAppBubbleTaskId(mBubble.getKey(), mTaskId);
             }
 
             // With the task org, the taskAppeared callback will only happen once the task has
@@ -301,7 +301,7 @@ public class BubbleExpandedView extends LinearLayout {
             ProtoLog.d(WM_SHELL_BUBBLES, "onTaskRemovalStarted: taskId=%d bubble=%s",
                     taskId, getBubbleKey());
             if (mBubble != null) {
-                mController.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+                mManager.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
             }
             if (mTaskView != null) {
                 // Release the surface
@@ -421,17 +421,20 @@ public class BubbleExpandedView extends LinearLayout {
      * Initialize {@link BubbleController} and {@link BubbleStackView} here, this method must need
      * to be called after view inflate.
      */
-    void initialize(BubbleController controller, BubbleStackView stackView, boolean isOverflow,
+    void initialize(BubbleExpandedViewManager expandedViewManager,
+            BubbleStackView stackView,
+            BubblePositioner positioner,
+            boolean isOverflow,
             @Nullable BubbleTaskView bubbleTaskView) {
-        mController = controller;
+        mManager = expandedViewManager;
         mStackView = stackView;
         mIsOverflow = isOverflow;
-        mPositioner = mController.getPositioner();
+        mPositioner = positioner;
 
         if (mIsOverflow) {
             mOverflowView = (BubbleOverflowContainerView) LayoutInflater.from(getContext()).inflate(
                     R.layout.bubble_overflow_container, null /* root */);
-            mOverflowView.setBubbleController(mController);
+            mOverflowView.initialize(expandedViewManager, positioner);
             FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
             mExpandedViewContainer.addView(mOverflowView, lp);
             mExpandedViewContainer.setLayoutParams(

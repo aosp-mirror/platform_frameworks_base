@@ -72,7 +72,7 @@ class CredentialSelectorViewModel(
 
     init {
         uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INIT,
-            credManRepo.requestInfo?.appPackageName)
+            credManRepo.requestInfo?.packageName)
     }
 
     /**************************************************************************/
@@ -107,7 +107,7 @@ class CredentialSelectorViewModel(
         if (this.credManRepo.requestInfo?.token != credManRepo.requestInfo?.token) {
             this.uiMetrics.resetInstanceId()
             this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_NEW_REQUEST,
-                credManRepo.requestInfo?.appPackageName)
+                credManRepo.requestInfo?.packageName)
         }
     }
 
@@ -189,7 +189,7 @@ class CredentialSelectorViewModel(
     private fun onInternalError() {
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
         this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INTERNAL_ERROR,
-            credManRepo.requestInfo?.appPackageName)
+            credManRepo.requestInfo?.packageName)
         credManRepo.onParsingFailureCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }
@@ -399,6 +399,6 @@ class CredentialSelectorViewModel(
 
     @Composable
     fun logUiEvent(uiEventEnum: UiEventEnum) {
-        this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo?.appPackageName)
+        this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo?.packageName)
     }
 }

@@ -829,6 +829,34 @@ public class ViewRootImplTest {
     }
 
     /**
+     * A View should either vote a frame rate or a frame rate category instead of both.
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRateOnly() {
+        View view = new View(sContext);
+        float frameRate = 20;
+        attachViewToWindow(view);
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+
+            view.setRequestedFrameRate(frameRate);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            assertEquals(viewRootImpl.getPreferredFrameRate(), frameRate, 0.1);
+
+            view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_LOW);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_LOW);
+        });
+    }
+
+    /**
      * Test the logic of infrequent layer:
      * - NORMAL for infrequent update: FT2-FT1 > 100 && FT3-FT2 > 100.
      * - HIGH/NORMAL based on size for frequent update: (FT3-FT2) + (FT2 - FT1) < 100.

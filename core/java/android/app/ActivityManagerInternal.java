@@ -1258,4 +1258,11 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean clearApplicationUserData(String packageName, boolean keepState,
             boolean isRestore, IPackageDataObserver observer, int userId);
+
+    /**
+     * Returns current state of {@link com.android.systemui.theme.ThemeOverlayController} color
+     * palette readiness.
+     * @hide
+     */
+    public abstract boolean getThemeOverlayReadiness();
 }

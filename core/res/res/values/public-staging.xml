@@ -149,6 +149,8 @@
     <public name="autoTransact"/>
     <!-- @FlaggedApi("com.android.window.flags.enforce_edge_to_edge") -->
     <public name="windowOptOutEdgeToEdgeEnforcement"/>
+    <!-- @FlaggedApi("android.security.content_uri_permission_apis") -->
+    <public name="requireContentUriPermissionFromCaller" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

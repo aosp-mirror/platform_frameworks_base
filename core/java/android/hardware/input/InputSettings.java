@@ -76,6 +76,12 @@ public class InputSettings {
      */
     public static final int MAX_ACCESSIBILITY_SLOW_KEYS_THRESHOLD_MILLIS = 5000;
 
+    /**
+     * Default value for {@link Settings.Secure#STYLUS_POINTER_ICON_ENABLED}.
+     * @hide
+     */
+    public static final int DEFAULT_STYLUS_POINTER_ICON_ENABLED = 1;
+
     private InputSettings() {
     }
 
@@ -383,14 +389,19 @@ public class InputSettings {
     }
 
     /**
-     * Whether a pointer icon will be shown over the location of a
-     * stylus pointer.
+     * Whether a pointer icon will be shown over the location of a stylus pointer.
+     *
      * @hide
      */
     public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
+        if (InputProperties.force_enable_stylus_pointer_icon().orElse(false)) {
+            return true;
+        }
         return context.getResources()
-                       .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon)
-               || InputProperties.force_enable_stylus_pointer_icon().orElse(false);
+                        .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon)
+                && Settings.Secure.getIntForUser(context.getContentResolver(),
+                        Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+                        DEFAULT_STYLUS_POINTER_ICON_ENABLED, UserHandle.USER_CURRENT_OR_SELF) != 0;
     }
 
     /**

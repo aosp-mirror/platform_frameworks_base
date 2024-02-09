@@ -22,10 +22,10 @@ import java.lang.Float.max
 /**
  * Shader that renders turbulence simplex noise, by default no octave.
  *
- * @param useFractal whether to use fractal noise (4 octaves).
+ * @param baseType the base [Type] of the shader.
  */
-class TurbulenceNoiseShader(useFractal: Boolean = false) :
-    RuntimeShader(if (useFractal) FRACTAL_NOISE_SHADER else SIMPLEX_NOISE_SHADER) {
+class TurbulenceNoiseShader(val baseType: Type = Type.SIMPLEX_NOISE) :
+    RuntimeShader(getShader(baseType)) {
     // language=AGSL
     companion object {
         private const val UNIFORMS =
@@ -86,11 +86,34 @@ class TurbulenceNoiseShader(useFractal: Boolean = false) :
                 return vec4(color * in_opacity, in_opacity);
             }
         """
-
         private const val SIMPLEX_NOISE_SHADER =
             ShaderUtilLibrary.SHADER_LIB + UNIFORMS + SIMPLEX_SHADER
         private const val FRACTAL_NOISE_SHADER =
             ShaderUtilLibrary.SHADER_LIB + UNIFORMS + FRACTAL_SHADER
+        // TODO (b/282007590): Add NOISE_WITH_SPARKLE
+
+        enum class Type {
+            SIMPLEX_NOISE,
+            SIMPLEX_NOISE_FRACTAL,
+        }
+
+        fun getShader(type: Type): String {
+            return when (type) {
+                Type.SIMPLEX_NOISE -> SIMPLEX_NOISE_SHADER
+                Type.SIMPLEX_NOISE_FRACTAL -> FRACTAL_NOISE_SHADER
+            }
+        }
+    }
+
+    /** Convenient way for updating multiple uniform values via config object. */
+    fun applyConfig(config: TurbulenceNoiseAnimationConfig) {
+        setGridCount(config.gridCount)
+        setPixelDensity(config.pixelDensity)
+        setColor(config.color)
+        setBackgroundColor(config.backgroundColor)
+        setSize(config.width, config.height)
+        setLumaMatteFactors(config.lumaMatteBlendFactor, config.lumaMatteOverallBrightness)
+        setInverseNoiseLuminosity(config.shouldInverseNoiseLuminosity)
     }
 
     /** Sets the number of grid for generating noise. */
@@ -107,18 +130,19 @@ class TurbulenceNoiseShader(useFractal: Boolean = false) :
         setFloatUniform("in_pixelDensity", pixelDensity)
     }
 
-    /** Sets the noise color of the effect. */
+    /** Sets the noise color of the effect. Alpha is ignored. */
     fun setColor(color: Int) {
         setColorUniform("in_color", color)
     }
 
-    /** Sets the background color of the effect. */
+    /** Sets the background color of the effect. Alpha is ignored. */
     fun setBackgroundColor(color: Int) {
         setColorUniform("in_backgroundColor", color)
     }
 
     /**
-     * Sets the opacity to achieve fade in/ out of the animation.
+     * Sets the opacity of the effect. Not intended to set by the client as it is used for
+     * ease-in/out animations.
      *
      * Expected value range is [1, 0].
      */

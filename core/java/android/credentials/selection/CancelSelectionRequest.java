@@ -21,7 +21,6 @@ import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENAB
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -59,7 +58,7 @@ public final class CancelSelectionRequest implements Parcelable {
     private final boolean mShouldShowCancellationExplanation;
 
     @NonNull
-    private final String mAppPackageName;
+    private final String mPackageName;
 
     /**
      * Returns the request token matching the user request that should be cancelled.
@@ -85,8 +84,8 @@ public final class CancelSelectionRequest implements Parcelable {
      * metadata (e.g. "Cancelled by `App Name`").
      */
     @NonNull
-    public String getAppPackageName() {
-        return mAppPackageName;
+    public String getPackageName() {
+        return mPackageName;
     }
 
     /**
@@ -98,33 +97,36 @@ public final class CancelSelectionRequest implements Parcelable {
         return mShouldShowCancellationExplanation;
     }
 
+
     /**
      * Constructs a {@link CancelSelectionRequest}.
      *
-     * @hide
+     * @param requestToken request token matching the app request that should be cancelled
+     * @param shouldShowCancellationExplanation whether the UI should display some informational
+     *                                          cancellation message before closing
+     * @param packageName package that is invoking this request
+     *
      */
-    @TestApi
-    @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
-    public CancelSelectionRequest(@NonNull IBinder token, boolean shouldShowCancellationExplanation,
-            @NonNull String appPackageName) {
-        mToken = token;
+    public CancelSelectionRequest(@NonNull RequestToken requestToken,
+            boolean shouldShowCancellationExplanation, @NonNull String packageName) {
+        mToken = requestToken.getToken();
         mShouldShowCancellationExplanation = shouldShowCancellationExplanation;
-        mAppPackageName = appPackageName;
+        mPackageName = packageName;
     }
 
     private CancelSelectionRequest(@NonNull Parcel in) {
         mToken = in.readStrongBinder();
         AnnotationValidations.validate(NonNull.class, null, mToken);
         mShouldShowCancellationExplanation = in.readBoolean();
-        mAppPackageName = in.readString8();
-        AnnotationValidations.validate(NonNull.class, null, mAppPackageName);
+        mPackageName = in.readString8();
+        AnnotationValidations.validate(NonNull.class, null, mPackageName);
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mToken);
         dest.writeBoolean(mShouldShowCancellationExplanation);
-        dest.writeString8(mAppPackageName);
+        dest.writeString8(mPackageName);
     }
 
     @Override

@@ -361,7 +361,10 @@ stubs_defaults {
     previous_api: ":android.api.public.latest",
     merge_annotations_dirs: ["metalava-manual"],
     defaults_visibility: ["//frameworks/base/api"],
-    visibility: ["//frameworks/base/api"],
+    visibility: [
+        "//frameworks/base/api",
+        "//frameworks/base/core/api",
+    ],
 }
 
 // We resolve dependencies on APIs in modules by depending on a prebuilt of the whole

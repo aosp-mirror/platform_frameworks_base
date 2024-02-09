@@ -15,9 +15,12 @@
  */
 package com.android.systemui.surfaceeffects.turbulencenoise
 
+import android.graphics.Color
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE_FRACTAL
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -35,7 +38,8 @@ class TurbulenceNoiseViewTest : SysuiTestCase() {
     @Test
     fun play_playsAnimation() {
         val config = TurbulenceNoiseAnimationConfig()
-        val turbulenceNoiseView = TurbulenceNoiseView(context, null).also { it.applyConfig(config) }
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        turbulenceNoiseView.initShader(SIMPLEX_NOISE, config)
         var onAnimationEndCalled = false
 
         fakeExecutor.execute {
@@ -50,7 +54,8 @@ class TurbulenceNoiseViewTest : SysuiTestCase() {
     @Test
     fun playEaseIn_playsEaseInAnimation() {
         val config = TurbulenceNoiseAnimationConfig()
-        val turbulenceNoiseView = TurbulenceNoiseView(context, null).also { it.applyConfig(config) }
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        turbulenceNoiseView.initShader(SIMPLEX_NOISE, config)
         var onAnimationEndCalled = false
 
         fakeExecutor.execute {
@@ -65,7 +70,8 @@ class TurbulenceNoiseViewTest : SysuiTestCase() {
     @Test
     fun playEaseOut_playsEaseOutAnimation() {
         val config = TurbulenceNoiseAnimationConfig()
-        val turbulenceNoiseView = TurbulenceNoiseView(context, null).also { it.applyConfig(config) }
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        turbulenceNoiseView.initShader(SIMPLEX_NOISE, config)
         var onAnimationEndCalled = false
 
         fakeExecutor.execute {
@@ -80,7 +86,8 @@ class TurbulenceNoiseViewTest : SysuiTestCase() {
     @Test
     fun finish_animationPlaying_finishesAnimation() {
         val config = TurbulenceNoiseAnimationConfig()
-        val turbulenceNoiseView = TurbulenceNoiseView(context, null).also { it.applyConfig(config) }
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        turbulenceNoiseView.initShader(SIMPLEX_NOISE, config)
         var onAnimationEndCalled = false
 
         fakeExecutor.execute {
@@ -93,5 +100,52 @@ class TurbulenceNoiseViewTest : SysuiTestCase() {
             assertThat(onAnimationEndCalled).isTrue()
             assertThat(turbulenceNoiseView.currentAnimator).isNull()
         }
+    }
+
+    @Test
+    fun initShader_createsShaderCorrectly() {
+        val config = TurbulenceNoiseAnimationConfig()
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+
+        // To begin with, the shader is not initialized yet.
+        assertThat(turbulenceNoiseView.turbulenceNoiseShader).isNull()
+
+        turbulenceNoiseView.initShader(baseType = SIMPLEX_NOISE, config)
+
+        assertThat(turbulenceNoiseView.turbulenceNoiseShader).isNotNull()
+        assertThat(turbulenceNoiseView.turbulenceNoiseShader!!.baseType).isEqualTo(SIMPLEX_NOISE)
+    }
+
+    @Test
+    fun initShader_changesConfig_doesNotCreateNewShader() {
+        val config = TurbulenceNoiseAnimationConfig(color = Color.RED)
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        turbulenceNoiseView.initShader(baseType = SIMPLEX_NOISE, config)
+
+        val shader = turbulenceNoiseView.turbulenceNoiseShader
+        assertThat(shader).isNotNull()
+
+        val newConfig = TurbulenceNoiseAnimationConfig(color = Color.GREEN)
+        turbulenceNoiseView.initShader(baseType = SIMPLEX_NOISE, newConfig)
+
+        val newShader = turbulenceNoiseView.turbulenceNoiseShader
+        assertThat(newShader).isNotNull()
+        assertThat(newShader).isEqualTo(shader)
+    }
+
+    @Test
+    fun initShader_changesBaseType_createsNewShader() {
+        val config = TurbulenceNoiseAnimationConfig()
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        turbulenceNoiseView.initShader(baseType = SIMPLEX_NOISE, config)
+
+        val shader = turbulenceNoiseView.turbulenceNoiseShader
+        assertThat(shader).isNotNull()
+
+        turbulenceNoiseView.initShader(baseType = SIMPLEX_NOISE_FRACTAL, config)
+
+        val newShader = turbulenceNoiseView.turbulenceNoiseShader
+        assertThat(newShader).isNotNull()
+        assertThat(newShader).isNotEqualTo(shader)
     }
 }

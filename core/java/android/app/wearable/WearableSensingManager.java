@@ -25,9 +25,11 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
@@ -58,7 +60,6 @@ import java.util.function.Consumer;
  *
  * @hide
  */
-
 @SystemApi
 @SystemService(Context.WEARABLE_SENSING_SERVICE)
 public class WearableSensingManager {
@@ -71,6 +72,14 @@ public class WearableSensingManager {
     public static final String STATUS_RESPONSE_BUNDLE_KEY =
             "android.app.wearable.WearableSensingStatusBundleKey";
 
+    /**
+     * The Intent extra key for the data request in the Intent sent to the PendingIntent registered
+     * with {@link #registerDataRequestObserver(int, PendingIntent, Executor, Consumer)}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_WEARABLE_SENSING_DATA_REQUEST =
+            "android.app.wearable.extra.WEARABLE_SENSING_DATA_REQUEST";
 
     /**
      * An unknown status.
@@ -107,6 +116,7 @@ public class WearableSensingManager {
      * The value of the status code that indicates the method called is not supported by the
      * implementation of {@link WearableSensingService}.
      */
+
     @FlaggedApi(Flags.FLAG_ENABLE_UNSUPPORTED_OPERATION_STATUS_CODE)
     public static final int STATUS_UNSUPPORTED_OPERATION = 6;
 
@@ -118,19 +128,41 @@ public class WearableSensingManager {
     @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
     public static final int STATUS_CHANNEL_ERROR = 7;
 
+    /** The value of the status code that indicates the provided data type is not supported. */
+    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
+    public static final int STATUS_UNSUPPORTED_DATA_TYPE = 8;
+
     /** @hide */
-    @IntDef(prefix = { "STATUS_" }, value = {
-            STATUS_UNKNOWN,
-            STATUS_SUCCESS,
-            STATUS_UNSUPPORTED,
-            STATUS_SERVICE_UNAVAILABLE,
-            STATUS_WEARABLE_UNAVAILABLE,
-            STATUS_ACCESS_DENIED,
-            STATUS_UNSUPPORTED_OPERATION,
-            STATUS_CHANNEL_ERROR
-    })
+    @IntDef(
+            prefix = {"STATUS_"},
+            value = {
+                STATUS_UNKNOWN,
+                STATUS_SUCCESS,
+                STATUS_UNSUPPORTED,
+                STATUS_SERVICE_UNAVAILABLE,
+                STATUS_WEARABLE_UNAVAILABLE,
+                STATUS_ACCESS_DENIED,
+                STATUS_UNSUPPORTED_OPERATION,
+                STATUS_CHANNEL_ERROR,
+                STATUS_UNSUPPORTED_DATA_TYPE
+            })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StatusCode {}
+
+    /**
+     * Retrieves a {@link WearableSensingDataRequest} from the Intent sent to the PendingIntent
+     * provided to {@link #registerDataRequestObserver(int, PendingIntent, Executor, Consumer)}.
+     *
+     * @param intent The Intent received from the PendingIntent.
+     * @return The WearableSensingDataRequest in the provided Intent, or null if the Intent does not
+     *     contain a WearableSensingDataRequest.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
+    @Nullable
+    public static WearableSensingDataRequest getDataRequestFromIntent(@NonNull Intent intent) {
+        return intent.getParcelableExtra(
+                EXTRA_WEARABLE_SENSING_DATA_REQUEST, WearableSensingDataRequest.class);
+    }
 
     private final Context mContext;
     private final IWearableSensingManager mService;
@@ -251,6 +283,99 @@ public class WearableSensingManager {
         try {
             RemoteCallback callback = createStatusCallback(executor, statusConsumer);
             mService.provideData(data, sharedMemory, callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers a data request observer for the provided data type.
+     *
+     * <p>When data is requested, the provided {@code dataRequestPendingIntent} will be invoked. A
+     * {@link WearableSensingDataRequest} can be extracted from the Intent sent to {@code
+     * dataRequestPendingIntent} by calling {@link #getDataRequestFromIntent(Intent)}. The observer
+     * can then provide the requested data via {@link #provideData(PersistableBundle, SharedMemory,
+     * Executor, Consumer)}.
+     *
+     * <p>There is no limit to the number of observers registered for a data type. How they are
+     * handled depends on the implementation of WearableSensingService.
+     *
+     * <p>When the observer is no longer needed, {@link #unregisterDataRequestObserver(int,
+     * PendingIntent, Executor, Consumer)} should be called with the same {@code
+     * dataRequestPendingIntent}. It should be done regardless of the status code returned from
+     * {@code statusConsumer} in order to clean up housekeeping data for the {@code
+     * dataRequestPendingIntent} maintained by the system.
+     *
+     * <p>Example:
+     *
+     * <pre>{@code
+     * // Create a PendingIntent for MyDataRequestBroadcastReceiver
+     * Intent intent =
+     *         new Intent(actionString).setClass(context, MyDataRequestBroadcastReceiver.class);
+     * PendingIntent pendingIntent = PendingIntent.getBroadcast(
+     *         context, 0, intent, PendingIntent.FLAG_MUTABLE);
+     *
+     * // Register the PendingIntent as a data request observer
+     * wearableSensingManager.registerDataRequestObserver(
+     *         dataType, pendingIntent, executor, statusConsumer);
+     *
+     * // Within MyDataRequestBroadcastReceiver, receive the broadcast Intent and extract the
+     * // WearableSensingDataRequest
+     * {@literal @}Override
+     * public void onReceive(Context context, Intent intent) {
+     *     WearableSensingDataRequest dataRequest =
+     *             WearableSensingManager.getDataRequestFromIntent(intent);
+     *     // After parsing the dataRequest, provide the data
+     *     wearableSensingManager.provideData(data, sharedMemory, executor, statusConsumer);
+     * }
+     * }</pre>
+     *
+     * @param dataType The data type to listen to. Values are defined by the application that
+     *     implements {@link WearableSensingService}.
+     * @param dataRequestPendingIntent A mutable {@link PendingIntent} that will be invoked when
+     *     data is requested. See {@link #getDataRequestFromIntent(Intent)}. Activities are not
+     *     allowed to be launched using this PendingIntent.
+     * @param executor Executor on which to run the consumer callback.
+     * @param statusConsumer A consumer that handles the status code for the observer registration.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    public void registerDataRequestObserver(
+            int dataType,
+            @NonNull PendingIntent dataRequestPendingIntent,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull @StatusCode Consumer<Integer> statusConsumer) {
+        try {
+            RemoteCallback statusCallback = createStatusCallback(executor, statusConsumer);
+            mService.registerDataRequestObserver(
+                    dataType, dataRequestPendingIntent, statusCallback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters a previously registered data request observer. If the provided {@link
+     * PendingIntent} was not registered, or is already unregistered, the {@link
+     * WearableSensingService} will not be notified.
+     *
+     * @param dataType The data type the observer is for.
+     * @param dataRequestPendingIntent The observer to unregister.
+     * @param executor Executor on which to run the consumer callback.
+     * @param statusConsumer A consumer that handles the status code for the observer
+     *     unregistration.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    public void unregisterDataRequestObserver(
+            int dataType,
+            @NonNull PendingIntent dataRequestPendingIntent,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull @StatusCode Consumer<Integer> statusConsumer) {
+        try {
+            RemoteCallback statusCallback = createStatusCallback(executor, statusConsumer);
+            mService.unregisterDataRequestObserver(
+                    dataType, dataRequestPendingIntent, statusCallback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

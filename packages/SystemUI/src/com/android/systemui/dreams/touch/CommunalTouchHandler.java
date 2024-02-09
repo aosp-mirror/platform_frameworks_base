@@ -17,15 +17,21 @@
 package com.android.systemui.dreams.touch;
 
 import static com.android.systemui.dreams.touch.dagger.ShadeModule.COMMUNAL_GESTURE_INITIATION_WIDTH;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
+import androidx.annotation.VisibleForTesting;
+import androidx.lifecycle.Lifecycle;
+
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,17 +40,49 @@ import javax.inject.Named;
 public class CommunalTouchHandler implements DreamTouchHandler {
     private final int mInitiationWidth;
     private final Optional<CentralSurfaces> mCentralSurfaces;
+    private final Lifecycle mLifecycle;
+    private final CommunalInteractor mCommunalInteractor;
+    private Boolean mIsEnabled = false;
+
+    @VisibleForTesting
+    final Consumer<Boolean> mIsCommunalAvailableCallback =
+            isAvailable -> {
+                setIsEnabled(isAvailable);
+            };
 
     @Inject
     public CommunalTouchHandler(
             Optional<CentralSurfaces> centralSurfaces,
-            @Named(COMMUNAL_GESTURE_INITIATION_WIDTH) int initiationWidth) {
+            @Named(COMMUNAL_GESTURE_INITIATION_WIDTH) int initiationWidth,
+            CommunalInteractor communalInteractor,
+            Lifecycle lifecycle) {
         mInitiationWidth = initiationWidth;
         mCentralSurfaces = centralSurfaces;
+        mLifecycle = lifecycle;
+        mCommunalInteractor = communalInteractor;
+
+        collectFlow(
+                mLifecycle,
+                mCommunalInteractor.isCommunalAvailable(),
+                mIsCommunalAvailableCallback
+        );
+    }
+
+    @Override
+    public Boolean isEnabled() {
+        return mIsEnabled;
+    }
+
+    @Override
+    public void setIsEnabled(Boolean enabled) {
+        mIsEnabled = enabled;
     }
 
     @Override
     public void onSessionStart(TouchSession session) {
+        if (!mIsEnabled) {
+            return;
+        }
         mCentralSurfaces.ifPresent(surfaces -> handleSessionStart(surfaces, session));
     }
 

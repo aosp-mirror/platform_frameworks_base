@@ -48,7 +48,8 @@ public interface WwanSelectorCallback {
      */
     void onRequestEmergencyNetworkScan(@NonNull List<Integer> preferredNetworks,
             @EmergencyScanType int scanType, boolean resetScan,
-            @NonNull CancellationSignal signal, @NonNull Consumer<EmergencyRegResult> consumer);
+            @NonNull CancellationSignal signal,
+            @NonNull Consumer<EmergencyRegistrationResult> consumer);
 
     /**
      * Notifies the FW that the domain has been selected. After this method is called,

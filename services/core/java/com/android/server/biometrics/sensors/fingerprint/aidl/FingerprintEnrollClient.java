@@ -144,6 +144,7 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
                 controller -> controller.onEnrollmentProgress(getSensorId(), remaining));
 
         if (remaining == 0) {
+            resetIgnoreDisplayTouches();
             mSensorOverlays.hide(getSensorId());
             if (sidefpsControllerRefactor()) {
                 mAuthenticationStateListeners.onAuthenticationStopped();
@@ -178,6 +179,7 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
     @Override
     public void onError(int errorCode, int vendorCode) {
         super.onError(errorCode, vendorCode);
+        resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         if (sidefpsControllerRefactor()) {
             mAuthenticationStateListeners.onAuthenticationStopped();
@@ -192,6 +194,7 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
 
     @Override
     protected void startHalOperation() {
+        resetIgnoreDisplayTouches();
         mSensorOverlays.show(getSensorId(), getRequestReasonFromEnrollReason(mEnrollReason),
                 this);
         if (sidefpsControllerRefactor()) {
@@ -273,6 +276,7 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
 
     @Override
     protected void stopHalOperation() {
+        resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         if (sidefpsControllerRefactor()) {
             mAuthenticationStateListeners.onAuthenticationStopped();

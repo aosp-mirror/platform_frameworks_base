@@ -246,16 +246,6 @@ public class AdbDebuggingManager {
 
         @Override
         public void run() {
-            if (mGuid.isEmpty()) {
-                Slog.e(TAG, "adbwifi guid was not set");
-                return;
-            }
-            mPort = native_pairing_start(mGuid, mPairingCode);
-            if (mPort <= 0 || mPort > 65535) {
-                Slog.e(TAG, "Unable to start pairing server");
-                return;
-            }
-
             // Register the mdns service
             NsdServiceInfo serviceInfo = new NsdServiceInfo();
             serviceInfo.setServiceName(mServiceName);
@@ -286,6 +276,28 @@ public class AdbDebuggingManager {
                                              AdbDebuggingHandler.MSG_RESPONSE_PAIRING_RESULT,
                                              bundle);
             mHandler.sendMessage(message);
+        }
+
+        @Override
+        public void start() {
+            /*
+             * If a user is fast enough to click cancel, native_pairing_cancel can be invoked
+             * while native_pairing_start is running which run the destruction of the object
+             * while it is being constructed. Here we start the pairing server on foreground
+             * Thread so native_pairing_cancel can never be called concurrently. Then we let
+             * the pairing server run on a background Thread.
+             */
+            if (mGuid.isEmpty()) {
+                Slog.e(TAG, "adbwifi guid was not set");
+                return;
+            }
+            mPort = native_pairing_start(mGuid, mPairingCode);
+            if (mPort <= 0) {
+                Slog.e(TAG, "Unable to start pairing server");
+                return;
+            }
+
+            super.start();
         }
 
         public void cancelPairing() {

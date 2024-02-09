@@ -1,13 +1,6 @@
 package: "android.view.flags"
 
 flag {
-     name: "enable_surface_native_alloc_registration"
-     namespace: "toolkit"
-     description: "Feature flag for registering surfaces with the VM for faster cleanup"
-     bug: "306193257"
-}
-
-flag {
     name: "enable_surface_native_alloc_registration_ro"
     namespace: "toolkit"
     description: "Feature flag for registering surfaces with the VM for faster"
@@ -22,5 +15,13 @@ flag {
     description: "Enables using the measure cache during a view force layout from the second "
       "onMeasure call onwards during the same traversal."
     bug: "316170253"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_vector_cursors"
+    namespace: "systemui"
+    description: "Feature flag to enable vector drawables in addition to bitmaps for PointerIcon."
+    bug: "305193969"
     is_fixed_read_only: true
 }

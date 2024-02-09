@@ -56,19 +56,32 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
     }
 
     /** Call before use and again if cleanUpExpandedState was called. */
-    fun initialize(controller: BubbleController, forBubbleBar: Boolean) {
-        if (forBubbleBar) {
-            createBubbleBarExpandedView()
-                .initialize(controller, /* isOverflow= */ true, /* bubbleTaskView= */ null)
-        } else {
-            createExpandedView()
+    fun initialize(
+        expandedViewManager: BubbleExpandedViewManager,
+        stackView: BubbleStackView,
+        positioner: BubblePositioner
+    ) {
+        createExpandedView()
                 .initialize(
-                    controller,
-                    controller.stackView,
+                        expandedViewManager,
+                    stackView,
+                    positioner,
                     /* isOverflow= */ true,
                     /* bubbleTaskView= */ null
                 )
-        }
+    }
+
+    fun initializeForBubbleBar(
+        expandedViewManager: BubbleExpandedViewManager,
+        positioner: BubblePositioner
+    ) {
+        createBubbleBarExpandedView()
+            .initialize(
+                expandedViewManager,
+                positioner,
+                /* isOverflow= */ true,
+                /* bubbleTaskView= */ null
+            )
     }
 
     fun cleanUpExpandedState() {

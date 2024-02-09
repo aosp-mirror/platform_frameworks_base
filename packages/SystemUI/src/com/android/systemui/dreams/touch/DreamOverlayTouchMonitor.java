@@ -292,6 +292,9 @@ public class DreamOverlayTouchMonitor {
                         new HashMap<>();
 
                 for (DreamTouchHandler handler : mHandlers) {
+                            if (!handler.isEnabled()) {
+                                continue;
+                            }
                     final Rect maxBounds = mDisplayHelper.getMaxBounds(ev.getDisplayId(),
                             TYPE_APPLICATION_OVERLAY);
 

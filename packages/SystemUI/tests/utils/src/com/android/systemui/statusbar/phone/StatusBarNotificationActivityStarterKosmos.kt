@@ -23,7 +23,7 @@ import android.service.dream.dreamManagerInterface
 import com.android.internal.logging.metricsLogger
 import com.android.internal.widget.lockPatternUtils
 import com.android.systemui.activityIntentHelper
-import com.android.systemui.animation.activityLaunchAnimator
+import com.android.systemui.animation.activityTransitionAnimator
 import com.android.systemui.assist.assistManager
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
@@ -35,7 +35,7 @@ import com.android.systemui.shade.shadeController
 import com.android.systemui.shade.shadeViewController
 import com.android.systemui.statusbar.notification.collection.provider.launchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.notificationVisibilityProvider
-import com.android.systemui.statusbar.notification.notificationLaunchAnimatorControllerProvider
+import com.android.systemui.statusbar.notification.notificationTransitionAnimatorControllerProvider
 import com.android.systemui.statusbar.notification.row.onUserInteractionCallback
 import com.android.systemui.statusbar.notificationClickNotifier
 import com.android.systemui.statusbar.notificationLockscreenUserManager
@@ -78,9 +78,9 @@ val Kosmos.statusBarNotificationActivityStarter by
             notificationPresenter,
             shadeViewController,
             notificationShadeWindowController,
-            activityLaunchAnimator,
+            activityTransitionAnimator,
             shadeAnimationInteractor,
-            notificationLaunchAnimatorControllerProvider,
+            notificationTransitionAnimatorControllerProvider,
             launchFullScreenIntentProvider,
             powerInteractor,
             userTracker,

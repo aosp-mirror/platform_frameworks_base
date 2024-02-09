@@ -25,7 +25,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.biometrics.UdfpsKeyguardViewLegacy.ANIMATE_APPEAR_ON_SCREEN_OFF
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
@@ -69,7 +69,7 @@ open class UdfpsKeyguardViewControllerLegacy(
     private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
     systemUIDialogManager: SystemUIDialogManager,
     private val udfpsController: UdfpsController,
-    private val activityLaunchAnimator: ActivityLaunchAnimator,
+    private val activityTransitionAnimator: ActivityTransitionAnimator,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
@@ -137,20 +137,20 @@ open class UdfpsKeyguardViewControllerLegacy(
             }
         }
 
-    private val activityLaunchAnimatorListener: ActivityLaunchAnimator.Listener =
-        object : ActivityLaunchAnimator.Listener {
-            override fun onLaunchAnimationStart() {
+    private val mActivityTransitionAnimatorListener: ActivityTransitionAnimator.Listener =
+        object : ActivityTransitionAnimator.Listener {
+            override fun onTransitionAnimationStart() {
                 isLaunchingActivity = true
                 activityLaunchProgress = 0f
                 updateAlpha()
             }
 
-            override fun onLaunchAnimationEnd() {
+            override fun onTransitionAnimationEnd() {
                 isLaunchingActivity = false
                 updateAlpha()
             }
 
-            override fun onLaunchAnimationProgress(linearProgress: Float) {
+            override fun onTransitionAnimationProgress(linearProgress: Float) {
                 activityLaunchProgress = linearProgress
                 updateAlpha()
             }
@@ -370,7 +370,7 @@ open class UdfpsKeyguardViewControllerLegacy(
         updatePauseAuth()
         keyguardViewManager.setOccludingAppBiometricUI(occludingAppBiometricUI)
         lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = this
-        activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
+        activityTransitionAnimator.addListener(mActivityTransitionAnimatorListener)
         view.startIconAsyncInflate {
             val animationViewInternal: View =
                 view.requireViewById(R.id.udfps_animation_view_internal)
@@ -389,7 +389,7 @@ open class UdfpsKeyguardViewControllerLegacy(
         if (lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy === this) {
             lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = null
         }
-        activityLaunchAnimator.removeListener(activityLaunchAnimatorListener)
+        activityTransitionAnimator.removeListener(mActivityTransitionAnimatorListener)
         keyguardViewManager.removeCallback(statusBarKeyguardViewManagerCallback)
     }
 
@@ -536,7 +536,7 @@ open class UdfpsKeyguardViewControllerLegacy(
                 val udfpsActivityLaunchAlphaMultiplier =
                     1f -
                         (activityLaunchProgress *
-                                (ActivityLaunchAnimator.TIMINGS.totalDuration / 83))
+                                (ActivityTransitionAnimator.TIMINGS.totalDuration / 83))
                             .coerceIn(0f, 1f)
                 alpha = (alpha * udfpsActivityLaunchAlphaMultiplier).toInt()
             }

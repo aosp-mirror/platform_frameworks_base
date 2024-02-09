@@ -39,6 +39,7 @@ struct PointerIcon {
     float hotSpotY;
     std::vector<graphics::Bitmap> bitmapFrames;
     int32_t durationPerFrame;
+    bool drawNativeDropShadow;
 
     inline bool isNullIcon() { return style == PointerIconStyle::TYPE_NULL; }
 
@@ -49,6 +50,7 @@ struct PointerIcon {
         hotSpotY = 0;
         bitmapFrames.clear();
         durationPerFrame = 0;
+        drawNativeDropShadow = false;
     }
 };
 

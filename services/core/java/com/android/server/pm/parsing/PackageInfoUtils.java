@@ -594,6 +594,7 @@ public class PackageInfoUtils {
         }
         ai.applicationInfo = applicationInfo;
         ai.requiredDisplayCategory = a.getRequiredDisplayCategory();
+        ai.requireContentUriPermissionFromCaller = a.getRequireContentUriPermissionFromCaller();
         ai.setKnownActivityEmbeddingCerts(a.getKnownActivityEmbeddingCerts());
         assignFieldsComponentInfoParsedMainComponent(ai, a, pkgSetting, userId);
         return ai;

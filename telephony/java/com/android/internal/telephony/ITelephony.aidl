@@ -2742,14 +2742,19 @@ interface ITelephony {
      * Request to enable or disable the satellite modem.
      *
      * @param subId The subId of the subscription to enable or disable the satellite modem for.
-     * @param enable True to enable the satellite modem and false to disable.
-     * @param isDemoModeEnabled True if demo mode is enabled and false otherwise.
+     * @param enableSatellite True to enable the satellite modem and false to disable.
+     * @param enableDemoMode True if demo mode is enabled and false otherwise. When
+     *                       disabling satellite, {@code enableDemoMode} is always considered as
+     *                       {@code false} by Telephony.
+     * @param isEmergency {@code true} means satellite is enabled for emergency mode, {@code false}
+     *                    otherwise. When disabling satellite, {@code isEmergency} is always
+     *                    considered as {@code false} by Telephony.
      * @param callback The callback to get the result of the request.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void requestSatelliteEnabled(int subId, boolean enable, boolean isDemoModeEnabled,
-            in IIntegerConsumer callback);
+    void requestSatelliteEnabled(int subId, boolean enableSatellite, boolean enableDemoMode,
+            boolean isEmergency, in IIntegerConsumer callback);
 
     /**
      * Request to get whether the satellite modem is enabled.
@@ -2773,6 +2778,18 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void requestIsDemoModeEnabled(int subId, in ResultReceiver receiver);
+
+    /**
+     * Request to get whether the satellite service is enabled with emergency mode.
+     *
+     * @param subId The subId of the subscription to request whether the satellite demo mode is
+     *              enabled for.
+     * @param receiver Result receiver to get the error code of the request and whether the
+     *                 satellite is enabled with emergency mode.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestIsEmergencyModeEnabled(int subId, in ResultReceiver receiver);
 
     /**
      * Request to get whether the satellite service is supported on the device.

@@ -612,6 +612,7 @@ message SecureSettingsProto {
     }
     optional Sounds sounds = 72;
 
+    optional SettingProto stylus_pointer_icon_enabled = 99 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto swipe_bottom_to_notification_enabled = 82 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Defines whether managed profile ringtones should be synced from its
     // parent profile.
@@ -720,5 +721,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 99;
+    // Next tag = 100;
 }

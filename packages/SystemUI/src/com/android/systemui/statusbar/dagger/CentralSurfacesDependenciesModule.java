@@ -26,7 +26,7 @@ import android.util.Log;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.AnimationFeatureFlags;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
@@ -190,8 +190,8 @@ public interface CentralSurfacesDependenciesModule {
     /** */
     @Provides
     @SysUISingleton
-    static ActivityLaunchAnimator provideActivityLaunchAnimator() {
-        return new ActivityLaunchAnimator();
+    static ActivityTransitionAnimator provideActivityTransitionAnimator() {
+        return new ActivityTransitionAnimator();
     }
 
     /** */

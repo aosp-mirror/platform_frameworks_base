@@ -62,7 +62,7 @@ constructor(
     override val reorderingWidgets: StateFlow<Boolean>
         get() = _reorderingWidgets
 
-    override fun onDeleteWidget(id: Int) = communalInteractor.deleteWidgetFromHost(id)
+    override fun onDeleteWidget(id: Int) = communalInteractor.deleteWidget(id)
 
     override fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) =
         communalInteractor.updateWidgetOrder(widgetIdToPriorityMap)

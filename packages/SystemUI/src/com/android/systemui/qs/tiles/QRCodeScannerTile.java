@@ -27,8 +27,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.res.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -40,6 +39,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 
 import javax.inject.Inject;
 
@@ -108,8 +108,8 @@ public class QRCodeScannerTile extends QSTileImpl<QSTile.State> {
             return;
         }
 
-        ActivityLaunchAnimator.Controller animationController =
-                view == null ? null : ActivityLaunchAnimator.Controller.fromView(view,
+        ActivityTransitionAnimator.Controller animationController =
+                view == null ? null : ActivityTransitionAnimator.Controller.fromView(view,
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE);
         mActivityStarter.startActivity(intent, true /* dismissShade */,
                 animationController, true /* showOverLockscreenWhenLocked */);

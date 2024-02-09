@@ -162,6 +162,13 @@ public final class SatelliteManager {
 
     /**
      * Bundle key to get the response from
+     * {@link #requestIsEmergencyModeEnabled(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_EMERGENCY_MODE_ENABLED = "emergency_mode_enabled";
+
+    /**
+     * Bundle key to get the response from
      * {@link #requestIsSupported(Executor, OutcomeReceiver)}.
      * @hide
      */
@@ -341,6 +348,13 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_RESULT_ILLEGAL_STATE = 23;
 
+    /**
+     * Telephony framework timeout to receive ACK or response from the satellite modem after
+     * sending a request to the modem.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_RESULT_MODEM_TIMEOUT = 24;
+
     /** @hide */
     @IntDef(prefix = {"SATELLITE_RESULT_"}, value = {
             SATELLITE_RESULT_SUCCESS,
@@ -366,7 +380,8 @@ public final class SatelliteManager {
             SATELLITE_RESULT_NOT_SUPPORTED,
             SATELLITE_RESULT_REQUEST_IN_PROGRESS,
             SATELLITE_RESULT_MODEM_BUSY,
-            SATELLITE_RESULT_ILLEGAL_STATE
+            SATELLITE_RESULT_ILLEGAL_STATE,
+            SATELLITE_RESULT_MODEM_TIMEOUT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteResult {}
@@ -482,20 +497,18 @@ public final class SatelliteManager {
      * aligned with the satellite, user can send a message and also receive a reply in demo mode.
      * If enableSatellite is {@code false}, enableDemoMode has no impact on the behavior.
      *
-     * @param enableSatellite {@code true} to enable the satellite modem and
-     *                        {@code false} to disable.
-     * @param enableDemoMode {@code true} to enable demo mode and {@code false} to disable.
+     * @param attributes The attributes of the enable request.
      * @param executor The executor on which the error code listener will be called.
      * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
-     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    public void requestEnabled(boolean enableSatellite, boolean enableDemoMode,
+    public void requestEnabled(@NonNull EnableRequestAttributes attributes,
             @NonNull @CallbackExecutor Executor executor,
             @SatelliteResult @NonNull Consumer<Integer> resultListener) {
+        Objects.requireNonNull(attributes);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(resultListener);
 
@@ -509,14 +522,17 @@ public final class SatelliteManager {
                                 () -> resultListener.accept(result)));
                     }
                 };
-                telephony.requestSatelliteEnabled(mSubId, enableSatellite, enableDemoMode,
-                        errorCallback);
+                telephony.requestSatelliteEnabled(mSubId, attributes.isEnabled(),
+                        attributes.isDemoMode(), attributes.isEmergencyMode(), errorCallback);
             } else {
-                throw new IllegalStateException("telephony service is null.");
+                Rlog.e(TAG, "requestEnabled() invalid telephony");
+                executor.execute(() -> Binder.withCleanCallingIdentity(
+                        () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "requestSatelliteEnabled() RemoteException: ", ex);
-            ex.rethrowAsRuntimeException();
+            Rlog.e(TAG, "requestEnabled() exception: ", ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(
+                    () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
         }
     }
 
@@ -566,12 +582,14 @@ public final class SatelliteManager {
                 };
                 telephony.requestIsSatelliteEnabled(mSubId, receiver);
             } else {
+                loge("requestIsEnabled() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                         new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
             }
         } catch (RemoteException ex) {
-            loge("requestIsSatelliteEnabled() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            loge("requestIsEnabled() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }
     }
 
@@ -621,11 +639,68 @@ public final class SatelliteManager {
                 };
                 telephony.requestIsDemoModeEnabled(mSubId, receiver);
             } else {
+                loge("requestIsDemoModeEnabled() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                         new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
             }
         } catch (RemoteException ex) {
             loge("requestIsDemoModeEnabled() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+        }
+    }
+
+    /**
+     * Request to get whether the satellite service is enabled for emergency mode.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return a {@code boolean} with value {@code true} if satellite is enabled
+     *                 for emergency mode and {@code false} otherwise.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public void requestIsEmergencyModeEnabled(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData.containsKey(KEY_EMERGENCY_MODE_ENABLED)) {
+                                boolean isEmergencyModeEnabled =
+                                        resultData.getBoolean(KEY_EMERGENCY_MODE_ENABLED);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(isEmergencyModeEnabled)));
+                            } else {
+                                loge("KEY_EMERGENCY_MODE_ENABLED does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestIsEmergencyModeEnabled(mSubId, receiver);
+            } else {
+                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+            }
+        } catch (RemoteException ex) {
+            loge("requestIsEmergencyModeEnabled() RemoteException: " + ex);
             ex.rethrowAsRuntimeException();
         }
     }
@@ -678,12 +753,14 @@ public final class SatelliteManager {
                 };
                 telephony.requestIsSatelliteSupported(mSubId, receiver);
             } else {
+                loge("requestIsSupported() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                         new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
             }
         } catch (RemoteException ex) {
-            loge("requestIsSatelliteSupported() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            loge("requestIsSupported() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }
     }
 
@@ -733,12 +810,14 @@ public final class SatelliteManager {
                 };
                 telephony.requestSatelliteCapabilities(mSubId, receiver);
             } else {
+                loge("requestCapabilities() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                         new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
             }
         } catch (RemoteException ex) {
-            loge("requestSatelliteCapabilities() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            loge("requestCapabilities() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }
     }
 
@@ -1014,12 +1093,14 @@ public final class SatelliteManager {
                 telephony.startSatelliteTransmissionUpdates(mSubId, errorCallback,
                         internalCallback);
             } else {
+                loge("startTransmissionUpdates() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
                         () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
             }
         } catch (RemoteException ex) {
-            loge("startSatelliteTransmissionUpdates() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            loge("startTransmissionUpdates() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(
+                    () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
         }
     }
 
@@ -1069,12 +1150,14 @@ public final class SatelliteManager {
                             () -> resultListener.accept(SATELLITE_RESULT_INVALID_ARGUMENTS)));
                 }
             } else {
+                loge("stopTransmissionUpdates() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
                         () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
             }
         } catch (RemoteException ex) {
-            loge("stopSatelliteTransmissionUpdates() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            loge("stopTransmissionUpdates() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(
+                    () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
         }
     }
 
@@ -1092,7 +1175,6 @@ public final class SatelliteManager {
      * @param resultListener Listener for the {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
-     * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -1119,12 +1201,14 @@ public final class SatelliteManager {
                 cancelRemote = telephony.provisionSatelliteService(mSubId, token, provisionData,
                         errorCallback);
             } else {
+                loge("provisionService() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
                         () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
             }
         } catch (RemoteException ex) {
-            loge("provisionSatelliteService() RemoteException=" + ex);
-            ex.rethrowAsRuntimeException();
+            loge("provisionService() RemoteException=" + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(
+                    () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
         }
         if (cancellationSignal != null) {
             cancellationSignal.setRemote(cancelRemote);
@@ -1168,12 +1252,14 @@ public final class SatelliteManager {
                 };
                 telephony.deprovisionSatelliteService(mSubId, token, errorCallback);
             } else {
+                loge("deprovisionService() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
                         () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
             }
         } catch (RemoteException ex) {
-            loge("deprovisionSatelliteService() RemoteException=" + ex);
-            ex.rethrowAsRuntimeException();
+            loge("deprovisionService() RemoteException ex=" + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(
+                    () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
         }
     }
 
@@ -1215,7 +1301,7 @@ public final class SatelliteManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("registerForSatelliteProvisionStateChanged() RemoteException: " + ex);
+            loge("registerForProvisionStateChanged() RemoteException: " + ex);
             ex.rethrowAsRuntimeException();
         }
         return SATELLITE_RESULT_REQUEST_FAILED;
@@ -1302,12 +1388,14 @@ public final class SatelliteManager {
                 };
                 telephony.requestIsSatelliteProvisioned(mSubId, receiver);
             } else {
+                loge("requestIsProvisioned() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                         new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
             }
         } catch (RemoteException ex) {
-            loge("requestIsSatelliteProvisioned() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            loge("requestIsProvisioned() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }
     }
 
@@ -1347,7 +1435,7 @@ public final class SatelliteManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("registerForSatelliteModemStateChanged() RemoteException:" + ex);
+            loge("registerForModemStateChanged() RemoteException:" + ex);
             ex.rethrowAsRuntimeException();
         }
         return SATELLITE_RESULT_REQUEST_FAILED;
@@ -1516,12 +1604,14 @@ public final class SatelliteManager {
                 };
                 telephony.pollPendingDatagrams(mSubId, internalCallback);
             } else {
+                loge("pollPendingDatagrams() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
                         () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
             }
         } catch (RemoteException ex) {
             loge("pollPendingDatagrams() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            executor.execute(() -> Binder.withCleanCallingIdentity(
+                    () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
         }
     }
 
@@ -1573,12 +1663,14 @@ public final class SatelliteManager {
                 telephony.sendDatagram(mSubId, datagramType, datagram,
                         needFullScreenPointingUI, internalCallback);
             } else {
+                loge("sendDatagram() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
                         () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
             }
         } catch (RemoteException ex) {
             loge("sendDatagram() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            executor.execute(() -> Binder.withCleanCallingIdentity(
+                    () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
         }
     }
 
@@ -1628,16 +1720,16 @@ public final class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestIsCommunicationAllowedForCurrentLocation(mSubId,
-                        receiver);
+                telephony.requestIsCommunicationAllowedForCurrentLocation(mSubId, receiver);
             } else {
+                loge("requestIsCommunicationAllowedForCurrentLocation() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                         new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
             }
         } catch (RemoteException ex) {
-            loge("requestIsCommunicationAllowedForCurrentLocation() RemoteException: "
-                    + ex);
-            ex.rethrowAsRuntimeException();
+            loge("requestIsCommunicationAllowedForCurrentLocation() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }
     }
 
@@ -1688,12 +1780,14 @@ public final class SatelliteManager {
                 };
                 telephony.requestTimeForNextSatelliteVisibility(mSubId, receiver);
             } else {
+                loge("requestTimeForNextSatelliteVisibility() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                         new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
             }
         } catch (RemoteException ex) {
             loge("requestTimeForNextSatelliteVisibility() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }
     }
 
@@ -1720,7 +1814,7 @@ public final class SatelliteManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("informDeviceAlignedToSatellite() RemoteException:" + ex);
+            loge("setDeviceAlignedWithSatellite() RemoteException:" + ex);
             ex.rethrowAsRuntimeException();
         }
     }
@@ -1830,12 +1924,14 @@ public final class SatelliteManager {
                 };
                 telephony.addAttachRestrictionForCarrier(subId, reason, errorCallback);
             } else {
+                loge("addAttachRestrictionForCarrier() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
                         () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
             }
         } catch (RemoteException ex) {
             loge("addAttachRestrictionForCarrier() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            executor.execute(() -> Binder.withCleanCallingIdentity(
+                    () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
         }
     }
 
@@ -1873,12 +1969,14 @@ public final class SatelliteManager {
                 };
                 telephony.removeAttachRestrictionForCarrier(subId, reason, errorCallback);
             } else {
+                loge("removeAttachRestrictionForCarrier() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(
                         () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
             }
         } catch (RemoteException ex) {
             loge("removeAttachRestrictionForCarrier() RemoteException:" + ex);
-            ex.rethrowAsRuntimeException();
+            executor.execute(() -> Binder.withCleanCallingIdentity(
+                    () -> resultListener.accept(SATELLITE_RESULT_ILLEGAL_STATE)));
         }
     }
 
@@ -1939,10 +2037,7 @@ public final class SatelliteManager {
      * The {@link NtnSignalStrength#NTN_SIGNAL_STRENGTH_NONE} will be returned if there is no
      * signal strength data available.
      * If the request is not successful, {@link OutcomeReceiver#onError(Throwable)} will return a
-     * {@link SatelliteException} with the {@link SatelliteResult}, or return a
-     * {@link IllegalStateException} if the Telephony process is not currently available or
-     * satellite is not supported, or return a {@link RuntimeException} when remote procedure call
-     * has failed.
+     * {@link SatelliteException} with the {@link SatelliteResult}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      */
@@ -1980,12 +2075,14 @@ public final class SatelliteManager {
                 };
                 telephony.requestNtnSignalStrength(mSubId, receiver);
             } else {
+                loge("requestNtnSignalStrength() invalid telephony");
                 executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                         new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
             }
         } catch (RemoteException ex) {
             loge("requestNtnSignalStrength() RemoteException: " + ex);
-            ex.rethrowAsRuntimeException();
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }
     }
 
@@ -2187,14 +2284,11 @@ public final class SatelliteManager {
         return new ArrayList<>();
     }
 
-    private static ITelephony getITelephony() {
+    @Nullable private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(TelephonyFrameworkInitializer
                 .getTelephonyServiceManager()
                 .getTelephonyServiceRegisterer()
                 .get());
-        if (binder == null) {
-            throw new RuntimeException("Could not find Telephony Service.");
-        }
         return binder;
     }
 

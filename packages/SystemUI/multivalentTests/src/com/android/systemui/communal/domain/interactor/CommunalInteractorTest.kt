@@ -23,6 +23,7 @@ import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
@@ -41,6 +42,8 @@ import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
@@ -109,12 +112,19 @@ class CommunalInteractorTest : SysuiTestCase() {
         whenever(secondaryUser.isMain).thenReturn(false)
         userRepository.setUserInfos(listOf(mainUser, secondaryUser))
 
+        kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
+        mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
+
         underTest = kosmos.communalInteractor
     }
 
     @Test
     fun communalEnabled_true() =
-        testScope.runTest { assertThat(underTest.isCommunalEnabled).isTrue() }
+        testScope.runTest {
+            userRepository.setSelectedUserInfo(mainUser)
+            runCurrent()
+            assertThat(underTest.isCommunalEnabled).isTrue()
+        }
 
     @Test
     fun isCommunalAvailable_storageUnlockedAndMainUser_true() =
@@ -125,7 +135,6 @@ class CommunalInteractorTest : SysuiTestCase() {
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(mainUser)
             keyguardRepository.setKeyguardShowing(true)
-            communalRepository.setCommunalEnabledState(true)
 
             assertThat(isAvailable).isTrue()
         }
@@ -139,7 +148,6 @@ class CommunalInteractorTest : SysuiTestCase() {
             keyguardRepository.setIsEncryptedOrLockdown(true)
             userRepository.setSelectedUserInfo(mainUser)
             keyguardRepository.setKeyguardShowing(true)
-            communalRepository.setCommunalEnabledState(true)
 
             assertThat(isAvailable).isFalse()
         }
@@ -153,7 +161,6 @@ class CommunalInteractorTest : SysuiTestCase() {
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(secondaryUser)
             keyguardRepository.setKeyguardShowing(true)
-            communalRepository.setCommunalEnabledState(true)
 
             assertThat(isAvailable).isFalse()
         }
@@ -167,7 +174,6 @@ class CommunalInteractorTest : SysuiTestCase() {
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(mainUser)
             keyguardRepository.setDreaming(true)
-            communalRepository.setCommunalEnabledState(true)
 
             assertThat(isAvailable).isTrue()
         }
@@ -175,13 +181,14 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun isCommunalAvailable_communalDisabled_false() =
         testScope.runTest {
+            mSetFlagsRule.disableFlags(FLAG_COMMUNAL_HUB)
+
             val isAvailable by collectLastValue(underTest.isCommunalAvailable)
             assertThat(isAvailable).isFalse()
 
             keyguardRepository.setIsEncryptedOrLockdown(false)
             userRepository.setSelectedUserInfo(mainUser)
             keyguardRepository.setKeyguardShowing(true)
-            communalRepository.setCommunalEnabledState(false)
 
             assertThat(isAvailable).isFalse()
         }

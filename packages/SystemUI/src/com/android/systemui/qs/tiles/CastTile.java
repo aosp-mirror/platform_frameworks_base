@@ -38,7 +38,7 @@ import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -222,7 +222,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                     mContext,
                     ROUTE_TYPE_REMOTE_DISPLAY,
                     v -> {
-                        ActivityLaunchAnimator.Controller controller =
+                        ActivityTransitionAnimator.Controller controller =
                                 mDialogLaunchAnimator.createActivityLaunchController(v);
 
                         if (controller == null) {

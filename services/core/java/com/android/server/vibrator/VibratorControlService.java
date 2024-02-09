@@ -248,8 +248,6 @@ public final class VibratorControlService extends IVibratorControlService.Stub {
             IVibratorController vibratorController =
                     mVibratorControllerHolder.getVibratorController();
             if (vibratorController == null) {
-                Slog.d(TAG, "Unable to check if should request vibration params. "
-                        + "There is no registered IVibrationController.");
                 return false;
             }
 

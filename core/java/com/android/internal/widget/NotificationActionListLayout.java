@@ -17,7 +17,7 @@
 package com.android.internal.widget;
 
 import static android.app.Notification.CallStyle.DEBUG_NEW_ACTION_LAYOUT;
-import static android.app.Notification.CallStyle.USE_NEW_ACTION_LAYOUT;
+import static android.app.Flags.evenlyDividedCallStyleActionLayout;
 
 import android.annotation.DimenRes;
 import android.app.Notification;
@@ -410,7 +410,7 @@ public class NotificationActionListLayout extends LinearLayout {
      */
     @RemotableViewMethod
     public void setEvenlyDividedMode(boolean evenlyDividedMode) {
-        if (evenlyDividedMode && !USE_NEW_ACTION_LAYOUT) {
+        if (evenlyDividedMode && !evenlyDividedCallStyleActionLayout()) {
             Log.e(TAG, "setEvenlyDividedMode(true) called with new action layout disabled; "
                     + "leaving evenly divided mode disabled");
             return;

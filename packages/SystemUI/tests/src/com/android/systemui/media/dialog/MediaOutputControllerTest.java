@@ -72,7 +72,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
@@ -110,7 +110,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     @Mock
     private DialogLaunchAnimator mDialogLaunchAnimator;
     @Mock
-    private ActivityLaunchAnimator.Controller mActivityLaunchAnimatorController;
+    private ActivityTransitionAnimator.Controller mActivityTransitionAnimatorController;
     @Mock
     private NearbyMediaDevicesManager mNearbyMediaDevicesManager;
     // Mock
@@ -143,7 +143,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
-    private ActivityLaunchAnimator.Controller mController;
+    private ActivityTransitionAnimator.Controller mController;
     @Mock
     private PowerExemptionManager mPowerExemptionManager;
     @Mock
@@ -1122,7 +1122,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     @Test
     public void launchBluetoothPairing_isKeyguardLocked_dismissDialog() {
         when(mDialogLaunchAnimator.createActivityLaunchController(mDialogLaunchView)).thenReturn(
-                mActivityLaunchAnimatorController);
+                mActivityTransitionAnimatorController);
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
         mMediaOutputController.mCallback = this.mCallback;
 

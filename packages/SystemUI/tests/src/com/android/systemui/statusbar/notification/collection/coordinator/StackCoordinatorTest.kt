@@ -102,6 +102,7 @@ class StackCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     fun testSetNotificationStats_clearableAlerting() {
         whenever(section.bucket).thenReturn(BUCKET_ALERTING)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
@@ -109,6 +110,7 @@ class StackCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     fun testSetNotificationStats_clearableSilent() {
         whenever(section.bucket).thenReturn(BUCKET_SILENT)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)

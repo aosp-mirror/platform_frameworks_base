@@ -20,6 +20,7 @@ import com.android.systemui.communal.data.db.CommunalDatabaseModule
 import com.android.systemui.communal.data.repository.CommunalMediaRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalPrefsRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalRepositoryModule
+import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
@@ -36,6 +37,7 @@ import dagger.Module
             CommunalWidgetRepositoryModule::class,
             CommunalDatabaseModule::class,
             CommunalPrefsRepositoryModule::class,
+            CommunalSettingsRepositoryModule::class,
         ]
 )
 interface CommunalModule {

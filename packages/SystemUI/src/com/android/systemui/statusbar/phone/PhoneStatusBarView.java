@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.phone;
 
 
+import static com.android.systemui.Flags.truncatedStatusBarIconsFix;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -41,6 +43,7 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.leak.RotationUtils;
@@ -50,6 +53,7 @@ import java.util.Objects;
 public class PhoneStatusBarView extends FrameLayout {
     private static final String TAG = "PhoneStatusBarView";
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
+    private final StatusBarWindowController mStatusBarWindowController;
 
     private DarkReceiver mBattery;
     private Clock mClock;
@@ -72,6 +76,7 @@ public class PhoneStatusBarView extends FrameLayout {
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContentInsetsProvider = Dependency.get(StatusBarContentInsetsProvider.class);
+        mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
     }
 
     void setTouchEventHandler(Gefingerpoken handler) {
@@ -101,6 +106,9 @@ public class PhoneStatusBarView extends FrameLayout {
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mClock);
         if (updateDisplayParameters()) {
             updateLayoutForCutout();
+            if (truncatedStatusBarIconsFix()) {
+                updateWindowHeight();
+            }
         }
     }
 
@@ -124,6 +132,9 @@ public class PhoneStatusBarView extends FrameLayout {
         if (updateDisplayParameters()) {
             updateLayoutForCutout();
             requestLayout();
+            if (truncatedStatusBarIconsFix()) {
+                updateWindowHeight();
+            }
         }
     }
 
@@ -278,5 +289,9 @@ public class PhoneStatusBarView extends FrameLayout {
                 insets.top,
                 insets.right,
                 getPaddingBottom());
+    }
+
+    private void updateWindowHeight() {
+        mStatusBarWindowController.refreshStatusBarHeight();
     }
 }

@@ -2601,6 +2601,9 @@ class SettingsProtoDumpUtil {
         p.end(soundsToken);
 
         dumpSetting(s, p,
+                Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+                SecureSettingsProto.STYLUS_POINTER_ICON_ENABLED);
+        dumpSetting(s, p,
                 Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
                 SecureSettingsProto.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED);
         dumpSetting(s, p,

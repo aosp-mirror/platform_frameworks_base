@@ -12458,6 +12458,20 @@ public class AudioService extends IAudioService.Stub
         return app;
     }
 
+    /**
+     * Retrieves all audioMixes registered with the AudioPolicyManager
+     * @return list of registered audio mixes
+     */
+    public List<AudioMix> getRegisteredPolicyMixes() {
+        if (!android.media.audiopolicy.Flags.audioMixTestApi()) {
+            return Collections.emptyList();
+        }
+
+        synchronized (mAudioPolicies) {
+            return mAudioSystem.getRegisteredPolicyMixes();
+        }
+    }
+
     public int addMixForPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb) {
         if (DEBUG_AP) { Log.d(TAG, "addMixForPolicy for " + pcb.asBinder()
                 + " with config:" + policyConfig); }

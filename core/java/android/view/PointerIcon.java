@@ -32,6 +32,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -173,6 +174,8 @@ public final class PointerIcon implements Parcelable {
     private Bitmap mBitmapFrames[];
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mDurationPerFrame;
+    @SuppressWarnings("unused")
+    private boolean mDrawNativeDropShadow;
 
     private PointerIcon(int type) {
         mType = type;
@@ -231,9 +234,15 @@ public final class PointerIcon implements Parcelable {
             typeIndex = getSystemIconTypeIndex(TYPE_DEFAULT);
         }
 
-        final int defStyle = useLargeIcons
-                ? com.android.internal.R.style.LargePointer
-                : com.android.internal.R.style.Pointer;
+        final int defStyle;
+        // TODO(b/305193969): Use scaled vectors when large icons are requested.
+        if (useLargeIcons) {
+            defStyle = com.android.internal.R.style.LargePointer;
+        } else if (android.view.flags.Flags.enableVectorCursors()) {
+            defStyle = com.android.internal.R.style.VectorPointer;
+        } else {
+            defStyle = com.android.internal.R.style.Pointer;
+        }
         TypedArray a = context.obtainStyledAttributes(null,
                 com.android.internal.R.styleable.Pointer,
                 0, defStyle);
@@ -333,6 +342,7 @@ public final class PointerIcon implements Parcelable {
                                     Bitmap.CREATOR.createFromParcel(in),
                                     in.readFloat(),
                                     in.readFloat());
+                    icon.mDrawNativeDropShadow = in.readBoolean();
                     return icon;
                 }
 
@@ -362,6 +372,7 @@ public final class PointerIcon implements Parcelable {
         mBitmap.writeToParcel(out, flags);
         out.writeFloat(mHotSpotX);
         out.writeFloat(mHotSpotY);
+        out.writeBoolean(mDrawNativeDropShadow);
     }
 
     @Override
@@ -413,6 +424,16 @@ public final class PointerIcon implements Parcelable {
         paint.setFilterBitmap(true);
         canvas.drawBitmap(bitmap, src, dst, paint);
         return scaled;
+    }
+
+    private BitmapDrawable getBitmapDrawableFromVectorDrawable(Resources resources,
+            VectorDrawable vectorDrawable) {
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        vectorDrawable.draw(canvas);
+        return new BitmapDrawable(resources, bitmap);
     }
 
     private void loadResource(Context context, Resources resources, @XmlRes int resourceId) {
@@ -475,6 +496,10 @@ public final class PointerIcon implements Parcelable {
                     mBitmapFrames[i - 1] = getBitmapFromDrawable(bitmapDrawableFrame);
                 }
             }
+        }
+        if (drawable instanceof VectorDrawable) {
+            mDrawNativeDropShadow = true;
+            drawable = getBitmapDrawableFromVectorDrawable(resources, (VectorDrawable) drawable);
         }
         if (!(drawable instanceof BitmapDrawable)) {
             throw new IllegalArgumentException("<pointer-icon> bitmap attribute must "

@@ -81,7 +81,7 @@ public final class AudioHalVersionInfo implements Parcelable, Comparable<AudioHa
      * defined in frameworks/av/media/libaudiohal/FactoryHal.cpp.
      */
     public static final @NonNull List<AudioHalVersionInfo> VERSIONS =
-            List.of(AIDL_1_0, HIDL_7_1, HIDL_7_0, HIDL_6_0, HIDL_5_0, HIDL_4_0);
+            List.of(AIDL_1_0, HIDL_7_1, HIDL_7_0, HIDL_6_0, HIDL_5_0);
 
     private static final String TAG = "AudioHalVersionInfo";
     private AudioHalVersion mHalVersion = new AudioHalVersion();

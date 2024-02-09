@@ -2753,23 +2753,25 @@ public class TelecomManager {
      *
      * @param packageName the package name of the app to check calls for.
      * @param userHandle the user handle on which to check for calls.
-     * @param hasCrossUserAccess indicates if calls should be detected across all users.
+     * @param detectForAllUsers indicates if calls should be detected across all users. If it is
+     *                          set to {@code true}, and the caller has the ability to interact
+     *                          across users, the userHandle parameter is disregarded.
      * @return {@code true} if there are ongoing calls, {@code false} otherwise.
+     * @throws SecurityException if detectForAllUsers is true or userHandle is not the calling user
+     * and the caller does not grant the ability to interact across users.
      * @hide
      */
     @SystemApi
     @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
-            Manifest.permission.INTERACT_ACROSS_USERS
-    })
+    @RequiresPermission(allOf = {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isInSelfManagedCall(@NonNull String packageName,
-            @NonNull UserHandle userHandle, boolean hasCrossUserAccess) {
+            @NonNull UserHandle userHandle, boolean detectForAllUsers) {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
                 return service.isInSelfManagedCall(packageName, userHandle,
-                        mContext.getOpPackageName(), hasCrossUserAccess);
+                        mContext.getOpPackageName(), detectForAllUsers);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException isInSelfManagedCall: " + e);
                 e.rethrowFromSystemServer();

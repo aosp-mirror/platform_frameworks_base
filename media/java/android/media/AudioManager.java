@@ -5513,6 +5513,26 @@ public class AudioManager {
 
     /**
      * @hide
+     * @return All currently registered audio policy mixes.
+     */
+    @TestApi
+    @FlaggedApi(android.media.audiopolicy.Flags.FLAG_AUDIO_MIX_TEST_API)
+    @NonNull
+    public List<android.media.audiopolicy.AudioMix> getRegisteredPolicyMixes() {
+        if (!android.media.audiopolicy.Flags.audioMixTestApi()) {
+            return Collections.emptyList();
+        }
+
+        final IAudioService service = getService();
+        try {
+            return service.getRegisteredPolicyMixes();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
      * @return true if an AudioPolicy was previously registered
      */
     @TestApi

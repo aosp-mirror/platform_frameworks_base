@@ -32,6 +32,7 @@ java_test_host {
         ":BackgroundInstallControlServiceTestApp",
         ":BackgroundInstallControlMockApp1",
         ":BackgroundInstallControlMockApp2",
+        ":BackgroundInstallControlMockApp3",
     ],
     test_suites: [
         "general-tests",

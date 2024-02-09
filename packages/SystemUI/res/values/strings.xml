@@ -1932,7 +1932,7 @@
     <!-- User visible title for the keyboard shortcut that locks screen. [CHAR LIMIT=70] -->
     <string name="group_system_lock_screen">Lock screen</string>
     <!-- User visible title for the keyboard shortcut that pulls up Notes app for quick memo. [CHAR LIMIT=70] -->
-    <string name="group_system_quick_memo">Open notes</string>
+    <string name="group_system_quick_memo">Take a note</string>
 
     <!-- User visible title for the system multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_system_multitasking">System multitasking</string>

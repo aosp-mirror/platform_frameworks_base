@@ -135,7 +135,7 @@ class CredentialSelectorActivity : ComponentActivity() {
         Log.d(
             Constants.LOG_TAG, "Received UI cancellation intent. Should show cancellation" +
             " ui = $shouldShowCancellationUi")
-        val appDisplayName = getAppLabel(packageManager, cancelUiRequest.appPackageName)
+        val appDisplayName = getAppLabel(packageManager, cancelUiRequest.packageName)
         if (!shouldShowCancellationUi) {
             this.finish()
         }

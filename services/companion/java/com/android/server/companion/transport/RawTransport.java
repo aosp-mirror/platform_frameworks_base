@@ -94,6 +94,13 @@ class RawTransport extends Transport {
         }
     }
 
+    @Override
+    public String toString() {
+        return "RawTransport{"
+                + "mAssociationId=" + mAssociationId
+                + '}';
+    }
+
     private void receiveMessage() throws IOException {
         synchronized (mRemoteIn) {
             final byte[] headerBytes = new byte[HEADER_LENGTH];

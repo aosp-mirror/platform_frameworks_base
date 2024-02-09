@@ -66,7 +66,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.biometrics.dagger.BiometricsBackground;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
@@ -162,7 +162,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             mUnlockedScreenOffAnimationController;
     @NonNull private final LatencyTracker mLatencyTracker;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
-    @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
+    @NonNull private final ActivityTransitionAnimator mActivityTransitionAnimator;
     @NonNull private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @NonNull private final ShadeInteractor mShadeInteractor;
     @Nullable private final TouchProcessor mTouchProcessor;
@@ -287,7 +287,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                             event,
                             fromUdfpsView
                         ),
-                        mActivityLaunchAnimator,
+                            mActivityTransitionAnimator,
                         mPrimaryBouncerInteractor,
                         mAlternateBouncerInteractor,
                         mUdfpsKeyguardAccessibilityDelegate,
@@ -663,7 +663,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             @NonNull SystemUIDialogManager dialogManager,
             @NonNull LatencyTracker latencyTracker,
-            @NonNull ActivityLaunchAnimator activityLaunchAnimator,
+            @NonNull ActivityTransitionAnimator activityTransitionAnimator,
             @NonNull @BiometricsBackground Executor biometricsExecutor,
             @NonNull PrimaryBouncerInteractor primaryBouncerInteractor,
             @NonNull ShadeInteractor shadeInteractor,
@@ -706,7 +706,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mSystemClock = systemClock;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mLatencyTracker = latencyTracker;
-        mActivityLaunchAnimator = activityLaunchAnimator;
+        mActivityTransitionAnimator = activityTransitionAnimator;
         mSensorProps = new FingerprintSensorPropertiesInternal(
                 -1 /* sensorId */,
                 SensorProperties.STRENGTH_CONVENIENCE,

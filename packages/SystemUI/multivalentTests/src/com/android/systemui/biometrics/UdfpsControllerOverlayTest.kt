@@ -37,7 +37,7 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayViewModel
@@ -106,7 +106,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var udfpsController: UdfpsController
     @Mock private lateinit var udfpsView: UdfpsView
     @Mock private lateinit var mUdfpsKeyguardViewLegacy: UdfpsKeyguardViewLegacy
-    @Mock private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
+    @Mock private lateinit var mActivityTransitionAnimator: ActivityTransitionAnimator
     @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
@@ -167,7 +167,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
                 reason,
                 controllerCallback,
                 onTouch,
-                activityLaunchAnimator,
+                mActivityTransitionAnimator,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 isDebuggable,

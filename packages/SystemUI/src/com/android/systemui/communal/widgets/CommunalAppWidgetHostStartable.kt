@@ -50,7 +50,7 @@ constructor(
             .launchIn(bgScope)
 
         appWidgetHost.appWidgetIdToRemove
-            .onEach { appWidgetId -> communalInteractor.deleteWidgetFromDb(appWidgetId) }
+            .onEach { appWidgetId -> communalInteractor.deleteWidget(id = appWidgetId) }
             .launchIn(bgScope)
     }
 

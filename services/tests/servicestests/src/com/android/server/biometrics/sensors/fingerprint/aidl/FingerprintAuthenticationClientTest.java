@@ -472,6 +472,7 @@ public class FingerprintAuthenticationClientTest {
 
         verify(mUdfpsOverlayController).hideUdfpsOverlay(anyInt());
         verify(mSideFpsController).hide(anyInt());
+        verify(mHal, times(2)).setIgnoreDisplayTouches(false);
     }
 
     @Test
