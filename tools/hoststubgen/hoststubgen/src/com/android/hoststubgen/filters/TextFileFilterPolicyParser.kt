@@ -132,23 +132,24 @@ fun createFilterFromTextPolicyFile(
                                             throw ParseException(
                                                     "Policy for AIDL classes already defined")
                                         }
-                                        aidlPolicy = policy.withReason("$FILTER_REASON (AIDL)")
+                                        aidlPolicy = policy.withReason(
+                                                "$FILTER_REASON (special-class AIDL)")
                                     }
                                     SpecialClass.FeatureFlags -> {
                                         if (featureFlagsPolicy != null) {
                                             throw ParseException(
                                                     "Policy for feature flags already defined")
                                         }
-                                        featureFlagsPolicy =
-                                                policy.withReason("$FILTER_REASON (feature flags)")
+                                        featureFlagsPolicy = policy.withReason(
+                                                "$FILTER_REASON (special-class feature flags)")
                                     }
                                     SpecialClass.Sysprops -> {
                                         if (syspropsPolicy != null) {
                                             throw ParseException(
                                                     "Policy for sysprops already defined")
                                         }
-                                        syspropsPolicy =
-                                                policy.withReason("$FILTER_REASON (sysprops)")
+                                        syspropsPolicy = policy.withReason(
+                                                "$FILTER_REASON (special-class sysprops)")
                                     }
                                 }
                             }

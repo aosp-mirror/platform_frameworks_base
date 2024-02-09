@@ -16,6 +16,7 @@
 package com.android.hoststubgen.visitors
 
 import com.android.hoststubgen.HostStubGenErrors
+import com.android.hoststubgen.HostStubGenStats
 import com.android.hoststubgen.LogLevel
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.UnifiedVisitor
@@ -50,6 +51,7 @@ abstract class BaseAdapter (
      */
     data class Options (
             val errors: HostStubGenErrors,
+            val stats: HostStubGenStats,
             val enablePreTrace: Boolean,
             val enablePostTrace: Boolean,
             val enableNonStubMethodCallDetection: Boolean,
