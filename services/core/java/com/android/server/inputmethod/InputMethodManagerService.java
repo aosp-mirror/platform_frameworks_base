@@ -286,8 +286,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final InputManagerInternal mInputManagerInternal;
     final ImePlatformCompatUtils mImePlatformCompatUtils;
     final InputMethodDeviceConfigs mInputMethodDeviceConfigs;
-    private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
-            new ArrayMap<>();
+
+    @GuardedBy("ImfLock.class")
+    @NonNull
+    private AdditionalSubtypeMap mAdditionalSubtypeMap = AdditionalSubtypeMap.EMPTY_MAP;
     private final UserManagerInternal mUserManagerInternal;
     private final InputMethodMenuController mMenuController;
     @NonNull private final InputMethodBindingController mBindingController;
@@ -1332,16 +1334,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onPackageDataCleared(String packageName, int uid) {
             synchronized (ImfLock.class) {
-                boolean changed = false;
+                // Note that one package may implement multiple IMEs.
+                final ArrayList<String> changedImes = new ArrayList<>();
                 for (InputMethodInfo imi : mSettings.getMethodList()) {
                     if (imi.getPackageName().equals(packageName)) {
-                        mAdditionalSubtypeMap.remove(imi.getId());
-                        changed = true;
+                        changedImes.add(imi.getId());
                     }
                 }
-                if (changed) {
+                final AdditionalSubtypeMap newMap =
+                        mAdditionalSubtypeMap.cloneWithRemoveOrSelf(changedImes);
+                if (newMap != mAdditionalSubtypeMap) {
+                    mAdditionalSubtypeMap = newMap;
                     AdditionalSubtypeUtils.save(
                             mAdditionalSubtypeMap, mSettings.getMethodMap(), mSettings.getUserId());
+                }
+                if (!changedImes.isEmpty()) {
                     mChangedPackages.add(packageName);
                 }
             }
@@ -1413,7 +1420,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             Slog.i(TAG,
                                     "Input method reinstalling, clearing additional subtypes: "
                                             + imi.getComponent());
-                            mAdditionalSubtypeMap.remove(imi.getId());
+                            mAdditionalSubtypeMap =
+                                    mAdditionalSubtypeMap.cloneWithRemoveOrSelf(imi.getId());
                             AdditionalSubtypeUtils.save(mAdditionalSubtypeMap,
                                     mSettings.getMethodMap(), mSettings.getUserId());
                         }
@@ -1648,7 +1656,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // mSettings should be created before buildInputMethodListLocked
         mSettings = InputMethodSettings.createEmptyMap(userId);
 
-        AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, userId);
+        mAdditionalSubtypeMap = AdditionalSubtypeUtils.load(userId);
         mSwitchingController =
                 InputMethodSubtypeSwitchingController.createInstanceLocked(context,
                         mSettings.getMethodMap(), userId);
@@ -1783,7 +1791,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         mSettings = InputMethodSettings.createEmptyMap(newUserId);
         // Additional subtypes should be reset when the user is changed
-        AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, newUserId);
+        mAdditionalSubtypeMap = AdditionalSubtypeUtils.load(newUserId);
         final String defaultImiId = mSettings.getSelectedInputMethod();
 
         if (DEBUG) {
@@ -2016,9 +2024,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 && directBootAwareness == DirectBootAwareness.AUTO) {
             settings = mSettings;
         } else {
-            final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                    new ArrayMap<>();
-            AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+            final AdditionalSubtypeMap additionalSubtypeMap = AdditionalSubtypeUtils.load(userId);
             settings = queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
                     directBootAwareness);
         }
@@ -4218,10 +4224,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
 
             if (mSettings.getUserId() == userId) {
-                if (!mSettings.setAdditionalInputMethodSubtypes(imiId, toBeAdded,
-                        mAdditionalSubtypeMap, mPackageManagerInternal, callingUid)) {
+                final var newAdditionalSubtypeMap = mSettings.getNewAdditionalSubtypeMap(
+                        imiId, toBeAdded, mAdditionalSubtypeMap, mPackageManagerInternal,
+                        callingUid);
+                if (mAdditionalSubtypeMap == newAdditionalSubtypeMap) {
                     return;
                 }
+                AdditionalSubtypeUtils.save(newAdditionalSubtypeMap, mSettings.getMethodMap(),
+                        mSettings.getUserId());
+                mAdditionalSubtypeMap = newAdditionalSubtypeMap;
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
@@ -4231,13 +4242,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
 
-            final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                    new ArrayMap<>();
-            AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+            final AdditionalSubtypeMap additionalSubtypeMap = AdditionalSubtypeUtils.load(userId);
             final InputMethodSettings settings = queryInputMethodServicesInternal(mContext, userId,
                     additionalSubtypeMap, DirectBootAwareness.AUTO);
-            settings.setAdditionalInputMethodSubtypes(imiId, toBeAdded, additionalSubtypeMap,
-                    mPackageManagerInternal, callingUid);
+            final var newAdditionalSubtypeMap = settings.getNewAdditionalSubtypeMap(
+                    imiId, toBeAdded, additionalSubtypeMap, mPackageManagerInternal, callingUid);
+            if (additionalSubtypeMap != newAdditionalSubtypeMap) {
+                AdditionalSubtypeUtils.save(newAdditionalSubtypeMap, settings.getMethodMap(),
+                        settings.getUserId());
+            }
         }
     }
 
@@ -5072,7 +5085,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @NonNull
     static InputMethodSettings queryInputMethodServicesInternal(Context context,
-            @UserIdInt int userId, ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
+            @UserIdInt int userId, @NonNull AdditionalSubtypeMap additionalSubtypeMap,
             @DirectBootAwareness int directBootAwareness) {
         final Context userAwareContext = context.getUserId() == userId
                 ? context
@@ -5112,7 +5125,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @NonNull
     static InputMethodMap filterInputMethodServices(
-            ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
+            @NonNull AdditionalSubtypeMap additionalSubtypeMap,
             List<String> enabledInputMethodList, Context userAwareContext,
             List<ResolveInfo> services) {
         final ArrayMap<String, Integer> imiPackageCount = new ArrayMap<>();
@@ -5512,9 +5525,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (userId == mSettings.getUserId()) {
             settings = mSettings;
         } else {
-            final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                    new ArrayMap<>();
-            AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+            final AdditionalSubtypeMap additionalSubtypeMap = AdditionalSubtypeUtils.load(userId);
             settings = queryInputMethodServicesInternal(mContext, userId,
                     additionalSubtypeMap, DirectBootAwareness.AUTO);
         }
@@ -5522,9 +5533,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private InputMethodSettings queryMethodMapForUser(@UserIdInt int userId) {
-        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                new ArrayMap<>();
-        AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+        final AdditionalSubtypeMap additionalSubtypeMap = AdditionalSubtypeUtils.load(userId);
         return queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
                 DirectBootAwareness.AUTO);
     }
@@ -6572,9 +6581,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         nextIme = mSettings.getSelectedInputMethod();
                         nextEnabledImes = mSettings.getEnabledInputMethodList();
                     } else {
-                        final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap =
-                                new ArrayMap<>();
-                        AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
+                        final AdditionalSubtypeMap additionalSubtypeMap =
+                                AdditionalSubtypeUtils.load(userId);
                         final InputMethodSettings settings = queryInputMethodServicesInternal(
                                 mContext, userId, additionalSubtypeMap, DirectBootAwareness.AUTO);
 
