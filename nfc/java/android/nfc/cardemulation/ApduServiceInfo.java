@@ -44,6 +44,8 @@ import android.util.Log;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -136,6 +138,11 @@ public final class ApduServiceInfo implements Parcelable {
      * State of the service for CATEGORY_OTHER selection
      */
     private boolean mCategoryOtherServiceEnabled;
+
+    /**
+     * Whether the NFC stack should default to Observe Mode when this preferred service.
+     */
+    private boolean mDefaultToObserveMode;
 
     /**
      * @hide
@@ -257,6 +264,9 @@ public final class ApduServiceInfo implements Parcelable {
                         com.android.internal.R.styleable.HostApduService_settingsActivity);
                 mOffHostName = null;
                 mStaticOffHostName = mOffHostName;
+                mDefaultToObserveMode = sa.getBoolean(
+                        R.styleable.HostApduService_defaultToObserveMode,
+                        false);
                 sa.recycle();
             } else {
                 TypedArray sa = res.obtainAttributes(attrs,
@@ -276,6 +286,9 @@ public final class ApduServiceInfo implements Parcelable {
                         com.android.internal.R.styleable.HostApduService_settingsActivity);
                 mOffHostName = sa.getString(
                         com.android.internal.R.styleable.OffHostApduService_secureElementName);
+                mDefaultToObserveMode = sa.getBoolean(
+                        R.styleable.HostApduService_defaultToObserveMode,
+                        false);
                 if (mOffHostName != null) {
                     if (mOffHostName.equals("eSE")) {
                         mOffHostName = "eSE1";
@@ -608,6 +621,25 @@ public final class ApduServiceInfo implements Parcelable {
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public boolean requiresScreenOn() {
         return mRequiresDeviceScreenOn;
+    }
+
+    /**
+     * Returns whether the NFC stack should default to observe mode when this servise is preferred.
+     * @return whether the NFC stack should default to observe mode when this servise is preferred
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
+    public boolean defaultToObserveMode() {
+        return mDefaultToObserveMode;
+    }
+
+    /**
+     * Sets whether the NFC stack should default to observe mode when this servise is preferred.
+     * @param defaultToObserveMode whether the NFC stack should default to observe mode when this
+     *                             servise is preferred
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
+    public void setDefaultToObserveMode(boolean defaultToObserveMode) {
+        mDefaultToObserveMode = defaultToObserveMode;
     }
 
     /**
