@@ -33,6 +33,7 @@ import android.service.voice.IDetectorSessionVisualQueryDetectionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.ISandboxedDetectionService;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
+import android.service.voice.VisualQueryDetectedResult;
 import android.service.voice.VisualQueryDetectionServiceFailure;
 import android.util.Slog;
 
@@ -166,6 +167,26 @@ final class VisualQueryDetectorSession extends DetectorSession {
                     }
                     mQueryStreaming = true;
                     callback.onQueryDetected(partialQuery);
+                    Slog.i(TAG, "Egressed from visual query detection process.");
+                }
+            }
+
+            @Override
+            public void onResultDetected(@NonNull VisualQueryDetectedResult partialResult)
+                    throws RemoteException {
+                Slog.v(TAG, "BinderCallback#onResultDetected");
+                synchronized (mLock) {
+                    Objects.requireNonNull(partialResult);
+                    if (!mEgressingData) {
+                        Slog.v(TAG, "Result should not be egressed within the unattention state.");
+                        callback.onVisualQueryDetectionServiceFailure(
+                                new VisualQueryDetectionServiceFailure(
+                                        ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                        "Cannot stream results without attention signals."));
+                        return;
+                    }
+                    mQueryStreaming = true;
+                    callback.onResultDetected(partialResult);
                     Slog.i(TAG, "Egressed from visual query detection process.");
                 }
             }

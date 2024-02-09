@@ -17,6 +17,7 @@
 package android.service.voice;
 
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -35,6 +36,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.flags.Flags;
 import android.speech.IRecognitionServiceManager;
 import android.util.Log;
 import android.view.contentcapture.ContentCaptureManager;
@@ -282,12 +284,16 @@ public abstract class VisualQueryDetectionService extends Service
         }
     }
 
+    // TODO(b/324341724): Properly deprecate this API.
     /**
      * Informs the {@link VisualQueryDetector} with the text content being captured about the
      * query from the audio source. {@code partialQuery} is provided to the
      * {@link VisualQueryDetector}. This method is expected to be only triggered if
      * {@link VisualQueryDetectionService#gainedAttention()} is called to put the service into the
      * attention gained state.
+     *
+     * Usage of this method is not recommended, please use
+     * {@link VisualQueryDetectionService#streamQuery(VisualQueryDetectedResult)} instead.
      *
      * @param partialQuery Partially detected query in string.
      * @throws IllegalStateException if method called without attention gained.
@@ -296,6 +302,27 @@ public abstract class VisualQueryDetectionService extends Service
         Objects.requireNonNull(partialQuery);
         try {
             mRemoteCallback.onQueryDetected(partialQuery);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("#streamQuery must be only be triggered after "
+                    + "calling #gainedAttention to be in the attention gained state.");
+        }
+    }
+
+    /**
+     * Informs the {@link VisualQueryDetector} with the text content being captured about the
+     * query from the audio source. {@code partialResult} is provided to the
+     * {@link VisualQueryDetector}. This method is expected to be only triggered if
+     * {@link VisualQueryDetectionService#gainedAttention()} is called to put the service into
+     * the attention gained state.
+     *
+     * @param partialResult Partially detected result in the format of
+     * {@link VisualQueryDetectedResult}.
+     */
+    @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+    public final void streamQuery(@NonNull VisualQueryDetectedResult partialResult) {
+        Objects.requireNonNull(partialResult);
+        try {
+            mRemoteCallback.onResultDetected(partialResult);
         } catch (RemoteException e) {
             throw new IllegalStateException("#streamQuery must be only be triggered after "
                     + "calling #gainedAttention to be in the attention gained state.");
