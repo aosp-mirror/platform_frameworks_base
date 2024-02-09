@@ -4333,7 +4333,7 @@ public class SubscriptionManager {
      *
      * <p>Note the assumption is that one subscription (which usually means one SIM) has
      * only one phone number. The multiple sources backup each other so hopefully at least one
-     * is availavle. For example, for a carrier that doesn't typically set phone numbers
+     * is available. For example, for a carrier that doesn't typically set phone numbers
      * on {@link #PHONE_NUMBER_SOURCE_UICC UICC}, the source {@link #PHONE_NUMBER_SOURCE_IMS IMS}
      * may provide one. Or, a carrier may decide to provide the phone number via source
      * {@link #PHONE_NUMBER_SOURCE_CARRIER carrier} if neither source UICC nor IMS is available.
