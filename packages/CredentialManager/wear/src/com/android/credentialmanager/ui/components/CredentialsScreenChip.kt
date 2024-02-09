@@ -18,6 +18,7 @@ package com.android.credentialmanager.ui.components
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -29,12 +30,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Chip
+import androidx.core.graphics.drawable.toBitmap
 import androidx.wear.compose.material.ChipColors
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.Color
 import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.Text
 import com.android.credentialmanager.R
+import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 import com.android.credentialmanager.ui.components.CredentialsScreenChip.TOPPADDING
+import androidx.compose.material3.Icon
 
+/* Used as credential suggestion or user action chip. */
 @Composable
 fun CredentialsScreenChip(
     label: String,
@@ -65,9 +72,15 @@ fun CredentialsScreenChip(
         }
 
     val iconParam: (@Composable BoxScope.() -> Unit)? =
-        icon?.let {
+        icon?.toBitmap()?.asImageBitmap()?.let {
             {
-                 ChipDefaults.IconSize
+                Icon(
+                    bitmap = it,
+                    // Decorative purpose only.
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = Color.Unspecified
+                )
             }
         }
 
@@ -136,6 +149,40 @@ fun DismissChip(onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier
             .padding(top = TOPPADDING),
+    )
+}
+
+@Composable
+fun SignInOnPhoneChip(onClick: () -> Unit) {
+    CredentialsScreenChip(
+        label = stringResource(R.string.sign_in_on_phone_button),
+        onClick = onClick,
+        modifier = Modifier
+            .padding(top = TOPPADDING),
+    )
+}
+
+@Composable
+fun LockedProviderChip(
+    authenticationEntryInfo: AuthenticationEntryInfo,
+    onClick: () -> Unit
+) {
+    val secondaryLabel = stringResource(
+        if (authenticationEntryInfo.isUnlockedAndEmpty)
+            R.string.locked_credential_entry_label_subtext_no_sign_in
+        else R.string.locked_credential_entry_label_subtext_tap_to_unlock
+    )
+
+    if (!authenticationEntryInfo.isUnlockedAndEmpty) {
+        // TODO(b/324465527) need to draw a lock icon here. may need to switch over from using chip
+    }
+
+    CredentialsScreenChip(
+        label = authenticationEntryInfo.title,
+        icon = authenticationEntryInfo.icon,
+        secondaryLabel = secondaryLabel,
+        onClick = onClick,
+        modifier = Modifier.padding(top = TOPPADDING),
     )
 }
 
