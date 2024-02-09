@@ -65,6 +65,8 @@ public class QSCustomizer extends LinearLayout {
     private boolean mOpening;
     private boolean mIsShowingNavBackdrop;
 
+    private boolean mSceneContainerEnabled;
+
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -88,6 +90,28 @@ public class QSCustomizer extends LinearLayout {
         updateTransparentViewHeight();
     }
 
+    void applyBottomNavBarToPadding(int padding) {
+        mRecyclerView.setPadding(
+                /* left= */ mRecyclerView.getPaddingLeft(),
+                /* top= */ mRecyclerView.getPaddingTop(),
+                /* right= */ mRecyclerView.getPaddingRight(),
+                /* bottom= */ padding
+        );
+    }
+
+    void setSceneContainerEnabled(boolean enabled) {
+        if (enabled != mSceneContainerEnabled) {
+            mSceneContainerEnabled = enabled;
+            updateTransparentViewHeight();
+            if (mSceneContainerEnabled) {
+                findViewById(R.id.nav_bar_background).setVisibility(View.GONE);
+            } else {
+                findViewById(R.id.nav_bar_background)
+                        .setVisibility(mIsShowingNavBackdrop ? View.VISIBLE : View.GONE);
+            }
+        }
+    }
+
     void updateResources() {
         updateTransparentViewHeight();
         mRecyclerView.getAdapter().notifyItemChanged(0);
@@ -98,7 +122,8 @@ public class QSCustomizer extends LinearLayout {
         mIsShowingNavBackdrop = newConfig.smallestScreenWidthDp >= 600
                 || newConfig.orientation != Configuration.ORIENTATION_LANDSCAPE;
         if (navBackdrop != null) {
-            navBackdrop.setVisibility(mIsShowingNavBackdrop ? View.VISIBLE : View.GONE);
+            navBackdrop.setVisibility(
+                    mIsShowingNavBackdrop && !mSceneContainerEnabled ? View.VISIBLE : View.GONE);
         }
         updateNavColors(lightBarController);
     }
@@ -275,7 +300,7 @@ public class QSCustomizer extends LinearLayout {
 
     private void updateTransparentViewHeight() {
         LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
-        lp.height = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
+        lp.height = mSceneContainerEnabled ? 0 : QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
         mTransparentView.setLayoutParams(lp);
     }
 

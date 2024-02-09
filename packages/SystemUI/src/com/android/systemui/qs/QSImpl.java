@@ -992,6 +992,15 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         return mContainer.getQsHeight();
     }
 
+    /**
+     * Pass the size of the navbar when it's at the bottom of the device so it can be used as
+     * padding
+     * @param padding size of the bottom nav bar in px
+     */
+    public void applyBottomNavBarToCustomizerPadding(int padding) {
+        mQSCustomizerController.applyBottomNavBarSizeToRecyclerViewPadding(padding);
+    }
+
     @NeverCompile
     @Override
     public void dump(PrintWriter pw, String[] args) {
