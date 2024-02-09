@@ -9727,6 +9727,13 @@ package android.net.vcn {
 
 package android.net.wifi {
 
+  public final class WifiKeystore {
+    method @NonNull public static byte[] get(@NonNull String);
+    method @NonNull public static String[] list(@NonNull String);
+    method public static boolean put(@NonNull String, @NonNull byte[]);
+    method public static boolean remove(@NonNull String);
+  }
+
   public final class WifiMigration {
     method @Nullable public static java.io.InputStream convertAndRetrieveSharedConfigStoreFile(int);
     method @Nullable public static java.io.InputStream convertAndRetrieveUserConfigStoreFile(int, @NonNull android.os.UserHandle);
