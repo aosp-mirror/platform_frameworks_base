@@ -90,3 +90,10 @@ flag {
     description: "Enables mechanisms to prevent route providers from keeping malicious apps alive."
     bug: "263520343"
 }
+
+flag {
+    name: "enable_screen_off_scanning"
+    namespace: "media_solutions"
+    description: "Enable new MediaRouter2 API to enable watch companion apps to scan while the phone screen is off."
+    bug: "281072508"
+}

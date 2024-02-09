@@ -16,6 +16,9 @@
 
 package android.media;
 
+import static android.media.MediaRouter2.SCANNING_STATE_NOT_SCANNING;
+import static android.media.MediaRouter2.SCANNING_STATE_WHILE_INTERACTIVE;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
@@ -174,7 +177,7 @@ public final class MediaRouter2Manager {
     public void registerScanRequest() {
         if (mScanRequestCount.getAndIncrement() == 0) {
             try {
-                mMediaRouterService.startScan(mClient);
+                mMediaRouterService.updateScanningState(mClient, SCANNING_STATE_WHILE_INTERACTIVE);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -201,7 +204,7 @@ public final class MediaRouter2Manager {
                 })
                 == 0) {
             try {
-                mMediaRouterService.stopScan(mClient);
+                mMediaRouterService.updateScanningState(mClient, SCANNING_STATE_NOT_SCANNING);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
