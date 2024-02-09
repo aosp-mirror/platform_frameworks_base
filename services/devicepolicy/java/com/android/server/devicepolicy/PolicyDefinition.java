@@ -484,6 +484,9 @@ final class PolicyDefinition<V> {
                 UserManager.DISALLOW_CELLULAR_2G, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_SIM_GLOBALLY,
+                POLICY_FLAG_GLOBAL_ONLY_POLICY);
 
         for (String key : USER_RESTRICTION_FLAGS.keySet()) {
             createAndAddUserRestrictionPolicyDefinition(key, USER_RESTRICTION_FLAGS.get(key));
