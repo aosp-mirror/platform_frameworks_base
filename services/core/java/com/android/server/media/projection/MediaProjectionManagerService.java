@@ -550,8 +550,8 @@ public final class MediaProjectionManagerService extends SystemService
                     break;
                 case RECORD_CONTENT_TASK:
                     IBinder taskWindowContainerToken =
-                            mProjectionGrant.getLaunchCookie() == null ? null
-                                    : mProjectionGrant.getLaunchCookie().binder;
+                            mProjectionGrant.getLaunchCookieInternal() == null ? null
+                                    : mProjectionGrant.getLaunchCookieInternal().binder;
                     setReviewedConsentSessionLocked(
                             ContentRecordingSession.createTaskSession(taskWindowContainerToken));
                     break;
@@ -601,6 +601,17 @@ public final class MediaProjectionManagerService extends SystemService
             Binder.restoreCallingIdentity(callingToken);
         }
         return projection;
+    }
+
+    /**
+     * Test API mirroring the types in the aidl interface for access outside the projection
+     * package.
+     */
+    @VisibleForTesting
+    public IMediaProjection createProjectionInternal(int processUid, String packageName, int type,
+            boolean isPermanentGrant) {
+        return createProjectionInternal(processUid, packageName, type, isPermanentGrant,
+                Binder.getCallingUserHandle());
     }
 
     // TODO(b/261563516): Remove internal method and test aidl directly, here and elsewhere.
@@ -1192,6 +1203,10 @@ public final class MediaProjectionManagerService extends SystemService
         @Override // Binder call
         public void setLaunchCookie(LaunchCookie launchCookie) {
             setLaunchCookie_enforcePermission();
+            setLaunchCookieInternal(launchCookie);
+        }
+
+        @VisibleForTesting void setLaunchCookieInternal(LaunchCookie launchCookie) {
             mLaunchCookie = launchCookie;
         }
 
@@ -1199,6 +1214,10 @@ public final class MediaProjectionManagerService extends SystemService
         @Override // Binder call
         public LaunchCookie getLaunchCookie() {
             getLaunchCookie_enforcePermission();
+            return getLaunchCookieInternal();
+        }
+
+        @VisibleForTesting LaunchCookie getLaunchCookieInternal() {
             return mLaunchCookie;
         }
 
@@ -1206,6 +1225,11 @@ public final class MediaProjectionManagerService extends SystemService
         @Override
         public boolean isValid() {
             isValid_enforcePermission();
+            return isValidInternal();
+        }
+
+        @VisibleForTesting
+        boolean isValidInternal() {
             synchronized (mLock) {
                 final long curMs = mClock.uptimeMillis();
                 final boolean hasTimedOut = curMs - mCreateTimeMs > mTimeoutMs;
@@ -1236,6 +1260,11 @@ public final class MediaProjectionManagerService extends SystemService
         @Override
         public void notifyVirtualDisplayCreated(int displayId) {
             notifyVirtualDisplayCreated_enforcePermission();
+            notifyVirtualDisplayCreatedInternal(displayId);
+        }
+
+        @VisibleForTesting
+        void notifyVirtualDisplayCreatedInternal(int displayId) {
             synchronized (mLock) {
                 mVirtualDisplayId = displayId;
 

@@ -6853,10 +6853,13 @@
     <permission android:name="android.permission.ACCESS_DRM_CERTIFICATES"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Api Allows an application to manage media projection sessions.
+    <!-- Allows an application to manage media projection sessions, by showing the permission dialog
+         to the user and creating a new token for each capture session.
+         @FlaggedApi("com.android.media.flags.limit_manage_media_projection")
+         @SystemApi Only granted to apps holding role SYSTEM_UI.
          @hide This is not a third-party API (intended for system apps). -->
     <permission android:name="android.permission.MANAGE_MEDIA_PROJECTION"
-        android:protectionLevel="signature" />
+        android:protectionLevel="internal|role" />
 
     <!-- @SystemApi Allows an application to read install sessions
          @hide This is not a third-party API (intended for system apps). -->

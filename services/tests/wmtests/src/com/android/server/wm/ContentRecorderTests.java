@@ -811,7 +811,7 @@ public class ContentRecorderTests extends WindowTestsBase {
 
     @Test
     public void testDisplayContentUpdatesRecording_withSurface() {
-        defaultInit();
+        createContentRecorder(createDefaultDisplayInfo());
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
         setUpDefaultTaskDisplayAreaWindowToken();
@@ -820,6 +820,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         // getDisplaySurfaceDefaultSize (done by surfaceControlMirrors in setUp).
         final DisplayContent virtualDisplay =
                 mRootWindowContainer.getDisplayContent(mDisplaySession.getVirtualDisplayId());
+        virtualDisplay.setContentRecorder(mContentRecorder);
         mWm.mContentRecordingController.setContentRecordingSessionLocked(mDisplaySession, mWm);
         virtualDisplay.updateRecording();
 
@@ -844,6 +845,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         // WHEN getting the DisplayContent for the new virtual display.
         final DisplayContent virtualDisplay =
                 mRootWindowContainer.getDisplayContent(mDisplaySession.getVirtualDisplayId());
+        virtualDisplay.setContentRecorder(mContentRecorder);
         // Return the default display as the value to mirror to ensure the VD with flag mirroring
         // creates a ContentRecordingSession automatically.
         doReturn(DEFAULT_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());

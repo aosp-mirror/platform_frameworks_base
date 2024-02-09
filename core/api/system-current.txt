@@ -202,6 +202,7 @@ package android {
     field public static final String MANAGE_HOTWORD_DETECTION = "android.permission.MANAGE_HOTWORD_DETECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final String MANAGE_LOW_POWER_STANDBY = "android.permission.MANAGE_LOW_POWER_STANDBY";
+    field @FlaggedApi("com.android.media.flags.limit_manage_media_projection") public static final String MANAGE_MEDIA_PROJECTION = "android.permission.MANAGE_MEDIA_PROJECTION";
     field public static final String MANAGE_MUSIC_RECOGNITION = "android.permission.MANAGE_MUSIC_RECOGNITION";
     field public static final String MANAGE_NOTIFICATION_LISTENERS = "android.permission.MANAGE_NOTIFICATION_LISTENERS";
     field public static final String MANAGE_ONE_TIME_PERMISSION_SESSIONS = "android.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS";
