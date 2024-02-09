@@ -4373,16 +4373,23 @@ public class AudioService extends IAudioService.Stub
     }
 
     private int getBluetoothContextualVolumeStream(int mode) {
+        boolean voiceActivityCanOverride = true;
         switch (mode) {
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
                 return AudioSystem.STREAM_VOICE_CALL;
+            case AudioSystem.MODE_CALL_SCREENING:
+            case AudioSystem.MODE_COMMUNICATION_REDIRECT:
+            case AudioSystem.MODE_CALL_REDIRECT:
+                voiceActivityCanOverride = false;
+                // intended fallthrough
             case AudioSystem.MODE_NORMAL:
             default:
                 // other conditions will influence the stream type choice, read on...
                 break;
         }
-        if (mVoicePlaybackActive.get()) {
+        if (voiceActivityCanOverride
+                && mVoicePlaybackActive.get()) {
             return AudioSystem.STREAM_VOICE_CALL;
         }
         return AudioSystem.STREAM_MUSIC;
