@@ -31,7 +31,6 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -146,8 +145,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
-            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
+            sceneInteractor.changeScene(SceneKey.Lockscreen, "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
         }
@@ -162,8 +160,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.None
             )
             runCurrent()
-            sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone), "reason")
+            sceneInteractor.changeScene(SceneKey.Gone, "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
         }
@@ -171,7 +168,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
@@ -180,13 +177,13 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
             underTest.onContentClicked()
 
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+            assertThat(currentScene).isEqualTo(SceneKey.Gone)
         }
 
     @Test
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
@@ -195,7 +192,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
             underTest.onContentClicked()
 
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
         }
 
     @Test

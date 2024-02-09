@@ -52,6 +52,7 @@ import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.compose.FooterActions
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.scene.ui.composable.SceneContainer
@@ -126,6 +127,7 @@ object ComposeFacade : BaseComposeFacade {
         viewModel: SceneContainerViewModel,
         windowInsets: StateFlow<WindowInsets?>,
         sceneByKey: Map<SceneKey, Scene>,
+        dataSourceDelegator: SceneDataSourceDelegator,
     ): View {
         return ComposeView(context).apply {
             setContent {
@@ -138,6 +140,7 @@ object ComposeFacade : BaseComposeFacade {
                             viewModel = viewModel,
                             sceneByKey =
                                 sceneByKey.mapValues { (_, scene) -> scene as ComposableScene },
+                            dataSourceDelegator = dataSourceDelegator,
                         )
                     }
                 }

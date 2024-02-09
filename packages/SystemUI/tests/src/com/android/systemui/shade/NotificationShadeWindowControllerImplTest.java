@@ -178,7 +178,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mTestScope.getBackgroundScope(),
                 new SceneContainerRepository(
                         mTestScope.getBackgroundScope(),
-                        mKosmos.getFakeSceneContainerConfig()),
+                        mKosmos.getFakeSceneContainerConfig(),
+                        mKosmos.getSceneDataSource()),
                 powerInteractor,
                 mock(SceneLogger.class),
                 mKosmos.getDeviceUnlockedInteractor());

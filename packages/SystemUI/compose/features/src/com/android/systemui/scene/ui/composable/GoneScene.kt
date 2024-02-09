@@ -25,9 +25,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
-import com.android.systemui.shade.ui.composable.Shade
+import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,15 +45,16 @@ constructor(
 ) : ComposableScene {
     override val key = SceneKey.Gone
 
-    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
-        MutableStateFlow<Map<UserAction, SceneModel>>(
+    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+        MutableStateFlow<Map<UserAction, UserActionResult>>(
                 mapOf(
                     UserAction.Swipe(
                         pointerCount = 2,
                         fromEdge = Edge.TOP,
                         direction = Direction.DOWN,
-                    ) to SceneModel(SceneKey.QuickSettings),
-                    UserAction.Swipe(direction = Direction.DOWN) to SceneModel(SceneKey.Shade),
+                    ) to UserActionResult(SceneKey.QuickSettings),
+                    UserAction.Swipe(direction = Direction.DOWN) to
+                        UserActionResult(SceneKey.Shade),
                 )
             )
             .asStateFlow()

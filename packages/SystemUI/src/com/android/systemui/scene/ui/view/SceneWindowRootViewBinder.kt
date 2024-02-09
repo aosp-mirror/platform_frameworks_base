@@ -34,6 +34,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
@@ -54,6 +55,7 @@ object SceneWindowRootViewBinder {
         flags: SceneContainerFlags,
         scenes: Set<Scene>,
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
+        dataSourceDelegator: SceneDataSourceDelegator,
     ) {
         val unsortedSceneByKey: Map<SceneKey, Scene> = scenes.associateBy { scene -> scene.key }
         val sortedSceneByKey: Map<SceneKey, Scene> = buildMap {
@@ -90,6 +92,7 @@ object SceneWindowRootViewBinder {
                                 viewModel = viewModel,
                                 windowInsets = windowInsets,
                                 sceneByKey = sortedSceneByKey,
+                                dataSourceDelegator = dataSourceDelegator,
                             )
                             .also { it.id = R.id.scene_container_root_composable }
                     )

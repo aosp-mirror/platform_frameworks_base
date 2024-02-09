@@ -30,7 +30,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationStackAppearanceViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
@@ -59,6 +59,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
     private val placeholderViewModel by lazy { kosmos.notificationsPlaceholderViewModel }
     private val appearanceViewModel by lazy { kosmos.notificationStackAppearanceViewModel }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
 
     @Test
     fun updateBounds() =
@@ -97,7 +98,8 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(0f)
 
-            sceneInteractor.changeScene(SceneModel(SceneKey.Shade), "reason")
+            fakeSceneDataSource.pause()
+            sceneInteractor.changeScene(SceneKey.Shade, "reason")
             val transitionProgress = MutableStateFlow(0f)
             transitionState.value =
                 ObservableTransitionState.Transition(
@@ -115,7 +117,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                 assertThat(expandFraction).isWithin(0.01f).of(progress)
             }
 
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Shade), "reason")
+            fakeSceneDataSource.unpause(expectedScene = SceneKey.Shade)
             assertThat(expandFraction).isWithin(0.01f).of(1f)
         }
 
@@ -142,7 +144,8 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(1f)
 
-            sceneInteractor.changeScene(SceneModel(SceneKey.QuickSettings), "reason")
+            fakeSceneDataSource.pause()
+            sceneInteractor.changeScene(SceneKey.QuickSettings, "reason")
             val transitionProgress = MutableStateFlow(0f)
             transitionState.value =
                 ObservableTransitionState.Transition(
@@ -160,7 +163,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                 assertThat(expandFraction).isEqualTo(1f)
             }
 
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.QuickSettings), "reason")
+            fakeSceneDataSource.unpause(expectedScene = SceneKey.QuickSettings)
             assertThat(expandFraction).isEqualTo(1f)
         }
 }

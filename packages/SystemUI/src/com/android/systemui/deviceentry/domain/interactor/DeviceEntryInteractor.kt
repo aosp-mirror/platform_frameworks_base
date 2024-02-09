@@ -26,7 +26,6 @@ import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -80,8 +79,7 @@ constructor(
      * Note: This does not imply that the lockscreen is visible or not.
      */
     val isDeviceEntered: StateFlow<Boolean> =
-        sceneInteractor.desiredScene
-            .map { it.key }
+        sceneInteractor.currentScene
             .filter { currentScene ->
                 currentScene == SceneKey.Gone || currentScene == SceneKey.Lockscreen
             }
@@ -150,12 +148,12 @@ constructor(
         applicationScope.launch {
             if (isAuthenticationRequired()) {
                 sceneInteractor.changeScene(
-                    scene = SceneModel(SceneKey.Bouncer),
+                    toScene = SceneKey.Bouncer,
                     loggingReason = "request to unlock device while authentication required",
                 )
             } else {
                 sceneInteractor.changeScene(
-                    scene = SceneModel(SceneKey.Gone),
+                    toScene = SceneKey.Gone,
                     loggingReason = "request to unlock device while authentication isn't required",
                 )
             }

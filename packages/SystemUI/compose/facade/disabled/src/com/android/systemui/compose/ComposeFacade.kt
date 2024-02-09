@@ -86,6 +86,7 @@ object ComposeFacade : BaseComposeFacade {
         viewModel: SceneContainerViewModel,
         windowInsets: StateFlow<WindowInsets?>,
         sceneByKey: Map<SceneKey, Scene>,
+        dataSourceDelegator: SceneDataSourceBinder,
     ): View {
         throwComposeUnavailableError()
     }
