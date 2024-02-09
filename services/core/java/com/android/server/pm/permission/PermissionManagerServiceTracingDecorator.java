@@ -23,6 +23,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.os.Trace;
 import android.permission.IOnPermissionsChangeListener;
+import android.permission.PermissionManager.PermissionState;
 
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
@@ -342,6 +343,18 @@ public class PermissionManagerServiceTracingDecorator implements PermissionManag
         Trace.traceBegin(TRACE_TAG, "TaggedTracingPermissionManagerServiceImpl#checkUidPermission");
         try {
             return mService.checkUidPermission(uid, permName, deviceId);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
+            @NonNull String persistentDeviceId, int userId) {
+        Trace.traceBegin(TRACE_TAG, "TaggedTracingPermissionManagerServiceImpl"
+                + "#getAllPermissionStates");
+        try {
+            return mService.getAllPermissionStates(packageName, persistentDeviceId, userId);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }

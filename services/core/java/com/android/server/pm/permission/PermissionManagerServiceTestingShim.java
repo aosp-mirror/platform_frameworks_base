@@ -24,6 +24,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.os.Build;
 import android.permission.IOnPermissionsChangeListener;
+import android.permission.PermissionManager.PermissionState;
 
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
@@ -324,6 +325,12 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
             signalImplDifference("checkUidPermission");
         }
         return newVal;
+    }
+
+    @Override
+    public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
+            @NonNull String persistentDeviceId, int userId) {
+        return mNewImplementation.getAllPermissionStates(packageName, persistentDeviceId, userId);
     }
 
     @Override

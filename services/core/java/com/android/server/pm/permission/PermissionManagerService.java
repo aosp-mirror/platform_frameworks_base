@@ -65,6 +65,7 @@ import android.permission.IPermissionChecker;
 import android.permission.IPermissionManager;
 import android.permission.PermissionCheckerManager;
 import android.permission.PermissionManager;
+import android.permission.PermissionManager.PermissionState;
 import android.permission.PermissionManagerInternal;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.ArrayMap;
@@ -255,6 +256,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         return checkPermissionDelegate.checkUidPermission(uid, permissionName,
                 deviceId, mPermissionManagerServiceImpl::checkUidPermission);
+    }
+
+    @Override
+    public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
+            @NonNull String persistentDeviceId, int userId) {
+        return mPermissionManagerServiceImpl.getAllPermissionStates(packageName,
+                persistentDeviceId, userId);
     }
 
     @Override
