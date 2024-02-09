@@ -1079,4 +1079,10 @@ public abstract class WindowManagerInternal {
      * Moves the current focus to the top activity window if the top activity is embedded.
      */
     public abstract boolean moveFocusToTopEmbeddedWindowIfNeeded();
+
+    /**
+     * Returns an instance of {@link ScreenCapture.ScreenshotHardwareBuffer} containing the current
+     * screenshot.
+     */
+    public abstract ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot();
 }
