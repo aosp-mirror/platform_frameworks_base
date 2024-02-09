@@ -6034,6 +6034,36 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.CHOOSER_MODIFY_SHARE_ACTION";
 
     /**
+     * Optional integer extra to be used with {@link #ACTION_CHOOSER} to describe conteng being
+     * shared.
+     * <p>
+     * If provided, sharesheets may customize their UI presentation to include a more precise
+     * description of the content being shared.
+     *
+     * @see #CHOOSER_CONTENT_TYPE_ALBUM
+     * @see #createChooser(Intent, CharSequence)
+     */
+    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_ALBUM_TEXT)
+    public static final String EXTRA_CHOOSER_CONTENT_TYPE_HINT =
+            "android.intent.extra.CHOOSER_CONTENT_TYPE_HINT";
+
+    /** @hide */
+    @IntDef(prefix = {"CHOOSER_CONTENT_TYPE_"}, value = {
+            CHOOSER_CONTENT_TYPE_ALBUM,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ChooserContentType {}
+
+    /**
+     * Indicates that the content being shared with {@link #ACTION_SEND} represents an album
+     * (e.g. containing photos).
+     *
+     * @see #EXTRA_CHOOSER_CONTENT_TYPE_HINT
+     */
+    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_ALBUM_TEXT)
+    public static final int CHOOSER_CONTENT_TYPE_ALBUM = 1;
+
+    /**
      * An {@code ArrayList} of {@code String} annotations describing content for
      * {@link #ACTION_CHOOSER}.
      *
