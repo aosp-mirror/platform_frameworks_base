@@ -501,4 +501,22 @@ oneway interface ISatellite {
      *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
      */
      void stopSendingNtnSignalStrength(in IIntegerConsumer resultCallback);
+
+     /**
+      * Abort all outgoing satellite datagrams which vendor service has received from Telephony
+      * framework.
+      *
+      * This API helps modem to be in sync with framework when framework times out on sending
+      * datagrams.
+      *
+      * @param resultCallback The callback to receive the error code result of the operation.
+      *
+      * Valid result codes returned:
+      *   SatelliteResult:SATELLITE_RESULT_SUCCESS
+      *   SatelliteResult:SATELLITE_RESULT_INVALID_MODEM_STATE
+      *   SatelliteResult:SATELLITE_RESULT_MODEM_ERROR
+      *   SatelliteResult:SATELLITE_RESULT_RADIO_NOT_AVAILABLE
+      *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
+      */
+     void abortSendingSatelliteDatagrams(in IIntegerConsumer resultCallback);
 }

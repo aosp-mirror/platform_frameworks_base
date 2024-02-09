@@ -172,6 +172,35 @@
     <integer name="config_satellite_nb_iot_inactivity_timeout_millis">180000</integer>
     <java-symbol type="integer" name="config_satellite_nb_iot_inactivity_timeout_millis" />
 
+    <!-- The time duration in millis needed to switch the modem image from TN to NTN. -->
+    <integer name="config_satellite_modem_image_switching_duration_millis">20000</integer>
+    <java-symbol type="integer" name="config_satellite_modem_image_switching_duration_millis" />
+
+    <!-- The time duration in millis after which Telephony will abort the datagram sending requests.
+         Telephony starts a timer when receiving a datagram sending request in either OFF, IDLE, or
+         NOT_CONNECTED state. In NOT_CONNECTED, the duration of the timer is given by this config.
+         In OFF or IDLE state, the duration of the timer is the sum of this config and the
+         config_satellite_modem_image_switching_duration_millis.
+         -->
+    <integer name="config_datagram_wait_for_connected_state_timeout_millis">60000</integer>
+    <java-symbol type="integer" name="config_datagram_wait_for_connected_state_timeout_millis" />
+
+    <!-- The time duration in millis after which Telephony will stop waiting for the response of the
+         satellite enable request from modem, and send failure response to the client that has
+         requested Telephony to enable satellite.
+         -->
+    <integer name="config_wait_for_satellite_enabling_response_timeout_millis">180000</integer>
+    <java-symbol type="integer" name="config_wait_for_satellite_enabling_response_timeout_millis" />
+
+    <!-- The time duration in millis after which Telephony will abort the datagram sending requests
+         and send failure response to the client that has requested sending the datagrams. Telephony
+         starts a timer after pushing down the datagram sending request to modem. Before expiry, the
+         timer will be stopped when Telephony receives the response for the sending request from
+         modem.
+         -->
+    <integer name="config_wait_for_datagram_sending_response_timeout_millis">180000</integer>
+    <java-symbol type="integer" name="config_wait_for_datagram_sending_response_timeout_millis" />
+
     <!-- The timeout duration in milliseconds to determine whether to recommend Dialer to show the
          emergency messaging option to users.
 

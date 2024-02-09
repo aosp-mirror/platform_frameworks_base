@@ -265,6 +265,14 @@ public class SatelliteImplBase extends SatelliteService {
                     "stopSendingNtnSignalStrength");
         }
 
+        @Override
+        public void abortSendingSatelliteDatagrams(IIntegerConsumer resultCallback)
+                throws RemoteException {
+            executeMethodAsync(
+                    () -> SatelliteImplBase.this.abortSendingSatelliteDatagrams(resultCallback),
+                    "abortSendingSatelliteDatagrams");
+        }
+
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
         private void executeMethodAsync(Runnable r, String errorLogName) throws RemoteException {
@@ -781,6 +789,15 @@ public class SatelliteImplBase extends SatelliteService {
      * @param resultCallback The {@link SatelliteError} result of the operation.
      */
     public void stopSendingNtnSignalStrength(@NonNull IIntegerConsumer resultCallback){
+        // stub implementation
+    }
+
+    /**
+     * Requests to abort sending satellite datagrams
+     *
+     * @param resultCallback The {@link SatelliteError} result of the operation.
+     */
+    public void abortSendingSatelliteDatagrams(@NonNull IIntegerConsumer resultCallback){
         // stub implementation
     }
 }
