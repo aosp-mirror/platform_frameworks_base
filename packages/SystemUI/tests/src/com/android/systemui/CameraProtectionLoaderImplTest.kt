@@ -89,7 +89,7 @@ class CameraProtectionLoaderImplTest : SysuiTestCase() {
         loader.loadCameraProtectionInfoList().map { it.toTestableVersion() }
 
     private fun CameraProtectionInfo.toTestableVersion() =
-        TestableProtectionInfo(logicalCameraId, physicalCameraId, cutoutBounds, displayUniqueId)
+        TestableProtectionInfo(logicalCameraId, physicalCameraId, bounds, displayUniqueId)
 
     /**
      * "Testable" version, because the original version contains a Path property, which doesn't
