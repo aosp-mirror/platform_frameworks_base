@@ -2141,6 +2141,12 @@
         <item>com.android.location.fused</item>
     </string-array>
 
+   <!-- Package name of the extension software fallback. -->
+    <string name="config_extensionFallbackPackageName" translatable="false"></string>
+
+   <!-- Service name of the extension software fallback. -->
+    <string name="config_extensionFallbackServiceName" translatable="false"></string>
+
     <!-- Package name(s) of Advanced Driver Assistance applications. These packages have additional
     management of access to location, specific to driving assistance use-cases. They must be system
     packages. This configuration is only applicable to devices that declare
