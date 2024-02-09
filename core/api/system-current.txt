@@ -4811,7 +4811,7 @@ package android.hardware.camera2.extension {
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public static interface SessionProcessor.CaptureCallback {
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureCompleted(long, int, @NonNull android.hardware.camera2.CaptureResult);
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureFailed(int);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureFailed(int, int);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureProcessStarted(int);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureSequenceAborted(int);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureSequenceCompleted(int);
