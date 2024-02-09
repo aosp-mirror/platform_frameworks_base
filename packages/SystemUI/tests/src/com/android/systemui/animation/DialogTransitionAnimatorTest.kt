@@ -39,8 +39,8 @@ import org.mockito.junit.MockitoJUnit
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
-class DialogLaunchAnimatorTest : SysuiTestCase() {
-    private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+class DialogTransitionAnimatorTest : SysuiTestCase() {
+    private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
     private val attachedViews = mutableSetOf<View>()
 
     @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
@@ -48,8 +48,8 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        dialogLaunchAnimator =
-            fakeDialogLaunchAnimator(interactionJankMonitor = interactionJankMonitor)
+        mDialogTransitionAnimator =
+            fakeDialogTransitionAnimator(interactionJankMonitor = interactionJankMonitor)
     }
 
     @After
@@ -112,7 +112,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         assertTrue(firstDialog.isShowing)
         assertTrue(secondDialog.isShowing)
         runOnMainThreadAndWaitForIdleSync {
-            dialogLaunchAnimator.dismissStack(secondDialog)
+            mDialogTransitionAnimator.dismissStack(secondDialog)
         }
 
         assertFalse(firstDialog.isShowing)
@@ -120,12 +120,12 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testActivityLaunchControllerFromDialog() {
+    fun testActivityTransitionControllerFromDialog() {
         val firstDialog = createAndShowDialog()
         val secondDialog = createDialogAndShowFromDialog(firstDialog)
 
         val controller =
-            dialogLaunchAnimator.createActivityLaunchController(secondDialog.contentView)!!
+            mDialogTransitionAnimator.createActivityTransitionController(secondDialog.contentView)!!
 
         // The dialog shouldn't be dismissable during the animation.
         runOnMainThreadAndWaitForIdleSync {
@@ -148,23 +148,25 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         runOnMainThreadAndWaitForIdleSync {
             dialog.hide()
         }
-        assertNull(dialogLaunchAnimator.createActivityLaunchController(dialog.contentView))
+        assertNull(mDialogTransitionAnimator.createActivityTransitionController(dialog.contentView))
     }
 
     @Test
     fun testActivityLaunchWhenLockedWithoutAlternateAuth() {
-        val dialogLaunchAnimator =
-            fakeDialogLaunchAnimator(isUnlocked = false, isShowingAlternateAuthOnUnlock = false)
-        val dialog = createAndShowDialog(dialogLaunchAnimator)
-        assertNull(dialogLaunchAnimator.createActivityLaunchController(dialog.contentView))
+        val dialogTransitionAnimator =
+            fakeDialogTransitionAnimator(isUnlocked = false, isShowingAlternateAuthOnUnlock = false)
+        val dialog = createAndShowDialog(dialogTransitionAnimator)
+        assertNull(dialogTransitionAnimator.createActivityTransitionController(dialog.contentView))
     }
 
     @Test
     fun testActivityLaunchWhenLockedWithAlternateAuth() {
-        val dialogLaunchAnimator =
-            fakeDialogLaunchAnimator(isUnlocked = false, isShowingAlternateAuthOnUnlock = true)
-        val dialog = createAndShowDialog(dialogLaunchAnimator)
-        assertNotNull(dialogLaunchAnimator.createActivityLaunchController(dialog.contentView))
+        val dialogTransitionAnimator =
+            fakeDialogTransitionAnimator(isUnlocked = false, isShowingAlternateAuthOnUnlock = true)
+        val dialog = createAndShowDialog(dialogTransitionAnimator)
+        assertNotNull(
+            dialogTransitionAnimator.createActivityTransitionController(dialog.contentView)
+        )
     }
 
     @Test
@@ -178,7 +180,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
         val touchSurface = createTouchSurface()
         runOnMainThreadAndWaitForIdleSync {
-            dialogLaunchAnimator.showFromView(dialog, touchSurface)
+            mDialogTransitionAnimator.showFromView(dialog, touchSurface)
         }
         assertNotEquals(0, window.attributes.windowAnimations)
     }
@@ -188,7 +190,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         val touchSurface = createTouchSurface()
         runOnMainThreadAndWaitForIdleSync {
             val dialog = TestDialog(context)
-            dialogLaunchAnimator.showFromView(
+            mDialogTransitionAnimator.showFromView(
                 dialog, touchSurface, cuj = DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN))
         }
 
@@ -201,7 +203,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         val firstDialog = createAndShowDialog()
         runOnMainThreadAndWaitForIdleSync {
             val dialog = TestDialog(context)
-            dialogLaunchAnimator.showFromDialog(
+            mDialogTransitionAnimator.showFromDialog(
                 dialog, firstDialog, cuj = DialogCuj(InteractionJankMonitor.CUJ_USER_DIALOG_OPEN))
             dialog
         }
@@ -265,7 +267,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     @Test
     fun creatingControllerFromNormalViewThrows() {
         assertThrows(IllegalArgumentException::class.java) {
-            DialogLaunchAnimator.Controller.fromView(FrameLayout(mContext))
+            DialogTransitionAnimator.Controller.fromView(FrameLayout(mContext))
         }
     }
 
@@ -276,7 +278,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     }
 
     private fun createAndShowDialog(
-        animator: DialogLaunchAnimator = dialogLaunchAnimator,
+        animator: DialogTransitionAnimator = mDialogTransitionAnimator,
     ): TestDialog {
         val touchSurface = createTouchSurface()
         return showDialogFromView(touchSurface, animator)
@@ -299,7 +301,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
     private fun showDialogFromView(
         touchSurface: View,
-        animator: DialogLaunchAnimator = dialogLaunchAnimator,
+        animator: DialogTransitionAnimator = mDialogTransitionAnimator,
     ): TestDialog {
         return runOnMainThreadAndWaitForIdleSync {
             val dialog = TestDialog(context)
@@ -311,7 +313,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     private fun createDialogAndShowFromDialog(animateFrom: Dialog): TestDialog {
         return runOnMainThreadAndWaitForIdleSync {
             val dialog = TestDialog(context)
-            dialogLaunchAnimator.showFromDialog(dialog, animateFrom)
+            mDialogTransitionAnimator.showFromDialog(dialog, animateFrom)
             dialog
         }
     }

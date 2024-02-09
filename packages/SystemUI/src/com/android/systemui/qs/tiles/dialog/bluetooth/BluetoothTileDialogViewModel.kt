@@ -26,7 +26,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Prefs
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -58,7 +58,7 @@ internal class BluetoothTileDialogViewModel
 constructor(
     private val deviceItemInteractor: DeviceItemInteractor,
     private val bluetoothStateInteractor: BluetoothStateInteractor,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val activityStarter: ActivityStarter,
     private val systemClock: SystemClock,
     private val uiEventLogger: UiEventLogger,
@@ -88,7 +88,7 @@ constructor(
                 val dialog = createBluetoothTileDialog(context)
 
                 view?.let {
-                    dialogLaunchAnimator.showFromView(
+                    dialogTransitionAnimator.showFromView(
                         dialog,
                         it,
                         animateBackgroundBoundsChange = true,
@@ -239,7 +239,7 @@ constructor(
             activityStarter.postStartActivityDismissingKeyguard(
                 intent,
                 0,
-                dialogLaunchAnimator.createActivityLaunchController(view)
+                dialogTransitionAnimator.createActivityTransitionController(view)
             )
         }
     }

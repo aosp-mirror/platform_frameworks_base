@@ -21,7 +21,7 @@ import android.provider.Settings
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.accessibility.fontscaling.FontScalingDialogDelegate
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
@@ -44,7 +44,7 @@ constructor(
     private val qsTileIntentUserActionHandler: QSTileIntentUserInputHandler,
     private val fontScalingDialogDelegateProvider: Provider<FontScalingDialogDelegate>,
     private val keyguardStateController: KeyguardStateController,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val activityStarter: ActivityStarter,
 ) : QSTileUserActionInteractor<FontScalingTileModel> {
 
@@ -59,7 +59,7 @@ constructor(
                         val dialog: SystemUIDialog =
                             fontScalingDialogDelegateProvider.get().createDialog()
                         if (animateFromView) {
-                            dialogLaunchAnimator.showFromView(
+                            dialogTransitionAnimator.showFromView(
                                 dialog,
                                 action.view!!,
                                 DialogCuj(

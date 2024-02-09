@@ -66,7 +66,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.animation.DialogCuj;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
@@ -75,7 +75,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.NotificationChannels;
-import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.volume.Events;
 
 import dagger.Lazy;
@@ -87,7 +86,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  */
@@ -183,7 +181,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final UiEventLogger mUiEventLogger;
     private final UserTracker mUserTracker;
     private final Lazy<BatteryController> mBatteryControllerLazy;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
 
     /**
      */
@@ -193,7 +191,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             ActivityStarter activityStarter,
             BroadcastSender broadcastSender,
             Lazy<BatteryController> batteryControllerLazy,
-            DialogLaunchAnimator dialogLaunchAnimator,
+            DialogTransitionAnimator dialogTransitionAnimator,
             UiEventLogger uiEventLogger,
             UserTracker userTracker,
             SystemUIDialog.Factory systemUIDialogFactory) {
@@ -206,7 +204,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mActivityStarter = activityStarter;
         mBroadcastSender = broadcastSender;
         mBatteryControllerLazy = batteryControllerLazy;
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mUiEventLogger = uiEventLogger;
         mUserTracker = userTracker;
         mUseExtraSaverConfirmation =
@@ -707,7 +705,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         });
         WeakReference<View> ref = mBatteryControllerLazy.get().getLastPowerSaverStartView();
         if (ref != null && ref.get() != null && ref.get().isAggregatedVisible()) {
-            mDialogLaunchAnimator.showFromView(d, ref.get(),
+            mDialogTransitionAnimator.showFromView(d, ref.get(),
                     new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
                             INTERACTION_JANK_TAG));
         } else {

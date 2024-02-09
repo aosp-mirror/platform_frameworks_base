@@ -26,7 +26,7 @@ import android.widget.Button
 import android.widget.Switch
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
@@ -80,7 +80,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var bgExecutor: Executor
     @Mock private lateinit var mainExecutor: Executor
-    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
 
     private lateinit var dialog: SystemUIDialog
     private lateinit var factory: SystemUIDialog.Factory
@@ -108,7 +108,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                     systemUIDialogManager,
                     sysuiState,
                     broadcastDispatcher,
-                    dialogLaunchAnimator
+                    mDialogTransitionAnimator
                 )
             )
 

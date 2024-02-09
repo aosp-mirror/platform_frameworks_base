@@ -64,7 +64,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.settingslib.wifi.dpp.WifiDppIntentHelper;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -172,7 +172,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Mock
     private LocationController mLocationController;
     @Mock
-    private DialogLaunchAnimator mDialogLaunchAnimator;
+    private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
     private View mDialogLaunchView;
     @Mock
@@ -227,7 +227,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 mConnectivityManager, mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
                 mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker,
-                mLocationController, mDialogLaunchAnimator, mWifiStateWorker, mFlags);
+                mLocationController, mDialogTransitionAnimator, mWifiStateWorker, mFlags);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mInternetDialogCallback, true);

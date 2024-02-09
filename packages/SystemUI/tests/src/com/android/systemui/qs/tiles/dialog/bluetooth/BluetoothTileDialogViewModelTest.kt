@@ -25,7 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -69,7 +69,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var activityStarter: ActivityStarter
 
-    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
 
     @Mock private lateinit var cachedBluetoothDevice: CachedBluetoothDevice
 
@@ -94,7 +94,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             BluetoothTileDialogViewModel(
                 deviceItemInteractor,
                 bluetoothStateInteractor,
-                dialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 activityStarter,
                 fakeSystemClock,
                 uiEventLogger,
@@ -117,7 +117,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(context, null)
 
-            verify(dialogLaunchAnimator, never()).showFromView(any(), any(), any(), any())
+            verify(mDialogTransitionAnimator, never()).showFromView(any(), any(), any(), any())
             verify(uiEventLogger).log(BluetoothTileDialogUiEvent.BLUETOOTH_TILE_DIALOG_SHOWN)
         }
     }
@@ -127,7 +127,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(mContext, LinearLayout(mContext))
 
-            verify(dialogLaunchAnimator).showFromView(any(), any(), nullable(), anyBoolean())
+            verify(mDialogTransitionAnimator).showFromView(any(), any(), nullable(), anyBoolean())
         }
     }
 
@@ -137,7 +137,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             backgroundExecutor.execute {
                 bluetoothTileDialogViewModel.showDialog(mContext, LinearLayout(mContext))
 
-                verify(dialogLaunchAnimator).showFromView(any(), any(), nullable(), anyBoolean())
+                verify(mDialogTransitionAnimator)
+                    .showFromView(any(), any(), nullable(), anyBoolean())
             }
         }
     }

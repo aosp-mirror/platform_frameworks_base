@@ -28,9 +28,8 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
-import com.android.systemui.res.R;
 import com.android.systemui.animation.DialogCuj;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -41,6 +40,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.DataSaverController;
 
@@ -54,7 +54,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
     private static final String INTERACTION_JANK_TAG = "start_data_saver";
 
     private final DataSaverController mDataSaverController;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final SystemUIDialog.Factory mSystemUIDialogFactory;
 
     @Inject
@@ -69,13 +69,13 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             DataSaverController dataSaverController,
-            DialogLaunchAnimator dialogLaunchAnimator,
+            DialogTransitionAnimator dialogTransitionAnimator,
             SystemUIDialog.Factory systemUIDialogFactory
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mDataSaverController = dataSaverController;
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mSystemUIDialogFactory = systemUIDialogFactory;
         mDataSaverController.observe(getLifecycle(), this);
     }
@@ -98,8 +98,8 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
             return;
         }
 
-        // Show a dialog to confirm first. Dialogs shown by the DialogLaunchAnimator must be created
-        // and shown on the main thread, so we post it to the UI handler.
+        // Show a dialog to confirm first. Dialogs shown by the DialogTransitionAnimator must be
+        // created and shown on the main thread, so we post it to the UI handler.
         mUiHandler.post(() -> {
             SystemUIDialog dialog = mSystemUIDialogFactory.create();
             dialog.setTitle(com.android.internal.R.string.data_saver_enable_title);
@@ -113,7 +113,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
             dialog.setShowForAllUsers(true);
 
             if (view != null) {
-                mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(
+                mDialogTransitionAnimator.showFromView(dialog, view, new DialogCuj(
                         InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
                         INTERACTION_JANK_TAG));
             } else {

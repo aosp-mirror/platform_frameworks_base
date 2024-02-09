@@ -159,7 +159,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     fun onQuickAffordanceTriggered() {
         val animationController: ActivityTransitionAnimator.Controller = mock()
         val expandable: Expandable = mock {
-            whenever(this.activityLaunchController()).thenReturn(animationController)
+            whenever(this.activityTransitionController()).thenReturn(animationController)
         }
 
         assertThat(underTest.onTriggered(expandable))

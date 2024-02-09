@@ -32,7 +32,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -77,7 +77,7 @@ public class InternetDialogTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguard;
     @Mock
-    private DialogLaunchAnimator mDialogLaunchAnimator;
+    private DialogTransitionAnimator mDialogTransitionAnimator;
 
     private FakeExecutor mBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InternetDialog mInternetDialog;
@@ -124,7 +124,7 @@ public class InternetDialogTest extends SysuiTestCase {
     private void createInternetDialog() {
         mInternetDialog = new InternetDialog(mContext, mock(InternetDialogFactory.class),
                 mInternetDialogController, true, true, true, mock(UiEventLogger.class),
-                mDialogLaunchAnimator, mHandler,
+                mDialogTransitionAnimator, mHandler,
                 mBgExecutor, mKeyguard);
         mInternetDialog.mAdapter = mInternetAdapter;
         mInternetDialog.mConnectedWifiEntry = mInternetWifiEntry;
@@ -522,7 +522,7 @@ public class InternetDialogTest extends SysuiTestCase {
         primaryLayout.performClick();
         ArgumentCaptor<AlertDialog> dialogArgumentCaptor =
                 ArgumentCaptor.forClass(AlertDialog.class);
-        verify(mDialogLaunchAnimator).showFromDialog(dialogArgumentCaptor.capture(),
+        verify(mDialogTransitionAnimator).showFromDialog(dialogArgumentCaptor.capture(),
                 eq(mInternetDialog), eq(null), eq(false));
         AlertDialog dialog = dialogArgumentCaptor.getValue();
         dialog.show();
