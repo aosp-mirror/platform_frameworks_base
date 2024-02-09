@@ -1393,7 +1393,7 @@ public class StorageManager {
                 // Package name can be null if the activity thread is running but the app
                 // hasn't bound yet. In this case we fall back to the first package in the
                 // current UID. This works for runtime permissions as permission state is
-                // per UID and permission realted app ops are updated for all UID packages.
+                // per UID and permission related app ops are updated for all UID packages.
                 String[] packageNames = ActivityThread.getPackageManager().getPackagesForUid(
                         android.os.Process.myUid());
                 if (packageNames == null || packageNames.length <= 0) {
