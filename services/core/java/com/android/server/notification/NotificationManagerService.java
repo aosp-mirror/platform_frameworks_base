@@ -1340,6 +1340,10 @@ public class NotificationManagerService extends SystemService {
                 nv.recycle();
                 reportUserInteraction(r);
                 mAssistants.notifyAssistantActionClicked(r, action, generatedByAssistant);
+                // Notifications that have been interacted with don't need to be lifetime extended.
+                if (lifetimeExtensionRefactor()) {
+                    r.getSbn().getNotification().flags &= ~FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+                }
             }
         }
 
