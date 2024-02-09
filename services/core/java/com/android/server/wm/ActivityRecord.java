@@ -381,6 +381,7 @@ import com.android.server.am.PendingIntentRecord;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
@@ -436,6 +437,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private static final String ATTR_LAUNCHEDFROMFEATURE = "launched_from_feature";
     private static final String ATTR_RESOLVEDTYPE = "resolved_type";
     private static final String ATTR_COMPONENTSPECIFIED = "component_specified";
+    private static final String TAG_INITIAL_CALLER_INFO = "initial_caller_info";
     static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
 
     // How many activities have to be scheduled to stop to force a stop pass.
@@ -472,6 +474,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private static final float ASPECT_RATIO_ROUNDING_TOLERANCE = 0.005f;
 
     final ActivityTaskManagerService mAtmService;
+    final ActivityCallerState mCallerState;
     @NonNull
     final ActivityInfo info; // activity info provided by developer in AndroidManifest
     // Which user is this running for?
@@ -2021,6 +2024,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    void computeInitialCallerInfo() {
+        computeCallerInfo(initialCallerInfoAccessToken, intent, launchedFromUid);
+    }
+
+    void computeCallerInfo(IBinder callerToken, Intent intent, int callerUid) {
+        mCallerState.computeCallerInfo(callerToken, intent, callerUid);
+    }
+
+    boolean checkContentUriPermission(IBinder callerToken, GrantUri grantUri, int modeFlags) {
+        return mCallerState.checkContentUriPermission(callerToken, grantUri, modeFlags);
+    }
+
     private ActivityRecord(ActivityTaskManagerService _service, WindowProcessController _caller,
             int _launchedFromPid, int _launchedFromUid, String _launchedFromPackage,
             @Nullable String _launchedFromFeature, Intent _intent, String _resolvedType,
@@ -2246,6 +2261,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                             }
                             return appContext;
                         });
+        mCallerState = new ActivityCallerState(mAtmService);
     }
 
     /**
@@ -10113,6 +10129,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mPersistentState.saveToXml(out);
             out.endTag(null, TAG_PERSISTABLEBUNDLE);
         }
+
+        if (android.security.Flags.contentUriPermissionApis()) {
+            ActivityCallerState.CallerInfo initialCallerInfo = mCallerState.getCallerInfoOrNull(
+                    initialCallerInfoAccessToken);
+            if (initialCallerInfo != null) {
+                out.startTag(null, TAG_INITIAL_CALLER_INFO);
+                initialCallerInfo.saveToXml(out);
+                out.endTag(null, TAG_INITIAL_CALLER_INFO);
+            }
+        }
     }
 
     static ActivityRecord restoreFromXml(TypedXmlPullParser in,
@@ -10127,6 +10153,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         int userId = in.getAttributeInt(null, ATTR_USERID, 0);
         long createTime = in.getAttributeLong(null, ATTR_ID, -1);
         final int outerDepth = in.getDepth();
+        ActivityCallerState.CallerInfo initialCallerInfo = null;
 
         TaskDescription taskDescription = new TaskDescription();
         taskDescription.restoreFromXml(in);
@@ -10146,6 +10173,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     persistentState = PersistableBundle.restoreFromXml(in);
                     if (DEBUG) Slog.d(TaskPersister.TAG,
                             "ActivityRecord: persistentState=" + persistentState);
+                } else if (android.security.Flags.contentUriPermissionApis()
+                        && TAG_INITIAL_CALLER_INFO.equals(name)) {
+                    initialCallerInfo = ActivityCallerState.CallerInfo.restoreFromXml(in);
                 } else {
                     Slog.w(TAG, "restoreActivity: unexpected name=" + name);
                     XmlUtils.skipCurrentTag(in);
@@ -10164,7 +10194,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             throw new XmlPullParserException("restoreActivity resolver error. Intent=" + intent +
                     " resolvedType=" + resolvedType);
         }
-        return new ActivityRecord.Builder(service)
+        final ActivityRecord r = new ActivityRecord.Builder(service)
                 .setLaunchedFromUid(launchedFromUid)
                 .setLaunchedFromPackage(launchedFromPackage)
                 .setLaunchedFromFeature(launchedFromFeature)
@@ -10176,6 +10206,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 .setTaskDescription(taskDescription)
                 .setCreateTime(createTime)
                 .build();
+
+        if (android.security.Flags.contentUriPermissionApis() && initialCallerInfo != null) {
+            r.mCallerState.add(r.initialCallerInfoAccessToken, initialCallerInfo);
+        }
+        return r;
     }
 
     private static boolean isInVrUiMode(Configuration config) {
