@@ -151,6 +151,8 @@
     <public name="windowOptOutEdgeToEdgeEnforcement"/>
     <!-- @FlaggedApi("android.security.content_uri_permission_apis") -->
     <public name="requireContentUriPermissionFromCaller" />
+    <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp") -->
+    <public name="languageSettingsActivity"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

@@ -3894,7 +3894,7 @@ package android.view.inputmethod {
   }
 
   public final class InputMethodInfo implements android.os.Parcelable {
-    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, boolean, @NonNull String);
+    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, @NonNull String, boolean, @NonNull String);
     ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, int);
     field public static final int COMPONENT_NAME_MAX_LENGTH = 1000; // 0x3e8
     field public static final int MAX_IMES_PER_PACKAGE = 20; // 0x14
