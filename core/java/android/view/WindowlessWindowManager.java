@@ -23,7 +23,6 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
@@ -33,6 +32,7 @@ import android.util.MergedConfiguration;
 import android.view.View.FocusDirection;
 import android.view.WindowInsets.Type.InsetsType;
 import android.window.ClientWindowFrames;
+import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
 
 import java.util.HashMap;
@@ -60,7 +60,7 @@ public class WindowlessWindowManager implements IWindowSession {
         SurfaceControl mLeash;
         Rect mFrame;
         Rect mAttachedFrame;
-        IBinder mInputTransferToken;
+        InputTransferToken mInputTransferToken;
 
         State(SurfaceControl sc, WindowManager.LayoutParams p, int displayId, IWindow client,
                 SurfaceControl leash, Rect frame) {
@@ -90,8 +90,8 @@ public class WindowlessWindowManager implements IWindowSession {
     protected final SurfaceControl mRootSurface;
     private final Configuration mConfiguration;
     private final IWindowSession mRealWm;
-    private final IBinder mHostInputToken;
-    private final IBinder mInputTransferToken = new Binder();
+    final InputTransferToken mHostInputTransferToken;
+    private final InputTransferToken mInputTransferToken = new InputTransferToken();
     private InsetsState mInsetsState;
     private final ClientWindowFrames mTmpFrames = new ClientWindowFrames();
     private final MergedConfiguration mTmpConfig = new MergedConfiguration();
@@ -100,18 +100,18 @@ public class WindowlessWindowManager implements IWindowSession {
     private ISurfaceControlViewHostParent mParentInterface;
 
     public WindowlessWindowManager(Configuration c, SurfaceControl rootSurface,
-            IBinder hostInputToken) {
+            InputTransferToken hostInputTransferToken) {
         mRootSurface = rootSurface;
         mConfiguration = new Configuration(c);
         mRealWm = WindowManagerGlobal.getWindowSession();
-        mHostInputToken = hostInputToken;
+        mHostInputTransferToken = hostInputTransferToken;
     }
 
     public void setConfiguration(Configuration configuration) {
         mConfiguration.setTo(configuration);
     }
 
-    IBinder getInputTransferToken(IBinder window) {
+    InputTransferToken getInputTransferToken(IBinder window) {
         synchronized (this) {
             // This can only happen if someone requested the focusGrantToken before setView was
             // called for the SCVH. In that case, use the root focusGrantToken since this will be
@@ -211,7 +211,7 @@ public class WindowlessWindowManager implements IWindowSession {
             if (mStateForWindow.isEmpty()) {
                 state.mInputTransferToken = mInputTransferToken;
             } else {
-                state.mInputTransferToken = new Binder();
+                state.mInputTransferToken = new InputTransferToken();
             }
 
             mStateForWindow.put(window.asBinder(), state);
@@ -230,15 +230,15 @@ public class WindowlessWindowManager implements IWindowSession {
                 if (mRealWm instanceof IWindowSession.Stub) {
                     mRealWm.grantInputChannel(displayId,
                             new SurfaceControl(sc, "WindowlessWindowManager.addToDisplay"),
-                            window.asBinder(), mHostInputToken, attrs.flags, attrs.privateFlags,
-                            attrs.inputFeatures, attrs.type,
-                            attrs.token, state.mInputTransferToken, attrs.getTitle().toString(),
+                            window.asBinder(), mHostInputTransferToken, attrs.flags,
+                            attrs.privateFlags, attrs.inputFeatures, attrs.type, attrs.token,
+                            state.mInputTransferToken, attrs.getTitle().toString(),
                             outInputChannel);
                 } else {
-                    mRealWm.grantInputChannel(displayId, sc, window.asBinder(), mHostInputToken,
-                            attrs.flags, attrs.privateFlags, attrs.inputFeatures, attrs.type,
-                            attrs.token, state.mInputTransferToken, attrs.getTitle().toString(),
-                            outInputChannel);
+                    mRealWm.grantInputChannel(displayId, sc, window.asBinder(),
+                            mHostInputTransferToken, attrs.flags, attrs.privateFlags,
+                            attrs.inputFeatures, attrs.type, attrs.token, state.mInputTransferToken,
+                            attrs.getTitle().toString(), outInputChannel);
                 }
                 state.mInputChannelToken =
                         outInputChannel != null ? outInputChannel.getToken() : null;
@@ -595,9 +595,9 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface, IBinder clientToken,
-            IBinder hostInputToken, int flags, int privateFlags, int inputFeatures, int type,
-            IBinder windowToken, IBinder focusGrantToken, String inputHandleName,
-            InputChannel outInputChannel) {
+            InputTransferToken hostInputToken, int flags, int privateFlags, int inputFeatures,
+            int type, IBinder windowToken, InputTransferToken embeddedInputTransferToken,
+            String inputHandleName, InputChannel outInputChannel) {
     }
 
     @Override
@@ -611,7 +611,7 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void grantEmbeddedWindowFocus(IWindow callingWindow, IBinder targetInputToken,
+    public void grantEmbeddedWindowFocus(IWindow callingWindow, InputTransferToken targetInputToken,
                                          boolean grantFocus) {
     }
 
@@ -659,7 +659,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public boolean transferHostTouchGestureToEmbedded(IWindow hostWindow,
-            IBinder embeddedInputToken) {
+            InputTransferToken embeddedInputToken) {
         Log.e(TAG, "Received request to transferHostTouchGestureToEmbedded on"
                 + " WindowlessWindowManager. We shouldn't get here!");
         return false;

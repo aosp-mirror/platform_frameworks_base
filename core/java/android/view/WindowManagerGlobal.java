@@ -41,6 +41,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.view.inputmethod.InputMethodManager;
 import android.window.ITrustedPresentationListener;
+import android.window.InputTransferToken;
 import android.window.TrustedPresentationThresholds;
 
 import com.android.internal.annotations.GuardedBy;
@@ -839,7 +840,7 @@ public final class WindowManagerGlobal {
     }
 
     void registerBatchedSurfaceControlInputReceiver(int displayId,
-            @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
+            @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
         IBinder clientToken = new Binder();
         InputChannel inputChannel = new InputChannel();
@@ -866,8 +867,8 @@ public final class WindowManagerGlobal {
         }
     }
 
-    void registerUnbatchedSurfaceControlInputReceiver(
-            int displayId, @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
+    void registerUnbatchedSurfaceControlInputReceiver(int displayId,
+            @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
         IBinder clientToken = new Binder();
         InputChannel inputChannel = new InputChannel();

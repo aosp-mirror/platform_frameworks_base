@@ -73,6 +73,7 @@ import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ITrustedPresentationListener;
+import android.window.InputTransferToken;
 import android.window.ScreenCapture;
 import android.window.TrustedPresentationThresholds;
 import android.window.WindowContextInfo;
