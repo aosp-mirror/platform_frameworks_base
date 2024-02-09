@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
@@ -24,11 +26,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
@@ -117,7 +118,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
 
         // TODO(b/317250444): use MediaProjectionManagerService directly, reduces unnecessary
         //  handler, delegate, and binder death recipient
-        mProjectionManager.addCallback(mProjectionCallback, new Handler(Looper.getMainLooper()));
+        mProjectionManager.addCallback(mProjectionCallback, getContext().getMainThreadHandler());
 
         try {
             mNotificationListener.registerAsSystemService(
@@ -148,6 +149,15 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     }
 
     private void onProjectionStart() {
+        // TODO(b/324447419): move GlobalSettings lookup to background thread
+        boolean disableScreenShareProtections =
+                Settings.Global.getInt(getContext().getContentResolver(),
+                        DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 0) != 0;
+        if (disableScreenShareProtections) {
+            Log.w(TAG, "Screen share protections disabled, ignoring projection start");
+            return;
+        }
+
         synchronized (mSensitiveContentProtectionLock) {
             mProjectionActive = true;
             updateAppsThatShouldBlockScreenCapture();
