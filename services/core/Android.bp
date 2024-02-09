@@ -205,6 +205,7 @@ java_library_static {
         "com.android.server.utils_aconfig-java",
         "service-jobscheduler-deviceidle.flags-aconfig-java",
         "net_flags_lib",
+        "core_os_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
