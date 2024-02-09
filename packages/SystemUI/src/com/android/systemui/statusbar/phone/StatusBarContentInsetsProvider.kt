@@ -494,7 +494,8 @@ private fun getStatusBarContentBounds(
 
     val logicalDisplayWidth = if (targetRotation.isHorizontal()) height else width
 
-    val cutoutRects = sysUICutout?.cutout?.boundingRects
+    // Exclude the bottom rect, as it doesn't intersect with the status bar. 
+    val cutoutRects = sysUICutout?.cutout?.boundingRectsLeftRightTop
     if (cutoutRects.isNullOrEmpty()) {
         return Rect(minLeft, insetTop, logicalDisplayWidth - minRight, sbHeight)
     }
@@ -546,6 +547,9 @@ private fun rectUnion(first: Rect, second: Rect) = Rect(first).apply { union(sec
 
 private fun Rect.intersects(other: Rect): Boolean =
     intersects(other.left, other.top, other.right, other.bottom)
+
+private val DisplayCutout.boundingRectsLeftRightTop
+    get() = listOf(boundingRectLeft, boundingRectRight, boundingRectTop).filter { !it.isEmpty }
 
 /*
  * Returns the inset top of the status bar.
