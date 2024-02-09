@@ -1331,17 +1331,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void onPackageDataCleared(String packageName, int uid) {
-            boolean changed = false;
-            for (InputMethodInfo imi : mSettings.getMethodList()) {
-                if (imi.getPackageName().equals(packageName)) {
-                    mAdditionalSubtypeMap.remove(imi.getId());
-                    changed = true;
+            synchronized (ImfLock.class) {
+                boolean changed = false;
+                for (InputMethodInfo imi : mSettings.getMethodList()) {
+                    if (imi.getPackageName().equals(packageName)) {
+                        mAdditionalSubtypeMap.remove(imi.getId());
+                        changed = true;
+                    }
                 }
-            }
-            if (changed) {
-                AdditionalSubtypeUtils.save(
-                        mAdditionalSubtypeMap, mSettings.getMethodMap(), mSettings.getUserId());
-                mChangedPackages.add(packageName);
+                if (changed) {
+                    AdditionalSubtypeUtils.save(
+                            mAdditionalSubtypeMap, mSettings.getMethodMap(), mSettings.getUserId());
+                    mChangedPackages.add(packageName);
+                }
             }
         }
 
