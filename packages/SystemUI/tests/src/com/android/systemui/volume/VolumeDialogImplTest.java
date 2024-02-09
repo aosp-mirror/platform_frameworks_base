@@ -160,7 +160,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     private FakeSettings mSecureSettings;
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
    @Before
     public void setup() throws Exception {

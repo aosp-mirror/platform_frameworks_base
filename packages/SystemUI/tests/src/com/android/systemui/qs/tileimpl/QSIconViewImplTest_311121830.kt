@@ -40,7 +40,7 @@ import org.junit.runner.RunWith
 @SmallTest
 class QSIconViewImplTest_311121830 : SysuiTestCase() {
 
-    @get:Rule val animatorRule = AnimatorTestRule()
+    @get:Rule val animatorRule = AnimatorTestRule(this)
 
     @Test
     fun alwaysLastIcon() {
