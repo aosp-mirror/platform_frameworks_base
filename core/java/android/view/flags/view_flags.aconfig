@@ -25,3 +25,20 @@ flag {
     bug: "305193969"
     is_fixed_read_only: true
 }
+
+flag {
+  name: "sensitive_content_app_protection_api"
+  namespace: "permissions"
+  description: "This flag controls the new sensitive content protection API,"
+    " The API will be used by other ui toolkits (i.e. compose, webview, custom virtual views)."
+  bug: "322887144"
+}
+
+flag {
+  name: "sensitive_content_app_protection"
+  namespace: "permissions"
+  description: "This flag controls the sensitive content protection when sharing the screen"
+  bug: "322887144"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+}
