@@ -17,10 +17,15 @@
 package com.android.systemui.statusbar.notification.row;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.asynclayoutinflater.view.AsyncLayoutFactory;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 
 import com.android.systemui.res.R;
@@ -55,10 +60,38 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
             mInflateOrigin = new Throwable("inflate requested here");
         }
         mListener = listener;
-        AsyncLayoutInflater inflater = new AsyncLayoutInflater(context);
+        AsyncLayoutInflater inflater = com.android.systemui.Flags.notificationRowUserContext()
+                ? new AsyncLayoutInflater(context, new RowAsyncLayoutInflater(entry))
+                : new AsyncLayoutInflater(context);
         mEntry = entry;
         entry.setInflationTask(this);
         inflater.inflate(R.layout.status_bar_notification_row, parent, this);
+    }
+
+    @VisibleForTesting
+    static class RowAsyncLayoutInflater implements AsyncLayoutFactory {
+        private final NotificationEntry mEntry;
+
+        RowAsyncLayoutInflater(NotificationEntry entry) {
+            mEntry = entry;
+        }
+
+        @Nullable
+        @Override
+        public View onCreateView(@Nullable View parent, @NonNull String name,
+                @NonNull Context context, @NonNull AttributeSet attrs) {
+            if (name.equals(ExpandableNotificationRow.class.getName())) {
+                return new ExpandableNotificationRow(context, attrs, mEntry);
+            }
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public View onCreateView(@NonNull String name, @NonNull Context context,
+                @NonNull AttributeSet attrs) {
+            return null;
+        }
     }
 
     @Override
