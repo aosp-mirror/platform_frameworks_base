@@ -16,9 +16,11 @@
 package android.hardware.location;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.chre.flags.Flags;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 
@@ -57,7 +59,8 @@ public class ContextHubTransaction<T> {
             TYPE_UNLOAD_NANOAPP,
             TYPE_ENABLE_NANOAPP,
             TYPE_DISABLE_NANOAPP,
-            TYPE_QUERY_NANOAPPS
+            TYPE_QUERY_NANOAPPS,
+            TYPE_RELIABLE_MESSAGE,
     })
     public @interface Type { }
 
@@ -66,6 +69,8 @@ public class ContextHubTransaction<T> {
     public static final int TYPE_ENABLE_NANOAPP = 2;
     public static final int TYPE_DISABLE_NANOAPP = 3;
     public static final int TYPE_QUERY_NANOAPPS = 4;
+    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
+    public static final int TYPE_RELIABLE_MESSAGE = 5;
 
     /**
      * Constants describing the result of a transaction or request through the Context Hub Service.
@@ -81,7 +86,8 @@ public class ContextHubTransaction<T> {
             RESULT_FAILED_AT_HUB,
             RESULT_FAILED_TIMEOUT,
             RESULT_FAILED_SERVICE_INTERNAL_FAILURE,
-            RESULT_FAILED_HAL_UNAVAILABLE
+            RESULT_FAILED_HAL_UNAVAILABLE,
+            RESULT_FAILED_NOT_SUPPORTED,
     })
     public @interface Result {}
     public static final int RESULT_SUCCESS = 0;
@@ -117,6 +123,11 @@ public class ContextHubTransaction<T> {
      * Failure mode when the Context Hub HAL was not available.
      */
     public static final int RESULT_FAILED_HAL_UNAVAILABLE = 8;
+    /**
+     * Failure mode when the operation is not supported.
+     */
+    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
+    public static final int RESULT_FAILED_NOT_SUPPORTED = 9;
 
     /**
      * A class describing the response for a ContextHubTransaction.
@@ -221,6 +232,11 @@ public class ContextHubTransaction<T> {
                 return upperCase ? "Disable" : "disable";
             case ContextHubTransaction.TYPE_QUERY_NANOAPPS:
                 return upperCase ? "Query" : "query";
+            case ContextHubTransaction.TYPE_RELIABLE_MESSAGE: {
+                if (Flags.reliableMessage()) {
+                    return upperCase ? "Reliable Message" : "reliable message";
+                }
+            }
             default:
                 return upperCase ? "Unknown" : "unknown";
         }
