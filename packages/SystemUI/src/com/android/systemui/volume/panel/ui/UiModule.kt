@@ -16,10 +16,14 @@
 
 package com.android.systemui.volume.panel.ui
 
+import com.android.systemui.volume.panel.component.shared.model.VolumePanelComponents
+import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayoutManager
 import com.android.systemui.volume.panel.ui.layout.DefaultComponentsLayoutManager
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 
 /** UI layer bindings module. */
 @Module
@@ -27,4 +31,26 @@ interface UiModule {
 
     @Binds
     fun bindComponentsLayoutManager(impl: DefaultComponentsLayoutManager): ComponentsLayoutManager
+
+    companion object {
+
+        @Provides
+        @VolumePanelScope
+        @HeaderComponents
+        fun provideHeaderComponents(): Collection<VolumePanelComponentKey> = setOf()
+
+        @Provides
+        @VolumePanelScope
+        @FooterComponents
+        fun provideFooterComponents(): Collection<VolumePanelComponentKey> {
+            return setOf(
+                VolumePanelComponents.CAPTIONING,
+            )
+        }
+
+        @Provides
+        @VolumePanelScope
+        @BottomBar
+        fun provideBottomBarKey(): VolumePanelComponentKey = VolumePanelComponents.BOTTOM_BAR
+    }
 }

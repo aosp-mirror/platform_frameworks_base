@@ -33,43 +33,37 @@ import org.junit.runner.RunWith
 class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
-    private val underTest: ComponentsLayoutManager = DefaultComponentsLayoutManager()
+    private val underTest: ComponentsLayoutManager =
+        DefaultComponentsLayoutManager(
+            BOTTOM_BAR,
+            headerComponents = listOf(COMPONENT_1),
+            footerComponents = listOf(COMPONENT_2),
+        )
 
     @Test
-    fun bottomBar_isSet() {
+    fun correspondingComponents_areSet() {
         val bottomBarComponentState =
             ComponentState(BOTTOM_BAR, kosmos.mockVolumePanelUiComponent, false)
+        val component1 = ComponentState(COMPONENT_1, kosmos.mockVolumePanelUiComponent, false)
+        val component2 = ComponentState(COMPONENT_2, kosmos.mockVolumePanelUiComponent, false)
+        val component3 = ComponentState(COMPONENT_3, kosmos.mockVolumePanelUiComponent, false)
+        val component4 = ComponentState(COMPONENT_4, kosmos.mockVolumePanelUiComponent, false)
         val layout =
             underTest.layout(
                 VolumePanelState(0, false),
-                setOf(
-                    bottomBarComponentState,
-                    ComponentState(COMPONENT_1, kosmos.mockVolumePanelUiComponent, false),
-                    ComponentState(COMPONENT_2, kosmos.mockVolumePanelUiComponent, false),
-                )
+                setOf(bottomBarComponentState, component1, component2, component3, component4)
             )
 
         Truth.assertThat(layout.bottomBarComponent).isEqualTo(bottomBarComponentState)
-    }
-
-    @Test
-    fun componentsAreInOrder() {
-        val bottomBarComponentState =
-            ComponentState(BOTTOM_BAR, kosmos.mockVolumePanelUiComponent, false)
-        val component1State = ComponentState(COMPONENT_1, kosmos.mockVolumePanelUiComponent, false)
-        val component2State = ComponentState(COMPONENT_2, kosmos.mockVolumePanelUiComponent, false)
-        val layout =
-            underTest.layout(
-                VolumePanelState(0, false),
-                setOf(
-                    bottomBarComponentState,
-                    component1State,
-                    component2State,
-                )
-            )
-
-        Truth.assertThat(layout.contentComponents[0]).isEqualTo(component1State)
-        Truth.assertThat(layout.contentComponents[1]).isEqualTo(component2State)
+        Truth.assertThat(layout.headerComponents)
+            .containsExactlyElementsIn(listOf(component1))
+            .inOrder()
+        Truth.assertThat(layout.footerComponents)
+            .containsExactlyElementsIn(listOf(component2))
+            .inOrder()
+        Truth.assertThat(layout.contentComponents)
+            .containsExactlyElementsIn(listOf(component3, component4))
+            .inOrder()
     }
 
     @Test(expected = IllegalStateException::class)
@@ -89,5 +83,7 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
         const val COMPONENT_1: VolumePanelComponentKey = "test_component:1"
         const val COMPONENT_2: VolumePanelComponentKey = "test_component:2"
+        const val COMPONENT_3: VolumePanelComponentKey = "test_component:3"
+        const val COMPONENT_4: VolumePanelComponentKey = "test_component:4"
     }
 }

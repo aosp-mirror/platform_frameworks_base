@@ -16,27 +16,47 @@
 
 package com.android.systemui.volume.panel.ui.layout
 
-import com.android.systemui.volume.panel.component.shared.model.VolumePanelComponents
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.volume.panel.ui.BottomBar
+import com.android.systemui.volume.panel.ui.FooterComponents
+import com.android.systemui.volume.panel.ui.HeaderComponents
 import com.android.systemui.volume.panel.ui.viewmodel.ComponentState
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelState
 import javax.inject.Inject
 
 @VolumePanelScope
-class DefaultComponentsLayoutManager @Inject constructor() : ComponentsLayoutManager {
+class DefaultComponentsLayoutManager
+@Inject
+constructor(
+    @BottomBar private val bottomBar: VolumePanelComponentKey,
+    @HeaderComponents
+    private val headerComponents: Collection<VolumePanelComponentKey> = emptyList(),
+    @FooterComponents
+    private val footerComponents: Collection<VolumePanelComponentKey> = emptyList(),
+) : ComponentsLayoutManager {
 
     override fun layout(
         volumePanelState: VolumePanelState,
         components: Collection<ComponentState>
     ): ComponentsLayout {
-        val bottomBarKey = VolumePanelComponents.BOTTOM_BAR
+        val contentComponents =
+            components.filter {
+                !headerComponents.contains(it.key) &&
+                    !footerComponents.contains(it.key) &&
+                    it.key != bottomBar
+            }
+        val headerComponents = components.filter { headerComponents.contains(it.key) }
+        val footerComponents = components.filter { footerComponents.contains(it.key) }
         return ComponentsLayout(
-            components.filter { it.key != bottomBarKey }.sortedBy { it.key },
-            components.find { it.key == bottomBarKey }
-                ?: error(
-                    "VolumePanelComponents.BOTTOM_BAR must be present in the default " +
-                        "components layout."
-                )
+            headerComponents = headerComponents.sortedBy { it.key },
+            contentComponents = contentComponents.sortedBy { it.key },
+            footerComponents = footerComponents.sortedBy { it.key },
+            bottomBarComponent = components.find { it.key == bottomBar }
+                    ?: error(
+                        "VolumePanelComponents.BOTTOM_BAR must be present in the default " +
+                            "components layout."
+                    )
         )
     }
 }

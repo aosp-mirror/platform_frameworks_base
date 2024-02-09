@@ -30,7 +30,7 @@ import com.android.systemui.volume.panel.criteriaByKey
 import com.android.systemui.volume.panel.dagger.factory.KosmosVolumePanelComponentFactory
 import com.android.systemui.volume.panel.mockVolumePanelUiComponentProvider
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
-import com.android.systemui.volume.panel.ui.layout.FakeComponentsLayoutManager
+import com.android.systemui.volume.panel.ui.layout.DefaultComponentsLayoutManager
 import com.android.systemui.volume.panel.unavailableCriteria
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,9 +45,7 @@ import org.junit.runner.RunWith
 class VolumePanelViewModelTest : SysuiTestCase() {
 
     private val kosmos =
-        testKosmos().apply {
-            componentsLayoutManager = FakeComponentsLayoutManager { it.key == BOTTOM_BAR }
-        }
+        testKosmos().apply { componentsLayoutManager = DefaultComponentsLayoutManager(BOTTOM_BAR) }
 
     private val testableResources = context.orCreateTestableResources
 

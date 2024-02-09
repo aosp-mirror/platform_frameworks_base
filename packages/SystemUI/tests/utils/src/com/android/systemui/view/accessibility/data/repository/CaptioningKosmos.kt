@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.shared.model
+package com.android.systemui.view.accessibility.data.repository
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.settingslib.view.accessibility.domain.interactor.CaptioningInteractor
+import com.android.systemui.kosmos.Kosmos
 
-object VolumePanelComponents {
-
-    const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
-    const val CAPTIONING: VolumePanelComponentKey = "captioning"
-}
+val Kosmos.captioningRepository by Kosmos.Fixture { FakeCaptioningRepository() }
+val Kosmos.captioningInteractor by Kosmos.Fixture { CaptioningInteractor(captioningRepository) }

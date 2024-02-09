@@ -50,6 +50,7 @@ interface DomainModule {
         @VolumePanelScope
         fun provideEnabledComponents(): Collection<VolumePanelComponentKey> {
             return setOf(
+                VolumePanelComponents.CAPTIONING,
                 VolumePanelComponents.BOTTOM_BAR,
             )
         }

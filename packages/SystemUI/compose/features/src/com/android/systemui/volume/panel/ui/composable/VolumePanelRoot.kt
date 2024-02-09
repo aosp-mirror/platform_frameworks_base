@@ -21,14 +21,15 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -37,7 +38,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.dimensionResource
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.res.R
@@ -64,14 +67,17 @@ fun VolumePanelRoot(
             }
         }
 
-        Column(
-            modifier =
-                modifier
-                    .fillMaxSize()
-                    .statusBarsPadding()
-                    .clickable(onClick = { viewModel.dismissPanel() }),
-            verticalArrangement = Arrangement.Bottom,
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter,
         ) {
+            Spacer(
+                modifier =
+                    Modifier.fillMaxSize()
+                        .alpha(0.32f)
+                        .background(MaterialTheme.colorScheme.scrim)
+                        .clickable(onClick = { viewModel.dismissPanel() })
+            )
             AnimatedVisibility(
                 visibleState = transitionState,
                 enter = slideInVertically { it },
@@ -80,7 +86,7 @@ fun VolumePanelRoot(
                 val radius = dimensionResource(R.dimen.volume_panel_corner_radius)
                 Surface(
                     shape = RoundedCornerShape(topStart = radius, topEnd = radius),
-                    color = MaterialTheme.colorScheme.surfaceBright,
+                    color = MaterialTheme.colorScheme.surfaceContainer,
                 ) {
                     Column {
                         components?.let { componentsState ->
@@ -97,7 +103,7 @@ fun VolumePanelRoot(
 private fun VolumePanelComposeScope.Components(state: ComponentsLayout) {
     if (orientation == Configuration.ORIENTATION_PORTRAIT) {
         VerticalVolumePanelContent(
-            components = state.contentComponents,
+            state,
             modifier = Modifier.padding(dimensionResource(R.dimen.volume_panel_content_padding)),
         )
     } else {
