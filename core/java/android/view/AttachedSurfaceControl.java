@@ -183,6 +183,7 @@ public interface AttachedSurfaceControl {
      * {@link SurfaceControlViewHost} instances.
      *
      * <p>This token should be passed to {@link SurfaceControlViewHost}'s constructor.
+     * This token will be {@code null} if the window does not have an input channel.
      *
      * @return The SurfaceControlViewHost link token.
      */

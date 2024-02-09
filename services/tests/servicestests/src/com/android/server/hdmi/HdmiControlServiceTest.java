@@ -169,14 +169,14 @@ public class HdmiControlServiceTest {
                         .setEarcSupported(true)
                         .build();
         mHdmiPortInfo[3] =
-                new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_INPUT, 0x3000)
+                new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_OUTPUT, 0x3000)
                         .setCecSupported(true)
                         .setMhlSupported(false)
                         .setArcSupported(false)
                         .setEarcSupported(false)
                         .build();
         mHdmiPortInfo[4] =
-                new HdmiPortInfo.Builder(4, HdmiPortInfo.PORT_OUTPUT, 0x3000)
+                new HdmiPortInfo.Builder(5, HdmiPortInfo.PORT_OUTPUT, 0x3000)
                         .setCecSupported(true)
                         .setMhlSupported(false)
                         .setArcSupported(false)
@@ -840,6 +840,65 @@ public class HdmiControlServiceTest {
         assertThat(hdmiControlStatusCallback.mCecAvailable).isTrue();
     }
 
+    @Test
+    public void onHotPlugIn_CecDisabledOnTv_CecNotAvailable() {
+        HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
+        mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        mHdmiControlServiceSpy.playback().removeAction(DevicePowerStatusAction.class);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.onHotplug(4, true);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage giveDevicePowerStatus =
+                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        Constants.ADDR_TV);
+        assertThat(mNativeWrapper.getResultMessages()).contains(giveDevicePowerStatus);
+        // Wait for DevicePowerStatusAction to finish.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiControlStatusCallback.mCecEnabled).isTrue();
+        assertThat(hdmiControlStatusCallback.mCecAvailable).isFalse();
+    }
+
+    @Test
+    public void onHotPlugIn_CecEnabledOnTv_CecAvailable() {
+        HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
+        mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        mHdmiControlServiceSpy.playback().removeAction(DevicePowerStatusAction.class);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.onHotplug(4, true);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage giveDevicePowerStatus =
+                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        Constants.ADDR_TV);
+        HdmiCecMessage reportPowerStatus =
+                HdmiCecMessageBuilder.buildReportPowerStatus(
+                        Constants.ADDR_TV,
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        HdmiControlManager.POWER_STATUS_ON);
+        assertThat(mNativeWrapper.getResultMessages()).contains(giveDevicePowerStatus);
+        mNativeWrapper.onCecMessage(reportPowerStatus);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiControlStatusCallback.mCecEnabled).isTrue();
+        assertThat(hdmiControlStatusCallback.mCecAvailable).isTrue();
+    }
     @Test
     public void handleCecCommand_errorParameter_returnsAbortInvalidOperand() {
         // Validity ERROR_PARAMETER. Taken from HdmiCecMessageValidatorTest#isValid_menuStatus

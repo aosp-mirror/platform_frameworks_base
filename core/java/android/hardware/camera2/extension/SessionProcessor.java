@@ -18,13 +18,15 @@ package android.hardware.camera2.extension;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.impl.CameraExtensionUtils.HandlerExecutor;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -60,7 +62,7 @@ import java.util.concurrent.Executor;
  * to the repeating request and single requests but the implementation can
  * choose to apply some of them only.
  *
- * (5) {@link #startCapture}: It is called when apps want
+ * (5) {@link #startMultiFrameCapture}: It is called when apps want
  * to start a multi-frame image capture.  {@link CaptureCallback} will be
  * called to report the status and the output image will be written to the
  * capture output surface specified in {@link #initSession}.
@@ -78,8 +80,11 @@ public abstract class SessionProcessor {
     private static final String TAG = "SessionProcessor";
     private CameraUsageTracker mCameraUsageTracker;
 
+    /**
+     * Initialize a session process instance
+     */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    protected SessionProcessor() {}
+    public SessionProcessor() {}
 
     void setCameraUsageTracker(CameraUsageTracker tracker) {
         mCameraUsageTracker = tracker;
@@ -87,7 +92,7 @@ public abstract class SessionProcessor {
 
     /**
      * Callback for notifying the status of {@link
-     * #startCapture} and {@link #startRepeating}.
+     * #startMultiFrameCapture} and {@link #startRepeating}.
      * @hide
      */
     @SystemApi
@@ -175,7 +180,7 @@ public abstract class SessionProcessor {
          * @param requestId  the capture request id that generated the
          *                   capture results. This is the return value of
          *                   either {@link #startRepeating} or {@link
-         *                   #startCapture}.
+         *                   #startMultiFrameCapture}.
          * @param results  The supported capture results. Do note
          *                  that if results 'android.jpeg.quality' and
          *                  android.jpeg.orientation' are present in the
@@ -252,7 +257,14 @@ public abstract class SessionProcessor {
      * until onCaptureSessionEnd is called.
      * @param requestProcessor The request processor to be used for
      *                         managing capture requests
-     * @param statsKey         Unique key for telemetry
+     * @param statsKey         Unique key that is associated with the
+     *                         current Camera2 session and used by the
+     *                         framework telemetry. The id can be referenced
+     *                         by the extension, in case there is additional
+     *                         extension specific telemetry that needs
+     *                         to be linked to the regular capture session.
+     *
+     *
      */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract void onCaptureSessionStart(@NonNull RequestProcessor requestProcessor,
@@ -275,13 +287,12 @@ public abstract class SessionProcessor {
      * repeating request when needed later.
      *
      * @param executor the executor which will be used for
-     *                 invoking the callbacks or null to use the
-     *                 current thread's looper
+     *                 invoking the callbacks
      * @param callback a callback to report the status.
      * @return the id of the capture sequence.
      */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    public abstract int startRepeating(@Nullable Executor executor,
+    public abstract int startRepeating(@NonNull Executor executor,
             @NonNull CaptureCallback callback);
 
     /**
@@ -309,13 +320,12 @@ public abstract class SessionProcessor {
      * immediately.
      *
      * @param executor the executor which will be used for
-     *                 invoking the callbacks or null to use the
-     *                 current thread's looper
+     *                 invoking the callbacks
      * @param callback a callback to report the status.
      * @return the id of the capture sequence.
      */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-    public abstract int startCapture(@Nullable Executor executor,
+    public abstract int startMultiFrameCapture(@NonNull Executor executor,
             @NonNull CaptureCallback callback);
 
     /**
@@ -340,15 +350,14 @@ public abstract class SessionProcessor {
      * @param captureRequest Capture request that includes the respective
      *                       triggers.
      * @param executor the executor which will be used for
-     *                 invoking the callbacks or null to use the
-     *                 current thread's looper
+     *                 invoking the callbacks
      * @param callback a callback to report the status.
      * @return the id of the capture sequence.
      *
      */
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract int startTrigger(@NonNull CaptureRequest captureRequest,
-            @Nullable Executor executor, @NonNull CaptureCallback callback);
+            @NonNull Executor executor, @NonNull CaptureCallback callback);
 
     private final class SessionProcessorImpl extends ISessionProcessorImpl.Stub {
         private long mVendorId = -1;
@@ -401,7 +410,8 @@ public abstract class SessionProcessor {
 
         @Override
         public int startRepeating(ICaptureCallback callback) throws RemoteException {
-            return SessionProcessor.this.startRepeating(/*executor*/ null,
+            return SessionProcessor.this.startRepeating(
+                    new HandlerExecutor(new Handler(Looper.getMainLooper())),
                     new CaptureCallbackImpl(callback));
         }
 
@@ -413,7 +423,8 @@ public abstract class SessionProcessor {
         @Override
         public int startCapture(ICaptureCallback callback, boolean isPostviewRequested)
                 throws RemoteException {
-            return SessionProcessor.this.startCapture(/*executor*/ null,
+            return SessionProcessor.this.startMultiFrameCapture(
+                    new HandlerExecutor(new Handler(Looper.getMainLooper())),
                     new CaptureCallbackImpl(callback));
         }
 
@@ -425,7 +436,8 @@ public abstract class SessionProcessor {
         @Override
         public int startTrigger(CaptureRequest captureRequest, ICaptureCallback callback)
                 throws RemoteException {
-            return SessionProcessor.this.startTrigger(captureRequest, /*executor*/ null,
+            return SessionProcessor.this.startTrigger(captureRequest,
+                    new HandlerExecutor(new Handler(Looper.getMainLooper())),
                     new CaptureCallbackImpl(callback));
         }
 

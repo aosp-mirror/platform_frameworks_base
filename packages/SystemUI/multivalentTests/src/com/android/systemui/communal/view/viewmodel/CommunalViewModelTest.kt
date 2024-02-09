@@ -22,12 +22,12 @@ import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
@@ -37,6 +37,8 @@ import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
@@ -92,7 +94,8 @@ class CommunalViewModelTest : SysuiTestCase() {
         mediaRepository = kosmos.fakeCommunalMediaRepository
         userRepository = kosmos.fakeUserRepository
 
-        kosmos.fakeCommunalRepository.setCommunalEnabledState(true)
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+        mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
 
         underTest =
             CommunalViewModel(

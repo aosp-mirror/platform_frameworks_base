@@ -40,7 +40,7 @@ fun Intent.parseCancelUiRequest(packageManager: PackageManager): Request? =
             Log.d(TAG, "Received UI cancel request, shouldShowCancellationUi: $this")
         }
         if (showCancel) {
-            val appLabel = packageManager.appLabel(cancelUiRequest.appPackageName)
+            val appLabel = packageManager.appLabel(cancelUiRequest.packageName)
             if (appLabel == null) {
                 Log.d(TAG, "Received UI cancel request with an invalid package name.")
                 null

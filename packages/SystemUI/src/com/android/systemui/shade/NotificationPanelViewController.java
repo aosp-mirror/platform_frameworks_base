@@ -112,7 +112,7 @@ import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.TransitionAnimator;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
@@ -136,6 +136,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver;
+import com.android.systemui.keyguard.shared.ComposeLockscreen;
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -259,7 +260,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     /** The parallax amount of the quick settings translation when dragging down the panel. */
     public static final float QS_PARALLAX_AMOUNT = 0.175f;
     private static final long ANIMATION_DELAY_ICON_FADE_IN =
-            ActivityLaunchAnimator.TIMINGS.getTotalDuration()
+            ActivityTransitionAnimator.TIMINGS.getTotalDuration()
                     - CollapsedStatusBarFragment.FADE_IN_DURATION
                     - CollapsedStatusBarFragment.FADE_IN_DELAY - 48;
     private static final int NO_FIXED_DURATION = -1;
@@ -2476,6 +2477,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         if (!isKeyguardShowing()) {
             return 0;
         }
+
+        if (ComposeLockscreen.isEnabled()) {
+            return (int) mKeyguardInteractor.getNotificationContainerBounds()
+                    .getValue().getTop();
+        }
+
         if (!mKeyguardBypassController.getBypassEnabled()) {
             if (migrateClocksToBlueprint() && !mSplitShadeEnabled) {
                 return (int) mKeyguardInteractor.getNotificationContainerBounds()
@@ -3231,7 +3238,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public void applyLaunchAnimationProgress(float linearProgress) {
-        boolean hideIcons = TransitionAnimator.getProgress(ActivityLaunchAnimator.TIMINGS,
+        boolean hideIcons = TransitionAnimator.getProgress(ActivityTransitionAnimator.TIMINGS,
                 linearProgress, ANIMATION_DELAY_ICON_FADE_IN, 100) == 0.0f;
         if (hideIcons != mHideIconsDuringLaunchAnimation) {
             mHideIconsDuringLaunchAnimation = hideIcons;

@@ -928,17 +928,11 @@ public class AccessibilityWindowManager {
          * Dumps all {@link AccessibilityWindowInfo}s here.
          */
         void dumpLocked(FileDescriptor fd, final PrintWriter pw, String[] args) {
-            pw.append("Global Info [ ");
-            pw.println("Top focused display Id = " + mTopFocusedDisplayId);
-            pw.println("     Active Window Id = " + mActiveWindowId);
-            pw.println("     Top Focused Window Id = " + mTopFocusedWindowId);
-            pw.println("     Accessibility Focused Window Id = " + mAccessibilityFocusedWindowId
-                    + " ]");
             if (mIsProxy) {
                 pw.println("Proxy accessibility focused window = "
                         + mProxyDisplayAccessibilityFocusedWindow);
+                pw.println();
             }
-            pw.println();
             if (mWindows != null) {
                 final int windowCount = mWindows.size();
                 for (int j = 0; j < windowCount; j++) {
@@ -2201,6 +2195,13 @@ public class AccessibilityWindowManager {
      * Dumps all {@link AccessibilityWindowInfo}s here.
      */
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+        pw.append("Global Info [ ");
+        pw.println("Top focused display Id = " + mTopFocusedDisplayId);
+        pw.println("     Active Window Id = " + mActiveWindowId);
+        pw.println("     Top Focused Window Id = " + mTopFocusedWindowId);
+        pw.println("     Accessibility Focused Window Id = " + mAccessibilityFocusedWindowId
+                + " ]");
+        pw.println();
         final int count = mDisplayWindowsObservers.size();
         for (int i = 0; i < count; i++) {
             final DisplayWindowsObserver observer = mDisplayWindowsObservers.valueAt(i);

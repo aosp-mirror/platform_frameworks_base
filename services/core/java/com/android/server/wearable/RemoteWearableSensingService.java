@@ -118,4 +118,62 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
         }
         post(service -> service.provideData(data, sharedMemory, callback));
     }
+
+    /**
+     * Registers a data request observer with WearableSensingService.
+     *
+     * @param dataType The data type to listen to. Values are defined by the application that
+     *     implements WearableSensingService.
+     * @param dataRequestCallback The observer to send data requests to.
+     * @param dataRequestObserverId The unique ID for the data request observer. It will be used for
+     *     unregistering the observer.
+     * @param packageName The package name of the app that will receive the data requests.
+     * @param statusCallback The callback for status of the method call.
+     */
+    public void registerDataRequestObserver(
+            int dataType,
+            RemoteCallback dataRequestCallback,
+            int dataRequestObserverId,
+            String packageName,
+            RemoteCallback statusCallback) {
+        if (DEBUG) {
+            Slog.i(TAG, "Registering data request observer.");
+        }
+        var unused =
+                post(
+                        service ->
+                                service.registerDataRequestObserver(
+                                        dataType,
+                                        dataRequestCallback,
+                                        dataRequestObserverId,
+                                        packageName,
+                                        statusCallback));
+    }
+
+    /**
+     * Unregisters a previously registered data request observer.
+     *
+     * @param dataType The data type the observer was registered against.
+     * @param dataRequestObserverId The unique ID of the observer to unregister.
+     * @param packageName The package name of the app that will receive requests sent to the
+     *     observer.
+     * @param statusCallback The callback for status of the method call.
+     */
+    public void unregisterDataRequestObserver(
+            int dataType,
+            int dataRequestObserverId,
+            String packageName,
+            RemoteCallback statusCallback) {
+        if (DEBUG) {
+            Slog.i(TAG, "Unregistering data request observer.");
+        }
+        var unused =
+                post(
+                        service ->
+                                service.unregisterDataRequestObserver(
+                                        dataType,
+                                        dataRequestObserverId,
+                                        packageName,
+                                        statusCallback));
+    }
 }

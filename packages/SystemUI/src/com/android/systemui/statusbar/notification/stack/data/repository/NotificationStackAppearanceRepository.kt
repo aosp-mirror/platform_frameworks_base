@@ -47,4 +47,11 @@ class NotificationStackAppearanceRepository @Inject constructor() {
      * further.
      */
     val scrolledToTop = MutableStateFlow(true)
+
+    /**
+     * The amount in px that the notification stack should scroll due to internal expansion. This
+     * should only happen when a notification expansion hits the bottom of the screen, so it is
+     * necessary to scroll up to keep expanding the notification.
+     */
+    val syntheticScroll = MutableStateFlow(0f)
 }

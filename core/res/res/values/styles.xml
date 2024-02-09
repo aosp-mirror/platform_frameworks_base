@@ -1460,6 +1460,43 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- @hide -->
+    <style name="VectorPointer">
+        <item name="pointerIconArrow">@drawable/pointer_arrow_vector_icon</item>
+        <item name="pointerIconSpotHover">@drawable/pointer_spot_hover_vector_icon</item>
+        <item name="pointerIconSpotTouch">@drawable/pointer_spot_touch_vector_icon</item>
+        <item name="pointerIconSpotAnchor">@drawable/pointer_spot_anchor_vector_icon</item>
+        <item name="pointerIconHand">@drawable/pointer_hand_vector_icon</item>
+        <item name="pointerIconContextMenu">@drawable/pointer_context_menu_vector_icon</item>
+        <item name="pointerIconHelp">@drawable/pointer_help_vector_icon</item>
+        <item name="pointerIconWait">@drawable/pointer_wait_icon</item>
+        <item name="pointerIconCell">@drawable/pointer_cell_vector_icon</item>
+        <item name="pointerIconCrosshair">@drawable/pointer_crosshair_vector_icon</item>
+        <item name="pointerIconText">@drawable/pointer_text_vector_icon</item>
+        <item name="pointerIconVerticalText">@drawable/pointer_vertical_text_vector_icon</item>
+        <item name="pointerIconAlias">@drawable/pointer_alias_vector_icon</item>
+        <item name="pointerIconCopy">@drawable/pointer_copy_vector_icon</item>
+        <item name="pointerIconAllScroll">@drawable/pointer_all_scroll_vector_icon</item>
+        <item name="pointerIconNodrop">@drawable/pointer_nodrop_vector_icon</item>
+        <item name="pointerIconHorizontalDoubleArrow">
+            @drawable/pointer_horizontal_double_arrow_vector_icon
+        </item>
+        <item name="pointerIconVerticalDoubleArrow">
+            @drawable/pointer_vertical_double_arrow_vector_icon
+        </item>
+        <item name="pointerIconTopRightDiagonalDoubleArrow">
+            @drawable/pointer_top_right_diagonal_double_arrow_vector_icon
+        </item>
+        <item name="pointerIconTopLeftDiagonalDoubleArrow">
+            @drawable/pointer_top_left_diagonal_double_arrow_vector_icon
+        </item>
+        <item name="pointerIconZoomIn">@drawable/pointer_zoom_in_vector_icon</item>
+        <item name="pointerIconZoomOut">@drawable/pointer_zoom_out_vector_icon</item>
+        <item name="pointerIconGrab">@drawable/pointer_grab_vector_icon</item>
+        <item name="pointerIconGrabbing">@drawable/pointer_grabbing_vector_icon</item>
+        <item name="pointerIconHandwriting">@drawable/pointer_handwriting_vector_icon</item>
+    </style>
+
+    <!-- @hide -->
     <style name="aerr_list_item" parent="Widget.Material.Light.Button.Borderless">
         <item name="minHeight">?attr/listPreferredItemHeightSmall</item>
         <item name="textAppearance">?attr/textAppearanceListItemSmall</item>

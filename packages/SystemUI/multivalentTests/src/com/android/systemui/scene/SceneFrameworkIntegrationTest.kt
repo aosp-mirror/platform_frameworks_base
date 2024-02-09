@@ -40,7 +40,7 @@ import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.bouncerViewModel
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.classifier.falsingCollector
-import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -130,7 +130,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
     private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
-    private val communalInteractor by lazy { kosmos.communalInteractor }
+    private val communalSettingsInteractor by lazy { kosmos.communalSettingsInteractor }
 
     private val transitionState by lazy {
         MutableStateFlow<ObservableTransitionState>(
@@ -155,7 +155,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = deviceEntryInteractor,
-            communalInteractor = communalInteractor,
+            communalSettingsInteractor = communalSettingsInteractor,
             longPress =
                 KeyguardLongPressViewModel(
                     interactor = mock(),

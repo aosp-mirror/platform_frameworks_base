@@ -238,7 +238,7 @@ static SpriteIcon toSpriteIcon(PointerIcon pointerIcon) {
     // to the underlying bitmap, so even if the java object is released, we will still have access
     // to it.
     return SpriteIcon(pointerIcon.bitmap, pointerIcon.style, pointerIcon.hotSpotX,
-                      pointerIcon.hotSpotY);
+                      pointerIcon.hotSpotY, pointerIcon.drawNativeDropShadow);
 }
 
 enum {
@@ -1760,13 +1760,14 @@ void NativeInputManager::loadAdditionalMouseResources(
             animationData.durationPerFrame =
                     milliseconds_to_nanoseconds(pointerIcon.durationPerFrame);
             animationData.animationFrames.reserve(numFrames);
-            animationData.animationFrames.push_back(SpriteIcon(
-                    pointerIcon.bitmap, pointerIcon.style,
-                    pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+            animationData.animationFrames.emplace_back(pointerIcon.bitmap, pointerIcon.style,
+                                                       pointerIcon.hotSpotX, pointerIcon.hotSpotY,
+                                                       pointerIcon.drawNativeDropShadow);
             for (size_t i = 0; i < numFrames - 1; ++i) {
-              animationData.animationFrames.push_back(SpriteIcon(
-                      pointerIcon.bitmapFrames[i], pointerIcon.style,
-                      pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+                animationData.animationFrames.emplace_back(pointerIcon.bitmapFrames[i],
+                                                           pointerIcon.style, pointerIcon.hotSpotX,
+                                                           pointerIcon.hotSpotY,
+                                                           pointerIcon.drawNativeDropShadow);
             }
         }
     }
@@ -2610,7 +2611,7 @@ static bool nativeSetPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject ico
         icon = std::make_unique<SpriteIcon>(pointerIcon.bitmap.copy(
                                                     ANDROID_BITMAP_FORMAT_RGBA_8888),
                                             pointerIcon.style, pointerIcon.hotSpotX,
-                                            pointerIcon.hotSpotY);
+                                            pointerIcon.hotSpotY, pointerIcon.drawNativeDropShadow);
     } else {
         icon = pointerIcon.style;
     }

@@ -217,7 +217,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     @PackageManager.PermissionResult
-    public int checkPermission(String packageName, String permissionName, int deviceId,
+    public int checkPermission(String packageName, String permissionName, String persistentDeviceId,
             @UserIdInt int userId) {
         // Not using Objects.requireNonNull() here for compatibility reasons.
         if (packageName == null || permissionName == null) {
@@ -231,10 +231,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         if (checkPermissionDelegate == null) {
             return mPermissionManagerServiceImpl.checkPermission(packageName, permissionName,
-                    deviceId, userId);
+                    persistentDeviceId, userId);
         }
         return checkPermissionDelegate.checkPermission(packageName, permissionName,
-                deviceId, userId, mPermissionManagerServiceImpl::checkPermission);
+                persistentDeviceId, userId, mPermissionManagerServiceImpl::checkPermission);
     }
 
     @Override
@@ -527,17 +527,18 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permissionName, int deviceId,
-            int userId) {
+    public int getPermissionFlags(String packageName, String permissionName,
+            String persistentDeviceId, int userId) {
         return mPermissionManagerServiceImpl
-                .getPermissionFlags(packageName, permissionName, deviceId, userId);
+                .getPermissionFlags(packageName, permissionName, persistentDeviceId, userId);
     }
 
     @Override
     public void updatePermissionFlags(String packageName, String permissionName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, String persistentDeviceId,
+            int userId) {
         mPermissionManagerServiceImpl.updatePermissionFlags(packageName, permissionName, flagMask,
-                flagValues, checkAdjustPolicyFlagPermission, deviceId, userId);
+                flagValues, checkAdjustPolicyFlagPermission, persistentDeviceId, userId);
     }
 
     @Override
@@ -577,17 +578,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permissionName, int deviceId,
-            int userId) {
+    public void grantRuntimePermission(String packageName, String permissionName,
+            String persistentDeviceId, int userId) {
         mPermissionManagerServiceImpl.grantRuntimePermission(packageName, permissionName,
-                deviceId, userId);
+                persistentDeviceId, userId);
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permissionName, int deviceId,
-            int userId, String reason) {
+    public void revokeRuntimePermission(String packageName, String permissionName,
+            String persistentDeviceId, int userId, String reason) {
         mPermissionManagerServiceImpl.revokeRuntimePermission(packageName, permissionName,
-                deviceId, userId, reason);
+                persistentDeviceId, userId, reason);
     }
 
     @Override
@@ -620,9 +621,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private class PermissionManagerServiceInternalImpl implements PermissionManagerServiceInternal {
         @Override
         public int checkPermission(@NonNull String packageName, @NonNull String permissionName,
-                int deviceId, @UserIdInt int userId) {
+                @NonNull String persistentDeviceId, @UserIdInt int userId) {
             return PermissionManagerService.this.checkPermission(packageName, permissionName,
-                    deviceId, userId);
+                    persistentDeviceId, userId);
         }
 
         @Override
@@ -888,7 +889,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
          *
          * @param packageName the name of the package to be checked
          * @param permissionName the name of the permission to be checked
-         * @param deviceId The device ID
+         * @param persistentDeviceId The persistent device ID
          * @param userId the user ID
          * @param superImpl the original implementation that can be delegated to
          * @return {@link android.content.pm.PackageManager#PERMISSION_GRANTED} if the package has
@@ -897,8 +898,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
          * @see android.content.pm.PackageManager#checkPermission(String, String)
          */
         int checkPermission(@NonNull String packageName, @NonNull String permissionName,
-                int deviceId, @UserIdInt int userId,
-                @NonNull QuadFunction<String, String, Integer, Integer, Integer> superImpl);
+                String persistentDeviceId, @UserIdInt int userId,
+                @NonNull QuadFunction<String, String, String, Integer, Integer> superImpl);
 
         /**
          * Check whether the given UID has been granted the specified permission.
@@ -940,18 +941,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public int checkPermission(@NonNull String packageName, @NonNull String permissionName,
-                int deviceId, int userId,
-                @NonNull QuadFunction<String, String, Integer, Integer, Integer> superImpl) {
+                String persistentDeviceId, int userId,
+                @NonNull QuadFunction<String, String, String, Integer, Integer> superImpl) {
             if (mDelegatedPackageName.equals(packageName)
                     && isDelegatedPermission(permissionName)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply("com.android.shell", permissionName, deviceId, userId);
+                    return superImpl.apply("com.android.shell", permissionName, persistentDeviceId,
+                            userId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(packageName, permissionName, deviceId, userId);
+            return superImpl.apply(packageName, permissionName, persistentDeviceId, userId);
         }
 
         @Override

@@ -16,26 +16,18 @@
 
 package com.android.systemui.communal.data.repository
 
-import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.fakeFeatureFlagsClassic
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.testKosmos
-import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -48,37 +40,20 @@ import org.junit.runner.RunWith
 class CommunalRepositoryImplTest : SysuiTestCase() {
     private lateinit var underTest: CommunalRepositoryImpl
 
-    private lateinit var secureSettings: FakeSettings
-    private lateinit var userRepository: FakeUserRepository
-
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneContainerRepository = kosmos.sceneContainerRepository
 
     @Before
     fun setUp() {
-        secureSettings = FakeSettings()
-        userRepository = kosmos.fakeUserRepository
-
-        val listOfUserInfo = listOf(MAIN_USER_INFO)
-        userRepository.setUserInfos(listOfUserInfo)
-
-        kosmos.fakeFeatureFlagsClassic.apply { set(Flags.COMMUNAL_SERVICE_ENABLED, true) }
-        mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
-
         underTest = createRepositoryImpl(false)
     }
 
     private fun createRepositoryImpl(sceneContainerEnabled: Boolean): CommunalRepositoryImpl {
         return CommunalRepositoryImpl(
             testScope.backgroundScope,
-            testScope.backgroundScope,
-            kosmos.testDispatcher,
-            kosmos.fakeFeatureFlagsClassic,
             kosmos.fakeSceneContainerFlags.apply { enabled = sceneContainerEnabled },
             sceneContainerRepository,
-            kosmos.fakeUserRepository,
-            secureSettings,
         )
     }
 
@@ -159,29 +134,4 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
             assertThat(transitionState)
                 .isEqualTo(ObservableCommunalTransitionState.Idle(CommunalSceneKey.DEFAULT))
         }
-
-    @Test
-    fun communalEnabledState_false_whenGlanceableHubSettingFalse() =
-        testScope.runTest {
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
-            secureSettings.putIntForUser(GLANCEABLE_HUB_ENABLED, 0, MAIN_USER_INFO.id)
-
-            val communalEnabled by collectLastValue(underTest.communalEnabledState)
-            assertThat(communalEnabled).isFalse()
-        }
-
-    @Test
-    fun communalEnabledState_true_whenGlanceableHubSettingTrue() =
-        testScope.runTest {
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
-            secureSettings.putIntForUser(GLANCEABLE_HUB_ENABLED, 1, MAIN_USER_INFO.id)
-
-            val communalEnabled by collectLastValue(underTest.communalEnabledState)
-            assertThat(communalEnabled).isTrue()
-        }
-
-    companion object {
-        private const val GLANCEABLE_HUB_ENABLED = "glanceable_hub_enabled"
-        private val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
-    }
 }

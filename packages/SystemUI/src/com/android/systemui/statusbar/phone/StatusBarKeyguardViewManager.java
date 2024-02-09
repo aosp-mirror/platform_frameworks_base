@@ -482,20 +482,19 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         if (KeyguardWmStateRefactor.isEnabled()) {
             // Show the keyguard views whenever we've told WM that the lockscreen is visible.
-            mShadeViewController.postToView(() ->
-                    collectFlow(
-                        getViewRootImpl().getView(),
-                        combineFlows(
-                                mWmLockscreenVisibilityInteractor.get().getLockscreenVisibility(),
-                                mSurfaceBehindInteractor.get().isAnimatingSurface(),
-                                (lockscreenVis, animatingSurface) ->
-                                        // TODO(b/322546110): Waiting until we're not animating the
-                                        // surface is a workaround to avoid jank. We should actually
-                                        // fix the source of the jank, and then hide the keyguard
-                                        // view without waiting for the animation to end.
-                                        lockscreenVis || animatingSurface
-                        ),
-                        this::consumeShowStatusBarKeyguardView));
+            collectFlow(
+                    getViewRootImpl().getView(),
+                    combineFlows(
+                            mWmLockscreenVisibilityInteractor.get().getLockscreenVisibility(),
+                            mSurfaceBehindInteractor.get().isAnimatingSurface(),
+                            (lockscreenVis, animatingSurface) ->
+                                    // TODO(b/322546110): Waiting until we're not animating the
+                                    // surface is a workaround to avoid jank. We should actually
+                                    // fix the source of the jank, and then hide the keyguard
+                                    // view without waiting for the animation to end.
+                                    lockscreenVis || animatingSurface
+                    ),
+                    this::consumeShowStatusBarKeyguardView);
         }
     }
 

@@ -212,7 +212,7 @@ public class PipTouchHandler {
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
                         mMotionHelper, mTouchState, pipTaskOrganizer, mPipDismissTargetHandler,
-                        this::getMovementBounds, this::updateMovementBounds, pipUiEventLogger,
+                        this::updateMovementBounds, pipUiEventLogger,
                         menuController, mainExecutor);
         mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),

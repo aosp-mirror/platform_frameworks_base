@@ -1305,6 +1305,8 @@ public class CompanionDeviceManagerService extends SystemService {
             mAssociationStore.dump(out);
             mDevicePresenceMonitor.dump(out);
             mCompanionAppController.dump(out);
+            mTransportManager.dump(out);
+            mSystemDataTransferRequestStore.dump(out);
         }
     }
 

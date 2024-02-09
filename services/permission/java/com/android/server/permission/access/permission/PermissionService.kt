@@ -423,6 +423,7 @@ class PermissionService(private val service: AccessCheckingService) :
             with(policy) { removePermission(permission) }
         }
     }
+
     private fun GetStateScope.getAndEnforcePermissionTree(permissionName: String): Permission {
         val callingUid = Binder.getCallingUid()
         val permissionTree = with(policy) { findPermissionTree(permissionName) }
@@ -486,9 +487,16 @@ class PermissionService(private val service: AccessCheckingService) :
                 )
                 return PackageManager.PERMISSION_DENIED
             }
+
+            val persistentDeviceId = getPersistentDeviceId(deviceId)
+            if (persistentDeviceId == null) {
+                Slog.e(LOG_TAG, "Cannot find persistent device id for $deviceId.")
+                return PackageManager.PERMISSION_DENIED
+            }
+
             val isPermissionGranted =
                 service.getState {
-                    isPermissionGranted(packageState, userId, permissionName, deviceId)
+                    isPermissionGranted(packageState, userId, permissionName, persistentDeviceId)
                 }
             return if (isPermissionGranted) {
                 PackageManager.PERMISSION_GRANTED
@@ -522,7 +530,7 @@ class PermissionService(private val service: AccessCheckingService) :
     override fun checkPermission(
         packageName: String,
         permissionName: String,
-        deviceId: Int,
+        persistentDeviceId: String,
         userId: Int
     ): Int {
         if (!userManagerInternal.exists(userId)) {
@@ -536,7 +544,9 @@ class PermissionService(private val service: AccessCheckingService) :
                 ?: return PackageManager.PERMISSION_DENIED
 
         val isPermissionGranted =
-            service.getState { isPermissionGranted(packageState, userId, permissionName, deviceId) }
+            service.getState {
+                isPermissionGranted(packageState, userId, permissionName, persistentDeviceId)
+            }
         return if (isPermissionGranted) {
             PackageManager.PERMISSION_GRANTED
         } else {
@@ -554,13 +564,21 @@ class PermissionService(private val service: AccessCheckingService) :
         packageState: PackageState,
         userId: Int,
         permissionName: String,
-        deviceId: Int
+        persistentDeviceId: String
     ): Boolean {
         val appId = packageState.appId
         // Note that instant apps can't have shared UIDs, so we only need to check the current
         // package state.
         val isInstantApp = packageState.getUserStateOrDefault(userId).isInstantApp
-        if (isSinglePermissionGranted(appId, userId, isInstantApp, permissionName, deviceId)) {
+        if (
+            isSinglePermissionGranted(
+                appId,
+                userId,
+                isInstantApp,
+                permissionName,
+                persistentDeviceId
+            )
+        ) {
             return true
         }
 
@@ -572,7 +590,7 @@ class PermissionService(private val service: AccessCheckingService) :
                     userId,
                     isInstantApp,
                     fullerPermissionName,
-                    deviceId
+                    persistentDeviceId
                 )
         ) {
             return true
@@ -587,9 +605,9 @@ class PermissionService(private val service: AccessCheckingService) :
         userId: Int,
         isInstantApp: Boolean,
         permissionName: String,
-        deviceId: Int,
+        persistentDeviceId: String,
     ): Boolean {
-        val flags = getPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId)
+        val flags = getPermissionFlagsWithPolicy(appId, userId, permissionName, persistentDeviceId)
         if (!PermissionFlags.isPermissionGranted(flags)) {
             return false
         }
@@ -626,7 +644,7 @@ class PermissionService(private val service: AccessCheckingService) :
                         packageState,
                         userId,
                         permissionName,
-                        Context.DEVICE_ID_DEFAULT
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT
                     )
                 ) {
                     permissionName
@@ -670,16 +688,22 @@ class PermissionService(private val service: AccessCheckingService) :
     override fun grantRuntimePermission(
         packageName: String,
         permissionName: String,
-        deviceId: Int,
+        persistentDeviceId: String,
         userId: Int
     ) {
-        setRuntimePermissionGranted(packageName, userId, permissionName, deviceId, isGranted = true)
+        setRuntimePermissionGranted(
+            packageName,
+            userId,
+            permissionName,
+            persistentDeviceId,
+            isGranted = true
+        )
     }
 
     override fun revokeRuntimePermission(
         packageName: String,
         permissionName: String,
-        deviceId: Int,
+        persistentDeviceId: String,
         userId: Int,
         reason: String?
     ) {
@@ -687,7 +711,7 @@ class PermissionService(private val service: AccessCheckingService) :
             packageName,
             userId,
             permissionName,
-            deviceId,
+            persistentDeviceId,
             isGranted = false,
             revokeReason = reason
         )
@@ -701,7 +725,7 @@ class PermissionService(private val service: AccessCheckingService) :
             packageName,
             userId,
             Manifest.permission.POST_NOTIFICATIONS,
-            Context.DEVICE_ID_DEFAULT,
+            VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
             isGranted = false,
             skipKillUid = true
         )
@@ -715,7 +739,7 @@ class PermissionService(private val service: AccessCheckingService) :
         packageName: String,
         userId: Int,
         permissionName: String,
-        deviceId: Int,
+        persistentDeviceId: String,
         isGranted: Boolean,
         skipKillUid: Boolean = false,
         revokeReason: String? = null
@@ -739,7 +763,8 @@ class PermissionService(private val service: AccessCheckingService) :
                     " permissionName = $permissionName" +
                     (if (isGranted) "" else "skipKillUid = $skipKillUid, reason = $revokeReason") +
                     ", userId = $userId," +
-                    " callingUid = $callingUidName ($callingUid))",
+                    " callingUid = $callingUidName ($callingUid))," +
+                    " persistentDeviceId = $persistentDeviceId",
                 RuntimeException()
             )
         }
@@ -809,7 +834,7 @@ class PermissionService(private val service: AccessCheckingService) :
                 packageState,
                 userId,
                 permissionName,
-                deviceId,
+                persistentDeviceId,
                 isGranted,
                 canManageRolePermission,
                 overridePolicyFixed,
@@ -853,7 +878,7 @@ class PermissionService(private val service: AccessCheckingService) :
                                 packageState,
                                 userId,
                                 permissionName,
-                                Context.DEVICE_ID_DEFAULT,
+                                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
                                 isGranted = true,
                                 canManageRolePermission = false,
                                 overridePolicyFixed = false,
@@ -864,7 +889,7 @@ class PermissionService(private val service: AccessCheckingService) :
                                 packageState.appId,
                                 userId,
                                 permissionName,
-                                Context.DEVICE_ID_DEFAULT,
+                                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
                                 PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED or
                                     PackageManager.FLAG_PERMISSION_REVOKED_COMPAT,
                                 0,
@@ -897,7 +922,7 @@ class PermissionService(private val service: AccessCheckingService) :
         packageState: PackageState,
         userId: Int,
         permissionName: String,
-        deviceId: Int,
+        persistentDeviceId: String,
         isGranted: Boolean,
         canManageRolePermission: Boolean,
         overridePolicyFixed: Boolean,
@@ -956,12 +981,14 @@ class PermissionService(private val service: AccessCheckingService) :
         }
 
         val appId = packageState.appId
-        val oldFlags = getPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId)
+        val oldFlags =
+            getPermissionFlagsWithPolicy(appId, userId, permissionName, persistentDeviceId)
 
         if (permissionName !in androidPackage.requestedPermissions && oldFlags == 0) {
             if (reportError) {
                 Slog.e(
-                    LOG_TAG, "Permission $permissionName isn't requested by package $packageName"
+                    LOG_TAG,
+                    "Permission $permissionName isn't requested by package $packageName"
                 )
             }
             return
@@ -1027,7 +1054,7 @@ class PermissionService(private val service: AccessCheckingService) :
             return
         }
 
-        setPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId, newFlags)
+        setPermissionFlagsWithPolicy(appId, userId, permissionName, persistentDeviceId, newFlags)
 
         if (permission.isRuntime) {
             val action =
@@ -1061,7 +1088,7 @@ class PermissionService(private val service: AccessCheckingService) :
     override fun getPermissionFlags(
         packageName: String,
         permissionName: String,
-        deviceId: Int,
+        persistentDeviceId: String,
         userId: Int,
     ): Int {
         if (!userManagerInternal.exists(userId)) {
@@ -1097,7 +1124,12 @@ class PermissionService(private val service: AccessCheckingService) :
             }
 
             val flags =
-                getPermissionFlagsWithPolicy(packageState.appId, userId, permissionName, deviceId)
+                getPermissionFlagsWithPolicy(
+                    packageState.appId,
+                    userId,
+                    permissionName,
+                    persistentDeviceId
+                )
 
             return PermissionFlags.toApiFlags(flags)
         }
@@ -1127,13 +1159,24 @@ class PermissionService(private val service: AccessCheckingService) :
             }
                 ?: return false
 
+        val persistentDeviceId = getPersistentDeviceId(deviceId)
+        if (persistentDeviceId == null) {
+            Slog.w(LOG_TAG, "Cannot find persistent device Id for $deviceId")
+            return false
+        }
+
         service.getState {
-            if (isPermissionGranted(packageState, userId, permissionName, deviceId)) {
+            if (isPermissionGranted(packageState, userId, permissionName, persistentDeviceId)) {
                 return false
             }
 
             val flags =
-                getPermissionFlagsWithPolicy(packageState.appId, userId, permissionName, deviceId)
+                getPermissionFlagsWithPolicy(
+                    packageState.appId,
+                    userId,
+                    permissionName,
+                    persistentDeviceId
+                )
 
             return flags.hasBits(PermissionFlags.POLICY_FIXED)
         }
@@ -1183,13 +1226,19 @@ class PermissionService(private val service: AccessCheckingService) :
             return false
         }
 
+        val persistentDeviceId = getPersistentDeviceId(deviceId)
+        if (persistentDeviceId == null) {
+            Slog.w(LOG_TAG, "Cannot find persistent device Id for $deviceId")
+            return false
+        }
+
         val flags: Int
         service.getState {
-            if (isPermissionGranted(packageState, userId, permissionName, deviceId)) {
+            if (isPermissionGranted(packageState, userId, permissionName, persistentDeviceId)) {
                 return false
             }
 
-            flags = getPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId)
+            flags = getPermissionFlagsWithPolicy(appId, userId, permissionName, persistentDeviceId)
         }
         if (flags.hasAnyBit(UNREQUESTABLE_MASK)) {
             return false
@@ -1228,7 +1277,7 @@ class PermissionService(private val service: AccessCheckingService) :
         flagMask: Int,
         flagValues: Int,
         enforceAdjustPolicyPermission: Boolean,
-        deviceId: Int,
+        persistentDeviceId: String,
         userId: Int
     ) {
         val callingUid = Binder.getCallingUid()
@@ -1254,6 +1303,7 @@ class PermissionService(private val service: AccessCheckingService) :
                 "updatePermissionFlags(packageName = $packageName," +
                     " permissionName = $permissionName, flagMask = $flagMaskString," +
                     " flagValues = $flagValuesString, userId = $userId," +
+                    " persistentDeviceId = $persistentDeviceId," +
                     " callingUid = $callingUidName ($callingUid))",
                 RuntimeException()
             )
@@ -1343,7 +1393,7 @@ class PermissionService(private val service: AccessCheckingService) :
                 appId,
                 userId,
                 permissionName,
-                deviceId,
+                persistentDeviceId,
                 flagMask,
                 flagValues,
                 canUpdateSystemFlags,
@@ -1410,7 +1460,7 @@ class PermissionService(private val service: AccessCheckingService) :
                         packageState.appId,
                         userId,
                         permissionName,
-                        Context.DEVICE_ID_DEFAULT,
+                        VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
                         flagMask,
                         flagValues,
                         canUpdateSystemFlags,
@@ -1429,7 +1479,7 @@ class PermissionService(private val service: AccessCheckingService) :
         appId: Int,
         userId: Int,
         permissionName: String,
-        deviceId: Int,
+        persistentDeviceId: String,
         flagMask: Int,
         flagValues: Int,
         canUpdateSystemFlags: Boolean,
@@ -1463,7 +1513,8 @@ class PermissionService(private val service: AccessCheckingService) :
             return
         }
 
-        val oldFlags = getPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId)
+        val oldFlags =
+            getPermissionFlagsWithPolicy(appId, userId, permissionName, persistentDeviceId)
         if (!isPermissionRequested && oldFlags == 0) {
             Slog.w(
                 LOG_TAG,
@@ -1474,7 +1525,7 @@ class PermissionService(private val service: AccessCheckingService) :
         }
 
         val newFlags = PermissionFlags.updateFlags(permission, oldFlags, flagMask, flagValues)
-        setPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId, newFlags)
+        setPermissionFlagsWithPolicy(appId, userId, permissionName, persistentDeviceId, newFlags)
     }
 
     override fun getAllowlistedRestrictedPermissions(
@@ -1549,10 +1600,12 @@ class PermissionService(private val service: AccessCheckingService) :
         appId: Int,
         userId: Int,
         permissionName: String,
-        deviceId: Int,
+        persistentDeviceId: String,
     ): Int {
-        return if (!Flags.deviceAwarePermissionApisEnabled() ||
-            deviceId == Context.DEVICE_ID_DEFAULT) {
+        return if (
+            !Flags.deviceAwarePermissionApisEnabled() ||
+                persistentDeviceId == VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT
+        ) {
             with(policy) { getPermissionFlags(appId, userId, permissionName) }
         } else {
             if (permissionName !in DEVICE_AWARE_PERMISSIONS) {
@@ -1563,19 +1616,8 @@ class PermissionService(private val service: AccessCheckingService) :
                 )
                 return with(policy) { getPermissionFlags(appId, userId, permissionName) }
             }
-            val virtualDeviceManagerInternal = virtualDeviceManagerInternal
-            if (virtualDeviceManagerInternal == null) {
-                Slog.e(LOG_TAG, "Virtual device manager service is not available.")
-                return 0
-            }
-            val persistentDeviceId = virtualDeviceManagerInternal.getPersistentIdForDevice(deviceId)
-            if (persistentDeviceId != null) {
-                with(devicePolicy) {
-                    getPermissionFlags(appId, persistentDeviceId, userId, permissionName)
-                }
-            } else {
-                Slog.e(LOG_TAG, "Invalid device ID $deviceId.")
-                0
+            with(devicePolicy) {
+                getPermissionFlags(appId, persistentDeviceId, userId, permissionName)
             }
         }
     }
@@ -1584,11 +1626,13 @@ class PermissionService(private val service: AccessCheckingService) :
         appId: Int,
         userId: Int,
         permissionName: String,
-        deviceId: Int,
+        persistentDeviceId: String,
         flags: Int
     ): Boolean {
-        return if (!Flags.deviceAwarePermissionApisEnabled() ||
-            deviceId == Context.DEVICE_ID_DEFAULT) {
+        return if (
+            !Flags.deviceAwarePermissionApisEnabled() ||
+                persistentDeviceId == VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT
+        ) {
             with(policy) { setPermissionFlags(appId, userId, permissionName, flags) }
         } else {
             if (permissionName !in DEVICE_AWARE_PERMISSIONS) {
@@ -1600,21 +1644,22 @@ class PermissionService(private val service: AccessCheckingService) :
                 return with(policy) { setPermissionFlags(appId, userId, permissionName, flags) }
             }
 
-            val virtualDeviceManagerInternal = virtualDeviceManagerInternal
-            if (virtualDeviceManagerInternal == null) {
-                Slog.e(LOG_TAG, "Virtual device manager service is not available.")
-                return false
-            }
-            val persistentDeviceId = virtualDeviceManagerInternal.getPersistentIdForDevice(deviceId)
-            if (persistentDeviceId != null) {
-                with(devicePolicy) {
-                    setPermissionFlags(appId, persistentDeviceId, userId, permissionName, flags)
-                }
-            } else {
-                Slog.e(LOG_TAG, "Invalid device ID $deviceId.")
-                false
+            with(devicePolicy) {
+                setPermissionFlags(appId, persistentDeviceId, userId, permissionName, flags)
             }
         }
+    }
+
+    private fun getPersistentDeviceId(deviceId: Int): String? {
+        if (deviceId == Context.DEVICE_ID_DEFAULT) {
+            return VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT
+        }
+
+        if (virtualDeviceManagerInternal == null) {
+            virtualDeviceManagerInternal =
+                LocalServices.getService(VirtualDeviceManagerInternal::class.java)
+        }
+        return virtualDeviceManagerInternal?.getPersistentIdForDevice(deviceId)
     }
 
     /**

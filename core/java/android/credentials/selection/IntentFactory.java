@@ -210,7 +210,8 @@ public class IntentFactory {
                                                 .config_credentialManagerDialogComponent));
         intent.setComponent(componentName);
         intent.putExtra(CancelSelectionRequest.EXTRA_CANCEL_UI_REQUEST,
-                new CancelSelectionRequest(requestToken, shouldShowCancellationUi, appPackageName));
+                new CancelSelectionRequest(new RequestToken(requestToken), shouldShowCancellationUi,
+                        appPackageName));
         return intent;
     }
 

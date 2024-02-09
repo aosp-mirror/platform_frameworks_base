@@ -44,7 +44,7 @@ import android.view.accessibility.AccessibilityManager.TouchExplorationStateChan
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.biometrics.ui.binder.UdfpsTouchOverlayBinder
@@ -100,7 +100,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     @RequestReason val requestReason: Int,
     private val controllerCallback: IUdfpsOverlayControllerCallback,
     private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
-    private val activityLaunchAnimator: ActivityLaunchAnimator,
+    private val activityTransitionAnimator: ActivityTransitionAnimator,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
@@ -304,7 +304,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                     unlockedScreenOffAnimationController,
                     dialogManager,
                     controller,
-                    activityLaunchAnimator,
+                    activityTransitionAnimator,
                     primaryBouncerInteractor,
                     alternateBouncerInteractor,
                     udfpsKeyguardAccessibilityDelegate,

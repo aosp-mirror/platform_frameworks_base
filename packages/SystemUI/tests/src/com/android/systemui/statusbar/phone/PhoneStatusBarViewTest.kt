@@ -29,16 +29,20 @@ import android.view.RoundedCorners
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
+import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
@@ -47,6 +51,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     private lateinit var view: PhoneStatusBarView
 
     private val contentInsetsProvider = mock<StatusBarContentInsetsProvider>()
+    private val windowController = mock<StatusBarWindowController>()
 
     @Before
     fun setUp() {
@@ -55,8 +60,11 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
             contentInsetsProvider
         )
         mDependency.injectTestDependency(DarkIconDispatcher::class.java, mock<DarkIconDispatcher>())
+        mDependency.injectTestDependency(StatusBarWindowController::class.java, windowController)
         view = spy(createStatusBarView())
         whenever(view.rootWindowInsets).thenReturn(emptyWindowInsets())
+        whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
+            .thenReturn(Insets.NONE)
     }
 
     @Test
@@ -107,6 +115,42 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     fun onTouchEvent_noListener_noCrash() {
         view.onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
         // No assert needed, just testing no crash
+    }
+
+    @Test
+    fun onAttachedToWindow_flagEnabled_updatesWindowHeight() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
+
+        view.onAttachedToWindow()
+
+        verify(windowController).refreshStatusBarHeight()
+    }
+
+    @Test
+    fun onAttachedToWindow_flagDisabled_doesNotUpdateWindowHeight() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
+
+        view.onAttachedToWindow()
+
+        verify(windowController, never()).refreshStatusBarHeight()
+    }
+
+    @Test
+    fun onConfigurationChanged_flagEnabled_updatesWindowHeight() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
+
+        view.onConfigurationChanged(Configuration())
+
+        verify(windowController).refreshStatusBarHeight()
+    }
+
+    @Test
+    fun onConfigurationChanged_flagDisabled_doesNotUpdateWindowHeight() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
+
+        view.onConfigurationChanged(Configuration())
+
+        verify(windowController, never()).refreshStatusBarHeight()
     }
 
     @Test

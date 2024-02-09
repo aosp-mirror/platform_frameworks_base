@@ -63,7 +63,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -159,7 +159,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private StatusBarNotificationActivityStarter mNotificationActivityStarter;
     @Mock
-    private ActivityLaunchAnimator mActivityLaunchAnimator;
+    private ActivityTransitionAnimator mActivityTransitionAnimator;
     @Mock
     private InteractionJankMonitor mJankMonitor;
     private FakePowerRepository mPowerRepository;
@@ -255,7 +255,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(NotificationPresenter.class),
                         mock(ShadeViewController.class),
                         mock(NotificationShadeWindowController.class),
-                        mActivityLaunchAnimator,
+                        mActivityTransitionAnimator,
                         new ShadeAnimationInteractorLegacyImpl(
                                 new ShadeAnimationRepository(), new FakeShadeRepository()),
                         notificationAnimationProvider,
@@ -306,7 +306,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mShadeController, atLeastOnce()).collapseShade();
 
-        verify(mActivityLaunchAnimator).startPendingIntentWithAnimation(any(),
+        verify(mActivityTransitionAnimator).startPendingIntentWithAnimation(any(),
                 eq(false) /* animate */, any(), any());
 
         verify(mAssistManager).hideAssist();

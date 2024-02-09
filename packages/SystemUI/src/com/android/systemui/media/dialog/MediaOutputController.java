@@ -78,7 +78,7 @@ import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
@@ -400,7 +400,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     void tryToLaunchInAppRoutingIntent(String routeId, View view) {
         ComponentName componentName = mLocalMediaManager.getLinkedItemComponentName();
         if (componentName != null) {
-            ActivityLaunchAnimator.Controller controller =
+            ActivityTransitionAnimator.Controller controller =
                     mDialogLaunchAnimator.createActivityLaunchController(view);
             Intent launchIntent = new Intent(ACTION_TRANSFER_MEDIA);
             launchIntent.setComponent(componentName);
@@ -412,7 +412,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void tryToLaunchMediaApplication(View view) {
-        ActivityLaunchAnimator.Controller controller =
+        ActivityTransitionAnimator.Controller controller =
                 mDialogLaunchAnimator.createActivityLaunchController(view);
         Intent launchIntent = getAppLaunchIntent();
         if (launchIntent != null) {
@@ -881,7 +881,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void launchBluetoothPairing(View view) {
-        ActivityLaunchAnimator.Controller controller =
+        ActivityTransitionAnimator.Controller controller =
                 mDialogLaunchAnimator.createActivityLaunchController(view);
 
         if (controller == null || (mKeyGuardManager != null

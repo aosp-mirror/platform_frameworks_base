@@ -62,13 +62,14 @@ constructor(
     private val isForTesting: Boolean = false,
 ) {
     private companion object {
-        private val TIMINGS = ActivityLaunchAnimator.TIMINGS
+        private val TIMINGS = ActivityTransitionAnimator.TIMINGS
 
         // We use the same interpolator for X and Y axis to make sure the dialog does not move out
         // of the screen bounds during the animation.
         private val INTERPOLATORS =
-            ActivityLaunchAnimator.INTERPOLATORS.copy(
-                positionXInterpolator = ActivityLaunchAnimator.INTERPOLATORS.positionInterpolator
+            ActivityTransitionAnimator.INTERPOLATORS.copy(
+                positionXInterpolator =
+                    ActivityTransitionAnimator.INTERPOLATORS.positionInterpolator
             )
     }
 
@@ -319,9 +320,9 @@ constructor(
     }
 
     /**
-     * Create an [ActivityLaunchAnimator.Controller] that can be used to launch an activity from the
-     * dialog that contains [View]. Note that the dialog must have been shown using this animator,
-     * otherwise this method will return null.
+     * Create an [ActivityTransitionAnimator.Controller] that can be used to launch an activity from
+     * the dialog that contains [View]. Note that the dialog must have been shown using this
+     * animator, otherwise this method will return null.
      *
      * The returned controller will take care of dismissing the dialog at the right time after the
      * activity started, when the dialog to app animation is done (or when it is cancelled). If this
@@ -333,7 +334,7 @@ constructor(
     fun createActivityLaunchController(
         view: View,
         cujType: Int? = null,
-    ): ActivityLaunchAnimator.Controller? {
+    ): ActivityTransitionAnimator.Controller? {
         val animatedDialog =
             openedDialogs.firstOrNull {
                 it.dialog.window?.decorView?.viewRootImpl == view.viewRootImpl
@@ -343,7 +344,7 @@ constructor(
     }
 
     /**
-     * Create an [ActivityLaunchAnimator.Controller] that can be used to launch an activity from
+     * Create an [ActivityTransitionAnimator.Controller] that can be used to launch an activity from
      * [dialog]. Note that the dialog must have been shown using this animator, otherwise this
      * method will return null.
      *
@@ -357,7 +358,7 @@ constructor(
     fun createActivityLaunchController(
         dialog: Dialog,
         cujType: Int? = null,
-    ): ActivityLaunchAnimator.Controller? {
+    ): ActivityTransitionAnimator.Controller? {
         val animatedDialog = openedDialogs.firstOrNull { it.dialog == dialog } ?: return null
         return createActivityLaunchController(animatedDialog, cujType)
     }
@@ -365,7 +366,7 @@ constructor(
     private fun createActivityLaunchController(
         animatedDialog: AnimatedDialog,
         cujType: Int? = null
-    ): ActivityLaunchAnimator.Controller? {
+    ): ActivityTransitionAnimator.Controller? {
         // At this point, we know that the intent of the caller is to dismiss the dialog to show
         // an app, so we disable the exit animation into the source because we will never want to
         // run it anyways.
@@ -384,12 +385,12 @@ constructor(
 
         val dialogContentWithBackground = animatedDialog.dialogContentWithBackground ?: return null
         val controller =
-            ActivityLaunchAnimator.Controller.fromView(dialogContentWithBackground, cujType)
+            ActivityTransitionAnimator.Controller.fromView(dialogContentWithBackground, cujType)
                 ?: return null
 
         // Wrap the controller into one that will instantly dismiss the dialog when the animation is
         // done or dismiss it normally (fading it out) if the animation is cancelled.
-        return object : ActivityLaunchAnimator.Controller by controller {
+        return object : ActivityTransitionAnimator.Controller by controller {
             override val isDialogLaunch = true
 
             override fun onIntentStarted(willAnimate: Boolean) {
@@ -400,8 +401,8 @@ constructor(
                 }
             }
 
-            override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
-                controller.onLaunchAnimationCancelled()
+            override fun onTransitionAnimationCancelled(newKeyguardOccludedState: Boolean?) {
+                controller.onTransitionAnimationCancelled()
                 enableDialogDismiss()
                 dialog.dismiss()
             }
@@ -632,7 +633,7 @@ private class AnimatedDialog(
 
         val background = dialogContentWithBackground.background
         originalDialogBackgroundColor =
-            GhostedViewLaunchAnimatorController.findGradientDrawable(background)
+            GhostedViewTransitionAnimatorController.findGradientDrawable(background)
                 ?.color
                 ?.defaultColor
                 ?: Color.BLACK
@@ -894,11 +895,11 @@ private class AnimatedDialog(
             if (isLaunching) {
                 controller.createTransitionController()
             } else {
-                GhostedViewLaunchAnimatorController(dialogContentWithBackground!!)
+                GhostedViewTransitionAnimatorController(dialogContentWithBackground!!)
             }
         val endController =
             if (isLaunching) {
-                GhostedViewLaunchAnimatorController(dialogContentWithBackground!!)
+                GhostedViewTransitionAnimatorController(dialogContentWithBackground!!)
             } else {
                 controller.createExitController()
             }
@@ -967,7 +968,7 @@ private class AnimatedDialog(
                     // Therefore we update the end state to the new position/size. Usually the
                     // dialog dimension or position will change in the early frames, so changing the
                     // end state shouldn't really be noticeable.
-                    if (endController is GhostedViewLaunchAnimatorController) {
+                    if (endController is GhostedViewTransitionAnimatorController) {
                         endController.fillGhostedViewState(endState)
                     }
                 }

@@ -232,6 +232,7 @@ public class FingerprintAuthenticationClient
         handleLockout(authenticated);
         if (authenticated) {
             mState = STATE_STOPPED;
+            resetIgnoreDisplayTouches();
             mSensorOverlays.hide(getSensorId());
             if (sidefpsControllerRefactor()) {
                 mAuthenticationStateListeners.onAuthenticationStopped();
@@ -268,6 +269,7 @@ public class FingerprintAuthenticationClient
                 // Send the error, but do not invoke the FinishCallback yet. Since lockout is not
                 // controlled by the HAL, the framework must stop the sensor before finishing the
                 // client.
+                resetIgnoreDisplayTouches();
                 mSensorOverlays.hide(getSensorId());
                 if (sidefpsControllerRefactor()) {
                     mAuthenticationStateListeners.onAuthenticationStopped();
@@ -298,6 +300,7 @@ public class FingerprintAuthenticationClient
             BiometricNotificationUtils.showBadCalibrationNotification(getContext());
         }
 
+        resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         if (sidefpsControllerRefactor()) {
             mAuthenticationStateListeners.onAuthenticationStopped();
@@ -306,6 +309,7 @@ public class FingerprintAuthenticationClient
 
     @Override
     protected void startHalOperation() {
+        resetIgnoreDisplayTouches();
         mSensorOverlays.show(getSensorId(), getRequestReason(), this);
         if (sidefpsControllerRefactor()) {
             mAuthenticationStateListeners.onAuthenticationStarted(getRequestReason());
@@ -419,6 +423,7 @@ public class FingerprintAuthenticationClient
 
     @Override
     protected void stopHalOperation() {
+        resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         if (sidefpsControllerRefactor()) {
             mAuthenticationStateListeners.onAuthenticationStopped();
@@ -518,6 +523,7 @@ public class FingerprintAuthenticationClient
             Slog.e(TAG, "Remote exception", e);
         }
 
+        resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         if (sidefpsControllerRefactor()) {
             mAuthenticationStateListeners.onAuthenticationStopped();
@@ -548,6 +554,7 @@ public class FingerprintAuthenticationClient
             Slog.e(TAG, "Remote exception", e);
         }
 
+        resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
         if (sidefpsControllerRefactor()) {
             mAuthenticationStateListeners.onAuthenticationStopped();

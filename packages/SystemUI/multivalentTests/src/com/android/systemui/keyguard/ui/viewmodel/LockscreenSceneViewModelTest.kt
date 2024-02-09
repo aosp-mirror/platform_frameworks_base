@@ -18,22 +18,28 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.pm.UserInfo
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
-import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
+import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,9 +55,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
 
-    private val underTest by lazy {
-        createLockscreenSceneViewModel()
-    }
+    private val underTest by lazy { createLockscreenSceneViewModel() }
 
     @Test
     fun upTransitionSceneKey_canSwipeToUnlock_gone() =
@@ -80,34 +84,47 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
         }
 
+    @EnableFlags(FLAG_COMMUNAL_HUB)
     @Test
     fun leftTransitionSceneKey_communalIsEnabled_communal() =
         testScope.runTest {
-            kosmos.fakeCommunalRepository.setIsCommunalEnabled(true)
-            val underTest = createLockscreenSceneViewModel()
-
-            assertThat(underTest.leftDestinationSceneKey).isEqualTo(SceneKey.Communal)
+            with(kosmos.fakeUserRepository) {
+                setUserInfos(listOf(PRIMARY_USER))
+                setSelectedUserInfo(PRIMARY_USER)
+            }
+            kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+            val leftDestinationSceneKey by collectLastValue(underTest.leftDestinationSceneKey)
+            assertThat(leftDestinationSceneKey).isEqualTo(SceneKey.Communal)
         }
 
+    @DisableFlags(FLAG_COMMUNAL_HUB)
     @Test
     fun leftTransitionSceneKey_communalIsDisabled_null() =
         testScope.runTest {
-            kosmos.fakeCommunalRepository.setIsCommunalEnabled(false)
-            val underTest = createLockscreenSceneViewModel()
-
-            assertThat(underTest.leftDestinationSceneKey).isNull()
+            with(kosmos.fakeUserRepository) {
+                setUserInfos(listOf(PRIMARY_USER))
+                setSelectedUserInfo(PRIMARY_USER)
+            }
+            kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+            val leftDestinationSceneKey by collectLastValue(underTest.leftDestinationSceneKey)
+            assertThat(leftDestinationSceneKey).isNull()
         }
 
     private fun createLockscreenSceneViewModel(): LockscreenSceneViewModel {
         return LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = kosmos.deviceEntryInteractor,
-            communalInteractor = kosmos.communalInteractor,
+            communalSettingsInteractor = kosmos.communalSettingsInteractor,
             longPress =
                 KeyguardLongPressViewModel(
                     interactor = mock(),
                 ),
             notifications = kosmos.notificationsPlaceholderViewModel,
         )
+    }
+
+    private companion object {
+        val PRIMARY_USER =
+            UserInfo(/* id= */ 0, /* name= */ "primary user", /* flags= */ UserInfo.FLAG_MAIN)
     }
 }

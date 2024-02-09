@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportHeight="24"
+    android:viewportWidth="24">
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20.442 7.562a2 2 0 0 0-2-2c-.366 0-.705.106-1 .277V4.686a2 2 0 0 0-2-2 2 2 0 0 0-1.004.279 1.995 1.995 0 0 0-3.986-.06 2 2 0 0 0-1.006-.28 2 2 0 0 0-2 2v6.501l-.247-.253a2.216 2.216 0 0 0-3.178 0 2.286 2.286 0 0 0 0 3.186l5.106 5.224q.063.061.131.118l-.001.001a6.58 6.58 0 0 0 4.624 1.901c3.587 0 6.565-2.906 6.565-6.516q0-.105-.004-.21m-6.561 5.727a5.58 5.58 0 0 1-3.922-1.613 1 1 0 0 1-.117-.106l-5.106-5.224a1.286 1.286 0 0 1 0-1.788 1.215 1.215 0 0 1 1.747 0l1.962 2.008V4.625a1 1 0 0 1 2 0v5.833q.463-.362.996-.623V3a1 1 0 0 1 2 0v6.29a6 6 0 0 1 1 .011V4.686a1 1 0 0 1 2 0v5.21c.357.185.693.408 1 .663V7.562a1 1 0 0 1 2 0v7.019h.001-.001q.004.104.004.207c.001 3.046-2.518 5.516-5.564 5.516" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19.442 14.581V7.562a1 1 0 0 0-2 0v2.997a5.7 5.7 0 0 0-1-.663v-5.21a1 1 0 0 0-2 0v4.615a5.5 5.5 0 0 0-1-.011V3a1 1 0 0 0-2 0v6.835a5.6 5.6 0 0 0-.996.623V4.625a1 1 0 0 0-2 0v8.955l-1.962-2.008a1.215 1.215 0 0 0-1.747 0 1.286 1.286 0 0 0 0 1.788l5.106 5.224q.056.057.117.106a5.58 5.58 0 0 0 3.922 1.613c3.046 0 5.565-2.469 5.565-5.516z" />
+</vector>

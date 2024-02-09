@@ -19,6 +19,7 @@ package com.android.systemui.communal.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
@@ -59,7 +60,7 @@ class CommunalInteractorCommunalDisabledTest : SysuiTestCase() {
         widgetRepository = kosmos.fakeCommunalWidgetRepository
         keyguardRepository = kosmos.fakeKeyguardRepository
 
-        communalRepository.setIsCommunalEnabled(false)
+        mSetFlagsRule.disableFlags(FLAG_COMMUNAL_HUB)
 
         underTest = kosmos.communalInteractor
     }

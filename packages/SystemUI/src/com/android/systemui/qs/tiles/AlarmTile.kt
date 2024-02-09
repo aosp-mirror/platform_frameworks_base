@@ -14,7 +14,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.res.R
-import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -75,7 +75,7 @@ class AlarmTile @Inject constructor(
 
     override fun handleClick(view: View?) {
         val animationController = view?.let {
-            ActivityLaunchAnimator.Controller.fromView(
+            ActivityTransitionAnimator.Controller.fromView(
                     it, InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE)
         }
         val pendingIntent = lastAlarmInfo?.showIntent

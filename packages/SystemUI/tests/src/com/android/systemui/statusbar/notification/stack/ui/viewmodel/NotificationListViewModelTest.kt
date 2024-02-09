@@ -28,11 +28,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakefulnessState
@@ -70,7 +66,6 @@ class NotificationListViewModelTest : SysuiTestCase() {
     private val activeNotificationListRepository = kosmos.activeNotificationListRepository
     private val fakeConfigurationController = kosmos.fakeConfigurationController
     private val fakeKeyguardRepository = kosmos.fakeKeyguardRepository
-    private val fakeKeyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val fakePowerRepository = kosmos.fakePowerRepository
     private val fakeRemoteInputRepository = kosmos.fakeRemoteInputRepository
     private val fakeShadeRepository = kosmos.fakeShadeRepository
@@ -90,11 +85,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
             // WHEN on lockscreen
-            fakeKeyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.GONE,
-                to = KeyguardState.LOCKSCREEN,
-                testScope,
-            )
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
             // AND has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             testScope.runCurrent()
@@ -109,11 +100,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
             // WHEN on lockscreen
-            fakeKeyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.GONE,
-                to = KeyguardState.LOCKSCREEN,
-                testScope,
-            )
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
             // AND has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
             runCurrent()
@@ -128,11 +115,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
             // WHEN not on lockscreen
-            fakeKeyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GONE,
-                testScope,
-            )
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
             // AND has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             runCurrent()
@@ -150,7 +133,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             activeNotificationListRepository.setActiveNotifs(count = 0)
             runCurrent()
 
-            // THEN should show
+            // THEN empty shade is visible
             assertThat(shouldShow).isTrue()
         }
 
@@ -163,7 +146,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             activeNotificationListRepository.setActiveNotifs(count = 2)
             runCurrent()
 
-            // THEN should not show
+            // THEN empty shade is not visible
             assertThat(shouldShow).isFalse()
         }
 
@@ -178,7 +161,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             fakeShadeRepository.legacyQsFullscreen.value = true
             runCurrent()
 
-            // THEN should not show
+            // THEN empty shade is not visible
             assertThat(shouldShow).isFalse()
         }
 
@@ -196,48 +179,54 @@ class NotificationListViewModelTest : SysuiTestCase() {
             fakeConfigurationController.notifyConfigurationChanged()
             runCurrent()
 
-            // THEN should show
+            // THEN empty shade is visible
             assertThat(shouldShow).isTrue()
         }
 
     @Test
-    fun testShouldShowEmptyShadeView_falseWhenTransitioningToAOD() =
+    fun testShouldShowEmptyShadeView_trueWhenLockedShade() =
         testScope.runTest {
             val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
-            // AND transitioning to AOD
-            fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.AOD,
-                    value = 0f,
-                )
-            )
+            // AND shade is open
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
             runCurrent()
 
-            // THEN should not show
+            // THEN empty shade is visible
+            assertThat(shouldShow).isTrue()
+        }
+
+    @Test
+    fun testShouldShowEmptyShadeView_falseWhenKeyguard() =
+        testScope.runTest {
+            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+
+            // WHEN has no notifs
+            activeNotificationListRepository.setActiveNotifs(count = 0)
+            // AND shade is open
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            runCurrent()
+
+            // THEN empty shade is not visible
             assertThat(shouldShow).isFalse()
         }
 
     @Test
-    fun testShouldShowEmptyShadeView_falseWhenBouncerShowing() =
+    fun testShouldShowEmptyShadeView_falseWhenStartingToSleep() =
         testScope.runTest {
             val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
-            // AND is on bouncer
-            fakeKeyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.PRIMARY_BOUNCER,
-                testScope,
-            )
+            // AND shade is open
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            // AND device is starting to go to sleep
+            fakePowerRepository.updateWakefulness(WakefulnessState.STARTING_TO_SLEEP)
             runCurrent()
 
-            // THEN should not show
+            // THEN empty shade is not visible
             assertThat(shouldShow).isFalse()
         }
 

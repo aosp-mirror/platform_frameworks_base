@@ -31,6 +31,7 @@ val Kosmos.communalTutorialInteractor by
             keyguardInteractor = keyguardInteractor,
             communalRepository = communalRepository,
             communalInteractor = communalInteractor,
+            communalSettingsInteractor = communalSettingsInteractor,
             tableLogBuffer = mock(),
         )
     }

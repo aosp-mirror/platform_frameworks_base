@@ -86,6 +86,13 @@ constructor(
      */
     val expandFraction: Flow<Float> = shadeInteractor.shadeExpansion
 
+    /**
+     * The amount in px that the notification stack should scroll due to internal expansion. This
+     * should only happen when a notification expansion hits the bottom of the screen, so it is
+     * necessary to scroll up to keep expanding the notification.
+     */
+    val syntheticScroll: Flow<Float> = interactor.syntheticScroll
+
     /** Sets the y-coord in px of the top of the contents of the notification stack. */
     fun onContentTopChanged(padding: Float) {
         interactor.setContentTop(padding)

@@ -34,7 +34,7 @@ import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletClientImpl;
 import android.util.Log;
 
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -236,12 +236,12 @@ public class QuickAccessWalletController {
      * that too is null, then fall back to {@link WalletActivity}.
      *
      * @param activityStarter an {@link ActivityStarter} to launch the Intent or PendingIntent.
-     * @param animationController an {@link ActivityLaunchAnimator.Controller} to provide a
+     * @param animationController an {@link ActivityTransitionAnimator.Controller} to provide a
      *                            smooth animation for the activity launch.
      * @param hasCard whether the service returns any cards.
      */
     public void startQuickAccessUiIntent(ActivityStarter activityStarter,
-            ActivityLaunchAnimator.Controller animationController,
+            ActivityTransitionAnimator.Controller animationController,
             boolean hasCard) {
         mQuickAccessWalletClient.getWalletPendingIntent(mExecutor,
                 walletPendingIntent -> {
@@ -271,7 +271,7 @@ public class QuickAccessWalletController {
     private void startQuickAccessViaIntent(Intent intent,
             boolean hasCard,
             ActivityStarter activityStarter,
-            ActivityLaunchAnimator.Controller animationController) {
+            ActivityTransitionAnimator.Controller animationController) {
         if (hasCard) {
             activityStarter.startActivity(intent, true /* dismissShade */,
                     animationController, true /* showOverLockscreenWhenLocked */);
@@ -285,7 +285,7 @@ public class QuickAccessWalletController {
 
     private void startQuickAccessViaPendingIntent(PendingIntent pendingIntent,
             ActivityStarter activityStarter,
-            ActivityLaunchAnimator.Controller animationController) {
+            ActivityTransitionAnimator.Controller animationController) {
         activityStarter.postStartActivityDismissingKeyguard(
                 pendingIntent,
                 animationController);

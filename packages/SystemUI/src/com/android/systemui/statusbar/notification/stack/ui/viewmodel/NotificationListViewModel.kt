@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -54,7 +52,6 @@ constructor(
     val logger: Optional<NotificationLoggerViewModel>,
     activeNotificationsInteractor: ActiveNotificationsInteractor,
     keyguardInteractor: KeyguardInteractor,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor,
     powerInteractor: PowerInteractor,
     remoteInputInteractor: RemoteInputInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
@@ -74,11 +71,9 @@ constructor(
         } else {
             combine(
                     activeNotificationsInteractor.areAnyNotificationsPresent,
-                    keyguardTransitionInteractor.isFinishedInStateWhere {
-                        KeyguardState.lockscreenVisibleInState(it)
-                    }
-                ) { hasNotifications, isOnKeyguard ->
-                    hasNotifications || !isOnKeyguard
+                    isShowingOnLockscreen,
+                ) { hasNotifications, isShowingOnLockscreen ->
+                    hasNotifications || !isShowingOnLockscreen
                 }
                 .distinctUntilChanged()
         }
@@ -91,26 +86,17 @@ constructor(
             combine(
                     activeNotificationsInteractor.areAnyNotificationsPresent,
                     shadeInteractor.isQsFullscreen,
-                    // TODO(b/293167744): It looks like we're essentially trying to check the same
-                    //  things for the empty shade visibility as we do for the footer, just in a
-                    //  slightly different way. We should change this so we also check
-                    //  statusBarState and isAwake instead of specific keyguard transitions.
-                    keyguardTransitionInteractor.isInTransitionToState(KeyguardState.AOD).onStart {
-                        emit(false)
-                    },
-                    keyguardTransitionInteractor
-                        .isFinishedInState(KeyguardState.PRIMARY_BOUNCER)
-                        .onStart { emit(false) }
-                ) { hasNotifications, isQsFullScreen, transitioningToAOD, isBouncerShowing ->
-                    !hasNotifications &&
-                        !isQsFullScreen &&
-                        // Hide empty shade view when in transition to AOD.
-                        // That avoids "No Notifications" blinking when transitioning to AOD.
-                        // For more details, see b/228790482.
-                        !transitioningToAOD &&
-                        // Don't show any notification content if the bouncer is showing. See
-                        // b/267060171.
-                        !isBouncerShowing
+                    isShowingOnLockscreen,
+                ) { hasNotifications, isQsFullScreen, isShowingOnLockscreen ->
+                    when {
+                        hasNotifications -> false
+                        isQsFullScreen -> false
+                        // Do not show the empty shade if the lockscreen is visible (including AOD
+                        // b/228790482 and bouncer b/267060171), except if the shade is opened on
+                        // top.
+                        isShowingOnLockscreen -> false
+                        else -> true
+                    }
                 }
                 .distinctUntilChanged()
         }
@@ -123,52 +109,47 @@ constructor(
             combine(
                     activeNotificationsInteractor.areAnyNotificationsPresent,
                     userSetupInteractor.isUserSetUp,
-                    keyguardInteractor.statusBarState.map { it == StatusBarState.KEYGUARD },
+                    isShowingOnLockscreen,
                     shadeInteractor.qsExpansion,
                     shadeInteractor.isQsFullscreen,
-                    powerInteractor.isAsleep,
                     remoteInputInteractor.isRemoteInputActive,
                     shadeInteractor.shadeExpansion.map { it == 0f }
                 ) {
                     hasNotifications,
                     isUserSetUp,
-                    isOnKeyguard,
+                    isShowingOnLockscreen,
                     qsExpansion,
                     qsFullScreen,
-                    isAsleep,
                     isRemoteInputActive,
                     isShadeClosed ->
-                    Pair(
-                        // Should the footer be visible?
-                        when {
-                            !hasNotifications -> false
-                            // Hide the footer until the user setup is complete, to prevent access
-                            // to settings (b/193149550).
-                            !isUserSetUp -> false
-                            // Do not show the footer if the lockscreen is visible (incl. AOD),
-                            // except if the shade is opened on top. See also b/219680200.
-                            isOnKeyguard -> false
-                            // Make sure we're not showing the footer in the transition to AOD while
-                            // going to sleep (b/190227875). The StatusBarState is unfortunately not
-                            // updated quickly enough when the power button is pressed, so this is
-                            // necessary in addition to the isOnKeyguard check.
-                            isAsleep -> false
-                            // Do not show the footer if quick settings are fully expanded (except
-                            // for the foldable split shade view). See b/201427195 && b/222699879.
-                            qsExpansion == 1f && qsFullScreen -> false
-                            // Hide the footer if remote input is active (i.e. user is replying to a
-                            // notification). See b/75984847.
-                            isRemoteInputActive -> false
-                            // Never show the footer if the shade is collapsed (e.g. when HUNing).
-                            isShadeClosed -> false
-                            else -> true
-                        },
-                        // This could in theory be in the .sample below, but it tends to be
-                        // inconsistent, so we're passing it on to make sure we have the same state.
-                        isOnKeyguard
-                    )
+                    // A pair of (visible, canAnimate)
+                    when {
+                        !hasNotifications -> Pair(false, true)
+                        // Hide the footer until the user setup is complete, to prevent access
+                        // to settings (b/193149550).
+                        !isUserSetUp -> Pair(false, true)
+                        // Do not show the footer if the lockscreen is visible (incl. AOD),
+                        // except if the shade is opened on top. See also b/219680200.
+                        // Do not animate, as that makes the footer appear briefly when
+                        // transitioning between the shade and keyguard.
+                        isShowingOnLockscreen -> Pair(false, false)
+                        // Do not show the footer if quick settings are fully expanded (except
+                        // for the foldable split shade view). See b/201427195 && b/222699879.
+                        qsExpansion == 1f && qsFullScreen -> Pair(false, true)
+                        // Hide the footer if remote input is active (i.e. user is replying to a
+                        // notification). See b/75984847.
+                        isRemoteInputActive -> Pair(false, true)
+                        // Never show the footer if the shade is collapsed (e.g. when HUNing).
+                        isShadeClosed -> Pair(false, false)
+                        else -> Pair(true, true)
+                    }
                 }
-                .distinctUntilChanged()
+                .distinctUntilChanged(
+                    // Equivalent unless visibility changes
+                    areEquivalent = { a: Pair<Boolean, Boolean>, b: Pair<Boolean, Boolean> ->
+                        a.first == b.first
+                    }
+                )
                 // Should we animate the visibility change?
                 .sample(
                     // TODO(b/322167853): This check is currently duplicated in FooterViewModel,
@@ -179,14 +160,37 @@ constructor(
                             ::Pair
                         )
                         .onStart { emit(Pair(false, false)) }
-                ) { (visible, isOnKeyguard), (isShadeFullyExpanded, animationsEnabled) ->
+                ) { (visible, canAnimate), (isShadeFullyExpanded, animationsEnabled) ->
                     // Animate if the shade is interactive, but NOT on the lockscreen. Having
                     // animations enabled while on the lockscreen makes the footer appear briefly
                     // when transitioning between the shade and keyguard.
-                    val shouldAnimate = isShadeFullyExpanded && animationsEnabled && !isOnKeyguard
+                    val shouldAnimate = isShadeFullyExpanded && animationsEnabled && canAnimate
                     AnimatableEvent(visible, shouldAnimate)
                 }
                 .toAnimatedValueFlow()
+        }
+    }
+
+    private val isShowingOnLockscreen: Flow<Boolean> by lazy {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            combine(
+                    // Non-notification UI elements of the notification list should not be visible
+                    // on the lockscreen (incl. AOD and bouncer), except if the shade is opened on
+                    // top. See b/219680200 for the footer and b/228790482, b/267060171 for the
+                    // empty shade.
+                    // TODO(b/323187006): There's a plan to eventually get rid of StatusBarState
+                    //  entirely, so this will have to be replaced at some point.
+                    keyguardInteractor.statusBarState.map { it == StatusBarState.KEYGUARD },
+                    // The StatusBarState is unfortunately not updated quickly enough when the power
+                    // button is pressed, so this is necessary in addition to the KEYGUARD check to
+                    // cover the transition to AOD while going to sleep (b/190227875).
+                    powerInteractor.isAsleep,
+                ) { (isOnKeyguard, isAsleep) ->
+                    isOnKeyguard || isAsleep
+                }
+                .distinctUntilChanged()
         }
     }
 
@@ -205,6 +209,22 @@ constructor(
             flowOf(false)
         } else {
             seenNotificationsInteractor.hasFilteredOutSeenNotifications
+        }
+    }
+
+    val hasClearableAlertingNotifications: Flow<Boolean> by lazy {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            activeNotificationsInteractor.hasClearableAlertingNotifications
+        }
+    }
+
+    val hasNonClearableSilentNotifications: Flow<Boolean> by lazy {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            activeNotificationsInteractor.hasNonClearableSilentNotifications
         }
     }
 }

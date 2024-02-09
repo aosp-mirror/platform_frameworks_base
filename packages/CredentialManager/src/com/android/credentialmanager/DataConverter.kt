@@ -195,7 +195,7 @@ class GetFlowUtils {
                 }
             return com.android.credentialmanager.getflow.RequestDisplayInfo(
                 appName = originName?.ifEmpty { null }
-                    ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
+                    ?: getAppLabel(context.packageManager, requestInfo.packageName)
                     ?: return null,
                 preferImmediatelyAvailableCredentials = preferImmediatelyAvailableCredentials,
                 preferIdentityDocUi = getCredentialRequest.data.getBoolean(
@@ -269,7 +269,7 @@ class CreateFlowUtils {
                 return null
             }
             val appLabel = originName?.ifEmpty { null }
-                ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
+                ?: getAppLabel(context.packageManager, requestInfo.packageName)
                 ?: return null
             val createCredentialRequest = requestInfo.createCredentialRequest ?: return null
             val createCredentialRequestJetpack = CreateCredentialRequest.createFrom(

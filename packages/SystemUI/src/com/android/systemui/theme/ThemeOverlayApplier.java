@@ -15,6 +15,8 @@
  */
 package com.android.systemui.theme;
 
+import static com.android.systemui.shared.Flags.enableHomeDelay;
+
 import android.annotation.AnyThread;
 import android.content.om.FabricatedOverlay;
 import android.content.om.OverlayIdentifier;
@@ -32,6 +34,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 
 import com.google.android.collect.Lists;
@@ -142,6 +145,7 @@ public class ThemeOverlayApplier implements Dumpable {
     private final Map<String, String> mCategoryToTargetPackage = new ArrayMap<>();
     private final OverlayManager mOverlayManager;
     private final Executor mBgExecutor;
+    private final Executor mMainExecutor;
     private final String mLauncherPackage;
     private final String mThemePickerPackage;
 
@@ -150,9 +154,11 @@ public class ThemeOverlayApplier implements Dumpable {
             @Background Executor bgExecutor,
             @Named(ThemeModule.LAUNCHER_PACKAGE) String launcherPackage,
             @Named(ThemeModule.THEME_PICKER_PACKAGE) String themePickerPackage,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            @Main Executor mainExecutor) {
         mOverlayManager = overlayManager;
         mBgExecutor = bgExecutor;
+        mMainExecutor = mainExecutor;
         mLauncherPackage = launcherPackage;
         mThemePickerPackage = themePickerPackage;
         mTargetPackageToCategories.put(ANDROID_PACKAGE, Sets.newHashSet(
@@ -184,12 +190,21 @@ public class ThemeOverlayApplier implements Dumpable {
     /**
      * Apply the set of overlay packages to the set of {@code UserHandle}s provided. Overlays that
      * affect sysui will also be applied to the system user.
+     *
+     * @param categoryToPackage Overlay packages to be applied
+     * @param pendingCreation Overlays yet to be created
+     * @param currentUser Current User ID
+     * @param managedProfiles Profiles get overlays
+     * @param onComplete Callback for when resources are ready. Runs in the main thread.
      */
     public void applyCurrentUserOverlays(
             Map<String, OverlayIdentifier> categoryToPackage,
             FabricatedOverlay[] pendingCreation,
             int currentUser,
-            Set<UserHandle> managedProfiles) {
+            Set<UserHandle> managedProfiles,
+            Runnable onComplete
+    ) {
+
         mBgExecutor.execute(() -> {
 
             // Disable all overlays that have not been specified in the user setting.
@@ -236,6 +251,10 @@ public class ThemeOverlayApplier implements Dumpable {
 
             try {
                 mOverlayManager.commit(transaction.build());
+                if (enableHomeDelay() && onComplete != null) {
+                    Log.d(TAG, "Executing onComplete runnable");
+                    mMainExecutor.execute(onComplete);
+                }
             } catch (SecurityException | IllegalStateException e) {
                 Log.e(TAG, "setEnabled failed", e);
             }

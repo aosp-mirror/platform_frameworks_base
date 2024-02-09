@@ -58,6 +58,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -595,6 +596,21 @@ public class AudioPolicy {
     /** @hide */
     public void reset() {
         setRegistration(null);
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    @FlaggedApi(Flags.FLAG_AUDIO_MIX_TEST_API)
+    public List<AudioMix> getMixes() {
+        if (!Flags.audioMixTestApi()) {
+            return Collections.emptyList();
+        }
+        synchronized (mLock) {
+            return List.copyOf(mConfig.getMixes());
+        }
     }
 
     public void setRegistration(String regId) {

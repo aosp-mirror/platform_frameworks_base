@@ -1155,7 +1155,7 @@ constructor(
                 onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
                 // TODO(b/311234666): revisit logic once interactions between the hub and
                 //  shade/keyguard state are finalized
-                isCommunalShowing && communalInteractor.isCommunalEnabled -> LOCATION_COMMUNAL_HUB
+                isCommunalShowing -> LOCATION_COMMUNAL_HUB
                 onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN
                 else -> LOCATION_QQS
             }

@@ -75,7 +75,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.udfps.InteractionEvent;
@@ -203,7 +203,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private SystemUIDialogManager mSystemUIDialogManager;
     @Mock
-    private ActivityLaunchAnimator mActivityLaunchAnimator;
+    private ActivityTransitionAnimator mActivityTransitionAnimator;
     @Mock
     private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @Mock
@@ -331,7 +331,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController,
                 mSystemUIDialogManager,
                 mLatencyTracker,
-                mActivityLaunchAnimator,
+                mActivityTransitionAnimator,
                 mBiometricExecutor,
                 mPrimaryBouncerInteractor,
                 mShadeInteractor,

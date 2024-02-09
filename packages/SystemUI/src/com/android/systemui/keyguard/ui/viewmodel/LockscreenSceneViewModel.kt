@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
@@ -36,7 +36,7 @@ class LockscreenSceneViewModel
 constructor(
     @Application applicationScope: CoroutineScope,
     deviceEntryInteractor: DeviceEntryInteractor,
-    communalInteractor: CommunalInteractor,
+    communalSettingsInteractor: CommunalSettingsInteractor,
     val longPress: KeyguardLongPressViewModel,
     val notifications: NotificationsPlaceholderViewModel,
 ) {
@@ -55,10 +55,12 @@ constructor(
     }
 
     /** The key of the scene we should switch to when swiping left. */
-    val leftDestinationSceneKey: SceneKey? =
-        if (communalInteractor.isCommunalEnabled) {
-            SceneKey.Communal
-        } else {
-            null
-        }
+    val leftDestinationSceneKey: StateFlow<SceneKey?> =
+        communalSettingsInteractor.isCommunalEnabled
+            .map { available -> if (available) SceneKey.Communal else null }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = null,
+            )
 }
