@@ -97,7 +97,6 @@ android_ravenwood_libgroup {
         "framework-minus-apex.ravenwood",
         "hoststubgen-helper-runtime.ravenwood",
         "hoststubgen-helper-framework-runtime.ravenwood",
-        "core-libart-for-host",
         "all-updatable-modules-system-stubs",
         "junit",
         "truth",

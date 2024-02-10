@@ -18,7 +18,7 @@ package com.android.systemui.bluetooth;
 
 import android.view.View;
 
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
@@ -30,14 +30,14 @@ import javax.inject.Inject;
 @SysUISingleton
 public class BroadcastDialogController {
 
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final BroadcastDialogDelegate.Factory mBroadcastDialogFactory;
 
     @Inject
     public BroadcastDialogController(
-            DialogLaunchAnimator dialogLaunchAnimator,
+            DialogTransitionAnimator dialogTransitionAnimator,
             BroadcastDialogDelegate.Factory broadcastDialogFactory) {
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mBroadcastDialogFactory = broadcastDialogFactory;
     }
 
@@ -51,7 +51,7 @@ public class BroadcastDialogController {
         SystemUIDialog broadcastDialog = mBroadcastDialogFactory.create(
                 currentBroadcastAppName, outputPkgName).createDialog();
         if (view != null) {
-            mDialogLaunchAnimator.showFromView(broadcastDialog, view);
+            mDialogTransitionAnimator.showFromView(broadcastDialog, view);
         } else {
             broadcastDialog.show();
         }

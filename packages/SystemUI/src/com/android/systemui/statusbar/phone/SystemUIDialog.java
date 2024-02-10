@@ -44,7 +44,7 @@ import android.view.WindowManager.LayoutParams;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.model.SysUiState;
@@ -112,7 +112,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 Dependency.get(SystemUIDialogManager.class),
                 Dependency.get(SysUiState.class),
                 Dependency.get(BroadcastDispatcher.class),
-                Dependency.get(DialogLaunchAnimator.class));
+                Dependency.get(DialogTransitionAnimator.class));
     }
 
     public static class Factory {
@@ -120,7 +120,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         private final SystemUIDialogManager mSystemUIDialogManager;
         private final SysUiState mSysUiState;
         private final BroadcastDispatcher mBroadcastDispatcher;
-        private final DialogLaunchAnimator mDialogLaunchAnimator;
+        private final DialogTransitionAnimator mDialogTransitionAnimator;
 
         @Inject
         public Factory(
@@ -128,12 +128,12 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 SystemUIDialogManager systemUIDialogManager,
                 SysUiState sysUiState,
                 BroadcastDispatcher broadcastDispatcher,
-                DialogLaunchAnimator dialogLaunchAnimator) {
+                DialogTransitionAnimator dialogTransitionAnimator) {
             mContext = context;
             mSystemUIDialogManager = systemUIDialogManager;
             mSysUiState = sysUiState;
             mBroadcastDispatcher = broadcastDispatcher;
-            mDialogLaunchAnimator = dialogLaunchAnimator;
+            mDialogTransitionAnimator = dialogTransitionAnimator;
         }
 
         /** Creates a new instance of {@link SystemUIDialog} with no customized behavior.
@@ -175,7 +175,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                     mSystemUIDialogManager,
                     mSysUiState,
                     mBroadcastDispatcher,
-                    mDialogLaunchAnimator,
+                    mDialogTransitionAnimator,
                     dialogDelegate);
         }
     }
@@ -187,7 +187,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             SystemUIDialogManager dialogManager,
             SysUiState sysUiState,
             BroadcastDispatcher broadcastDispatcher,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            DialogTransitionAnimator dialogTransitionAnimator) {
         this(
                 context,
                 theme,
@@ -195,7 +195,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 dialogManager,
                 sysUiState,
                 broadcastDispatcher,
-                dialogLaunchAnimator,
+                dialogTransitionAnimator,
                 new DialogDelegate<>(){});
     }
 
@@ -206,7 +206,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             SystemUIDialogManager dialogManager,
             SysUiState sysUiState,
             BroadcastDispatcher broadcastDispatcher,
-            DialogLaunchAnimator dialogLaunchAnimator,
+            DialogTransitionAnimator dialogTransitionAnimator,
             Delegate delegate) {
         this(
                 context,
@@ -215,7 +215,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 dialogManager,
                 sysUiState,
                 broadcastDispatcher,
-                dialogLaunchAnimator,
+                dialogTransitionAnimator,
                 (DialogDelegate<SystemUIDialog>) delegate);
     }
 
@@ -226,7 +226,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             SystemUIDialogManager dialogManager,
             SysUiState sysUiState,
             BroadcastDispatcher broadcastDispatcher,
-            DialogLaunchAnimator dialogLaunchAnimator,
+            DialogTransitionAnimator dialogTransitionAnimator,
             DialogDelegate<SystemUIDialog> delegate) {
         super(context, theme);
         mContext = context;
@@ -238,7 +238,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         getWindow().setAttributes(attrs);
 
         mDismissReceiver = dismissOnDeviceLock ? new DismissReceiver(this, broadcastDispatcher,
-                dialogLaunchAnimator) : null;
+                dialogTransitionAnimator) : null;
         mDialogManager = dialogManager;
         mSysUiState = sysUiState;
     }
@@ -499,7 +499,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         // TODO(b/219008720): Remove those calls to Dependency.get.
         DismissReceiver dismissReceiver = new DismissReceiver(dialog,
                 Dependency.get(BroadcastDispatcher.class),
-                Dependency.get(DialogLaunchAnimator.class));
+                Dependency.get(DialogTransitionAnimator.class));
         dialog.setOnDismissListener(d -> {
             dismissReceiver.unregister();
             if (dismissAction != null) dismissAction.run();
@@ -556,7 +556,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         }
 
         // We first look for the background on the dialogContentWithBackground added by
-        // DialogLaunchAnimator. If it's not there, we use the background of the DecorView.
+        // DialogTransitionAnimator. If it's not there, we use the background of the DecorView.
         View viewWithBackground = decorView.findViewByPredicate(
                 view -> view.getTag(
                         com.android.systemui.animation.R.id.tag_dialog_background) != null);
@@ -580,13 +580,13 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         private final Dialog mDialog;
         private boolean mRegistered;
         private final BroadcastDispatcher mBroadcastDispatcher;
-        private final DialogLaunchAnimator mDialogLaunchAnimator;
+        private final DialogTransitionAnimator mDialogTransitionAnimator;
 
         DismissReceiver(Dialog dialog, BroadcastDispatcher broadcastDispatcher,
-                DialogLaunchAnimator dialogLaunchAnimator) {
+                DialogTransitionAnimator dialogTransitionAnimator) {
             mDialog = dialog;
             mBroadcastDispatcher = broadcastDispatcher;
-            mDialogLaunchAnimator = dialogLaunchAnimator;
+            mDialogTransitionAnimator = dialogTransitionAnimator;
         }
 
         void register() {
@@ -606,7 +606,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             // These broadcast are usually received when locking the device, swiping up to home
             // (which collapses the shade), etc. In those cases, we usually don't want to animate
             // back into the view.
-            mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
+            mDialogTransitionAnimator.disableAllCurrentDialogsExitAnimations();
             mDialog.dismiss();
         }
     }

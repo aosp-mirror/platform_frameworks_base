@@ -27,7 +27,6 @@ import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
-
 /**
  * {@hide}
  */
@@ -56,6 +55,7 @@ interface IMediaRouterService {
 
     void registerRouter2(IMediaRouter2 router, String packageName);
     void unregisterRouter2(IMediaRouter2 router);
+    void updateScanningStateWithRouter2(IMediaRouter2 router, @JavaPassthrough(annotation="@android.media.MediaRouter2.ScanningState") int scanningState);
     void setDiscoveryRequestWithRouter2(IMediaRouter2 router,
             in RouteDiscoveryPreference preference);
     void setRouteListingPreference(IMediaRouter2 router,
@@ -81,8 +81,7 @@ interface IMediaRouterService {
     void unregisterManager(IMediaRouter2Manager manager);
     void setRouteVolumeWithManager(IMediaRouter2Manager manager, int requestId,
             in MediaRoute2Info route, int volume);
-    void startScan(IMediaRouter2Manager manager);
-    void stopScan(IMediaRouter2Manager manager);
+    void updateScanningState(IMediaRouter2Manager manager, @JavaPassthrough(annotation="@android.media.MediaRouter2.ScanningState") int scanningState);
 
     void requestCreateSessionWithManager(IMediaRouter2Manager manager, int requestId,
             in RoutingSessionInfo oldSession, in @nullable MediaRoute2Info route,

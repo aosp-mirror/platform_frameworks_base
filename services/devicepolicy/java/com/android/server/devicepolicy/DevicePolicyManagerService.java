@@ -2581,7 +2581,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         for (final String restriction : doAdmin.userRestrictions.keySet()) {
-            if (UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(restriction)) {
+            if (UserRestrictionsUtils.canParentOfProfileOwnerOfOrganizationOwnedDeviceChange(
+                    restriction)) {
                 parentAdmin.ensureUserRestrictions().putBoolean(
                         restriction, doAdmin.userRestrictions.getBoolean(restriction));
             }
@@ -13047,9 +13048,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void checkAdminCanSetRestriction(CallerIdentity caller, boolean parent, String key) {
+        boolean isProfileOwnerOfOrganizationOwnedDevice =
+                isProfileOwnerOfOrganizationOwnedDevice(caller);
         if (parent) {
             Preconditions.checkCallAuthorization(
-                    isProfileOwnerOfOrganizationOwnedDevice(caller));
+                    isProfileOwnerOfOrganizationOwnedDevice);
         } else {
             Preconditions.checkCallAuthorization(
                     isDeviceOwner(caller) || isProfileOwner(caller));
@@ -13073,11 +13076,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } else {
                 boolean profileOwnerCanChangeOnItself = !parent
                         && UserRestrictionsUtils.canProfileOwnerChange(
-                        key, caller.getUserId() == getMainUserId());
+                            key,
+                            caller.getUserId() == getMainUserId(),
+                            isProfileOwnerOfOrganizationOwnedDevice);
                 boolean orgOwnedProfileOwnerCanChangeGlobally = parent
-                        && isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        && UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(
-                        key);
+                        && isProfileOwnerOfOrganizationOwnedDevice
+                        && UserRestrictionsUtils
+                            .canParentOfProfileOwnerOfOrganizationOwnedDeviceChange(key);
 
                 if (!profileOwnerCanChangeOnItself && !orgOwnedProfileOwnerCanChangeGlobally) {
                     throw new SecurityException("Profile owner cannot set user restriction "
@@ -13370,6 +13375,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 UserManager.DISALLOW_WIFI_TETHERING, new String[]{MANAGE_DEVICE_POLICY_WIFI});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.ENSURE_VERIFY_APPS, new String[]{MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES});
+        USER_RESTRICTION_PERMISSIONS.put(
+                UserManager.DISALLOW_SIM_GLOBALLY,
+                new String[]{MANAGE_DEVICE_POLICY_MOBILE_NETWORK});
 
         // Restrictions not allowed to be set by admins.
         USER_RESTRICTION_PERMISSIONS.put(

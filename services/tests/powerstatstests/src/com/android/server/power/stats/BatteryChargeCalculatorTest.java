@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.BatteryManager;
 import android.os.BatteryUsageStats;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -34,9 +35,14 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class BatteryChargeCalculatorTest {
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private static final double PRECISION = 0.00001;
 
-    @Rule
+    @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
                     .setAveragePower(PowerProfile.POWER_BATTERY_CAPACITY, 4000.0);
 
@@ -46,15 +52,17 @@ public class BatteryChargeCalculatorTest {
 
         final BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
-        batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0,
-                1_000_000, 1_000_000, 1_000_000);
-        batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 85, 72, 3700, 3_000_000, 4_000_000, 0,
-                1_500_000, 1_500_000, 1_500_000);
-        batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0,
-                2_000_000, 2_000_000, 2_000_000);
+        synchronized (batteryStats) {
+            batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
+                    /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0,
+                    1_000_000, 1_000_000, 1_000_000);
+            batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
+                    /* plugType */ 0, 85, 72, 3700, 3_000_000, 4_000_000, 0,
+                    1_500_000, 1_500_000, 1_500_000);
+            batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
+                    /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0,
+                    2_000_000, 2_000_000, 2_000_000);
+        }
 
         mStatsRule.setTime(5_000_000, 5_000_000);
         BatteryChargeCalculator calculator = new BatteryChargeCalculator();
@@ -73,10 +81,11 @@ public class BatteryChargeCalculatorTest {
         assertThat(batteryUsageStats.getChargeTimeRemainingMs()).isEqualTo(-1);
 
         // Plug in
-        batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_CHARGING, 100,
-                BatteryManager.BATTERY_PLUGGED_USB, 80, 72, 3700, 2_400_000, 4_000_000, 100,
-                4_000_000, 4_000_000, 4_000_000);
-
+        synchronized (batteryStats) {
+            batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_CHARGING, 100,
+                    BatteryManager.BATTERY_PLUGGED_USB, 80, 72, 3700, 2_400_000, 4_000_000, 100,
+                    4_000_000, 4_000_000, 4_000_000);
+        }
         batteryUsageStats = mStatsRule.apply(calculator);
 
         assertThat(batteryUsageStats.getChargeTimeRemainingMs()).isEqualTo(100_000);
@@ -86,15 +95,17 @@ public class BatteryChargeCalculatorTest {
     public void testDischargeTotals_chargeUahUnavailable() {
         final BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
-        batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 90, 72, 3700, 0, 0, 0,
-                1_000_000, 1_000_000, 1_000_000);
-        batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 85, 72, 3700, 0, 0, 0,
-                1_500_000, 1_500_000, 1_500_000);
-        batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 80, 72, 3700, 0, 0, 0,
-                2_000_000, 2_000_000, 2_000_000);
+        synchronized (batteryStats) {
+            batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
+                    /* plugType */ 0, 90, 72, 3700, 0, 0, 0,
+                    1_000_000, 1_000_000, 1_000_000);
+            batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
+                    /* plugType */ 0, 85, 72, 3700, 0, 0, 0,
+                    1_500_000, 1_500_000, 1_500_000);
+            batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
+                    /* plugType */ 0, 80, 72, 3700, 0, 0, 0,
+                    2_000_000, 2_000_000, 2_000_000);
+        }
 
         BatteryChargeCalculator calculator = new BatteryChargeCalculator();
         BatteryUsageStats batteryUsageStats = mStatsRule.apply(calculator);

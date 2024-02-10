@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> បន្ទាប់​ពី <xliff:g id="TIME_DELAY">{2}</xliff:g> វិនាទី"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"សុវត្ថិភាពបណ្ដាញចល័ត"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ពិនិត្យមើល​ការកំណត់"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"បានចូលប្រើ​លេខកូដ​សម្គាល់​ឧបករណ៍​"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"បណ្តាញនៅលើការតភ្ជាប់ <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> បានកត់ត្រាលេខកូដសម្គាល់ខុសពីគេ (IMSI) ​របស់ឧបករណ៍អ្នក <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ដងក្នុងរយៈពេលចន្លោះពី <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ដល់ <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>។"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"បានអ៊ីនគ្រីបការតភ្ជាប់ទៅ <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ឥឡូវនេះ អ្នកបានភ្ជាប់ទៅបណ្ដាញ​ចល័តដែលមានសុវត្ថិភាពជាងមុន។"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"ការតភ្ជាប់ដែលមិនមានការអ៊ីនគ្រីបទៅ <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"អ្នកបានភ្ជាប់ទៅបបណ្ដាញ​ចល័តដែលមិនមានការអ៊ីនគ្រីប។ ការហៅទូរសព្ទ សារ និងទិន្នន័យរបស់អ្នកងាយរងគ្រោះពីការស្កាត់យក។"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"ការកំណត់សុវត្ថិភាពបណ្ដាញចល័ត"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ស្វែងយល់បន្ថែម"</string>
     <string name="fcComplete" msgid="1080909484660507044">"កូដ​លក្ខណៈ​ពេញលេញ។"</string>
     <string name="fcError" msgid="5325116502080221346">"បញ្ហា​ការ​តភ្ជាប់​ ឬ​កូដ​លក្ខណៈ​​​មិន​ត្រឹមត្រូវ​។"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"យល់​ព្រម​"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"អនុញ្ញាតឱ្យ​កម្មវិធី​ភ្ជាប់ទៅ​ម៉ូឌុល​ការផ្សាយចល័ត ដើម្បីបញ្ជូន​សារផ្សាយ​ចល័តបន្ត នៅពេល​ទទួលបាន​សារទាំងនោះ។ ការជូនដំណឹងអំពី​ការផ្សាយចល័ត​ត្រូវបានបញ្ជូនទៅ​ទីតាំងមួយចំនួន ដើម្បីព្រមាន​អ្នក​អំពីស្ថានភាព​អាសន្ន។ កម្មវិធី​គ្រោះថ្នាក់​អាច​រំខាន​ដល់ដំណើរការ ឬប្រតិបត្តិការ​ឧបករណ៍​របស់អ្នក នៅពេល​ទទួលបានការផ្សាយ​ចល័តពេលមានអាសន្ន​។"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"គ្រប់គ្រង​ការហៅទូរសព្ទដែល​កំពុងដំណើរការ"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"អនុញ្ញាតឱ្យ​កម្មវិធីមើលព័ត៌មានលម្អិត​អំពីការហៅទូរសព្ទ​ដែលកំពុងដំណើរការ​នៅលើឧបករណ៍​របស់អ្នក និងគ្រប់គ្រង​ការហៅទូរសព្ទទាំងនេះ។"</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"ចូលប្រើអត្តសញ្ញាណទូរសព្ទចល័តដែលស្គាល់ចុងក្រោយ។"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"អនុញ្ញាតឱ្យកម្មវិធីចូលប្រើអត្តសញ្ញាណទូរសព្ទចល័តដែលស្គាល់ចុងក្រោយ ដែលបានផ្ដល់ដោយទូរសព្ទ។"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"អាន​សារ​ប្រកាស​ចល័ត"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ឲ្យ​កម្មវិធី​អាន​សារ​ប្រកាស​ការ​ហៅ​ដែល​ឧបករណ៍​របស់​​អ្នក​បាន​ទទួល។ ការ​ជូន​ដំណឹង​ប្រកាស​ចល័ត​ត្រូវ​បាន​បញ្ជូន​ទៅ​ទីតាំង​មួយ​ចំនួន ដើម្បី​ព្រមាន​អ្នក​អំពី​ស្ថានភាព​អាសន្ន។ កម្មវិធី​ព្យាបាទ​អាច​ជ្រៀតជ្រែក​ការ​អនុវត្ត ឬ​ប្រតិបត្តិការ​ឧបករណ៍​របស់​អ្នក​​ពេល​ទទួល​ការ​ប្រកាស​ចល័ត​ពេល​អាសន្ន។"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"អាន​អត្ថបទ​ព័ត៌មាន​បាន​ជាវ"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ឲ្យ​កម្មវិធី​ប្រើ​កម្មវិធី​បញ្ជូន​តាម​អ៊ីនហ្វ្រា​រ៉េ​ដ​​របស់​ទូរស័ព្ទ។"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"កំណត់​ផ្ទាំង​រូបភាព"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"ឲ្យ​កម្មវិធី​កំណត់​ផ្ទាំង​រូបភាព​ប្រព័ន្ធ។"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"ចូលប្រើកម្រងព័ត៌មានដែលបានលាក់"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"អនុញ្ញាតឱ្យកម្មវិធីចូលប្រើកម្រងព័ត៌មានដែលបានលាក់។"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"កែតម្រូវ​ទំហំ​ផ្ទាំង​រូបភាព​របស់​អ្នក"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"ឲ្យ​កម្មវិធី​កំណត់​ជំនួយ​ទំហំ​ផ្ទាំង​រូបភាព​ប្រព័ន្ធ។"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"កំណត់​តំបន់​ពេលវេលា"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"អនុញ្ញាតឱ្យកម្មវិធី​ធ្វើសំណាកទិន្នន័យ​ឧបករណ៍ចាប់សញ្ញា​នៅអត្រាលើសពី 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ដំឡើងកំណែកម្មវិធីដោយមិនចាំបាច់មានសកម្មភាពរបស់អ្នកប្រើប្រាស់"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"អនុញ្ញាតឱ្យម្ចាស់សិទ្ធិដំឡើងកំណែកម្មវិធីដែលខ្លួនបានដំឡើងពីមុនដោយមិនចាំបាច់មានសកម្មភាពរបស់អ្នកប្រើប្រាស់"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"ធ្វើបច្ចុប្បន្នភាពស្ថានភាពផ្ទៀងផ្ទាត់សោទំនាក់ទំនង E2EE ដែលជាកម្មសិទ្ធិរបស់កម្មវិធីផ្សេងទៀត"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"អនុញ្ញាតឱ្យកម្មវិធីធ្វើបច្ចុប្បន្នភាពស្ថានភាពផ្ទៀងផ្ទាត់ស្ថានភាពសោទំនាក់ទំនង E2EE ដែលជាកម្មសិទ្ធិរបស់កម្មវិធីផ្សេងទៀត"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"តាមដាន​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"បាន​ផ្ទៀងផ្ទាត់​"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ពង្រីក"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"លាក់"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"បាន​បង្រួម"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"បាន​ពង្រីក"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"បិទ/បើកការពង្រីក"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"ឧបករណ៍រន្ធ USB Android បន្ថែម"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"ការធ្វើ​តេស្ត"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ទូទៅ"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"ភ្ជាប់ដោយស្វ័យប្រវត្តិទៅផ្កាយរណប"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"អ្នកអាចផ្ញើ និងទទួលសារដោយមិនប្រើបណ្តាញទូរសព្ទចល័ត ឬ Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"បើក​កម្មវិធី Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"របៀបដែលវាដំណើរការ"</string>
 </resources>

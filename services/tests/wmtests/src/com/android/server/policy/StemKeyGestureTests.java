@@ -34,6 +34,7 @@ import android.app.ActivityTaskManager.RootTaskInfo;
 import android.content.ComponentName;
 import android.os.RemoteException;
 import android.provider.Settings;
+import android.view.Display;
 
 import org.junit.Test;
 
@@ -97,6 +98,27 @@ public class StemKeyGestureTests extends ShortcutKeyTestBase {
 
         ComponentName targetComponent = ComponentName.unflattenFromString(TEST_TARGET_ACTIVITY);
         mPhoneWindowManager.overrideStemPressTargetActivity(targetComponent);
+
+        sendKey(KEYCODE_STEM_PRIMARY);
+
+        mPhoneWindowManager.assertActivityTargetLaunched(targetComponent);
+    }
+
+    @Test
+    public void stemSingleKey_launchTargetActivity_whenScreenIsOff() {
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_SHORT_PRESS,
+                SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.overrideShouldEarlyShortPressOnStemPrimary(false);
+        mPhoneWindowManager.overrideStartActivity();
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+        mPhoneWindowManager.assumeResolveActivityNotNull();
+        mPhoneWindowManager.overrideDisplayState(Display.STATE_OFF);
+        ComponentName targetComponent = ComponentName.unflattenFromString(TEST_TARGET_ACTIVITY);
+        mPhoneWindowManager.overrideStemPressTargetActivity(targetComponent);
+        mPhoneWindowManager.overrideKeyEventPolicyFlags(0);
 
         sendKey(KEYCODE_STEM_PRIMARY);
 

@@ -23,6 +23,7 @@ import android.app.PictureInPictureParams;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.PersistableBundle;
@@ -90,6 +91,9 @@ interface IActivityClientController {
     String getCallingPackage(in IBinder token);
     int getLaunchedFromUid(in IBinder token);
     String getLaunchedFromPackage(in IBinder token);
+
+    int checkActivityCallerContentUriPermission(in IBinder activityToken, in IBinder callerToken,
+            in Uri uri, int modeFlags, int userId);
 
     void setRequestedOrientation(in IBinder token, int requestedOrientation);
     int getRequestedOrientation(in IBinder token);

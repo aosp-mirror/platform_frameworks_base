@@ -120,6 +120,24 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೇವ್‌ ಮಾಡುವಾಗ ದೋಷ ಎದುರಾಗಿದೆ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸುವಾಗ ದೋಷ ಕಂಡುಬಂದಿದೆ"</string>
+    <!-- no translation found for issuerecord_title (286627115110121849) -->
+    <skip />
+    <!-- no translation found for issuerecord_background_processing_label (1666840264959336876) -->
+    <skip />
+    <!-- no translation found for issuerecord_channel_description (6142326363431474632) -->
+    <skip />
+    <!-- no translation found for issuerecord_ongoing_screen_only (6248206059935015722) -->
+    <skip />
+    <!-- no translation found for issuerecord_share_label (3992657993619876199) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_title (4161043023696751591) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_text (1205985304551521495) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_error (6913040083446722726) -->
+    <skip />
+    <!-- no translation found for issuerecord_start_error (3402782952722871190) -->
+    <skip />
     <string name="immersive_cling_title" msgid="8372056499315585941">"ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ವೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"ನಿರ್ಗಮಿಸಲು, ಮೇಲಿನಿಂದ ಕೆಳಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ."</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"ಅರ್ಥವಾಯಿತು"</string>
@@ -412,16 +430,13 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ನಿಧಾನವಾಗಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ಸಮಯದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"ಸಮುದಾಯದ ಟ್ಯುಟೋರಿಯಲ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲು ಎಡಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
-    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"ವಿಜೆಟ್ ಎಡಿಟರ್ ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"ಈ ಜಾಗದಲ್ಲಿ ನಿಮ್ಮ ವಿಜೆಟ್‌ಗಳನ್ನು ಸೇರಿಸಿ, ತೆಗೆದುಹಾಕಿ ಮತ್ತು ಮರುಕ್ರಮಗೊಳಿಸಿ"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ಹೆಚ್ಚಿನ ವಿಜೆಟ್‌ಗಳನ್ನು ಸೇರಿಸಿ"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ದೀರ್ಘಕಾಲ ಒತ್ತಿರಿ"</string>
-    <!-- no translation found for button_to_configure_widgets_text (4191862850185256901) -->
-    <skip />
-    <!-- no translation found for edit_widget (9030848101135393954) -->
-    <skip />
+    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ವಿಜೆಟ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
+    <string name="edit_widget" msgid="9030848101135393954">"ವಿಜೆಟ್ ಅನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ವಿಜೆಟ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ಮುಗಿದಿದೆ"</string>
@@ -597,6 +612,14 @@
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> ರಲ್ಲಿ"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> ರಂದು"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ಹಾಟ್‌ಸ್ಪಾಟ್"</string>
+    <!-- no translation found for accessibility_status_bar_satellite_no_connection (3001571744269917762) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_poor_connection (5231478574952724160) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_good_connection (308079391708578704) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_available (6514855015496916829) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ಕೆಲವರಿಗೆ ಮೋಜು ಆಗಿದೆ ಎಲ್ಲರಿಗೆ ಇಲ್ಲ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್ ನಿಮಗೆ Android ಬಳಕೆದಾರ ಅಂತರಸಂಪರ್ಕವನ್ನು ಸರಿಪಡಿಸಲು ಮತ್ತು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಹೆಚ್ಚುವರಿ ಮಾರ್ಗಗಳನ್ನು ನೀಡುತ್ತದೆ. ಈ ಪ್ರಾಯೋಗಿಕ ವೈಶಿಷ್ಟ್ಯಗಳು ಭವಿಷ್ಯದ ಬಿಡುಗಡೆಗಳಲ್ಲಿ ಬದಲಾಗಬಹುದು, ವಿರಾಮವಾಗಬಹುದು ಅಥವಾ ಕಾಣಿಸಿಕೊಳ್ಳದಿರಬಹುದು. ಎಚ್ಚರಿಕೆಯಿಂದ ಮುಂದುವರಿಯಿರಿ."</string>
@@ -652,6 +675,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"ನೋಟಿಫಿಕೇಶನ್ ಸ್ನೂಜ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"ನನಗೆ ಜ್ಞಾಪಿಸಿ"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"ರದ್ದುಗೊಳಿಸಿ"</string>
+    <string name="snooze_undo_content_description" msgid="2711656788917580801">"ನೋಟಿಫಿಕೇಶನ್ ಸ್ನೂಜ್ ಅನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ಗೆ ಸ್ನೂಜ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# ಗಂಟೆ}=2{# ಗಂಟೆಗಳು}one{# ಗಂಟೆಗಳು}other{# ಗಂಟೆಗಳು}}"</string>
     <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# ನಿಮಿಷ}one{# ನಿಮಿಷಗಳು}other{# ನಿಮಿಷಗಳು}}"</string>
@@ -949,6 +973,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ಅಂಚನ್ನು ಸರಿಸಿ ಮತ್ತು ತೋರಿಸಿ"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ಟಾಗಲ್ ಮಾಡಿ"</string>
+    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# ನಿಯಂತ್ರಣವನ್ನು ಸೇರಿಸಲಾಗಿದೆ.}one{# ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.}other{# ನಿಯಂತ್ರಣಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ.}}"</string>
@@ -1217,8 +1242,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"ಬಳಕೆದಾರರ ಉಪಸ್ಥಿತಿಯನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಅನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="install_app" msgid="5066668100199613936">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
-    <!-- no translation found for dismissible_keyguard_swipe (8377597870094949432) -->
-    <skip />
+    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"ಮುಂದುವರಿಯಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ಬಾಹ್ಯ ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಬೇಕೆ?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"ನಿಮ್ಮ ಒಳಗಿನ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಪ್ರತಿಬಿಂಬಿಸಲಾಗುತ್ತದೆ. ನಿಮ್ಮ ಫ್ರಂಟ್ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಆಫ್ ಮಾಡಲಾಗುತ್ತದೆ."</string>
     <string name="mirror_display" msgid="2515262008898122928">"ಮಿರರ್ ಡಿಸ್‌ಪ್ಲೇ"</string>
@@ -1244,4 +1268,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ಕೀಬೋರ್ಡ್ ಬ್ಯಾಕ್‌ಲೈಟ್"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ರಲ್ಲಿ %1$d ಮಟ್ಟ"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"ಹೋಮ್ ನಿಯಂತ್ರಣಗಳು"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"ಹೋಮ್ ನಿಯಂತ್ರಣವನ್ನು ಸ್ಕ್ರೀನ್‌ಸೇವರ್‌ನಂತೆ ತ್ವರಿತವಾಗಿ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ"</string>
 </resources>

@@ -166,14 +166,14 @@ UinputDevice::~UinputDevice() {
     ::ioctl(mFd, UI_DEV_DESTROY);
 }
 
-void UinputDevice::injectEvent(uint16_t type, uint16_t code, int32_t value) {
+void UinputDevice::injectEvent(std::chrono::microseconds timestamp, uint16_t type, uint16_t code,
+                               int32_t value) {
     struct input_event event = {};
     event.type = type;
     event.code = code;
     event.value = value;
-    timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    TIMESPEC_TO_TIMEVAL(&event.time, &ts);
+    event.time.tv_sec = timestamp.count() / 1'000'000;
+    event.time.tv_usec = timestamp.count() % 1'000'000;
 
     if (::write(mFd, &event, sizeof(input_event)) < 0) {
         ALOGE("Could not write event %" PRIu16 " %" PRIu16 " with value %" PRId32 " : %s", type,
@@ -268,12 +268,12 @@ static void closeUinputDevice(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) 
     }
 }
 
-static void injectEvent(JNIEnv* /* env */, jclass /* clazz */, jlong ptr, jint type, jint code,
-                        jint value) {
+static void injectEvent(JNIEnv* /* env */, jclass /* clazz */, jlong ptr, jlong timestampMicros,
+                        jint type, jint code, jint value) {
     uinput::UinputDevice* d = reinterpret_cast<uinput::UinputDevice*>(ptr);
     if (d != nullptr) {
-        d->injectEvent(static_cast<uint16_t>(type), static_cast<uint16_t>(code),
-                       static_cast<int32_t>(value));
+        d->injectEvent(std::chrono::microseconds(timestampMicros), static_cast<uint16_t>(type),
+                       static_cast<uint16_t>(code), static_cast<int32_t>(value));
     } else {
         ALOGE("Could not inject event, Device* is null!");
     }
@@ -330,7 +330,7 @@ static JNINativeMethod sMethods[] = {
          "(Ljava/lang/String;IIIIIILjava/lang/String;"
          "Lcom/android/commands/uinput/Device$DeviceCallback;)J",
          reinterpret_cast<void*>(openUinputDevice)},
-        {"nativeInjectEvent", "(JIII)V", reinterpret_cast<void*>(injectEvent)},
+        {"nativeInjectEvent", "(JJIII)V", reinterpret_cast<void*>(injectEvent)},
         {"nativeConfigure", "(II[I)V", reinterpret_cast<void*>(configure)},
         {"nativeSetAbsInfo", "(IILandroid/os/Parcel;)V", reinterpret_cast<void*>(setAbsInfo)},
         {"nativeCloseUinputDevice", "(J)V", reinterpret_cast<void*>(closeUinputDevice)},

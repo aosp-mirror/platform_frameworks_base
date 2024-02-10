@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकंड के बाद"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित नहीं किया गया"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित नहीं किया गया"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"मोबाइल नेटवर्क की सुरक्षा"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"सेटिंग देखें"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"डिवाइस आइडेंटिफ़ायर की जानकारी ऐक्सेस की गई"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> कनेक्शन से जुड़े किसी नेटवर्क ने, <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> से <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> के बीच आपके डिवाइस के यूनीक आइडेंटिफ़ायर (IMSI) की जानकारी <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> बार रिकॉर्ड की."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> के साथ एन्क्रिप्ट यानी सुरक्षित किया गया कनेक्शन"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"अब आपका डिवाइस ज़्यादा सुरक्षित मोबाइल नेटवर्क से कनेक्ट है."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> के साथ एन्क्रिप्ट नहीं किया गया कनेक्शन"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"आपका डिवाइस ऐसे मोबाइल नेटवर्क से कनेक्ट है जिसे एन्क्रिप्ट नहीं किया गया है. आपके कॉल, मैसेज, और डेटा को ऐक्सेस किया जा सकता है."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"मोबाइल नेटवर्क की सुरक्षा सेटिंग"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ज़्यादा जानें"</string>
     <string name="fcComplete" msgid="1080909484660507044">"सुविधा कोड पूरा हुआ."</string>
     <string name="fcError" msgid="5325116502080221346">"कनेक्‍शन समस्‍या या अमान्‍य सुविधा कोड."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ठीक है"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"सेल ब्रॉडकास्ट (CBC) मैसेज आते ही उसे दूसरे नंबर पर भेजने के लिए, ऐप्लिकेशन को सेल ब्रॉडकास्ट (CBC) मॉड्यूल पर बाइंड करने की अनुमति देता है. कुछ जगहों में सेल ब्रॉडकास्ट (CBC) अलर्ट आपातकालीन स्थितियों के बारे में चेतावनी देने के लिए भेजा जाता है. नुकसान पहुंचाने वाले ऐप्लिकेशन, आपातकाल में सेल ब्रॉडकास्ट (CBC) मैसेज मिलने पर आपके डिवाइस के काम करते समय या इसके परफ़ॉर्मेंस में रुकावट पैदा कर सकते हैं."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"चल रहे कॉल प्रबंधित करें"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"इससे, ऐप्लिकेशन को आपके डिवाइस पर चल रहे कॉल की जानकारी देखने और उन्हें कंट्रोल करने की अनुमति मिलती है."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"उस मोबाइल टावर की आईडी को ऐक्सेस करें जिससे आपका फ़ोन पिछली बार कनेक्ट था."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"इससे ऐप्लिकेशन, फ़ोन कॉल से मिले उस मोबाइल टावर की आईडी को ऐक्सेस कर सकता है जिससे आपका फ़ोन पिछली बार कनेक्ट था."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"सेल ब्रॉडकास्ट (CBC) मैसेज पढ़ें"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ऐप को, वो सेल ब्रॉडकास्ट (CBC) मैसेज पढ़ने देता है जो आपके डिवाइस को मिले हैं. सेल ब्रॉडकास्ट (CBC) अलर्ट कुछ स्थानों (लोकेशन) पर आपको आपातकालीन स्‍थितियों की चेतावनी देने के लिए दिए जाते हैं. आपातकालीन सेल ब्रॉडकास्ट (CBC) मिलने पर, धोखा देने वाले ऐप आपके डिवाइस के परफ़ॉर्मेंस या कार्यवाही में दखल दे सकते हैं."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"सदस्यता वाली फ़ीड पढ़ें"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ऐप्लिकेशन को फ़ोन के इंफ़्रारेड ट्रांसमीटर का उपयोग करने देती है."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"वॉलपेपर सेट करें"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"ऐप्स को सिस्‍टम वॉलपेपर सेट करने देता है."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"छिपाई गई प्रोफ़ाइलों को ऐक्सेस करें"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"इससे यह ऐप्लिकेशन, छिपाई गई प्रोफ़ाइलों को ऐक्सेस कर पाएगा."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"अपने वॉलपेपर का आकार एडजस्ट करें"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"ऐप्स को सिस्‍टम वॉलपेपर आकार संकेत सेट करने देता है."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"समय क्षेत्र सेट करें"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"यह अनुमति मिलने पर ऐप्लिकेशन, 200 हर्ट्ज़ से ज़्यादा की दर पर सेंसर डेटा का नमूना ले पाएगा"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ऐप्लिकेशन अपने-आप अपडेट होने की अनुमति दें"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"इससे होल्डर उस ऐप्लिकेशन को अपने-आप अपडेट कर पाएगा जो उसने पहले इंस्टॉल किया था"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"संपर्क की पहचान करने में इस्तेमाल होने वाली उन E2EE सुरक्षा कुंजियों से की गई पुष्टि की स्थितियों को अपडेट करें जिन पर अन्य ऐप्लिकेशन का मालिकाना हक है"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"इससे ऐप्लिकेशन, संपर्क की पहचान करने में इस्तेमाल होने वाली उन E2EE सुरक्षा कुंजियों से की गई पुष्टि की स्थितियों को अपडेट कर पाएगा जिन पर अन्य ऐप्लिकेशन का मालिकाना हक है"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करना"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्‍क्रीन अनलॉक करने की कोशिशों पर नज़र रखना"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"पुष्टि हो चुकी है"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"विस्तार करें"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"छोटा करें"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"छोटा किया गया"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"बड़ा किया गया"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"टॉगल विस्तार"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB पेरिफ़ेरल पोर्ट"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"टेस्ट"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"कम्यूनिटी"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"सैटलाइट से अपने-आप कनेक्ट हो गया"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"मोबाइल या वाई-फ़ाई नेटवर्क के बिना भी मैसेज भेजे और पाए जा सकते हैं"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ऐप्लिकेशन खोलें"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"यह सेटिंग कैसे काम करती है"</string>
 </resources>

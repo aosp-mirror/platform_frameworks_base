@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> 於 <xliff:g id="TIME_DELAY">{2}</xliff:g> 秒後轉接"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：尚未轉接"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：尚未轉接"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"行動網路安全性"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"查看設定"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"已存取裝置 ID"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> 連線上的網路已記錄裝置的專屬 ID (IMSI)，次數為 <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> 次；記錄區間為 <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g>至 <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>。"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"已連上加密的 <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"你現在已連上較安全的行動網路。"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"已連上未加密的 <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"你已連上未加密的行動網路。通話、訊息和資料會容易遭到攔截。"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"行動網路安全性設定"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"瞭解詳情"</string>
     <string name="fcComplete" msgid="1080909484660507044">"功能碼輸入完成。"</string>
     <string name="fcError" msgid="5325116502080221346">"連線問題或功能碼無效。"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"確定"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"允許應用程式繫結至區域廣播模組，以在收到區域廣播訊息時轉寄訊息。在某些地點，系統會發出區域廣播通知，提示你有緊急狀況發生。惡意應用程式可能會在裝置收到緊急區域廣播時，干擾裝置的效能或運作。"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"管理正在進行的通話"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"允許應用程式查看裝置上正在進行的通話詳情並控制通話。"</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"存取最後已知的小區 ID。"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"允許應用程式存取最後已知的小區 ID (由電話服務供應商提供)。"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"讀取區域廣播訊息"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"允許應用程式讀取你裝置接收的區域廣播訊息。某些地點會發出區域廣播警報，警告你發生緊急狀況。惡意應用程式可能會在裝置收到緊急區域廣播時，干擾裝置的性能或運作。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"讀取訂閱的資訊提供"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"允許應用程式使用手機的紅外線傳送器。"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"設定桌布"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"允許應用程式設定系統桌布。"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"存取隱藏的設定檔"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"允許應用程式存取隱藏的設定檔。"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"調整桌布大小"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"允許應用程式設定有關系統桌布大小的提示。"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"設定時區"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"允許應用程式以大於 200 Hz 的頻率對感應器資料進行取樣"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"更新應用程式，無需使用者操作"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"允許擁有者更新先前安裝的應用程式，無需使用者操作"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"更新 E2EE 聯絡人金鑰的驗證狀態，這些金鑰為其他應用程式所有"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"允許應用程式更新 E2EE 聯絡人金鑰的驗證狀態，這些金鑰為其他應用程式所有"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"控制螢幕鎖定密碼和 PIN 所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"已驗證"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"展開"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"收合"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"收埋咗"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"打開咗"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"切換展開"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB 外端連接埠"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"測試"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"共用"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"已自動連上衛星"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"你可以收發訊息，沒有行動/Wi-Fi 網路也無妨"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"開啟「訊息」應用程式"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"運作方式"</string>
 </resources>

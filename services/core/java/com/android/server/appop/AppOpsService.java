@@ -106,6 +106,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.hardware.SensorPrivacyManager;
 import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -151,6 +152,7 @@ import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsStartedCallback;
 import com.android.internal.app.MessageSamplingConfig;
+import com.android.internal.camera.flags.Flags;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.Clock;
 import com.android.internal.pm.pkg.component.ParsedAttribution;
@@ -222,6 +224,8 @@ public class AppOpsService extends IAppOpsService.Stub {
      * Increment by one every time an upgrade step is added at boot, none currently exists.
      */
     private static final int CURRENT_VERSION = 1;
+
+    private SensorPrivacyManager mSensorPrivacyManager;
 
     // Write at most every 30 minutes.
     static final long WRITE_DELAY = DEBUG ? 1000 : 30*60*1000;
@@ -1231,6 +1235,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         }
                     }
                 });
+        mSensorPrivacyManager = SensorPrivacyManager.getInstance(mContext);
     }
 
     @VisibleForTesting
@@ -4642,6 +4647,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         return pmi.isPackageSuspended(packageName, UserHandle.getUserId(uid));
     }
 
+    private boolean isAutomotive() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
     private boolean isOpRestrictedLocked(int uid, int code, String packageName,
             String attributionTag, int virtualDeviceId, @Nullable RestrictionBypass appBypass,
             boolean isCheckOp) {
@@ -4655,6 +4664,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             ClientGlobalRestrictionState restrictionState = mOpGlobalRestrictions.valueAt(i);
             if (restrictionState.hasRestriction(code)) {
                 return true;
+            }
+        }
+
+        if (Flags.privacyAllowlist()) {
+            if ((code == OP_CAMERA) && isAutomotive()) {
+                if (mSensorPrivacyManager.isCameraPrivacyEnabled(packageName)) {
+                    return true;
+                }
             }
         }
 

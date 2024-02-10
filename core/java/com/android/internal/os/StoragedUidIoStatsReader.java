@@ -74,7 +74,6 @@ public class StoragedUidIoStatsReader {
      *
      * @param callback The callback to invoke for each line of the proc file.
      */
-    @android.ravenwood.annotation.RavenwoodReplace
     public void readAbsolute(Callback callback) {
         final int oldMask = StrictMode.allowThreadDiskReadsMask();
         try {
@@ -82,10 +81,6 @@ public class StoragedUidIoStatsReader {
         } finally {
             StrictMode.setThreadPolicyMask(oldMask);
         }
-    }
-
-    public void readAbsolute$ravenwood(Callback callback) {
-        readAbsoluteInternal(callback);
     }
 
     private void readAbsoluteInternal(Callback callback) {

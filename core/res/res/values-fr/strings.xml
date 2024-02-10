@@ -154,6 +154,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : <xliff:g id="DIALING_NUMBER">{1}</xliff:g> au bout de <xliff:g id="TIME_DELAY">{2}</xliff:g> secondes"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : non transféré"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : non transféré"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Sécurité des réseaux mobiles"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Vérifier les paramètres"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Identifiant de l\'appareil accessible"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Un réseau sur la connexion <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> a enregistré l\'identifiant unique de votre appareil (IMSI)<xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> fois entre<xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> et<xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Connexion chiffrée au réseau <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Vous êtes désormais connecté à un réseau mobile plus sécurisé."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Connexion non chiffrée au réseau <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Vous êtes connecté à un réseau mobile non chiffré. Vos appels, messages ainsi que vos données sont vulnérables et donc, susceptibles d\'être interceptés."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Paramètres de sécurité des réseaux mobiles"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"En savoir plus"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Code de service terminé"</string>
     <string name="fcError" msgid="5325116502080221346">"Problème de connexion ou code de service non valide"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -316,7 +326,7 @@
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accéder aux contenus musicaux et audio sur votre appareil"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Photos et vidéos"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accéder aux photos et aux vidéos sur votre appareil"</string>
-    <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microphone"</string>
+    <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micro"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder aux données d\'activité physique"</string>
@@ -371,10 +381,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Autorise l\'application à établir une connexion avec le module de diffusion cellulaire afin de transférer les messages reçus via un canal de diffusion cellulaire. Des alertes de diffusion cellulaire sont générées dans certaines régions afin de vous avertir de situations d\'urgence. Des applications malveillantes peuvent interférer avec les performances ou le fonctionnement de votre appareil lors de la réception d\'une alerte d\'urgence par diffusion cellulaire."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Gérer les appels en cours"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Autorise une application à afficher les détails concernant les appels en cours sur votre appareil et à contrôler ces appels."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Accéder à la dernière identité mobile connue."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Autorisez une application à accéder à la dernière identité mobile connue fournie par les services de téléphonie."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lire les messages reçus via un canal de diffusion cellulaire"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Permet à l\'application de lire les messages que votre appareil reçoit via un canal de diffusion cellulaire. Dans certaines zones géographiques, des alertes vous sont envoyées afin de vous prévenir en cas de situation d\'urgence. Les applications malveillantes peuvent venir perturber les performances ou le fonctionnement de votre appareil lorsqu\'un message est reçu via un canal de diffusion cellulaire."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lire les flux auxquels vous êtes abonné"</string>
@@ -546,6 +554,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Permet à l\'application d\'utiliser l\'émetteur infrarouge du téléphone."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"configurer le fond d\'écran"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Permet à l\'application de définir le fond d\'écran du système."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Accéder aux profils masqués"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Autorise l\'appli à accéder aux profils masqués."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"modifier la taille du fond d\'écran"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Permet à l\'application de définir les bulles d\'aide concernant la taille du fond d\'écran du système."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"Sélection du fuseau horaire"</string>
@@ -814,6 +824,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Autorise l\'appli à échantillonner les données des capteurs à un taux supérieur à 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"mettre à jour l\'appli sans action de l\'utilisateur"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Autorise l\'appli précédemment installée à se mettre à jour sans action de l\'utilisateur"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"mettre à jour les états de validation des clés de contact E2EE possédées par d\'autres applis"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Autorise l\'appli à mettre à jour les états de validation des clés de contact E2EE possédées par d\'autres applis."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les codes d\'accès de verrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gérer les tentatives de déverrouillage de l\'écran"</string>
@@ -1933,6 +1945,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Validé"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Développer"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Réduire"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Réduit"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Développé"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"activer/désactiver le développement"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Port du périphérique USB Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2373,4 +2387,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Commun"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Connecté automatiquement au réseau satellite"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Vous pouvez envoyer et recevoir des messages sans connexion au réseau mobile ou Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ouvrir Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Fonctionnement"</string>
 </resources>

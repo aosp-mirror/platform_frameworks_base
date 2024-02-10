@@ -288,10 +288,6 @@ public class TransactionParcelTests {
         transaction.addTransactionItem(callback2);
         transaction.addTransactionItem(lifecycleRequest);
 
-        transaction.addCallback(callback1);
-        transaction.addCallback(callback2);
-        transaction.setLifecycleStateRequest(lifecycleRequest);
-
         writeAndPrepareForReading(transaction);
 
         // Read from parcel and assert
@@ -299,6 +295,7 @@ public class TransactionParcelTests {
 
         assertEquals(transaction.hashCode(), result.hashCode());
         assertEquals(transaction, result);
+        assertEquals(mActivityToken, result.getActivityToken());
     }
 
     @Test
@@ -319,6 +316,7 @@ public class TransactionParcelTests {
 
         assertEquals(transaction.hashCode(), result.hashCode());
         assertEquals(transaction, result);
+        assertEquals(mActivityToken, result.getActivityToken());
     }
 
     @Test
@@ -337,6 +335,7 @@ public class TransactionParcelTests {
 
         assertEquals(transaction.hashCode(), result.hashCode());
         assertEquals(transaction, result);
+        assertEquals(mActivityToken, result.getActivityToken());
     }
 
     /** Write to {@link #mParcel} and reset its position to prepare for reading from the start. */

@@ -120,6 +120,24 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Toca para verla"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"No se ha podido guardar la grabación de pantalla"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"No se ha podido empezar a grabar la pantalla"</string>
+    <!-- no translation found for issuerecord_title (286627115110121849) -->
+    <skip />
+    <!-- no translation found for issuerecord_background_processing_label (1666840264959336876) -->
+    <skip />
+    <!-- no translation found for issuerecord_channel_description (6142326363431474632) -->
+    <skip />
+    <!-- no translation found for issuerecord_ongoing_screen_only (6248206059935015722) -->
+    <skip />
+    <!-- no translation found for issuerecord_share_label (3992657993619876199) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_title (4161043023696751591) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_text (1205985304551521495) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_error (6913040083446722726) -->
+    <skip />
+    <!-- no translation found for issuerecord_start_error (3402782952722871190) -->
+    <skip />
     <string name="immersive_cling_title" msgid="8372056499315585941">"Visualización en pantalla completa"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"Para salir, desliza de arriba abajo."</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Entendido"</string>
@@ -412,16 +430,13 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga lenta • En <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> terminará de cargarse"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando • Carga completa en <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Desliza hacia la izquierda para iniciar el tutorial de la comunidad"</string>
-    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Abrir editor de widgets"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Personalizar"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Cerrar"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Añade, elimina y reordena tus widgets en este espacio"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Añade más widgets"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Mantén pulsado para personalizar los widgets"</string>
-    <!-- no translation found for button_to_configure_widgets_text (4191862850185256901) -->
-    <skip />
-    <!-- no translation found for edit_widget (9030848101135393954) -->
-    <skip />
+    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personalizar widgets"</string>
+    <string name="edit_widget" msgid="9030848101135393954">"Editar widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Quitar"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Añadir widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Hecho"</string>
@@ -597,6 +612,14 @@
     <string name="alarm_template" msgid="2234991538018805736">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Compartir Internet"</string>
+    <!-- no translation found for accessibility_status_bar_satellite_no_connection (3001571744269917762) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_poor_connection (5231478574952724160) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_good_connection (308079391708578704) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_available (6514855015496916829) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión solo para algunos"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El configurador de UI del sistema te ofrece otras formas de modificar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
@@ -652,6 +675,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"Opciones para posponer las notificaciones"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Recordar"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Deshacer"</string>
+    <string name="snooze_undo_content_description" msgid="2711656788917580801">"Deshacer la posposición de notificaciones"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Volverá a mostrarse en <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# hora}=2{# horas}many{# horas}other{# horas}}"</string>
     <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# minuto}many{# minutos}other{# minutos}}"</string>
@@ -949,6 +973,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Mover al borde y mostrar"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Quitar"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"activar/desactivar"</string>
+    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"Editar"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Control de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Elige una aplicación para añadir controles"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# control añadido.}many{# controles añadidos.}other{# controles añadidos.}}"</string>
@@ -1217,8 +1242,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Se ha detectado la presencia de usuarios"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Configura la aplicación de notas predeterminada en Ajustes"</string>
     <string name="install_app" msgid="5066668100199613936">"Instalar aplicación"</string>
-    <!-- no translation found for dismissible_keyguard_swipe (8377597870094949432) -->
-    <skip />
+    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"Desliza hacia arriba para continuar"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"¿Proyectar a pantalla externa?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"Se proyectará tu pantalla interior. Se apagará tu pantalla frontal."</string>
     <string name="mirror_display" msgid="2515262008898122928">"Proyectar pantalla"</string>
@@ -1244,4 +1268,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Usado recientemente por <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroiluminación del teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivel %1$d de %2$d"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"Controles de la casa"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Usa los controles de tu casa como salvapantallas"</string>
 </resources>

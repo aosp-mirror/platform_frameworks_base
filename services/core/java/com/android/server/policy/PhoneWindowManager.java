@@ -4995,6 +4995,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             }
+            case KeyEvent.KEYCODE_STEM_PRIMARY: {
+                if (down && event.getRepeatCount() == 0 && (result & ACTION_PASS_TO_USER) == 0) {
+                    // We've decided not to pass key to user at queueing stage. Make the gesture
+                    // executable.
+                    setDeferredKeyActionsExecutableAsync(keyCode, event.getDownTime());
+                }
+                break;
+            }
             case KeyEvent.KEYCODE_VIDEO_APP_1:
             case KeyEvent.KEYCODE_VIDEO_APP_2:
             case KeyEvent.KEYCODE_VIDEO_APP_3:

@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> na <xliff:g id="TIME_DELAY">{2}</xliff:g> sekondes"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nie aangestuur nie"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nie aangestuur nie"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Selnetwerksekuriteit"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Gaan instellings na"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Toegang gekry tot toestelidentifiseerder"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"’n Netwerk op die <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>-verbinding het jou toestel se unieke identifiseerder (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> keer in die tydperk tussen <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> en <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> aangeteken."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Geënkripteerde verbinding aan <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Jy is nou gekoppel aan ’n veiliger selnetwerk."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Nie-geënkripteerde verbinding aan <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Jy is gekoppel aan \'n nie-geënkripteerde selnetwerk. Jou oproepe, boodskappe en data is kwesbaar vir onderskepping."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Selsekuriteitinstellings"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Meer inligting"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Kenmerkkode klaar."</string>
     <string name="fcError" msgid="5325116502080221346">"Verbindingsprobleem of ongeldige kenmerk-kode."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Laat die program toe om die seluitsendingmodule te bind om seluitsendingboodskappe aan te stuur wanneer hulle ontvang word. Seluitsendingwaarskuwings word in sommige liggings gelewer om jou oor noodsituasies te waarsku. Kwaadwillige programme kan met die werkverrigting of werking van jou toestel inmeng wanneer \'n noodseluitsending ontvang word."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Bestuur voortgaande oproepe"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Stel \'n program in staat om besonderhede oor voortgaande oproepe op jou toestel te sien, en hierdie oproepe te beheer."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Kry toegang tot laaste bekende selidentiteit."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Laat ’n app toe om toegang tot die laaste bekende selidentiteit te kry wat deur telefonie verskaf is"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lees seluitsending-boodskappe"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Laat die program toe om seluitsending-boodskappe te lees wat deur jou toestel ontvang word. Seluitsending-waarskuwings word in sommige plekke afgelewer om jou van noodsituasies te waarsku. Kwaadwillige programme mag inmeng met die prestasie of die werking van jou toestel wanneer \'n noodgeval se seluitsending ontvang word."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lees ingetekende nuus"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Laat die program toe om die foon se infrarooisender te gebruik."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"stel muurpapier"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Laat die program toe om die stelsel se muurpapier te stel."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Kry toegang tot versteekte profiele"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Laat die app toe om toegang tot versteekte profiele te kry."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"verstel jou muurpapier se grootte"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Laat die program toe om die stelsel se muurpapier se groottewenke te stel."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"stel tydsone"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Laat die program toe om monsters van sensordata teen \'n hoër koers as 200 Hz te neem"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"dateer app sonder gebruikerhandeling op"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Laat die houer toe om die app wat dit voorheen sonder gebruikhandeling geïnstalleer het, op te dateer"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"dateer die verifikasiestatus van E2EE-kontaksleutels op wat deur ander apps besit word"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Laat die app toe om die verifikasiestatus van E2EE-kontaksleutels op te dateer wat deur ander apps besit word"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Beheer die lengte en die karakters wat in skermslotwagwoorde en -PIN\'e toegelaat word."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitor pogings om skerm te ontsluit"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Geverifieer"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Vou uit"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Vou in"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Ingevou"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Uitgevou"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"wissel uitvou-aksie"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android-USB-randpoort"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Toets"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Gemeenskaplik"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Outomaties aan satelliet gekoppel"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Jy kan boodskappe stuur en ontvang sonder ’n selfoon- of wi-fi-netwerk"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Maak Boodskappe oop"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Hoe dit werk"</string>
 </resources>

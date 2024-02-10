@@ -2626,12 +2626,18 @@ class ContextImpl extends Context {
     @Override
     public Context createApplicationContext(ApplicationInfo application, int flags)
             throws NameNotFoundException {
+        final UserHandle user = new UserHandle(UserHandle.getUserId(application.uid));
+        return createApplicationContextAsUser(application, flags, user);
+    }
+
+    private Context createApplicationContextAsUser(ApplicationInfo application, int flags,
+                                                   UserHandle user) throws NameNotFoundException {
         LoadedApk pi = mMainThread.getPackageInfo(application, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE);
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, ContextParams.EMPTY,
                     mAttributionSource.getAttributionTag(), mAttributionSource.getNext(), null,
-                    mToken, new UserHandle(UserHandle.getUserId(application.uid)), flags, null,
+                    mToken, user, flags, null,
                     null, mDeviceId, mIsExplicitDeviceId);
 
             final int displayId = getDisplayId();
@@ -2656,7 +2662,9 @@ class ContextImpl extends Context {
             throw new SecurityException("API can only be called from SdkSandbox process");
         }
 
-        ContextImpl ctx = (ContextImpl) createApplicationContext(sdkInfo, flags);
+        final UserHandle user = sdkInfo.uid >= 0
+                ? new UserHandle(UserHandle.getUserId(sdkInfo.uid)) : Process.myUserHandle();
+        ContextImpl ctx = (ContextImpl) createApplicationContextAsUser(sdkInfo, flags, user);
 
         // Set sandbox app's context as the application context for sdk context
         ctx.mPackageInfo.makeApplicationInner(/*forceDefaultAppClass=*/false,

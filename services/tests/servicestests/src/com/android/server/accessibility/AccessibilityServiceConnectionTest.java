@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -24,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -88,7 +91,7 @@ public class AccessibilityServiceConnectionTest {
 
     @Mock AccessibilityUserState mMockUserState;
     @Mock Context mMockContext;
-    @Mock AccessibilityServiceInfo mMockServiceInfo;
+    AccessibilityServiceInfo mServiceInfo;
     @Mock ResolveInfo mMockResolveInfo;
     @Mock AccessibilitySecurityPolicy mMockSecurityPolicy;
     @Mock AccessibilityWindowManager mMockA11yWindowManager;
@@ -115,7 +118,8 @@ public class AccessibilityServiceConnectionTest {
         when(mMockSystemSupport.getMotionEventInjectorForDisplayLocked(
                 Display.DEFAULT_DISPLAY)).thenReturn(mMockMotionEventInjector);
 
-        when(mMockServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
+        mServiceInfo = spy(new AccessibilityServiceInfo());
+        when(mServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
         mMockResolveInfo.serviceInfo = mock(ServiceInfo.class);
         mMockResolveInfo.serviceInfo.applicationInfo = mock(ApplicationInfo.class);
 
@@ -125,7 +129,7 @@ public class AccessibilityServiceConnectionTest {
                 .thenReturn(new DisplayManager(mMockContext));
 
         mConnection = new AccessibilityServiceConnection(mMockUserState, mMockContext,
-                COMPONENT_NAME, mMockServiceInfo, SERVICE_ID, mHandler, new Object(),
+                COMPONENT_NAME, mServiceInfo, SERVICE_ID, mHandler, new Object(),
                 mMockSecurityPolicy, mMockSystemSupport, mMockA11yTrace,
                 mMockWindowManagerInternal, mMockSystemActionPerformer,
                 mMockA11yWindowManager, mMockActivityTaskManagerInternal);
@@ -286,4 +290,22 @@ public class AccessibilityServiceConnectionTest {
         verify(mMockMagnificationProcessor).resetAllIfNeeded(anyInt());
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_RESETTABLE_DYNAMIC_PROPERTIES)
+    public void binderDied_resetA11yServiceInfo() {
+        final int flag = AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
+        AccessibilityServiceInfo info = mConnection.getServiceInfo();
+        assertThat(info.flags & flag).isEqualTo(0);
+
+        info = mConnection.getServiceInfo();
+        info.flags |= flag;
+        mConnection.setServiceInfo(info);
+        assertThat(mConnection.getServiceInfo().flags & flag).isEqualTo(flag);
+
+        mConnection.binderDied();
+        assertThat(mConnection.getServiceInfo().flags & flag).isEqualTo(0);
+    }
 }

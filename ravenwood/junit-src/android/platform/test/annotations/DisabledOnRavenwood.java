@@ -42,4 +42,13 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DisabledOnRavenwood {
+    /**
+     * One or more classes that aren't yet supported by Ravenwood, which this test depends on.
+     */
+    Class<?>[] blockedBy() default {};
+
+    /**
+     * General free-form description of why this test is being ignored.
+     */
+    String reason() default "";
 }

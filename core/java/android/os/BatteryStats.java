@@ -31,6 +31,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.GnssSignalQuality;
+import android.net.NetworkCapabilities;
 import android.os.BatteryStatsManager.WifiState;
 import android.os.BatteryStatsManager.WifiSupplState;
 import android.server.ServerProtoEnums;
@@ -59,6 +60,7 @@ import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerStats;
+import com.android.net.module.util.NetworkCapabilitiesUtils;
 
 import com.google.android.collect.Lists;
 
@@ -2734,26 +2736,28 @@ public abstract class BatteryStats {
         "emngcy", "other"
     };
 
+    public static final int NUM_ALL_NETWORK_TYPES = getAllNetworkTypesCount();
     public static final int DATA_CONNECTION_OUT_OF_SERVICE = 0;
-    public static final int DATA_CONNECTION_EMERGENCY_SERVICE = getEmergencyNetworkConnectionType();
-    public static final int DATA_CONNECTION_OTHER = DATA_CONNECTION_EMERGENCY_SERVICE + 1;
+    public static final int DATA_CONNECTION_EMERGENCY_SERVICE = NUM_ALL_NETWORK_TYPES + 1;
+    public static final int DATA_CONNECTION_OTHER = NUM_ALL_NETWORK_TYPES + 2;
 
     @UnsupportedAppUsage
-    public static final int NUM_DATA_CONNECTION_TYPES = DATA_CONNECTION_OTHER + 1;
+    public static final int NUM_DATA_CONNECTION_TYPES = NUM_ALL_NETWORK_TYPES + 3;
+
 
     @android.ravenwood.annotation.RavenwoodReplace
-    private static int getEmergencyNetworkConnectionType() {
+    public static int getAllNetworkTypesCount() {
         int count = TelephonyManager.getAllNetworkTypes().length;
         if (DATA_CONNECTION_NAMES.length != count + 3) {        // oos, emngcy, other
             throw new IllegalStateException(
                     "DATA_CONNECTION_NAMES length does not match network type count. "
                     + "Expected: " + (count + 3) + ", actual:" + DATA_CONNECTION_NAMES.length);
         }
-        return count + 1;
+        return count;
     }
 
-    private static int getEmergencyNetworkConnectionType$ravenwood() {
-        return DATA_CONNECTION_NAMES.length - 2;
+    public static int getAllNetworkTypesCount$ravenwood() {
+        return DATA_CONNECTION_NAMES.length - 3;  // oos, emngcy, other
     }
 
     /**
@@ -9070,5 +9074,32 @@ public abstract class BatteryStats {
 
     protected static boolean isKernelStatsAvailable$ravenwood() {
         return false;
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    protected static int getDisplayTransport(int[] transports) {
+        return NetworkCapabilitiesUtils.getDisplayTransport(transports);
+    }
+
+    // See NetworkCapabilitiesUtils
+    private static final int[] DISPLAY_TRANSPORT_PRIORITIES = new int[] {
+            NetworkCapabilities.TRANSPORT_VPN,
+            NetworkCapabilities.TRANSPORT_CELLULAR,
+            NetworkCapabilities.TRANSPORT_WIFI_AWARE,
+            NetworkCapabilities.TRANSPORT_BLUETOOTH,
+            NetworkCapabilities.TRANSPORT_WIFI,
+            NetworkCapabilities.TRANSPORT_ETHERNET,
+            NetworkCapabilities.TRANSPORT_USB
+    };
+
+    protected static int getDisplayTransport$ravenwood(int[] transports) {
+        for (int transport : DISPLAY_TRANSPORT_PRIORITIES) {
+            for (int t : transports) {
+                if (t == transport) {
+                    return transport;
+                }
+            }
+        }
+        return transports[0];
     }
 }

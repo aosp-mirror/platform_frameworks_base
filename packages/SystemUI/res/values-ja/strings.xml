@@ -120,6 +120,15 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"タップすると表示されます"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"画面の録画の保存中にエラーが発生しました"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"画面の録画中にエラーが発生しました"</string>
+    <string name="issuerecord_title" msgid="286627115110121849">"問題記録ツール"</string>
+    <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"問題の記録を処理しています"</string>
+    <string name="issuerecord_channel_description" msgid="6142326363431474632">"問題の収集セッションに関する進行中の通知"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"問題を記録しています"</string>
+    <string name="issuerecord_share_label" msgid="3992657993619876199">"共有"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"問題の記録を保存しました"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"タップして表示"</string>
+    <string name="issuerecord_save_error" msgid="6913040083446722726">"問題の記録の保存中にエラーが発生しました"</string>
+    <string name="issuerecord_start_error" msgid="3402782952722871190">"問題の記録の開始中にエラーが発生しました"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"全画面表示"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"終了するには、上から下にスワイプします。"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
@@ -412,16 +421,13 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 低速充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 • フル充電まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"左にスワイプすると、コミュニティ チュートリアルが開始します"</string>
-    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"ウィジェット エディタを開く"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"カスタマイズ"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"閉じる"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"このスペースでのウィジェットの追加、削除、並べ替え"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ウィジェットの追加"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"長押ししてウィジェットをカスタマイズ"</string>
-    <!-- no translation found for button_to_configure_widgets_text (4191862850185256901) -->
-    <skip />
-    <!-- no translation found for edit_widget (9030848101135393954) -->
-    <skip />
+    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ウィジェットのカスタマイズ"</string>
+    <string name="edit_widget" msgid="9030848101135393954">"ウィジェットを編集"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"削除"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ウィジェットを追加"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"完了"</string>
@@ -597,6 +603,14 @@
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"アクセスポイント"</string>
+    <!-- no translation found for accessibility_status_bar_satellite_no_connection (3001571744269917762) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_poor_connection (5231478574952724160) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_good_connection (308079391708578704) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_available (6514855015496916829) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"仕事用プロファイル"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"一部の方のみお楽しみいただける限定公開ツール"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"システムUI調整ツールでは、Androidユーザーインターフェースの調整やカスタマイズを行えます。これらの試験運用機能は今後のリリースで変更となったり、中止となったり、削除されたりする可能性がありますのでご注意ください。"</string>
@@ -652,6 +666,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知スヌーズ設定"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"リマインダーの設定"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"元に戻す"</string>
+    <string name="snooze_undo_content_description" msgid="2711656788917580801">"通知スヌーズを元に戻します"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"スヌーズ: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# 時間}=2{# 時間}other{# 時間}}"</string>
     <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# 分}other{# 分}}"</string>
@@ -949,6 +964,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"端から移動して表示"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"削除"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"切り替え"</string>
+    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"編集"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"デバイス コントロール"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"コントロールを追加するアプリの選択"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# 件のコントロールを追加しました。}other{# 件のコントロールを追加しました。}}"</string>
@@ -1217,8 +1233,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"会話を始められます"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"[設定] でデフォルトのメモアプリを設定してください"</string>
     <string name="install_app" msgid="5066668100199613936">"アプリをインストール"</string>
-    <!-- no translation found for dismissible_keyguard_swipe (8377597870094949432) -->
-    <skip />
+    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"上にスワイプして続行"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"外部ディスプレイにミラーリングしますか？"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"インナー ディスプレイがミラーリングされます。フロント ディスプレイはオフになります。"</string>
     <string name="mirror_display" msgid="2515262008898122928">"ディスプレイをミラーリングする"</string>
@@ -1244,4 +1259,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> が最近使用（<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>）"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"キーボード バックライト"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"レベル %1$d/%2$d"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"ホーム コントロール"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"ホーム コントロールにスクリーンセーバーとしてすばやくアクセス"</string>
 </resources>

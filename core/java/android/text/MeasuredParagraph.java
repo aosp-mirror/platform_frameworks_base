@@ -116,9 +116,6 @@ public class MeasuredParagraph {
     // This is empty if mLtrWithoutBidi is true.
     private @NonNull ByteArray mLevels = new ByteArray();
 
-    // The bidi level for runs.
-    private @NonNull ByteArray mRunLevels = new ByteArray();
-
     private Bidi mBidi;
 
     // The whole width of the text.
@@ -154,7 +151,6 @@ public class MeasuredParagraph {
         reset();
         mLevels.clearWithReleasingLargeArray();
         mWidths.clearWithReleasingLargeArray();
-        mRunLevels.clearWithReleasingLargeArray();
         mFontMetrics.clearWithReleasingLargeArray();
         mSpanEndCache.clearWithReleasingLargeArray();
     }
@@ -167,7 +163,6 @@ public class MeasuredParagraph {
         mCopiedBuffer = null;
         mWholeWidth = 0;
         mLevels.clear();
-        mRunLevels.clear();
         mWidths.clear();
         mFontMetrics.clear();
         mSpanEndCache.clear();
@@ -250,8 +245,7 @@ public class MeasuredParagraph {
             }
 
             // Reorder directionality run visually.
-            mRunLevels.resize(bidi.getRunCount());
-            byte[] levels = mRunLevels.getRawArray();
+            byte[] levels = new byte[bidi.getRunCount()];
             for (int i = 0; i < bidi.getRunCount(); ++i) {
                 levels[i] = (byte) bidi.getRunLevel(i);
             }

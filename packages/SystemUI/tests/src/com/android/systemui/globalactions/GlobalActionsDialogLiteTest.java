@@ -62,7 +62,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions;
@@ -134,7 +134,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private VibratorHelper mVibratorHelper;
     @Mock private ShadeController mShadeController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
@@ -188,7 +188,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mPackageManager,
                 mShadeController,
                 mKeyguardUpdateMonitor,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mSelectedUserInteractor);
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
 

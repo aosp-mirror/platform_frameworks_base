@@ -21,7 +21,7 @@ import android.content.Intent
 import android.provider.Settings
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -47,7 +47,7 @@ constructor(
     @Background private val backgroundContext: CoroutineContext,
     private val dataSaverController: DataSaverController,
     private val qsTileIntentUserActionHandler: QSTileIntentUserInputHandler,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val systemUIDialogFactory: SystemUIDialog.Factory,
     userFileManager: UserFileManager,
 ) : QSTileUserActionInteractor<DataSaverTileModel> {
@@ -71,7 +71,7 @@ constructor(
                         }
                         return@with
                     }
-                    // Show a dialog to confirm first. Dialogs shown by the DialogLaunchAnimator
+                    // Show a dialog to confirm first. Dialogs shown by the DialogTransitionAnimator
                     // must be created and shown on the main thread, so we post it to the UI
                     // handler
                     withContext(coroutineContext) {
@@ -87,7 +87,7 @@ constructor(
                         val dialog = systemUIDialogFactory.create(dialogDelegate, dialogContext)
 
                         if (action.view != null) {
-                            dialogLaunchAnimator.showFromView(
+                            dialogTransitionAnimator.showFromView(
                                 dialog,
                                 action.view!!,
                                 DialogCuj(

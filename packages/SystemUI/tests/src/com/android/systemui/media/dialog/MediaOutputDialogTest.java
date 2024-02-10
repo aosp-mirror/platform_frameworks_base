@@ -50,7 +50,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
@@ -91,7 +91,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private final MediaDevice mMediaDevice = mock(MediaDevice.class);
     private final CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
-    private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final DialogTransitionAnimator mDialogTransitionAnimator = mock(
+            DialogTransitionAnimator.class);
     private final MediaMetadata mMediaMetadata = mock(MediaMetadata.class);
     private final MediaDescription mMediaDescription = mock(MediaDescription.class);
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
@@ -130,7 +131,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
@@ -379,7 +380,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         });
 
         verify(mockMediaOutputController).releaseSession();
-        verify(mDialogLaunchAnimator).disableAllCurrentDialogsExitAnimations();
+        verify(mDialogTransitionAnimator).disableAllCurrentDialogsExitAnimations();
     }
 
     @Test
@@ -399,7 +400,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
                 false,
                 mBroadcastSender,
                 controller,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mUiEventLogger,
                 true);
     }

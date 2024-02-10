@@ -16,6 +16,8 @@
 
 package android.service.voice;
 
+import android.service.voice.VisualQueryDetectedResult;
+
 /**
  * Callback for returning the detected result from the {@link VisualQueryDetectionService}.
  *
@@ -40,6 +42,11 @@ oneway interface IDetectorSessionVisualQueryDetectionCallback {
      * Called when the detected query is streamed.
      */
     void onQueryDetected(in String partialQuery);
+
+    /**
+     * Called when the detected result is streamed.
+     */
+    void onResultDetected(in VisualQueryDetectedResult partialResult);
 
     /**
      * Called when the detected result is valid.

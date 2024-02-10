@@ -18,21 +18,35 @@ package android.hardware.location;
 
 import android.app.PendingIntent;
 import android.hardware.location.NanoAppMessage;
+import android.hardware.location.IContextHubTransactionCallback;
 
 /**
  * @hide
  */
 interface IContextHubClient {
-
-    // Sends a message to a nanoapp
+    // Sends a message to a nanoapp.
     int sendMessageToNanoApp(in NanoAppMessage message);
 
-    // Closes the connection with the Context Hub
+    // Closes the connection with the Context Hub.
     void close();
 
     // Returns the unique ID for this client.
     int getId();
 
-    // Notify direct-call message callback completed
+    // Notify the framework that a client callback has finished executing.
     void callbackFinished();
+
+    // Notify the framework that a reliable message client callback has
+    // finished executing.
+    void reliableMessageCallbackFinished(int messageSequenceNumber, byte errorCode);
+
+    /**
+     * Sends a reliable message to a nanoapp.
+     *
+     * @param message The message to send.
+     * @param transactionCallback The transaction callback for reliable message.
+     */
+    int sendReliableMessageToNanoApp(
+        in NanoAppMessage message,
+        in IContextHubTransactionCallback transactionCallback);
 }

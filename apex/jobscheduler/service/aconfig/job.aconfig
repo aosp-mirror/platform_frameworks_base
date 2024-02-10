@@ -27,10 +27,3 @@ flag {
     description: "Only relax a prefetch job's connectivity constraint when the device is charging and battery is not low"
     bug: "299329948"
 }
-
-flag {
-    name: "throw_on_unsupported_bias_usage"
-    namespace: "backstage_power"
-    description: "Throw an exception if an unsupported app uses JobInfo.setBias"
-    bug: "300477393"
-}

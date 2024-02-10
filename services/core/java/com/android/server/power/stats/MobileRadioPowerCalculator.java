@@ -32,6 +32,7 @@ import com.android.internal.power.ModemPowerProfile;
 
 import java.util.ArrayList;
 
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class MobileRadioPowerCalculator extends PowerCalculator {
     private static final String TAG = "MobRadioPowerCalculator";
     private static final boolean DEBUG = PowerCalculator.DEBUG;
@@ -320,7 +321,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
 
     private double calculateActiveModemPowerMah(BatteryStats bs, long elapsedRealtimeUs) {
         final long elapsedRealtimeMs = elapsedRealtimeUs / 1000;
-        final int txLvlCount = CellSignalStrength.getNumSignalStrengthLevels();
+        final int txLvlCount = NUM_SIGNAL_STRENGTH_LEVELS;
         double consumptionMah = 0.0;
 
         if (DEBUG) {

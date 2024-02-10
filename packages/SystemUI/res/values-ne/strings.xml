@@ -120,6 +120,24 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"हेर्नका लागि ट्याप गर्नुहोस्"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"स्क्रिन रेकर्डिङ सेभ गर्ने क्रममा त्रुटि भयो"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"स्क्रिन रेकर्ड गर्न थाल्ने क्रममा त्रुटि भयो"</string>
+    <!-- no translation found for issuerecord_title (286627115110121849) -->
+    <skip />
+    <!-- no translation found for issuerecord_background_processing_label (1666840264959336876) -->
+    <skip />
+    <!-- no translation found for issuerecord_channel_description (6142326363431474632) -->
+    <skip />
+    <!-- no translation found for issuerecord_ongoing_screen_only (6248206059935015722) -->
+    <skip />
+    <!-- no translation found for issuerecord_share_label (3992657993619876199) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_title (4161043023696751591) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_text (1205985304551521495) -->
+    <skip />
+    <!-- no translation found for issuerecord_save_error (6913040083446722726) -->
+    <skip />
+    <!-- no translation found for issuerecord_start_error (3402782952722871190) -->
+    <skip />
     <string name="immersive_cling_title" msgid="8372056499315585941">"फुल स्क्रिन हेरिँदै छ"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"बाहिरिन सिरानबाट तलतिर स्वाइप गर्नुहोस्।"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"बुझेँ"</string>
@@ -412,16 +430,13 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • बिस्तारै चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा फुल चार्ज हुने छ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"कम्युनल ट्युटोरियल सुरु गर्न बायाँतिर स्वाइप गर्नुहोस्"</string>
-    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"विजेट एडिटर खोल्नुहोस्"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"कस्टमाइज गर्नुहोस्"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"खारेज गर्नुहोस्"</string>
     <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"यो स्पेसमा आफ्ना विजेटहरू हाल्नुहोस्, हटाउनुहोस् र तिनका क्रम फेरि मिलाउनुहोस्"</string>
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"थप विजेटहरू हाल्नुहोस्"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"विजेटहरू कस्टमाइज गर्न केही बेरसम्म थिच्नुहोस्"</string>
-    <!-- no translation found for button_to_configure_widgets_text (4191862850185256901) -->
-    <skip />
-    <!-- no translation found for edit_widget (9030848101135393954) -->
-    <skip />
+    <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"विजेटहरू कस्टमाइज गर्नुहोस्"</string>
+    <string name="edit_widget" msgid="9030848101135393954">"विजेट सम्पादन गर्नुहोस्"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"हटाउनुहोस्"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"विजेट हाल्नुहोस्"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"पूरा भयो"</string>
@@ -597,6 +612,14 @@
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> मा"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> मा"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Hotspot"</string>
+    <!-- no translation found for accessibility_status_bar_satellite_no_connection (3001571744269917762) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_poor_connection (5231478574952724160) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_good_connection (308079391708578704) -->
+    <skip />
+    <!-- no translation found for accessibility_status_bar_satellite_available (6514855015496916829) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"कार्य प्रोफाइल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"केहीका लागि रमाइलो हुन्छ तर सबैका लागि होइन"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनरले तपाईँलाई Android प्रयोगकर्ता इन्टरफेस आफू अनुकूल गर्न र ट्विक गर्न थप तरिकाहरू प्रदान गर्छ। यी प्रयोगात्मक सुविधाहरू भावी विमोचनमा परिवर्तन हुन, बिग्रिन वा हराउन सक्ने छन्। सावधानीपूर्वक अगाडि बढ्नुहोस्।"</string>
@@ -652,6 +675,7 @@
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"सूचना स्नुज गर्ने विकल्पहरू"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"मलाई सम्झाउनुहोस्"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"अन्डू गर्नुहोस्"</string>
+    <string name="snooze_undo_content_description" msgid="2711656788917580801">"सूचना स्नुज गर्ने कार्य अन्डू गर्नुहोस्"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> का लागि स्नुज गरियो"</string>
     <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# घण्टा}=2{# घण्टा}other{# घण्टा}}"</string>
     <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# मिनेट}other{# मिनेट}}"</string>
@@ -949,6 +973,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"किनाराबाट सार्नुहोस् र देखिने पार्नु…"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"हटाउनुहोस्"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"टगल गर्नुहोस्"</string>
+    <string name="accessibility_floating_button_action_edit" msgid="1688227814600463987">"सम्पादन गर्नुहोस्"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"डिभाइस नियन्त्रण गर्ने विजेटहरू"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"कन्ट्रोल थप्नु पर्ने एप छान्नुहोस्"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# कन्ट्रोल हालियो।}other{# वटा कन्ट्रोल हालियो।}}"</string>
@@ -1217,8 +1242,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"प्रयोगकर्ता उपस्थित भएको कुरा पत्ता लागेको छ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"सेटिङमा गई नोट बनाउने डिफल्ट एप तोक्नुहोस्"</string>
     <string name="install_app" msgid="5066668100199613936">"एप इन्स्टल गर्नुहोस्"</string>
-    <!-- no translation found for dismissible_keyguard_swipe (8377597870094949432) -->
-    <skip />
+    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"जारी राख्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"बाह्य डिस्प्लेमा मिरर गर्ने हो?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"तपाईंको भित्री डिस्प्ले मिरर गरिने छ। तपाईंको अगाडिको डिस्प्ले अफ गरिने छ।"</string>
     <string name="mirror_display" msgid="2515262008898122928">"डिस्प्ले मिरर गर्नुहोस्"</string>
@@ -1244,4 +1268,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ले हालसालै प्रयोग गरेको"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"किबोर्ड ब्याकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d मध्ये %1$d औँ स्तर"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कन्ट्रोलहरू"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"होम कन्ट्रोललाई तुरुन्तै स्क्रिनसेभरका रूपमा एक्सेस गर्नुहोस्"</string>
 </resources>

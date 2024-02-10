@@ -45,6 +45,7 @@ import android.os.UserManager
 import android.permission.IOnPermissionsChangeListener
 import android.permission.PermissionControllerManager
 import android.permission.PermissionManager
+import android.permission.PermissionManager.PermissionState
 import android.permission.flags.Flags
 import android.provider.Settings
 import android.util.ArrayMap
@@ -1133,6 +1134,53 @@ class PermissionService(private val service: AccessCheckingService) :
 
             return PermissionFlags.toApiFlags(flags)
         }
+    }
+
+    override fun getAllPermissionStates(
+        packageName: String,
+        persistentDeviceId: String,
+        userId: Int
+    ): Map<String, PermissionState> {
+        if (!userManagerInternal.exists(userId)) {
+            Slog.w(LOG_TAG, "getAllPermissionStates: Unknown user $userId")
+            return emptyMap()
+        }
+        enforceCallingOrSelfCrossUserPermission(
+            userId,
+            enforceFullPermission = true,
+            enforceShellRestriction = false,
+            "getAllPermissionStates"
+        )
+        enforceCallingOrSelfAnyPermission(
+            "getAllPermissionStates",
+            Manifest.permission.GET_RUNTIME_PERMISSIONS
+        )
+
+        val packageState =
+            packageManagerLocal.withFilteredSnapshot().use { it.getPackageState(packageName) }
+        if (packageState == null) {
+            Slog.w(LOG_TAG, "getAllPermissionStates: Unknown package $packageName")
+            return emptyMap()
+        }
+
+        val permissionFlagsMap =
+            service.getState {
+                if (persistentDeviceId == VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT) {
+                    with(policy) { getAllPermissionFlags(packageState.appId, userId) }
+                } else {
+                    with(devicePolicy) {
+                        getAllPermissionFlags(packageState.appId, persistentDeviceId, userId)
+                    }
+                }
+            } ?: return emptyMap()
+
+        val permissionStates = ArrayMap<String, PermissionState>()
+        permissionFlagsMap.forEachIndexed { _, permissionName, flags ->
+            val granted = PermissionFlags.isPermissionGranted(flags)
+            val apiFlags = PermissionFlags.toApiFlags(flags)
+            permissionStates[permissionName] = PermissionState(granted, apiFlags)
+        }
+        return permissionStates
     }
 
     override fun isPermissionRevokedByPolicy(

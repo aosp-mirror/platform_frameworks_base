@@ -168,7 +168,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
             statsToken = ImeTracker.forLogging().onRequestHide(null /* component */,
                     Process.myUid(),
                     ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
+                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API,
+                    mController.getHost().isHandlingPointerEvent() /* fromUser */);
         }
 
         ImeTracker.forLogging().onProgress(statsToken,

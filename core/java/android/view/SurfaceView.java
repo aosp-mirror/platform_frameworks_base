@@ -2099,7 +2099,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
         try {
             viewRoot.mWindowSession.grantEmbeddedWindowFocus(viewRoot.mWindow,
-                    mSurfacePackage.getInputToken(), gainFocus);
+                    mSurfacePackage.getInputTransferToken(), gainFocus);
         } catch (Exception e) {
             Log.e(TAG, System.identityHashCode(this)
                     + "Exception requesting focus on embedded window", e);

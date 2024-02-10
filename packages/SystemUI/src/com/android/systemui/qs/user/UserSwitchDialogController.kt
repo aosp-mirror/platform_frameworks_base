@@ -27,7 +27,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.res.R
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
@@ -44,12 +44,12 @@ import javax.inject.Provider
  */
 @SysUISingleton
 class UserSwitchDialogController @Inject constructor(
-        private val userDetailViewAdapterProvider: Provider<UserDetailView.Adapter>,
-        private val activityStarter: ActivityStarter,
-        private val falsingManager: FalsingManager,
-        private val dialogLaunchAnimator: DialogLaunchAnimator,
-        private val uiEventLogger: UiEventLogger,
-        private val dialogFactory: SystemUIDialog.Factory
+    private val userDetailViewAdapterProvider: Provider<UserDetailView.Adapter>,
+    private val activityStarter: ActivityStarter,
+    private val falsingManager: FalsingManager,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
+    private val uiEventLogger: UiEventLogger,
+    private val dialogFactory: SystemUIDialog.Factory
 ) {
 
     companion object {
@@ -75,7 +75,7 @@ class UserSwitchDialogController @Inject constructor(
             setNeutralButton(R.string.quick_settings_more_user_settings, { _, _ ->
                 if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                     uiEventLogger.log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
-                    val controller = dialogLaunchAnimator.createActivityLaunchController(
+                    val controller = dialogTransitionAnimator.createActivityTransitionController(
                         getButton(BUTTON_NEUTRAL)
                     )
 
@@ -97,11 +97,11 @@ class UserSwitchDialogController @Inject constructor(
             adapter.linkToViewGroup(gridFrame.findViewById(R.id.grid))
 
             val controller =
-                expandable.dialogLaunchController(
+                expandable.dialogTransitionController(
                     DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG)
                 )
             if (controller != null) {
-                dialogLaunchAnimator.show(
+                dialogTransitionAnimator.show(
                     this,
                     controller,
                 )
@@ -110,7 +110,7 @@ class UserSwitchDialogController @Inject constructor(
             }
 
             uiEventLogger.log(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN)
-            adapter.injectDialogShower(DialogShowerImpl(this, dialogLaunchAnimator))
+            adapter.injectDialogShower(DialogShowerImpl(this, dialogTransitionAnimator))
         }
     }
 

@@ -69,3 +69,10 @@ flag {
   description: "Emit a security log event when DPM.setBackupServiceEnabled is called"
   bug: "304999634"
 }
+
+flag {
+  name: "esim_management_enabled"
+  namespace: "enterprise"
+  description: "Enable APIs to provision and manage eSIMs"
+  bug: "295301164"
+}

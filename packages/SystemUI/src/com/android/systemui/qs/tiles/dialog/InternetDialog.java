@@ -60,7 +60,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
 import com.android.systemui.Prefs;
 import com.android.systemui.accessibility.floatingmenu.AnnotationLinkSpan;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -88,7 +88,7 @@ public class InternetDialog extends SystemUIDialog implements
 
     private final Handler mHandler;
     private final Executor mBackgroundExecutor;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
 
     @VisibleForTesting
     protected InternetAdapter mAdapter;
@@ -162,7 +162,7 @@ public class InternetDialog extends SystemUIDialog implements
     public InternetDialog(Context context, InternetDialogFactory internetDialogFactory,
             InternetDialogController internetDialogController, boolean canConfigMobileData,
             boolean canConfigWifi, boolean aboveStatusBar, UiEventLogger uiEventLogger,
-            DialogLaunchAnimator dialogLaunchAnimator,
+            DialogTransitionAnimator dialogTransitionAnimator,
             @Main Handler handler, @Background Executor executor,
             KeyguardStateController keyguardStateController) {
         super(context);
@@ -185,7 +185,7 @@ public class InternetDialog extends SystemUIDialog implements
         mKeyguard = keyguardStateController;
 
         mUiEventLogger = uiEventLogger;
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mAdapter = new InternetAdapter(mInternetDialogController);
         if (!aboveStatusBar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
@@ -689,7 +689,7 @@ public class InternetDialog extends SystemUIDialog implements
         SystemUIDialog.setShowForAllUsers(mAlertDialog, true);
         SystemUIDialog.registerDismissListener(mAlertDialog);
         SystemUIDialog.setWindowOnTop(mAlertDialog, mKeyguard.isShowing());
-        mDialogLaunchAnimator.showFromDialog(mAlertDialog, this, null, false);
+        mDialogTransitionAnimator.showFromDialog(mAlertDialog, this, null, false);
     }
 
     private void showTurnOffAutoDataSwitchDialog(int subId) {
@@ -716,7 +716,7 @@ public class InternetDialog extends SystemUIDialog implements
         SystemUIDialog.setShowForAllUsers(mAlertDialog, true);
         SystemUIDialog.registerDismissListener(mAlertDialog);
         SystemUIDialog.setWindowOnTop(mAlertDialog, mKeyguard.isShowing());
-        mDialogLaunchAnimator.showFromDialog(mAlertDialog, this, null, false);
+        mDialogTransitionAnimator.showFromDialog(mAlertDialog, this, null, false);
     }
 
     @Override

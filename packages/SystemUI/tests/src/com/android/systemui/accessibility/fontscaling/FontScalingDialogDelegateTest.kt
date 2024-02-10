@@ -26,7 +26,7 @@ import android.widget.Button
 import android.widget.SeekBar
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener
 import com.android.systemui.model.SysUiState
@@ -77,7 +77,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
     @Mock private lateinit var dialogFactory: SystemUIDialog.Factory
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var sysuiState: SysUiState
-    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
 
     @Before
     fun setUp() {
@@ -115,7 +115,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
                 dialogManager,
                 sysuiState,
                 fakeBroadcastDispatcher,
-                dialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 fontScalingDialogDelegate
             )
 

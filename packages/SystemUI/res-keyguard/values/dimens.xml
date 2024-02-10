@@ -169,9 +169,6 @@
     <dimen name="weather_clock_smartspace_translateX">0dp</dimen>
     <dimen name="weather_clock_smartspace_translateY">0dp</dimen>
 
-    <!-- Additional length to add to the SFPS sensor length we get from framework so that the length
-     of the progress bar matches the length of the power button  -->
-    <dimen name="sfps_progress_bar_length_extra_padding">12dp</dimen>
     <!-- Thickness of the progress bar we show for the SFPS based authentication. -->
     <dimen name="sfps_progress_bar_thickness">6dp</dimen>
     <!-- Padding from the edge of the screen for the progress bar -->

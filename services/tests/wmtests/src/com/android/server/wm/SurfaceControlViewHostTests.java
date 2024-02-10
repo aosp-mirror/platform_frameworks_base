@@ -27,7 +27,6 @@ import android.app.Instrumentation;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.server.wm.BuildUtils;
@@ -43,6 +42,7 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowlessWindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.window.InputTransferToken;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
@@ -110,7 +110,7 @@ public class SurfaceControlViewHostTests {
         mInstrumentation.runOnMainSync(() -> {
             TestWindowlessWindowManager wwm = new TestWindowlessWindowManager(
                     mActivity.getResources().getConfiguration(), sc,
-                    mSurfaceView.getHostToken());
+                    mSurfaceView.getViewRootImpl().getInputTransferToken());
 
             mScvh1 = new SurfaceControlViewHost(mActivity, mActivity.getDisplay(),
                     wwm, "requestFocusWithMultipleWindows");
@@ -151,8 +151,8 @@ public class SurfaceControlViewHostTests {
         private final SurfaceControl mRoot;
 
         TestWindowlessWindowManager(Configuration c, SurfaceControl rootSurface,
-                IBinder hostInputToken) {
-            super(c, rootSurface, hostInputToken);
+                InputTransferToken inputTransferToken) {
+            super(c, rootSurface, inputTransferToken);
             mRoot = rootSurface;
         }
 

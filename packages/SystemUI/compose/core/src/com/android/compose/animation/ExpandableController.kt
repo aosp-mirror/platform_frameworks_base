@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.TransitionAnimator
 import kotlin.math.roundToInt
@@ -133,7 +133,7 @@ internal class ExpandableControllerImpl(
 ) : ExpandableController {
     override val expandable: Expandable =
         object : Expandable {
-            override fun activityLaunchController(
+            override fun activityTransitionController(
                 cujType: Int?,
             ): ActivityTransitionAnimator.Controller? {
                 if (!isComposed.value) {
@@ -143,7 +143,9 @@ internal class ExpandableControllerImpl(
                 return activityController(cujType)
             }
 
-            override fun dialogLaunchController(cuj: DialogCuj?): DialogLaunchAnimator.Controller? {
+            override fun dialogTransitionController(
+                cuj: DialogCuj?
+            ): DialogTransitionAnimator.Controller? {
                 if (!isComposed.value) {
                     return null
                 }
@@ -275,8 +277,8 @@ internal class ExpandableControllerImpl(
         }
     }
 
-    private fun dialogController(cuj: DialogCuj?): DialogLaunchAnimator.Controller {
-        return object : DialogLaunchAnimator.Controller {
+    private fun dialogController(cuj: DialogCuj?): DialogTransitionAnimator.Controller {
+        return object : DialogTransitionAnimator.Controller {
             override val viewRoot: ViewRootImpl? = composeViewRoot.viewRootImpl
             override val sourceIdentity: Any = this@ExpandableControllerImpl
             override val cuj: DialogCuj? = cuj

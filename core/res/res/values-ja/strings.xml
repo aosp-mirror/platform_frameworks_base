@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:<xliff:g id="DIALING_NUMBER">{1}</xliff:g> (<xliff:g id="TIME_DELAY">{2}</xliff:g>秒後)"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:転送できません"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:転送できません"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"モバイル ネットワークのセキュリティ"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"設定を確認する"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"デバイス ID にアクセスしました"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> 接続のネットワークは、<xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g>～<xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>の間にデバイスの一意の ID（IMSI）を <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> 回記録しました。"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> への接続が暗号化されています"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"より安全なモバイル ネットワークに接続しました。"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> への接続が暗号化されていません"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"接続先のモバイル ネットワークは暗号化されていません。通話、メッセージ、データが傍受に対し脆弱です。"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"モバイル セキュリティの設定"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"詳細"</string>
     <string name="fcComplete" msgid="1080909484660507044">"機能コードが完了しました。"</string>
     <string name="fcError" msgid="5325116502080221346">"接続エラーまたは無効な機能コードです。"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"受信した緊急速報メールを転送するために、緊急速報メール モジュールにバインドすることをこのアプリに許可します。緊急速報メールは、緊急事態を警告する目的で一部の地域に配信されます。緊急速報メールの受信時に、悪意のあるアプリによってデバイスの動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"通話の管理"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"デバイスでの通話に関する詳細の参照と、通話の操作をアプリに許可します。"</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"最後に認識されたセル ID へのアクセス。"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"電話通信により提供される最後に認識されたセル ID へのアクセスをアプリに許可します。"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"緊急速報メール SMS の読み取り"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"デバイスで受信した緊急速報メール SMS の読み取りをアプリに許可します。緊急速報メールは、緊急事態を警告する目的で一部の地域に配信されます。緊急速報メールの受信時に、悪意のあるアプリによってデバイスの動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"登録したフィードの読み取り"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"携帯電話の赤外線送信機能の使用をアプリに許可します。"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"壁紙の設定"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"システムの壁紙を設定することをアプリに許可します。"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"非表示プロファイルへのアクセス"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"非表示プロファイルへのアクセスをアプリに許可します。"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"壁紙のサイズの調整"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"システムの壁紙サイズのヒントを設定することをアプリに許可します。"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"タイムゾーンの設定"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz を超えるレートでセンサーデータをサンプリングすることをアプリに許可します"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ユーザーの操作なしでアプリを更新する"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ユーザーの操作なしで以前にインストールされたアプリの更新をホルダーに許可します"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"他のアプリが所有する E2EE Contact Key の確認ステータスの更新"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"他のアプリが所有する E2EE Contact Key の確認ステータスの更新をアプリに許可します"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"画面ロック解除試行の監視"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"確認済み"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"展開"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"折りたたむ"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"閉じた状態です"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"開いた状態です"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"展開の切り替え"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB周辺機器ポート"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"テスト"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"共用"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"衛星に自動接続しました"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"モバイル ネットワークや Wi-Fi ネットワークを使わずにメッセージを送受信できます"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"メッセージ アプリを開く"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"仕組み"</string>
 </resources>

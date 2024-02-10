@@ -44,6 +44,7 @@ import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Per-user manager service for managing sensing {@link AmbientContextEvent}s on Wearables.
@@ -68,7 +69,7 @@ final class WearableSensingManagerPerUserService extends
         super(master, lock, userId);
     }
 
-    static void notifyStatusCallback(RemoteCallback statusCallback, int statusCode) {
+    public static void notifyStatusCallback(RemoteCallback statusCallback, int statusCode) {
         Bundle bundle = new Bundle();
         bundle.putInt(
                 WearableSensingManager.STATUS_RESPONSE_BUNDLE_KEY, statusCode);
@@ -183,11 +184,11 @@ final class WearableSensingManagerPerUserService extends
         }
         synchronized (mSecureChannelLock) {
             if (mSecureChannel != null) {
-                // TODO(b/321012559): Kill the WearableSensingService process if it has not been
-                // killed from onError
                 mSecureChannel.close();
             }
             try {
+                final AtomicReference<WearableSensingSecureChannel> currentSecureChannelRef =
+                        new AtomicReference<>();
                 mSecureChannel =
                         WearableSensingSecureChannel.create(
                                 getContext().getSystemService(CompanionDeviceManager.class),
@@ -206,8 +207,17 @@ final class WearableSensingManagerPerUserService extends
 
                                     @Override
                                     public void onError() {
-                                        // TODO(b/321012559): Kill the WearableSensingService
-                                        // process if mSecureChannel has not been reassigned
+                                        if (Flags.enableRestartWssProcess()) {
+                                            synchronized (mSecureChannelLock) {
+                                                if (mSecureChannel != null
+                                                        && mSecureChannel
+                                                                == currentSecureChannelRef.get()) {
+                                                    mRemoteService
+                                                            .killWearableSensingServiceProcess();
+                                                    mSecureChannel = null;
+                                                }
+                                            }
+                                        }
                                         if (Flags.enableProvideWearableConnectionApi()) {
                                             notifyStatusCallback(
                                                     callback,
@@ -215,6 +225,7 @@ final class WearableSensingManagerPerUserService extends
                                         }
                                     }
                                 });
+                currentSecureChannelRef.set(mSecureChannel);
             } catch (IOException ex) {
                 Slog.e(TAG, "Unable to create the secure channel.", ex);
                 if (Flags.enableProvideWearableConnectionApi()) {

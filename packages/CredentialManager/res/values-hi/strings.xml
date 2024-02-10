@@ -31,7 +31,7 @@
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"पासकी के बारे में ज़्यादा जानकारी"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"बिना पासवर्ड वाली टेक्नोलॉजी"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"पासकी की मदद से, पासवर्ड के बिना साइन इन किया जा सकता है. अपनी पहचान की पुष्टि करने और पासकी बनाने के लिए, फ़िंगरप्रिंट, चेहरे की पहचान करने की सुविधा, पिन या स्वाइप पैटर्न का इस्तेमाल करें."</string>
-    <string name="public_key_cryptography_title" msgid="6751970819265298039">"सार्वजनिक कुंजी क्रिप्टोग्राफ़ी"</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"सार्वजनिक पासकोड क्रिप्टोग्राफ़ी"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"W3C के तय मानकों और FIDO अलायंस (इसमें Google, Apple, Microsoft वगैरह शामिल हैं) के मुताबिक, पासकी में क्रिप्टोग्राफ़िक कुंजी के जोड़े इस्तेमाल किए जाते हैं. पासवर्ड में उपयोगकर्ता नाम और वर्णों की स्ट्रिंग इस्तेमाल की जाती है, जबकि ऐप्लिकेशन या वेबसाइट के लिए निजी-सार्वजनिक कुंजी का जोड़ा बनाया जाता है. निजी कुंजी, Password Manager या डिवाइस में सुरक्षित रहती है और आपकी पहचान की पुष्टि करती है. सार्वजनिक कुंजी, ऐप्लिकेशन या वेबसाइट सर्वर के साथ शेयर होती है. दोनों कुंजियों से, ऐप्लिकेशन या वेबसाइट पर तुरंत रजिस्टर और साइन इन किया जा सकता है."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"खाते की बेहतर सुरक्षा"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"हर कुंजी खास तौर पर उस ऐप्लिकेशन या वेबसाइट से लिंक होती है जिसके लिए उसे बनाया गया है. ऐसा इसलिए किया जाता है, ताकि कोई भी व्यक्ति धोखाधड़ी करने वाले ऐप्लिकेशन या वेबसाइट पर कभी भी गलती से साइन इन न करे. साथ ही, सर्वर के पास सिर्फ़ सार्वजनिक कुंजी होती हैं, इसलिए पूरी कुंजी को हैक करना काफ़ी मुश्किल होता है."</string>
@@ -92,8 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"किसी दूसरे डिवाइस से"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"दूसरे डिवाइस का इस्तेमाल करें"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> की ओर से अनुरोध रद्द किया गया"</string>
-    <!-- no translation found for dropdown_presentation_more_sign_in_options_text (1693727354272417902) -->
-    <skip />
-    <!-- no translation found for provider_icon_content_description (4023359912607637248) -->
-    <skip />
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"साइन-इन करने के विकल्प"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"ज़्यादा"</string>
 </resources>

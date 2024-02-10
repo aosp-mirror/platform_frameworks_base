@@ -29,7 +29,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
-import android.os.Binder;
 import android.os.Handler;
 import android.util.SparseArray;
 import android.view.Display;
@@ -39,6 +38,7 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
+import android.window.InputTransferToken;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -114,7 +114,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
 
             Supplier<SurfaceControlViewHost> scvhSupplier = () ->
                     Flags.createWindowlessWindowMagnifier() ? new SurfaceControlViewHost(mContext,
-                            mContext.getDisplay(), new Binder(), TAG) : null;
+                            mContext.getDisplay(), new InputTransferToken(), TAG) : null;
 
             return new WindowMagnificationController(
                     windowContext,
