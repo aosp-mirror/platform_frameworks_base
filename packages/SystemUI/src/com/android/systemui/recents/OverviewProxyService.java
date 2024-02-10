@@ -68,7 +68,6 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 
@@ -114,6 +113,8 @@ import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.wm.shell.sysui.ShellInterface;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,8 +125,6 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 /**
  * Class to send information from overview to launcher with a binder.
@@ -457,6 +456,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             // Only rebind for TouchInteractionService component from launcher
             ResolveInfo ri = context.getPackageManager()
                     .resolveService(new Intent(ACTION_QUICKSTEP), 0);
+            if (ri == null) {
+                return;
+            }
             String interestingComponent = ri.serviceInfo.name;
             for (String component : compsList) {
                 if (interestingComponent.equals(component)) {

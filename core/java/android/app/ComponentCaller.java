@@ -18,6 +18,9 @@ package android.app;
 
 import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.Process;
 
@@ -116,6 +119,40 @@ public final class ComponentCaller {
     @Nullable
     public String getPackage() {
         return ActivityClient.getInstance().getLaunchedFromPackage(mActivityToken);
+    }
+
+    /**
+     * Determines whether this component caller had access to a specific content URI at launch time.
+     * Apps can use this API to validate content URIs coming from other apps.
+     *
+     * <p><b>Note</b>, in {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} only
+     * {@link Activity} has access to {@link ComponentCaller} instances.
+     *
+     * <p>Before using this method, note the following:
+     * <ul>
+     *     <li>You must have access to the supplied URI, otherwise it will throw a
+     *     {@link SecurityException}.
+     *     <li>This is not a real time check, i.e. the permissions have been computed at launch
+     *     time.
+     *     <li>This method will return the correct result for content URIs passed at launch time,
+     *     specifically the ones from {@link Intent#getData()}, and {@link Intent#getClipData()} in
+     *     the intent of {@code startActivity(intent)}. For others, it will throw an
+     *     {@link IllegalArgumentException}.
+     * </ul>
+     *
+     * @param uri The content uri that is being checked
+     * @param modeFlags The access modes to check
+     * @return {@link PackageManager#PERMISSION_GRANTED} if this activity caller is allowed to
+     *         access that uri, or {@link PackageManager#PERMISSION_DENIED} if it is not
+     * @throws IllegalArgumentException if uri is a non-content URI or it wasn't passed at launch
+     * @throws SecurityException if you don't have access to uri
+     *
+     * @see android.content.Context#checkContentUriPermissionFull(Uri, int, int, int)
+     */
+    @PackageManager.PermissionResult
+    public int checkContentUriPermission(@NonNull Uri uri, @Intent.AccessUriMode int modeFlags) {
+        return ActivityClient.getInstance().checkActivityCallerContentUriPermission(mActivityToken,
+                mCallerToken, uri, modeFlags);
     }
 
     @Override

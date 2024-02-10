@@ -1716,10 +1716,10 @@ public class ZenModeHelper {
             ZenLog.traceConfig(reason, mConfig, config);
 
             // send some broadcasts
-            final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
-                    getNotificationPolicy(config));
+            Policy newPolicy = getNotificationPolicy(config);
+            boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig), newPolicy);
             if (policyChanged) {
-                dispatchOnPolicyChanged();
+                dispatchOnPolicyChanged(newPolicy);
             }
             updateConfigAndZenModeLocked(config, origin, reason, setRingerMode, callingUid);
             mConditions.evaluateConfig(config, triggeringComponent, true /*processSubscriptions*/);
@@ -1929,7 +1929,7 @@ public class ZenModeHelper {
             Policy newPolicy = mConfig.toNotificationPolicy(policy);
             if (!Objects.equals(mConsolidatedPolicy, newPolicy)) {
                 mConsolidatedPolicy = newPolicy;
-                dispatchOnConsolidatedPolicyChanged();
+                dispatchOnConsolidatedPolicyChanged(newPolicy);
                 ZenLog.traceSetConsolidatedZenPolicy(mConsolidatedPolicy, reason);
             }
 
@@ -2097,15 +2097,15 @@ public class ZenModeHelper {
         }
     }
 
-    private void dispatchOnPolicyChanged() {
+    private void dispatchOnPolicyChanged(Policy newPolicy) {
         for (Callback callback : mCallbacks) {
-            callback.onPolicyChanged();
+            callback.onPolicyChanged(newPolicy);
         }
     }
 
-    private void dispatchOnConsolidatedPolicyChanged() {
+    private void dispatchOnConsolidatedPolicyChanged(Policy newConsolidatedPolicy) {
         for (Callback callback : mCallbacks) {
-            callback.onConsolidatedPolicyChanged();
+            callback.onConsolidatedPolicyChanged(newConsolidatedPolicy);
         }
     }
 
@@ -2631,8 +2631,8 @@ public class ZenModeHelper {
     public static class Callback {
         void onConfigChanged() {}
         void onZenModeChanged() {}
-        void onPolicyChanged() {}
-        void onConsolidatedPolicyChanged() {}
+        void onPolicyChanged(Policy newPolicy) {}
+        void onConsolidatedPolicyChanged(Policy newConsolidatedPolicy) {}
         void onAutomaticRuleStatusChanged(int userId, String pkg, String id, int status) {}
     }
 }

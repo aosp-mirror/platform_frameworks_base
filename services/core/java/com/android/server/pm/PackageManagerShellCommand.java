@@ -4801,7 +4801,7 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             final ComponentName domainVerificationAgent = mInterface.getDomainVerificationAgent();
             pw.println(domainVerificationAgent == null
-                    ? "No Domain Verifier available!" : domainVerificationAgent.toString());
+                    ? "No Domain Verifier available!" : domainVerificationAgent.flattenToString());
         } catch (Exception e) {
             pw.println("Failure [" + e.getMessage() + "]");
             return 1;

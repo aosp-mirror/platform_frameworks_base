@@ -416,3 +416,14 @@ flag {
    bug: "282007590"
 }
 
+flag {
+    name: "notification_row_user_context"
+    namespace: "systemui"
+    description: "Create a user-specific Context for the ImageResolver in ExpandableNotificationRow"
+        " (based on the NotificationEntry's user)."
+    bug: "317503801"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+

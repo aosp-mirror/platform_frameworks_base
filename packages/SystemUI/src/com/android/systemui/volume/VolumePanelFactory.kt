@@ -19,7 +19,7 @@ package com.android.systemui.volume
 import android.content.Context
 import android.util.Log
 import android.view.View
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
@@ -35,7 +35,7 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 class VolumePanelFactory @Inject constructor(
     private val context: Context,
     private val activityStarter: ActivityStarter,
-    private val dialogLaunchAnimator: DialogLaunchAnimator
+    private val dialogTransitionAnimator: DialogTransitionAnimator
 ) {
     companion object {
         var volumePanelDialog: VolumePanelDialog? = null
@@ -52,7 +52,11 @@ class VolumePanelFactory @Inject constructor(
 
         // Show the dialog.
         if (view != null) {
-            dialogLaunchAnimator.showFromView(dialog, view, animateBackgroundBoundsChange = true)
+            dialogTransitionAnimator.showFromView(
+                dialog,
+                view,
+                animateBackgroundBoundsChange = true
+            )
         } else {
             dialog.show()
         }

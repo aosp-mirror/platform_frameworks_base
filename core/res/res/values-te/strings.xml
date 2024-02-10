@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> సెకన్ల తర్వాత <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వర్డ్ చేయబడలేదు"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ఫార్వర్డ్ చేయబడలేదు"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"సెల్యులర్ నెట్‌వర్క్ సెక్యూరిటీ"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"సెట్టింగ్‌లను రివ్యూ చేయండి"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"పరికర ఐడెంటిఫయర్ యాక్సెస్ చేయబడింది"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> కనెక్షన్‌లోని నెట్‌వర్క్ మీ పరికరంకు సంబంధించిన ప్రత్యేక ఐడెంటిఫయర్‌ను (IMSI) <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> నుండి <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> మధ్య కాలంలో <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> సార్లు రికార్డ్ చేసింది."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>‌కు ఎన్‌క్రిప్ట్ చేసిన కనెక్షన్"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"మీరు ఇప్పుడు మరింత సురక్షితమైన సెల్యులార్ నెట్‌వర్క్‌కు కనెక్ట్ చేయబడ్డారు."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>‌కు ఎన్‌క్రిప్ట్ చేయని కనెక్షన్"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"మీరు ఎన్‌క్రిప్ట్ చేయని సెల్యులార్ నెట్‌వర్క్‌కు కనెక్ట్ చేయబడ్డారు. మీ కాల్స్, మెసేజ్‌లు, అలాగే డేటా అంతరాయానికి ఎక్కువగా గురవుతాయి."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"సెల్యులార్ సెక్యూరిటీ సెట్టింగ్‌లు"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"మరింత తెలుసుకోండి"</string>
     <string name="fcComplete" msgid="1080909484660507044">"లక్షణం కోడ్ పూర్తయింది."</string>
     <string name="fcError" msgid="5325116502080221346">"కనెక్షన్ సమస్య లేదా లక్షణం కోడ్ చెల్లదు."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"సరే"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"సెల్ ప్రసార మెసేజ్‌లను స్వీకరించినప్పుడు, వాటిని ఫార్వర్డ్ చేయడానికి సెల్ ప్రసార మాడ్యూల్‌కు కట్టుబడి ఉండేందుకు యాప్‌ను అనుమతిస్తుంది. ఎమర్జెన్సీ పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని లొకేషన్లలో సెల్ ప్రసార అలర్ట్‌లు డెలివరీ చేయబడతాయి. ఎమర్జెన్సీ సెల్ ప్రసార అలర్ట్‌ను స్వీకరించినప్పుడు హానికరమైన యాప్‌లు మీ పరికరం పనితీరుకు లేదా నిర్వహణకు ఆటంకం కలిగించే అవకాశం ఉంది."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"కొనసాగుతున్న కాల్స్‌ను మేనేజ్ చేయండి"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"మీ పరికరంలో కొనసాగుతున్న కాల్స్‌ను చూడటానికి అలాగే వాటిని కంట్రోల్ చేయడానికి ఒక యాప్‌కు అనుమతిస్తోంది."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"చివరిగా తెలిసిన సెల్ ఐడెంటిటీని యాక్సెస్ చేయండి."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"టెలిఫోన్ అందించిన చివరిగా తెలిసిన సెల్ ఐడెంటిటీని యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"సెల్ ప్రసార మెసేజ్‌లను చదవడం"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"మీ పరికరం స్వీకరించిన సెల్ ప్రసార మెసేజ్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఎమర్జెన్సీ పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని లొకేషన్లలో సెల్ ప్రసార అలర్ట్‌లు డెలివరీ చేయబడతాయి. ఎమర్జెన్సీ సెల్ ప్రసార అలర్ట్‌ను స్వీకరించినప్పుడు హానికరమైన యాప్‌లు మీ పరికరం పనితీరుకు లేదా నిర్వహణకు ఆటంకం కలిగించే అవకాశం ఉంది."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"చందా చేయబడిన ఫీడ్‌లను చదవడం"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ఫోన్ యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"వాల్‌పేపర్‌ను సెట్ చేయడం"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"సిస్టమ్ వాల్‌పేపర్‌ను సెట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"దాచిన ప్రొఫైల్స్‌ను యాక్సెస్ చేయండి"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"దాచిన ప్రొఫైల్స్‌ను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"మీ వాల్‌పేపర్ పరిమాణాన్ని సర్దుబాటు చేయడం"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"సిస్టమ్ వాల్‌పేపర్ సైజ్‌ సూచనలను సెట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"సమయ మండలిని సెట్ చేయడం"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz కంటే ఎక్కువ రేట్ వద్ద శాంపిల్ సెన్సార్ డేటాకు యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"యూజర్ చర్య లేకుండా యాప్‌ను అప్‌డేట్ చేయండి"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"యూజర్ చర్య లేకుండా హోల్డర్ మునుపు ఇన్‌స్టాల్ చేసిన యాప్‌ను అప్‌డేట్ చేయడానికి హోల్డర్‌ను అనుమతిస్తుంది"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"మీకు సంబంధించిన ఇతర యాప్‌లలోని E2EE కాంటాక్ట్ కీల వెరిఫికేషన్ స్టేట్‌లను అప్‌డేట్ చేయండి"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"మీకు సంబంధించిన ఇతర యాప్‌లలోని E2EE కాంటాక్ట్ కీల వెరిఫికేషన్ స్టేట్‌లను అప్‌డేట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"స్క్రీన్ అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"వెరిఫై చేయబడింది"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"విస్తరింపజేయి"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"కుదించు"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"కుదించబడింది"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"విస్తరించబడింది"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"విస్తరణను టోగుల్ చేయండి"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB పెరిఫెరల్ పోర్ట్"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"పరీక్ష"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"కమ్యూనల్"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"శాటిలైట్‌కు ఆటోమేటిక్‌గా కనెక్ట్ చేయబడింది"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"మీరు మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపవచ్చు, స్వీకరించవచ్చు"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messagesను తెరవండి"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ఇది ఎలా పని చేస్తుంది"</string>
 </resources>

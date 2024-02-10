@@ -142,6 +142,8 @@ class android.net.UriCodec stubclass
 class android.telephony.PinResult stubclass
 
 # Just enough to support mocking, no further functionality
+class android.content.BroadcastReceiver stub
+    method <init> ()V stub
 class android.content.Context stub
     method <init> ()V stub
 class android.content.pm.PackageManager stub

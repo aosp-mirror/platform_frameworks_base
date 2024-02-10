@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.stack
 
 import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
-import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
@@ -46,7 +45,6 @@ private const val HEADS_UP_ABOVE_SCREEN = 80
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-@RunWithLooper
 class StackStateAnimatorTest : SysuiTestCase() {
 
     private lateinit var stackStateAnimator: StackStateAnimator

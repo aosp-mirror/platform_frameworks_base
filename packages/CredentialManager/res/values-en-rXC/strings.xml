@@ -92,8 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‎‏‏‎‎‎‎‏‏‏‏‎‎‎‎‏‏‎‎‎‎‎‏‎‏‏‎‏‏‎‏‏‎‎‏‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‎‏‎‎‎‎From another device‎‏‎‎‏‎"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‏‎‎‏‏‏‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‎‏‎‎‏‎‏‏‏‏‎‏‎Use a different device‎‏‎‎‏‎"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‏‎‏‎‏‏‎‎‎‏‎‏‏‎‎‏‏‏‎‏‎‏‎‏‎‎‎‏‏‏‏‎‎‏‎‏‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‎‎Request cancelled by ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
-    <!-- no translation found for dropdown_presentation_more_sign_in_options_text (1693727354272417902) -->
-    <skip />
-    <!-- no translation found for provider_icon_content_description (4023359912607637248) -->
-    <skip />
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‎‎‎‎‎‎‏‎‏‎‏‎‏‎‎‎‎‎‎‏‏‏‎‎‎‎‏‎‎‎‏‏‏‎‎‎‏‎‏‎‎‎‎‏‎‎‎‎‏‏‎‏‏‏‎‎Sign-in options‎‏‎‎‏‎"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‏‏‏‎‏‏‏‎‎‎‎‏‎‎‎‏‎‏‏‎‏‎‏‏‎‎‏‏‏‏‏‎‏‎‏‏‎‎‎‏‎‎‏‏‏‏‎‎‏‏‎‎‎‎More‎‏‎‎‏‎"</string>
 </resources>

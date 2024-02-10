@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g><xliff:g id="TIME_DELAY">{2}</xliff:g>초 후"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안됨"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안됨"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"셀룰러 네트워크 보안"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"설정 검토"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"기기 식별자에 액세스됨"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> 연결의 네트워크가 <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g>부터 <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>의 기간 동안 기기의 고유 식별자(IMSI)에 <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g>회 기록되었습니다."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"암호화된 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> 연결"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"이제 더 안전한 셀룰러 네트워크에 연결되었습니다."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"암호화되지 않은 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> 연결"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"암호화되지 않은 셀룰러 네트워크에 연결되어 있습니다. 통화, 메시지, 데이터가 가로채기에 취약합니다."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"셀룰러 네트워크 보안 설정"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"자세히 알아보기"</string>
     <string name="fcComplete" msgid="1080909484660507044">"기능 코드가 완료되었습니다."</string>
     <string name="fcError" msgid="5325116502080221346">"연결에 문제가 있거나 기능 코드가 잘못되었습니다."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"확인"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"셀 브로드캐스트 메시지를 수신하자마자 전달하기 위해 앱이 셀 브로드캐스트 모듈에 연결하도록 허용합니다. 비상 상황임을 알리기 위해 일부 지역에서 셀 브로드캐스트 경고가 전달됩니다. 비상 셀 브로드캐스트를 수신할 때 악성 앱이 기기의 성능이나 작동을 방해할 수 있습니다."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"진행 중인 전화 관리"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"앱에서 기기의 진행 중인 전화에 관한 세부정보를 확인하고 전화를 제어하도록 허용합니다."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"마지막으로 알려진 셀 ID에 액세스"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"앱이 전화 서비스에서 제공된 마지막으로 알려진 셀 ID에 액세스하도록 허용합니다."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"셀 브로드캐스트 메시지 읽기"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"앱이 기기가 수신한 셀 브로드캐스트 메시지를 읽을 수 있도록 합니다. 비상 상황임을 알리기 위해 일부 지역에서 셀 브로드캐스트 경고가 전달됩니다. 비상 셀 브로드캐스트를 수신할 때 악성 앱이 기기의 성능이나 작동을 방해할 수 있습니다."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"가입된 피드 읽기"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"앱에서 휴대전화의 적외선 송신기를 사용하도록 허용합니다."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"배경화면 설정"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"앱이 시스템 배경화면을 설정할 수 있도록 허용합니다."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"숨겨진 프로필에 액세스"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"앱이 숨겨진 프로필에 액세스할 수 있도록 허용합니다."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"배경화면 크기 조정"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"앱이 시스템 배경화면 크기 힌트를 설정할 수 있도록 허용합니다."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"표준시간대 설정"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"앱에서 200Hz보다 빠른 속도로 센서 데이터를 샘플링하도록 허용합니다."</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"사용자 작업 없이 앱 업데이트"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"홀더가 사용자 작업 없이 이전에 설치된 앱을 업데이트하도록 허용합니다."</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"다른 앱 소유인 E2EE 연락처 키의 인증 상태 업데이트"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"앱이 다른 앱 소유인 E2EE 연락처 키의 인증 상태를 업데이트할 수 있도록 허용합니다."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"화면 잠금 해제 시도 모니터링"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"확인됨"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"펼치기"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"접기"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"접은 상태"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"펼친 상태"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"확장 전환"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB 주변기기 포트"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"테스트"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"공동"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"위성에 자동 연결됨"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"모바일 또는 Wi-Fi 네트워크 없이 메시지를 주고 받을 수 있습니다"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"메시지 열기"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"작동 방식"</string>
 </resources>

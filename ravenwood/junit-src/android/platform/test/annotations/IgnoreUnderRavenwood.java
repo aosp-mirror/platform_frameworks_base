@@ -35,9 +35,12 @@ import java.lang.annotation.Target;
  * to be enabled.
  *
  * @hide
+ *
+ * @deprecated Use {@link DisabledOnRavenwood} instead.
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated
 public @interface IgnoreUnderRavenwood {
     /**
      * One or more classes that aren't yet supported by Ravenwood, which this test depends on.

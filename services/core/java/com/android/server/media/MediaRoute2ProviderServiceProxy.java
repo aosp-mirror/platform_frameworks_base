@@ -194,13 +194,17 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
                 && mComponentName.getClassName().equals(className);
     }
 
-    public void start() {
+    public void start(boolean rebindIfDisconnected) {
         if (!mRunning) {
             if (DEBUG) {
                 Slog.d(TAG, this + ": Starting");
             }
             mRunning = true;
             updateBinding();
+        }
+        if (rebindIfDisconnected && mActiveConnection == null && shouldBind()) {
+            unbind();
+            bind();
         }
     }
 
@@ -211,15 +215,6 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             }
             mRunning = false;
             updateBinding();
-        }
-    }
-
-    public void rebindIfDisconnected() {
-        //TODO: When we are connecting to the service, calling this will unbind and bind again.
-        // We'd better not unbind if we are connecting.
-        if (mActiveConnection == null && shouldBind()) {
-            unbind();
-            bind();
         }
     }
 

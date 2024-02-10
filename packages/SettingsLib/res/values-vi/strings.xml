@@ -551,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Luôn hỏi"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Cho đến khi bạn tắt"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Vừa xong"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Điện thoại này"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Máy tính bảng này"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Điện thoại này"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Máy tính bảng này"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Loa có gắn đế"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Thiết bị bên ngoài"</string>
@@ -594,7 +594,7 @@
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"Người dùng có ứng dụng và nội dung riêng của mình"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Bạn có thể hạn chế quyền truy cập vào ứng dụng và nội dung từ tài khoản của bạn"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Người dùng"</string>
-    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Tiểu sử bị hạn chế"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Hồ sơ bị hạn chế"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Thêm người dùng mới?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Bạn có thể chia sẻ thiết bị này với người khác bằng cách tạo thêm người dùng. Mỗi người dùng sẽ có không gian riêng của mình. Họ có thể tùy chỉnh không gian riêng đó bằng các ứng dụng, hình nền, v.v. Người dùng cũng có thể điều chỉnh các tùy chọn cài đặt thiết bị có ảnh hưởng đến tất cả mọi người, chẳng hạn như Wi‑Fi.\n\nKhi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác. Các dịch vụ và các tùy chọn cài đặt hỗ trợ tiếp cận có thể không chuyển sang người dùng mới."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Khi bạn thêm người dùng mới, người đó cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
@@ -603,15 +603,15 @@
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Đặt làm quản trị viên"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Thiết lập người dùng ngay bây giờ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Đảm bảo người dùng có mặt để tự thiết lập không gian của mình trên thiết bị"</string>
-    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Thiết lập tiểu sử ngay bây giờ?"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Thiết lập hồ sơ ngay bây giờ?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Thiết lập ngay"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Để sau"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"Thêm"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Người dùng mới"</string>
-    <string name="user_new_profile_name" msgid="2405500423304678841">"Tiểu sử mới"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Hồ sơ mới"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"Thông tin người dùng"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Thông tin hồ sơ"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"Trước khi bạn có thể tạo tiểu sử bị hạn chế, bạn sẽ cần thiết lập một màn hình khóa để bảo vệ các ứng dụng và dữ liệu cá nhân của bạn."</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Trước khi bạn có thể tạo hồ sơ bị hạn chế, bạn sẽ cần thiết lập một màn hình khoá để bảo vệ các ứng dụng và dữ liệu cá nhân của bạn."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Thiết lập khóa"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Chuyển sang <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Đang tạo người dùng mới…"</string>
@@ -619,6 +619,8 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Không tạo được người dùng mới"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Không tạo được khách mới"</string>
     <string name="user_nickname" msgid="262624187455825083">"Biệt hiệu"</string>
+    <!-- no translation found for edit_user_info_message (5199468585059260053) -->
+    <skip />
     <string name="user_add_user" msgid="7876449291500212468">"Thêm người dùng"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Thêm khách"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Xóa khách"</string>

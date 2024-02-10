@@ -73,7 +73,7 @@ import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityTransitionAnimator;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
@@ -108,7 +108,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private static final String TEST_SESSION_ID = "test_session_id";
     private static final String TEST_SESSION_NAME = "test_session_name";
     @Mock
-    private DialogLaunchAnimator mDialogLaunchAnimator;
+    private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
     private ActivityTransitionAnimator.Controller mActivityTransitionAnimatorController;
     @Mock
@@ -196,7 +196,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
         mMediaOutputController = new MediaOutputController(mSpyContext, mPackageName,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
@@ -278,7 +278,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void start_withoutPackageName_verifyMediaControllerInit() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
 
@@ -308,7 +308,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void stop_withoutPackageName_verifyMediaControllerDeinit() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
 
@@ -338,8 +338,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void tryToLaunchMediaApplication_intentNotNull_startActivity() {
-        when(mDialogLaunchAnimator.createActivityLaunchController(any(View.class))).thenReturn(
-                mController);
+        when(mDialogTransitionAnimator.createActivityTransitionController(any(View.class)))
+                .thenReturn(mController);
         Intent intent = new Intent(mPackageName);
         doReturn(intent).when(mPackageManager).getLaunchIntentForPackage(mPackageName);
         mMediaOutputController.start(mCallback);
@@ -352,8 +352,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void tryToLaunchInAppRoutingIntent_componentNameNotNull_startActivity() {
-        when(mDialogLaunchAnimator.createActivityLaunchController(any(View.class))).thenReturn(
-                mController);
+        when(mDialogTransitionAnimator.createActivityTransitionController(any(View.class)))
+                .thenReturn(mController);
         mMediaOutputController.start(mCallback);
         when(mLocalMediaManager.getLinkedItemComponentName()).thenReturn(
                 new ComponentName(mPackageName, ""));
@@ -553,7 +553,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
                 "",
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
         testMediaOutputController.start(mCb);
@@ -576,7 +576,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
                 "",
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
         testMediaOutputController.start(mCb);
@@ -612,7 +612,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
                 null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
 
@@ -628,7 +628,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
                 null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
 
@@ -896,7 +896,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     public void getNotificationLargeIcon_withoutPackageName_returnsNull() {
         mMediaOutputController = new MediaOutputController(mSpyContext, null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
 
@@ -1088,7 +1088,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
                 null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
+                mNotifCollection, mDialogTransitionAnimator,
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
 
@@ -1121,8 +1121,8 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void launchBluetoothPairing_isKeyguardLocked_dismissDialog() {
-        when(mDialogLaunchAnimator.createActivityLaunchController(mDialogLaunchView)).thenReturn(
-                mActivityTransitionAnimatorController);
+        when(mDialogTransitionAnimator.createActivityTransitionController(mDialogLaunchView))
+                .thenReturn(mActivityTransitionAnimatorController);
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
         mMediaOutputController.mCallback = this.mCallback;
 

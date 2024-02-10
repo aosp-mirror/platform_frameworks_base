@@ -28,14 +28,14 @@ interface Expandable {
      * @param cujType the CUJ type from the [com.android.internal.jank.InteractionJankMonitor]
      *   associated to the launch that will use this controller.
      */
-    fun activityLaunchController(cujType: Int? = null): ActivityTransitionAnimator.Controller?
+    fun activityTransitionController(cujType: Int? = null): ActivityTransitionAnimator.Controller?
 
     /**
-     * Create a [DialogLaunchAnimator.Controller] that can be used to expand this [Expandable] into
-     * a Dialog, or return `null` if this [Expandable] should not be animated (e.g. if it is
+     * Create a [DialogTransitionAnimator.Controller] that can be used to expand this [Expandable]
+     * into a Dialog, or return `null` if this [Expandable] should not be animated (e.g. if it is
      * currently not attached or visible).
      */
-    fun dialogLaunchController(cuj: DialogCuj? = null): DialogLaunchAnimator.Controller?
+    fun dialogTransitionController(cuj: DialogCuj? = null): DialogTransitionAnimator.Controller?
 
     companion object {
         /**
@@ -47,16 +47,16 @@ interface Expandable {
         @JvmStatic
         fun fromView(view: View): Expandable {
             return object : Expandable {
-                override fun activityLaunchController(
+                override fun activityTransitionController(
                     cujType: Int?,
                 ): ActivityTransitionAnimator.Controller? {
                     return ActivityTransitionAnimator.Controller.fromView(view, cujType)
                 }
 
-                override fun dialogLaunchController(
+                override fun dialogTransitionController(
                     cuj: DialogCuj?
-                ): DialogLaunchAnimator.Controller? {
-                    return DialogLaunchAnimator.Controller.fromView(view, cuj)
+                ): DialogTransitionAnimator.Controller? {
+                    return DialogTransitionAnimator.Controller.fromView(view, cuj)
                 }
             }
         }

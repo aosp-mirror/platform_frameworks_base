@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> หลังผ่านไป <xliff:g id="TIME_DELAY">{2}</xliff:g> วินาที"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ไม่ได้โอนสาย"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"การรักษาความปลอดภัยของเครือข่ายมือถือ"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ตรวจสอบการตั้งค่า"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"เข้าถึงตัวระบุของอุปกรณ์แล้ว"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"เครือข่ายในการเชื่อมต่อ <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> จะบันทึกตัวระบุที่ไม่ซ้ำ (IMSI) ของอุปกรณ์จำนวน <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ครั้งในช่วงเวลาระหว่าง<xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ถึง <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"การเชื่อมต่อกับ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ที่เข้ารหัส"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ตอนนี้คุณเชื่อมต่อกับเครือข่ายมือถือที่ปลอดภัยยิ่งขึ้นแล้ว"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"การเชื่อมต่อกับ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ที่ไม่ได้เข้ารหัส"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"คุณเชื่อมต่อกับเครือข่ายมือถือที่ไม่ได้เข้ารหัสอยู่ การโทร ข้อความ และข้อมูลของคุณเสี่ยงต่อการถูกดักข้อมูล"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"การตั้งค่าความปลอดภัยเครือข่ายมือถือ"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="fcComplete" msgid="1080909484660507044">"รหัสฟีเจอร์เสร็จสมบูรณ์"</string>
     <string name="fcError" msgid="5325116502080221346">"พบปัญหาในการเชื่อมต่อหรือรหัสฟีเจอร์ไม่ถูกต้อง"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ตกลง"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"อนุญาตให้แอปเชื่อมโยงกับโมดูลการส่งข้อมูลเตือนภัยทางมือถือ (CB) เพื่อส่งต่อข้อความจากการส่งข้อมูลเตือนภัยทางมือถือ (CB) ทันทีที่ได้รับ ระบบจะส่งการแจ้งเตือนจากการส่งข้อมูลเตือนภัยทางมือถือ (CB) ในบางตำแหน่งเพื่อแจ้งเตือนคุณเกี่ยวกับสถานการณ์ฉุกเฉิน แอปที่เป็นอันตรายอาจรบกวนประสิทธิภาพหรือการทำงานของอุปกรณ์เมื่อได้รับการส่งข้อมูลเตือนภัยทางมือถือ (CB) ในกรณีฉุกเฉิน"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"จัดการสายที่สนทนา"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"อนุญาตแอปเพื่อดูรายละเอียดเกี่ยวกับสายที่สนทนาอยู่บนโทรศัพท์และเพื่อควบคุมสายสนทนาเหล่านี้"</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"เข้าถึงรหัสเสาสัญญาณโทรศัพท์ที่ทราบล่าสุด"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"อนุญาตให้แอปเข้าถึงรหัสเสาสัญญาณโทรศัพท์ที่ทราบล่าสุดซึ่งได้รับจากโทรศัพท์"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"อ่านข้อความที่ได้รับจากสถานีมือถือ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"อนุญาตให้แอปอ่านข้อความจากสถานีมือถือที่อุปกรณ์ได้รับ การแจ้งเตือนทางมือถือมีให้บริการในบางพื้นที่ โดยจะแจ้งเตือนคุณเกี่ยวกับสถานการณ์ฉุกเฉิน แอปที่เป็นอันตรายอาจเข้าแทรกแซงการทำงานของอุปกรณ์เมื่อได้รับข้อความแจ้งเตือนฉุกเฉิน"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"อ่านฟีดข้อมูลที่สมัครไว้"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"อนุญาตให้แอปใช้ตัวส่งสัญญาณอินฟราเรดของโทรศัพท์"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"ตั้งค่าวอลเปเปอร์"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"อนุญาตให้แอปพลิเคชันตั้งค่าวอลเปเปอร์ระบบ"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"เข้าถึงโปรไฟล์ที่ซ่อนอยู่"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"อนุญาตให้แอปเข้าถึงโปรไฟล์ที่ซ่อนอยู่"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ปรับขนาดวอลเปเปอร์ของคุณ"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"อนุญาตให้แอปพลิเคชันตั้งค่าคำแนะนำขนาดวอลเปเปอร์ของระบบ"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"ตั้งค่าเขตเวลา"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"อนุญาตให้แอปสุ่มตัวอย่างข้อมูลเซ็นเซอร์ที่อัตราสูงกว่า 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"อัปเดตแอปโดยที่ผู้ใช้ไม่ต้องดำเนินการใดๆ"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"อนุญาตให้ผู้ให้บริการอัปเดตแอปที่ติดตั้งไว้ก่อนหน้านี้โดยที่ผู้ใช้ไม่ต้องดำเนินการใดๆ"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"อัปเดตสถานะการยืนยันคีย์ผู้ติดต่อ E2EE ที่แอปอื่นเป็นเจ้าของ"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"อนุญาตให้แอปอัปเดตสถานะการยืนยันคีย์ผู้ติดต่อ E2EE ที่แอปอื่นเป็นเจ้าของ"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ควบคุมความยาวและอักขระที่สามารถใช้ในรหัสผ่านของการล็อกหน้าจอและ PIN"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"ยืนยันแล้ว"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ขยาย"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ยุบ"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"ยุบแล้ว"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"ขยายแล้ว"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"สลับการขยาย"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"อุปกรณ์สำหรับต่อพอร์ต USB ของ Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"ทดสอบ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ส่วนกลาง"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"เชื่อมต่อกับดาวเทียมโดยอัตโนมัติ"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"คุณรับส่งข้อความผ่านดาวเทียมได้โดยไม่ต้องใช้เครือข่ายมือถือหรือ Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"เปิด Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"วิธีการทำงาน"</string>
 </resources>

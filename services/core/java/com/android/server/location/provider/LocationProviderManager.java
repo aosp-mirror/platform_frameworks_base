@@ -2590,7 +2590,7 @@ public class LocationProviderManager extends
                 if (!location.hasMslAltitude() && location.hasAltitude()) {
                     try {
                         Location locationCopy = new Location(location);
-                        if (mAltitudeConverter.addMslAltitudeToLocation(locationCopy)) {
+                        if (mAltitudeConverter.tryAddMslAltitudeToLocation(locationCopy)) {
                             return locationCopy;
                         }
                         // Only queue up one IO thread runnable.

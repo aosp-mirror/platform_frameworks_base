@@ -276,6 +276,8 @@ import java.util.List;
         aidlMessage.messageBody = message.getMessageBody();
         // This explicit definition is required to avoid erroneous behavior at the binder.
         aidlMessage.permissions = new String[0];
+        aidlMessage.isReliable = message.isReliable();
+        aidlMessage.messageSequenceNumber = message.getMessageSequenceNumber();
 
         return aidlMessage;
     }
@@ -306,7 +308,8 @@ import java.util.List;
             android.hardware.contexthub.ContextHubMessage message) {
         return NanoAppMessage.createMessageFromNanoApp(
                 message.nanoappId, message.messageType, message.messageBody,
-                message.hostEndPoint == HOST_ENDPOINT_BROADCAST);
+                message.hostEndPoint == HOST_ENDPOINT_BROADCAST,
+                message.isReliable, message.messageSequenceNumber);
     }
 
     /**

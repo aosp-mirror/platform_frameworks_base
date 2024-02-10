@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
 import android.service.ambientcontext.AmbientContextDetectionResult;
@@ -241,6 +242,13 @@ public abstract class WearableSensingService extends Service {
                     Integer[] events = intArrayToIntegerArray(eventTypes);
                     WearableSensingService.this.onQueryServiceStatus(
                             new HashSet<>(Arrays.asList(events)), packageName, consumer);
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public void killProcess() {
+                    Slog.d(TAG, "#killProcess");
+                    Process.killProcess(Process.myPid());
                 }
             };
         }

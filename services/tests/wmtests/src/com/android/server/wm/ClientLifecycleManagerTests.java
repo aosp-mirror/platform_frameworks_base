@@ -143,7 +143,9 @@ public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
                 mLifecycleManager.mPendingTransactions.get(mNonBinderClient);
         assertEquals(1, transaction.getTransactionItems().size());
         assertEquals(mTransactionItem, transaction.getTransactionItems().get(0));
-        assertNull(transaction.getCallbacks());
+        // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
+        assertEquals(1, transaction.getCallbacks().size());
+        assertEquals(mTransactionItem, transaction.getCallbacks().get(0));
         assertNull(transaction.getLifecycleStateRequest());
         verify(mLifecycleManager, never()).scheduleTransaction(any());
 
@@ -156,8 +158,10 @@ public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
         assertEquals(2, transaction.getTransactionItems().size());
         assertEquals(mTransactionItem, transaction.getTransactionItems().get(0));
         assertEquals(mLifecycleItem, transaction.getTransactionItems().get(1));
-        assertNull(transaction.getCallbacks());
-        assertNull(transaction.getLifecycleStateRequest());
+        // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
+        assertEquals(1, transaction.getCallbacks().size());
+        assertEquals(mTransactionItem, transaction.getCallbacks().get(0));
+        assertEquals(mLifecycleItem, transaction.getLifecycleStateRequest());
         verify(mLifecycleManager, never()).scheduleTransaction(any());
     }
 
@@ -202,8 +206,10 @@ public class ClientLifecycleManagerTests extends SystemServiceTestsBase {
         assertEquals(2, transaction.getTransactionItems().size());
         assertEquals(mTransactionItem, transaction.getTransactionItems().get(0));
         assertEquals(mLifecycleItem, transaction.getTransactionItems().get(1));
-        assertNull(transaction.getCallbacks());
-        assertNull(transaction.getLifecycleStateRequest());
+        // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
+        assertEquals(1, transaction.getCallbacks().size());
+        assertEquals(mTransactionItem, transaction.getCallbacks().get(0));
+        assertEquals(mLifecycleItem, transaction.getLifecycleStateRequest());
         verify(mLifecycleManager, never()).scheduleTransaction(any());
     }
 

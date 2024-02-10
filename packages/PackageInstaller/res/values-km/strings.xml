@@ -109,11 +109,12 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ការជូនដំណឹង​អំពីកម្មវិធីដែល​បានដំឡើង"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"បាន​ដំឡើង​ដោយ​ជោគជ័យ​ហើយ"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"បាន​ដំឡើង \"<xliff:g id="APPNAME">%1$s</xliff:g>\" ដោយ​ជោគជ័យ​ហើយ"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"ស្ដារ <xliff:g id="APPNAME">%1$s</xliff:g> ពី <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ឬ?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"ស្ដារ <xliff:g id="APPNAME">%1$s</xliff:g> ពី <xliff:g id="INSTALLERNAME">%2$s</xliff:g> ឬ?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"កម្មវិធីនេះនឹងចាប់ផ្ដើមទាញយកនៅផ្ទៃខាងក្រោយ"</string>
     <string name="restore" msgid="8460854736328970444">"ស្ដារ"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"អ្នកគ្មាន​អ៊ីនធឺណិត​ទេ"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"កម្មវិធីនេះនឹងស្ដារដោយស្វ័យប្រវត្តិ នៅពេលអ្នកភ្ជាប់អ៊ីនធឺណិត"</string>
+    <!-- no translation found for unarchive_error_offline_body (2256042209364094099) -->
+    <skip />
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"មានអ្វីមួយខុសប្រក្រតី"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"មានបញ្ហាក្នុងការព្យាយាមស្ដារកម្មវិធីនេះ"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"ទំហំផ្ទុក​មិន​គ្រប់គ្រាន់"</string>

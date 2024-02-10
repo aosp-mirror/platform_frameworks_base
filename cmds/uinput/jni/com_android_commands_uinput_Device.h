@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#include <memory>
-#include <vector>
-
+#include <android-base/unique_fd.h>
 #include <jni.h>
 #include <linux/input.h>
 
-#include <android-base/unique_fd.h>
+#include <chrono>
+#include <memory>
+#include <vector>
+
 #include "src/com/android/commands/uinput/InputAbsInfo.h"
 
 namespace android {
@@ -53,7 +54,8 @@ public:
 
     virtual ~UinputDevice();
 
-    void injectEvent(uint16_t type, uint16_t code, int32_t value);
+    void injectEvent(std::chrono::microseconds timestamp, uint16_t type, uint16_t code,
+                     int32_t value);
     int handleEvents(int events);
 
 private:

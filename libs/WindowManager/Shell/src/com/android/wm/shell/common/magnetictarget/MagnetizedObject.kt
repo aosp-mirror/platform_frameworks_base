@@ -352,8 +352,8 @@ abstract class MagnetizedObject<T : Any>(
 
         val targetObjectIsInMagneticFieldOf = associatedTargets.firstOrNull { target ->
             val distanceFromTargetCenter = hypot(
-                    ev.rawX - target.centerOnScreen.x,
-                    ev.rawY - target.centerOnScreen.y)
+                    ev.rawX - target.centerOnDisplayX(),
+                    ev.rawY - target.centerOnDisplayY())
             distanceFromTargetCenter < target.magneticFieldRadiusPx
         }
 
@@ -406,7 +406,6 @@ abstract class MagnetizedObject<T : Any>(
 
         // First, check for relevant gestures concluding with an ACTION_UP.
         if (ev.action == MotionEvent.ACTION_UP) {
-
             velocityTracker.computeCurrentVelocity(1000 /* units */)
             val velX = velocityTracker.xVelocity
             val velY = velocityTracker.yVelocity
@@ -542,7 +541,7 @@ abstract class MagnetizedObject<T : Any>(
         // Whether velocity is sufficient, depending on whether we're flinging into a target at the
         // top or the bottom of the screen.
         val velocitySufficient =
-                if (rawY < target.centerOnScreen.y) velY > flingToTargetMinVelocity
+                if (rawY < target.centerOnDisplayY()) velY > flingToTargetMinVelocity
                 else velY < flingToTargetMinVelocity
 
         if (!velocitySufficient) {
@@ -560,15 +559,15 @@ abstract class MagnetizedObject<T : Any>(
             val yIntercept = rawY - slope * rawX
 
             // ...calculate the x value when y = the target's y-coordinate.
-            targetCenterXIntercept = (target.centerOnScreen.y - yIntercept) / slope
+            targetCenterXIntercept = (target.centerOnDisplayY() - yIntercept) / slope
         }
 
         // The width of the area we're looking for a fling towards.
         val targetAreaWidth = target.targetView.width * flingToTargetWidthPercent
 
         // Velocity was sufficient, so return true if the intercept is within the target area.
-        return targetCenterXIntercept > target.centerOnScreen.x - targetAreaWidth / 2 &&
-                targetCenterXIntercept < target.centerOnScreen.x + targetAreaWidth / 2
+        return targetCenterXIntercept > target.centerOnDisplayX() - targetAreaWidth / 2 &&
+                targetCenterXIntercept < target.centerOnDisplayX() + targetAreaWidth / 2
     }
 
     /** Cancel animations on this object's x/y properties. */
@@ -601,6 +600,22 @@ abstract class MagnetizedObject<T : Any>(
     ) {
         val centerOnScreen = PointF()
 
+        /**
+         * Set screen vertical offset amount.
+         *
+         * Screen surface may be vertically shifted in some cases, for example when one-handed mode
+         * is enabled. [MagneticTarget] and [MagnetizedObject] set their location in screen
+         * coordinates (see [MagneticTarget.centerOnScreen] and
+         * [MagnetizedObject.getLocationOnScreen] respectively).
+         *
+         * When a [MagnetizedObject] is dragged, the touch location is determined by
+         * [MotionEvent.getRawX] and [MotionEvent.getRawY]. These work in display coordinates. When
+         * screen is shifted due to one-handed mode, display coordinates and screen coordinates do
+         * not match. To determine if a [MagnetizedObject] is dragged into a [MagneticTarget], view
+         * location on screen is translated to display coordinates using this offset value.
+         */
+        var screenVerticalOffset: Int = 0
+
         private val tempLoc = IntArray(2)
 
         fun updateLocationOnScreen() {
@@ -613,6 +628,23 @@ abstract class MagnetizedObject<T : Any>(
                         tempLoc[0] + targetView.width / 2f - targetView.translationX,
                         tempLoc[1] + targetView.height / 2f - targetView.translationY)
             }
+        }
+
+        /**
+         * Get target center coordinate on x-axis on display. [centerOnScreen] has to be up to date
+         * by calling [updateLocationOnScreen] first.
+         */
+        fun centerOnDisplayX(): Float {
+            return centerOnScreen.x
+        }
+
+        /**
+         * Get target center coordinate on y-axis on display. [centerOnScreen] has to be up to date
+         * by calling [updateLocationOnScreen] first. Use [screenVerticalOffset] to update the
+         * screen offset compared to the display.
+         */
+        fun centerOnDisplayY(): Float {
+            return centerOnScreen.y + screenVerticalOffset
         }
     }
 

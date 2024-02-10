@@ -43,6 +43,7 @@ import android.media.IMediaRouterClient;
 import android.media.IMediaRouterService;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter;
+import android.media.MediaRouter2.ScanningState;
 import android.media.MediaRouterClientState;
 import android.media.RemoteDisplayState;
 import android.media.RemoteDisplayState.RemoteDisplayInfo;
@@ -439,6 +440,13 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public void updateScanningStateWithRouter2(
+            IMediaRouter2 router, @ScanningState int scanningState) {
+        mService2.updateScanningState(router, scanningState);
+    }
+
+    // Binder call
+    @Override
     public void setDiscoveryRequestWithRouter2(IMediaRouter2 router,
             RouteDiscoveryPreference request) {
         mService2.setDiscoveryRequestWithRouter2(router, request);
@@ -574,14 +582,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void startScan(IMediaRouter2Manager manager) {
-        mService2.startScan(manager);
-    }
-
-    // Binder call
-    @Override
-    public void stopScan(IMediaRouter2Manager manager) {
-        mService2.stopScan(manager);
+    public void updateScanningState(
+            IMediaRouter2Manager manager, @ScanningState int scanningState) {
+        mService2.updateScanningState(manager, scanningState);
     }
 
     // Binder call

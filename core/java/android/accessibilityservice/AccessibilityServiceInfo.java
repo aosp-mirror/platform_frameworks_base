@@ -647,11 +647,44 @@ public class AccessibilityServiceInfo implements Parcelable {
 
     private int mObservedMotionEventSources = 0;
 
+    // Default values for each dynamic property
+    // LINT.IfChange(dynamic_property_defaults)
+    private final DynamicPropertyDefaults mDynamicPropertyDefaults;
+
+    private static class DynamicPropertyDefaults {
+        private final int mEventTypesDefault;
+        private final List<String> mPackageNamesDefault;
+        private final int mFeedbackTypeDefault;
+        private final long mNotificationTimeoutDefault;
+        private final int mFlagsDefault;
+        private final int mNonInteractiveUiTimeoutDefault;
+        private final int mInteractiveUiTimeoutDefault;
+        private final int mMotionEventSourcesDefault;
+        private final int mObservedMotionEventSourcesDefault;
+
+        DynamicPropertyDefaults(AccessibilityServiceInfo info) {
+            mEventTypesDefault = info.eventTypes;
+            if (info.packageNames != null) {
+                mPackageNamesDefault = List.of(info.packageNames);
+            } else {
+                mPackageNamesDefault = null;
+            }
+            mFeedbackTypeDefault = info.feedbackType;
+            mNotificationTimeoutDefault = info.notificationTimeout;
+            mNonInteractiveUiTimeoutDefault = info.mNonInteractiveUiTimeout;
+            mInteractiveUiTimeoutDefault = info.mInteractiveUiTimeout;
+            mFlagsDefault = info.flags;
+            mMotionEventSourcesDefault = info.mMotionEventSources;
+            mObservedMotionEventSourcesDefault = info.mObservedMotionEventSources;
+        }
+    }
+    // LINT.ThenChange(:dynamic_property_reset)
+
     /**
      * Creates a new instance.
      */
     public AccessibilityServiceInfo() {
-        /* do nothing */
+        mDynamicPropertyDefaults = new DynamicPropertyDefaults(this);
     }
 
     /**
@@ -758,7 +791,7 @@ public class AccessibilityServiceInfo implements Parcelable {
                 }
             }
             peekedValue = asAttributes.peekValue(
-                com.android.internal.R.styleable.AccessibilityService_summary);
+                    com.android.internal.R.styleable.AccessibilityService_summary);
             if (peekedValue != null) {
                 mSummaryResId = peekedValue.resourceId;
                 CharSequence nonLocalizedSummary = peekedValue.coerceToString();
@@ -793,8 +826,36 @@ public class AccessibilityServiceInfo implements Parcelable {
             if (parser != null) {
                 parser.close();
             }
+
+            mDynamicPropertyDefaults = new DynamicPropertyDefaults(this);
         }
     }
+
+    /**
+     * Resets all dynamically configurable properties to their default values.
+     *
+     * @hide
+     */
+    // LINT.IfChange(dynamic_property_reset)
+    public void resetDynamicallyConfigurableProperties() {
+        eventTypes = mDynamicPropertyDefaults.mEventTypesDefault;
+        if (mDynamicPropertyDefaults.mPackageNamesDefault == null) {
+            packageNames = null;
+        } else {
+            packageNames = mDynamicPropertyDefaults.mPackageNamesDefault.toArray(new String[0]);
+        }
+        feedbackType = mDynamicPropertyDefaults.mFeedbackTypeDefault;
+        notificationTimeout = mDynamicPropertyDefaults.mNotificationTimeoutDefault;
+        mNonInteractiveUiTimeout = mDynamicPropertyDefaults.mNonInteractiveUiTimeoutDefault;
+        mInteractiveUiTimeout = mDynamicPropertyDefaults.mInteractiveUiTimeoutDefault;
+        flags = mDynamicPropertyDefaults.mFlagsDefault;
+        mMotionEventSources = mDynamicPropertyDefaults.mMotionEventSourcesDefault;
+        if (Flags.motionEventObserving()) {
+            mObservedMotionEventSources = mDynamicPropertyDefaults
+                    .mObservedMotionEventSourcesDefault;
+        }
+    }
+    // LINT.ThenChange(:dynamic_property_update)
 
     /**
      * Updates the properties that an AccessibilityService can change dynamically.
@@ -808,6 +869,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @hide
      */
+    // LINT.IfChange(dynamic_property_update)
     public void updateDynamicallyConfigurableProperties(IPlatformCompat platformCompat,
             AccessibilityServiceInfo other) {
         if (isRequestAccessibilityButtonChangeEnabled(platformCompat)) {
@@ -828,6 +890,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         // NOTE: Ensure that only properties that are safe to be modified by the service itself
         // are included here (regardless of hidden setters, etc.).
     }
+    // LINT.ThenChange(:dynamic_property_defaults)
 
     private boolean isRequestAccessibilityButtonChangeEnabled(IPlatformCompat platformCompat) {
         if (mResolveInfo == null) {

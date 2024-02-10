@@ -310,6 +310,7 @@ import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ITrustedPresentationListener;
+import android.window.InputTransferToken;
 import android.window.ScreenCapture;
 import android.window.SystemPerformanceHinter;
 import android.window.TaskSnapshot;
@@ -9011,19 +9012,21 @@ public class WindowManagerService extends IWindowManager.Stub
      * views.
      */
     void grantInputChannel(Session session, int callingUid, int callingPid, int displayId,
-            SurfaceControl surface, IBinder clientToken, IBinder hostInputToken,
-            int flags, int privateFlags, int inputFeatures, int type, IBinder windowToken,
-            IBinder inputTransferToken, String inputHandleName, InputChannel outInputChannel) {
+            SurfaceControl surface, IBinder clientToken,
+            @Nullable InputTransferToken hostInputTransferToken, int flags, int privateFlags,
+            int inputFeatures, int type, IBinder windowToken, InputTransferToken inputTransferToken,
+            String inputHandleName, InputChannel outInputChannel) {
         final int sanitizedType = sanitizeWindowType(session, displayId, windowToken, type);
         final InputApplicationHandle applicationHandle;
         final String name;
         Objects.requireNonNull(outInputChannel);
         synchronized (mGlobalLock) {
+            WindowState hostWindowState = hostInputTransferToken != null
+                    ? mInputToWindowMap.get(hostInputTransferToken.mToken) : null;
             EmbeddedWindowController.EmbeddedWindow win =
                     new EmbeddedWindowController.EmbeddedWindow(session, this, clientToken,
-                            mInputToWindowMap.get(hostInputToken), callingUid, callingPid,
-                            sanitizedType, displayId, inputTransferToken, inputHandleName,
-                            (flags & FLAG_NOT_FOCUSABLE) == 0);
+                            hostWindowState, callingUid, callingPid, sanitizedType, displayId,
+                            inputTransferToken, inputHandleName, (flags & FLAG_NOT_FOCUSABLE) == 0);
             win.openInputChannel(outInputChannel);
             mEmbeddedWindowController.add(outInputChannel.getToken(), win);
             applicationHandle = win.getApplicationHandle();
@@ -9068,7 +9071,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean transferHostTouchGestureToEmbedded(Session session, IWindow hostWindow,
-            IBinder inputTransferToken) {
+            InputTransferToken inputTransferToken) {
         final IBinder hostInputChannel, embeddedInputChannel;
         synchronized (mGlobalLock) {
             final WindowState hostWindowState = windowForClientLocked(session, hostWindow, false);
@@ -9484,7 +9487,8 @@ public class WindowManagerService extends IWindowManager.Stub
         return mPossibleDisplayInfoMapper.getPossibleDisplayInfos(displayId);
     }
 
-    void grantEmbeddedWindowFocus(Session session, IBinder inputTransferToken, boolean grantFocus) {
+    void grantEmbeddedWindowFocus(Session session, InputTransferToken inputTransferToken,
+            boolean grantFocus) {
         synchronized (mGlobalLock) {
             final EmbeddedWindowController.EmbeddedWindow embeddedWindow =
                     mEmbeddedWindowController.getByInputTransferToken(inputTransferToken);
@@ -9533,7 +9537,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void grantEmbeddedWindowFocus(Session session, IWindow callingWindow,
-            IBinder inputTransferToken, boolean grantFocus) {
+            InputTransferToken inputTransferToken, boolean grantFocus) {
         synchronized (mGlobalLock) {
             final WindowState hostWindow =
                     windowForClientLocked(session, callingWindow, false /* throwOnError*/);

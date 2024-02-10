@@ -485,6 +485,32 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener,
             EconomyManagerInternal.TareStateChangeListener {
+        @Nullable
+        @GuardedBy("mLock")
+        private DeviceConfig.Properties mLastPropertiesPulled;
+        @GuardedBy("mLock")
+        private boolean mCacheConfigChanges = false;
+
+        @Nullable
+        @GuardedBy("mLock")
+        public String getValueLocked(String key) {
+            if (mLastPropertiesPulled == null) {
+                return null;
+            }
+            return mLastPropertiesPulled.getString(key, null);
+        }
+
+        @GuardedBy("mLock")
+        public void setCacheConfigChangesLocked(boolean enabled) {
+            if (enabled && !mCacheConfigChanges) {
+                mLastPropertiesPulled =
+                        DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
+            } else {
+                mLastPropertiesPulled = null;
+            }
+            mCacheConfigChanges = enabled;
+        }
+
         public void start() {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     AppSchedulingModuleThread.getExecutor(), this);
@@ -513,11 +539,15 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             synchronized (mLock) {
+                if (mCacheConfigChanges) {
+                    mLastPropertiesPulled =
+                            DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
+                }
                 for (String name : properties.getKeyset()) {
                     if (name == null) {
                         continue;
                     }
-                    if (DEBUG) {
+                    if (DEBUG || mCacheConfigChanges) {
                         Slog.d(TAG, "DeviceConfig " + name
                                 + " changed to " + properties.getString(name, null));
                     }
@@ -4812,8 +4842,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         private JobInfo enforceBuilderApiPermissions(int uid, int pid, JobInfo job) {
             if (job.getBias() != JobInfo.BIAS_DEFAULT
                         && !hasPermission(uid, pid, Manifest.permission.UPDATE_DEVICE_STATS)) {
-                if (CompatChanges.isChangeEnabled(THROW_ON_UNSUPPORTED_BIAS_USAGE, uid)
-                        && Flags.throwOnUnsupportedBiasUsage()) {
+                if (CompatChanges.isChangeEnabled(THROW_ON_UNSUPPORTED_BIAS_USAGE, uid)) {
                     throw new SecurityException("Apps may not call setBias()");
                 } else {
                     // We can't throw the exception. Log the issue and modify the job to remove
@@ -5554,6 +5583,18 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    void setCacheConfigChanges(boolean enabled) {
+        synchronized (mLock) {
+            mConstantsObserver.setCacheConfigChangesLocked(enabled);
+        }
+    }
+
+    String getConfigValue(String key) {
+        synchronized (mLock) {
+            return mConstantsObserver.getValueLocked(key);
+        }
+    }
+
     int getStorageSeq() {
         synchronized (mLock) {
             return mStorageController.getTracker().getSeq();
@@ -5864,9 +5905,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
             pw.print(Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT,
                     Flags.doNotForceRushExecutionAtBoot());
-            pw.println();
-            pw.print(Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE,
-                    Flags.throwOnUnsupportedBiasUsage());
             pw.println();
             pw.print(android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION,
                     android.app.job.Flags.backupJobsExemption());

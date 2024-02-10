@@ -22,7 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.accessibility.fontscaling.FontScalingDialogDelegate
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
@@ -60,7 +60,7 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
     private lateinit var underTest: FontScalingTileUserActionInteractor
 
     @Mock private lateinit var fontScalingDialogDelegate: FontScalingDialogDelegate
-    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
     @Mock private lateinit var dialog: SystemUIDialog
     @Mock private lateinit var activityStarter: ActivityStarter
 
@@ -69,7 +69,7 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
     @Before
     fun setup() {
         activityStarter = mock<ActivityStarter>()
-        dialogLaunchAnimator = mock<DialogLaunchAnimator>()
+        mDialogTransitionAnimator = mock<DialogTransitionAnimator>()
         dialog = mock<SystemUIDialog>()
         fontScalingDialogDelegate =
             mock<FontScalingDialogDelegate> { whenever(createDialog()).thenReturn(dialog) }
@@ -81,7 +81,7 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
                 qsTileIntentUserActionHandler,
                 { fontScalingDialogDelegate },
                 keyguardStateController,
-                dialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 activityStarter
             )
     }
@@ -103,7 +103,8 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
                     eq(false)
                 )
             argumentCaptor.value.run()
-            verify(dialogLaunchAnimator).showFromView(any(), eq(testView), nullable(), anyBoolean())
+            verify(mDialogTransitionAnimator)
+                .showFromView(any(), eq(testView), nullable(), anyBoolean())
         }
 
     @Test
@@ -123,7 +124,7 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
                     eq(false)
                 )
             argumentCaptor.value.run()
-            verify(dialogLaunchAnimator, never())
+            verify(mDialogTransitionAnimator, never())
                 .showFromView(any(), eq(testView), nullable(), anyBoolean())
             verify(dialog).show()
         }

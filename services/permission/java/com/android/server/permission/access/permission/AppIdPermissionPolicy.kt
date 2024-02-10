@@ -1662,6 +1662,9 @@ class AppIdPermissionPolicy : SchemePolicy() {
     ): Int =
         state.userStates[userId]?.appIdPermissionFlags?.get(appId).getWithDefault(permissionName, 0)
 
+    fun GetStateScope.getAllPermissionFlags(appId: Int, userId: Int): IndexedMap<String, Int>? =
+        state.userStates[userId]?.appIdPermissionFlags?.get(appId)
+
     fun MutateStateScope.setPermissionFlags(
         appId: Int,
         userId: Int,

@@ -26,7 +26,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager
@@ -46,7 +46,7 @@ open class MediaOutputDialogFactory @Inject constructor(
     private val broadcastSender: BroadcastSender,
     private val notifCollection: CommonNotifCollection,
     private val uiEventLogger: UiEventLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val nearbyMediaDevicesManager: NearbyMediaDevicesManager,
     private val audioManager: AudioManager,
     private val powerExemptionManager: PowerExemptionManager,
@@ -80,16 +80,16 @@ open class MediaOutputDialogFactory @Inject constructor(
         val controller = MediaOutputController(
             context, packageName,
             mediaSessionManager, lbm, starter, notifCollection,
-            dialogLaunchAnimator, nearbyMediaDevicesManager, audioManager,
+            dialogTransitionAnimator, nearbyMediaDevicesManager, audioManager,
             powerExemptionManager, keyGuardManager, featureFlags, userTracker)
         val dialog =
             MediaOutputDialog(context, aboveStatusBar, broadcastSender, controller,
-                    dialogLaunchAnimator, uiEventLogger, includePlaybackAndAppMetadata)
+                    dialogTransitionAnimator, uiEventLogger, includePlaybackAndAppMetadata)
         mediaOutputDialog = dialog
 
         // Show the dialog.
         if (view != null) {
-            dialogLaunchAnimator.showFromView(
+            dialogTransitionAnimator.showFromView(
                 dialog, view,
                 cuj = DialogCuj(
                     InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,

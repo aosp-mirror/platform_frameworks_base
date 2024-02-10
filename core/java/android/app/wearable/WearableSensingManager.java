@@ -206,9 +206,10 @@ public class WearableSensingManager {
      * and kill the WearableSensingService process.
      *
      * <p>Before providing the secureWearableConnection, the system will restart the
-     * WearableSensingService process. Other method calls into WearableSensingService may be dropped
-     * during the restart. The caller is responsible for ensuring other method calls are queued
-     * until a success status is returned from the {@code statusConsumer}.
+     * WearableSensingService process if it has not been restarted since the last
+     * secureWearableConnection was provided. Other method calls into WearableSensingService may be
+     * dropped during the restart. The caller is responsible for ensuring other method calls are
+     * queued until a success status is returned from the {@code statusConsumer}.
      *
      * @param wearableConnection The connection to provide
      * @param executor Executor on which to run the consumer callback

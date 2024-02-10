@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> pagkatapos ng <xliff:g id="TIME_DELAY">{2}</xliff:g> (na) segundo"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Hindi naipasa"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Hindi ipinasa"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Seguridad ng cellular network"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Suriin ang mga setting"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Na-access ang identifier ng device"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Naitala ng isang network sa koneksyon sa <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> ang unique identifier (IMSI) ng iyong device nang <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> (na) beses sa pagitan ng <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> at <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Naka-encrypt na koneksyon sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Nakakonekta ka na sa mas secure na cellular network."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Hindi naka-encrypt na koneksyon sa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Nakakonekta ka sa hindi naka-encrypt na cellular network. Posibleng mahina ang proteksyon laban pag-intercept ng iyong mga tawag, mensahe, at data."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mga setting ng seguridad ng cellular"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Matuto pa"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Kumpleto na ang code ng tampok."</string>
     <string name="fcError" msgid="5325116502080221346">"Problema sa koneksyon o di-wastong code ng tampok."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Nagbibigay-daan sa app na mag-bind sa module ng cell broadcast para makapagpasa ng mga mensahe ng cell broadcast pagkatanggap sa mga ito. Inihahatid ang mga alerto ng cell broadcast sa ilang lokasyon para balaan ka tungkol sa mga emergency na sitwasyon. Posibleng makasagabal ang mga nakakahamak na app sa performance o pagpapatakbo ng iyong device kapag nakatanggap ito ng emergency na cell broadcast."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Pamahalaan ang mga kasalukuyang tawag"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Pinapayagan ang app na makita ang mga detalye tungkol sa mga kasalukuyang tawag sa iyong device at kontrolin ang mga tawag na ito."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"I-access ang huling napag-alamang pagkakakilanlan ng cell"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Pinapayagan ang app na i-access ang huling napag-alamang pagkakakilanlan ng cell na ibinigay ng telephony."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"basahin ang mga mensahe ng cell broadcast"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Binibigyang-daan ang app na magbasa ng mga mensahe ng cell broadcast na natanggap ng iyong device. Inihahatid ang mga alerto ng cell broadcast sa ilang lokasyon upang balaan ka tungkol sa mga emergency na sitwasyon. Maaaring makaabala ang nakakahamak na apps sa performance o pagpapatakbo ng iyong device kapag nakatanggap ng emergency na cell broadcast."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"magbasa ng mga na-subscribe na feed"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Nagbibigay-daan sa app na gamitin ang infrared transmitter ng telepono."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"itakda ang wallpaper"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Pinapayagan ang app na itakda ang wallpaper ng system."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"I-access ang mga nakatagong profile"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Nagbibigay-daan sa app na i-access ang mga nakatagong profile."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"isaayos ang laki ng iyong wallpaper"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Pinapayagan ang app na itakda ang mga pahiwatig sa laki ng wallpaper ng system."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"itakda ang time zone"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Pinapahintulutan ang app na mag-sample ng data ng sensor sa rate na higit sa 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"i-update ang app nang walang pagkilos mula sa user"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Pinapayagan ang may-ari na i-update ang app na dati nitong na-install nang walang pagkilos mula sa user"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"i-update ang mga status ng pag-verify ng E2EE contact key na pag-aari ng iba pang app"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Nagbibigay-daan sa app na i-update ang mga status ng pag-verify ng E2EE contact key na pag-aari ng iba pang app"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa screen lock."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Na-verify"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Palawakin"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"I-collapse"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Naka-collapse"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Naka-expand"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"i-toggle ang pagpapalawak"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Communal"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Awtomatikong nakakonekta sa satellite"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Puwede kang magpadala at tumanggap ng mga mensahe nang walang mobile o Wi-Fi network"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buksan ang Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Paano ito gumagana"</string>
 </resources>

@@ -155,6 +155,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> po <xliff:g id="TIME_DELAY">{2}</xliff:g> sek."</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepřesměrováno"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepřesměrováno"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Zabezpečení mobilní sítě"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Zkontrolovat nastavení"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Byl sdílen identifikátor zařízení"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"V období od <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> do <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> síť na připojení <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> zaznamenala <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g>krát jedinečný identifikátor vašeho zařízení (IMSI)."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Šifrované připojení k síti <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Nyní jste připojeni k zabezpečenější mobilní síti."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Nešifrované připojení k síti <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Jste připojeni k nešifrované mobilní síti. Vaše hovory, zprávy a data by někdo mohl zachytit."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Nastavení zabezpečení mobilní sítě"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Další informace"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Požadavek zadaný pomocí kódu funkce byl úspěšně dokončen."</string>
     <string name="fcError" msgid="5325116502080221346">"Problém s připojením nebo neplatný kód funkce."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -372,10 +382,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Umožňuje aplikaci vytvořit vazbu s modulem informačních služeb za účelem přesměrovávání přijatých zpráv informačních služeb. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Správa probíhajících hovorů"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Umožňuje aplikaci zobrazit podrobnosti o probíhajících hovorech v zařízení a tyto hovory ovládat."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Přístup k poslednímu známému ID buňky."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Umožňuje aplikaci přístup k poslednímu známému ID buňky poskytnutému telefonickou službou."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"čtení zpráv informačních služeb"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Umožňuje aplikaci číst zprávy informačních služeb přijaté ve vašem zařízení. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"čtení zdrojů přihlášených k odběru"</string>
@@ -547,6 +555,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Umožňuje aplikaci využívat infračervený vysílač telefonu."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"nastavení tapety"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Umožňuje aplikaci nastavit tapetu systému."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Přístup ke skrytým profilům"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Umožňuje aplikaci přístup ke skrytým profilům."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"úprava velikosti tapety"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Umožňuje aplikaci nastavit nápovědu pro velikost tapety systému."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"nastavení časového pásma"</string>
@@ -815,6 +825,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Umožňuje aplikaci vzorkovat data ze senzorů s frekvencí vyšší než 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"aktualizovat aplikaci bez zásahu uživatele"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Umožňuje držiteli aktualizovat aplikaci, kterou dříve nainstaloval, bez zásahu uživatele"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"aktualizace stavů ověření kontaktních klíčů E2EE vlastněných jinými aplikacemi"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Umožňuje aplikaci aktualizovat stavy ověření kontaktních klíčů E2EE vlastněných jinými aplikacemi"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Sledovat pokusy o odemknutí obrazovky"</string>
@@ -1934,6 +1946,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Ověřeno"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Rozbalit"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Sbalit"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Sbaleno"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Rozbaleno"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"přepnout rozbalení"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Port USB pro periferní zařízení – Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2374,4 +2388,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Komunální"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Automaticky připojeno k satelitu"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Zprávy můžete odesílat a přijímat bez mobilní sítě nebo sítě Wi-Fi"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otevřít Zprávy"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Jak to funguje"</string>
 </resources>

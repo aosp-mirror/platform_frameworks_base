@@ -21,6 +21,7 @@ com.android.internal.os.RuntimeInit
 com.android.internal.power.ModemPowerProfile
 
 android.util.AtomicFile
+android.util.CloseGuard
 android.util.DataUnit
 android.util.DayOfMonthCursor
 android.util.DumpableContainer
@@ -68,10 +69,14 @@ android.os.Message
 android.os.MessageQueue
 android.os.PackageTagsList
 android.os.Parcel
+android.os.ParcelFileDescriptor
+android.os.ParcelFileDescriptor$AutoCloseInputStream
+android.os.ParcelFileDescriptor$AutoCloseOutputStream
 android.os.Parcelable
 android.os.PowerComponents
 android.os.Process
 android.os.ServiceSpecificException
+android.os.StrictMode
 android.os.SystemClock
 android.os.SystemProperties
 android.os.TestLooperManager
@@ -147,6 +152,9 @@ android.graphics.RectF
 android.content.ContentProvider
 
 android.app.ActivityManager
+android.app.ActivityOptions
+android.app.BroadcastOptions
+android.app.ComponentOptions
 android.app.Instrumentation
 
 android.metrics.LogMaker

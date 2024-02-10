@@ -28,7 +28,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.AnimationFeatureFlags;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpHandler;
@@ -197,18 +197,18 @@ public interface CentralSurfacesDependenciesModule {
     /** */
     @Provides
     @SysUISingleton
-    static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager,
+    static DialogTransitionAnimator provideDialogTransitionAnimator(IDreamManager dreamManager,
             KeyguardStateController keyguardStateController,
             Lazy<AlternateBouncerInteractor> alternateBouncerInteractor,
             InteractionJankMonitor interactionJankMonitor,
             AnimationFeatureFlags animationFeatureFlags) {
-        DialogLaunchAnimator.Callback callback = new DialogLaunchAnimator.Callback() {
+        DialogTransitionAnimator.Callback callback = new DialogTransitionAnimator.Callback() {
             @Override
             public boolean isDreaming() {
                 try {
                     return dreamManager.isDreaming();
                 } catch (RemoteException e) {
-                    Log.e("DialogLaunchAnimator.Callback", "dreamManager.isDreaming failed", e);
+                    Log.e("DialogTransitionAnimator.Callback", "dreamManager.isDreaming failed", e);
                     return false;
                 }
             }
@@ -223,7 +223,8 @@ public interface CentralSurfacesDependenciesModule {
                 return alternateBouncerInteractor.get().canShowAlternateBouncerForFingerprint();
             }
         };
-        return new DialogLaunchAnimator(callback, interactionJankMonitor, animationFeatureFlags);
+        return new DialogTransitionAnimator(
+                callback, interactionJankMonitor, animationFeatureFlags);
     }
 
     /** */

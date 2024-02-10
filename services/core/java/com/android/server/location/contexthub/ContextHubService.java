@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
+import android.chre.flags.Flags;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +30,8 @@ import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
+import android.hardware.contexthub.ErrorCode;
+import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
 import android.hardware.location.ContextHubTransaction;
@@ -217,6 +220,11 @@ public class ContextHubService extends IContextHubService.Stub {
             initExistingCallbacks();
             resetSettings();
             Log.i(TAG, "Finished Context Hub Service restart");
+        }
+
+        @Override
+        public void handleMessageDeliveryStatus(MessageDeliveryStatus messageDeliveryStatus) {
+            handleMessageDeliveryStatusCallback(messageDeliveryStatus);
         }
     }
 
@@ -822,8 +830,8 @@ public class ContextHubService extends IContextHubService.Stub {
                         info.getAppId(), msg.getMsgType(), msg.getData());
 
                 IContextHubClient client = mDefaultClientMap.get(contextHubHandle);
-                success = (client.sendMessageToNanoApp(message) ==
-                        ContextHubTransaction.RESULT_SUCCESS);
+                success = client.sendMessageToNanoApp(message)
+                        == ContextHubTransaction.RESULT_SUCCESS;
             } else {
                 Log.e(TAG, "Failed to send nanoapp message - nanoapp with handle "
                         + nanoAppHandle + " does not exist.");
@@ -841,16 +849,33 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param message the message contents
      * @param nanoappPermissions the set of permissions the nanoapp holds
      * @param messagePermissions the set of permissions that should be used for attributing
-     *     permissions when this message is consumed by a client
+     *        permissions when this message is consumed by a client
      */
-    private void handleClientMessageCallback(
-            int contextHubId,
-            short hostEndpointId,
-            NanoAppMessage message,
-            List<String> nanoappPermissions,
+    private void handleClientMessageCallback(int contextHubId, short hostEndpointId,
+            NanoAppMessage message, List<String> nanoappPermissions,
             List<String> messagePermissions) {
-        mClientManager.onMessageFromNanoApp(
-                contextHubId, hostEndpointId, message, nanoappPermissions, messagePermissions);
+        byte errorCode = mClientManager.onMessageFromNanoApp(contextHubId, hostEndpointId, message,
+                nanoappPermissions, messagePermissions);
+        if (message.isReliable() && errorCode != ErrorCode.OK) {
+            sendMessageDeliveryStatusToContextHub(contextHubId, message.getMessageSequenceNumber(),
+                    errorCode);
+        }
+    }
+
+    private void sendMessageDeliveryStatusToContextHub(int contextHubId,
+            int messageSequenceNumber, byte errorCode) {
+        if (!Flags.reliableMessageImplementation()) {
+            return;
+        }
+
+        MessageDeliveryStatus status = new MessageDeliveryStatus();
+        status.messageSequenceNumber = messageSequenceNumber;
+        status.errorCode = errorCode;
+        if (mContextHubWrapper.sendMessageDeliveryStatusToContextHub(contextHubId, status)
+                != ContextHubTransaction.RESULT_SUCCESS) {
+            Log.e(TAG, "Failed to send the reliable message status for message sequence number: "
+                    + messageSequenceNumber + " with error code: " + errorCode);
+        }
     }
 
     /**
@@ -894,6 +919,16 @@ public class ContextHubService extends IContextHubService.Stub {
     private void handleTransactionResultCallback(int contextHubId, int transactionId,
             boolean success) {
         mTransactionManager.onTransactionResponse(transactionId, success);
+    }
+
+    /**
+     * Handles a message deliveyr status from a Context Hub.
+     *
+     * @param messageDeliveryStatus     The message delivery status to deliver.
+     */
+    private void handleMessageDeliveryStatusCallback(MessageDeliveryStatus messageDeliveryStatus) {
+        mTransactionManager.onMessageDeliveryResponse(messageDeliveryStatus.messageSequenceNumber,
+                messageDeliveryStatus.errorCode == ErrorCode.OK);
     }
 
     /**

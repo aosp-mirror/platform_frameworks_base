@@ -37,4 +37,5 @@ oneway interface IWearableSensingService {
             in RemoteCallback detectionResultCallback, in RemoteCallback statusCallback);
     void stopDetection(in String packageName);
     void queryServiceStatus(in int[] eventTypes, in String packageName, in RemoteCallback callback);
+    void killProcess();
 }

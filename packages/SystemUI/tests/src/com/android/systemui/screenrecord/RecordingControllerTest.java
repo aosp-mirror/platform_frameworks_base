@@ -41,7 +41,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -88,7 +88,7 @@ public class RecordingControllerTest extends SysuiTestCase {
     @Mock
     private ScreenCaptureDevicePolicyResolver mDevicePolicyResolver;
     @Mock
-    private DialogLaunchAnimator mDialogLaunchAnimator;
+    private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
@@ -115,7 +115,7 @@ public class RecordingControllerTest extends SysuiTestCase {
                 Dependency.get(SystemUIDialogManager.class),
                 Dependency.get(SysUiState.class),
                 Dependency.get(BroadcastDispatcher.class),
-                Dependency.get(DialogLaunchAnimator.class)
+                Dependency.get(DialogTransitionAnimator.class)
         );
 
         mFeatureFlags = new FakeFeatureFlags();
@@ -238,7 +238,7 @@ public class RecordingControllerTest extends SysuiTestCase {
                 mController.createScreenRecordDialog(
                         mContext,
                         mFeatureFlags,
-                        mDialogLaunchAnimator,
+                        mDialogTransitionAnimator,
                         mActivityStarter,
                         /* onStartRecordingClicked= */ null);
 
@@ -253,7 +253,7 @@ public class RecordingControllerTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES, false);
 
         Dialog dialog = mController.createScreenRecordDialog(mContext, mFeatureFlags,
-                mDialogLaunchAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
+                mDialogTransitionAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
 
         assertThat(dialog).isInstanceOf(ScreenRecordDialog.class);
     }
@@ -265,7 +265,7 @@ public class RecordingControllerTest extends SysuiTestCase {
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(true);
 
         Dialog dialog = mController.createScreenRecordDialog(mContext, mFeatureFlags,
-                mDialogLaunchAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
+                mDialogTransitionAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
 
         assertThat(dialog).isInstanceOf(ScreenCaptureDisabledDialog.class);
     }
@@ -280,7 +280,7 @@ public class RecordingControllerTest extends SysuiTestCase {
                 mController.createScreenRecordDialog(
                         mContext,
                         mFeatureFlags,
-                        mDialogLaunchAnimator,
+                        mDialogTransitionAnimator,
                         mActivityStarter,
                         /* onStartRecordingClicked= */ null);
 
@@ -296,7 +296,7 @@ public class RecordingControllerTest extends SysuiTestCase {
         when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(false);
 
         mController.createScreenRecordDialog(mContext, mFeatureFlags,
-                mDialogLaunchAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
+                mDialogTransitionAnimator, mActivityStarter, /* onStartRecordingClicked= */ null);
 
         verify(mMediaProjectionMetricsLogger)
                 .notifyProjectionInitiated(
@@ -314,13 +314,13 @@ public class RecordingControllerTest extends SysuiTestCase {
                 SystemUIDialogManager systemUIDialogManager,
                 SysUiState sysUiState,
                 BroadcastDispatcher broadcastDispatcher,
-                DialogLaunchAnimator dialogLaunchAnimator) {
+                DialogTransitionAnimator dialogTransitionAnimator) {
             super(
                     context,
                     systemUIDialogManager,
                     sysUiState,
                     broadcastDispatcher,
-                    dialogLaunchAnimator);
+                    dialogTransitionAnimator);
         }
 
         @Override

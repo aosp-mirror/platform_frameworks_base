@@ -32,7 +32,7 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.model.SysUiState
 
@@ -55,7 +55,7 @@ class ComponentSystemUIDialog(
     dialogManager: SystemUIDialogManager,
     sysUiState: SysUiState,
     broadcastDispatcher: BroadcastDispatcher,
-    dialogLaunchAnimator: DialogLaunchAnimator,
+    dialogTransitionAnimator: DialogTransitionAnimator,
 ) :
     SystemUIDialog(
         context,
@@ -64,7 +64,7 @@ class ComponentSystemUIDialog(
         dialogManager,
         sysUiState,
         broadcastDispatcher,
-        dialogLaunchAnimator
+        dialogTransitionAnimator
     ),
     LifecycleOwner,
     SavedStateRegistryOwner,

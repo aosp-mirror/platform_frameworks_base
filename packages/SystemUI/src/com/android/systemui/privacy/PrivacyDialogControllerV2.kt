@@ -30,7 +30,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.core.view.isVisible
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -74,7 +74,7 @@ class PrivacyDialogControllerV2(
     private val keyguardStateController: KeyguardStateController,
     private val appOpsController: AppOpsController,
     private val uiEventLogger: UiEventLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val dialogProvider: DialogProvider
 ) {
 
@@ -91,7 +91,7 @@ class PrivacyDialogControllerV2(
         keyguardStateController: KeyguardStateController,
         appOpsController: AppOpsController,
         uiEventLogger: UiEventLogger,
-        dialogLaunchAnimator: DialogLaunchAnimator
+        dialogTransitionAnimator: DialogTransitionAnimator
     ) : this(
         permissionManager,
         packageManager,
@@ -104,7 +104,7 @@ class PrivacyDialogControllerV2(
         keyguardStateController,
         appOpsController,
         uiEventLogger,
-        dialogLaunchAnimator,
+        dialogTransitionAnimator,
         defaultDialogProvider
     )
 
@@ -282,7 +282,7 @@ class PrivacyDialogControllerV2(
                         if (controller == null) {
                             d.show()
                         } else {
-                            dialogLaunchAnimator.show(d, controller)
+                            dialogTransitionAnimator.show(d, controller)
                         }
                     } else {
                         d.show()
@@ -298,10 +298,11 @@ class PrivacyDialogControllerV2(
 
     private fun getPrivacyDialogController(
         source: OngoingPrivacyChip
-    ): DialogLaunchAnimator.Controller? {
+    ): DialogTransitionAnimator.Controller? {
         val delegate =
-            DialogLaunchAnimator.Controller.fromView(source.launchableContentView) ?: return null
-        return object : DialogLaunchAnimator.Controller by delegate {
+            DialogTransitionAnimator.Controller.fromView(source.launchableContentView)
+                ?: return null
+        return object : DialogTransitionAnimator.Controller by delegate {
             override fun shouldAnimateExit() = source.isVisible
         }
     }

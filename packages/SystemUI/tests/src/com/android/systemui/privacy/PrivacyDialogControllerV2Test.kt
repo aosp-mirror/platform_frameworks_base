@@ -34,7 +34,7 @@ import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.logging.PrivacyLogger
@@ -97,7 +97,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
     @Captor private lateinit var activityStartedCaptor: ArgumentCaptor<ActivityStarter.Callback>
     @Captor private lateinit var intentCaptor: ArgumentCaptor<Intent>
     @Mock private lateinit var uiEventLogger: UiEventLogger
-    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
 
     private val backgroundExecutor = FakeExecutor(FakeSystemClock())
     private val uiExecutor = FakeExecutor(FakeSystemClock())
@@ -145,7 +145,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
                 keyguardStateController,
                 appOpsController,
                 uiEventLogger,
-                dialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 dialogProvider
             )
     }
@@ -197,7 +197,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        verify(dialogLaunchAnimator, never()).show(any(), any(), anyBoolean())
+        verify(mDialogTransitionAnimator, never()).show(any(), any(), anyBoolean())
         verify(dialog).show()
     }
 
@@ -212,7 +212,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
         controller.showDialog(context, view)
         exhaustExecutors()
 
-        verify(dialogLaunchAnimator).show(eq(dialog), any(), anyBoolean())
+        verify(mDialogTransitionAnimator).show(eq(dialog), any(), anyBoolean())
         verify(dialog, never()).show()
     }
 

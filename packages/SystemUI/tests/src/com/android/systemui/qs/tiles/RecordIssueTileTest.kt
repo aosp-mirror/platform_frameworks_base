@@ -23,7 +23,7 @@ import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -65,7 +65,7 @@ class RecordIssueTileTest : SysuiTestCase() {
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var keyguardDismissUtil: KeyguardDismissUtil
     @Mock private lateinit var keyguardStateController: KeyguardStateController
-    @Mock private lateinit var dialogLauncherAnimator: DialogLaunchAnimator
+    @Mock private lateinit var dialogLauncherAnimator: DialogTransitionAnimator
     @Mock private lateinit var userContextProvider: UserContextProvider
     @Mock private lateinit var delegateFactory: RecordIssueDialogDelegate.Factory
     @Mock private lateinit var dialogDelegate: RecordIssueDialogDelegate

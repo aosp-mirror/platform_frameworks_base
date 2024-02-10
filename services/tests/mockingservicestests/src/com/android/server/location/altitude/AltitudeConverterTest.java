@@ -58,7 +58,7 @@ public class AltitudeConverterTest {
         location.setAltitude(-1);
         location.setVerticalAccuracyMeters(1);
         // Requires data to be loaded from raw assets.
-        assertThat(mAltitudeConverter.addMslAltitudeToLocation(location)).isFalse();
+        assertThat(mAltitudeConverter.tryAddMslAltitudeToLocation(location)).isFalse();
         assertThat(location.hasMslAltitude()).isFalse();
         assertThat(location.hasMslAltitudeAccuracy()).isFalse();
         // Loads data from raw assets.
@@ -75,7 +75,7 @@ public class AltitudeConverterTest {
         location.setAltitude(-1);
         location.setVerticalAccuracyMeters(-1); // Invalid vertical accuracy
         // Requires no data to be loaded from raw assets.
-        assertThat(mAltitudeConverter.addMslAltitudeToLocation(location)).isTrue();
+        assertThat(mAltitudeConverter.tryAddMslAltitudeToLocation(location)).isTrue();
         assertThat(location.getMslAltitudeMeters()).isWithin(2).of(5.0622);
         assertThat(location.hasMslAltitudeAccuracy()).isFalse();
         // Results in same outcome.
@@ -90,7 +90,7 @@ public class AltitudeConverterTest {
         location.setAltitude(-1);
         location.setVerticalAccuracyMeters(1);
         // Requires data to be loaded from raw assets.
-        assertThat(mAltitudeConverter.addMslAltitudeToLocation(location)).isFalse();
+        assertThat(mAltitudeConverter.tryAddMslAltitudeToLocation(location)).isFalse();
         assertThat(location.hasMslAltitude()).isFalse();
         assertThat(location.hasMslAltitudeAccuracy()).isFalse();
         // Loads data from raw assets.

@@ -68,11 +68,11 @@ constructor(
         scope.launch {
             keyguardInteractor.isKeyguardShowing
                 .sample(
-                    currentKeyguardState,
+                    startedKeyguardState,
                     communalInteractor.isIdleOnCommunal,
                 )
-                .collect { (isKeyguardShowing, currentState, isIdleOnCommunal) ->
-                    if (isKeyguardShowing && currentState == KeyguardState.GONE) {
+                .collect { (isKeyguardShowing, startedState, isIdleOnCommunal) ->
+                    if (isKeyguardShowing && startedState == KeyguardState.GONE) {
                         val to =
                             if (isIdleOnCommunal) {
                                 KeyguardState.GLANCEABLE_HUB

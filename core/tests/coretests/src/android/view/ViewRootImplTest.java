@@ -355,16 +355,14 @@ public class ViewRootImplTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_GET_HOST_TOKEN_API)
+    @RequiresFlagsEnabled(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
     public void whenViewIsAttachedToWindow_getHostToken() {
         View view = new View(sContext);
         attachViewToWindow(view);
 
         mViewRootImpl = view.getViewRootImpl();
 
-        assertThat(mViewRootImpl.getHostToken()).isNotEqualTo(null);
-        assertThat(mViewRootImpl.getHostToken())
-                .isEqualTo(mViewRootImpl.getInputToken());
+        assertThat(mViewRootImpl.getInputTransferToken()).isNotEqualTo(null);
     }
 
     /**

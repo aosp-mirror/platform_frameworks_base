@@ -31,10 +31,13 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.platform.test.annotations.DisabledOnRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,6 +46,9 @@ import java.io.FileDescriptor;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BinderDeathDispatcherTest {
+    @Rule
+    public RavenwoodRule mRavenwood = new RavenwoodRule.Builder().build();
+
     private static class MyTarget implements IInterface, IBinder {
         public boolean isAlive = true;
         public DeathRecipient mRecipient;
@@ -195,6 +201,7 @@ public class BinderDeathDispatcherTest {
     }
 
     @Test
+    @DisabledOnRavenwood(reason = "b/324433654 -- depends on unsupported classes")
     public void testRegisterAndKill() {
         BinderDeathDispatcher<MyTarget> d = new BinderDeathDispatcher<>();
 
@@ -265,6 +272,7 @@ public class BinderDeathDispatcherTest {
     }
 
     @Test
+    @DisabledOnRavenwood(reason = "b/324433654 -- depends on unsupported classes")
     public void duplicateRegistrations() {
         BinderDeathDispatcher<MyTarget> d = new BinderDeathDispatcher<>();
 

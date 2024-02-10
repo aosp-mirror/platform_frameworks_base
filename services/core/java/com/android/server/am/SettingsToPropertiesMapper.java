@@ -168,6 +168,7 @@ public class SettingsToPropertiesMapper {
         "pixel_system_sw_video",
         "pixel_watch",
         "platform_security",
+        "pmw",
         "power",
         "preload_safety",
         "privacy_infra_policy",

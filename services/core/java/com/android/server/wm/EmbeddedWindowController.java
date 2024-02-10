@@ -32,6 +32,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
+import android.window.InputTransferToken;
 
 /**
  * Keeps track of embedded windows.
@@ -44,7 +45,7 @@ class EmbeddedWindowController {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "EmbeddedWindowController" : TAG_WM;
     /* maps input token to an embedded window */
     private ArrayMap<IBinder /*input token */, EmbeddedWindow> mWindows = new ArrayMap<>();
-    private ArrayMap<IBinder /*input transfer token */, EmbeddedWindow>
+    private ArrayMap<InputTransferToken /*input transfer token */, EmbeddedWindow>
             mWindowsByInputTransferToken = new ArrayMap<>();
     private ArrayMap<IBinder /*window token*/, EmbeddedWindow> mWindowsByWindowToken =
         new ArrayMap<>();
@@ -66,7 +67,7 @@ class EmbeddedWindowController {
     void add(IBinder inputToken, EmbeddedWindow window) {
         try {
             mWindows.put(inputToken, window);
-            final IBinder inputTransferToken = window.getInputTransferToken();
+            final InputTransferToken inputTransferToken = window.getInputTransferToken();
             mWindowsByInputTransferToken.put(inputTransferToken, window);
             mWindowsByWindowToken.put(window.getWindowToken(), window);
             updateProcessController(window);
@@ -126,7 +127,7 @@ class EmbeddedWindowController {
         return mWindows.get(inputToken);
     }
 
-    EmbeddedWindow getByInputTransferToken(IBinder inputTransferToken) {
+    EmbeddedWindow getByInputTransferToken(InputTransferToken inputTransferToken) {
         return mWindowsByInputTransferToken.get(inputTransferToken);
     }
 
@@ -152,7 +153,7 @@ class EmbeddedWindowController {
          * to request focus transfer and gesture transfer to the embedded. This is not the input
          * token since we don't want to give clients access to each others input token.
          */
-        private final IBinder mInputTransferToken;
+        private final InputTransferToken mInputTransferToken;
 
         private boolean mIsFocusable;
 
@@ -170,7 +171,7 @@ class EmbeddedWindowController {
          */
         EmbeddedWindow(Session session, WindowManagerService service, IBinder clientToken,
                        WindowState hostWindowState, int ownerUid, int ownerPid, int windowType,
-                       int displayId, IBinder inputTransferToken, String inputHandleName,
+                       int displayId, InputTransferToken inputTransferToken, String inputHandleName,
                        boolean isFocusable) {
             mSession = session;
             mWmService = service;
@@ -254,7 +255,7 @@ class EmbeddedWindowController {
             return mOwnerUid;
         }
 
-        IBinder getInputTransferToken() {
+        InputTransferToken getInputTransferToken() {
             return mInputTransferToken;
         }
 

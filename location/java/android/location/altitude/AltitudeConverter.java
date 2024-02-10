@@ -224,7 +224,7 @@ public final class AltitudeConverter {
      * are necessary to load data from raw assets. Example code on the main thread is as follows:
      *
      * <pre>{@code
-     *   if (!mAltitudeConverter.addMslAltitudeToLocation(location)) {
+     *   if (!mAltitudeConverter.tryAddMslAltitudeToLocation(location)) {
      *       // Queue up only one call off the main thread.
      *       if (mIsAltitudeConverterIdle) {
      *           mIsAltitudeConverterIdle = false;
@@ -242,7 +242,7 @@ public final class AltitudeConverter {
      * }</pre>
      */
     @FlaggedApi(Flags.FLAG_GEOID_HEIGHTS_VIA_ALTITUDE_HAL)
-    public boolean addMslAltitudeToLocation(@NonNull Location location) {
+    public boolean tryAddMslAltitudeToLocation(@NonNull Location location) {
         validate(location);
         MapParamsProto geoidHeightParams = GeoidMap.getGeoidHeightParams();
         if (geoidHeightParams == null) {

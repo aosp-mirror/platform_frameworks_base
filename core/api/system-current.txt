@@ -5676,6 +5676,7 @@ package android.hardware.location {
     method @NonNull public android.hardware.location.ContextHubInfo getAttachedHub();
     method @IntRange(from=0, to=65535) public int getId();
     method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int sendMessageToNanoApp(@NonNull android.hardware.location.NanoAppMessage);
+    method @FlaggedApi("android.chre.flags.reliable_message") @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> sendReliableMessageToNanoApp(@NonNull android.hardware.location.NanoAppMessage);
   }
 
   public class ContextHubClientCallback {
@@ -5711,6 +5712,7 @@ package android.hardware.location {
     method public String getToolchain();
     method public int getToolchainVersion();
     method public String getVendor();
+    method @FlaggedApi("android.chre.flags.reliable_message") public boolean supportsReliableMessages();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.ContextHubInfo> CREATOR;
   }
@@ -5794,6 +5796,7 @@ package android.hardware.location {
     field public static final int RESULT_FAILED_BAD_PARAMS = 2; // 0x2
     field public static final int RESULT_FAILED_BUSY = 4; // 0x4
     field public static final int RESULT_FAILED_HAL_UNAVAILABLE = 8; // 0x8
+    field @FlaggedApi("android.chre.flags.reliable_message") public static final int RESULT_FAILED_NOT_SUPPORTED = 9; // 0x9
     field public static final int RESULT_FAILED_SERVICE_INTERNAL_FAILURE = 7; // 0x7
     field public static final int RESULT_FAILED_TIMEOUT = 6; // 0x6
     field public static final int RESULT_FAILED_UNINITIALIZED = 3; // 0x3
@@ -5803,6 +5806,7 @@ package android.hardware.location {
     field public static final int TYPE_ENABLE_NANOAPP = 2; // 0x2
     field public static final int TYPE_LOAD_NANOAPP = 0; // 0x0
     field public static final int TYPE_QUERY_NANOAPPS = 4; // 0x4
+    field @FlaggedApi("android.chre.flags.reliable_message") public static final int TYPE_RELIABLE_MESSAGE = 5; // 0x5
     field public static final int TYPE_UNLOAD_NANOAPP = 1; // 0x1
   }
 
@@ -5985,12 +5989,17 @@ package android.hardware.location {
 
   public final class NanoAppMessage implements android.os.Parcelable {
     method public static android.hardware.location.NanoAppMessage createMessageFromNanoApp(long, int, byte[], boolean);
+    method @FlaggedApi("android.chre.flags.reliable_message") @NonNull public static android.hardware.location.NanoAppMessage createMessageFromNanoApp(long, int, @NonNull byte[], boolean, boolean, int);
     method public static android.hardware.location.NanoAppMessage createMessageToNanoApp(long, int, byte[]);
     method public int describeContents();
     method public byte[] getMessageBody();
+    method @FlaggedApi("android.chre.flags.reliable_message") public int getMessageSequenceNumber();
     method public int getMessageType();
     method public long getNanoAppId();
     method public boolean isBroadcastMessage();
+    method @FlaggedApi("android.chre.flags.reliable_message") public boolean isReliable();
+    method @FlaggedApi("android.chre.flags.reliable_message") public void setIsReliable(boolean);
+    method @FlaggedApi("android.chre.flags.reliable_message") public void setMessageSequenceNumber(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppMessage> CREATOR;
   }
@@ -11306,6 +11315,7 @@ package android.permission {
     method public int checkPermissionForPreflight(@NonNull String, @NonNull android.content.AttributionSource);
     method @RequiresPermission(value=android.Manifest.permission.UPDATE_APP_OPS_STATS, conditional=true) public int checkPermissionForStartDataDelivery(@NonNull String, @NonNull android.content.AttributionSource, @Nullable String);
     method public void finishDataDelivery(@NonNull String, @NonNull android.content.AttributionSource);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @NonNull @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public java.util.Map<java.lang.String,android.permission.PermissionManager.PermissionState> getAllPermissionStates(@NonNull String, @NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Set<java.lang.String> getAutoRevokeExemptionGrantedPackages();
     method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Set<java.lang.String> getAutoRevokeExemptionRequestedPackages();
     method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.GET_RUNTIME_PERMISSIONS}) public int getPermissionFlags(@NonNull String, @NonNull String, @NonNull String);
@@ -11323,6 +11333,14 @@ package android.permission {
     field public static final int PERMISSION_GRANTED = 0; // 0x0
     field public static final int PERMISSION_HARD_DENIED = 2; // 0x2
     field public static final int PERMISSION_SOFT_DENIED = 1; // 0x1
+  }
+
+  @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public static final class PermissionManager.PermissionState implements android.os.Parcelable {
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public int describeContents();
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public int getFlags();
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public boolean isGranted();
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @NonNull public static final android.os.Parcelable.Creator<android.permission.PermissionManager.PermissionState> CREATOR;
   }
 
   public static final class PermissionManager.SplitPermissionInfo {
@@ -13176,10 +13194,12 @@ package android.service.voice {
     method public static int getMaxBundleSize();
     method public static int getMaxHotwordPhraseId();
     method public static int getMaxScore();
+    method @FlaggedApi("android.service.voice.flags.allow_speaker_id_egress") public static int getMaxSpeakerId();
     method @Nullable public android.media.MediaSyncEvent getMediaSyncEvent();
     method public int getPersonalizedScore();
     method public int getProximity();
     method public int getScore();
+    method @FlaggedApi("android.service.voice.flags.allow_speaker_id_egress") public int getSpeakerId();
     method public boolean isHotwordDetectionPersonalized();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUDIO_CHANNEL_UNSET = -1; // 0xffffffff
@@ -13213,6 +13233,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setMediaSyncEvent(@NonNull android.media.MediaSyncEvent);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setPersonalizedScore(int);
     method @NonNull public android.service.voice.HotwordDetectedResult.Builder setScore(int);
+    method @FlaggedApi("android.service.voice.flags.allow_speaker_id_egress") @NonNull public android.service.voice.HotwordDetectedResult.Builder setSpeakerId(int);
   }
 
   public abstract class HotwordDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionInitializer {
@@ -13351,6 +13372,22 @@ package android.service.voice {
     field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
   }
 
+  @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public final class VisualQueryDetectedResult implements android.os.Parcelable {
+    method public int describeContents();
+    method public static int getMaxSpeakerId();
+    method @NonNull public String getPartialQuery();
+    method public int getSpeakerId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.VisualQueryDetectedResult> CREATOR;
+  }
+
+  public static final class VisualQueryDetectedResult.Builder {
+    ctor public VisualQueryDetectedResult.Builder();
+    method @NonNull public android.service.voice.VisualQueryDetectedResult build();
+    method @NonNull public android.service.voice.VisualQueryDetectedResult.Builder setPartialQuery(@NonNull String);
+    method @NonNull public android.service.voice.VisualQueryDetectedResult.Builder setSpeakerId(int);
+  }
+
   public abstract class VisualQueryDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionInitializer {
     ctor public VisualQueryDetectionService();
     method public final void finishQuery() throws java.lang.IllegalStateException;
@@ -13362,6 +13399,7 @@ package android.service.voice {
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
     method public final void rejectQuery() throws java.lang.IllegalStateException;
     method public final void streamQuery(@NonNull String) throws java.lang.IllegalStateException;
+    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public final void streamQuery(@NonNull android.service.voice.VisualQueryDetectedResult);
     field public static final String SERVICE_INTERFACE = "android.service.voice.VisualQueryDetectionService";
   }
 
@@ -13390,6 +13428,7 @@ package android.service.voice {
   public static interface VisualQueryDetector.Callback {
     method public void onFailure(@NonNull android.service.voice.VisualQueryDetectionServiceFailure);
     method public void onQueryDetected(@NonNull String);
+    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public default void onQueryDetected(@NonNull android.service.voice.VisualQueryDetectedResult);
     method public void onQueryFinished();
     method public void onQueryRejected();
     method public void onUnknownFailure(@NonNull String);

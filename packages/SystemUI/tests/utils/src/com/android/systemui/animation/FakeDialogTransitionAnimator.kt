@@ -17,15 +17,15 @@ package com.android.systemui.animation
 import com.android.internal.jank.InteractionJankMonitor
 import org.mockito.Mockito.mock
 
-/** A [DialogLaunchAnimator] to be used in tests. */
+/** A [DialogTransitionAnimator] to be used in tests. */
 @JvmOverloads
-fun fakeDialogLaunchAnimator(
+fun fakeDialogTransitionAnimator(
     isUnlocked: Boolean = true,
     isShowingAlternateAuthOnUnlock: Boolean = false,
     interactionJankMonitor: InteractionJankMonitor = mock(InteractionJankMonitor::class.java),
     isPredictiveBackQsDialogAnim: Boolean = false,
-): DialogLaunchAnimator {
-    return DialogLaunchAnimator(
+): DialogTransitionAnimator {
+    return DialogTransitionAnimator(
         callback =
             FakeCallback(
                 isUnlocked = isUnlocked,
@@ -45,7 +45,7 @@ private class FakeCallback(
     private val isDreaming: Boolean = false,
     private val isUnlocked: Boolean = true,
     private val isShowingAlternateAuthOnUnlock: Boolean = false,
-) : DialogLaunchAnimator.Callback {
+) : DialogTransitionAnimator.Callback {
     override fun isDreaming(): Boolean = isDreaming
     override fun isUnlocked(): Boolean = isUnlocked
     override fun isShowingAlternateAuthOnUnlock() = isShowingAlternateAuthOnUnlock

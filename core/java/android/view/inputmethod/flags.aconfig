@@ -54,3 +54,11 @@ flag {
     bug: "293640003"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "ime_switcher_revamp"
+    namespace: "input_method"
+    description: "Feature flag for revamping the Input Method Switcher menu"
+    bug: "311791923"
+    is_fixed_read_only: true
+}

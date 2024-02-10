@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> по <xliff:g id="TIME_DELAY">{2}</xliff:g> секунди"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не е препратено"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не е проследен"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Безбедност на мобилната мрежа"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Преглед на поставките"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Пристапено е до идентификаторот на уредот"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Мрежа на врската <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> го снимила уникатниот идентификатор (IMSI) на вашиот уред <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> пати во периодот меѓу <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> и <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Шифрирана врска на <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Сега сте поврзани на побезбедна мобилна мрежа."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Нешифрирана врска на <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Се поврзавте на нешифрирана мобилна мрежа. Постои опасност од проследување на вашите повици, пораки и податоци."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Поставки за безбедност на мобилната мрежа"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Дознајте повеќе"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Кодот за карактеристиката заврши."</string>
     <string name="fcError" msgid="5325116502080221346">"Проблем со поврзувањето или неважечки код за карактеристиката."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Во ред"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Дозволува апликацијата да се врзе со модулот за мобилен пренос за да проследува пораки за мобилен пренос штом ќе се примат. Предупредувањата за мобилно емитување се доставуваат на некои локации за да ве предупредат на итни ситуации. Злонамерните апликации може да пречат во ефикасноста или работењето на вашиот уред кога се прима емитување за итен случај."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Управување со тековни повици"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Дозволува апликацијата да гледа детали за тековните повици на уредот и да ги контролира овие повици."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Пристап до последниот познат идентитет на ќелијата."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Дозволува апликацијата да пристапи до последниот познат идентитет на ќелијата обезбеден преку телефон."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"прочитај пораки за мобилно емитување"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Овозможува апликациите да ги читаат пораките за мобилно емитување што ги прима вашиот уред. Предупредувањата за мобилно емитување се доставуваат на некои локации, за да ве предупредат на итни ситуации. Злонамерните апликации може да пречат во ефикасноста или работењето на вашиот уред кога се прима емитување за итен случај."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"читај претплатени навестувања на содржина"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Овозможува апликацијата да го користи инфрацрвениот предавател на телефонот."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"постави позадина"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Дозволува апликацијата да го постави системскиот тапет."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Пристап до скриените профили"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Дозволува апликацијата да пристапува до скриените профили."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"приспособи ја големината на твојот тапет"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Дозволува апликацијата да постави сугестии за големина на системски тапет."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"постави временска зона"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Дозволува апликацијата да пристапува до податоците од сензорите со фреквенција на семпл поголема од 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ажурирај ја апликацијата без дејство од корисникот"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозволува сопственикот да ја ажурира апликацијата што претходно ја инсталирал без дејство од корисникот"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"ажурирање на состојбите за потврда на контактните клучеви за обострано шифрирање што се во сопственост на други апликации"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Дозволува апликацијата да ги ажурира состојбите за потврда на контактните клучеви за обострано шифрирање што се во сопственост на други апликации"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Постави правила за лозинката"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролирај ги должината и знаците што се дозволени за лозинки и PIN-броеви за отклучување екран."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Следење на обидите за отклучување на екранот"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Потврдено"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Прошири"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Собери"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Собрано"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Проширено"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"вклучи/исклучи проширување"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Надворешна порта на USB за Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Профил за тестирање"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Профил на заедницата"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Поврзано со сателит автоматски"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Може да испраќате и примате пораки без мобилна или Wi-Fi мрежа"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Отворете ја Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Дознајте како функционира"</string>
 </resources>
