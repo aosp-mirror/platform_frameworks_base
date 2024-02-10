@@ -40,6 +40,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.TextView
+import android.window.InputTransferToken
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isInvisible
@@ -206,7 +207,7 @@ constructor(
                 SurfaceControlViewHost(
                     context,
                     displayManager.getDisplay(DEFAULT_DISPLAY),
-                    hostToken,
+                    if (hostToken == null) null else InputTransferToken(hostToken),
                     "KeyguardPreviewRenderer"
                 )
             disposables.add(DisposableHandle { host.release() })

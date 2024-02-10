@@ -25,6 +25,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.permission.IOnPermissionsChangeListener;
+import android.permission.PermissionManager.PermissionState;
 import android.permission.PermissionManagerInternal;
 
 import com.android.server.pm.pkg.AndroidPackage;
@@ -404,6 +405,19 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * @return permission result {@link PackageManager.PermissionResult}
      */
     int checkUidPermission(int uid, String permName, int deviceId);
+
+    /**
+     * Gets the permission states for requested package, persistent device and user.
+     *
+     * @param packageName name of the package you are checking against
+     * @param persistentDeviceId id of the persistent device you are checking against
+     * @param userId id of the user for which to get permission flags
+     * @return mapping of all permission states keyed by their permission names
+     *
+     * @hide
+     */
+    Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
+            @NonNull String persistentDeviceId, @UserIdInt int userId);
 
     /**
      * Get all the package names requesting app op permissions.

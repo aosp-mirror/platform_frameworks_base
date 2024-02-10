@@ -109,11 +109,12 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Notificación de app instalada"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Se instaló correctamente"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"Se instaló correctamente \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"¿Quieres restablecer <xliff:g id="APPNAME">%1$s</xliff:g> desde <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"¿Quieres restablecer <xliff:g id="APPNAME">%1$s</xliff:g> desde <xliff:g id="INSTALLERNAME">%2$s</xliff:g>?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"Esta app comenzará la descarga en segundo plano"</string>
     <string name="restore" msgid="8460854736328970444">"Restablecer"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"No tienes conexión"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Se restablecerá automáticamente esta app cuando te conectes a Internet"</string>
+    <!-- no translation found for unarchive_error_offline_body (2256042209364094099) -->
+    <skip />
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Se produjo un error"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Hubo un problema al intentar restablecer esta app"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"No hay suficiente espacio de almacenamiento"</string>

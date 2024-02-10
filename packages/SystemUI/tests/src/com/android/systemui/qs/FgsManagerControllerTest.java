@@ -50,7 +50,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
@@ -92,7 +92,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     @Mock
     UserTracker mUserTracker;
     @Mock
-    DialogLaunchAnimator mDialogLaunchAnimator;
+    DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
     BroadcastDispatcher mBroadcastDispatcher;
     @Mock
@@ -330,7 +330,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mPackageManager,
                 mUserTracker,
                 mDeviceConfigProxyFake,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mBroadcastDispatcher,
                 mDumpManager,
                 mSystemUIDialogFactory
@@ -357,7 +357,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mPackageManager,
                 mUserTracker,
                 mDeviceConfigProxyFake,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mBroadcastDispatcher,
                 mDumpManager,
                 mSystemUIDialogFactory
@@ -464,7 +464,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mPackageManager,
                 mUserTracker,
                 mDeviceConfigProxyFake,
-                mDialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 mBroadcastDispatcher,
                 mDumpManager,
                 mSystemUIDialogFactory

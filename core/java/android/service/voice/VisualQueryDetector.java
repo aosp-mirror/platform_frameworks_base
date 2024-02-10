@@ -20,6 +20,7 @@ import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.RECORD_AUDIO;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -33,6 +34,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.flags.Flags;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -206,6 +208,17 @@ public class VisualQueryDetector {
         void onQueryDetected(@NonNull String partialQuery);
 
         /**
+         * Called when the {@link VisualQueryDetectionService} starts to stream partial results
+         * with {@link VisualQueryDetectionService#streamQuery(VisualQueryDetectedResult)}.
+         *
+         * @param partialResult The partial query in a text form being streamed.
+         */
+        @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+        default void onQueryDetected(@NonNull VisualQueryDetectedResult partialResult) {
+            throw new UnsupportedOperationException("This emthod must be implemented for use.");
+        }
+
+        /**
          * Called when the {@link VisualQueryDetectionService} decides to abandon the streamed
          * partial queries with {@link VisualQueryDetectionService#rejectQuery()}.
          */
@@ -319,13 +332,24 @@ public class VisualQueryDetector {
             this.mLock = lock;
         }
 
-        /** Called when the detected result is valid. */
+        /** Called when the detected query is valid. */
         @Override
         public void onQueryDetected(@NonNull String partialQuery) {
             Slog.v(TAG, "BinderCallback#onQueryDetected");
             Binder.withCleanCallingIdentity(() -> {
                 synchronized (mLock) {
                     mExecutor.execute(()->mCallback.onQueryDetected(partialQuery));
+                }
+            });
+        }
+
+        /** Called when the detected result is valid. */
+        @Override
+        public void onResultDetected(@NonNull VisualQueryDetectedResult partialResult) {
+            Slog.v(TAG, "BinderCallback#onResultDetected");
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mCallback.onQueryDetected(partialResult);
                 }
             });
         }

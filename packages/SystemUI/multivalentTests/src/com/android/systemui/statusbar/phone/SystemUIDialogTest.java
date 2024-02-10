@@ -40,7 +40,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Dependency;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.model.SysUiState;
 
@@ -179,7 +179,7 @@ public class SystemUIDialogTest extends SysuiTestCase {
                 Dependency.get(SystemUIDialogManager.class),
                 Dependency.get(SysUiState.class),
                 Dependency.get(BroadcastDispatcher.class),
-                Dependency.get(DialogLaunchAnimator.class)
+                Dependency.get(DialogTransitionAnimator.class)
         );
         return factory.create(mDelegate);
     }

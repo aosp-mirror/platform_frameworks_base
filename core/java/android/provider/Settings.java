@@ -11830,6 +11830,12 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_LOCK_SCREEN = "media_controls_lock_screen";
 
         /**
+         * Whether to enable camera extensions software fallback.
+         * @hide
+         */
+        public static final String CAMERA_EXTENSIONS_FALLBACK = "camera_extensions_fallback";
+
+        /**
          * Controls whether contextual suggestions can be shown in the media controls.
          * @hide
          */
@@ -11907,6 +11913,16 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED =
                 "accessibility_magnification_two_finger_triple_tap_enabled";
+
+        /**
+         * For pinch to zoom anywhere feature.
+         *
+         * If true, you should be able to pinch to magnify the window anywhere.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_PINCH_TO_ZOOM_ANYWHERE_ENABLED =
+                "accessibility_pinch_to_zoom_anywhere_enabled";
 
         /**
          * Controls magnification capability. Accessibility magnification is capable of at least one

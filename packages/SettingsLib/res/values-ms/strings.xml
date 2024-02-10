@@ -551,9 +551,9 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Tanya setiap kali"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Sehingga anda matikan"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sebentar tadi"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Telefon ini"</string>
-    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tablet ini"</string>
-    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Telefon ini"</string>
+    <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Tablet ini"</string>
+    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Pembesar suara dok"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Peranti Luar"</string>
@@ -619,6 +619,8 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Gagal membuat pengguna baharu"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Gagal membuat tetamu baharu"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nama panggilan"</string>
+    <!-- no translation found for edit_user_info_message (5199468585059260053) -->
+    <skip />
     <string name="user_add_user" msgid="7876449291500212468">"Tambah pengguna"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Tambah tetamu"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Alih keluar tetamu"</string>

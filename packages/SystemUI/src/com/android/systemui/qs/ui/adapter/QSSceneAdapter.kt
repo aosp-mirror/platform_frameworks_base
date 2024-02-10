@@ -39,10 +39,13 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -68,6 +71,9 @@ interface QSSceneAdapter {
 
     /** Set the current state for QS. [state]. */
     fun setState(state: State)
+
+    /** Propagates the bottom nav bar size to [QSImpl] to be used as necessary. */
+    suspend fun applyBottomNavBarPadding(padding: Int)
 
     /** The current height of QQS in the current [qsView], or 0 if there's no view. */
     val qqsHeight: Int
@@ -123,6 +129,11 @@ constructor(
         ::AsyncLayoutInflater,
     )
 
+    private val bottomNavBarSize =
+        MutableSharedFlow<Int>(
+            extraBufferCapacity = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
     private val state = MutableStateFlow<QSSceneAdapter.State>(QSSceneAdapter.State.CLOSED)
     private val _isCustomizing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isCustomizing = _isCustomizing.asStateFlow()
@@ -168,6 +179,11 @@ constructor(
                     }
                 }
             }
+            launch {
+                combine(bottomNavBarSize, qsImpl.filterNotNull(), ::Pair).collect {
+                    it.second.applyBottomNavBarToCustomizerPadding(it.first)
+                }
+            }
         }
     }
 
@@ -206,6 +222,10 @@ constructor(
     }
     override fun setState(state: QSSceneAdapter.State) {
         this.state.value = state
+    }
+
+    override suspend fun applyBottomNavBarPadding(padding: Int) {
+        bottomNavBarSize.emit(padding)
     }
 
     private fun QSImpl.applyState(state: QSSceneAdapter.State) {

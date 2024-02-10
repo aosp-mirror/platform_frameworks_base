@@ -39,7 +39,7 @@ import com.android.compose.theme.PlatformTheme
  *   )
  * }
  *
- * dialogLaunchAnimator.showFromView(dialog, viewThatWasClicked)
+ * dialogTransitionAnimator.showFromView(dialog, viewThatWasClicked)
  * ```
  *
  * @param context the [Context] in which the dialog will be constructed.
@@ -59,7 +59,7 @@ fun SystemUIDialogFactory.create(
     dialog.create()
 
     // Set the content. Note that the background of the dialog is drawn on the DecorView of the
-    // dialog directly, which makes it automatically work nicely with DialogLaunchAnimator.
+    // dialog directly, which makes it automatically work nicely with DialogTransitionAnimator.
     dialog.setContentView(
         ComposeView(context).apply {
             setContent {

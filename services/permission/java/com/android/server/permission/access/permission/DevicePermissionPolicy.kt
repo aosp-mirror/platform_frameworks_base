@@ -95,8 +95,8 @@ class DevicePermissionPolicy : SchemePolicy() {
     ) {
         packageNames.forEachIndexed { _, packageName ->
             // The package may still be removed even if it was once notified as installed.
-            val packageState = newState.externalState.packageStates[packageName]
-                ?: return@forEachIndexed
+            val packageState =
+                newState.externalState.packageStates[packageName] ?: return@forEachIndexed
             trimPermissionStates(packageState.appId)
         }
     }
@@ -225,6 +225,16 @@ class DevicePermissionPolicy : SchemePolicy() {
         }
         return flags
     }
+
+    fun GetStateScope.getAllPermissionFlags(
+        appId: Int,
+        persistentDeviceId: String,
+        userId: Int
+    ): IndexedMap<String, Int>? =
+        state.userStates[userId]
+            ?.appIdDevicePermissionFlags
+            ?.get(appId)
+            ?.get(persistentDeviceId)
 
     fun MutateStateScope.setPermissionFlags(
         appId: Int,

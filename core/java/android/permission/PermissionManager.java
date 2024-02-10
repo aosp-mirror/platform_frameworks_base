@@ -66,6 +66,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -89,6 +91,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -1785,6 +1788,29 @@ public final class PermissionManager {
     }
 
     /**
+     * Gets the permission states for requested package and persistent device.
+     *
+     * @param packageName name of the package you are checking against
+     * @param persistentDeviceId id of the persistent device you are checking against
+     * @return mapping of all permission states keyed by their permission names
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
+            @NonNull String persistentDeviceId) {
+        try {
+            return mPermissionManager.getAllPermissionStates(packageName, persistentDeviceId,
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Make checkPermission() above bypass the permission cache in this process.
      *
      * @hide
@@ -1978,5 +2004,69 @@ public final class PermissionManager {
                     return false;
             }
         }
+    }
+
+    /**
+     * Data class for the state of a permission requested by a package
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public static final class PermissionState implements Parcelable {
+        private final boolean mGranted;
+        private final int mFlags;
+
+        /** @hide */
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        public PermissionState(boolean granted, int flags) {
+            mGranted = granted;
+            mFlags = flags;
+        }
+
+        /**
+         * Returns whether this permission is granted
+         */
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        public boolean isGranted() {
+            return mGranted;
+        }
+
+        /**
+         * Returns the flags associated with this permission state
+         * @see PackageManager#getPermissionFlags
+         */
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        public int getFlags() {
+            return mFlags;
+        }
+
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        @Override
+        public void writeToParcel(@NonNull Parcel parcel, int flags) {
+            parcel.writeBoolean(mGranted);
+            parcel.writeInt(mFlags);
+        }
+
+        private PermissionState(Parcel parcel) {
+            this(parcel.readBoolean(), parcel.readInt());
+        }
+
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        public static final @NonNull Creator<PermissionState> CREATOR = new Creator<>() {
+            public PermissionState createFromParcel(Parcel source) {
+                return new PermissionState(source);
+            }
+
+            public PermissionState[] newArray(int size) {
+                return new PermissionState[size];
+            }
+        };
     }
 }

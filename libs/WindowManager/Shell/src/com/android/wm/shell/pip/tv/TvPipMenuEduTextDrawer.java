@@ -18,7 +18,6 @@ package com.android.wm.shell.pip.tv;
 
 import static android.view.Gravity.BOTTOM;
 import static android.view.Gravity.CENTER;
-import static android.view.View.GONE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE;
@@ -36,7 +35,6 @@ import android.text.TextUtils;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -267,7 +265,6 @@ class TvPipMenuEduTextDrawer extends FrameLayout {
     }
 
     public void onCloseEduTextAnimationEnd() {
-        setVisibility(GONE);
         mListener.onCloseEduTextAnimationEnd();
     }
 

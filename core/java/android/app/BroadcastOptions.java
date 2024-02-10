@@ -46,6 +46,7 @@ import java.util.Objects;
  * {@link android.content.Context#sendBroadcast(android.content.Intent)
  * Context.sendBroadcast(Intent)} and related methods.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BroadcastOptions extends ComponentOptions {
     private @Flags int mFlags;
     private long mTemporaryAppAllowlistDuration;
@@ -751,6 +752,7 @@ public class BroadcastOptions extends ComponentOptions {
      * @hide
      */
     @TestApi
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean testRequireCompatChange(int uid) {
         if (mRequireCompatChangeId != CHANGE_INVALID) {
             final boolean requireEnabled = (mFlags & FLAG_REQUIRE_COMPAT_CHANGE_ENABLED) != 0;

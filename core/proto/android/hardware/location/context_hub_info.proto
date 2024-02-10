@@ -46,4 +46,6 @@ message ContextHubInfoProto {
     optional float peak_power_draw_mw = 12;
     // The maximum number of bytes that can be sent per message to the hub
     optional int32 max_packet_length_bytes = 13;
+    // Whether reliable messages are supported
+    optional int32 supports_reliable_messages = 14;
 }

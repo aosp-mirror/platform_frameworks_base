@@ -10,6 +10,13 @@ flag {
 }
 
 flag {
+    name: "resettable_dynamic_properties"
+    namespace: "accessibility"
+    description: "Maintains initial copies of a11yServiceInfo dynamic properties so they can reset on disconnect."
+    bug: "312386990"
+}
+
+flag {
     name: "cleanup_a11y_overlays"
     namespace: "accessibility"
     description: "Removes all attached accessibility overlays when a service is removed."

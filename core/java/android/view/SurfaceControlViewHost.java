@@ -30,6 +30,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.window.ISurfaceSyncGroup;
+import android.window.InputTransferToken;
 import android.window.WindowTokenClient;
 
 import dalvik.system.CloseGuard;
@@ -150,15 +151,16 @@ public class SurfaceControlViewHost {
     public static final class SurfacePackage implements Parcelable {
         private SurfaceControl mSurfaceControl;
         private final IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
-        private final IBinder mInputToken;
+        private final InputTransferToken mInputTransferToken;
         @NonNull
         private final ISurfaceControlViewHost mRemoteInterface;
 
         SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection,
-                IBinder inputToken, @NonNull ISurfaceControlViewHost ri) {
+                InputTransferToken inputTransferToken,
+                @NonNull ISurfaceControlViewHost ri) {
             mSurfaceControl = sc;
             mAccessibilityEmbeddedConnection = connection;
-            mInputToken = inputToken;
+            mInputTransferToken = inputTransferToken;
             mRemoteInterface = ri;
         }
 
@@ -178,7 +180,7 @@ public class SurfaceControlViewHost {
                 mSurfaceControl = new SurfaceControl(otherSurfaceControl, "SurfacePackage");
             }
             mAccessibilityEmbeddedConnection = other.mAccessibilityEmbeddedConnection;
-            mInputToken = other.mInputToken;
+            mInputTransferToken = other.mInputTransferToken;
             mRemoteInterface = other.mRemoteInterface;
         }
 
@@ -188,9 +190,8 @@ public class SurfaceControlViewHost {
             mSurfaceControl.setUnreleasedWarningCallSite("SurfacePackage(Parcel)");
             mAccessibilityEmbeddedConnection = IAccessibilityEmbeddedConnection.Stub.asInterface(
                     in.readStrongBinder());
-            mInputToken = in.readStrongBinder();
-            mRemoteInterface = ISurfaceControlViewHost.Stub.asInterface(
-                in.readStrongBinder());
+            mInputTransferToken = InputTransferToken.CREATOR.createFromParcel(in);
+            mRemoteInterface = ISurfaceControlViewHost.Stub.asInterface(in.readStrongBinder());
         }
 
         /**
@@ -269,7 +270,7 @@ public class SurfaceControlViewHost {
         public void writeToParcel(@NonNull Parcel out, int flags) {
             mSurfaceControl.writeToParcel(out, flags);
             out.writeStrongBinder(mAccessibilityEmbeddedConnection.asBinder());
-            out.writeStrongBinder(mInputToken);
+            mInputTransferToken.writeToParcel(out, flags);
             out.writeStrongBinder(mRemoteInterface.asBinder());
         }
 
@@ -287,13 +288,22 @@ public class SurfaceControlViewHost {
         }
 
         /**
-         * Returns an input token used which can be used to request focus on the embedded surface
-         * or to transfer touch gesture to the embedded surface.
+         * Gets an {@link InputTransferToken} which can be used to request focus on the embedded
+         * surface or to transfer touch gesture to the embedded surface.
+         * @return the InputTransferToken associated with {@link SurfacePackage}
+         * @see AttachedSurfaceControl#transferHostTouchGestureToEmbedded(SurfacePackage)
          *
          * @hide
          */
-        public IBinder getInputToken() {
-            return mInputToken;
+        @Nullable
+        public InputTransferToken getInputTransferToken() {
+            return mInputTransferToken;
+        }
+
+        @Override
+        public String toString() {
+            return "{inputTransferToken=" + getInputTransferToken() + " remoteInterface="
+                    + getRemoteInterface() + "}";
         }
 
         public static final @NonNull Creator<SurfacePackage> CREATOR
@@ -335,7 +345,8 @@ public class SurfaceControlViewHost {
      */
     public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
             @Nullable IBinder hostToken) {
-        this(context, display, hostToken, "untracked");
+        this(context, display, hostToken == null ? null : new InputTransferToken(hostToken),
+                "untracked");
     }
 
     /**
@@ -353,7 +364,7 @@ public class SurfaceControlViewHost {
      * @hide
      */
     public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
-            @Nullable IBinder hostToken, @NonNull String callsite) {
+            @Nullable InputTransferToken hostToken, @NonNull String callsite) {
         mSurfaceControl = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("SurfaceControlViewHost")
@@ -533,7 +544,7 @@ public class SurfaceControlViewHost {
      *
      * @hide
      */
-    public IBinder getInputTransferToken() {
+    public InputTransferToken getInputTransferToken() {
         return mWm.getInputTransferToken(getWindowToken().asBinder());
     }
 

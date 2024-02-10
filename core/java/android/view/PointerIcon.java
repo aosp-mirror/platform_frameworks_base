@@ -257,7 +257,7 @@ public final class PointerIcon implements Parcelable {
         }
 
         final PointerIcon icon = new PointerIcon(type);
-        icon.loadResource(context, context.getResources(), resourceId);
+        icon.loadResource(context.getResources(), resourceId);
         return icon;
     }
 
@@ -320,7 +320,7 @@ public final class PointerIcon implements Parcelable {
         }
 
         PointerIcon icon = new PointerIcon(TYPE_CUSTOM);
-        icon.loadResource(null, resources, resourceId);
+        icon.loadResource(resources, resourceId);
         return icon;
     }
 
@@ -436,7 +436,7 @@ public final class PointerIcon implements Parcelable {
         return new BitmapDrawable(resources, bitmap);
     }
 
-    private void loadResource(Context context, Resources resources, @XmlRes int resourceId) {
+    private void loadResource(@NonNull Resources resources, @XmlRes int resourceId) {
         final XmlResourceParser parser = resources.getXml(resourceId);
         final int bitmapRes;
         final float hotSpotX;
@@ -460,12 +460,7 @@ public final class PointerIcon implements Parcelable {
             throw new IllegalArgumentException("<pointer-icon> is missing bitmap attribute.");
         }
 
-        Drawable drawable;
-        if (context == null) {
-            drawable = resources.getDrawable(bitmapRes);
-        } else {
-            drawable = context.getDrawable(bitmapRes);
-        }
+        Drawable drawable = resources.getDrawable(bitmapRes);
         if (drawable instanceof AnimationDrawable) {
             // Extract animation frame bitmaps.
             final AnimationDrawable animationDrawable = (AnimationDrawable) drawable;

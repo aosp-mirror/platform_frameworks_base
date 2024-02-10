@@ -22,10 +22,9 @@ import android.provider.Settings
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.accessibility.fontscaling.FontScalingDialogDelegate
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -36,6 +35,7 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
@@ -54,7 +54,7 @@ constructor(
     activityStarter: ActivityStarter,
     qsLogger: QSLogger,
     private val keyguardStateController: KeyguardStateController,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val fontScalingDialogDelegateProvider: Provider<FontScalingDialogDelegate>
 ) :
     QSTileImpl<QSTile.State?>(
@@ -81,7 +81,7 @@ constructor(
         val runnable = Runnable {
             val dialog: SystemUIDialog = fontScalingDialogDelegateProvider.get().createDialog()
             if (animateFromView) {
-                dialogLaunchAnimator.showFromView(
+                dialogTransitionAnimator.showFromView(
                     dialog,
                     view!!,
                     DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG)

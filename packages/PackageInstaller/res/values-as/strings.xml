@@ -109,11 +109,12 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"এপ্ ইনষ্টল কৰাৰ জাননী"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"সফলতাৰে ইনষ্টল কৰা হ’ল"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"“<xliff:g id="APPNAME">%1$s</xliff:g>” সফলতাৰে ইনষ্টল কৰা হ’ল"</string>
-    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g>ৰ পৰা <xliff:g id="APPNAME">%1$s</xliff:g> পুনঃস্থাপন কৰিবনে?"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%2$s</xliff:g>ৰ পৰা <xliff:g id="APPNAME">%1$s</xliff:g> পুনঃস্থাপন কৰিবনে?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"এই এপ্‌টোৱে নেপথ্যত ডাউনল’ড কৰিবলৈ আৰম্ভ কৰিব"</string>
     <string name="restore" msgid="8460854736328970444">"পুনঃস্থাপন কৰক"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"আপুনি অফলাইন হৈ আছে"</string>
-    <string name="unarchive_error_offline_body" msgid="255717000519772755">"আপুনি ইণ্টাৰনেটৰ সৈতে সংযুক্ত হ’লে এই এপ্‌টো স্বয়ংক্ৰিয়ভাৱে পুনঃস্থাপন কৰা হ’ব"</string>
+    <!-- no translation found for unarchive_error_offline_body (2256042209364094099) -->
+    <skip />
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"কিবা ভুল হ’ল"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"এই এপ্‌টো পুনঃস্থাপন কৰাত কিবা অসুবিধা হৈছিল"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"ষ্ট’ৰেজত পৰ্যাপ্ত ঠাই নাই"</string>

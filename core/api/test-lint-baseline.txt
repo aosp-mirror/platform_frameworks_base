@@ -2189,6 +2189,8 @@ UnflaggedApi: android.view.accessibility.AccessibilityWindowInfo#UNDEFINED_WINDO
     New API must be flagged with @FlaggedApi: field android.view.accessibility.AccessibilityWindowInfo.UNDEFINED_WINDOW_ID
 UnflaggedApi: android.view.animation.AnimationUtils#lockAnimationClock(long, long):
     New API must be flagged with @FlaggedApi: method android.view.animation.AnimationUtils.lockAnimationClock(long,long)
+UnflaggedApi: android.view.inputmethod.InputMethodInfo#InputMethodInfo(String, String, CharSequence, String, String, boolean, String):
+    New API must be flagged with @FlaggedApi: constructor android.view.inputmethod.InputMethodInfo(String,String,CharSequence,String,String,boolean,String)
 UnflaggedApi: android.view.inputmethod.InputMethodManager#getEnabledInputMethodListAsUser(android.os.UserHandle):
     New API must be flagged with @FlaggedApi: method android.view.inputmethod.InputMethodManager.getEnabledInputMethodListAsUser(android.os.UserHandle)
 UnflaggedApi: android.view.inputmethod.InputMethodManager#getEnabledInputMethodSubtypeListAsUser(String, boolean, android.os.UserHandle):

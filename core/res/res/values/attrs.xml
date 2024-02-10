@@ -3893,6 +3893,10 @@
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity" format="string" />
+        <!-- Component name of an activity that allows the user to modify
+             on-screen keyboards variants (e.g. different language or layout) for this service. -->
+        <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp") -->
+        <attr name="languageSettingsActivity" format="string"/>
         <!-- Set to true in all of the configurations for which this input
              method should be considered an option as the default. -->
         <attr name="isDefault" format="boolean" />

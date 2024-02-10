@@ -50,6 +50,7 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.SELinuxUtil;
 
 import dalvik.system.VMRuntime;
@@ -502,6 +503,7 @@ public class AppDataHelper {
     private void assertPackageStorageValid(@NonNull Computer snapshot, String volumeUuid,
             String packageName, int userId) throws PackageManagerException {
         final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+        final PackageUserStateInternal userState = packageState.getUserStateOrDefault(userId);
         if (packageState == null) {
             throw PackageManagerException.ofInternalError("Package " + packageName + " is unknown",
                     PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_PACKAGE_UNKNOWN);
@@ -510,9 +512,10 @@ public class AppDataHelper {
                     "Package " + packageName + " found on unknown volume " + volumeUuid
                             + "; expected volume " + packageState.getVolumeUuid(),
                     PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_VOLUME_UNKNOWN);
-        } else if (!packageState.getUserStateOrDefault(userId).isInstalled()) {
+        } else if (!userState.isInstalled() && !userState.dataExists()) {
             throw PackageManagerException.ofInternalError(
-                    "Package " + packageName + " not installed for user " + userId,
+                    "Package " + packageName + " not installed for user " + userId
+                            + " or was deleted without DELETE_KEEP_DATA",
                     PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_NOT_INSTALLED_FOR_USER);
         } else if (packageState.getPkg() != null
                 && !shouldHaveAppStorage(packageState.getPkg())) {

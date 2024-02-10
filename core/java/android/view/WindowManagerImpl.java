@@ -39,6 +39,7 @@ import android.os.RemoteException;
 import android.os.StrictMode;
 import android.util.Log;
 import android.window.ITaskFpsCallback;
+import android.window.InputTransferToken;
 import android.window.TaskFpsCallback;
 import android.window.TrustedPresentationThresholds;
 import android.window.WindowContext;
@@ -531,7 +532,8 @@ public final class WindowManagerImpl implements WindowManager {
     public void registerBatchedSurfaceControlInputReceiver(int displayId,
             @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
-        mGlobal.registerBatchedSurfaceControlInputReceiver(displayId, hostToken,
+        mGlobal.registerBatchedSurfaceControlInputReceiver(displayId,
+                new InputTransferToken(hostToken),
                 surfaceControl, choreographer, receiver);
     }
 
@@ -539,7 +541,8 @@ public final class WindowManagerImpl implements WindowManager {
     public void registerUnbatchedSurfaceControlInputReceiver(
             int displayId, @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
-        mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId, hostToken,
+        mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId,
+                new InputTransferToken(hostToken),
                 surfaceControl, looper, receiver);
     }
 

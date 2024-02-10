@@ -999,6 +999,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         return checkUidPermissionInternal(pkg, uid, permName);
     }
 
+    @Override
+    public Map<String, PermissionManager.PermissionState> getAllPermissionStates(
+            @NonNull String packageName, @NonNull String persistentDeviceId, int userId) {
+        throw new UnsupportedOperationException(
+                "This method is supported in newer implementation only");
+    }
+
     /**
      * Checks whether or not the given package has been granted the specified
      * permission. If the given package is {@code null}, we instead check the

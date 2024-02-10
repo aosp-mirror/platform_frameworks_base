@@ -575,14 +575,14 @@ final class IInputMethodManagerGlobalInvoker {
     @AnyThread
     @NonNull
     static ImeTracker.Token onRequestShow(@NonNull String tag, int uid,
-            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason, boolean fromUser) {
         final IImeTracker service = getImeTrackerService();
         if (service == null) {
             // Create token with "fake" binder if the service was not found.
             return new ImeTracker.Token(new Binder(), tag);
         }
         try {
-            return service.onRequestShow(tag, uid, origin, reason);
+            return service.onRequestShow(tag, uid, origin, reason, fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -592,14 +592,14 @@ final class IInputMethodManagerGlobalInvoker {
     @AnyThread
     @NonNull
     static ImeTracker.Token onRequestHide(@NonNull String tag, int uid,
-            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason, boolean fromUser) {
         final IImeTracker service = getImeTrackerService();
         if (service == null) {
             // Create token with "fake" binder if the service was not found.
             return new ImeTracker.Token(new Binder(), tag);
         }
         try {
-            return service.onRequestHide(tag, uid, origin, reason);
+            return service.onRequestHide(tag, uid, origin, reason, fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -24,7 +24,6 @@ import android.content.pm.PackageManagerInternal;
 import android.os.LocaleList;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Printer;
@@ -614,26 +613,27 @@ final class InputMethodSettings {
                 explicitlyOrImplicitlyEnabledSubtypes, null, locale, true);
     }
 
-    boolean setAdditionalInputMethodSubtypes(@NonNull String imeId,
+    @NonNull
+    AdditionalSubtypeMap getNewAdditionalSubtypeMap(@NonNull String imeId,
             @NonNull ArrayList<InputMethodSubtype> subtypes,
-            @NonNull ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
+            @NonNull AdditionalSubtypeMap additionalSubtypeMap,
             @NonNull PackageManagerInternal packageManagerInternal, int callingUid) {
         final InputMethodInfo imi = mMethodMap.get(imeId);
         if (imi == null) {
-            return false;
+            return additionalSubtypeMap;
         }
         if (!InputMethodUtils.checkIfPackageBelongsToUid(packageManagerInternal, callingUid,
                 imi.getPackageName())) {
-            return false;
+            return additionalSubtypeMap;
         }
 
+        final AdditionalSubtypeMap newMap;
         if (subtypes.isEmpty()) {
-            additionalSubtypeMap.remove(imi.getId());
+            newMap = additionalSubtypeMap.cloneWithRemoveOrSelf(imi.getId());
         } else {
-            additionalSubtypeMap.put(imi.getId(), subtypes);
+            newMap = additionalSubtypeMap.cloneWithPut(imi.getId(), subtypes);
         }
-        AdditionalSubtypeUtils.save(additionalSubtypeMap, mMethodMap, getUserId());
-        return true;
+        return newMap;
     }
 
     boolean setEnabledInputMethodSubtypes(@NonNull String imeId,

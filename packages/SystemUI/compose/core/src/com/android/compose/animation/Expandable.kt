@@ -97,12 +97,12 @@ import kotlin.math.min
  *
  *      // For activities:
  *      onClick = { expandable ->
- *          activityStarter.startActivity(intent, expandable.activityLaunchController())
+ *          activityStarter.startActivity(intent, expandable.activityTransitionController())
  *      },
  *
  *      // For dialogs:
  *      onClick = { expandable ->
- *          dialogLaunchAnimator.show(dialog, controller.dialogLaunchController())
+ *          dialogTransitionAnimator.show(dialog, controller.dialogTransitionController())
  *      },
  *    ) {
  *      ...

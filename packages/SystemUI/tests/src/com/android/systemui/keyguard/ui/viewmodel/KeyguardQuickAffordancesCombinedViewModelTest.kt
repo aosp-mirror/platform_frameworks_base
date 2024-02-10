@@ -24,7 +24,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
@@ -87,7 +87,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardStateController: KeyguardStateController
-    @Mock private lateinit var launchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var launchAnimator: DialogTransitionAnimator
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock

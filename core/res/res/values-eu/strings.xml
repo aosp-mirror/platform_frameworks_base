@@ -54,7 +54,7 @@
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Deitzailearen identitatea (jasotako deiak)"</string>
     <string name="ClirMmi" msgid="6752346475055446417">"Ezkutatu irteerako deitzailearen identitatea"</string>
-    <string name="ColpMmi" msgid="4736462893284419302">"Konektatutako linearen IDa"</string>
+    <string name="ColpMmi" msgid="4736462893284419302">"Konektatutako linearenidentifikatzailea"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Konektatutako linearen ID murriztapena"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Dei-desbideratzea"</string>
     <string name="CwMmi" msgid="3164609577675404761">"Deia zain"</string>
@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> zenbakira <xliff:g id="TIME_DELAY">{2}</xliff:g> segundotan"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ez da desbideratu"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ez da desbideratu"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Sare mugikorraren segurtasuna"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Berrikusi ezarpenak"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Gailuaren identifikatzailea atzitu da"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> konexioko sare batek gailuaren identifikatzaile esklusiboa (IMSIa) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> aldiz erregistratu du <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> eta <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> artean."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> sarearekiko konexio enkriptatua"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Sare mugikor seguruago batera zaude konektatuta orain."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> sarearekiko konexio enkriptatu gabea"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Enkriptatu gabeko sare mugikor batera konektatuta zaude. Deiak, mezuak eta datuak atzemateko arriskua dago."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Sare mugikorraren segurtasunaren ezarpenak"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Lortu informazio gehiago"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Eginbide-kodea osatu da."</string>
     <string name="fcError" msgid="5325116502080221346">"Konexio-arazo bat gertatu da edo eginbide-kodea baliogabea da."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Ados"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Sare mugikor bidezko iragarpen-modulura lotzeko baimena ematen dio aplikazioari, sare mugikor bidezko iragarpen-mezuak jaso ahala desbideratu ahal izateko. Sare mugikor bidezko iragarpen-alertak kokapen batzuetan entregatzen dira larrialdi-egoeren berri emateko. Sare mugikor bidezko larrialdi-iragarpenak jasotzean, asmo txarreko aplikazioek gailuaren errendimenduari edota funtzionamenduari eragin diezaiokete."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Kudeatu abian dauden deiak"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Gailuak jasotzen dituen deiei buruzko xehetasunak ikusteko eta dei horiek kontrolatzeko baimena ematen die aplikazioei."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"erabili mugikorraren azken identitate ezaguna."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Operadoreak emandako mugikorraren azken identitate ezaguna erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"irakurri sare mugikor bidezko igorpen-mezuak"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Gailuak jasotako sare mugikor bidezko igorpen-mezuak irakurtzeko baimena ematen dio aplikazioari. Sare mugikor bidezko igorpen-alertak kokapen batzuetan ematen dira larrialdi-egoeren berri emateko. Asmo txarreko aplikazioek gailuaren errendimendua edo funtzionamendua oztopa dezakete larrialdi-igorpen horietako bat jasotzen denean."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"irakurri harpidetutako jarioak"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Telefonoaren infragorri-igorlea erabiltzeko baimena ematen dio aplikazioari."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"ezarri horma-papera"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Sistemaren horma-papera aldatzeko baimena ematen dio aplikazioari."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"atzitu ezkutatutako profilak"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Ezkutatutako profilak atzitzeko baimena ematen dio aplikazioari."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"doitu horma-paperaren tamaina"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Sistemaren horma-paperaren tamainaren doitzeak ezartzeko baimena ematen dio aplikazioari."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"ezarri ordu-zona"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz-tik gorako abiaduran sentsoreen datuen laginak hartzeko baimena ematen dio aplikazioari"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"eguneratu aplikazioa erabiltzaileak ezer egin gabe"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Lehendik instalatu duen aplikazioa erabiltzaileak ezer egin gabe eguneratzeko baimena ematen dio titularrari"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"eguneratu beste aplikazio batzuk jabe dituzten E2EEko kontaktu-gakoen egiaztapen-egoerak"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Beste aplikazio batzuk jabe dituzten E2EEko kontaktu-gakoen egiaztapen-egoerak eguneratzeko baimena ematen dio aplikazioari"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ezarri pasahitzen arauak"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolatu pantaila blokeoaren pasahitzen eta PINen luzera eta onartutako karaktereak."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gainbegiratu pantaila desblokeatzeko saiakerak"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Egiaztatuta"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Zabaldu"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Tolestu"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Tolestuta"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Zabalduta"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"zabaldu edo tolestu"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Android USB ataka periferikoa"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Probakoa"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Partekatua"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Automatikoki konektatu da satelitera"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Mezuak bidal eta jaso ditzakezu sare mugikorrik edo wifi-sarerik gabe"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ireki Mezuak"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Nola funtzionatzen du?"</string>
 </resources>

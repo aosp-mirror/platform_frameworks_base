@@ -22,6 +22,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.permission.IOnPermissionsChangeListener;
+import android.permission.PermissionManager.PermissionState;
 import android.util.Log;
 
 import com.android.server.pm.pkg.AndroidPackage;
@@ -243,9 +244,17 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
 
     @Override
     public int checkUidPermission(int uid, String permName, int deviceId) {
-        Log.i(LOG_TAG, "checkUidPermission(uid = " + uid + ", permName = " + permName
-                + ", deviceId = " + deviceId + ")");
+        Log.i(LOG_TAG, "checkUidPermission(uid = " + uid + ", permName = "
+                + permName + ", deviceId = " + deviceId + ")");
         return mService.checkUidPermission(uid, permName, deviceId);
+    }
+
+    @Override
+    public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
+            @NonNull String persistentDeviceId, int userId) {
+        Log.i(LOG_TAG, "getAllPermissionStates(packageName = " + packageName
+                + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId + ")");
+        return mService.getAllPermissionStates(packageName, persistentDeviceId, userId);
     }
 
     @Override

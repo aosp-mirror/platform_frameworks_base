@@ -21,9 +21,8 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
@@ -32,6 +31,7 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.DataSaverController
 import com.android.systemui.util.mockito.whenever
@@ -41,7 +41,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -56,7 +55,7 @@ class DataSaverTileTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var dataSaverController: DataSaverController
-    @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
     @Mock private lateinit var uiEventLogger: QsEventLogger
     @Mock private lateinit var systemUIDialogFactory: SystemUIDialog.Factory
     @Mock private lateinit var systemUIDialog: SystemUIDialog
@@ -84,7 +83,7 @@ class DataSaverTileTest : SysuiTestCase() {
                 activityStarter,
                 mQsLogger,
                 dataSaverController,
-                dialogLaunchAnimator,
+                mDialogTransitionAnimator,
                 systemUIDialogFactory
             )
     }

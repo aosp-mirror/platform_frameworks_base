@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> بعد از <xliff:g id="TIME_DELAY">{2}</xliff:g> سیکنڈ"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : فارورڈ نہیں کی گئی"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: فارورڈ نہیں کی گئی"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"سیلولر نیٹ ورک سیکیورٹی"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ترتیبات کا جائزہ لیں"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"آلے کے شناخت کار تک رسائی حاصل کر لی گئی"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"‏<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> کنکشن پر موجود نیٹ ورک نے <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> اور <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> کے درمیان کی مدت میں آپ کے آلے کے منفرد شناخت کنندہ (IMSI) کو <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> بار ریکارڈ کیا۔"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> سے مرموز کردہ کنکشن"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"اب آپ زیادہ محفوظ سیلولر نیٹ ورک سے منسلک ہیں۔"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> سے غیر مرموز کردہ کنکشن"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"آپ ایک غیر مرموز کردہ سیلولر نیٹ ورک سے منسلک ہیں۔ آپ کی کالز، پیغامات اور ڈیٹا پر انٹرسیپشن کا خطرہ لاحق ہے۔"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"سیلولر سیکیورٹی کی ترتیبات"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"مزید جانیں"</string>
     <string name="fcComplete" msgid="1080909484660507044">"خصوصیت کوڈ مکمل۔"</string>
     <string name="fcError" msgid="5325116502080221346">"کنکشن مسئلہ یا غلط خصوصیت کوڈ۔"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ٹھیک ہے"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"سیل کی نشریاتی پیغامات کے موصول ہوتے ہی فارورڈ کرنے کے لیے ایپ کو سیل کے نشریاتی ماڈیول میں پابندی لگانے کی اجازت دیں۔ سیل کی نشریاتی الرٹس آپ کو ایمرجنسی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ایمرجنسی سیل براڈ کاسٹ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں مداخلت کر سکتی ہیں۔"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"جاری کالز کا نظم کریں"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"اس سے ایپ کو آپ کے آلے پر جاری کالز کے بارے میں تفصیلات دیکھنے اور ان کالز کو کنٹرول کرنے کی اجازت ملتی ہے۔"</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"آخری معلوم سیل شناخت تک رسائی حاصل کریں۔"</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"ایک ایپ کو ٹیلی فونی کے ذریعے فراہم کردہ آخری معلوم سیل شناخت تک رسائی کی اجازت دیتا ہے۔"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"سیل کے نشریاتی پیغامات پڑھیں"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ایپ کو آپ کے آلے کو موصولہ سیل کے نشریاتی پیغامات پڑھنے کی اجازت دیتا ہے۔ سیل کی نشریاتی الرٹس آپ کو ایمرجنسی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ایمرجنسی سیل کا نشریہ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں خلل ڈال سکتی ہیں۔"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"سبسکرائب کردہ فیڈز پڑھیں"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ایپ کو فون کا انفراریڈ ٹرانسمیٹر استعمال کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"وال پیپر سیٹ کریں"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"ایپ کو سسٹم کا وال پیپر سیٹ کرنے کی اجازت دیتا ہے۔"</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"پوشیدہ پروفائلر تک رسائی حاصل کریں"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"اس سے ایپ کو پوشیدہ پروفائلر تک رسائی کی اجازت ملتی ہے۔"</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"اپنے وال پیپر کا سائز ایڈجسٹ کریں"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"ایپ کو سسٹم کے وال پیپر سائز کے اشاروں کو سیٹ کرنے کی اجازت دیتا ہے"</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"ٹائم زون سیٹ کریں"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"‏ایپ کو Hz‏200 سے زیادہ شرح پر سینسر ڈیٹا کا نمونہ لینے کی اجازت دیتی ہے"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"صارف کی کارروائی کے بغیر ایپ کو اپ ڈیٹ کرنا"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ہولڈر کو صارف کی کارروائی کے بغیر اپنی پہلے انسٹال کردہ ایپ کو اپ ڈیٹ کرنے کی اجازت دیتا ہے"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"‏دیگر ایپس کی ملکیت والی E2EE رابطہ کلیدوں کی تصدیقی حالتوں کو اپ ڈیٹ کریں"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"‏اس سے ایپ کو دیگر ایپس کی ملکیت والی E2EE رابطہ کلیدوں کی تصدیقی حالتوں کو اپ ڈیٹ کرنے کی اجازت ملتی ہے"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"پاس ورڈ کے اصول سیٹ کریں"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"‏اسکرین لاک پاس ورڈز اور PINs میں اجازت یافتہ لمبائی اور حروف کو کنٹرول کریں۔"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"اسکرین غیر مقفل کرنے کی کوششیں مانیٹر کریں"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"توثیق شدہ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"پھیلائیں"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"سکیڑیں"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"سکیڑا گیا"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"پھیلایا گیا"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"پھیلاؤ کو ٹوگل کریں"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"‏Android USB پیرفرل پورٹ"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"ٹیسٹ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"کمیونل"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"سٹلائٹ سے خودکار طور پر منسلک ہے"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"‏آپ موبائل یا Wi-Fi نیٹ ورک کے بغیر پیغامات بھیج اور موصول کر سکتے ہیں"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"پیغامات ایپ کو کھولیں"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"اس کے کام کرنے کا طریقہ"</string>
 </resources>

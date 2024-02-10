@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunnin päästä"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ei siirretty"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ei siirretty"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Mobiiliverkon tietoturva"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Tarkista asetukset"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Laitteen tunnistinta käytettiin"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Yhteys verkossa (<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g>) tallensi laitteesi yksilöllisen tunnisteen (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> kertaa <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> – <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> välillä."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Salattu yhteys verkkoon: <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Olet yhteydessä turvallisempaan mobiiliverkkoon."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Ei-salattu yhteys verkkoon: <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Olet yhteydessä ei-salattuun mobiiliverkkoon. Puhelusi, viestisi ja datasi ovat alttiita sieppaukselle."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mobiiliverkon suojausasetukset"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Lue lisää"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Ominaisuuskoodi valmis."</string>
     <string name="fcError" msgid="5325116502080221346">"Yhteysongelma tai virheellinen ominaisuuskoodi."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -370,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Sallii sovelluksen sitoutua solulähetysmoduuliin lähettääkseen solulähetysviestejä edelleen sitä mukaa kun ne saapuvat. Solulähetysilmoitusten avulla ilmoitetaan hätätilanteista joissakin paikoissa. Haitalliset sovellukset voivat häiritä laitteen toimintaa laitteen vastaanottaessa hätätilanteeseen liittyvän solulähetysviestin."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Ylläpidä käynnissä olevia puheluita"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Sovellus voi nähdä tietoja laitteella käynnissä olevista puheluista ja ohjata näitä puheluita."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Pääsy viimeisimpään solutunnukseen."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Sovellus saa pääsyn operaattorin tarjoamaan viimeisimpään solutunnukseen."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"lue tiedotteita"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Antaa sovelluksen lukea laitteesi vastaanottamia tiedotteita. Tiedotteiden avulla ilmoitetaan hätätilanteista joissakin paikoissa. Haitalliset sovellukset voivat häiritä laitteen toimintaa laitteen vastaanottaessa hätätiedotteen."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lukea tilattuja syötteitä"</string>
@@ -545,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Antaa sovelluksen käyttää puhelimen infrapunalähetintä."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"aseta taustakuva"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Antaa sovelluksen asettaa laitteen taustakuvan."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Pääsy piilotettuihin profiileihin"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Sallii sovellukselle pääsyn piilotettuihin profiileihin."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"säädä taustakuvan kokoa"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Antaa sovelluksen asettaa laitteen taustakuvakoon vinkkejä."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"asettaa aikavyöhykkeen"</string>
@@ -813,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Sallii sovelluksen ottaa anturidatasta näytteitä yli 200 Hz:n taajuudella"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"päivittää sovelluksen ilman käyttäjän toimintaa"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Sallii luvan saaneen sovelluksen päivittää aiemmin asentamansa sovelluksen ilman käyttäjän toimintaa"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"päivitä E2EE:n muiden sovellusten omistamia yhteystietoavainten vahvistustasoja"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Sallii sovelluksen päivittää E2EE:n muiden sovellusten omistamia yhteystietoavainten vahvistustasoja"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Asentaa salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Hallinnoida ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Tarkkailla näytön avaamisyrityksiä"</string>
@@ -1932,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Vahvistettu"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Laajenna"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Tiivistä"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Tiivistetty"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Laajennettu"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"Laajenna/tiivistä painikkeella"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Androidin USB-oheislaiteportti"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -2372,4 +2386,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Testi"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Jaettu"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Yhdistetty automaattisesti satelliittiin"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Voit lähettää ja vastaanottaa viestejä ilman mobiili‑ tai Wi-Fi-verkkoa"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Avaa Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Näin se toimii"</string>
 </resources>

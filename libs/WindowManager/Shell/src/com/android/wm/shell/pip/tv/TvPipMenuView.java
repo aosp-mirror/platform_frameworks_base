@@ -89,6 +89,8 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     private final int mPipMenuOuterSpace;
     private final int mPipMenuBorderWidth;
 
+    private final int mButtonStartEndOffset;
+
     private final int mPipMenuFadeAnimationDuration;
     private final int mResizeAnimationDuration;
 
@@ -147,6 +149,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         mPipMenuOuterSpace = res.getDimensionPixelSize(R.dimen.pip_menu_outer_space);
         mPipMenuBorderWidth = res.getDimensionPixelSize(R.dimen.pip_menu_border_width);
         mArrowElevation = res.getDimensionPixelSize(R.dimen.pip_menu_arrow_elevation);
+        mButtonStartEndOffset = res.getDimensionPixelSize(R.dimen.pip_menu_button_start_end_offset);
 
         initMoveArrows();
 
@@ -204,6 +207,16 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         v.setElevation(mArrowElevation);
     }
 
+    private void setButtonPadding(boolean vertical) {
+        if (vertical) {
+            mActionButtonsRecyclerView.setPadding(
+                    0, mButtonStartEndOffset, 0, mButtonStartEndOffset);
+        } else {
+            mActionButtonsRecyclerView.setPadding(
+                    mButtonStartEndOffset, 0, mButtonStartEndOffset, 0);
+        }
+    }
+
     void onPipTransitionToTargetBoundsStarted(Rect targetBounds) {
         if (targetBounds == null) {
             return;
@@ -244,6 +257,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         } else {
             mButtonLayoutManager.setOrientation(vertical
                     ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL);
+            setButtonPadding(vertical);
         }
     }
 
@@ -262,9 +276,10 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
             mEduTextDrawer.init();
         }
 
+        boolean vertical = mCurrentPipBounds.height() > mCurrentPipBounds.width();
         mButtonLayoutManager.setOrientation(
-                    mCurrentPipBounds.height() > mCurrentPipBounds.width()
-                            ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL);
+                vertical ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL);
+        setButtonPadding(vertical);
         if (mCurrentMenuMode == MODE_ALL_ACTIONS_MENU
                 && mActionButtonsRecyclerView.getAlpha() != 1f) {
             mActionButtonsRecyclerView.animate()
@@ -468,6 +483,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
 
     @Override
     public void onCloseEduTextAnimationEnd() {
+        mEduTextDrawer.setVisibility(GONE);
         mPipFrameView.setVisibility(GONE);
         mEduTextContainer.setVisibility(GONE);
     }

@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.content.Context
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.model.SysUiState
@@ -32,7 +32,7 @@ constructor(
     private val dialogManager: SystemUIDialogManager,
     private val sysUiState: SysUiState,
     private val broadcastDispatcher: BroadcastDispatcher,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
 ) {
     /**
      * Create a new [ComponentSystemUIDialog].
@@ -58,7 +58,7 @@ constructor(
             dialogManager,
             sysUiState,
             broadcastDispatcher,
-            dialogLaunchAnimator,
+            dialogTransitionAnimator,
         )
     }
 }

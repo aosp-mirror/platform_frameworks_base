@@ -23,7 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
@@ -51,7 +51,6 @@ import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
@@ -82,7 +81,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var activityStarter: ActivityStarter
-    @Mock private lateinit var launchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var launchAnimator: DialogTransitionAnimator
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger

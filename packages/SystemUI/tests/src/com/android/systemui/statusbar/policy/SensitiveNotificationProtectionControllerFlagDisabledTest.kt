@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.server.notification.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
 import org.junit.Test
@@ -49,6 +50,7 @@ class SensitiveNotificationProtectionControllerFlagDisabledTest : SysuiTestCase(
         controller =
             SensitiveNotificationProtectionControllerImpl(
                 mContext,
+                FakeGlobalSettings(),
                 mediaProjectionManager,
                 activityManager,
                 handler,

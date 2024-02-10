@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
+import android.provider.Settings;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
@@ -391,6 +392,16 @@ public class SensitiveContentProtectionManagerServiceTest {
     }
 
     @Test
+    public void mediaProjectionOnStart_disabledViaDevOption_noBlockedPackages() {
+        mockDisabledViaDevelopOption();
+        setupSensitiveNotification();
+
+        mMediaProjectionCallbackCaptor.getValue().onStart(mock(MediaProjectionInfo.class));
+
+        verifyZeroInteractions(mWindowManager);
+    }
+
+    @Test
     public void nlsOnListenerConnected_projectionNotStarted_noop() {
         // Sets up mNotification1 & mRankingMap to be a sensitive notification, and mNotification2
         // as non-sensitive
@@ -481,6 +492,18 @@ public class SensitiveContentProtectionManagerServiceTest {
         mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
 
         verify(mWindowManager).addBlockScreenCaptureForApps(EMPTY_SET);
+    }
+
+    @Test
+    public void nlsOnListenerConnected_disabledViaDevOption_noBlockedPackages() {
+        mockDisabledViaDevelopOption();
+        // Sets up mNotification1 & mRankingMap to be a sensitive notification, and mNotification2
+        // as non-sensitive
+        setupSensitiveNotification();
+        mMediaProjectionCallbackCaptor.getValue().onStart(mock(MediaProjectionInfo.class));
+        mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
+
+        verifyZeroInteractions(mWindowManager);
     }
 
     @Test
@@ -599,6 +622,19 @@ public class SensitiveContentProtectionManagerServiceTest {
     }
 
     @Test
+    public void nlsOnNotificationRankingUpdate_disabledViaDevOption_noBlockedPackages() {
+        mockDisabledViaDevelopOption();
+        // Sets up mNotification1 & mRankingMap to be a sensitive notification, and mNotification2
+        // as non-sensitive
+        setupSensitiveNotification();
+        mMediaProjectionCallbackCaptor.getValue().onStart(mock(MediaProjectionInfo.class));
+        mSensitiveContentProtectionManagerService.mNotificationListener
+                .onNotificationRankingUpdate(mRankingMap);
+
+        verifyZeroInteractions(mWindowManager);
+    }
+
+    @Test
     public void nlsOnNotificationPosted_projectionNotStarted_noop() {
         // Sets up mNotification1 & mRankingMap to be a sensitive notification, and mNotification2
         // as non-sensitive
@@ -696,5 +732,27 @@ public class SensitiveContentProtectionManagerServiceTest {
                 .onNotificationPosted(mNotification1, mRankingMap);
 
         verifyZeroInteractions(mWindowManager);
+    }
+
+    @Test
+    public void nlsOnNotificationPosted_disabledViaDevOption_noBlockedPackages() {
+        mockDisabledViaDevelopOption();
+        // Sets up mNotification1 & mRankingMap to be a sensitive notification, and mNotification2
+        // as non-sensitive
+        setupSensitiveNotification();
+        mMediaProjectionCallbackCaptor.getValue().onStart(mock(MediaProjectionInfo.class));
+        mSensitiveContentProtectionManagerService.mNotificationListener
+                .onNotificationPosted(mNotification1, mRankingMap);
+
+        verifyZeroInteractions(mWindowManager);
+    }
+
+    private void mockDisabledViaDevelopOption() {
+        // mContext (TestableContext) uses [TestableSettingsProvider] and it will be cleared after
+        // the test
+        Settings.Global.putInt(
+                mContext.getContentResolver(),
+                Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS,
+                1);
     }
 }

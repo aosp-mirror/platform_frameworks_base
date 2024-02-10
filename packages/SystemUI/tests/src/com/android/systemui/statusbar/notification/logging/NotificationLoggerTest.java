@@ -34,6 +34,7 @@ import android.app.Notification;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -62,6 +63,7 @@ import com.android.systemui.statusbar.notification.data.repository.ActiveNotific
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.logging.nano.Notifications;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -87,6 +89,7 @@ import kotlinx.coroutines.test.TestScope;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
+@DisableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
 public class NotificationLoggerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
