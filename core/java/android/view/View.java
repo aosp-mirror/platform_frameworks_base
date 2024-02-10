@@ -35,6 +35,7 @@ import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
+import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
@@ -132,6 +133,7 @@ import android.os.vibrator.Flags;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.FloatProperty;
@@ -3695,6 +3697,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *          1                       PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT
      *         1                        PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT
      *       11                         PFLAG4_CONTENT_SENSITIVITY_MASK
+     *      1                           PFLAG4_IS_COUNTED_AS_SENSITIVE
      * |-------|-------|-------|-------|
      */
 
@@ -3820,6 +3823,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int PFLAG4_CONTENT_SENSITIVITY_MASK =
             (CONTENT_SENSITIVITY_AUTO | CONTENT_SENSITIVITY_SENSITIVE
                     | CONTENT_SENSITIVITY_NOT_SENSITIVE) << PFLAG4_CONTENT_SENSITIVITY_SHIFT;
+
+    /**
+     * Whether this view has been counted as a sensitive view or not.
+     *
+     * @see AttachInfo#mSensitiveViewsCount
+     */
+    private static final int PFLAG4_IS_COUNTED_AS_SENSITIVE = 0x4000000;
     /* End of masks for mPrivateFlags4 */
 
     /** @hide */
@@ -10369,6 +10379,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags4 &= ~PFLAG4_CONTENT_SENSITIVITY_MASK;
         mPrivateFlags4 |= ((mode << PFLAG4_CONTENT_SENSITIVITY_SHIFT)
                 & PFLAG4_CONTENT_SENSITIVITY_MASK);
+        if (sensitiveContentAppProtection()) {
+            updateSensitiveViewsCountIfNeeded(isAggregatedVisible());
+        }
     }
 
     /**
@@ -10400,10 +10413,41 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @FlaggedApi(FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API)
     public final boolean isContentSensitive() {
-        if (getContentSensitivity() == CONTENT_SENSITIVITY_SENSITIVE) {
+        final int contentSensitivity = getContentSensitivity();
+        if (contentSensitivity == CONTENT_SENSITIVITY_SENSITIVE) {
             return true;
+        } else if (contentSensitivity == CONTENT_SENSITIVITY_NOT_SENSITIVE) {
+            return false;
+        } else if (sensitiveContentAppProtection()) {
+            return SensitiveAutofillHintsHelper
+                    .containsSensitiveAutofillHint(getAutofillHints());
         }
         return false;
+    }
+
+    /**
+     * Helper used to track sensitive views when they are added or removed from the window
+     * based on whether it's laid out and visible.
+     *
+     * <p>This method is called from many places (visibility changed, view laid out, view attached
+     * or detached to/from window, etc...)
+     */
+    private void updateSensitiveViewsCountIfNeeded(boolean appeared) {
+        if (!sensitiveContentAppProtection() || mAttachInfo == null) {
+            return;
+        }
+
+        if (appeared && isContentSensitive()) {
+            if ((mPrivateFlags4 & PFLAG4_IS_COUNTED_AS_SENSITIVE) == 0) {
+                mPrivateFlags4 |= PFLAG4_IS_COUNTED_AS_SENSITIVE;
+                mAttachInfo.increaseSensitiveViewsCount();
+            }
+        } else {
+            if ((mPrivateFlags4 & PFLAG4_IS_COUNTED_AS_SENSITIVE) != 0) {
+                mPrivateFlags4 &= ~PFLAG4_IS_COUNTED_AS_SENSITIVE;
+                mAttachInfo.decreaseSensitiveViewsCount();
+            }
+        }
     }
 
     /**
@@ -13435,6 +13479,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAutofillHints = null;
         } else {
             mAutofillHints = autofillHints;
+        }
+        if (sensitiveContentAppProtection()) {
+            if (getContentSensitivity() == CONTENT_SENSITIVITY_AUTO) {
+                updateSensitiveViewsCountIfNeeded(isAggregatedVisible());
+            }
         }
     }
 
@@ -16660,6 +16709,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             notifyAppearedOrDisappearedForContentCaptureIfNeeded(isVisible);
+            updateSensitiveViewsCountIfNeeded(isVisible);
 
             if (!getSystemGestureExclusionRects().isEmpty()) {
                 postUpdate(this::updateSystemGestureExclusionRects);
@@ -22649,6 +22699,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(false);
+        updateSensitiveViewsCountIfNeeded(false);
 
         mAttachInfo = null;
         if (mOverlay != null) {
@@ -31796,6 +31847,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ScrollCaptureInternal mScrollCaptureInternal;
 
         /**
+         * sensitive views attached to the window
+         */
+        int mSensitiveViewsCount;
+
+        /**
          * Creates a new set of attachment information with the specified
          * events handler and thread.
          *
@@ -31812,6 +31868,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mHandler = handler;
             mRootCallbacks = effectPlayer;
             mTreeObserver = new ViewTreeObserver(context);
+        }
+
+        void increaseSensitiveViewsCount() {
+            if (mSensitiveViewsCount == 0) {
+                mViewRootImpl.notifySensitiveContentAppProtection(true);
+            }
+            mSensitiveViewsCount++;
+        }
+
+        void decreaseSensitiveViewsCount() {
+            mSensitiveViewsCount--;
+            if (mSensitiveViewsCount == 0) {
+                mViewRootImpl.notifySensitiveContentAppProtection(false);
+            }
+            if (mSensitiveViewsCount < 0) {
+                Log.wtf(VIEW_LOG_TAG, "mSensitiveViewsCount is negative" + mSensitiveViewsCount);
+                mSensitiveViewsCount = 0;
+            }
         }
 
         @Nullable
@@ -32427,6 +32501,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    private static class SensitiveAutofillHintsHelper {
+        /**
+         * List of autofill hints deemed sensitive for screen protection during screen share.
+         */
+        private static final ArraySet<String> SENSITIVE_CONTENT_AUTOFILL_HINTS = new ArraySet<>();
+        static {
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_USERNAME);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_PASSWORD_AUTO);
+            SENSITIVE_CONTENT_AUTOFILL_HINTS.add(View.AUTOFILL_HINT_PASSWORD);
+        }
+
+        /**
+         * Whether View's autofill hints contains a sensitive autofill hint.
+         *
+         * @see #SENSITIVE_CONTENT_AUTOFILL_HINTS
+         */
+        static boolean containsSensitiveAutofillHint(@Nullable String[] autofillHints) {
+            if (autofillHints == null) {
+                return false;
+            }
+
+            int size = autofillHints.length;
+            for (int i = 0; i < size; i++) {
+                if (SENSITIVE_CONTENT_AUTOFILL_HINTS.contains(autofillHints[i])) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 
     /**
      * Returns the current scroll capture hint for this view.

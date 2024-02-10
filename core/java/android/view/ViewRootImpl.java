@@ -57,6 +57,7 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
+import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -165,6 +166,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -923,6 +925,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
+    private final ISensitiveContentProtectionManager mSensitiveContentProtectionService;
+
     static final class SystemUiVisibilityInfo {
         int globalVisibility;
         int localValue;
@@ -1195,6 +1199,13 @@ public final class ViewRootImpl implements ViewParent,
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
         mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(context);
+        if (sensitiveContentAppProtection()) {
+            mSensitiveContentProtectionService =
+                    ISensitiveContentProtectionManager.Stub.asInterface(
+                        ServiceManager.getService(Context.SENSITIVE_CONTENT_PROTECTION_SERVICE));
+        } else {
+            mSensitiveContentProtectionService = null;
+        }
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -4143,6 +4154,29 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mWmsRequestSyncGroup.add(this, null /* runnable */);
+    }
+
+    /**
+     * Helper used to notify the service to block projection when a sensitive
+     * view (the view displays sensitive content) is attached to the window.
+     * The window manager service is also notified to unblock projection when
+     * no attached view (to the window) displays sensitive content.
+     *
+     * <ol>
+     *   <li>It should only notify service to block projection when first sensitive view is
+     *   attached to the window.
+     *   <li>It should only notify service to unblock projection when all sensitive view are
+     *   removed from the window.
+     * </ol>
+     */
+    void notifySensitiveContentAppProtection(boolean showSensitiveContent) {
+        try {
+            // The window would be blocked during screen share if it shows sensitive content.
+            mSensitiveContentProtectionService.setSensitiveContentProtection(
+                    getWindowToken(), mContext.getPackageName(), showSensitiveContent);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Unable to protect sensitive content during screen share", ex);
+        }
     }
 
     private void notifyContentCaptureEvents() {
