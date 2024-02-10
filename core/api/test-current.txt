@@ -1616,6 +1616,7 @@ package android.hardware.input {
     method @NonNull public java.util.List<java.lang.String> getKeyboardLayoutDescriptorsForInputDevice(@NonNull android.view.InputDevice);
     method @NonNull public String getKeyboardLayoutTypeForLayoutDescriptor(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public java.util.Map<java.lang.Integer,java.lang.Integer> getModifierKeyRemapping();
+    method public int getMousePointerSpeed();
     method @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public void remapModifierKey(int, int);
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void removeKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
     method public void removeUniqueIdAssociation(@NonNull String);
@@ -1625,6 +1626,7 @@ package android.hardware.input {
 
   public class InputSettings {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, @FloatRange(from=0, to=1) float);
+    field public static final int DEFAULT_POINTER_SPEED = 0; // 0x0
   }
 
 }
@@ -2770,6 +2772,10 @@ package android.provider {
     field public static final String STYLUS_HANDWRITING_ENABLED = "stylus_handwriting_enabled";
     field @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
     field public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
+  }
+
+  public static final class Settings.System extends android.provider.Settings.NameValueTable {
+    field public static final String POINTER_SPEED = "pointer_speed";
   }
 
   public static final class Telephony.Sms.Intents {
