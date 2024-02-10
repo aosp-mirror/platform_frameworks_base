@@ -175,16 +175,21 @@ public class AggregatedPowerStatsConfig {
     private static final AggregatedPowerStatsProcessor NO_OP_PROCESSOR =
             new AggregatedPowerStatsProcessor() {
                 @Override
-                public void finish(PowerComponentAggregatedPowerStats stats) {
+                void finish(PowerComponentAggregatedPowerStats stats) {
                 }
 
                 @Override
-                public String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
+                String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
                     return Arrays.toString(stats);
                 }
 
                 @Override
-                public String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
+                String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats) {
+                    return descriptor.getStateLabel(key) + " " + Arrays.toString(stats);
+                }
+
+                @Override
+                String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
                     return Arrays.toString(stats);
                 }
             };

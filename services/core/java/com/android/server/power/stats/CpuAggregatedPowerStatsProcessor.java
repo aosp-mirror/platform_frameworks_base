@@ -527,6 +527,12 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
     }
 
     @Override
+    String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats) {
+        // Unsupported for this power component
+        return null;
+    }
+
+    @Override
     public String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats) {
         unpackPowerStatsDescriptor(descriptor);
         StringBuilder sb = new StringBuilder();

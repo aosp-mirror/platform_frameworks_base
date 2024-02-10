@@ -41,6 +41,8 @@ class PowerComponentAggregatedPowerStats {
     static final String XML_TAG_POWER_COMPONENT = "power_component";
     static final String XML_ATTR_ID = "id";
     private static final String XML_TAG_DEVICE_STATS = "device-stats";
+    private static final String XML_TAG_STATE_STATS = "state-stats";
+    private static final String XML_ATTR_KEY = "key";
     private static final String XML_TAG_UID_STATS = "uid-stats";
     private static final String XML_ATTR_UID = "uid";
     private static final long UNKNOWN = -1;
@@ -53,10 +55,12 @@ class PowerComponentAggregatedPowerStats {
     private final int[] mDeviceStates;
 
     private MultiStateStats.Factory mStatsFactory;
+    private MultiStateStats.Factory mStateStatsFactory;
     private MultiStateStats.Factory mUidStatsFactory;
     private PowerStats.Descriptor mPowerStatsDescriptor;
     private long mPowerStatsTimestamp;
     private MultiStateStats mDeviceStats;
+    private final SparseArray<MultiStateStats> mStateStats = new SparseArray<>();
     private final SparseArray<UidStats> mUidStats = new SparseArray<>();
 
     private static class UidStats {
@@ -93,6 +97,13 @@ class PowerComponentAggregatedPowerStats {
         if (mDeviceStateConfig[stateId].isTracked()) {
             if (mDeviceStats != null) {
                 mDeviceStats.setState(stateId, state, time);
+            }
+
+            for (int i = mStateStats.size() - 1; i >= 0; i--) {
+                MultiStateStats stateStats = mStateStats.valueAt(i);
+                if (stateStats != null) {
+                    stateStats.setState(stateId, state, time);
+                }
             }
         }
 
@@ -150,6 +161,14 @@ class PowerComponentAggregatedPowerStats {
             createDeviceStats();
         }
 
+        for (int i = powerStats.stateStats.size() - 1; i >= 0; i--) {
+            int key = powerStats.stateStats.keyAt(i);
+            MultiStateStats stateStats = mStateStats.get(key);
+            if (stateStats == null) {
+                stateStats = createStateStats(key);
+            }
+            stateStats.increment(powerStats.stateStats.valueAt(i), timestampMs);
+        }
         mDeviceStats.increment(powerStats.stats, timestampMs);
 
         for (int i = powerStats.uidStats.size() - 1; i >= 0; i--) {
@@ -168,6 +187,7 @@ class PowerComponentAggregatedPowerStats {
         mStatsFactory = null;
         mUidStatsFactory = null;
         mDeviceStats = null;
+        mStateStats.clear();
         for (int i = mUidStats.size() - 1; i >= 0; i--) {
             mUidStats.valueAt(i).stats = null;
         }
@@ -204,6 +224,20 @@ class PowerComponentAggregatedPowerStats {
         return false;
     }
 
+    boolean getStateStats(long[] outValues, int key, int[] deviceStates) {
+        if (deviceStates.length != mDeviceStateConfig.length) {
+            throw new IllegalArgumentException(
+                    "Invalid number of tracked states: " + deviceStates.length
+                            + " expected: " + mDeviceStateConfig.length);
+        }
+        MultiStateStats stateStats = mStateStats.get(key);
+        if (stateStats != null) {
+            stateStats.getStats(outValues, deviceStates);
+            return true;
+        }
+        return false;
+    }
+
     boolean getUidStats(long[] outValues, int uid, int[] uidStates) {
         if (uidStates.length != mUidStateConfig.length) {
             throw new IllegalArgumentException(
@@ -233,6 +267,24 @@ class PowerComponentAggregatedPowerStats {
                 mDeviceStats.setState(stateId, mDeviceStates[stateId], mPowerStatsTimestamp);
             }
         }
+    }
+
+    private MultiStateStats createStateStats(int key) {
+        if (mStateStatsFactory == null) {
+            if (mPowerStatsDescriptor == null) {
+                return null;
+            }
+            mStateStatsFactory = new MultiStateStats.Factory(
+                    mPowerStatsDescriptor.stateStatsArrayLength, mDeviceStateConfig);
+        }
+
+        MultiStateStats stateStats = mStateStatsFactory.create();
+        mStateStats.put(key, stateStats);
+        if (mDeviceStats != null) {
+            stateStats.copyStatesFrom(mDeviceStats);
+        }
+
+        return stateStats;
     }
 
     private void createUidStats(UidStats uidStats) {
@@ -266,6 +318,13 @@ class PowerComponentAggregatedPowerStats {
             serializer.startTag(null, XML_TAG_DEVICE_STATS);
             mDeviceStats.writeXml(serializer);
             serializer.endTag(null, XML_TAG_DEVICE_STATS);
+        }
+
+        for (int i = 0; i < mStateStats.size(); i++) {
+            serializer.startTag(null, XML_TAG_STATE_STATS);
+            serializer.attributeInt(null, XML_ATTR_KEY, mStateStats.keyAt(i));
+            mStateStats.valueAt(i).writeXml(serializer);
+            serializer.endTag(null, XML_TAG_STATE_STATS);
         }
 
         for (int i = mUidStats.size() - 1; i >= 0; i--) {
@@ -303,6 +362,16 @@ class PowerComponentAggregatedPowerStats {
                             return false;
                         }
                         break;
+                    case XML_TAG_STATE_STATS:
+                        int key = parser.getAttributeInt(null, XML_ATTR_KEY);
+                        MultiStateStats stats = mStateStats.get(key);
+                        if (stats == null) {
+                            stats = createStateStats(key);
+                        }
+                        if (!stats.readFromXml(parser)) {
+                            return false;
+                        }
+                        break;
                     case XML_TAG_UID_STATS:
                         int uid = parser.getAttributeInt(null, XML_ATTR_UID);
                         UidStats uidStats = getUidStats(uid);
@@ -326,6 +395,21 @@ class PowerComponentAggregatedPowerStats {
             ipw.increaseIndent();
             mDeviceStats.dump(ipw, stats ->
                     mConfig.getProcessor().deviceStatsToString(mPowerStatsDescriptor, stats));
+            ipw.decreaseIndent();
+        }
+
+        if (mStateStats.size() != 0) {
+            ipw.increaseIndent();
+            ipw.println(mPowerStatsDescriptor.name + " states");
+            ipw.increaseIndent();
+            for (int i = 0; i < mStateStats.size(); i++) {
+                int key = mStateStats.keyAt(i);
+                MultiStateStats stateStats = mStateStats.valueAt(i);
+                stateStats.dump(ipw, stats ->
+                        mConfig.getProcessor().stateStatsToString(mPowerStatsDescriptor, key,
+                                stats));
+            }
+            ipw.decreaseIndent();
             ipw.decreaseIndent();
         }
     }

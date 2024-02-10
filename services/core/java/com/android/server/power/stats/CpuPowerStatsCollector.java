@@ -306,7 +306,8 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         mLayout.toExtras(extras);
 
         mPowerStatsDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU,
-                mLayout.getDeviceStatsArrayLength(), mLayout.getUidStatsArrayLength(), extras);
+                mLayout.getDeviceStatsArrayLength(), /* stateLabels */null,
+                /* stateStatsArrayLength */ 0, mLayout.getUidStatsArrayLength(), extras);
         mCpuPowerStats = new PowerStats(mPowerStatsDescriptor);
 
         mTempUidStats = new long[mLayout.getCpuPowerBracketCount()];

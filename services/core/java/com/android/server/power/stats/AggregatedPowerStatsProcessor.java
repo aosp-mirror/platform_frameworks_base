@@ -49,6 +49,8 @@ abstract class AggregatedPowerStatsProcessor {
 
     abstract String deviceStatsToString(PowerStats.Descriptor descriptor, long[] stats);
 
+    abstract String stateStatsToString(PowerStats.Descriptor descriptor, int key, long[] stats);
+
     abstract String uidStatsToString(PowerStats.Descriptor descriptor, long[] stats);
 
     protected static class PowerEstimationPlan {

@@ -34,11 +34,14 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 /**
  * This class represents aggregated power stats for a variety of power components (CPU, WiFi,
@@ -223,7 +226,7 @@ class AggregatedPowerStats {
             if (i == 0) {
                 baseTime = clockUpdate.monotonicTime;
                 sb.append("Start time: ")
-                        .append(DateFormat.format("yyyy-MM-dd-HH-mm-ss", clockUpdate.currentTime))
+                        .append(formatDateTime(clockUpdate.currentTime))
                         .append(" (")
                         .append(baseTime)
                         .append(") duration: ")
@@ -235,8 +238,7 @@ class AggregatedPowerStats {
                 TimeUtils.formatDuration(
                         clockUpdate.monotonicTime - baseTime, sb,
                         TimeUtils.HUNDRED_DAY_FIELD_LEN + 3);
-                sb.append(" ").append(
-                        DateFormat.format("yyyy-MM-dd-HH-mm-ss", clockUpdate.currentTime));
+                sb.append(" ").append(formatDateTime(clockUpdate.currentTime));
                 ipw.increaseIndent();
                 ipw.println(sb);
                 ipw.decreaseIndent();
@@ -265,6 +267,12 @@ class AggregatedPowerStats {
             }
             ipw.decreaseIndent();
         }
+    }
+
+    private static String formatDateTime(long timeInMillis) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        format.getCalendar().setTimeZone(TimeZone.getTimeZone("GMT"));
+        return format.format(new Date(timeInMillis));
     }
 
     @Override

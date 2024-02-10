@@ -222,8 +222,8 @@ public class CpuAggregatedPowerStatsProcessorTest {
             PersistableBundle extras = new PersistableBundle();
             mStatsLayout.toExtras(extras);
             mDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU,
-                    mStatsLayout.getDeviceStatsArrayLength(), mStatsLayout.getUidStatsArrayLength(),
-                    extras);
+                    mStatsLayout.getDeviceStatsArrayLength(), null, 0,
+                    mStatsLayout.getUidStatsArrayLength(), extras);
         }
 
         @Override

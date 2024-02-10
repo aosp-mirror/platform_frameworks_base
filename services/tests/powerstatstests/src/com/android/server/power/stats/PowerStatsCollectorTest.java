@@ -57,7 +57,8 @@ public class PowerStatsCollectorTest {
                 mMockClock) {
             @Override
             protected PowerStats collectStats() {
-                return new PowerStats(new PowerStats.Descriptor(0, 0, 0, new PersistableBundle()));
+                return new PowerStats(
+                        new PowerStats.Descriptor(0, 0, null, 0, 0, new PersistableBundle()));
             }
         };
         mCollector.addConsumer(stats -> mCollectedStats = stats);

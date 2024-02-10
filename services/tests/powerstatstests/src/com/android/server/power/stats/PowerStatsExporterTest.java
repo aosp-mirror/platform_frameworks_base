@@ -113,7 +113,7 @@ public class PowerStatsExporterTest {
 
         mPowerStatsDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU,
                 mCpuStatsArrayLayout.getDeviceStatsArrayLength(),
-                mCpuStatsArrayLayout.getUidStatsArrayLength(), extras);
+                null, 0, mCpuStatsArrayLayout.getUidStatsArrayLength(), extras);
     }
 
     @Test

@@ -55,6 +55,14 @@ static void native_setState(jlong nativePtr, jint state, jlong timestamp) {
     counter->setState(state, timestamp);
 }
 
+static void native_copyStatesFrom(jlong nativePtrTarget, jlong nativePtrSource) {
+    battery::LongArrayMultiStateCounter *counterTarget =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtrTarget);
+    battery::LongArrayMultiStateCounter *counterSource =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtrSource);
+    counterTarget->copyStatesFrom(*counterSource);
+}
+
 static void native_setValues(jlong nativePtr, jint state, jlong longArrayContainerNativePtr) {
     battery::LongArrayMultiStateCounter *counter =
             reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
@@ -218,6 +226,8 @@ static const JNINativeMethod g_LongArrayMultiStateCounter_methods[] = {
         {"native_setEnabled", "(JZJ)V", (void *)native_setEnabled},
         // @CriticalNative
         {"native_setState", "(JIJ)V", (void *)native_setState},
+        // @CriticalNative
+        {"native_copyStatesFrom", "(JJ)V", (void *)native_copyStatesFrom},
         // @CriticalNative
         {"native_setValues", "(JIJ)V", (void *)native_setValues},
         // @CriticalNative
