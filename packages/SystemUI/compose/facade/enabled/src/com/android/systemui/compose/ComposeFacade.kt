@@ -40,6 +40,7 @@ import com.android.systemui.common.ui.compose.windowinsets.ScreenDecorProvider
 import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.keyboard.stickykeys.ui.view.createStickyKeyIndicatorView
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
@@ -161,7 +162,7 @@ object ComposeFacade : BaseComposeFacade {
         }
     }
 
-    override fun createCommunalContainer(context: Context, viewModel: BaseCommunalViewModel): View {
+    override fun createCommunalContainer(context: Context, viewModel: CommunalViewModel): View {
         return ComposeView(context).apply {
             setContent { PlatformTheme { CommunalContainer(viewModel = viewModel) } }
         }
