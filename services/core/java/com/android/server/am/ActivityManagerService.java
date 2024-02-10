@@ -513,6 +513,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -909,6 +910,16 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("this")
     final ComponentAliasResolver mComponentAliasResolver;
+
+    private static final long HOME_LAUNCH_TIMEOUT_MS = 15000;
+    private final AtomicBoolean mHasHomeDelay = new AtomicBoolean(false);
+
+    /**
+     * Tracks all users with computed color resources by ThemeOverlaycvontroller
+     */
+    @GuardedBy("this")
+    private final Set<Integer> mThemeOverlayReadyUsers = new HashSet<>();
+
 
     /**
      * Tracks association information for a particular package along with debuggability.
@@ -2269,6 +2280,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mService.startBroadcastObservers();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 mService.mPackageWatchdog.onPackagesReady();
+                mService.scheduleHomeTimeout();
             }
         }
 
@@ -5232,6 +5244,61 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (callFinishBooting) {
             finishBooting();
+        }
+    }
+
+    /**
+     * Starts Home if there is no completion signal from ThemeOverlayController
+     */
+    private void scheduleHomeTimeout() {
+        if (mHasHomeDelay.compareAndSet(false, true)) {
+            int userId = mUserController.getCurrentUserId();
+            mHandler.postDelayed(() -> {
+                if (!isThemeOverlayReady(userId)) {
+                    Slog.d(TAG,
+                            "ThemeHomeDelay: ThemeOverlayController not responding, launching "
+                                    + "Home after "
+                                    + HOME_LAUNCH_TIMEOUT_MS + "ms");
+                    setThemeOverlayReady(userId);
+                }
+            }, HOME_LAUNCH_TIMEOUT_MS);
+        }
+    }
+
+    /**
+     * Used by ThemeOverlayController to notify when color
+     * palette is ready.
+     *
+     * @param userId The ID of the user where ThemeOverlayController is ready.
+     *
+     * @throws RemoteException
+     *
+     * @hide
+     */
+    @Override
+    public void setThemeOverlayReady(@UserIdInt int userId) {
+        enforceCallingPermission(Manifest.permission.SET_THEME_OVERLAY_CONTROLLER_READY,
+                "setThemeOverlayReady");
+
+        boolean updateUser;
+        synchronized (mThemeOverlayReadyUsers) {
+            updateUser = mThemeOverlayReadyUsers.add(userId);
+        }
+
+        if (updateUser) {
+            mAtmInternal.startHomeOnAllDisplays(userId, "setThemeOverlayReady");
+        }
+    }
+
+    /**
+     * Returns current state of ThemeOverlayController color
+     * palette readiness.
+     *
+     * @hide
+     */
+    public boolean isThemeOverlayReady(int userId) {
+        synchronized (mThemeOverlayReadyUsers) {
+            return mThemeOverlayReadyUsers.contains(userId);
         }
     }
 
@@ -17612,6 +17679,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.onUserStopped(userId);
             // Clean up various services by removing the user
             mBatteryStatsService.onUserRemoved(userId);
+
+            synchronized (mThemeOverlayReadyUsers) {
+                mThemeOverlayReadyUsers.remove(userId);
+            }
         }
 
         @Override
@@ -18965,6 +19036,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 boolean isRestore, final IPackageDataObserver observer, int userId) {
             return ActivityManagerService.this.clearApplicationUserData(packageName, keepState,
                     isRestore, observer, userId);
+        }
+
+        @Override
+        public boolean isThemeOverlayReady(int userId) {
+            return ActivityManagerService.this.isThemeOverlayReady(userId);
         }
     }
 
