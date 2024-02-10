@@ -71,7 +71,11 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @Mock private lateinit var logger: BluetoothTileDialogLogger
 
-    private val subtitleResId = R.string.quick_settings_bluetooth_tile_subtitle
+    private val uiProperties =
+        BluetoothTileDialogViewModel.UiProperties.build(
+            isBluetoothEnabled = ENABLED,
+            isAutoOnToggleFeatureAvailable = ENABLED
+        )
 
     private val fakeSystemClock = FakeSystemClock()
 
@@ -90,7 +94,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
         bluetoothTileDialog =
             BluetoothTileDialog(
                 ENABLED,
-                subtitleResId,
+                uiProperties,
                 CONTENT_HEIGHT,
                 bluetoothTileDialogCallback,
                 dispatcher,
@@ -131,7 +135,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
             bluetoothTileDialog =
                 BluetoothTileDialog(
                     ENABLED,
-                    subtitleResId,
+                    uiProperties,
                     CONTENT_HEIGHT,
                     bluetoothTileDialogCallback,
                     dispatcher,
@@ -166,7 +170,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
         val viewHolder =
             BluetoothTileDialog(
                     ENABLED,
-                    subtitleResId,
+                    uiProperties,
                     CONTENT_HEIGHT,
                     bluetoothTileDialogCallback,
                     dispatcher,
@@ -194,7 +198,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
         val viewHolder =
             BluetoothTileDialog(
                     ENABLED,
-                    subtitleResId,
+                    uiProperties,
                     CONTENT_HEIGHT,
                     bluetoothTileDialogCallback,
                     dispatcher,
@@ -219,7 +223,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
             bluetoothTileDialog =
                 BluetoothTileDialog(
                     ENABLED,
-                    subtitleResId,
+                    uiProperties,
                     CONTENT_HEIGHT,
                     bluetoothTileDialogCallback,
                     dispatcher,
@@ -253,12 +257,36 @@ class BluetoothTileDialogTest : SysuiTestCase() {
     }
 
     @Test
-    fun testShowDialog_displayFromCachedHeight() {
+    fun testShowDialog_cachedHeightLargerThanMinHeight_displayFromCachedHeight() {
+        testScope.runTest {
+            val cachedHeight = Int.MAX_VALUE
+            bluetoothTileDialog =
+                BluetoothTileDialog(
+                    ENABLED,
+                    uiProperties,
+                    cachedHeight,
+                    bluetoothTileDialogCallback,
+                    dispatcher,
+                    fakeSystemClock,
+                    uiEventLogger,
+                    logger,
+                    mContext
+                )
+            bluetoothTileDialog.show()
+            assertThat(
+                    bluetoothTileDialog.requireViewById<View>(R.id.scroll_view).layoutParams.height
+                )
+                .isEqualTo(cachedHeight)
+        }
+    }
+
+    @Test
+    fun testShowDialog_cachedHeightLessThanMinHeight_displayFromUiProperties() {
         testScope.runTest {
             bluetoothTileDialog =
                 BluetoothTileDialog(
                     ENABLED,
-                    subtitleResId,
+                    uiProperties,
                     MATCH_PARENT,
                     bluetoothTileDialogCallback,
                     dispatcher,
@@ -271,7 +299,32 @@ class BluetoothTileDialogTest : SysuiTestCase() {
             assertThat(
                     bluetoothTileDialog.requireViewById<View>(R.id.scroll_view).layoutParams.height
                 )
-                .isEqualTo(MATCH_PARENT)
+                .isGreaterThan(MATCH_PARENT)
+        }
+    }
+
+    @Test
+    fun testShowDialog_bluetoothEnabled_autoOnToggleGone() {
+        testScope.runTest {
+            bluetoothTileDialog =
+                BluetoothTileDialog(
+                    ENABLED,
+                    BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
+                    MATCH_PARENT,
+                    bluetoothTileDialogCallback,
+                    dispatcher,
+                    fakeSystemClock,
+                    uiEventLogger,
+                    logger,
+                    mContext
+                )
+            bluetoothTileDialog.show()
+            assertThat(
+                    bluetoothTileDialog
+                        .requireViewById<View>(R.id.bluetooth_auto_on_toggle_layout)
+                        .visibility
+                )
+                .isEqualTo(GONE)
         }
     }
 }

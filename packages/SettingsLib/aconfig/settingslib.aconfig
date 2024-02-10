@@ -17,3 +17,9 @@ flag {
     }
 }
 
+flag {
+   name: "bluetooth_qs_tile_dialog_auto_on_toggle"
+   namespace: "bluetooth"
+   description: "Displays the auto on toggle in the bluetooth QS tile dialog"
+   bug: "316985153"
+}
