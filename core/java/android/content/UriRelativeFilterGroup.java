@@ -19,6 +19,7 @@ package android.content;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.Flags;
 import android.net.Uri;
 import android.os.Parcel;
@@ -36,9 +37,11 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -82,6 +85,40 @@ public final class UriRelativeFilterGroup {
 
     private final @Action int mAction;
     private final ArraySet<UriRelativeFilter> mUriRelativeFilters = new ArraySet<>();
+
+    /** @hide */
+    public static boolean matchGroupsToUri(List<UriRelativeFilterGroup> groups, Uri uri) {
+        for (int i = 0; i < groups.size(); i++) {
+            if (groups.get(i).matchData(uri)) {
+                return groups.get(i).getAction() == UriRelativeFilterGroup.ACTION_ALLOW;
+            }
+        }
+        return false;
+    }
+
+    /** @hide */
+    public static List<UriRelativeFilterGroup> parcelsToGroups(
+            @Nullable List<UriRelativeFilterGroupParcel> parcels) {
+        List<UriRelativeFilterGroup> groups = new ArrayList<>();
+        if (parcels != null) {
+            for (int i = 0; i < parcels.size(); i++) {
+                groups.add(new UriRelativeFilterGroup(parcels.get(i)));
+            }
+        }
+        return groups;
+    }
+
+    /** @hide */
+    public static List<UriRelativeFilterGroupParcel> groupsToParcels(
+            @Nullable List<UriRelativeFilterGroup> groups) {
+        List<UriRelativeFilterGroupParcel> parcels = new ArrayList<>();
+        if (groups != null) {
+            for (int i = 0; i < groups.size(); i++) {
+                parcels.add(groups.get(i).toParcel());
+            }
+        }
+        return parcels;
+    }
 
     /**
      * New UriRelativeFilterGroup that matches a Intent data.
@@ -205,12 +242,49 @@ public final class UriRelativeFilterGroup {
         }
     }
 
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        @SuppressWarnings("unchecked")
+        UriRelativeFilterGroup that = (UriRelativeFilterGroup) o;
+        if (mAction != that.mAction) return false;
+        return mUriRelativeFilters.equals(that.mUriRelativeFilters);
+    }
+
+    @Override
+    public int hashCode() {
+        int _hash = 0;
+        _hash = 31 * _hash + mAction;
+        _hash = 31 * _hash + java.util.Objects.hashCode(mUriRelativeFilters);
+        return _hash;
+    }
+
+    /** @hide */
+    public UriRelativeFilterGroupParcel toParcel() {
+        UriRelativeFilterGroupParcel parcel = new UriRelativeFilterGroupParcel();
+        parcel.action = mAction;
+        parcel.filters = new ArrayList<>();
+        for (UriRelativeFilter filter : mUriRelativeFilters) {
+            parcel.filters.add(filter.toParcel());
+        }
+        return parcel;
+    }
+
     /** @hide */
     UriRelativeFilterGroup(@NonNull Parcel src) {
         mAction = src.readInt();
         final int n = src.readInt();
         for (int i = 0; i < n; i++) {
             mUriRelativeFilters.add(new UriRelativeFilter(src));
+        }
+    }
+
+    /** @hide */
+    public UriRelativeFilterGroup(UriRelativeFilterGroupParcel parcel) {
+        mAction = parcel.action;
+        for (int i = 0; i < parcel.filters.size(); i++) {
+            mUriRelativeFilters.add(new UriRelativeFilter(parcel.filters.get(i)));
         }
     }
 }

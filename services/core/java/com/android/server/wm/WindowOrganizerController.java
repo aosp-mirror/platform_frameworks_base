@@ -583,8 +583,21 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
             final int hopSize = hops.size();
-            Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
-                    t.getChanges().entrySet().iterator();
+            Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries;
+            if (transition != null) {
+                // Mark any config-at-end containers before applying config changes so that
+                // the config changes don't dispatch to client.
+                entries = t.getChanges().entrySet().iterator();
+                while (entries.hasNext()) {
+                    final Map.Entry<IBinder, WindowContainerTransaction.Change> entry =
+                            entries.next();
+                    if (!entry.getValue().getConfigAtTransitionEnd()) continue;
+                    final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
+                    if (wc == null || !wc.isAttached()) continue;
+                    transition.setConfigAtEnd(wc);
+                }
+            }
+            entries = t.getChanges().entrySet().iterator();
             while (entries.hasNext()) {
                 final Map.Entry<IBinder, WindowContainerTransaction.Change> entry = entries.next();
                 final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());

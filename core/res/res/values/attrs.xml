@@ -5857,6 +5857,23 @@
           use glyph bound's as a source of text width.  -->
         <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
         <attr name="useBoundsForWidth" format="boolean" />
+        <!-- Whether to use the locale preferred line height for the minimum line height.
+
+          This flag is useful for preventing jitter of entering letters into empty EditText.
+          The line height of the text is determined by the font files used for drawing text in a
+          line. However, in case of the empty text case, the line height cannot be determined and
+          the default line height: usually it is came from a font of Latin script. By making this
+          attribute to true, the TextView/EditText uses a line height that is likely used for the
+          locale associated with the widget. For example, if the system locale is Japanese, the
+          height of the EditText will be adjusted to meet the height of the Japanese font even if
+          the text is empty.
+
+          The default value for EditText is true if targetSdkVersion is
+          {@link android.os.Build.VERSION_CODE#VANILLA_ICE_CREAM} or later, otherwise false.
+          For other TextViews, the default value is false.
+        -->
+        <!-- @FlaggedApi("com.android.text.flags.fix_line_height_for_locale") -->
+        <attr name="useLocalePreferredLineHeightForMinimum" format="boolean" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->

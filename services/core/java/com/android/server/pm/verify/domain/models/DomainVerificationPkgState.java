@@ -19,6 +19,7 @@ package com.android.server.pm.verify.domain.models;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.UriRelativeFilterGroup;
 import android.content.pm.Signature;
 import android.content.pm.verify.domain.DomainVerificationState;
 import android.util.ArrayMap;
@@ -26,6 +27,7 @@ import android.util.SparseArray;
 
 import com.android.internal.util.DataClass;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -77,15 +79,30 @@ public class DomainVerificationPkgState {
     @Nullable
     private final String mBackupSignatureHash;
 
+    /**
+     * List of {@link UriRelativeFilterGroup} for filtering domains.
+     */
+    @NonNull
+    private final ArrayMap<String, List<UriRelativeFilterGroup>> mUriRelativeFilterGroupMap;
+
     public DomainVerificationPkgState(@NonNull String packageName, @NonNull UUID id,
             boolean hasAutoVerifyDomains) {
-        this(packageName, id, hasAutoVerifyDomains, new ArrayMap<>(0), new SparseArray<>(0), null);
+        this(packageName, id, hasAutoVerifyDomains, new ArrayMap<>(0), new SparseArray<>(0), null,
+                new ArrayMap<>());
     }
 
     public DomainVerificationPkgState(@NonNull DomainVerificationPkgState pkgState,
             @NonNull UUID id, boolean hasAutoVerifyDomains) {
         this(pkgState.getPackageName(), id, hasAutoVerifyDomains, pkgState.getStateMap(),
-                pkgState.getUserStates(), null);
+                pkgState.getUserStates(), null, new ArrayMap<>());
+    }
+
+    public DomainVerificationPkgState(@NonNull String packageName, @NonNull UUID id,
+            boolean hasAutoVerifyDomains, @NonNull ArrayMap<String, Integer> stateMap,
+            @NonNull SparseArray<DomainVerificationInternalUserState> userStates,
+            @Nullable String backupSignatureHash) {
+        this(packageName, id, hasAutoVerifyDomains, stateMap, userStates, backupSignatureHash,
+                new ArrayMap<>());
     }
 
     @Nullable
@@ -158,6 +175,8 @@ public class DomainVerificationPkgState {
      *
      *   It's assumed the domain verification agent will eventually re-verify this domain
      *   and revoke if necessary.
+     * @param uriRelativeFilterGroupMap
+     *   List of {@link UriRelativeFilterGroup} for filtering domains.
      */
     @DataClass.Generated.Member
     public DomainVerificationPkgState(
@@ -166,7 +185,8 @@ public class DomainVerificationPkgState {
             boolean hasAutoVerifyDomains,
             @NonNull ArrayMap<String,Integer> stateMap,
             @NonNull SparseArray<DomainVerificationInternalUserState> userStates,
-            @Nullable String backupSignatureHash) {
+            @Nullable String backupSignatureHash,
+            @NonNull ArrayMap<String,List<UriRelativeFilterGroup>> uriRelativeFilterGroupMap) {
         this.mPackageName = packageName;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPackageName);
@@ -181,6 +201,9 @@ public class DomainVerificationPkgState {
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mUserStates);
         this.mBackupSignatureHash = backupSignatureHash;
+        this.mUriRelativeFilterGroupMap = uriRelativeFilterGroupMap;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mUriRelativeFilterGroupMap);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -239,6 +262,14 @@ public class DomainVerificationPkgState {
         return mBackupSignatureHash;
     }
 
+    /**
+     * List of {@link UriRelativeFilterGroup} for filtering domains.
+     */
+    @DataClass.Generated.Member
+    public @NonNull ArrayMap<String,List<UriRelativeFilterGroup>> getUriRelativeFilterGroupMap() {
+        return mUriRelativeFilterGroupMap;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -251,7 +282,8 @@ public class DomainVerificationPkgState {
                 "hasAutoVerifyDomains = " + mHasAutoVerifyDomains + ", " +
                 "stateMap = " + mStateMap + ", " +
                 "userStates = " + mUserStates + ", " +
-                "backupSignatureHash = " + mBackupSignatureHash +
+                "backupSignatureHash = " + mBackupSignatureHash + ", " +
+                "uriRelativeFilterGroupMap = " + mUriRelativeFilterGroupMap +
         " }";
     }
 
@@ -273,7 +305,8 @@ public class DomainVerificationPkgState {
                 && mHasAutoVerifyDomains == that.mHasAutoVerifyDomains
                 && Objects.equals(mStateMap, that.mStateMap)
                 && userStatesEquals(that.mUserStates)
-                && Objects.equals(mBackupSignatureHash, that.mBackupSignatureHash);
+                && Objects.equals(mBackupSignatureHash, that.mBackupSignatureHash)
+                && Objects.equals(mUriRelativeFilterGroupMap, that.mUriRelativeFilterGroupMap);
     }
 
     @Override
@@ -289,14 +322,15 @@ public class DomainVerificationPkgState {
         _hash = 31 * _hash + Objects.hashCode(mStateMap);
         _hash = 31 * _hash + userStatesHashCode();
         _hash = 31 * _hash + Objects.hashCode(mBackupSignatureHash);
+        _hash = 31 * _hash + Objects.hashCode(mUriRelativeFilterGroupMap);
         return _hash;
     }
 
     @DataClass.Generated(
-            time = 1617315369614L,
+            time = 1707351734724L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/services/core/java/com/android/server/pm/verify/domain/models/DomainVerificationPkgState.java",
-            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate @android.annotation.NonNull java.util.UUID mId\nprivate final  boolean mHasAutoVerifyDomains\nprivate final @android.annotation.NonNull android.util.ArrayMap<java.lang.String,java.lang.Integer> mStateMap\nprivate final @android.annotation.NonNull android.util.SparseArray<com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState> mUserStates\nprivate final @android.annotation.Nullable java.lang.String mBackupSignatureHash\npublic @android.annotation.Nullable com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState getUserState(int)\npublic @android.annotation.Nullable com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState getOrCreateUserState(int)\npublic  void removeUser(int)\npublic  void removeAllUsers()\nprivate  int userStatesHashCode()\nprivate  boolean userStatesEquals(android.util.SparseArray<com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState>)\nclass DomainVerificationPkgState extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true)")
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.util.UUID mId\nprivate final  boolean mHasAutoVerifyDomains\nprivate final @android.annotation.NonNull android.util.ArrayMap<java.lang.String,java.lang.Integer> mStateMap\nprivate final @android.annotation.NonNull android.util.SparseArray<com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState> mUserStates\nprivate final @android.annotation.Nullable java.lang.String mBackupSignatureHash\nprivate final @android.annotation.NonNull android.util.ArrayMap<java.lang.String,java.util.List<android.content.UriRelativeFilterGroup>> mUriRelativeFilterGroupMap\npublic @android.annotation.Nullable com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState getUserState(int)\npublic @android.annotation.Nullable com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState getOrCreateUserState(int)\npublic  void removeUser(int)\npublic  void removeAllUsers()\nprivate  int userStatesHashCode()\nprivate  boolean userStatesEquals(android.util.SparseArray<com.android.server.pm.verify.domain.models.DomainVerificationInternalUserState>)\nclass DomainVerificationPkgState extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

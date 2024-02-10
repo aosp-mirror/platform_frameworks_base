@@ -151,21 +151,20 @@ constructor(
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
         interactor.configurationBasedDimensions
             .map {
+                val marginTop =
+                    if (it.useLargeScreenHeader) it.marginTopLargeScreen else it.marginTop
                 ConfigurationBasedDimensions(
                     marginStart = if (it.useSplitShade) 0 else it.marginHorizontal,
                     marginEnd = it.marginHorizontal,
                     marginBottom = it.marginBottom,
-                    marginTop =
-                        if (it.useLargeScreenHeader) it.marginTopLargeScreen else it.marginTop,
+                    marginTop = marginTop,
                     useSplitShade = it.useSplitShade,
                     paddingTop =
                         if (it.useSplitShade) {
-                            // When in split shade, the margin is applied twice as the legacy shade
-                            // code uses it to calculate padding.
-                            it.keyguardSplitShadeTopMargin - 2 * it.marginTopLargeScreen
+                            marginTop
                         } else {
                             0
-                        }
+                        },
                 )
             }
             .distinctUntilChanged()
@@ -255,13 +254,15 @@ constructor(
                 isOnLockscreenWithoutShade,
                 keyguardInteractor.notificationContainerBounds,
                 configurationBasedDimensions,
-                interactor.topPosition.sampleCombine(
-                    keyguardTransitionInteractor.isInTransitionToAnyState,
-                    shadeInteractor.qsExpansion,
-                ),
+                interactor.topPosition
+                    .sampleCombine(
+                        keyguardTransitionInteractor.isInTransitionToAnyState,
+                        shadeInteractor.qsExpansion,
+                    )
+                    .onStart { emit(Triple(0f, false, 0f)) }
             ) { onLockscreen, bounds, config, (top, isInTransitionToAnyState, qsExpansion) ->
                 if (onLockscreen) {
-                    bounds.copy(top = bounds.top + config.paddingTop)
+                    bounds.copy(top = bounds.top - config.paddingTop)
                 } else {
                     // When QS expansion > 0, it should directly set the top padding so do not
                     // animate it

@@ -70,6 +70,7 @@ int register_com_android_server_wm_TaskFpsCallbackController(JNIEnv* env);
 int register_com_android_server_display_DisplayControl(JNIEnv* env);
 int register_com_android_server_SystemClockTime(JNIEnv* env);
 int register_android_server_display_smallAreaDetectionController(JNIEnv* env);
+int register_com_android_server_accessibility_BrailleDisplayConnection(JNIEnv* env);
 };
 
 using namespace android;
@@ -132,5 +133,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_com_android_server_display_DisplayControl(env);
     register_com_android_server_SystemClockTime(env);
     register_android_server_display_smallAreaDetectionController(env);
+    register_com_android_server_accessibility_BrailleDisplayConnection(env);
     return JNI_VERSION_1_4;
 }

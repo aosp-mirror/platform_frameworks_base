@@ -44,6 +44,7 @@ import java.util.Arrays;
  * This class doesn't use a TimeBase, and instead requires manual decisions about when to
  * accumulate since it is trivial. However, in the future, a TimeBase could be used instead.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class EnergyConsumerStats {
     private static final String TAG = "MeasuredEnergyStats";
 

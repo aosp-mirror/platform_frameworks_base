@@ -917,6 +917,9 @@
     <!-- Permissions required for CTS test - GrammaticalInflectionManagerTest -->
     <uses-permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
 
+    <!-- Permission required for CTS test - CtsPackageManagerTestCases-->
+    <uses-permission android:name="android.permission.DOMAIN_VERIFICATION_AGENT" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

@@ -16,24 +16,36 @@
 
 package com.android.server.power.stats;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import android.app.ActivityManager;
 import android.os.BatteryStats;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
 
 /**
  * Test BatteryStatsImpl Sensor Timers.
  */
-public class BatteryStatsSensorTest extends TestCase {
+@SmallTest
+public class BatteryStatsSensorTest {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
 
     private static final int UID = 10500;
     private static final int UID_2 = 10501; // second uid for testing pool usage
     private static final int SENSOR_ID = -10000;
 
-    @SmallTest
+    @Test
     public void testSensorStartStop() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -70,7 +82,7 @@ public class BatteryStatsSensorTest extends TestCase {
                 clocks.realtime * 1000, BatteryStats.STATS_SINCE_CHARGED));
     }
 
-    @SmallTest
+    @Test
     public void testCountingWhileOffBattery() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -106,7 +118,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertEquals(0, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
     }
 
-    @SmallTest
+    @Test
     public void testCountingWhileOnBattery() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -141,7 +153,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertEquals(1, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
     }
 
-    @SmallTest
+    @Test
     public void testBatteryStatusOnToOff() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -187,7 +199,7 @@ public class BatteryStatsSensorTest extends TestCase {
                 sensorTimer.getTotalTimeLocked(curr, BatteryStats.STATS_SINCE_CHARGED));
     }
 
-    @SmallTest
+    @Test
     public void testBatteryStatusOffToOn() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -238,7 +250,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertEquals(0, sensorTimer.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
     }
 
-    @SmallTest
+    @Test
     public void testPooledBackgroundUsage() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -375,7 +387,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertEquals(2, bgTimer2.getCountLocked(BatteryStats.STATS_SINCE_CHARGED));
     }
 
-    @SmallTest
+    @Test
     public void testSensorReset() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
@@ -419,7 +431,7 @@ public class BatteryStatsSensorTest extends TestCase {
         assertNull(sensor);
     }
 
-    @SmallTest
+    @Test
     public void testSensorResetTimes() throws Exception {
         final MockClock clocks = new MockClock();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
