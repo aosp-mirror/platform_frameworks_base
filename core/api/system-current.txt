@@ -100,7 +100,6 @@ package android {
     field public static final String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
     field @FlaggedApi("com.android.internal.camera.flags.camera_hsum_permission") public static final String CAMERA_HEADLESS_SYSTEM_USER = "android.permission.CAMERA_HEADLESS_SYSTEM_USER";
     field public static final String CAMERA_OPEN_CLOSE_LISTENER = "android.permission.CAMERA_OPEN_CLOSE_LISTENER";
-    field @FlaggedApi("com.android.internal.camera.flags.privacy_allowlist") public static final String CAMERA_PRIVACY_ALLOWLIST = "android.permission.CAMERA_PRIVACY_ALLOWLIST";
     field public static final String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
     field public static final String CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD = "android.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD";
     field public static final String CAPTURE_MEDIA_OUTPUT = "android.permission.CAPTURE_MEDIA_OUTPUT";
@@ -4360,10 +4359,12 @@ package android.content.pm.verify.domain {
   public final class DomainVerificationManager {
     method @Nullable @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public android.content.pm.verify.domain.DomainVerificationInfo getDomainVerificationInfo(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public java.util.SortedSet<android.content.pm.verify.domain.DomainOwner> getOwnersForDomain(@NonNull String);
+    method @FlaggedApi("android.content.pm.relative_reference_intent_filters") @NonNull public java.util.Map<java.lang.String,java.util.List<android.content.UriRelativeFilterGroup>> getUriRelativeFilterGroups(@NonNull String, @NonNull java.util.List<java.lang.String>);
     method @NonNull @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public java.util.List<java.lang.String> queryValidVerificationPackageNames();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public void setDomainVerificationLinkHandlingAllowed(@NonNull String, boolean) throws android.content.pm.PackageManager.NameNotFoundException;
     method @CheckResult @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public int setDomainVerificationStatus(@NonNull java.util.UUID, @NonNull java.util.Set<java.lang.String>, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @CheckResult @RequiresPermission(android.Manifest.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION) public int setDomainVerificationUserSelection(@NonNull java.util.UUID, @NonNull java.util.Set<java.lang.String>, boolean) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @FlaggedApi("android.content.pm.relative_reference_intent_filters") @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT) public void setUriRelativeFilterGroups(@NonNull String, @NonNull java.util.Map<java.lang.String,java.util.List<android.content.UriRelativeFilterGroup>>);
     field public static final int ERROR_DOMAIN_SET_ID_INVALID = 1; // 0x1
     field public static final int ERROR_UNABLE_TO_APPROVE = 3; // 0x3
     field public static final int ERROR_UNKNOWN_DOMAIN = 2; // 0x2
@@ -4657,15 +4658,11 @@ package android.hardware {
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void addSensorPrivacyListener(@NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void addSensorPrivacyListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean areAnySensorPrivacyTogglesEnabled(int);
-    method @FlaggedApi("com.android.internal.camera.flags.privacy_allowlist") @NonNull @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public java.util.Map<java.lang.String,java.lang.Boolean> getCameraPrivacyAllowlist();
-    method @FlaggedApi("com.android.internal.camera.flags.privacy_allowlist") @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public int getSensorPrivacyState(int, int);
-    method @FlaggedApi("com.android.internal.camera.flags.privacy_allowlist") @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean isCameraPrivacyEnabled(@NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean isSensorPrivacyEnabled(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean isSensorPrivacyEnabled(int, int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void removeSensorPrivacyListener(int, @NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void removeSensorPrivacyListener(@NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, boolean);
-    method @FlaggedApi("com.android.internal.camera.flags.privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacyState(int, int);
   }
 
   public static interface SensorPrivacyManager.OnSensorPrivacyChangedListener {
@@ -4675,7 +4672,6 @@ package android.hardware {
 
   public static class SensorPrivacyManager.OnSensorPrivacyChangedListener.SensorPrivacyChangedParams {
     method public int getSensor();
-    method @FlaggedApi("com.android.internal.camera.flags.privacy_allowlist") public int getState();
     method public int getToggleType();
     method public boolean isEnabled();
   }
@@ -11471,7 +11467,7 @@ package android.provider {
     field public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
-  @FlaggedApi("android.provider.user_keys") public class ContactKeysManager {
+  @FlaggedApi("android.provider.user_keys") public final class ContactKeysManager {
     method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateContactKeyLocalVerificationState(@NonNull String, @NonNull String, @NonNull String, @NonNull String, int);
     method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateContactKeyRemoteVerificationState(@NonNull String, @NonNull String, @NonNull String, @NonNull String, int);
     method @RequiresPermission(allOf={android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS, android.Manifest.permission.WRITE_CONTACTS}) public boolean updateSelfKeyRemoteVerificationState(@NonNull String, @NonNull String, @NonNull String, int);

@@ -23,7 +23,9 @@ import com.android.compose.animation.scene.transitions
 import com.android.compose.animation.scene.updateSceneTransitionLayoutState
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
+import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
 
@@ -51,7 +53,7 @@ val sceneTransitions = transitions {
 @Composable
 fun CommunalContainer(
     modifier: Modifier = Modifier,
-    viewModel: BaseCommunalViewModel,
+    viewModel: CommunalViewModel,
 ) {
     val currentScene: SceneKey by
         viewModel.currentScene
@@ -63,6 +65,7 @@ fun CommunalContainer(
             onChangeScene = { viewModel.onSceneChanged(it.toCommunalSceneKey()) },
             transitions = sceneTransitions,
         )
+    val touchesAllowed by viewModel.touchesAllowed.collectAsState(initial = false)
 
     // This effect exposes the SceneTransitionLayout's observable transition state to the rest of
     // the system, and unsets it when the view is disposed to avoid a memory leak.
@@ -75,7 +78,7 @@ fun CommunalContainer(
 
     SceneTransitionLayout(
         state = sceneTransitionLayoutState,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().allowGestures(allowed = touchesAllowed),
         swipeSourceDetector = FixedSizeEdgeDetector(ContainerDimensions.EdgeSwipeSize),
     ) {
         scene(

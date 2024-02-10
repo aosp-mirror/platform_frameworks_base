@@ -31,7 +31,8 @@ enum class BluetoothTileDialogUiEvent(val metricId: Int) : UiEventLogger.UiEvent
     @UiEvent(doc = "Saved clicked to connect") SAVED_DEVICE_CONNECT(1500),
     @UiEvent(doc = "Active device clicked to disconnect") ACTIVE_DEVICE_DISCONNECT(1507),
     @UiEvent(doc = "Connected other device clicked to disconnect")
-    CONNECTED_OTHER_DEVICE_DISCONNECT(1508);
+    CONNECTED_OTHER_DEVICE_DISCONNECT(1508),
+    @UiEvent(doc = "The auto on toggle is clicked") BLUETOOTH_AUTO_ON_TOGGLE_CLICKED(1617);
 
     override fun getId() = metricId
 }

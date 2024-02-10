@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package android.hardware;
+package android.content;
 
-/** @hide */
-parcelable CameraPrivacyAllowlistEntry {
-    String packageName;
-    boolean isMandatory;
+import android.content.UriRelativeFilterParcel;
+
+/**
+ * Class for holding UriRelativeFilterGroup data.
+ * @hide
+ */
+parcelable UriRelativeFilterGroupParcel {
+    int action;
+    List<UriRelativeFilterParcel> filters;
 }
-

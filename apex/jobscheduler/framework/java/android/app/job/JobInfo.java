@@ -2354,9 +2354,9 @@ public class JobInfo implements Parcelable {
                 if (maxExecutionDelayMillis - windowStart < MIN_ALLOWED_TIME_WINDOW_MILLIS) {
                     if (enforceMinimumTimeWindows
                             && Flags.enforceMinimumTimeWindows()) {
-                        throw new IllegalArgumentException("Jobs with a deadline and"
-                                + " functional constraints cannot have a time window less than "
-                                + MIN_ALLOWED_TIME_WINDOW_MILLIS + " ms."
+                        throw new IllegalArgumentException("Time window too short. Constraints"
+                                + " unlikely to be satisfied. Increase deadline to a reasonable"
+                                + " duration."
                                 + " Job '" + service.flattenToShortString() + "#" + jobId + "'"
                                 + " has delay=" + windowStart
                                 + ", deadline=" + maxExecutionDelayMillis);

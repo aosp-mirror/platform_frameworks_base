@@ -867,6 +867,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private boolean mUseBoundsForWidth;
     @Nullable private Paint.FontMetrics mMinimumFontMetrics;
+    @Nullable private Paint.FontMetrics mLocalePreferredFontMetrics;
+    private boolean mUseLocalePreferredLineHeightForMinimum;
 
     @ViewDebug.ExportedProperty(category = "text")
     @UnsupportedAppUsage
@@ -1617,6 +1619,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextView_useBoundsForWidth:
                     mUseBoundsForWidth = a.getBoolean(attr, false);
                     hasUseBoundForWidthValue = true;
+                    break;
+                case com.android.internal.R.styleable
+                        .TextView_useLocalePreferredLineHeightForMinimum:
+                    mUseLocalePreferredLineHeightForMinimum = a.getBoolean(attr, false);
+                    break;
             }
         }
 
@@ -4989,6 +4996,41 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
     public Paint.FontMetrics getMinimumFontMetrics() {
         return mMinimumFontMetrics;
+    }
+
+    /**
+     * Returns true if the locale preferred line height is used for the minimum line height.
+     *
+     * @return true if using locale preferred line height for the minimum line height. Otherwise
+     *         false.
+     *
+     * @see #setLocalePreferredLineHeightForMinimumUsed(boolean)
+     * @see #setMinimumFontMetrics(Paint.FontMetrics)
+     * @see #getMinimumFontMetrics()
+     */
+    @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+    public boolean isLocalePreferredLineHeightForMinimumUsed() {
+        return mUseLocalePreferredLineHeightForMinimum;
+    }
+
+    /**
+     * Set true if the locale preferred line height is used for the minimum line height.
+     *
+     * By setting this flag to true is equivalenet to call
+     * {@link #setMinimumFontMetrics(Paint.FontMetrics)} with the one obtained by
+     * {@link Paint#getFontMetricsForLocale(Paint.FontMetrics)}.
+     *
+     * If custom minimum line height was specified by
+     * {@link #setMinimumFontMetrics(Paint.FontMetrics)}, this flag will be ignored.
+     *
+     * @param flag true for using locale preferred line height for the minimum line height.
+     * @see #isLocalePreferredLineHeightForMinimumUsed()
+     * @see #setMinimumFontMetrics(Paint.FontMetrics)
+     * @see #getMinimumFontMetrics()
+     */
+    @FlaggedApi(FLAG_FIX_LINE_HEIGHT_FOR_LOCALE)
+    public void setLocalePreferredLineHeightForMinimumUsed(boolean flag) {
+        mUseLocalePreferredLineHeightForMinimum = flag;
     }
 
     /**
@@ -10728,6 +10770,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return alignment;
     }
 
+    private Paint.FontMetrics getResolvedMinimumFontMetrics() {
+        if (mMinimumFontMetrics != null) {
+            return mMinimumFontMetrics;
+        }
+        if (!mUseLocalePreferredLineHeightForMinimum) {
+            return null;
+        }
+
+        if (mLocalePreferredFontMetrics == null) {
+            mLocalePreferredFontMetrics = new Paint.FontMetrics();
+        }
+        mTextPaint.getFontMetricsForLocale(mLocalePreferredFontMetrics);
+        return mLocalePreferredFontMetrics;
+    }
+
     /**
      * The width passed in is now the desired layout width,
      * not the full view width with padding.
@@ -10792,7 +10849,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (hintBoring == UNKNOWN_BORING) {
                 hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mTextDir,
                         isFallbackLineSpacingForBoringLayout(),
-                        mMinimumFontMetrics, mHintBoring);
+                        getResolvedMinimumFontMetrics(), mHintBoring);
+
                 if (hintBoring != null) {
                     mHintBoring = hintBoring;
                 }
@@ -10842,7 +10900,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
                                 mLineBreakStyle, mLineBreakWordStyle))
                         .setUseBoundsForWidth(mUseBoundsForWidth)
-                        .setMinimumFontMetrics(mMinimumFontMetrics);
+                        .setMinimumFontMetrics(getResolvedMinimumFontMetrics());
+
                 if (shouldEllipsize) {
                     builder.setEllipsize(mEllipsize)
                             .setEllipsizedWidth(ellipsisWidth);
@@ -10907,12 +10966,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setUseBoundsForWidth(mUseBoundsForWidth)
                     .setEllipsize(getKeyListener() == null ? effectiveEllipsize : null)
                     .setEllipsizedWidth(ellipsisWidth)
-                    .setMinimumFontMetrics(mMinimumFontMetrics);
+                    .setMinimumFontMetrics(getResolvedMinimumFontMetrics());
             result = builder.build();
         } else {
             if (boring == UNKNOWN_BORING) {
                 boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir,
-                        isFallbackLineSpacingForBoringLayout(), mMinimumFontMetrics, mBoring);
+                        isFallbackLineSpacingForBoringLayout(), getResolvedMinimumFontMetrics(),
+                        mBoring);
                 if (boring != null) {
                     mBoring = boring;
                 }
@@ -10926,7 +10986,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 wantWidth, alignment, mSpacingMult, mSpacingAdd,
                                 boring, mIncludePad, null, wantWidth,
                                 isFallbackLineSpacingForBoringLayout(),
-                                mUseBoundsForWidth, mMinimumFontMetrics);
+                                mUseBoundsForWidth, getResolvedMinimumFontMetrics());
                     } else {
                         result = new BoringLayout(
                                 mTransformed,
@@ -10941,7 +11001,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 null,
                                 boring,
                                 mUseBoundsForWidth,
-                                mMinimumFontMetrics);
+                                getResolvedMinimumFontMetrics());
                     }
 
                     if (useSaved) {
@@ -10953,7 +11013,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 wantWidth, alignment, mSpacingMult, mSpacingAdd,
                                 boring, mIncludePad, effectiveEllipsize,
                                 ellipsisWidth, isFallbackLineSpacingForBoringLayout(),
-                                mUseBoundsForWidth, mMinimumFontMetrics);
+                                mUseBoundsForWidth, getResolvedMinimumFontMetrics());
                     } else {
                         result = new BoringLayout(
                                 mTransformed,
@@ -10968,7 +11028,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 effectiveEllipsize,
                                 boring,
                                 mUseBoundsForWidth,
-                                mMinimumFontMetrics);
+                                getResolvedMinimumFontMetrics());
                     }
                 }
             }
@@ -10988,7 +11048,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
                             mLineBreakStyle, mLineBreakWordStyle))
                     .setUseBoundsForWidth(mUseBoundsForWidth)
-                    .setMinimumFontMetrics(mMinimumFontMetrics);
+                    .setMinimumFontMetrics(getResolvedMinimumFontMetrics());
             if (shouldEllipsize) {
                 builder.setEllipsize(effectiveEllipsize)
                         .setEllipsizedWidth(ellipsisWidth);
@@ -11116,7 +11176,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (des < 0) {
                 boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir,
-                        isFallbackLineSpacingForBoringLayout(), mMinimumFontMetrics, mBoring);
+                        isFallbackLineSpacingForBoringLayout(), getResolvedMinimumFontMetrics(),
+                        mBoring);
                 if (boring != null) {
                     mBoring = boring;
                 }
@@ -11156,7 +11217,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (hintDes < 0) {
                     hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mTextDir,
-                            isFallbackLineSpacingForBoringLayout(), mMinimumFontMetrics,
+                            isFallbackLineSpacingForBoringLayout(), getResolvedMinimumFontMetrics(),
                             mHintBoring);
                     if (hintBoring != null) {
                         mHintBoring = hintBoring;
@@ -11370,7 +11431,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
                         mLineBreakStyle, mLineBreakWordStyle))
                 .setUseBoundsForWidth(mUseBoundsForWidth)
-                .setMinimumFontMetrics(mMinimumFontMetrics);
+                .setMinimumFontMetrics(getResolvedMinimumFontMetrics());
 
         final StaticLayout layout = layoutBuilder.build();
 

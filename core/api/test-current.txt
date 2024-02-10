@@ -104,6 +104,14 @@ package android.accessibilityservice {
     method @FlaggedApi("android.view.accessibility.motion_event_observing") public void setObservedMotionEventSources(int);
   }
 
+  @FlaggedApi("android.view.accessibility.braille_display_hid") public interface BrailleDisplayController {
+    method @FlaggedApi("android.view.accessibility.braille_display_hid") @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public static void setTestBrailleDisplayData(@NonNull android.accessibilityservice.AccessibilityService, @NonNull java.util.List<android.os.Bundle>);
+    field @FlaggedApi("android.view.accessibility.braille_display_hid") public static final String TEST_BRAILLE_DISPLAY_BUS_BLUETOOTH = "BUS_BLUETOOTH";
+    field @FlaggedApi("android.view.accessibility.braille_display_hid") public static final String TEST_BRAILLE_DISPLAY_DESCRIPTOR = "DESCRIPTOR";
+    field @FlaggedApi("android.view.accessibility.braille_display_hid") public static final String TEST_BRAILLE_DISPLAY_HIDRAW_PATH = "HIDRAW_PATH";
+    field @FlaggedApi("android.view.accessibility.braille_display_hid") public static final String TEST_BRAILLE_DISPLAY_UNIQUE_ID = "UNIQUE_ID";
+  }
+
 }
 
 package android.animation {
@@ -1483,7 +1491,6 @@ package android.hardware {
 
   public final class SensorPrivacyManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
-    method @FlaggedApi("com.android.internal.camera.flags.privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacyState(int, int, int);
   }
 
   public static class SensorPrivacyManager.Sources {

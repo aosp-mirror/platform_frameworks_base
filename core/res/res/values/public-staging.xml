@@ -153,6 +153,8 @@
     <public name="requireContentUriPermissionFromCaller" />
     <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp") -->
     <public name="languageSettingsActivity"/>
+    <!-- @FlaggedApi("com.android.text.flags.fix_line_height_for_locale") -->
+    <public name="useLocalePreferredLineHeightForMinimum"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

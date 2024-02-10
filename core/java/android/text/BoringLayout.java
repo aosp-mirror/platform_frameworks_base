@@ -585,9 +585,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         }
 
         if (ClientFlags.fixLineHeightForLocale()) {
-            if (minimumFontMetrics == null) {
-                paint.getFontMetricsIntForLocale(fm);
-            } else {
+            if (minimumFontMetrics != null) {
                 fm.set(minimumFontMetrics);
                 // Because the font metrics is provided by public APIs, adjust the top/bottom with
                 // ascent/descent: top must be smaller than ascent, bottom must be larger than

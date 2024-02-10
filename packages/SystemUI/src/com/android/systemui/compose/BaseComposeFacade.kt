@@ -25,6 +25,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
 import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
@@ -116,7 +117,7 @@ interface BaseComposeFacade {
     ): View
 
     /** Creates a container that hosts the communal UI and handles gesture transitions. */
-    fun createCommunalContainer(context: Context, viewModel: BaseCommunalViewModel): View
+    fun createCommunalContainer(context: Context, viewModel: CommunalViewModel): View
 
     /** Creates a [View] that represents the Lockscreen. */
     fun createLockscreen(

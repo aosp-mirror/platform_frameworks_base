@@ -19,14 +19,19 @@ package com.android.server.pm.verify.domain;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 
+import android.Manifest;
 import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.compat.annotation.ChangeId;
 import android.content.Context;
 import android.content.Intent;
+import android.content.UriRelativeFilterGroup;
+import android.content.UriRelativeFilterGroupParcel;
+import android.content.pm.Flags;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -38,6 +43,8 @@ import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationState;
 import android.content.pm.verify.domain.DomainVerificationUserState;
 import android.content.pm.verify.domain.IDomainVerificationManager;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -221,6 +228,72 @@ public class DomainVerificationService extends SystemService
     @Override
     public void setProxy(@NonNull DomainVerificationProxy proxy) {
         mProxy = proxy;
+    }
+
+    /**
+     * Update the URI relative filter groups for a package's verified domains. All previously
+     * existing groups will be cleared before the new groups will be applied.
+     */
+    @RequiresPermission(Manifest.permission.DOMAIN_VERIFICATION_AGENT)
+    public void setUriRelativeFilterGroups(@NonNull String packageName,
+            @NonNull Bundle bundle)
+            throws NameNotFoundException {
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.DOMAIN_VERIFICATION_AGENT,
+                "Caller " + mConnection.getCallingUid() + " does not hold "
+                        + android.Manifest.permission.DOMAIN_VERIFICATION_AGENT);
+        if (bundle.isEmpty()) {
+            return;
+        }
+        synchronized (mLock) {
+            DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
+            if (pkgState == null) {
+                throw DomainVerificationUtils.throwPackageUnavailable(packageName);
+            }
+            Map<String, List<UriRelativeFilterGroup>> domainToGroupsMap =
+                    pkgState.getUriRelativeFilterGroupMap();
+            for (String domain : bundle.keySet()) {
+                ArrayList<UriRelativeFilterGroupParcel> parcels =
+                        bundle.getParcelableArrayList(domain, UriRelativeFilterGroupParcel.class);
+                domainToGroupsMap.put(domain, UriRelativeFilterGroup.parcelsToGroups(parcels));
+            }
+        }
+    }
+
+    /**
+     * Retrieve the current URI relative filter groups for a package's verified domain.
+     */
+    @NonNull
+    public Bundle getUriRelativeFilterGroups(@NonNull String packageName,
+            @NonNull List<String> domains) {
+        Bundle bundle = new Bundle();
+        synchronized (mLock) {
+            DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
+            if (pkgState != null) {
+                Map<String, List<UriRelativeFilterGroup>> map =
+                        pkgState.getUriRelativeFilterGroupMap();
+                for (int i = 0; i < domains.size(); i++) {
+                    List<UriRelativeFilterGroup> groups = map.get(domains.get(i));
+                    bundle.putParcelableList(domains.get(i),
+                            UriRelativeFilterGroup.groupsToParcels(groups));
+                }
+            }
+        }
+        return bundle;
+    }
+
+    @NonNull
+    private List<UriRelativeFilterGroup> getUriRelativeFilterGroups(@NonNull String packageName,
+            @NonNull String domain) {
+        List<UriRelativeFilterGroup> groups = Collections.emptyList();
+        synchronized (mLock) {
+            DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
+            if (pkgState != null) {
+                groups = pkgState.getUriRelativeFilterGroupMap().getOrDefault(domain,
+                        Collections.emptyList());
+            }
+        }
+        return groups;
     }
 
     @NonNull
@@ -891,6 +964,8 @@ public class DomainVerificationService extends SystemService
             }
 
             ArrayMap<String, Integer> oldStateMap = oldPkgState.getStateMap();
+            ArrayMap<String, List<UriRelativeFilterGroup>> oldGroups =
+                    oldPkgState.getUriRelativeFilterGroupMap();
             ArraySet<String> newAutoVerifyDomains =
                     mCollector.collectValidAutoVerifyDomains(newPkg);
             int newDomainsSize = newAutoVerifyDomains.size();
@@ -941,7 +1016,7 @@ public class DomainVerificationService extends SystemService
 
             mAttachedPkgStates.put(pkgName, newDomainSetId, new DomainVerificationPkgState(
                     pkgName, newDomainSetId, hasAutoVerifyDomains, newStateMap, newUserStates,
-                    null /* signature */));
+                    null /* signature */, oldGroups));
         }
 
         if (sendBroadcast) {
@@ -1572,8 +1647,6 @@ public class DomainVerificationService extends SystemService
     public Pair<List<ResolveInfo>, Integer> filterToApprovedApp(@NonNull Intent intent,
             @NonNull List<ResolveInfo> infos, @UserIdInt int userId,
             @NonNull Function<String, PackageStateInternal> pkgSettingFunction) {
-        String domain = intent.getData().getHost();
-
         // Collect valid infos
         ArrayMap<ResolveInfo, Integer> infoApprovals = new ArrayMap<>();
         int infosSize = infos.size();
@@ -1586,7 +1659,7 @@ public class DomainVerificationService extends SystemService
         }
 
         // Find all approval levels
-        int highestApproval = fillMapWithApprovalLevels(infoApprovals, domain, userId,
+        int highestApproval = fillMapWithApprovalLevels(infoApprovals, intent.getData(), userId,
                 pkgSettingFunction);
         if (highestApproval <= APPROVAL_LEVEL_NONE) {
             return Pair.create(emptyList(), highestApproval);
@@ -1623,12 +1696,23 @@ public class DomainVerificationService extends SystemService
         return Pair.create(finalList, highestApproval);
     }
 
+    private boolean matchUriRelativeFilterGroups(Uri uri, String pkgName) {
+        if (uri.getHost() == null) {
+            return false;
+        }
+        List<UriRelativeFilterGroup> groups = getUriRelativeFilterGroups(pkgName, uri.getHost());
+        if (groups.isEmpty()) {
+            return true;
+        }
+        return UriRelativeFilterGroup.matchGroupsToUri(groups, uri);
+    }
+
     /**
      * @return highest approval level found
      */
     @ApprovalLevel
     private int fillMapWithApprovalLevels(@NonNull ArrayMap<ResolveInfo, Integer> inputMap,
-            @NonNull String domain, @UserIdInt int userId,
+            @NonNull Uri uri, @UserIdInt int userId,
             @NonNull Function<String, PackageStateInternal> pkgSettingFunction) {
         int highestApproval = APPROVAL_LEVEL_NONE;
         int size = inputMap.size();
@@ -1641,12 +1725,13 @@ public class DomainVerificationService extends SystemService
             ResolveInfo info = inputMap.keyAt(index);
             final String packageName = info.getComponentInfo().packageName;
             PackageStateInternal pkgSetting = pkgSettingFunction.apply(packageName);
-            if (pkgSetting == null) {
+            if (pkgSetting == null || (Flags.relativeReferenceIntentFilters()
+                    && !matchUriRelativeFilterGroups(uri, packageName))) {
                 fillInfoMapForSamePackage(inputMap, packageName, APPROVAL_LEVEL_NONE);
                 continue;
             }
-            int approval = approvalLevelForDomain(pkgSetting, domain, false, userId, DEBUG_APPROVAL,
-                    domain);
+            int approval = approvalLevelForDomain(pkgSetting, uri.getHost(), false, userId,
+                    DEBUG_APPROVAL, uri.getHost());
             highestApproval = Math.max(highestApproval, approval);
             fillInfoMapForSamePackage(inputMap, packageName, approval);
         }

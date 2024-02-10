@@ -30,6 +30,7 @@ class TurbulenceNoiseShader(val baseType: Type = Type.SIMPLEX_NOISE) :
     companion object {
         private const val UNIFORMS =
             """
+            uniform shader in_src; // Needed to support RenderEffect.
             uniform float in_gridNum;
             uniform vec3 in_noiseMove;
             uniform vec2 in_size;
@@ -114,6 +115,7 @@ class TurbulenceNoiseShader(val baseType: Type = Type.SIMPLEX_NOISE) :
         setSize(config.width, config.height)
         setLumaMatteFactors(config.lumaMatteBlendFactor, config.lumaMatteOverallBrightness)
         setInverseNoiseLuminosity(config.shouldInverseNoiseLuminosity)
+        setNoiseMove(config.noiseOffsetX, config.noiseOffsetY, config.noiseOffsetZ)
     }
 
     /** Sets the number of grid for generating noise. */

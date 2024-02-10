@@ -138,7 +138,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             configurationRepository.onAnyConfigurationChange()
 
-            assertThat(dimens!!.paddingTop).isEqualTo(30)
+            // Should directly use the header height (flagged off value)
+            assertThat(dimens!!.paddingTop).isEqualTo(10)
         }
 
     @Test
@@ -154,7 +155,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             configurationRepository.onAnyConfigurationChange()
 
-            assertThat(dimens!!.paddingTop).isEqualTo(40)
+            // Should directly use the header height (flagged on value)
+            assertThat(dimens!!.paddingTop).isEqualTo(5)
         }
 
     @Test
@@ -456,8 +458,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            // Top should be equal to bounds (1) + padding adjustment (30)
-            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 31f, bottom = 2f))
+            // Top should be equal to bounds (1) - padding adjustment (10)
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = -9f, bottom = 2f))
         }
 
     @Test
@@ -483,8 +485,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            // Top should be equal to bounds (1) + padding adjustment (40)
-            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 41f, bottom = 2f))
+            // Top should be equal to bounds (1) - padding adjustment (5)
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = -4f, bottom = 2f))
         }
 
     @Test
