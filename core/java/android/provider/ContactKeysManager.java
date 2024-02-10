@@ -39,18 +39,19 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * ContactKeysManager provides the access to the E2EE contact keys provider.
- * It manages two types of keys - {@link ContactKey} of other users' and the owner's keys -
- * {@link SelfKey}.
+ * ContactKeysManager provides access to the provider of end-to-end encryption contact keys.
+ * It manages two types of keys - {@link ContactKey} and {@link SelfKey}.
  * <ul>
  * <li>
- * For {@link ContactKey} this API allows the insert/update, removal, changing of the
- * verification state, retrieving the keys (either created by or visible to the caller app)
- * operations.
+ * A {@link ContactKey} is a public key associated with a contact. It's used to end-to-end
+ * encrypt the communications between a user and the contact. This API allows operations on
+ * {@link ContactKey}s to insert/update, remove, change the verification state, and retrieving
+ * keys (either created by or visible to the caller app).
  * </li>
  * <li>
- * For {@link SelfKey} this API allows the insert/update, removal, retrieving the self keys
- * (either created by or visible to the caller app) operations.
+ * A {@link SelfKey} is a key for this device, so the key represents the owner of the device.
+ * This API allows operations on {@link SelfKey}s to insert/update, remove, and retrieving
+ * self keys (either created by or visible to the caller app).
  * </li>
  * </ul>
  * Keys are uniquely identified by:
@@ -71,7 +72,7 @@ import java.util.Objects;
  * ContactsProvider.
  */
 @FlaggedApi(Flags.FLAG_USER_KEYS)
-public class ContactKeysManager {
+public final class ContactKeysManager {
     /**
      * The authority for the contact keys provider.
      * @hide
@@ -354,9 +355,9 @@ public class ContactKeysManager {
 
 
     private static void validateVerificationState(int verificationState) {
-        if (verificationState != UNVERIFIED
-                && verificationState != VERIFICATION_FAILED
-                && verificationState != VERIFIED) {
+        if (verificationState != VERIFICATION_STATE_UNVERIFIED
+                && verificationState != VERIFICATION_STATE_VERIFICATION_FAILED
+                && verificationState != VERIFICATION_STATE_VERIFIED) {
             throw new IllegalArgumentException("Verification state value "
                     + verificationState + " is not supported");
         }
@@ -600,25 +601,25 @@ public class ContactKeysManager {
      * @hide
      */
     @IntDef(prefix = {"VERIFICATION_STATE_"}, value = {
-            UNVERIFIED,
-            VERIFICATION_FAILED,
-            VERIFIED
+            VERIFICATION_STATE_UNVERIFIED,
+            VERIFICATION_STATE_VERIFICATION_FAILED,
+            VERIFICATION_STATE_VERIFIED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface VerificationState {}
 
     /**
-     * Unverified state of a contact E2EE key.
+     * Unverified state of a contact end to end encrypted key.
      */
-    public static final int UNVERIFIED = 0;
+    public static final int VERIFICATION_STATE_UNVERIFIED = 0;
     /**
-     * Failed verification state of a contact E2EE key.
+     * Failed verification state of a contact end to end encrypted key.
      */
-    public static final int VERIFICATION_FAILED = 1;
+    public static final int VERIFICATION_STATE_VERIFICATION_FAILED = 1;
     /**
-     * Verified state of a contact E2EE key.
+     * Verified state of a contact end to end encrypted key.
      */
-    public static final int VERIFIED = 2;
+    public static final int VERIFICATION_STATE_VERIFIED = 2;
 
     /** @hide */
     public static final class ContactKeys {
@@ -791,7 +792,7 @@ public class ContactKeysManager {
     }
 
     /**
-     * A parcelable class encapsulating other users' E2EE contact key.
+     * A parcelable class encapsulating other users' end to end encrypted contact key.
      */
     public static final class ContactKey implements Parcelable {
         /**
@@ -1056,7 +1057,7 @@ public class ContactKeysManager {
     }
 
     /**
-     * A parcelable class encapsulating self E2EE contact key.
+     * A parcelable class encapsulating self end to end encrypted contact key.
      */
     public static final class SelfKey implements Parcelable {
         /**
