@@ -120,6 +120,13 @@ public class BubblePositioner {
 
     @VisibleForTesting
     public void updateInternal(int rotation, Insets insets, Rect bounds) {
+        BubbleStackView.RelativeStackPosition prevStackPosition = null;
+        if (mRestingStackPosition != null && mScreenRect != null && !mScreenRect.equals(bounds)) {
+            // Save the resting position as a relative position with the previous bounds, at the
+            // end of the update we'll restore it based on the new bounds.
+            prevStackPosition = new BubbleStackView.RelativeStackPosition(getRestingPosition(),
+                    getAllowableStackPositionRegion(1));
+        }
         mRotation = rotation;
         mInsets = insets;
 
@@ -182,6 +189,12 @@ public class BubblePositioner {
                 R.dimen.bubbles_flyout_min_width_large_screen);
 
         mMaxBubbles = calculateMaxBubbles();
+
+        if (prevStackPosition != null) {
+            // Get the new resting position based on the updated values
+            mRestingStackPosition = prevStackPosition.getAbsolutePositionInRegion(
+                    getAllowableStackPositionRegion(1));
+        }
     }
 
     /**

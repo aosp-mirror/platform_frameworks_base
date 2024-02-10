@@ -165,6 +165,25 @@ class BubblePositionerTest {
     }
 
     @Test
+    fun testGetRestingPosition_afterBoundsChange() {
+        positioner.update(defaultDeviceConfig.copy(isLargeScreen = true,
+                windowBounds = Rect(0, 0, 2000, 1600)))
+
+        // Set the resting position to the right side
+        var allowableStackRegion = positioner.getAllowableStackPositionRegion(1 /* bubbleCount */)
+        val restingPosition = PointF(allowableStackRegion.right, allowableStackRegion.centerY())
+        positioner.restingPosition = restingPosition
+
+        // Now make the device smaller
+        positioner.update(defaultDeviceConfig.copy(isLargeScreen = false,
+                windowBounds = Rect(0, 0, 1000, 1600)))
+
+        // Check the resting position is on the correct side
+        allowableStackRegion = positioner.getAllowableStackPositionRegion(1 /* bubbleCount */)
+        assertThat(positioner.restingPosition.x).isEqualTo(allowableStackRegion.right)
+    }
+
+    @Test
     fun testHasUserModifiedDefaultPosition_false() {
         positioner.update(defaultDeviceConfig.copy(isLargeScreen = true, isRtl = true))
         assertThat(positioner.hasUserModifiedDefaultPosition()).isFalse()
