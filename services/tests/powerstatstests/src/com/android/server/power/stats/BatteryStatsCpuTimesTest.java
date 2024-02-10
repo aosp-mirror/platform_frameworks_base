@@ -118,7 +118,8 @@ public class BatteryStatsCpuTimesTest {
         mClocks = new MockClock();
         Handler handler = new Handler(Looper.getMainLooper());
         mPowerStatsUidResolver = new PowerStatsUidResolver();
-        mBatteryStatsImpl = new MockBatteryStatsImpl(mClocks, null, handler, mPowerStatsUidResolver)
+        mBatteryStatsImpl = new MockBatteryStatsImpl(MockBatteryStatsImpl.DEFAULT_CONFIG,
+                mClocks, null, handler, mPowerStatsUidResolver)
                 .setTestCpuScalingPolicies()
                 .setKernelCpuUidUserSysTimeReader(mCpuUidUserSysTimeReader)
                 .setKernelCpuUidFreqTimeReader(mCpuUidFreqTimeReader)

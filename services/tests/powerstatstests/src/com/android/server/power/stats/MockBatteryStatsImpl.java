@@ -52,6 +52,8 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     // The mNetworkStats will be used for both wifi and mobile categories
     private NetworkStats mNetworkStats;
     private DummyExternalStatsSync mExternalStatsSync = new DummyExternalStatsSync();
+    public static final BatteryStatsConfig DEFAULT_CONFIG =
+            new BatteryStatsConfig.Builder().build();
 
     MockBatteryStatsImpl() {
         this(new MockClock());
@@ -66,12 +68,12 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     MockBatteryStatsImpl(Clock clock, File historyDirectory, Handler handler) {
-        this(clock, historyDirectory, handler, new PowerStatsUidResolver());
+        this(DEFAULT_CONFIG, clock, historyDirectory, handler, new PowerStatsUidResolver());
     }
 
-    MockBatteryStatsImpl(Clock clock, File historyDirectory, Handler handler,
-            PowerStatsUidResolver powerStatsUidResolver) {
-        super(clock, historyDirectory, handler, powerStatsUidResolver,
+    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, File historyDirectory,
+            Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
+        super(config, clock, historyDirectory, handler, powerStatsUidResolver,
                 mock(FrameworkStatsLogger.class), mock(BatteryStatsHistory.TraceDelegate.class),
                 mock(BatteryStatsHistory.EventLogger.class));
         initTimersAndCounters();
@@ -274,10 +276,6 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     @Override
     public void writeSyncLocked() {
-    }
-
-    public void setHandler(Handler handler) {
-        mHandler = handler;
     }
 
     @Override

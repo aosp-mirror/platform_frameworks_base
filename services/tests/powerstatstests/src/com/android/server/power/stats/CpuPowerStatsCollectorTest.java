@@ -23,17 +23,15 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.hardware.power.stats.EnergyConsumer;
-import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.power.PowerStatsInternal;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -41,6 +39,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.powerstatstests.R;
+import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
@@ -51,8 +50,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.function.IntSupplier;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -71,8 +69,68 @@ public class CpuPowerStatsCollectorTest {
     @Mock
     private CpuPowerStatsCollector.KernelCpuStatsReader mMockKernelCpuStatsReader;
     @Mock
-    private PowerStatsInternal mPowerStatsInternal;
+    private PowerStatsCollector.ConsumedEnergyRetriever mConsumedEnergyRetriever;
     private CpuScalingPolicies mCpuScalingPolicies;
+
+    private class TestInjector implements CpuPowerStatsCollector.Injector {
+        private final int mDefaultCpuPowerBrackets;
+        private final int mDefaultCpuPowerBracketsPerEnergyConsumer;
+
+        TestInjector(int defaultCpuPowerBrackets, int defaultCpuPowerBracketsPerEnergyConsumer) {
+            mDefaultCpuPowerBrackets = defaultCpuPowerBrackets;
+            mDefaultCpuPowerBracketsPerEnergyConsumer = defaultCpuPowerBracketsPerEnergyConsumer;
+        }
+
+        @Override
+        public Handler getHandler() {
+            return mHandler;
+        }
+
+        @Override
+        public Clock getClock() {
+            return mMockClock;
+        }
+
+        @Override
+        public PowerStatsUidResolver getUidResolver() {
+            return mUidResolver;
+        }
+
+        @Override
+        public CpuScalingPolicies getCpuScalingPolicies() {
+            return mCpuScalingPolicies;
+        }
+
+        @Override
+        public PowerProfile getPowerProfile() {
+            return mPowerProfile;
+        }
+
+        @Override
+        public CpuPowerStatsCollector.KernelCpuStatsReader getKernelCpuStatsReader() {
+            return mMockKernelCpuStatsReader;
+        }
+
+        @Override
+        public PowerStatsCollector.ConsumedEnergyRetriever getConsumedEnergyRetriever() {
+            return mConsumedEnergyRetriever;
+        }
+
+        @Override
+        public IntSupplier getVoltageSupplier() {
+            return () -> 3500;
+        }
+
+        @Override
+        public int getDefaultCpuPowerBrackets() {
+            return mDefaultCpuPowerBrackets;
+        }
+
+        @Override
+        public int getDefaultCpuPowerBracketsPerEnergyConsumer() {
+            return mDefaultCpuPowerBracketsPerEnergyConsumer;
+        }
+    };
 
     @Before
     public void setup() {
@@ -90,6 +148,7 @@ public class CpuPowerStatsCollectorTest {
                 return uid;
             }
         });
+        when(mConsumedEnergyRetriever.getEnergyConsumerIds(anyInt())).thenReturn(new int[0]);
     }
 
     @Test
@@ -296,10 +355,9 @@ public class CpuPowerStatsCollectorTest {
 
     private CpuPowerStatsCollector createCollector(int defaultCpuPowerBrackets,
             int defaultCpuPowerBracketsPerEnergyConsumer) {
-        CpuPowerStatsCollector collector = new CpuPowerStatsCollector(mCpuScalingPolicies,
-                mPowerProfile, mHandler, mMockKernelCpuStatsReader, mUidResolver,
-                () -> mPowerStatsInternal, () -> 3500, 60_000, mMockClock,
-                defaultCpuPowerBrackets, defaultCpuPowerBracketsPerEnergyConsumer);
+        CpuPowerStatsCollector collector = new CpuPowerStatsCollector(
+                new TestInjector(defaultCpuPowerBrackets, defaultCpuPowerBracketsPerEnergyConsumer),
+                0);
         collector.addConsumer(stats -> mCollectedStats = stats);
         collector.setEnabled(true);
         return collector;
@@ -335,58 +393,13 @@ public class CpuPowerStatsCollectorTest {
                 });
     }
 
-    @SuppressWarnings("unchecked")
-    private void mockEnergyConsumers() throws Exception {
-        when(mPowerStatsInternal.getEnergyConsumerInfo())
-                .thenReturn(new EnergyConsumer[]{
-                        new EnergyConsumer() {{
-                            id = 1;
-                            type = EnergyConsumerType.CPU_CLUSTER;
-                            ordinal = 0;
-                            name = "CPU0";
-                        }},
-                        new EnergyConsumer() {{
-                            id = 2;
-                            type = EnergyConsumerType.CPU_CLUSTER;
-                            ordinal = 1;
-                            name = "CPU4";
-                        }},
-                        new EnergyConsumer() {{
-                            id = 3;
-                            type = EnergyConsumerType.BLUETOOTH;
-                            name = "BT";
-                        }},
-                });
-
-        CompletableFuture<EnergyConsumerResult[]> future1 = mock(CompletableFuture.class);
-        when(future1.get(anyLong(), any(TimeUnit.class)))
-                .thenReturn(new EnergyConsumerResult[]{
-                        new EnergyConsumerResult() {{
-                            id = 1;
-                            energyUWs = 1000;
-                        }},
-                        new EnergyConsumerResult() {{
-                            id = 2;
-                            energyUWs = 2000;
-                        }}
-                });
-
-        CompletableFuture<EnergyConsumerResult[]> future2 = mock(CompletableFuture.class);
-        when(future2.get(anyLong(), any(TimeUnit.class)))
-                .thenReturn(new EnergyConsumerResult[]{
-                        new EnergyConsumerResult() {{
-                            id = 1;
-                            energyUWs = 1500;
-                        }},
-                        new EnergyConsumerResult() {{
-                            id = 2;
-                            energyUWs = 2700;
-                        }}
-                });
-
-        when(mPowerStatsInternal.getEnergyConsumedAsync(eq(new int[]{1, 2})))
-                .thenReturn(future1)
-                .thenReturn(future2);
+    private void mockEnergyConsumers() {
+        reset(mConsumedEnergyRetriever);
+        when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.CPU_CLUSTER))
+                .thenReturn(new int[]{1, 2});
+        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{1, 2})))
+                .thenReturn(new long[]{1000, 2000})
+                .thenReturn(new long[]{1500, 2700});
     }
 
     private static int[] getScalingStepToPowerBracketMap(CpuPowerStatsCollector collector) {

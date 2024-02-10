@@ -17,9 +17,13 @@
 package com.android.server.power.stats;
 
 import android.annotation.Nullable;
+import android.hardware.power.stats.EnergyConsumer;
+import android.hardware.power.stats.EnergyConsumerResult;
+import android.hardware.power.stats.EnergyConsumerType;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.PersistableBundle;
+import android.power.PowerStatsInternal;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
@@ -30,7 +34,12 @@ import com.android.internal.os.PowerStats;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -43,6 +52,7 @@ import java.util.function.Consumer;
 public abstract class PowerStatsCollector {
     private static final String TAG = "PowerStatsCollector";
     private static final int MILLIVOLTS_PER_VOLT = 1000;
+    private static final long POWER_STATS_ENERGY_CONSUMERS_TIMEOUT = 20000;
     private final Handler mHandler;
     protected final Clock mClock;
     private final long mThrottlePeriodMs;
@@ -64,6 +74,7 @@ public abstract class PowerStatsCollector {
         protected static final double MILLI_TO_NANO_MULTIPLIER = 1000000.0;
 
         private int mDeviceStatsArrayLength;
+        private int mStateStatsArrayLength;
         private int mUidStatsArrayLength;
 
         protected int mDeviceDurationPosition;
@@ -76,6 +87,10 @@ public abstract class PowerStatsCollector {
             return mDeviceStatsArrayLength;
         }
 
+        public int getStateStatsArrayLength() {
+            return mStateStatsArrayLength;
+        }
+
         public int getUidStatsArrayLength() {
             return mUidStatsArrayLength;
         }
@@ -83,6 +98,12 @@ public abstract class PowerStatsCollector {
         protected int addDeviceSection(int length) {
             int position = mDeviceStatsArrayLength;
             mDeviceStatsArrayLength += length;
+            return position;
+        }
+
+        protected int addStateSection(int length) {
+            int position = mStateStatsArrayLength;
+            mStateStatsArrayLength += length;
             return position;
         }
 
@@ -393,5 +414,79 @@ public abstract class PowerStatsCollector {
         // To overflow, a 3.7V 10000mAh battery would need to completely drain 69244 times
         // since the last snapshot. Round off to the nearest whole long.
         return (deltaEnergyUj * MILLIVOLTS_PER_VOLT + (avgVoltageMv / 2)) / avgVoltageMv;
+    }
+
+    interface ConsumedEnergyRetriever {
+        int[] getEnergyConsumerIds(@EnergyConsumerType int energyConsumerType);
+
+        @Nullable
+        long[] getConsumedEnergyUws(int[] energyConsumerIds);
+    }
+
+    static class ConsumedEnergyRetrieverImpl implements ConsumedEnergyRetriever {
+        private final PowerStatsInternal mPowerStatsInternal;
+
+        ConsumedEnergyRetrieverImpl(PowerStatsInternal powerStatsInternal) {
+            mPowerStatsInternal = powerStatsInternal;
+        }
+
+        @Override
+        public int[] getEnergyConsumerIds(int energyConsumerType) {
+            if (mPowerStatsInternal == null) {
+                return new int[0];
+            }
+
+            EnergyConsumer[] energyConsumerInfo = mPowerStatsInternal.getEnergyConsumerInfo();
+            if (energyConsumerInfo == null) {
+                return new int[0];
+            }
+
+            List<EnergyConsumer> energyConsumers = new ArrayList<>();
+            for (EnergyConsumer energyConsumer : energyConsumerInfo) {
+                if (energyConsumer.type == energyConsumerType) {
+                    energyConsumers.add(energyConsumer);
+                }
+            }
+            if (energyConsumers.isEmpty()) {
+                return new int[0];
+            }
+
+            energyConsumers.sort(Comparator.comparing(c -> c.ordinal));
+
+            int[] ids = new int[energyConsumers.size()];
+            for (int i = 0; i < ids.length; i++) {
+                ids[i] = energyConsumers.get(i).id;
+            }
+            return ids;
+        }
+
+        @Override
+        public long[] getConsumedEnergyUws(int[] energyConsumerIds) {
+            CompletableFuture<EnergyConsumerResult[]> future =
+                    mPowerStatsInternal.getEnergyConsumedAsync(energyConsumerIds);
+            EnergyConsumerResult[] results = null;
+            try {
+                results = future.get(
+                        POWER_STATS_ENERGY_CONSUMERS_TIMEOUT, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                Slog.e(TAG, "Could not obtain energy consumers from PowerStatsService", e);
+            }
+
+            if (results == null) {
+                return null;
+            }
+
+            long[] energy = new long[energyConsumerIds.length];
+            for (int i = 0; i < energyConsumerIds.length; i++) {
+                int id = energyConsumerIds[i];
+                for (EnergyConsumerResult result : results) {
+                    if (result.id == id) {
+                        energy[i] = result.energyUWs;
+                        break;
+                    }
+                }
+            }
+            return energy;
+        }
     }
 }

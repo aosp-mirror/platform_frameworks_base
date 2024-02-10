@@ -16,14 +16,11 @@
 
 package com.android.server.power.stats;
 
-import android.hardware.power.stats.EnergyConsumer;
-import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.Process;
-import android.power.PowerStatsInternal;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -34,20 +31,11 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
-import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
 /**
  * Collects snapshots of power-related system statistics.
@@ -63,21 +51,41 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private static final int DEFAULT_CPU_POWER_BRACKETS_PER_ENERGY_CONSUMER = 2;
     private static final long POWER_STATS_ENERGY_CONSUMERS_TIMEOUT = 20000;
 
+    interface Injector {
+        Handler getHandler();
+        Clock getClock();
+        PowerStatsUidResolver getUidResolver();
+        CpuScalingPolicies getCpuScalingPolicies();
+        PowerProfile getPowerProfile();
+        KernelCpuStatsReader getKernelCpuStatsReader();
+        ConsumedEnergyRetriever getConsumedEnergyRetriever();
+        IntSupplier getVoltageSupplier();
+
+        default int getDefaultCpuPowerBrackets() {
+            return DEFAULT_CPU_POWER_BRACKETS;
+        }
+
+        default int getDefaultCpuPowerBracketsPerEnergyConsumer() {
+            return DEFAULT_CPU_POWER_BRACKETS_PER_ENERGY_CONSUMER;
+        }
+    }
+
+    private final Injector mInjector;
+
     private boolean mIsInitialized;
-    private final CpuScalingPolicies mCpuScalingPolicies;
-    private final PowerProfile mPowerProfile;
-    private final KernelCpuStatsReader mKernelCpuStatsReader;
-    private final PowerStatsUidResolver mUidResolver;
-    private final Supplier<PowerStatsInternal> mPowerStatsSupplier;
-    private final IntSupplier mVoltageSupplier;
-    private final int mDefaultCpuPowerBrackets;
-    private final int mDefaultCpuPowerBracketsPerEnergyConsumer;
+    private CpuScalingPolicies mCpuScalingPolicies;
+    private PowerProfile mPowerProfile;
+    private KernelCpuStatsReader mKernelCpuStatsReader;
+    private PowerStatsUidResolver mUidResolver;
+    private ConsumedEnergyRetriever mConsumedEnergyRetriever;
+    private IntSupplier mVoltageSupplier;
+    private int mDefaultCpuPowerBrackets;
+    private int mDefaultCpuPowerBracketsPerEnergyConsumer;
     private long[] mCpuTimeByScalingStep;
     private long[] mTempCpuTimeByScalingStep;
     private long[] mTempUidStats;
     private final SparseArray<UidStats> mUidStats = new SparseArray<>();
     private boolean mIsPerUidTimeInStateSupported;
-    private PowerStatsInternal mPowerStatsInternal;
     private int[] mCpuEnergyConsumerIds = new int[0];
     private PowerStats.Descriptor mPowerStatsDescriptor;
     // Reusable instance
@@ -247,29 +255,9 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         }
     }
 
-    public CpuPowerStatsCollector(CpuScalingPolicies cpuScalingPolicies, PowerProfile powerProfile,
-            PowerStatsUidResolver uidResolver, IntSupplier voltageSupplier, Handler handler,
-            long throttlePeriodMs) {
-        this(cpuScalingPolicies, powerProfile, handler, new KernelCpuStatsReader(), uidResolver,
-                () -> LocalServices.getService(PowerStatsInternal.class), voltageSupplier,
-                throttlePeriodMs, Clock.SYSTEM_CLOCK, DEFAULT_CPU_POWER_BRACKETS,
-                DEFAULT_CPU_POWER_BRACKETS_PER_ENERGY_CONSUMER);
-    }
-
-    public CpuPowerStatsCollector(CpuScalingPolicies cpuScalingPolicies, PowerProfile powerProfile,
-            Handler handler, KernelCpuStatsReader kernelCpuStatsReader,
-            PowerStatsUidResolver uidResolver, Supplier<PowerStatsInternal> powerStatsSupplier,
-            IntSupplier voltageSupplier, long throttlePeriodMs, Clock clock,
-            int defaultCpuPowerBrackets, int defaultCpuPowerBracketsPerEnergyConsumer) {
-        super(handler, throttlePeriodMs, clock);
-        mCpuScalingPolicies = cpuScalingPolicies;
-        mPowerProfile = powerProfile;
-        mKernelCpuStatsReader = kernelCpuStatsReader;
-        mUidResolver = uidResolver;
-        mPowerStatsSupplier = powerStatsSupplier;
-        mVoltageSupplier = voltageSupplier;
-        mDefaultCpuPowerBrackets = defaultCpuPowerBrackets;
-        mDefaultCpuPowerBracketsPerEnergyConsumer = defaultCpuPowerBracketsPerEnergyConsumer;
+    public CpuPowerStatsCollector(Injector injector, long throttlePeriodMs) {
+        super(injector.getHandler(), throttlePeriodMs, injector.getClock());
+        mInjector = injector;
     }
 
     private boolean ensureInitialized() {
@@ -281,12 +269,21 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
             return false;
         }
 
-        mIsPerUidTimeInStateSupported = mKernelCpuStatsReader.nativeIsSupportedFeature();
-        mPowerStatsInternal = mPowerStatsSupplier.get();
+        mCpuScalingPolicies = mInjector.getCpuScalingPolicies();
+        mPowerProfile = mInjector.getPowerProfile();
+        mKernelCpuStatsReader = mInjector.getKernelCpuStatsReader();
+        mUidResolver = mInjector.getUidResolver();
+        mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
+        mVoltageSupplier = mInjector.getVoltageSupplier();
+        mDefaultCpuPowerBrackets = mInjector.getDefaultCpuPowerBrackets();
+        mDefaultCpuPowerBracketsPerEnergyConsumer =
+                mInjector.getDefaultCpuPowerBracketsPerEnergyConsumer();
 
-        if (mPowerStatsInternal != null) {
-            readCpuEnergyConsumerIds();
-        }
+        mIsPerUidTimeInStateSupported = mKernelCpuStatsReader.nativeIsSupportedFeature();
+        mCpuEnergyConsumerIds =
+                mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.CPU_CLUSTER);
+        mLastConsumedEnergyUws = new long[mCpuEnergyConsumerIds.length];
+        Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
 
         int cpuScalingStepCount = mCpuScalingPolicies.getScalingStepCount();
         mCpuTimeByScalingStep = new long[cpuScalingStepCount];
@@ -314,32 +311,6 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
 
         mIsInitialized = true;
         return true;
-    }
-
-    private void readCpuEnergyConsumerIds() {
-        EnergyConsumer[] energyConsumerInfo = mPowerStatsInternal.getEnergyConsumerInfo();
-        if (energyConsumerInfo == null) {
-            return;
-        }
-
-        List<EnergyConsumer> cpuEnergyConsumers = new ArrayList<>();
-        for (EnergyConsumer energyConsumer : energyConsumerInfo) {
-            if (energyConsumer.type == EnergyConsumerType.CPU_CLUSTER) {
-                cpuEnergyConsumers.add(energyConsumer);
-            }
-        }
-        if (cpuEnergyConsumers.isEmpty()) {
-            return;
-        }
-
-        cpuEnergyConsumers.sort(Comparator.comparing(c -> c.ordinal));
-
-        mCpuEnergyConsumerIds = new int[cpuEnergyConsumers.size()];
-        for (int i = 0; i < mCpuEnergyConsumerIds.length; i++) {
-            mCpuEnergyConsumerIds[i] = cpuEnergyConsumers.get(i).id;
-        }
-        mLastConsumedEnergyUws = new long[cpuEnergyConsumers.size()];
-        Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
     }
 
     private int[] initPowerBrackets() {
@@ -572,35 +543,20 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
         mLastVoltageMv = voltageMv;
 
-        CompletableFuture<EnergyConsumerResult[]> future =
-                mPowerStatsInternal.getEnergyConsumedAsync(mCpuEnergyConsumerIds);
-        EnergyConsumerResult[] results = null;
-        try {
-            results = future.get(
-                    POWER_STATS_ENERGY_CONSUMERS_TIMEOUT, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            Slog.e(TAG, "Could not obtain energy consumers from PowerStatsService", e);
-        }
-        if (results == null) {
+        long[] energyUws = mConsumedEnergyRetriever.getConsumedEnergyUws(mCpuEnergyConsumerIds);
+        if (energyUws == null) {
             return;
         }
 
-        for (int i = 0; i < mCpuEnergyConsumerIds.length; i++) {
-            int id = mCpuEnergyConsumerIds[i];
-            for (EnergyConsumerResult result : results) {
-                if (result.id == id) {
-                    long energyDelta = mLastConsumedEnergyUws[i] != ENERGY_UNSPECIFIED
-                            ? result.energyUWs - mLastConsumedEnergyUws[i] : 0;
-                    if (energyDelta < 0) {
-                        // Likely, restart of powerstats HAL
-                        energyDelta = 0;
-                    }
-                    mLayout.setConsumedEnergy(mCpuPowerStats.stats, i,
-                            uJtoUc(energyDelta, averageVoltage));
-                    mLastConsumedEnergyUws[i] = result.energyUWs;
-                    break;
-                }
+        for (int i = energyUws.length - 1; i >= 0; i--) {
+            long energyDelta = mLastConsumedEnergyUws[i] != ENERGY_UNSPECIFIED
+                    ? energyUws[i] - mLastConsumedEnergyUws[i] : 0;
+            if (energyDelta < 0) {
+                // Likely, restart of powerstats HAL
+                energyDelta = 0;
             }
+            mLayout.setConsumedEnergy(mCpuPowerStats.stats, i, uJtoUc(energyDelta, averageVoltage));
+            mLastConsumedEnergyUws[i] = energyUws[i];
         }
     }
 

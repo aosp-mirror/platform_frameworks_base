@@ -408,11 +408,18 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 com.android.internal.R.bool.config_batteryStatsResetOnUnplugAfterSignificantCharge);
         final long powerStatsThrottlePeriodCpu = context.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultPowerStatsThrottlePeriodCpu);
+        final long powerStatsThrottlePeriodMobileRadio = context.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultPowerStatsThrottlePeriodMobileRadio);
         mBatteryStatsConfig =
                 new BatteryStatsImpl.BatteryStatsConfig.Builder()
                         .setResetOnUnplugHighBatteryLevel(resetOnUnplugHighBatteryLevel)
                         .setResetOnUnplugAfterSignificantCharge(resetOnUnplugAfterSignificantCharge)
-                        .setPowerStatsThrottlePeriodCpu(powerStatsThrottlePeriodCpu)
+                        .setPowerStatsThrottlePeriodMillis(
+                                BatteryConsumer.POWER_COMPONENT_CPU,
+                                powerStatsThrottlePeriodCpu)
+                        .setPowerStatsThrottlePeriodMillis(
+                                BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                                powerStatsThrottlePeriodMobileRadio)
                         .build();
         mPowerStatsUidResolver = new PowerStatsUidResolver();
         mStats = new BatteryStatsImpl(mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
@@ -494,7 +501,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void systemServicesReady() {
-        mStats.setPowerStatsCollectorEnabled(Flags.streamlinedBatteryStats());
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_CPU,
+                Flags.streamlinedBatteryStats());
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
+                Flags.streamlinedConnectivityBatteryStats());
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(Flags.streamlinedBatteryStats());
         mWorker.systemServicesReady();
         mStats.systemServicesReady(mContext);
@@ -536,7 +546,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * Notifies BatteryStatsService that the system server is ready.
      */
     public void onSystemReady() {
-        mStats.onSystemReady();
+        mStats.onSystemReady(mContext);
         mPowerStatsScheduler.start(Flags.streamlinedBatteryStats());
     }
 
@@ -1591,18 +1601,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
-                final boolean update;
                 synchronized (mStats) {
                     // Ignore if no power state change.
                     if (mLastPowerStateFromRadio == powerState) return;
 
                     mLastPowerStateFromRadio = powerState;
-                    update = mStats.noteMobileRadioPowerStateLocked(powerState, timestampNs, uid,
+                    mStats.noteMobileRadioPowerStateLocked(powerState, timestampNs, uid,
                             elapsedRealtime, uptime);
-                }
-
-                if (update) {
-                    mWorker.scheduleSync("modem-data", BatteryExternalStatsWorker.UPDATE_RADIO);
                 }
             });
         }

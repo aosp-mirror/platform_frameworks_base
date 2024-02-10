@@ -18,6 +18,8 @@ package com.android.server.power.stats;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
+
 import android.content.Context;
 import android.os.BatteryManager;
 
@@ -84,7 +86,7 @@ public class BatteryStatsResetTest {
 
         mMockClock = new MockClock();
         mBatteryStatsImpl = new MockBatteryStatsImpl(mMockClock, context.getFilesDir());
-        mBatteryStatsImpl.onSystemReady();
+        mBatteryStatsImpl.onSystemReady(mock(Context.class));
 
 
         // Set up the battery state. Start off with a fully charged plugged in battery.

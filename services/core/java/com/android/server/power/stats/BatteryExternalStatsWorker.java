@@ -24,6 +24,7 @@ import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.net.wifi.WifiManager;
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.OutcomeReceiver;
@@ -603,24 +604,31 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
         }
 
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_RADIO) != 0) {
-            // We were asked to fetch Telephony data.
-            if (mTelephony != null) {
-                CompletableFuture<ModemActivityInfo> temp = new CompletableFuture<>();
-                mTelephony.requestModemActivityInfo(Runnable::run,
-                        new OutcomeReceiver<ModemActivityInfo,
-                                TelephonyManager.ModemActivityInfoException>() {
-                            @Override
-                            public void onResult(ModemActivityInfo result) {
-                                temp.complete(result);
-                            }
+            @SuppressWarnings("GuardedBy")
+            PowerStatsCollector collector = mStats.getPowerStatsCollector(
+                    BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO);
+            if (collector.isEnabled()) {
+                collector.schedule();
+            } else {
+                // We were asked to fetch Telephony data.
+                if (mTelephony != null) {
+                    CompletableFuture<ModemActivityInfo> temp = new CompletableFuture<>();
+                    mTelephony.requestModemActivityInfo(Runnable::run,
+                            new OutcomeReceiver<ModemActivityInfo,
+                                    TelephonyManager.ModemActivityInfoException>() {
+                                @Override
+                                public void onResult(ModemActivityInfo result) {
+                                    temp.complete(result);
+                                }
 
-                            @Override
-                            public void onError(TelephonyManager.ModemActivityInfoException e) {
-                                Slog.w(TAG, "error reading modem stats:" + e);
-                                temp.complete(null);
-                            }
-                        });
-                modemFuture = temp;
+                                @Override
+                                public void onError(TelephonyManager.ModemActivityInfoException e) {
+                                    Slog.w(TAG, "error reading modem stats:" + e);
+                                    temp.complete(null);
+                                }
+                            });
+                    modemFuture = temp;
+                }
             }
             if (!railUpdated) {
                 synchronized (mStats) {
