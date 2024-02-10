@@ -100,7 +100,7 @@ static jlong native_getCount(jlong nativePtr, jint state) {
     return asLongMultiStateCounter(nativePtr)->getCount(state);
 }
 
-static jobject native_toString(JNIEnv *env, jobject self, jlong nativePtr) {
+static jobject native_toString(JNIEnv *env, jclass, jlong nativePtr) {
     return env->NewStringUTF(asLongMultiStateCounter(nativePtr)->toString().c_str());
 }
 
@@ -118,7 +118,7 @@ static void throwWriteRE(JNIEnv *env, binder_status_t status) {
         }                                     \
     }
 
-static void native_writeToParcel(JNIEnv *env, jobject self, jlong nativePtr, jobject jParcel,
+static void native_writeToParcel(JNIEnv *env, jclass, jlong nativePtr, jobject jParcel,
                                  jint flags) {
     battery::LongMultiStateCounter *counter = asLongMultiStateCounter(nativePtr);
     ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));

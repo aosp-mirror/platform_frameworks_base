@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 
 import java.nio.charset.Charset;
 
+@android.platform.test.annotations.IgnoreUnderRavenwood
 public class KernelWakelockReaderTest extends TestCase {
     /**
      * Helper class that builds the mock Kernel module file /d/wakeup_sources.

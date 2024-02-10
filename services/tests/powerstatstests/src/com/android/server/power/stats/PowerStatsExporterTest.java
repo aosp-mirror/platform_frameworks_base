@@ -99,7 +99,7 @@ public class PowerStatsExporterTest {
         mPowerStatsStore = new PowerStatsStore(storeDirectory, new TestHandler(), config);
         mHistory = new BatteryStatsHistory(Parcel.obtain(), storeDirectory, 0, 10000,
                 mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock,
-                mMonotonicClock, null);
+                mMonotonicClock, null, null);
         mPowerStatsAggregator = new PowerStatsAggregator(config, mHistory);
 
         mCpuStatsArrayLayout = new CpuPowerStatsCollector.CpuStatsArrayLayout();

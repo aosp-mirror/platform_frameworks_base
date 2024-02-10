@@ -21,9 +21,15 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.annotation.DimenRes
+import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
+import com.android.settingslib.flags.Flags.bluetoothQsTileDialogAutoOnToggle
 import com.android.systemui.Prefs
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -58,6 +64,7 @@ internal class BluetoothTileDialogViewModel
 constructor(
     private val deviceItemInteractor: DeviceItemInteractor,
     private val bluetoothStateInteractor: BluetoothStateInteractor,
+    private val bluetoothAutoOnInteractor: BluetoothAutoOnInteractor,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val activityStarter: ActivityStarter,
     private val systemClock: SystemClock,
@@ -143,7 +150,10 @@ constructor(
                 bluetoothStateInteractor.bluetoothStateUpdate
                     .filterNotNull()
                     .onEach {
-                        dialog.onBluetoothStateUpdated(it, getSubtitleResId(it))
+                        dialog.onBluetoothStateUpdated(
+                            it,
+                            UiProperties.build(it, isAutoOnToggleFeatureAvailable())
+                        )
                         updateDeviceItemJob?.cancel()
                         updateDeviceItemJob = launch {
                             deviceItemInteractor.updateDeviceItems(
@@ -177,6 +187,21 @@ constructor(
                     }
                     .launchIn(this)
 
+                if (isAutoOnToggleFeatureAvailable()) {
+                    // bluetoothAutoOnUpdate is emitted when bluetooth auto on on/off state is
+                    // changed.
+                    bluetoothAutoOnInteractor.isEnabled
+                        .onEach { dialog.onBluetoothAutoOnUpdated(it) }
+                        .launchIn(this)
+
+                    // bluetoothAutoOnToggle is emitted when user toggles the bluetooth auto on
+                    // switch, send the new value to the bluetoothAutoOnInteractor.
+                    dialog.bluetoothAutoOnToggle
+                        .filterNotNull()
+                        .onEach { bluetoothAutoOnInteractor.setEnabled(it) }
+                        .launchIn(this)
+                }
+
                 produce<Unit> { awaitClose { dialog.cancel() } }
             }
     }
@@ -192,7 +217,10 @@ constructor(
 
         return BluetoothTileDialog(
                 bluetoothStateInteractor.isBluetoothEnabled,
-                getSubtitleResId(bluetoothStateInteractor.isBluetoothEnabled),
+                UiProperties.build(
+                    bluetoothStateInteractor.isBluetoothEnabled,
+                    isAutoOnToggleFeatureAvailable()
+                ),
                 cachedContentHeight,
                 this@BluetoothTileDialogViewModel,
                 mainDispatcher,
@@ -244,12 +272,39 @@ constructor(
         }
     }
 
+    @VisibleForTesting
+    internal suspend fun isAutoOnToggleFeatureAvailable() =
+        bluetoothQsTileDialogAutoOnToggle() && bluetoothAutoOnInteractor.isValuePresent()
+
     companion object {
         private const val INTERACTION_JANK_TAG = "bluetooth_tile_dialog"
         private const val CONTENT_HEIGHT_PREF_KEY = Prefs.Key.BLUETOOTH_TILE_DIALOG_CONTENT_HEIGHT
         private fun getSubtitleResId(isBluetoothEnabled: Boolean) =
             if (isBluetoothEnabled) R.string.quick_settings_bluetooth_tile_subtitle
             else R.string.bt_is_off
+    }
+
+    internal data class UiProperties(
+        @StringRes val subTitleResId: Int,
+        val autoOnToggleVisibility: Int,
+        @DimenRes val scrollViewMinHeightResId: Int,
+    ) {
+        companion object {
+            internal fun build(
+                isBluetoothEnabled: Boolean,
+                isAutoOnToggleFeatureAvailable: Boolean
+            ) =
+                UiProperties(
+                    subTitleResId = getSubtitleResId(isBluetoothEnabled),
+                    autoOnToggleVisibility =
+                        if (isAutoOnToggleFeatureAvailable && !isBluetoothEnabled) VISIBLE
+                        else GONE,
+                    scrollViewMinHeightResId =
+                        if (isAutoOnToggleFeatureAvailable)
+                            R.dimen.bluetooth_dialog_scroll_view_min_height_with_auto_on
+                        else R.dimen.bluetooth_dialog_scroll_view_min_height
+                )
+        }
     }
 }
 

@@ -3046,13 +3046,24 @@ interface ITelephony {
     boolean setSatellitePointingUiClassName(in String packageName, in String className);
 
     /**
-     * This API can be used by only CTS to update the timeout duration in milliseconds whether
-     * the device is aligned with the satellite for demo mode
+     * This API can be used by only CTS to override the timeout durations used by the
+     * DatagramController module.
      *
      * @param timeoutMillis The timeout duration in millisecond.
      * @return {@code true} if the timeout duration is set successfully, {@code false} otherwise.
      */
-    boolean setSatelliteDeviceAlignedTimeoutDuration(long timeoutMillis);
+    boolean setDatagramControllerTimeoutDuration(
+            boolean reset, int timeoutType, long timeoutMillis);
+
+    /**
+     * This API can be used by only CTS to override the timeout durations used by the
+     * SatelliteController module.
+     *
+     * @param timeoutMillis The timeout duration in millisecond.
+     * @return {@code true} if the timeout duration is set successfully, {@code false} otherwise.
+     */
+    boolean setSatelliteControllerTimeoutDuration(
+            boolean reset, int timeoutType, long timeoutMillis);
 
     /**
      * This API can be used in only testing to override connectivity status in monitoring emergency

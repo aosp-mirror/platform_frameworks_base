@@ -559,6 +559,10 @@ public class IntentFilter implements Parcelable {
             sb.append(" sch=");
             sb.append(mDataSchemes.toString());
         }
+        if (Flags.relativeReferenceIntentFilters() && countUriRelativeFilterGroups() > 0) {
+            sb.append(" grp=");
+            sb.append(mUriRelativeFilterGroups.toString());
+        }
         sb.append(" }");
         return sb.toString();
     }
@@ -1807,13 +1811,7 @@ public class IntentFilter implements Parcelable {
         if (mUriRelativeFilterGroups == null) {
             return false;
         }
-        for (int i = 0; i < mUriRelativeFilterGroups.size(); i++) {
-            UriRelativeFilterGroup group = mUriRelativeFilterGroups.get(i);
-            if (group.matchData(data)) {
-                return group.getAction() == UriRelativeFilterGroup.ACTION_ALLOW;
-            }
-        }
-        return false;
+        return UriRelativeFilterGroup.matchGroupsToUri(mUriRelativeFilterGroups, data);
     }
 
     /**

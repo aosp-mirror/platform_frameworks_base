@@ -37,6 +37,7 @@ import android.os.BatteryUsageStats;
 import android.os.Parcel;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
@@ -45,6 +46,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -62,6 +64,10 @@ import java.util.stream.Collectors;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BatteryUsageStatsTest {
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
 
     private static final int USER_ID = 42;
     private static final int APP_UID1 = 271;
@@ -115,12 +121,13 @@ public class BatteryUsageStatsTest {
         final Parcel parcel = Parcel.obtain();
         parcel.writeParcelable(outBatteryUsageStats, 0);
 
-        assertThat(parcel.dataSize()).isLessThan(2000);
+        // Under ravenwood this parcel is larger.  On a device, 2K would suffice
+        assertThat(parcel.dataSize()).isLessThan(128_000);
 
         parcel.setDataPosition(0);
 
         final BatteryUsageStats inBatteryUsageStats =
-                parcel.readParcelable(getClass().getClassLoader());
+                parcel.readParcelable(getClass().getClassLoader(), BatteryUsageStats.class);
         parcel.recycle();
 
         assertThat(inBatteryUsageStats.getUidBatteryConsumers()).hasSize(uidCount);

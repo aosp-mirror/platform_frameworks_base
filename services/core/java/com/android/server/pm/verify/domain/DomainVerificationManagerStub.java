@@ -26,6 +26,7 @@ import android.content.pm.verify.domain.DomainVerificationInfo;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationUserState;
 import android.content.pm.verify.domain.IDomainVerificationManager;
+import android.os.Bundle;
 import android.os.ServiceSpecificException;
 
 import java.util.List;
@@ -39,6 +40,27 @@ public class DomainVerificationManagerStub extends IDomainVerificationManager.St
 
     public DomainVerificationManagerStub(DomainVerificationService service) {
         mService = service;
+    }
+
+    @Override
+    public void setUriRelativeFilterGroups(@NonNull String packageName,
+            @NonNull Bundle domainToGroupsBundle) {
+        try {
+            mService.setUriRelativeFilterGroups(packageName, domainToGroupsBundle);
+        } catch (Exception e) {
+            throw rethrow(e);
+        }
+    }
+
+    @NonNull
+    @Override
+    public Bundle getUriRelativeFilterGroups(
+            @NonNull String packageName, @NonNull List<String> domains) {
+        try {
+            return mService.getUriRelativeFilterGroups(packageName, domains);
+        } catch (Exception e) {
+            throw rethrow(e);
+        }
     }
 
     @NonNull

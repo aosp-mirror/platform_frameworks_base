@@ -668,6 +668,23 @@ public final class Settings {
             "android.settings.MANAGE_APP_LONG_RUNNING_JOBS";
 
     /**
+     * Activity Action: Show settings to allow configuration of
+     * {@link Manifest.permission#RUN_BACKUP_JOBS} permission.
+     *
+     * Input: Optionally, the Intent's data URI can specify the application package name to
+     * directly invoke the management GUI specific to the package name. For example
+     * "package:com.my.app".
+     * <p>
+     * Output: When a package data uri is passed as input, the activity result is set to
+     * {@link android.app.Activity#RESULT_OK} if the permission was granted to the app. Otherwise,
+     * the result is set to {@link android.app.Activity#RESULT_CANCELED}.
+     */
+    @FlaggedApi(Flags.FLAG_BACKUP_TASKS_SETTINGS_SCREEN)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_RUN_BACKUP_JOBS =
+            "android.settings.REQUEST_RUN_BACKUP_JOBS";
+
+    /**
      * Activity Action: Show settings to allow configuration of cross-profile access for apps
      *
      * Input: Optionally, the Intent's data URI can specify the application package name to
@@ -11833,6 +11850,7 @@ public final class Settings {
          * Whether to enable camera extensions software fallback.
          * @hide
          */
+        @Readable
         public static final String CAMERA_EXTENSIONS_FALLBACK = "camera_extensions_fallback";
 
         /**

@@ -28,6 +28,8 @@ import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineScope
@@ -51,6 +53,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
+    shadeInteractor: ShadeInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     @CommunalLog logBuffer: LogBuffer,
 ) : BaseCommunalViewModel(communalInteractor, mediaHost) {
@@ -80,6 +83,9 @@ constructor(
     private val _isPopupOnDismissCtaShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isPopupOnDismissCtaShowing: Flow<Boolean> =
         _isPopupOnDismissCtaShowing.asStateFlow()
+
+    /** Whether touches should be disabled in communal */
+    val touchesAllowed: Flow<Boolean> = not(shadeInteractor.isAnyFullyExpanded)
 
     init {
         // Initialize our media host for the UMO. This only needs to happen once and must be done
@@ -114,6 +120,7 @@ constructor(
     }
 
     private var delayedHidePopupJob: Job? = null
+
     private fun schedulePopupHiding() {
         cancelDelayedPopupHiding()
         delayedHidePopupJob =

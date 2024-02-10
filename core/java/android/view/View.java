@@ -30,6 +30,7 @@ import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ER
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_UNKNOWN;
 import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH;
 import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH_ERROR_CODE;
+import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
@@ -1946,6 +1947,41 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int TOOLTIP = 0x40000000;
 
     /** @hide */
+    @IntDef(prefix = { "CONTENT_SENSITIVITY_" }, value = {
+            CONTENT_SENSITIVITY_AUTO,
+            CONTENT_SENSITIVITY_SENSITIVE,
+            CONTENT_SENSITIVITY_NOT_SENSITIVE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ContentSensitivity {}
+
+    /**
+     * Automatically determine whether a view displays sensitive content. For example, available
+     * autofill hints (or some other signal) can be used to determine if this view
+     * displays sensitive content.
+     *
+     * @see #getContentSensitivity()
+     */
+    @FlaggedApi(FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API)
+    public static final int CONTENT_SENSITIVITY_AUTO = 0x0;
+
+    /**
+     * The view displays sensitive content.
+     *
+     * @see #getContentSensitivity()
+     */
+    @FlaggedApi(FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API)
+    public static final int CONTENT_SENSITIVITY_SENSITIVE = 0x1;
+
+    /**
+     * The view doesn't display sensitive content.
+     *
+     * @see #getContentSensitivity()
+     */
+    @FlaggedApi(FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API)
+    public static final int CONTENT_SENSITIVITY_NOT_SENSITIVE = 0x2;
+
+    /** @hide */
     @IntDef(flag = true, prefix = { "FOCUSABLES_" }, value = {
             FOCUSABLES_ALL,
             FOCUSABLES_TOUCH_MODE
@@ -3646,6 +3682,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *           1                      PFLAG4_ROTARY_HAPTICS_ENABLED
      *          1                       PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT
      *         1                        PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT
+     *       11                         PFLAG4_CONTENT_SENSITIVITY_MASK
      * |-------|-------|-------|-------|
      */
 
@@ -3762,6 +3799,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static final int PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT = 0x800000;
 
+    private static final int PFLAG4_CONTENT_SENSITIVITY_SHIFT = 24;
+
+    /**
+     * Mask for obtaining the bits which specify how to determine whether a view
+     * displays sensitive content or not.
+     */
+    private static final int PFLAG4_CONTENT_SENSITIVITY_MASK =
+            (CONTENT_SENSITIVITY_AUTO | CONTENT_SENSITIVITY_SENSITIVE
+                    | CONTENT_SENSITIVITY_NOT_SENSITIVE) << PFLAG4_CONTENT_SENSITIVITY_SHIFT;
     /* End of masks for mPrivateFlags4 */
 
     /** @hide */
@@ -10146,6 +10192,54 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         // Otherwise, assume it's not important...
+        return false;
+    }
+
+    /**
+     * Sets content sensitivity mode to determine whether this view displays sensitive content.
+     *
+     * @param mode {@link #CONTENT_SENSITIVITY_AUTO}, {@link #CONTENT_SENSITIVITY_NOT_SENSITIVE}
+     *                                            or {@link #CONTENT_SENSITIVITY_SENSITIVE}
+     */
+    @FlaggedApi(FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API)
+    public final void setContentSensitivity(@ContentSensitivity int mode)  {
+        mPrivateFlags4 &= ~PFLAG4_CONTENT_SENSITIVITY_MASK;
+        mPrivateFlags4 |= ((mode << PFLAG4_CONTENT_SENSITIVITY_SHIFT)
+                & PFLAG4_CONTENT_SENSITIVITY_MASK);
+    }
+
+    /**
+     * Gets content sensitivity mode to determine whether this view displays sensitive content.
+     *
+     * <p>See {@link #setContentSensitivity(int)} and
+     * {@link #isContentSensitive()} for more info about this mode.
+     *
+     * @return {@link #CONTENT_SENSITIVITY_AUTO} by default, or value passed to
+     * {@link #setContentSensitivity(int)}.
+     */
+    @FlaggedApi(FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API)
+    public @ContentSensitivity
+    final int getContentSensitivity() {
+        return (mPrivateFlags4 & PFLAG4_CONTENT_SENSITIVITY_MASK)
+                >> PFLAG4_CONTENT_SENSITIVITY_SHIFT;
+    }
+
+    /**
+     * Returns whether this view displays sensitive content, based
+     * on the value explicitly set by {@link #setContentSensitivity(int)}.
+     *
+     * @return whether the view displays sensitive content.
+     *
+     * @see #setContentSensitivity(int)
+     * @see #CONTENT_SENSITIVITY_AUTO
+     * @see #CONTENT_SENSITIVITY_SENSITIVE
+     * @see #CONTENT_SENSITIVITY_NOT_SENSITIVE
+     */
+    @FlaggedApi(FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API)
+    public final boolean isContentSensitive() {
+        if (getContentSensitivity() == CONTENT_SENSITIVITY_SENSITIVE) {
+            return true;
+        }
         return false;
     }
 

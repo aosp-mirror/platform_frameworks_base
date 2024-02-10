@@ -60,7 +60,7 @@ public class PowerStatsAggregatorTest {
     public void setup() throws ParseException {
         mHistory = new BatteryStatsHistory(32, 1024,
                 mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock,
-                mMonotonicClock, mock(BatteryStatsHistory.TraceDelegate.class));
+                mMonotonicClock, mock(BatteryStatsHistory.TraceDelegate.class), null);
 
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(TEST_POWER_COMPONENT)
@@ -178,7 +178,7 @@ public class PowerStatsAggregatorTest {
     }
 
     @NonNull
-    private static CharSequence formatDateTime(long timeInMillis) {
+    private static String formatDateTime(long timeInMillis) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         format.getCalendar().setTimeZone(TimeZone.getTimeZone("GMT"));
         return format.format(new Date(timeInMillis));

@@ -33,6 +33,7 @@ java_genrule {
         "@$(location ravenwood/ravenwood-standard-options.txt) " +
 
         "--debug-log $(location hoststubgen_framework-minus-apex.log) " +
+        "--stats-file $(location hoststubgen_framework-minus-apex_stats.csv) " +
 
         "--out-impl-jar $(location ravenwood.jar) " +
 
@@ -56,6 +57,7 @@ java_genrule {
         "hoststubgen_dump.txt",
 
         "hoststubgen_framework-minus-apex.log",
+        "hoststubgen_framework-minus-apex_stats.csv",
     ],
     visibility: ["//visibility:private"],
 }

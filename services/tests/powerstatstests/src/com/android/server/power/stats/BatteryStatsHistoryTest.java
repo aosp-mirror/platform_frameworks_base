@@ -26,7 +26,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -39,7 +38,6 @@ import android.telephony.NetworkRegistrationInfo;
 import android.util.AtomicFile;
 import android.util.Log;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistory;
@@ -59,6 +57,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -80,13 +79,14 @@ public class BatteryStatsHistoryTest {
     private BatteryStatsHistory.TraceDelegate mTracer;
     @Mock
     private BatteryStatsHistory.HistoryStepDetailsCalculator mStepDetailsCalculator;
+    @Mock
+    private BatteryStatsHistory.EventLogger mEventLogger;
     private List<String> mReadFiles = new ArrayList<>();
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
-        Context context = InstrumentationRegistry.getContext();
-        mSystemDir = context.getDataDir();
+        mSystemDir = Files.createTempDirectory("BatteryStatsHistoryTest").toFile();
         mHistoryDir = new File(mSystemDir, "battery-history");
         String[] files = mHistoryDir.list();
         if (files != null) {
@@ -99,7 +99,7 @@ public class BatteryStatsHistoryTest {
         mClock.realtime = 123;
 
         mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
-                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer);
+                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer, mEventLogger);
 
         when(mStepDetailsCalculator.getHistoryStepDetails())
                 .thenReturn(new BatteryStats.HistoryStepDetails());
@@ -238,7 +238,7 @@ public class BatteryStatsHistoryTest {
 
         // create a new BatteryStatsHistory object, it will pick up existing history files.
         BatteryStatsHistory history2 = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
-                null, mClock, mMonotonicClock, mTracer);
+                null, mClock, mMonotonicClock, mTracer, mEventLogger);
         // verify constructor can pick up all files from file system.
         verifyFileNames(history2, fileList);
         verifyActiveFile(history2, "33000.bh");
@@ -534,7 +534,7 @@ public class BatteryStatsHistoryTest {
         // Keep the preserved part of history short - we only need to capture the very tail of
         // history.
         mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 1, 6000,
-                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer);
+                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer, mEventLogger);
 
         mHistory.forceRecordAllHistory();
 

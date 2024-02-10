@@ -297,9 +297,20 @@ public class BatteryStatsHistory {
         }
     }
 
+    public static class EventLogger {
+        /**
+         * Records a statsd event when the batterystats config file is written to disk.
+         */
+        public void writeCommitSysConfigFile(long startTimeMs) {
+            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
+                    "batterystats", SystemClock.uptimeMillis() - startTimeMs);
+        }
+    }
+
     private TraceDelegate mTracer;
     private int mTraceLastState = 0;
     private int mTraceLastState2 = 0;
+    private final EventLogger mEventLogger;
 
     /**
      * Constructor
@@ -311,8 +322,16 @@ public class BatteryStatsHistory {
     public BatteryStatsHistory(File systemDir, int maxHistoryFiles, int maxHistoryBufferSize,
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
             MonotonicClock monotonicClock) {
+        this(systemDir, maxHistoryFiles, maxHistoryBufferSize,
+                stepDetailsCalculator, clock, monotonicClock, new TraceDelegate(),
+                new EventLogger());
+    }
+
+    public BatteryStatsHistory(File systemDir, int maxHistoryFiles, int maxHistoryBufferSize,
+            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
+            MonotonicClock monotonicClock, TraceDelegate tracer, EventLogger eventLogger) {
         this(Parcel.obtain(), systemDir, maxHistoryFiles, maxHistoryBufferSize,
-                stepDetailsCalculator, clock, monotonicClock, new TraceDelegate());
+                stepDetailsCalculator, clock, monotonicClock, tracer, eventLogger);
         initHistoryBuffer();
     }
 
@@ -320,15 +339,15 @@ public class BatteryStatsHistory {
     public BatteryStatsHistory(Parcel historyBuffer, File systemDir,
             int maxHistoryFiles, int maxHistoryBufferSize,
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
-            MonotonicClock monotonicClock, TraceDelegate tracer) {
+            MonotonicClock monotonicClock, TraceDelegate tracer, EventLogger eventLogger) {
         this(historyBuffer, systemDir, maxHistoryFiles, maxHistoryBufferSize, stepDetailsCalculator,
-                clock, monotonicClock, tracer, null);
+                clock, monotonicClock, tracer, eventLogger, null);
     }
 
     private BatteryStatsHistory(Parcel historyBuffer, File systemDir,
             int maxHistoryFiles, int maxHistoryBufferSize,
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
-            MonotonicClock monotonicClock, TraceDelegate tracer,
+            MonotonicClock monotonicClock, TraceDelegate tracer, EventLogger eventLogger,
             BatteryStatsHistory writableHistory) {
         mHistoryBuffer = historyBuffer;
         mSystemDir = systemDir;
@@ -338,6 +357,7 @@ public class BatteryStatsHistory {
         mTracer = tracer;
         mClock = clock;
         mMonotonicClock = monotonicClock;
+        mEventLogger = eventLogger;
         mWritableHistory = writableHistory;
         if (mWritableHistory != null) {
             mMutable = false;
@@ -394,19 +414,21 @@ public class BatteryStatsHistory {
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
             MonotonicClock monotonicClock) {
         this(maxHistoryFiles, maxHistoryBufferSize, stepDetailsCalculator, clock, monotonicClock,
-                new TraceDelegate());
+                new TraceDelegate(), new EventLogger());
     }
 
     @VisibleForTesting
     public BatteryStatsHistory(int maxHistoryFiles, int maxHistoryBufferSize,
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
-            MonotonicClock monotonicClock, TraceDelegate traceDelegate) {
+            MonotonicClock monotonicClock, TraceDelegate traceDelegate,
+            EventLogger eventLogger) {
         mMaxHistoryFiles = maxHistoryFiles;
         mMaxHistoryBufferSize = maxHistoryBufferSize;
         mStepDetailsCalculator = stepDetailsCalculator;
         mTracer = traceDelegate;
         mClock = clock;
         mMonotonicClock = monotonicClock;
+        mEventLogger = eventLogger;
 
         mHistoryBuffer = Parcel.obtain();
         mSystemDir = null;
@@ -425,6 +447,7 @@ public class BatteryStatsHistory {
         mSystemDir = null;
         mHistoryDir = null;
         mStepDetailsCalculator = null;
+        mEventLogger = new EventLogger();
         mWritableHistory = null;
         mMutable = false;
 
@@ -482,7 +505,7 @@ public class BatteryStatsHistory {
             historyBufferCopy.appendFrom(mHistoryBuffer, 0, mHistoryBuffer.dataSize());
 
             return new BatteryStatsHistory(historyBufferCopy, mSystemDir, 0, 0, null, null, null,
-                    null, this);
+                    null, mEventLogger, this);
         }
     }
 
@@ -2154,8 +2177,7 @@ public class BatteryStatsHistory {
                         + " duration ms:" + (SystemClock.uptimeMillis() - startTimeMs)
                         + " bytes:" + p.dataSize());
             }
-            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
-                    "batterystats", SystemClock.uptimeMillis() - startTimeMs);
+            mEventLogger.writeCommitSysConfigFile(startTimeMs);
         } catch (IOException e) {
             Slog.w(TAG, "Error writing battery statistics", e);
             file.failWrite(fos);
@@ -2163,6 +2185,7 @@ public class BatteryStatsHistory {
             mWriteLock.unlock();
         }
     }
+
 
     /**
      * Returns the total number of history tags in the tag pool.

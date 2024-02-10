@@ -17,6 +17,7 @@ package com.android.hoststubgen.nativesubstitution;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.os.Parcel;
 import android.util.Base64;
 
 import java.text.DecimalFormat;
@@ -31,6 +32,7 @@ public class CursorWindow_host {
     private static final HashMap<Long, CursorWindow_host> sInstances = new HashMap<>();
     private static long sNextId = 1;
 
+    private String mName;
     private int mColumnNum;
     private static class Row {
         String[] fields;
@@ -41,6 +43,7 @@ public class CursorWindow_host {
 
     public static long nativeCreate(String name, int cursorWindowSize) {
         CursorWindow_host instance = new CursorWindow_host();
+        instance.mName = name;
         long instanceId = sNextId++;
         sInstances.put(instanceId, instance);
         return instanceId;
@@ -48,6 +51,10 @@ public class CursorWindow_host {
 
     public static void nativeDispose(long windowPtr) {
         sInstances.remove(windowPtr);
+    }
+
+    public static String nativeGetName(long windowPtr) {
+        return sInstances.get(windowPtr).mName;
     }
 
     public static boolean nativeSetNumColumns(long windowPtr, int columnNum) {
@@ -155,5 +162,31 @@ public class CursorWindow_host {
             default:
                 return null;
         }
+    }
+
+    public static void nativeWriteToParcel(long windowPtr, Parcel parcel) {
+        CursorWindow_host window = sInstances.get(windowPtr);
+        parcel.writeString(window.mName);
+        parcel.writeInt(window.mColumnNum);
+        parcel.writeInt(window.mRows.size());
+        for (int row = 0; row < window.mRows.size(); row++) {
+            parcel.writeStringArray(window.mRows.get(row).fields);
+            parcel.writeIntArray(window.mRows.get(row).types);
+        }
+    }
+
+    public static long nativeCreateFromParcel(Parcel parcel) {
+        long windowPtr = nativeCreate(null, 0);
+        CursorWindow_host window = sInstances.get(windowPtr);
+        window.mName = parcel.readString();
+        window.mColumnNum = parcel.readInt();
+        int rowCount = parcel.readInt();
+        for (int row = 0; row < rowCount; row++) {
+            Row r = new Row();
+            r.fields = parcel.createStringArray();
+            r.types = parcel.createIntArray();
+            window.mRows.add(r);
+        }
+        return windowPtr;
     }
 }
