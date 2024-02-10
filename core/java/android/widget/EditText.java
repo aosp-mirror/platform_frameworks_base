@@ -16,9 +16,13 @@
 
 package android.widget;
 
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spannable;
@@ -28,6 +32,8 @@ import android.text.method.MovementMethod;
 import android.text.style.SpanUtils;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+
+import com.android.internal.R;
 
 /*
  * This is supposed to be a *very* thin veneer over TextView.
@@ -85,6 +91,11 @@ public class EditText extends TextView {
     private static final int ID_ITALIC = android.R.id.italic;
     private static final int ID_UNDERLINE = android.R.id.underline;
 
+    /** @hide */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long LINE_HEIGHT_FOR_LOCALE = 303326708L;
+
     public EditText(Context context) {
         this(context, null);
     }
@@ -104,15 +115,39 @@ public class EditText extends TextView {
         final TypedArray a = theme.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.EditText, defStyleAttr, defStyleRes);
 
-        final int n = a.getIndexCount();
-        for (int i = 0; i < n; ++i) {
-            int attr = a.getIndex(i);
-            switch (attr) {
-                case com.android.internal.R.styleable.EditText_enableTextStylingShortcuts:
-                    mStyleShortcutsEnabled = a.getBoolean(attr, false);
-                    break;
+        try {
+            final int n = a.getIndexCount();
+            for (int i = 0; i < n; ++i) {
+                int attr = a.getIndex(i);
+                switch (attr) {
+                    case com.android.internal.R.styleable.EditText_enableTextStylingShortcuts:
+                        mStyleShortcutsEnabled = a.getBoolean(attr, false);
+                        break;
+                }
             }
+        } finally {
+            a.recycle();
         }
+
+        boolean hasUseLocalePreferredLineHeightForMinimumInt = false;
+        boolean useLocalePreferredLineHeightForMinimumInt = false;
+        TypedArray tvArray = theme.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.TextView, defStyleAttr, defStyleRes);
+        try {
+            hasUseLocalePreferredLineHeightForMinimumInt =
+                    tvArray.hasValue(R.styleable.TextView_useLocalePreferredLineHeightForMinimum);
+            if (hasUseLocalePreferredLineHeightForMinimumInt) {
+                useLocalePreferredLineHeightForMinimumInt = tvArray.getBoolean(
+                        R.styleable.TextView_useLocalePreferredLineHeightForMinimum, false);
+            }
+        } finally {
+            tvArray.recycle();
+        }
+        if (!hasUseLocalePreferredLineHeightForMinimumInt) {
+            useLocalePreferredLineHeightForMinimumInt =
+                    CompatChanges.isChangeEnabled(LINE_HEIGHT_FOR_LOCALE);
+        }
+        setLocalePreferredLineHeightForMinimumUsed(useLocalePreferredLineHeightForMinimumInt);
     }
 
     @Override
