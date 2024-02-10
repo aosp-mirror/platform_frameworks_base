@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -180,6 +181,23 @@ final class OverlayManagerSettings {
             final int userId) {
         final List<SettingsItem> items = selectWhereTarget(targetPackageName, userId);
         return CollectionUtils.map(items, SettingsItem::getOverlayInfo);
+    }
+
+    void forEachMatching(int userId, String overlayName, String targetPackageName,
+            @NonNull Consumer<OverlayInfo> consumer) {
+        for (int i = 0, n = mItems.size(); i < n; i++) {
+            final SettingsItem item = mItems.get(i);
+            if (item.getUserId() != userId) {
+                continue;
+            }
+            if (overlayName != null && !item.mOverlay.getPackageName().equals(overlayName)) {
+                continue;
+            }
+            if (targetPackageName != null && !item.mTargetPackageName.equals(targetPackageName)) {
+                continue;
+            }
+            consumer.accept(item.getOverlayInfo());
+        }
     }
 
     ArrayMap<String, List<OverlayInfo>> getOverlaysForUser(final int userId) {
