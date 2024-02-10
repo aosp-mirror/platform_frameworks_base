@@ -16,7 +16,12 @@
 
 package com.android.server.pm.test.verify.domain
 
+import android.content.UriRelativeFilter
+import android.content.UriRelativeFilter.PATH
+import android.content.UriRelativeFilterGroup
+import android.content.UriRelativeFilterGroup.ACTION_ALLOW
 import android.content.pm.verify.domain.DomainVerificationState
+import android.os.PatternMatcher.PATTERN_LITERAL
 import android.os.UserHandle
 import android.util.ArrayMap
 import android.util.SparseArray
@@ -157,7 +162,7 @@ class DomainVerificationPersistenceTest {
 
     @Test
     fun writeStateSignatureIfFunctionReturnsNull() {
-        val (attached, pending, restored) = mockWriteValues  { "SIGNATURE_$it" }
+        val (attached, pending, restored) = mockWriteValues { "SIGNATURE_$it" }
         val file = tempFolder.newFile().writeXml {
             DomainVerificationPersistence.writeToXml(it, attached, pending, restored,
                     UserHandle.USER_ALL) { null }
@@ -313,6 +318,9 @@ class DomainVerificationPersistenceTest {
                     addHosts(setOf("$packageName-user.com"))
                     isLinkHandlingAllowed = true
                 }
+                val group = UriRelativeFilterGroup(ACTION_ALLOW)
+                group.addUriRelativeFilter(UriRelativeFilter(PATH, PATTERN_LITERAL, "test"))
+                uriRelativeFilterGroupMap.put("example.com", listOf(group))
             }
 
     private fun pkgName(id: Int) = "$PKG_PREFIX.pkg$id"

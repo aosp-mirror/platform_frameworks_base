@@ -217,6 +217,15 @@ public final class UriRelativeFilter {
                 + " }";
     }
 
+    /** @hide */
+    public UriRelativeFilterParcel toParcel() {
+        UriRelativeFilterParcel parcel = new UriRelativeFilterParcel();
+        parcel.uriPart = mUriPart;
+        parcel.patternType = mPatternType;
+        parcel.filter = mFilter;
+        return parcel;
+    }
+
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
@@ -256,5 +265,12 @@ public final class UriRelativeFilter {
         mUriPart = Integer.parseInt(parser.getAttributeValue(null, PART_STR));
         mPatternType = Integer.parseInt(parser.getAttributeValue(null, PATTERN_STR));
         mFilter = parser.getAttributeValue(null, FILTER_STR);
+    }
+
+    /** @hide */
+    public UriRelativeFilter(UriRelativeFilterParcel parcel) {
+        mUriPart = parcel.uriPart;
+        mPatternType = parcel.patternType;
+        mFilter = parcel.filter;
     }
 }

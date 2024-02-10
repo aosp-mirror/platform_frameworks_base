@@ -19,6 +19,8 @@ package com.android.server.pm.verify.domain;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.UriRelativeFilter;
+import android.content.UriRelativeFilterGroup;
 import android.content.pm.Signature;
 import android.content.pm.verify.domain.DomainVerificationState;
 import android.os.UserHandle;
@@ -38,7 +40,10 @@ import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -67,6 +72,13 @@ public class DomainVerificationPersistence {
     public static final String TAG_DOMAIN = "domain";
     public static final String ATTR_NAME = "name";
     public static final String ATTR_STATE = "state";
+    public static final String TAG_URI_RELATIVE_FILTER_GROUPS = "uri-relative-filter-groups";
+    public static final String TAG_URI_RELATIVE_FILTER_GROUP = "uri-relative-filter-group";
+    public static final String ATTR_ACTION = "action";
+    public static final String TAG_URI_RELATIVE_FILTER = "uri-relative-filter";
+    public static final String ATTR_URI_PART = "uri-part";
+    public static final String ATTR_PATTERN_TYPE = "pattern-type";
+    public static final String ATTR_FILTER = "filter";
 
     /**
      * @param pkgNameToSignature Converts package name to a string representation of its signature.
@@ -176,6 +188,7 @@ public class DomainVerificationPersistence {
 
         final ArrayMap<String, Integer> stateMap = new ArrayMap<>();
         final SparseArray<DomainVerificationInternalUserState> userStates = new SparseArray<>();
+        final ArrayMap<String, List<UriRelativeFilterGroup>> groupMap = new ArrayMap<>();
 
         SettingsXml.ChildSection child = section.children();
         while (child.moveToNext()) {
@@ -186,11 +199,47 @@ public class DomainVerificationPersistence {
                 case TAG_USER_STATES:
                     readUserStates(child, userStates);
                     break;
+                case TAG_URI_RELATIVE_FILTER_GROUPS:
+                    readUriRelativeFilterGroups(child, groupMap);
+                    break;
             }
         }
 
         return new DomainVerificationPkgState(packageName, id, hasAutoVerifyDomains, stateMap,
-                userStates, signature);
+                userStates, signature, groupMap);
+    }
+
+    private static void readUriRelativeFilterGroups(@NonNull SettingsXml.ReadSection section,
+            @NonNull ArrayMap<String, List<UriRelativeFilterGroup>> groupMap) {
+        SettingsXml.ChildSection child = section.children();
+        while (child.moveToNext(TAG_DOMAIN)) {
+            String domain = child.getString(ATTR_NAME);
+            groupMap.put(domain, createUriRelativeFilterGroupsFromXml(child));
+        }
+    }
+
+    private static ArrayList<UriRelativeFilterGroup> createUriRelativeFilterGroupsFromXml(
+            @NonNull SettingsXml.ReadSection section) {
+        SettingsXml.ChildSection child = section.children();
+        ArrayList<UriRelativeFilterGroup> groups = new ArrayList<>();
+        while (child.moveToNext(TAG_URI_RELATIVE_FILTER_GROUP)) {
+            UriRelativeFilterGroup group = new UriRelativeFilterGroup(section.getInt(ATTR_ACTION));
+            readUriRelativeFiltersFromXml(child, group);
+            groups.add(group);
+        }
+        return groups;
+    }
+
+    private static void readUriRelativeFiltersFromXml(
+            @NonNull SettingsXml.ReadSection section, UriRelativeFilterGroup group) {
+        SettingsXml.ChildSection child = section.children();
+        while (child.moveToNext(TAG_URI_RELATIVE_FILTER)) {
+            String filter = child.getString(ATTR_FILTER);
+            if (filter != null) {
+                group.addUriRelativeFilter(new UriRelativeFilter(child.getInt(ATTR_URI_PART),
+                        child.getInt(ATTR_PATTERN_TYPE), filter));
+            }
+        }
     }
 
     private static void readUserStates(@NonNull SettingsXml.ReadSection section,
@@ -236,6 +285,7 @@ public class DomainVerificationPersistence {
                              .attribute(ATTR_SIGNATURE, signature)) {
             writeStateMap(parentSection, pkgState.getStateMap());
             writeUserStates(parentSection, userId, pkgState.getUserStates());
+            writeUriRelativeFilterGroupMap(parentSection, pkgState.getUriRelativeFilterGroupMap());
         }
     }
 
@@ -330,6 +380,52 @@ public class DomainVerificationPersistence {
                                 .finish();
                     }
                 }
+            }
+        }
+    }
+
+    private static void writeUriRelativeFilterGroupMap(
+            @NonNull SettingsXml.WriteSection parentSection,
+            @NonNull ArrayMap<String, List<UriRelativeFilterGroup>> groupMap) throws IOException {
+        if (groupMap.isEmpty()) {
+            return;
+        }
+        try (SettingsXml.WriteSection section =
+                     parentSection.startSection(TAG_URI_RELATIVE_FILTER_GROUPS)) {
+            for (int i = 0; i < groupMap.size(); i++) {
+                writeUriRelativeFilterGroups(section, groupMap.keyAt(i), groupMap.valueAt(i));
+            }
+        }
+    }
+
+    private static void writeUriRelativeFilterGroups(
+            @NonNull SettingsXml.WriteSection parentSection, @NonNull String domain,
+            @NonNull List<UriRelativeFilterGroup> groups) throws IOException {
+        if (groups.isEmpty()) {
+            return;
+        }
+        try (SettingsXml.WriteSection section =
+                     parentSection.startSection(TAG_DOMAIN)
+                             .attribute(ATTR_NAME, domain)) {
+            for (int i = 0; i < groups.size(); i++) {
+                writeUriRelativeFilterGroup(section, groups.get(i));
+            }
+        }
+    }
+
+    private static void writeUriRelativeFilterGroup(
+            @NonNull SettingsXml.WriteSection parentSection,
+            @NonNull UriRelativeFilterGroup group) throws IOException {
+        try (SettingsXml.WriteSection section =
+                     parentSection.startSection(TAG_URI_RELATIVE_FILTER_GROUP)
+                             .attribute(ATTR_ACTION, group.getAction())) {
+            Iterator<UriRelativeFilter> it = group.getUriRelativeFilters().iterator();
+            while (it.hasNext()) {
+                UriRelativeFilter filter = it.next();
+                section.startSection(TAG_URI_RELATIVE_FILTER)
+                        .attribute(ATTR_URI_PART, filter.getUriPart())
+                        .attribute(ATTR_PATTERN_TYPE, filter.getPatternType())
+                        .attribute(ATTR_FILTER, filter.getFilter()).finish();
             }
         }
     }
