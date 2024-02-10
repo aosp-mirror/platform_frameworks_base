@@ -22,8 +22,10 @@ import com.android.server.notification.Flags.FLAG_VIBRATE_WHILE_UNLOCKED
 import com.android.server.notification.Flags.crossAppPoliteNotifications
 import com.android.server.notification.Flags.politeNotifications
 import com.android.server.notification.Flags.vibrateWhileUnlocked
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
 import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
+import com.android.systemui.Flags.communalHub
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
@@ -63,6 +65,9 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         ComposeLockscreen.token dependsOn KeyguardShadeMigrationNssl.token
         ComposeLockscreen.token dependsOn keyguardBottomAreaRefactor
         ComposeLockscreen.token dependsOn migrateClocksToBlueprint
+
+        // CommunalHub dependencies
+        communalHub dependsOn KeyguardShadeMigrationNssl.token
     }
 
     private inline val politeNotifications
@@ -75,4 +80,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         get() = FlagToken(FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR, keyguardBottomAreaRefactor())
     private inline val migrateClocksToBlueprint
         get() = FlagToken(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT, migrateClocksToBlueprint())
+    private inline val communalHub
+        get() = FlagToken(FLAG_COMMUNAL_HUB, communalHub())
 }
