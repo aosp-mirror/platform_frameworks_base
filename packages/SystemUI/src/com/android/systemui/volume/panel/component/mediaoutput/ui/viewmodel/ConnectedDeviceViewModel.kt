@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.shared.model
+package com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
-
-object VolumePanelComponents {
-
-    const val MEDIA_OUTPUT: VolumePanelComponentKey = "media_output"
-    const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
-    const val CAPTIONING: VolumePanelComponentKey = "captioning"
-}
+/**
+ * Models part of the Media Session Volume Panel component that displays connected device
+ * information.
+ */
+data class ConnectedDeviceViewModel(
+    val label: CharSequence,
+    val deviceName: CharSequence?,
+)

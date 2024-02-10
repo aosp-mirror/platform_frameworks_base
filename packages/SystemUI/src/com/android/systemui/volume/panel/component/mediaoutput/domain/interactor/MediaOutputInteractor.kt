@@ -38,11 +38,12 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
@@ -70,7 +71,8 @@ constructor(
 
     private fun MediaController.mediaDeviceSession(): Flow<MediaDeviceSession> {
         return stateChanges(backgroundHandler)
-            .filter { it is MediaControllerChange.PlaybackStateChanged }
+            .onStart { emit(MediaControllerChange.PlaybackStateChanged(playbackState)) }
+            .filterIsInstance<MediaControllerChange.PlaybackStateChanged>()
             .map {
                 MediaDeviceSession.Active(
                     appLabel = getApplicationLabel(packageName)

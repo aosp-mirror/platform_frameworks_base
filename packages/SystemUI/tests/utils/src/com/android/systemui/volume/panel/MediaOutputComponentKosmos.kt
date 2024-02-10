@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.shared.model
+package com.android.systemui.volume.panel
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.media.mediaOutputDialogFactory
+import com.android.systemui.plugins.activityStarter
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputActionsInteractor
 
-object VolumePanelComponents {
-
-    const val MEDIA_OUTPUT: VolumePanelComponentKey = "media_output"
-    const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
-    const val CAPTIONING: VolumePanelComponentKey = "captioning"
-}
+val Kosmos.mediaOutputActionsInteractor by
+    Kosmos.Fixture { MediaOutputActionsInteractor(mediaOutputDialogFactory, activityStarter) }

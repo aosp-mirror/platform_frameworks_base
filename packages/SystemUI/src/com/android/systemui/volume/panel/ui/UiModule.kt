@@ -37,7 +37,11 @@ interface UiModule {
         @Provides
         @VolumePanelScope
         @HeaderComponents
-        fun provideHeaderComponents(): Collection<VolumePanelComponentKey> = setOf()
+        fun provideHeaderComponents(): Collection<VolumePanelComponentKey> {
+            return setOf(
+                VolumePanelComponents.MEDIA_OUTPUT,
+            )
+        }
 
         @Provides
         @VolumePanelScope
