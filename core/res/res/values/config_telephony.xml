@@ -212,6 +212,11 @@
     <integer name="config_emergency_call_wait_for_connection_timeout_millis">20000</integer>
     <java-symbol type="integer" name="config_emergency_call_wait_for_connection_timeout_millis" />
 
+    <!-- Indicates the data limit in bytes that can be used for bootstrap sim until factory reset.
+         -1 means unlimited. -->
+    <integer name="config_esim_bootstrap_data_limit_bytes">-1</integer>
+    <java-symbol type="integer" name="config_esim_bootstrap_data_limit_bytes" />
+
     <!-- Telephony config for the PLMNs of all satellite providers. This is used by satellite modem
          to identify providers that should be ignored if the carrier config
          carrier_supported_satellite_services_per_provider_bundle does not support them.
