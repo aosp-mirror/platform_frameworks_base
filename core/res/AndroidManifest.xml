@@ -1730,6 +1730,16 @@
         android:description="@string/permdesc_cameraHeadlessSystemUser"
         android:protectionLevel="signature" />
 
+
+    <!-- @SystemApi Allows camera access of allowlisted driver assistance apps
+         to be controlled separately.
+         <p> Not for use by third-party applications.
+         @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist")
+         @hide
+    -->
+    <permission android:name="android.permission.CAMERA_PRIVACY_ALLOWLIST"
+        android:protectionLevel="signature|privileged" />
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device sensors                           -->
     <!-- ====================================================================== -->
