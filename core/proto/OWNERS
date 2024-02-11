@@ -21,7 +21,6 @@ per-file background_install_control.proto = wenhaowang@google.com,georgechan@goo
 per-file android/content/intent.proto = file:/PACKAGE_MANAGER_OWNERS
 
 # Biometrics
-jaggies@google.com
 jbolinger@google.com
 
 # Launcher
