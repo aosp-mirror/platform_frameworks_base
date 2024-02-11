@@ -100,7 +100,7 @@ public class Event {
     private int mBusId;
     private int[] mInjections;
     private SparseArray<int[]> mConfiguration;
-    private long mDurationNanos;
+    private int mDurationMillis;
     private int mFfEffectsMax = 0;
     private String mInputPort;
     private SparseArray<InputAbsInfo> mAbsInfo;
@@ -150,8 +150,8 @@ public class Event {
         return mConfiguration;
     }
 
-    public long getDurationNanos() {
-        return mDurationNanos;
+    public int getDurationMillis() {
+        return mDurationMillis;
     }
 
     public int getFfEffectsMax() {
@@ -182,7 +182,7 @@ public class Event {
             + ", busId=" + mBusId
             + ", events=" + Arrays.toString(mInjections)
             + ", configuration=" + mConfiguration
-            + ", duration=" + mDurationNanos + "ns"
+            + ", duration=" + mDurationMillis + "ms"
             + ", ff_effects_max=" + mFfEffectsMax
             + ", port=" + mInputPort
             + "}";
@@ -237,8 +237,8 @@ public class Event {
             mEvent.mBusId = busId;
         }
 
-        public void setDurationNanos(long durationNanos) {
-            mEvent.mDurationNanos = durationNanos;
+        public void setDurationMillis(int durationMillis) {
+            mEvent.mDurationMillis = durationMillis;
         }
 
         public void setFfEffectsMax(int ffEffectsMax) {
@@ -271,7 +271,7 @@ public class Event {
                     }
                 }
                 case DELAY -> {
-                    if (mEvent.mDurationNanos <= 0) {
+                    if (mEvent.mDurationMillis <= 0) {
                         throw new IllegalStateException("Delay has missing or invalid duration");
                     }
                 }

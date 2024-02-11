@@ -44,7 +44,7 @@ public class EvemuParser implements EventParser {
      * recordings, this will always be the same.
      */
     private static final int DEVICE_ID = 1;
-    private static final int REGISTRATION_DELAY_NANOS = 500_000_000;
+    private static final int REGISTRATION_DELAY_MILLIS = 500;
 
     private static class CommentAwareReader {
         private final LineNumberReader mReader;
@@ -152,7 +152,7 @@ public class EvemuParser implements EventParser {
         final Event.Builder delayEb = new Event.Builder();
         delayEb.setId(DEVICE_ID);
         delayEb.setCommand(Event.Command.DELAY);
-        delayEb.setDurationNanos(REGISTRATION_DELAY_NANOS);
+        delayEb.setDurationMillis(REGISTRATION_DELAY_MILLIS);
         mQueuedEvents.add(delayEb.build());
     }
 
@@ -204,7 +204,7 @@ public class EvemuParser implements EventParser {
                 final Event.Builder delayEb = new Event.Builder();
                 delayEb.setId(DEVICE_ID);
                 delayEb.setCommand(Event.Command.DELAY);
-                delayEb.setDurationNanos(delayMicros * 1000);
+                delayEb.setDurationMillis((int) (delayMicros / 1000));
                 return delayEb.build();
             }
         }
