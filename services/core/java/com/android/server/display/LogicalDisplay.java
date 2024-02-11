@@ -35,7 +35,6 @@ import android.view.SurfaceControl;
 
 import com.android.server.display.layout.Layout;
 import com.android.server.display.mode.DisplayModeDirector;
-import com.android.server.wm.utils.DisplayInfoOverrides;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
@@ -204,7 +203,28 @@ final class LogicalDisplay {
     private SparseArray<SurfaceControl.RefreshRateRange> mThermalRefreshRateThrottling =
             new SparseArray<>();
 
+    /**
+     * If the aspect ratio of the resolution of the display does not match the physical aspect
+     * ratio of the display, then without this feature enabled, picture would appear stretched to
+     * the user. This is because applications assume that they are rendered on square pixels
+     * (meaning density of pixels in x and y directions are equal). This would result into circles
+     * appearing as ellipses to the user.
+     * To compensate for non-square (anisotropic) pixels, if this feature is enabled:
+     * 1. LogicalDisplay will add more pixels for the applications to render on, as if the pixels
+     * were square and occupied the full display.
+     * 2. SurfaceFlinger will squeeze this taller/wider surface into the available number of
+     * physical pixels in the current display resolution.
+     * 3. If a setting on the display itself is set to "fill the entire display panel" then the
+     * display will stretch the pixels to fill the display fully.
+     */
+    private final boolean mIsAnisotropyCorrectionEnabled;
+
     LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
+        this(displayId, layerStack, primaryDisplayDevice, false);
+    }
+
+    LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice,
+            boolean isAnisotropyCorrectionEnabled) {
         mDisplayId = displayId;
         mLayerStack = layerStack;
         mPrimaryDisplayDevice = primaryDisplayDevice;
@@ -215,6 +235,7 @@ final class LogicalDisplay {
         mThermalBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
         mPowerThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
         mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
+        mIsAnisotropyCorrectionEnabled = isAnisotropyCorrectionEnabled;
     }
 
     public void setDevicePositionLocked(int position) {
@@ -453,6 +474,14 @@ final class LogicalDisplay {
             int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;
             int maskedHeight = deviceInfo.height - maskingInsets.top - maskingInsets.bottom;
 
+            if (mIsAnisotropyCorrectionEnabled && deviceInfo.xDpi > 0 && deviceInfo.yDpi > 0) {
+                if (deviceInfo.xDpi > deviceInfo.yDpi * DisplayDevice.MAX_ANISOTROPY) {
+                    maskedHeight = (int) (maskedHeight * deviceInfo.xDpi / deviceInfo.yDpi + 0.5);
+                } else if (deviceInfo.xDpi * DisplayDevice.MAX_ANISOTROPY < deviceInfo.yDpi) {
+                    maskedWidth = (int) (maskedWidth * deviceInfo.yDpi / deviceInfo.xDpi + 0.5);
+                }
+            }
+
             mBaseDisplayInfo.type = deviceInfo.type;
             mBaseDisplayInfo.address = deviceInfo.address;
             mBaseDisplayInfo.deviceProductInfo = deviceInfo.deviceProductInfo;
@@ -666,6 +695,31 @@ final class LogicalDisplay {
         physWidth -= maskingInsets.left + maskingInsets.right;
         physHeight -= maskingInsets.top + maskingInsets.bottom;
 
+        var displayLogicalWidth = displayInfo.logicalWidth;
+        var displayLogicalHeight = displayInfo.logicalHeight;
+
+        if (mIsAnisotropyCorrectionEnabled && displayDeviceInfo.xDpi > 0
+                    && displayDeviceInfo.yDpi > 0) {
+            if (displayDeviceInfo.xDpi > displayDeviceInfo.yDpi * DisplayDevice.MAX_ANISOTROPY) {
+                var scalingFactor = displayDeviceInfo.yDpi / displayDeviceInfo.xDpi;
+                if (rotated) {
+                    displayLogicalWidth = (int) ((float) displayLogicalWidth * scalingFactor + 0.5);
+                } else {
+                    displayLogicalHeight = (int) ((float) displayLogicalHeight * scalingFactor
+                                                          + 0.5);
+                }
+            } else if (displayDeviceInfo.xDpi * DisplayDevice.MAX_ANISOTROPY
+                               < displayDeviceInfo.yDpi) {
+                var scalingFactor = displayDeviceInfo.xDpi / displayDeviceInfo.yDpi;
+                if (rotated) {
+                    displayLogicalHeight = (int) ((float) displayLogicalHeight * scalingFactor
+                                                          + 0.5);
+                } else {
+                    displayLogicalWidth = (int) ((float) displayLogicalWidth * scalingFactor + 0.5);
+                }
+            }
+        }
+
         // Determine whether the width or height is more constrained to be scaled.
         //    physWidth / displayInfo.logicalWidth    => letter box
         // or physHeight / displayInfo.logicalHeight  => pillar box
@@ -675,16 +729,16 @@ final class LogicalDisplay {
         // comparing them.
         int displayRectWidth, displayRectHeight;
         if ((displayInfo.flags & Display.FLAG_SCALING_DISABLED) != 0 || mDisplayScalingDisabled) {
-            displayRectWidth = displayInfo.logicalWidth;
-            displayRectHeight = displayInfo.logicalHeight;
-        } else if (physWidth * displayInfo.logicalHeight
-                < physHeight * displayInfo.logicalWidth) {
+            displayRectWidth = displayLogicalWidth;
+            displayRectHeight = displayLogicalHeight;
+        } else if (physWidth * displayLogicalHeight
+                < physHeight * displayLogicalWidth) {
             // Letter box.
             displayRectWidth = physWidth;
-            displayRectHeight = displayInfo.logicalHeight * physWidth / displayInfo.logicalWidth;
+            displayRectHeight = displayLogicalHeight * physWidth / displayLogicalWidth;
         } else {
             // Pillar box.
-            displayRectWidth = displayInfo.logicalWidth * physHeight / displayInfo.logicalHeight;
+            displayRectWidth = displayLogicalWidth * physHeight / displayLogicalHeight;
             displayRectHeight = physHeight;
         }
         int displayRectTop = (physHeight - displayRectHeight) / 2;
