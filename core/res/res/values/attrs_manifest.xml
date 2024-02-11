@@ -3287,7 +3287,8 @@
              {@link java.lang.SecurityException}.
 
              <p> Note that the enforcement works for content URIs inside
-             {@link android.content.Intent#getData} and {@link android.content.Intent#getClipData}.
+             {@link android.content.Intent#getData}, {@link android.content.Intent#EXTRA_STREAM},
+             and {@link android.content.Intent#getClipData}.
              @FlaggedApi("android.security.content_uri_permission_apis") -->
         <attr name="requireContentUriPermissionFromCaller" format="string">
             <!-- Default, no specific permissions are required. -->
