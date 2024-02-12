@@ -1335,6 +1335,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         }
     }
 
+    public float getAlpha() {
+        return mView.getAlpha();
+    }
+
     public void setSuppressChildrenMeasureAndLayout(boolean suppressLayout) {
         mView.suppressChildrenMeasureAndLayout(suppressLayout);
     }
