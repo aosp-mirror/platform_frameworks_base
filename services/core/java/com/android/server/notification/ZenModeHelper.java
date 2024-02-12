@@ -1713,7 +1713,7 @@ public class ZenModeHelper {
                 mConfigs.put(config.user, config);
             }
             if (DEBUG) Log.d(TAG, "setConfigLocked reason=" + reason, new Throwable());
-            ZenLog.traceConfig(reason, mConfig, config);
+            ZenLog.traceConfig(reason, triggeringComponent, mConfig, config, callingUid);
 
             // send some broadcasts
             final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
