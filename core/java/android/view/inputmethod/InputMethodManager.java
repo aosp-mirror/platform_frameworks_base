@@ -18,6 +18,7 @@ package android.view.inputmethod;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
+import static android.view.inputmethod.Flags.initiationWithoutInputConnection;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_IMMEDIATE;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_MONITOR;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.DISPLAY_ID;
@@ -1950,6 +1951,10 @@ public final class InputMethodManager {
         if (mServedView != null) {
             clearedView = mServedView;
             mServedView = null;
+            if (initiationWithoutInputConnection() && clearedView.getViewRootImpl() != null) {
+                clearedView.getViewRootImpl().getHandwritingInitiator()
+                        .clearFocusedView(clearedView);
+            }
         }
         if (clearedView != null) {
             if (DEBUG) {
@@ -2932,6 +2937,10 @@ public final class InputMethodManager {
             switch (res.result) {
                 case InputBindResult.ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
                     mRestartOnNextWindowFocus = true;
+                    if (initiationWithoutInputConnection()) {
+                        mServedView.getViewRootImpl().getHandwritingInitiator().clearFocusedView(
+                                mServedView);
+                    }
                     mServedView = null;
                     break;
             }
@@ -3094,6 +3103,11 @@ public final class InputMethodManager {
             return false;
         }
         mServedView = mNextServedView;
+        if (initiationWithoutInputConnection() && mServedView.onCheckIsTextEditor()
+                && mServedView.isHandwritingDelegate()) {
+            mServedView.getViewRootImpl().getHandwritingInitiator().onDelegateViewFocused(
+                    mServedView);
+        }
         if (mServedInputConnection != null) {
             mServedInputConnection.finishComposingTextFromImm();
         }
