@@ -150,7 +150,9 @@ final class MediaRoute2ProviderWatcher {
                     mCallback.onAddProviderService(proxy);
                 } else if (sourceIndex >= targetIndex) {
                     MediaRoute2ProviderServiceProxy proxy = mProxies.get(sourceIndex);
-                    proxy.start(/* rebindIfDisconnected= */ true); // restart the proxy if needed
+                    proxy.start(
+                            /* rebindIfDisconnected= */
+                                    !Flags.enablePreventionOfKeepAliveRouteProviders());
                     Collections.swap(mProxies, sourceIndex, targetIndex++);
                 }
             }

@@ -200,7 +200,9 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
                 Slog.d(TAG, this + ": Starting");
             }
             mRunning = true;
-            updateBinding();
+            if (!Flags.enablePreventionOfKeepAliveRouteProviders()) {
+                updateBinding();
+            }
         }
         if (rebindIfDisconnected && mActiveConnection == null && shouldBind()) {
             unbind();
