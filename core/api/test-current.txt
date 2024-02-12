@@ -921,7 +921,33 @@ package android.companion {
 package android.companion.virtual {
 
   public final class VirtualDeviceManager {
+    method public int getAudioPlaybackSessionId(int);
+    method public int getAudioRecordingSessionId(int);
+    method public int getDeviceIdForDisplayId(int);
+    method public int getDevicePolicy(int, int);
     method @FlaggedApi("android.companion.virtual.flags.interactive_screen_mirror") public boolean isVirtualDeviceOwnedMirrorDisplay(int);
+    method public void playSoundEffect(int, int);
+  }
+
+}
+
+package android.companion.virtual.camera {
+
+  @FlaggedApi("android.companion.virtual.flags.virtual_camera") public final class VirtualCamera implements java.io.Closeable {
+    method @NonNull public String getId();
+  }
+
+}
+
+package android.companion.virtual.sensor {
+
+  public final class VirtualSensor implements android.os.Parcelable {
+    ctor public VirtualSensor(int, int, @NonNull String);
+    method public int getHandle();
+  }
+
+  public final class VirtualSensorConfig implements android.os.Parcelable {
+    method public int getFlags();
   }
 
 }
@@ -988,6 +1014,7 @@ package android.content {
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
     method public void updateDeviceId(int);
+    method public abstract void updateDisplay(int);
     field public static final String ATTENTION_SERVICE = "attention";
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
     field public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
@@ -1001,6 +1028,7 @@ package android.content {
 
   public class ContextWrapper extends android.content.Context {
     method public int getDisplayId();
+    method public void updateDisplay(int);
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
@@ -3538,6 +3566,7 @@ package android.view {
   public final class Display {
     method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearUserPreferredDisplayMode();
     method @NonNull public android.view.Display.Mode getDefaultMode();
+    method public int getRemoveMode();
     method @NonNull public int[] getReportedHdrTypes();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method @Nullable public android.view.Display.Mode getSystemPreferredDisplayMode();

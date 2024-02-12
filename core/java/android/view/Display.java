@@ -1211,6 +1211,8 @@ public final class Display {
      * @see #REMOVE_MODE_DESTROY_CONTENT
      */
     // TODO (b/114338689): Remove the method and use IWindowManager#getRemoveContentMode
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getRemoveMode() {
         return mDisplayInfo.removeMode;
     }

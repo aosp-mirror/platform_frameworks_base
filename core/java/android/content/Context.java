@@ -7706,9 +7706,13 @@ public abstract class Context {
     }
 
     /**
+     * Updates the display association of this Context with the display with the given ID.
+     *
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public abstract void updateDisplay(int displayId);
 
     /**

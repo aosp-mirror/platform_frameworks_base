@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -333,6 +334,8 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
             int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
         if (mService == null) {
@@ -351,6 +354,8 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getDeviceIdForDisplayId(int displayId) {
         if (mService == null) {
             Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
@@ -446,6 +451,8 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getAudioPlaybackSessionId(int deviceId) {
         if (mService == null) {
             return AUDIO_SESSION_ID_GENERATE;
@@ -470,6 +477,8 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getAudioRecordingSessionId(int deviceId) {
         if (mService == null) {
             return AUDIO_SESSION_ID_GENERATE;
@@ -491,6 +500,8 @@ public final class VirtualDeviceManager {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public void playSoundEffect(int deviceId, @AudioManager.SystemSoundEffect int effectType) {
         if (mService == null) {
             Log.w(TAG, "Failed to dispatch sound effect; no virtual device manager service.");
