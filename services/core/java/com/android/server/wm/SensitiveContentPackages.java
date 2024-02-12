@@ -56,6 +56,17 @@ public class SensitiveContentPackages {
     }
 
     /**
+     * Clears apps added to collection of apps in which screen capture should be disabled.
+     *
+     * @param packageInfos set of {@link PackageInfo} whose windows should be unblocked
+     *                     from capture.
+     * @return {@code true} if packages set is modified, {@code false} otherwise.
+     */
+    public boolean removeBlockScreenCaptureForApps(@NonNull ArraySet<PackageInfo> packageInfos) {
+        return mProtectedPackages.removeAll(packageInfos);
+    }
+
+    /**
      * Clears the set of package/uid pairs that should be blocked from screen capture
      *
      * @return {@code true} if packages set is modified, {@code false} otherwise.

@@ -1424,6 +1424,25 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(window2.isSecureLocked());
     }
 
+    @Test
+    @RequiresFlagsEnabled(FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION)
+    public void testIsSecureLocked_sensitiveContentBlockOrClearScreenCaptureForApp() {
+        String testPackage = "test";
+        int ownerId = 20;
+        final WindowState window = createWindow(null, TYPE_APPLICATION, "window", ownerId);
+        window.mAttrs.packageName = testPackage;
+        assertFalse(window.isSecureLocked());
+
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+        mWm.mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedPackages);
+        assertTrue(window.isSecureLocked());
+
+        mWm.mSensitiveContentPackages.removeBlockScreenCaptureForApps(blockedPackages);
+        assertFalse(window.isSecureLocked());
+    }
+
     private static class TestImeTargetChangeListener implements ImeTargetChangeListener {
         private IBinder mImeTargetToken;
         private boolean mIsRemoved;

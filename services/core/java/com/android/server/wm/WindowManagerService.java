@@ -8632,6 +8632,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void removeBlockScreenCaptureForApps(ArraySet<PackageInfo> packageInfos) {
+            synchronized (mGlobalLock) {
+                boolean modified =
+                        mSensitiveContentPackages.removeBlockScreenCaptureForApps(packageInfos);
+                if (modified) {
+                    WindowManagerService.this.refreshScreenCaptureDisabled();
+                }
+            }
+        }
+
+        @Override
         public void clearBlockedApps() {
             synchronized (mGlobalLock) {
                 boolean modified = mSensitiveContentPackages.clearBlockedApps();
