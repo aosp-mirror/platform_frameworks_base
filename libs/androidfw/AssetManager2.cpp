@@ -117,6 +117,10 @@ bool AssetManager2::SetApkAssets(ApkAssetsList apk_assets, bool invalidate_cache
   return true;
 }
 
+void AssetManager2::PresetApkAssets(ApkAssetsList apk_assets) {
+  BuildDynamicRefTable(apk_assets);
+}
+
 bool AssetManager2::SetApkAssets(std::initializer_list<ApkAssetsPtr> apk_assets,
                                  bool invalidate_caches) {
   return SetApkAssets(ApkAssetsList(apk_assets.begin(), apk_assets.size()), invalidate_caches);
@@ -432,13 +436,18 @@ bool AssetManager2::ContainsAllocatedTable() const {
   return false;
 }
 
-void AssetManager2::SetConfigurations(std::vector<ResTable_config> configurations) {
+void AssetManager2::SetConfigurations(std::vector<ResTable_config> configurations,
+    bool force_refresh) {
   int diff = 0;
-  if (configurations_.size() != configurations.size()) {
+  if (force_refresh) {
     diff = -1;
   } else {
-    for (int i = 0; i < configurations_.size(); i++) {
-      diff |= configurations_[i].diff(configurations[i]);
+    if (configurations_.size() != configurations.size()) {
+      diff = -1;
+    } else {
+      for (int i = 0; i < configurations_.size(); i++) {
+        diff |= configurations_[i].diff(configurations[i]);
+      }
     }
   }
   configurations_ = std::move(configurations);
@@ -775,8 +784,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
     bool has_locale = false;
     if (result->config.locale == 0) {
       if (default_locale_ != 0) {
-        ResTable_config conf;
-        conf.locale = default_locale_;
+        ResTable_config conf = {.locale = default_locale_};
         // Since we know conf has a locale and only a locale, match will tell us if that locale
         // matches
         has_locale = conf.match(config);
