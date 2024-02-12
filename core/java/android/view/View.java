@@ -22299,6 +22299,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Retrieve a unique token identifying the window this view is attached to.
      * @return Return the window's token for use in
      * {@link WindowManager.LayoutParams#token WindowManager.LayoutParams.token}.
+     * This token maybe null if this view is not attached to a window.
+     * @see #isAttachedToWindow() for current window attach state
+     * @see OnAttachStateChangeListener to listen to window attach/detach state changes
      */
     public IBinder getWindowToken() {
         return mAttachInfo != null ? mAttachInfo.mWindowToken : null;
