@@ -22,16 +22,21 @@ filegroup {
 genrule {
     name: "wmtests.protologsrc",
     srcs: [
+        ":protolog-impl",
         ":protolog-groups",
         ":wmtests-sources",
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
         "--protolog-class com.android.internal.protolog.common.ProtoLog " +
-        "--protolog-impl-class com.android.internal.protolog.ProtoLogImpl " +
-        "--protolog-cache-class 'com.android.server.wm.ProtoLogCache' " +
         "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
         "--loggroups-jar $(location :protolog-groups) " +
+        // Used for the ProtoLogIntegrationTest, where don't test decoding or writing to file
+        // so the parameters below are irrelevant.
+        "--viewer-config-file-path /some/unused/file/path.pb " +
+        "--legacy-viewer-config-file-path /some/unused/file/path.json.gz " +
+        "--legacy-output-file-path /some/unused/file/path.winscope " +
+        // END of irrelevant params.
         "--output-srcjar $(out) " +
         "$(locations :wmtests-sources)",
     out: ["wmtests.protolog.srcjar"],
@@ -42,7 +47,7 @@ android_test {
 
     // We only want this apk build for tests.
     srcs: [
-        ":wmtests.protologsrc",
+        ":wmtests-sources",
         "src/**/*.aidl",
     ],
 

@@ -82,16 +82,18 @@ filegroup {
 genrule {
     name: "wm_shell_protolog_src",
     srcs: [
+        ":protolog-impl",
         ":wm_shell_protolog-groups",
         ":wm_shell-sources",
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
         "--protolog-class com.android.internal.protolog.common.ProtoLog " +
-        "--protolog-impl-class com.android.wm.shell.protolog.ShellProtoLogImpl " +
-        "--protolog-cache-class com.android.wm.shell.protolog.ShellProtoLogCache " +
         "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
         "--loggroups-jar $(location :wm_shell_protolog-groups) " +
+        "--viewer-config-file-path /system_ext/etc/wmshell.protolog.pb " +
+        "--legacy-viewer-config-file-path /system_ext/etc/wmshell.protolog.json.gz " +
+        "--legacy-output-file-path /data/misc/wmtrace/shell_log.winscope " +
         "--output-srcjar $(out) " +
         "$(locations :wm_shell-sources)",
     out: ["wm_shell_protolog.srcjar"],
@@ -108,9 +110,27 @@ genrule {
         "--protolog-class com.android.internal.protolog.common.ProtoLog " +
         "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
         "--loggroups-jar $(location :wm_shell_protolog-groups) " +
-        "--viewer-conf $(out) " +
+        "--viewer-config-type json " +
+        "--viewer-config $(out) " +
         "$(locations :wm_shell-sources)",
     out: ["wm_shell_protolog.json"],
+}
+
+genrule {
+    name: "gen-wmshell.protolog.pb",
+    srcs: [
+        ":wm_shell_protolog-groups",
+        ":wm_shell-sources",
+    ],
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) generate-viewer-config " +
+        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--loggroups-class com.android.wm.shell.protolog.ShellProtoLogGroup " +
+        "--loggroups-jar $(location :wm_shell_protolog-groups) " +
+        "--viewer-config-type proto " +
+        "--viewer-config $(out) " +
+        "$(locations :wm_shell-sources)",
+    out: ["wmshell.protolog.pb"],
 }
 
 genrule {
@@ -124,6 +144,13 @@ prebuilt_etc {
     name: "wmshell.protolog.json.gz",
     system_ext_specific: true,
     src: ":protolog.json.gz",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "wmshell.protolog.pb",
+    system_ext_specific: true,
+    src: ":gen-wmshell.protolog.pb",
     filename_from_src: true,
 }
 
