@@ -27,3 +27,10 @@ flag {
      description: "API to add OnUidImportanceListener with targetted UIDs"
      bug: "286258140"
 }
+
+flag {
+     namespace: "backstage_power"
+     name: "introduce_new_service_ontimeout_callback"
+     description: "Add a new callback in Service to indicate a FGS has reached its timeout."
+     bug: "317799821"
+}
