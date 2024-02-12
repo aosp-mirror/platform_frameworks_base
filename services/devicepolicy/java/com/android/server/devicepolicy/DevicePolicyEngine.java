@@ -126,7 +126,6 @@ final class DevicePolicyEngine {
 
     //TODO(b/295504706) : Speak to security team to decide what to set Policy_Size_Limit
     private static final int POLICY_SIZE_LIMIT = 99999;
-
     private final DeviceAdminServiceController mDeviceAdminServiceController;
 
     DevicePolicyEngine(
@@ -1385,7 +1384,6 @@ final class DevicePolicyEngine {
         }
     }
 
-
     /**
      * Removes all local and global policies set by that admin.
      */
@@ -1546,10 +1544,17 @@ final class DevicePolicyEngine {
         return false;
     }
 
+    @NonNull
+    private Set<EnforcingAdmin> getEnforcingAdminsOnUser(int userId) {
+        synchronized (mLock) {
+            return mEnforcingAdmins.contains(userId)
+                    ? mEnforcingAdmins.get(userId) : Collections.emptySet();
+        }
+    }
+
     /**
      * Calculate the size of a policy in bytes
      */
-
     private static <V> int sizeOf(PolicyValue<V> value) {
         try {
             Parcel parcel = Parcel.obtain();
@@ -1576,23 +1581,25 @@ final class DevicePolicyEngine {
      *
      * If the policy size limit is reached then send policy result to admin and return false.
      */
-
     private <V> boolean handleAdminPolicySizeLimit(PolicyState<V> policyState, EnforcingAdmin admin,
-            PolicyValue<V> value, PolicyDefinition policyDefinition, int userId) {
-        int currentSize = 0;
+            PolicyValue<V> value, PolicyDefinition<V> policyDefinition, int userId) {
+        int currentAdminPoliciesSize = 0;
+        int existingPolicySize = 0;
         if (mAdminPolicySize.contains(admin.getUserId())
                 && mAdminPolicySize.get(
                 admin.getUserId()).containsKey(admin)) {
-            currentSize = mAdminPolicySize.get(admin.getUserId()).get(admin);
+            currentAdminPoliciesSize = mAdminPolicySize.get(admin.getUserId()).get(admin);
         }
         if (policyState.getPoliciesSetByAdmins().containsKey(admin)) {
-            currentSize -= sizeOf(policyState.getPoliciesSetByAdmins().get(admin));
+            existingPolicySize = sizeOf(policyState.getPoliciesSetByAdmins().get(admin));
         }
         int policySize = sizeOf(value);
-        if (currentSize + policySize < POLICY_SIZE_LIMIT) {
-            increasePolicySizeForAdmin(admin, policySize);
+        if (currentAdminPoliciesSize + policySize - existingPolicySize < POLICY_SIZE_LIMIT) {
+            increasePolicySizeForAdmin(
+                    admin, /* policySizeDiff = */ policySize - existingPolicySize);
             return true;
         } else {
+            Log.w(TAG, "Admin " + admin + "reached max allowed storage limit.");
             sendPolicyResultToAdmin(
                     admin,
                     policyDefinition,
@@ -1606,8 +1613,7 @@ final class DevicePolicyEngine {
      * Increase the int in mAdminPolicySize representing the size of the sum of all
      * active policies for that admin.
      */
-
-    private <V> void increasePolicySizeForAdmin(EnforcingAdmin admin, int policySize) {
+    private <V> void increasePolicySizeForAdmin(EnforcingAdmin admin, int policySizeDiff) {
         if (!mAdminPolicySize.contains(admin.getUserId())) {
             mAdminPolicySize.put(admin.getUserId(), new HashMap<>());
         }
@@ -1615,14 +1621,13 @@ final class DevicePolicyEngine {
             mAdminPolicySize.get(admin.getUserId()).put(admin, /* size= */ 0);
         }
         mAdminPolicySize.get(admin.getUserId()).put(admin,
-                mAdminPolicySize.get(admin.getUserId()).get(admin) + policySize);
+                mAdminPolicySize.get(admin.getUserId()).get(admin) + policySizeDiff);
     }
 
     /**
      * Decrease the int in mAdminPolicySize representing the size of the sum of all
      * active policies for that admin.
      */
-
     private <V> void decreasePolicySizeForAdmin(PolicyState<V> policyState, EnforcingAdmin admin) {
         if (policyState.getPoliciesSetByAdmins().containsKey(admin)) {
             mAdminPolicySize.get(admin.getUserId()).put(admin,
@@ -1634,14 +1639,6 @@ final class DevicePolicyEngine {
         }
         if (mAdminPolicySize.get(admin.getUserId()).isEmpty()) {
             mAdminPolicySize.remove(admin.getUserId());
-        }
-    }
-
-    @NonNull
-    private Set<EnforcingAdmin> getEnforcingAdminsOnUser(int userId) {
-        synchronized (mLock) {
-            return mEnforcingAdmins.contains(userId)
-                    ? mEnforcingAdmins.get(userId) : Collections.emptySet();
         }
     }
 
