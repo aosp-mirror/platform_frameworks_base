@@ -3233,6 +3233,12 @@
     <!-- Text for education page content description for unfolded animation. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_accessibility_unfolded_animation">Foldable device being flipped around</string>
 
+    <!-- QuickSettings: Additional label for the auto-rotation quicksettings tile indicating that the setting corresponds to the folded posture for a foldable device [CHAR LIMIT=32] -->
+    <string name="quick_settings_rotation_posture_folded">folded</string>
+    <!-- QuickSettings: Additional label for the auto-rotation quicksettings tile indicating that the setting corresponds to the unfolded posture for a foldable device [CHAR LIMIT=32] -->
+    <string name="quick_settings_rotation_posture_unfolded">unfolded</string>
+    <!-- QuickSettings: template for rotation tile foldable secondary label [CHAR LIMIT=64] !-->
+    <string name="rotation_tile_with_posture_secondary_label_template">%1$s / %2$s</string>
     <!-- Title for notification of low stylus battery with percentage. "percentage" is
         the value of the battery capacity remaining [CHAR LIMIT=none]-->
     <string name="stylus_battery_low_percentage"><xliff:g id="percentage" example="16%">%s</xliff:g> battery remaining</string>
