@@ -170,3 +170,10 @@ flag {
     description: "Disables adding items belonging to Private Space on Home Screen manually as well as automatically"
     bug: "287975131"
 }
+
+flag {
+    name: "enable_ps_sensitive_notifications_toggle"
+    namespace: "profile_experiences"
+    description: "Enable the sensitive notifications toggle to be visible in the Private space settings page"
+    bug: "317067050"
+}
