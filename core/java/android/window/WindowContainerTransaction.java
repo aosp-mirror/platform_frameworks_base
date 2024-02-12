@@ -676,18 +676,20 @@ public final class WindowContainerTransaction implements Parcelable {
      *                 This identifies them.
      * @param type     The {@link InsetsType} of the insets source.
      * @param frame    The rectangle area of the insets source.
+     * @param boundingRects The bounding rects within this inset, relative to the |frame|.
      * @hide
      */
     @NonNull
     public WindowContainerTransaction addInsetsSource(
             @NonNull WindowContainerToken receiver,
-            IBinder owner, int index, @InsetsType int type, Rect frame) {
+            IBinder owner, int index, @InsetsType int type, Rect frame, Rect[] boundingRects) {
         final HierarchyOp hierarchyOp =
                 new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER)
                         .setContainer(receiver.asBinder())
                         .setInsetsFrameProvider(new InsetsFrameProvider(owner, index, type)
                                 .setSource(InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE)
-                                .setArbitraryRectangle(frame))
+                                .setArbitraryRectangle(frame)
+                                .setBoundingRects(boundingRects))
                         .setInsetsFrameOwner(owner)
                         .build();
         mHierarchyOps.add(hierarchyOp);

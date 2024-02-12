@@ -298,10 +298,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 mCaptionInsetsRect.bottom =
                         mCaptionInsetsRect.top + outResult.mCaptionHeight;
                 wct.addInsetsSource(mTaskInfo.token,
-                        mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect);
+                        mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect,
+                        null /* boundingRects */);
                 wct.addInsetsSource(mTaskInfo.token,
                         mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures(),
-                        mCaptionInsetsRect);
+                        mCaptionInsetsRect, null /* boundingRects */);
             } else {
                 wct.removeInsetsSource(mTaskInfo.token, mOwner, 0 /* index */,
                         WindowInsets.Type.captionBar());
@@ -546,7 +547,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final int captionHeight = loadDimensionPixelSize(mContext.getResources(), captionHeightId);
         final Rect captionInsets = new Rect(0, 0, 0, captionHeight);
         wct.addInsetsSource(mTaskInfo.token, mOwner, 0 /* index */, WindowInsets.Type.captionBar(),
-                captionInsets);
+                captionInsets, null /* boundingRects */);
     }
 
     static class RelayoutParams {

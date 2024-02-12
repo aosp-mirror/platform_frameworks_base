@@ -259,7 +259,8 @@ public class WindowDecorationTests extends ShellTestCase {
                     any(),
                     eq(0 /* index */),
                     eq(WindowInsets.Type.captionBar()),
-                    eq(new Rect(100, 300, 400, 364)));
+                    eq(new Rect(100, 300, 400, 364)),
+                    any());
         }
 
         verify(mMockSurfaceControlStartT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
@@ -569,9 +570,9 @@ public class WindowDecorationTests extends ShellTestCase {
         windowDecor.relayout(taskInfo);
 
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(captionBar()), any());
+                eq(0) /* index */, eq(captionBar()), any(), any());
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(mandatorySystemGestures()), any());
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
     }
 
     @Test
