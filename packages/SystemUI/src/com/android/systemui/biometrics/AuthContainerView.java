@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
+import static android.hardware.biometrics.Flags.customBiometricPrompt;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_BIOMETRIC_PROMPT_TRANSITION;
@@ -401,41 +402,50 @@ public class AuthContainerView extends LinearLayout
             @Nullable FaceSensorPropertiesInternal faceProps,
             @NonNull VibratorHelper vibratorHelper
     ) {
-        if (Utils.isBiometricAllowed(config.mPromptInfo)) {
-            mPromptSelectorInteractorProvider.get().useBiometricsForAuthentication(
-                    config.mPromptInfo,
-                    config.mUserId,
-                    config.mOperationId,
-                    new BiometricModalities(fpProps, faceProps),
-                    config.mOpPackageName);
-
-            if (constraintBp()) {
-                mBiometricView = BiometricViewBinder.bind(mLayout, viewModel, null,
-                        // TODO(b/201510778): This uses the wrong timeout in some cases
-                        getJankListener(mLayout, TRANSIT,
-                                BiometricViewSizeBinder.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS),
-                        mBackgroundView, mBiometricCallback, mApplicationCoroutineScope,
-                        vibratorHelper);
-            } else {
-                final BiometricPromptLayout view = (BiometricPromptLayout) layoutInflater.inflate(
-                        R.layout.biometric_prompt_layout, null, false);
-                mBiometricView = BiometricViewBinder.bind(view, viewModel, mPanelController,
-                        // TODO(b/201510778): This uses the wrong timeout in some cases
-                        getJankListener(view, TRANSIT,
-                                BiometricViewSizeBinder.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS),
-                        mBackgroundView, mBiometricCallback, mApplicationCoroutineScope,
-                        vibratorHelper);
-
-                // TODO(b/251476085): migrate these dependencies
-                if (fpProps != null && fpProps.isAnyUdfpsType()) {
-                    view.setUdfpsAdapter(new UdfpsDialogMeasureAdapter(view, fpProps),
-                            config.mScaleProvider);
-                }
-            }
+        if (Utils.isBiometricAllowed(config.mPromptInfo) || customBiometricPrompt()) {
+            addBiometricView(config, layoutInflater, viewModel, fpProps, faceProps, vibratorHelper);
         } else if (constraintBp() && Utils.isDeviceCredentialAllowed(mConfig.mPromptInfo)) {
             addCredentialView(true, false);
         } else {
             mPromptSelectorInteractorProvider.get().resetPrompt();
+        }
+    }
+
+
+    private void addBiometricView(@NonNull Config config, @NonNull LayoutInflater layoutInflater,
+            @NonNull PromptViewModel viewModel,
+            @Nullable FingerprintSensorPropertiesInternal fpProps,
+            @Nullable FaceSensorPropertiesInternal faceProps,
+            @NonNull VibratorHelper vibratorHelper) {
+        mPromptSelectorInteractorProvider.get().useBiometricsForAuthentication(
+                config.mPromptInfo,
+                config.mUserId,
+                config.mOperationId,
+                new BiometricModalities(fpProps, faceProps),
+                config.mOpPackageName);
+
+        if (constraintBp()) {
+            mBiometricView = BiometricViewBinder.bind(mLayout, viewModel, null,
+                    // TODO(b/201510778): This uses the wrong timeout in some cases
+                    getJankListener(mLayout, TRANSIT,
+                            BiometricViewSizeBinder.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS),
+                    mBackgroundView, mBiometricCallback, mApplicationCoroutineScope,
+                    vibratorHelper);
+        } else {
+            final BiometricPromptLayout view = (BiometricPromptLayout) layoutInflater.inflate(
+                    R.layout.biometric_prompt_layout, null, false);
+            mBiometricView = BiometricViewBinder.bind(view, viewModel, mPanelController,
+                    // TODO(b/201510778): This uses the wrong timeout in some cases
+                    getJankListener(view, TRANSIT,
+                            BiometricViewSizeBinder.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS),
+                    mBackgroundView, mBiometricCallback, mApplicationCoroutineScope,
+                    vibratorHelper);
+
+            // TODO(b/251476085): migrate these dependencies
+            if (fpProps != null && fpProps.isAnyUdfpsType()) {
+                view.setUdfpsAdapter(new UdfpsDialogMeasureAdapter(view, fpProps),
+                        config.mScaleProvider);
+            }
         }
     }
 
@@ -524,7 +534,7 @@ public class AuthContainerView extends LinearLayout
                 () -> animateAway(AuthDialogCallback.DISMISSED_USER_CANCELED));
         if (constraintBp()) {
             // Do nothing on attachment with constraintLayout
-        } else if (Utils.isBiometricAllowed(mConfig.mPromptInfo)) {
+        } else if (Utils.isBiometricAllowed(mConfig.mPromptInfo) || customBiometricPrompt()) {
             mBiometricScrollView.addView(mBiometricView.asView());
         } else if (Utils.isDeviceCredentialAllowed(mConfig.mPromptInfo)) {
             addCredentialView(true /* animatePanel */, false /* animateContents */);
