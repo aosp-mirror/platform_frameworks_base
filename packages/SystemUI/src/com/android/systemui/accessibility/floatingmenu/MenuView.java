@@ -41,6 +41,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Counter;
 import com.android.systemui.Flags;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -434,6 +436,20 @@ class MenuView extends FrameLayout implements
         mMenuAnimationController.flingMenuThenSpringToEdge(
                 getMenuPosition().x, 100f, 0f);
         mContext.startActivity(getIntentForEditScreen());
+    }
+
+    void incrementTexMetricForAllTargets(String metric) {
+        if (!Flags.floatingMenuDragToEdit()) {
+            return;
+        }
+        for (AccessibilityTarget target : mTargetFeatures) {
+            incrementTexMetric(metric, target.getUid());
+        }
+    }
+
+    @VisibleForTesting
+    void incrementTexMetric(String metric, int uid) {
+        Counter.logIncrementWithUid(metric, uid);
     }
 
     Intent getIntentForEditScreen() {
