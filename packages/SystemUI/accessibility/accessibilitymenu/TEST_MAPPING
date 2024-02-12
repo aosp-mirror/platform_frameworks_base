@@ -4,8 +4,15 @@
       "name": "AccessibilityMenuServiceTests",
       "options": [
         {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
+          "exclude-annotation": "android.support.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "AccessibilityMenuServiceTests",
+      "options": [
         {
           "exclude-annotation": "android.support.test.filters.FlakyTest"
         }
