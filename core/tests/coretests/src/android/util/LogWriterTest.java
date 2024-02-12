@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,18 @@
 
 package android.util;
 
-/**
- * @deprecated This class will be removed from a future version of the Android API.
- */
-@Deprecated
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
-public final class MutableLong {
-    public long value;
+import androidx.test.runner.AndroidJUnit4;
 
-    public MutableLong(long value) {
-        this.value = value;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+public class LogWriterTest {
+    @Test
+    public void testSimple() throws Exception {
+        // Since we can't inspect the log output, the best we can do is make sure we don't crash
+        final LogWriter writer = new LogWriter(Log.DEBUG, "Example");
+        writer.write("Message");
+        writer.write("Message\nMessage");
     }
 }

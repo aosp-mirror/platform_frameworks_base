@@ -42,6 +42,7 @@ android.util.DumpableContainer
 android.util.EmptyArray
 android.util.EventLog
 android.util.FloatProperty
+android.util.FloatMath
 android.util.IndentingPrintWriter
 android.util.IntArray
 android.util.IntProperty
@@ -51,6 +52,7 @@ android.util.KeyValueListParser
 android.util.LocalLog
 android.util.Log
 android.util.LogPrinter
+android.util.LogWriter
 android.util.LongArray
 android.util.LongArrayQueue
 android.util.LongSparseArray
@@ -65,10 +67,15 @@ android.util.MutableByte
 android.util.MutableChar
 android.util.MutableDouble
 android.util.MutableFloat
+android.util.MutableInt
+android.util.MutableLong
 android.util.MutableShort
 android.util.NoSuchPropertyException
 android.util.Pair
 android.util.Patterns
+android.util.Pools
+android.util.PrefixPrinter
+android.util.PrefixPrintWriter
 android.util.Printer
 android.util.PrintStreamPrinter
 android.util.PrintWriterPrinter
@@ -90,6 +97,7 @@ android.util.SparseIntArray
 android.util.SparseLongArray
 android.util.SparseSetArray
 android.util.StringBuilderPrinter
+android.util.TeeWriter
 android.util.TimeUtils
 android.util.UtilConfig
 android.util.Xml
@@ -251,6 +259,7 @@ com.android.internal.util.BitUtils
 com.android.internal.util.BitwiseInputStream
 com.android.internal.util.BitwiseOutputStream
 com.android.internal.util.CallbackRegistry
+com.android.internal.util.CollectionUtils
 com.android.internal.util.DumpableContainer
 com.android.internal.util.dump.DumpableContainerImpl
 com.android.internal.util.DumpUtils
@@ -260,6 +269,7 @@ com.android.internal.util.FileRotator
 com.android.internal.util.GrowingArrayUtils
 com.android.internal.util.HeavyHitterSketch
 com.android.internal.util.HexDump
+com.android.internal.util.IntPair
 com.android.internal.util.LineBreakBufferedWriter
 com.android.internal.util.MessageUtils
 com.android.internal.util.ObjectUtils
@@ -268,6 +278,7 @@ com.android.internal.util.ParseUtils
 com.android.internal.util.ProcFileReader
 com.android.internal.util.QuickSelect
 com.android.internal.util.RingBuffer
+com.android.internal.util.SizedInputStream
 com.android.internal.util.StringPool
 com.android.internal.util.TokenBucket
 com.android.internal.util.XmlPullParserWrapper
