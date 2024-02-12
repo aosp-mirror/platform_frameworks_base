@@ -855,6 +855,13 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+java_aconfig_library {
+    name: "device_policy_aconfig_flags_lib_host",
+    aconfig_declarations: "device_policy_aconfig_flags",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 cc_aconfig_library {
     name: "device_policy_aconfig_flags_c_lib",
     aconfig_declarations: "device_policy_aconfig_flags",

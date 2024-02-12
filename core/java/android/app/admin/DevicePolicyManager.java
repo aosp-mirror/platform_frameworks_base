@@ -84,6 +84,7 @@ import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.admin.flags.Flags;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -2863,6 +2864,19 @@ public class DevicePolicyManager {
     public static final int STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED = 16;
 
     /**
+     * Result code for {@link #checkProvisioningPrecondition}.
+     *
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} when provisioning a DPC into the
+     * {@link DeviceAdminInfo#HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER} mode but only the system
+     * user exists on the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
+    public static final int STATUS_HEADLESS_ONLY_SYSTEM_USER = 17;
+
+    /**
      * Result codes for {@link #checkProvisioningPrecondition} indicating all the provisioning pre
      * conditions.
      *
@@ -2876,7 +2890,7 @@ public class DevicePolicyManager {
             STATUS_CANNOT_ADD_MANAGED_PROFILE, STATUS_DEVICE_ADMIN_NOT_SUPPORTED,
             STATUS_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER,
             STATUS_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS,
-            STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED
+            STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED, STATUS_HEADLESS_ONLY_SYSTEM_USER
     })
     public @interface ProvisioningPrecondition {}
 
@@ -9178,9 +9192,11 @@ public class DevicePolicyManager {
      * <p>Calling this after the setup phase of the device owner user has completed is allowed only
      * if the caller is the {@link Process#SHELL_UID Shell UID}, and there are no additional users
      * (except when the device runs on headless system user mode, in which case it could have exact
-     * one extra user, which is the current user - the device owner will be set in the
-     * {@link UserHandle#SYSTEM system} user and a profile owner will be set in the current user)
-     * and no accounts.
+     * one extra user, which is the current user.
+     *
+     * <p>On a headless devices, if it is in affiliated mode the device owner will be set in the
+     * {@link UserHandle#SYSTEM system} user. If the device is in single user mode, the device owner
+     * will be set in the first secondary user.
      *
      * @param who the component name to be registered as device owner.
      * @param userId ID of the user on which the device owner runs.
@@ -11371,7 +11387,9 @@ public class DevicePolicyManager {
      * @see UserHandle
      * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
      *         user could not be created.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if headless device is in
+     *        {@link DeviceAdminInfo#HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER} mode.
+     * @throws SecurityException if {@code admin} is not a device owner
      * @throws UserOperationException if the user could not be created and the calling app is
      * targeting {@link android.os.Build.VERSION_CODES#P} and running on
      * {@link android.os.Build.VERSION_CODES#P}.
@@ -16612,7 +16630,10 @@ public class DevicePolicyManager {
      * before calling this method.
      *
      * <p>Holders of {@link android.Manifest.permission#PROVISION_DEMO_DEVICE} can call this API
-     * only if {@link FullyManagedDeviceProvisioningParams#isDemoDevice()} is {@code true}.</p>
+     * only if {@link FullyManagedDeviceProvisioningParams#isDemoDevice()} is {@code true}.
+     *
+     * <p>If headless device is in {@link DeviceAdminInfo#HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER}
+     * mode then it sets the device owner on the first secondary user.</p>
      *
      * @param provisioningParams Params required to provision a fully managed device,
      * see {@link FullyManagedDeviceProvisioningParams}.
