@@ -1729,6 +1729,21 @@ public final class UserManagerTest {
         mUserManager.removeUser(userInfo.id);
     }
 
+    @Test
+    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_ENABLE_HIDING_PROFILES)
+    public void testGetProfileIdsExcludingHidden() throws Exception {
+        int mainUserId = mUserManager.getMainUser().getIdentifier();
+        final UserInfo profile = createProfileForUser("Profile",
+                UserManager.USER_TYPE_PROFILE_PRIVATE, mainUserId);
+
+        final int[] allProfiles = mUserManager.getProfileIds(mainUserId, /* enabledOnly */ false);
+        final int[] profilesExcludingHidden = mUserManager.getProfileIdsExcludingHidden(
+                mainUserId, /* enabledOnly */ false);
+
+        assertThat(allProfiles).asList().contains(profile.id);
+        assertThat(profilesExcludingHidden).asList().doesNotContain(profile.id);
+    }
+
     private String generateLongString() {
         String partialString = "Test Name Test Name Test Name Test Name Test Name Test Name Test "
                 + "Name Test Name Test Name Test Name "; //String of length 100

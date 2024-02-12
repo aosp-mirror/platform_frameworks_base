@@ -722,6 +722,17 @@ public final class UserManagerServiceTest {
         Mockito.verify(mKeyguardManager, never()).addKeyguardLockedStateListener(any(), any());
     }
 
+    @Test
+    public void testGetProfileIdsExcludingHidden() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_HIDING_PROFILES);
+        UserInfo privateProfileUser =
+                mUms.createProfileForUserEvenWhenDisallowedWithThrow("TestPrivateProfile",
+                        USER_TYPE_PROFILE_PRIVATE, 0, 0, null);
+        for (int id : mUms.getProfileIdsExcludingHidden(0, true)) {
+            assertThat(id).isNotEqualTo(privateProfileUser.id);
+        }
+    }
+
     /**
      * Returns true if the user's XML file has Default restrictions
      * @param userId Id of the user.
