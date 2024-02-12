@@ -73,6 +73,7 @@ import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ITrustedPresentationListener;
+import android.window.IUnhandledDragListener;
 import android.window.InputTransferToken;
 import android.window.ScreenCapture;
 import android.window.TrustedPresentationThresholds;
@@ -1091,4 +1092,10 @@ interface IWindowManager
 
     @EnforcePermission("DETECT_SCREEN_RECORDING")
     void unregisterScreenRecordingCallback(IScreenRecordingCallback callback);
+
+    /**
+     * Sets the listener to be called back when a cross-window drag and drop operation is unhandled
+     * (ie. not handled by any window which can handle the drag).
+     */
+    void setUnhandledDragListener(IUnhandledDragListener listener);
 }
