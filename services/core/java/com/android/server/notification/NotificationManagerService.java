@@ -71,6 +71,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.app.Flags.lifetimeExtensionRefactor;
 import static android.app.NotificationManager.zenModeFromInterruptionFilter;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
@@ -159,6 +160,7 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.DurationMillisLong;
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.FlaggedApi;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1852,6 +1854,7 @@ public class NotificationManagerService extends SystemService {
             }
             if (ACTION_NOTIFICATION_TIMEOUT.equals(action)) {
                 final NotificationRecord record;
+                // TODO: b/323013410 - Record should be cloned instead of used directly.
                 synchronized (mNotificationLock) {
                     record = findNotificationByKeyLocked(intent.getStringExtra(EXTRA_KEY));
                 }
@@ -1864,6 +1867,14 @@ public class NotificationManagerService extends SystemService {
                                 FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB
                                         | FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY,
                                 true, record.getUserId(), REASON_TIMEOUT, null);
+                        // If cancellation will be prevented due to lifetime extension, we send an
+                        // update to system UI.
+                        synchronized (mNotificationLock) {
+                            maybeNotifySystemUiListenerLifetimeExtendedLocked(record,
+                                    record.getSbn().getPackageName(),
+                                    mActivityManager.getPackageImportance(
+                                            record.getSbn().getPackageName()));
+                        }
                     } else {
                         cancelNotification(record.getSbn().getUid(),
                                 record.getSbn().getInitialPid(),
@@ -3825,7 +3836,17 @@ public class NotificationManagerService extends SystemService {
             int mustNotHaveFlags = isCallingUidSystem() ? 0 :
                     (FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB | FLAG_AUTOGROUP_SUMMARY);
             if (lifetimeExtensionRefactor()) {
+                // Also don't allow client apps to cancel lifetime extended notifs.
                 mustNotHaveFlags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+                // If cancellation will be prevented due to lifetime extension, we send an update to
+                // system UI.
+                NotificationRecord record = null;
+                final int packageImportance = mActivityManager.getPackageImportance(pkg);
+                synchronized (mNotificationLock) {
+                    record = findNotificationLocked(pkg, tag, id, userId);
+                    maybeNotifySystemUiListenerLifetimeExtendedLocked(record, pkg,
+                            packageImportance);
+                }
             }
 
             cancelNotificationInternal(pkg, opPkg, Binder.getCallingUid(), Binder.getCallingPid(),
@@ -3845,6 +3866,16 @@ public class NotificationManagerService extends SystemService {
                         pkg, null, 0, FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB
                                 | FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY,
                         userId, REASON_APP_CANCEL_ALL);
+                // If cancellation will be prevented due to lifetime extension, we send updates
+                // to system UI.
+                // In this case, we need to hold the lock to access these lists.
+                final int packageImportance = mActivityManager.getPackageImportance(pkg);
+                synchronized (mNotificationLock) {
+                    notifySystemUiListenerLifetimeExtendedListLocked(mNotificationList,
+                            packageImportance);
+                    notifySystemUiListenerLifetimeExtendedListLocked(mEnqueuedNotifications,
+                            packageImportance);
+                }
             } else {
                 cancelAllNotificationsInt(Binder.getCallingUid(), Binder.getCallingPid(),
                         pkg, null, 0, FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB,
@@ -4891,11 +4922,19 @@ public class NotificationManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             boolean notificationsRapidlyCleared = false;
             final String pkg;
+            final int packageImportance;
+            final ManagedServiceInfo info;
             try {
                 synchronized (mNotificationLock) {
-                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    info = mListeners.checkServiceTokenLocked(token);
                     pkg = info.component.getPackageName();
-
+                }
+                if (lifetimeExtensionRefactor()) {
+                    packageImportance = mActivityManager.getPackageImportance(pkg);
+                } else {
+                    packageImportance = IMPORTANCE_NONE;
+                }
+                synchronized (mNotificationLock) {
                     // Cancellation reason. If the token comes from assistant, label the
                     // cancellation as coming from the assistant; default to LISTENER_CANCEL.
                     int reason = REASON_LISTENER_CANCEL;
@@ -4917,7 +4956,7 @@ public class NotificationManagerService extends SystemService {
                                     || isNotificationRecent(r.getUpdateTimeMs());
                             cancelNotificationFromListenerLocked(info, callingUid, callingPid,
                                     r.getSbn().getPackageName(), r.getSbn().getTag(),
-                                    r.getSbn().getId(), userId, reason);
+                                    r.getSbn().getId(), userId, reason, packageImportance);
                         }
                     } else {
                         for (NotificationRecord notificationRecord : mNotificationList) {
@@ -4931,6 +4970,12 @@ public class NotificationManagerService extends SystemService {
                                     REASON_LISTENER_CANCEL_ALL, info, info.supportsProfiles(),
                                     FLAG_ONGOING_EVENT | FLAG_NO_CLEAR
                                             | FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+                            // If cancellation will be prevented due to lifetime extension, we send
+                            // an update to system UI.
+                            notifySystemUiListenerLifetimeExtendedListLocked(mNotificationList,
+                                    packageImportance);
+                            notifySystemUiListenerLifetimeExtendedListLocked(mEnqueuedNotifications,
+                                    packageImportance);
                         } else {
                             cancelAllLocked(callingUid, callingPid, info.userid,
                                     REASON_LISTENER_CANCEL_ALL, info, info.supportsProfiles(),
@@ -5051,10 +5096,14 @@ public class NotificationManagerService extends SystemService {
         @GuardedBy("mNotificationLock")
         private void cancelNotificationFromListenerLocked(ManagedServiceInfo info,
                 int callingUid, int callingPid, String pkg, String tag, int id, int userId,
-                int reason) {
+                int reason, int packageImportance) {
             int mustNotHaveFlags = FLAG_ONGOING_EVENT;
             if (lifetimeExtensionRefactor()) {
                 mustNotHaveFlags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+                // If cancellation will be prevented due to lifetime extension, we send an update
+                // to system UI.
+                NotificationRecord record = findNotificationLocked(pkg, tag, id, userId);
+                maybeNotifySystemUiListenerLifetimeExtendedLocked(record, pkg, packageImportance);
             }
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0 /* mustHaveFlags */,
                     mustNotHaveFlags,
@@ -5197,7 +5246,13 @@ public class NotificationManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final long identity = Binder.clearCallingIdentity();
+            final int packageImportance;
             try {
+                if (lifetimeExtensionRefactor()) {
+                    packageImportance = mActivityManager.getPackageImportance(pkg);
+                } else {
+                    packageImportance = IMPORTANCE_NONE;
+                }
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
                     int cancelReason = REASON_LISTENER_CANCEL;
@@ -5210,7 +5265,7 @@ public class NotificationManagerService extends SystemService {
                                 + " use cancelNotification(key) instead.");
                     } else {
                         cancelNotificationFromListenerLocked(info, callingUid, callingPid,
-                                pkg, tag, id, info.userid, cancelReason);
+                                pkg, tag, id, info.userid, cancelReason, packageImportance);
                     }
                 }
             } finally {
@@ -11654,6 +11709,30 @@ public class NotificationManagerService extends SystemService {
         });
     }
 
+    @FlaggedApi(FLAG_LIFETIME_EXTENSION_REFACTOR)
+    @GuardedBy("mNotificationLock")
+    private void notifySystemUiListenerLifetimeExtendedListLocked(
+            List<NotificationRecord> notificationList, int packageImportance) {
+        for (int i = notificationList.size() - 1; i >= 0; --i) {
+            NotificationRecord record = notificationList.get(i);
+            maybeNotifySystemUiListenerLifetimeExtendedLocked(record,
+                    record.getSbn().getPackageName(), packageImportance);
+        }
+    }
+
+    @FlaggedApi(FLAG_LIFETIME_EXTENSION_REFACTOR)
+    @GuardedBy("mNotificationLock")
+    private void maybeNotifySystemUiListenerLifetimeExtendedLocked(NotificationRecord record,
+            String pkg, int packageImportance) {
+        if (record != null && (record.getSbn().getNotification().flags
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0) {
+            boolean isAppForeground = pkg != null && packageImportance == IMPORTANCE_FOREGROUND;
+            mHandler.post(new EnqueueNotificationRunnable(record.getUser().getIdentifier(),
+                    record, isAppForeground,
+                    mPostNotificationTrackerFactory.newTracker(null)));
+        }
+    }
+
     public class NotificationListeners extends ManagedServices {
         static final String TAG_ENABLED_NOTIFICATION_LISTENERS = "enabled_listeners";
         static final String TAG_REQUESTED_LISTENERS = "request_listeners";
@@ -11777,6 +11856,11 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onServiceAdded(ManagedServiceInfo info) {
+            if (lifetimeExtensionRefactor()) {
+                // Only System or System UI can call registerSystemService, so if the caller is not
+                // system, we know it's system UI.
+                info.isSystemUi = !isCallerSystemOrPhone();
+            }
             final INotificationListener listener = (INotificationListener) info.service;
             final NotificationRankingUpdate update;
             synchronized (mNotificationLock) {
@@ -12139,6 +12223,23 @@ public class NotificationManagerService extends SystemService {
                     // unhidden.
                     if (r.isHidden() && info.targetSdkVersion < Build.VERSION_CODES.P) {
                         continue;
+                    }
+
+                    if (lifetimeExtensionRefactor()) {
+                        // Checks if this is a request to notify system UI about a notification that
+                        // has been lifetime extended.
+                        // (We only need to check old for the flag, because in both cancellation and
+                        // update cases, old should have the flag.)
+                        // If it is such a request, and this is system UI, we send the post request
+                        // only to System UI, and break as we don't need to continue checking other
+                        // Managed Services.
+                        if (info.isSystemUi() && old != null && old.getNotification() != null
+                                && (old.getNotification().flags
+                                & Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0) {
+                            final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
+                            listenerCalls.add(() -> notifyPosted(info, oldSbn, update));
+                            break;
+                        }
                     }
 
                     // If we shouldn't notify all listeners, this means the hidden state of

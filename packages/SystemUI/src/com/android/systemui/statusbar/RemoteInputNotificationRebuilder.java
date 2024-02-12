@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.Flags.lifetimeExtensionRefactor;
+
 import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.RemoteInputHistoryItem;
@@ -29,6 +31,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -68,7 +71,7 @@ public class RemoteInputNotificationRebuilder {
     @NonNull
     public StatusBarNotification rebuildForCanceledSmartReplies(
             NotificationEntry entry) {
-        return rebuildWithRemoteInputInserted(entry, null /* remoteInputTest */,
+        return rebuildWithRemoteInputInserted(entry, null /* remoteInputText */,
                 false /* showSpinner */, null /* mimeType */, null /* uri */);
     }
 
@@ -97,22 +100,50 @@ public class RemoteInputNotificationRebuilder {
     StatusBarNotification rebuildWithRemoteInputInserted(NotificationEntry entry,
             CharSequence remoteInputText, boolean showSpinner, String mimeType, Uri uri) {
         StatusBarNotification sbn = entry.getSbn();
-
         Notification.Builder b = Notification.Builder
                 .recoverBuilder(mContext, sbn.getNotification().clone());
-        if (remoteInputText != null || uri != null) {
-            RemoteInputHistoryItem newItem = uri != null
-                    ? new RemoteInputHistoryItem(mimeType, uri, remoteInputText)
-                    : new RemoteInputHistoryItem(remoteInputText);
+
+        if (lifetimeExtensionRefactor()) {
+            if (entry.remoteInputs == null) {
+                entry.remoteInputs = new ArrayList<RemoteInputHistoryItem>();
+            }
+
+            // Append new remote input information to remoteInputs list
+            if (remoteInputText != null || uri != null) {
+                RemoteInputHistoryItem newItem = uri != null
+                        ? new RemoteInputHistoryItem(mimeType, uri, remoteInputText)
+                        : new RemoteInputHistoryItem(remoteInputText);
+                // The list is latest-first, so new elements should be added as the first element.
+                entry.remoteInputs.add(0, newItem);
+            }
+
+            // Read the whole remoteInputs list from the entry, then append all of those to the sbn.
             Parcelable[] oldHistoryItems = sbn.getNotification().extras
                     .getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+
             RemoteInputHistoryItem[] newHistoryItems = oldHistoryItems != null
                     ? Stream.concat(
-                    Stream.of(newItem),
-                    Arrays.stream(oldHistoryItems).map(p -> (RemoteInputHistoryItem) p))
+                            entry.remoteInputs.stream(),
+                            Arrays.stream(oldHistoryItems).map(p -> (RemoteInputHistoryItem) p))
                     .toArray(RemoteInputHistoryItem[]::new)
-                    : new RemoteInputHistoryItem[] { newItem };
+                    : entry.remoteInputs.toArray(RemoteInputHistoryItem[]::new);
             b.setRemoteInputHistory(newHistoryItems);
+
+        } else {
+            if (remoteInputText != null || uri != null) {
+                RemoteInputHistoryItem newItem = uri != null
+                        ? new RemoteInputHistoryItem(mimeType, uri, remoteInputText)
+                        : new RemoteInputHistoryItem(remoteInputText);
+                Parcelable[] oldHistoryItems = sbn.getNotification().extras
+                        .getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+                RemoteInputHistoryItem[] newHistoryItems = oldHistoryItems != null
+                        ? Stream.concat(
+                                Stream.of(newItem),
+                                Arrays.stream(oldHistoryItems).map(p -> (RemoteInputHistoryItem) p))
+                        .toArray(RemoteInputHistoryItem[]::new)
+                        : new RemoteInputHistoryItem[]{newItem};
+                b.setRemoteInputHistory(newHistoryItems);
+            }
         }
         b.setShowRemoteInputSpinner(showSpinner);
         b.setHideSmartReplies(true);
