@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.devicestate;
+package android.hardware.devicestate;
 
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
@@ -22,7 +22,6 @@ import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STA
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.hardware.devicestate.DeviceStateManager;
 
 import com.android.internal.util.Preconditions;
 
@@ -38,9 +37,9 @@ import java.util.Objects;
  * state of the system. This is useful for variable-state devices, like foldable or rollable
  * devices, that can be configured by users into differing hardware states, which each may have a
  * different expected use case.
+ * @hide
  *
- * @see DeviceStateProvider
- * @see DeviceStateManagerService
+ * @see DeviceStateManager
  */
 public final class DeviceState {
     /**
