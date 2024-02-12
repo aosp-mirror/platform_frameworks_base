@@ -17,7 +17,7 @@
 package com.android.systemui.dreams.homecontrols
 
 import android.app.Activity
-import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
+import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Binder
@@ -122,15 +122,14 @@ constructor(
 
     /** Creates the task fragment */
     fun createTaskFragment() {
-        val taskBounds = Rect(activity.resources.configuration.windowConfiguration.bounds)
         val fragmentOptions =
             TaskFragmentCreationParams.Builder(
                     organizer.organizerToken,
                     fragmentToken,
                     activity.activityToken!!
                 )
-                .setInitialRelativeBounds(taskBounds)
-                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
+                .setInitialRelativeBounds(Rect())
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
                 .build()
         organizer.applyTransaction(
             WindowContainerTransaction().createTaskFragment(fragmentOptions),
