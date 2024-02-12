@@ -42,7 +42,7 @@ class MultiSourceMinAlphaControllerTest : SysuiTestCase() {
     private val multiSourceMinAlphaController =
         MultiSourceMinAlphaController(view, initialAlpha = INITIAL_ALPHA)
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     @Before
     fun setup() {

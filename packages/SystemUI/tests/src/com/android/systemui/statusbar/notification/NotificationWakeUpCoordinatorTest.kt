@@ -54,7 +54,7 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     private val kosmos = Kosmos()
 

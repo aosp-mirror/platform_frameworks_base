@@ -82,7 +82,7 @@ import java.util.function.Supplier;
 public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
     private static final float DEFAULT_SCALE = 4.0f;
