@@ -58,11 +58,14 @@ java_library {
     visibility: ["//visibility:public"],
 }
 
-java_host_for_device {
-    name: "core-xml-for-device",
-    libs: [
-        "core-xml-for-host",
+java_library {
+    // Prefixed with "200" to ensure it's sorted early in Tradefed classpath
+    // so that we provide a concrete implementation before Mainline stubs
+    name: "200-kxml2-android",
+    static_libs: [
+        "kxml2-android",
     ],
+    visibility: ["//frameworks/base"],
 }
 
 java_host_for_device {
