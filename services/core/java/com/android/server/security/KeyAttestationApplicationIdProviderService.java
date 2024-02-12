@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.android.server.security;
 
 import android.content.Context;
@@ -23,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.security.keystore.IKeyAttestationApplicationIdProvider;
 import android.security.keystore.KeyAttestationApplicationId;
@@ -57,7 +57,10 @@ public class KeyAttestationApplicationIdProviderService
         try {
             String[] packageNames = mPackageManager.getPackagesForUid(uid);
             if (packageNames == null) {
-                throw new RemoteException("No packages for uid");
+                throw new ServiceSpecificException(
+                        IKeyAttestationApplicationIdProvider
+                                .ERROR_GET_ATTESTATION_APPLICATION_ID_FAILED,
+                        "No package for uid: " + uid);
             }
             int userId = UserHandle.getUserId(uid);
             keyAttestationPackageInfos = new KeyAttestationPackageInfo[packageNames.length];
