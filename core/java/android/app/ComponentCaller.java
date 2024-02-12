@@ -42,6 +42,9 @@ public final class ComponentCaller {
     private final IBinder mActivityToken;
     private final IBinder mCallerToken;
 
+    /**
+     * @hide
+     */
     public ComponentCaller(@NonNull IBinder activityToken, @Nullable IBinder callerToken) {
         mActivityToken = activityToken;
         mCallerToken = callerToken;
