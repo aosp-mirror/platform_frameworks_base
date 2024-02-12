@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.Process;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -160,6 +161,13 @@ public class AppPredictionManagerService extends
         public void onDestroyPredictionSession(@NonNull AppPredictionSessionId sessionId) {
             runForUserLocked("onDestroyPredictionSession", sessionId,
                     (service) -> service.onDestroyPredictionSessionLocked(sessionId));
+        }
+
+        @Override
+        public void requestServiceFeatures(@NonNull AppPredictionSessionId sessionId,
+                IRemoteCallback callback) {
+            runForUserLocked("requestServiceFeatures", sessionId,
+                    (service) -> service.requestServiceFeaturesLocked(sessionId, callback));
         }
 
         public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
