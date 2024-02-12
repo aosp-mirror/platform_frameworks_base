@@ -189,10 +189,10 @@ public class EvemuParserTest {
                 .containsExactly(eventType, eventCode, value).inOrder();
     }
 
-    private void assertDelayEvent(Event event, int durationMillis) {
+    private void assertDelayEvent(Event event, int durationMicros) {
         assertThat(event).isNotNull();
         assertThat(event.getCommand()).isEqualTo(Event.Command.DELAY);
-        assertThat(event.getDurationMillis()).isEqualTo(durationMillis);
+        assertThat(event.getDurationMicros()).isEqualTo(durationMicros);
     }
 
     @Test
@@ -231,12 +231,12 @@ public class EvemuParserTest {
         assertInjectEvent(parser.getNextEvent(), 0x1, 0x15, 1);
         assertInjectEvent(parser.getNextEvent(), 0x0, 0x0, 0);
 
-        assertDelayEvent(parser.getNextEvent(), 10);
+        assertDelayEvent(parser.getNextEvent(), 10000);
 
         assertInjectEvent(parser.getNextEvent(), 0x1, 0x15, 0);
         assertInjectEvent(parser.getNextEvent(), 0x0, 0x0, 0);
 
-        assertDelayEvent(parser.getNextEvent(), 1000);
+        assertDelayEvent(parser.getNextEvent(), 1000000);
 
         assertInjectEvent(parser.getNextEvent(), 0x1, 0x15, 1);
         assertInjectEvent(parser.getNextEvent(), 0x0, 0x0, 0);
@@ -490,7 +490,7 @@ public class EvemuParserTest {
         assertInjectEvent(parser.getNextEvent(), 0x3, 0x18, 56);
         assertInjectEvent(parser.getNextEvent(), 0x0, 0x0, 0);
 
-        assertDelayEvent(parser.getNextEvent(), 6);
+        assertDelayEvent(parser.getNextEvent(), 6080);
 
         assertInjectEvent(parser.getNextEvent(), 0x3, 0x0035, 888);
     }

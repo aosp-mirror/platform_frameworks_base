@@ -55,7 +55,7 @@ public class Device {
     private final SparseArray<InputAbsInfo> mAbsInfo;
     private final OutputStream mOutputStream;
     private final Object mCond = new Object();
-    private long mTimeToSend;
+    private long mTimeToSendNanos;
 
     static {
         System.loadLibrary("uinputcommand_jni");
@@ -101,7 +101,13 @@ public class Device {
         }
 
         mHandler.obtainMessage(MSG_OPEN_UINPUT_DEVICE, args).sendToTarget();
-        mTimeToSend = SystemClock.uptimeMillis();
+        mTimeToSendNanos = SystemClock.uptimeNanos();
+    }
+
+    private long getTimeToSendMillis() {
+        // This should be the same as (long) Math.ceil(mTimeToSendNanos / 1_000_000.0), except
+        // without the precision loss that comes from converting from long to double and back.
+        return mTimeToSendNanos / 1_000_000 + ((mTimeToSendNanos % 1_000_000 > 0) ? 1 : 0);
     }
 
     /**
@@ -112,16 +118,26 @@ public class Device {
     public void injectEvent(int[] events) {
         // if two messages are sent at identical time, they will be processed in order received
         Message msg = mHandler.obtainMessage(MSG_INJECT_EVENT, events);
-        mHandler.sendMessageAtTime(msg, mTimeToSend);
+        mHandler.sendMessageAtTime(msg, getTimeToSendMillis());
     }
 
     /**
-     * Impose a delay to the device for execution.
+     * Delay subsequent device activity by the specified amount of time.
      *
-     * @param delay  Time to delay in unit of milliseconds.
+     * <p>Note that although the delay is specified in nanoseconds, due to limitations of {@link
+     * Handler}'s API, scheduling only occurs with millisecond precision. When scheduling an
+     * injection or sync, the time at which it is scheduled will be rounded up to the nearest
+     * millisecond. While this means that a particular injection cannot be scheduled precisely,
+     * rounding errors will not accumulate over time. For example, if five injections are scheduled
+     * with a delay of 1,200,000ns before each one, the total delay will be 6ms, as opposed to the
+     * 10ms it would have been if each individual delay had been rounded up (as {@link EvemuParser}
+     * would otherwise have to do to avoid sending timestamps that are in the future).
+     *
+     * @param delayNanos  Time to delay in unit of nanoseconds.
      */
-    public void addDelay(int delay) {
-        mTimeToSend = Math.max(SystemClock.uptimeMillis(), mTimeToSend) + delay;
+    public void addDelayNanos(long delayNanos) {
+        mTimeToSendNanos =
+                Math.max(SystemClock.uptimeNanos(), mTimeToSendNanos) + delayNanos;
     }
 
     /**
@@ -131,7 +147,8 @@ public class Device {
      * @param syncToken  The token for this sync command.
      */
     public void syncEvent(String syncToken) {
-        mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_SYNC_EVENT, syncToken), mTimeToSend);
+        mHandler.sendMessageAtTime(
+                mHandler.obtainMessage(MSG_SYNC_EVENT, syncToken), getTimeToSendMillis());
     }
 
     /**
@@ -140,7 +157,8 @@ public class Device {
      */
     public void close() {
         Message msg = mHandler.obtainMessage(MSG_CLOSE_UINPUT_DEVICE);
-        mHandler.sendMessageAtTime(msg, Math.max(SystemClock.uptimeMillis(), mTimeToSend) + 1);
+        mHandler.sendMessageAtTime(
+                msg, Math.max(SystemClock.uptimeMillis(), getTimeToSendMillis()) + 1);
         try {
             synchronized (mCond) {
                 mCond.wait();
