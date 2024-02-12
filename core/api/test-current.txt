@@ -2081,7 +2081,7 @@ package android.media.metrics {
 package android.media.projection {
 
   public final class MediaProjectionManager {
-    method @NonNull public android.content.Intent createScreenCaptureIntent(@Nullable android.app.ActivityOptions.LaunchCookie);
+    method @NonNull public android.content.Intent createScreenCaptureIntent(@NonNull android.app.ActivityOptions.LaunchCookie);
   }
 
 }
