@@ -200,6 +200,25 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             return this;
         }
 
+        /**
+         * Optional: Sets logo description text that will be shown on the prompt.
+         *
+         * <p> Note that using this method is not recommended in most scenarios because the calling
+         * application's name will be used by default. Setting the logo description is intended for
+         * large bundled applications that perform a wide range of functions and need to show
+         * distinct description for each function.
+         *
+         * @param logoDescription The logo description text that will be shown on the prompt.
+         * @return This builder.
+         */
+        @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+        @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
+        @NonNull
+        public BiometricPrompt.Builder setLogoDescription(@NonNull String logoDescription) {
+            mPromptInfo.setLogoDescription(logoDescription);
+            return this;
+        }
+
 
         /**
          * Required: Sets the title that will be shown on the prompt.
@@ -743,7 +762,20 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         return mPromptInfo.getLogoBitmap();
     }
 
-
+    /**
+     * Gets the logo description for the prompt, as set by
+     * {@link Builder#setDescription(CharSequence)}.
+     * Currently for system applications use only.
+     *
+     * @return The logo description of the prompt, or null if the prompt has no logo description
+     * set.
+     */
+    @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+    @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
+    @Nullable
+    public String getLogoDescription() {
+        return mPromptInfo.getLogoDescription();
+    }
 
     /**
      * Gets the title for the prompt, as set by {@link Builder#setTitle(CharSequence)}.
