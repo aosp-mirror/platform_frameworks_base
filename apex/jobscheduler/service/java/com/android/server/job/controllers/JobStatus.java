@@ -16,8 +16,6 @@
 
 package com.android.server.job.controllers;
 
-import static android.text.format.DateUtils.HOUR_IN_MILLIS;
-
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
 import static com.android.server.job.JobSchedulerService.EXEMPTED_INDEX;
 import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
@@ -430,9 +428,6 @@ public final class JobStatus {
      */
     public static final int INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ = 1 << 2;
 
-    /** Minimum difference between start and end time to have flexible constraint */
-    @VisibleForTesting
-    static final long MIN_WINDOW_FOR_FLEXIBILITY_MS = HOUR_IN_MILLIS;
     /**
      * Versatile, persistable flags for a job that's updated within the system server,
      * as opposed to {@link JobInfo#flags} that's set by callers.
@@ -708,14 +703,10 @@ public final class JobStatus {
         final boolean lacksSomeFlexibleConstraints =
                 ((~requiredConstraints) & SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS) != 0
                         || mCanApplyTransportAffinities;
-        final boolean satisfiesMinWindowException =
-                (latestRunTimeElapsedMillis - earliestRunTimeElapsedMillis)
-                >= MIN_WINDOW_FOR_FLEXIBILITY_MS;
 
         // The first time a job is rescheduled it will not be subject to flexible constraints.
         // Otherwise, every consecutive reschedule increases a jobs' flexibility deadline.
         if (!isRequestedExpeditedJob() && !job.isUserInitiated()
-                && satisfiesMinWindowException
                 && (numFailures + numSystemStops) != 1
                 && lacksSomeFlexibleConstraints) {
             requiredConstraints |= CONSTRAINT_FLEXIBLE;
