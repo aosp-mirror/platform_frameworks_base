@@ -94,14 +94,19 @@ java_library {
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     libs: [
-        "framework-minus-apex.ravenwood",
-        "hoststubgen-helper-runtime.ravenwood",
-        "hoststubgen-helper-framework-runtime.ravenwood",
+        // Prefixed with "200" to ensure it's sorted early in Tradefed classpath
+        // so that we provide a concrete implementation before Mainline stubs
+        "200-kxml2-android",
         "all-updatable-modules-system-stubs",
+        "android.test.mock.ravenwood",
+        "framework-minus-apex.ravenwood",
+        "hoststubgen-helper-framework-runtime.ravenwood",
+        "hoststubgen-helper-runtime.ravenwood",
+
+        // Provide runtime versions of utils linked in below
         "junit",
         "truth",
         "ravenwood-junit-impl",
-        "android.test.mock.ravenwood",
         "mockito-ravenwood-prebuilt",
         "inline-mockito-ravenwood-prebuilt",
     ],
