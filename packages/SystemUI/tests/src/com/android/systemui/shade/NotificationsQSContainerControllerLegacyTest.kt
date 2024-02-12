@@ -26,6 +26,7 @@ import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
@@ -400,6 +401,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
     @Test
     fun testSplitShadeLayout_isAlignedToGuideline() {
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
         enableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd).isEqualTo(R.id.qs_edge_guideline)
@@ -409,6 +411,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
     @Test
     fun testSinglePaneLayout_childrenHaveEqualMargins() {
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
         disableSplitShade()
         underTest.updateResources()
         val qsStartMargin = getConstraintSetLayout(R.id.qs_frame).startMargin
@@ -425,6 +428,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
     @Test
     fun testSplitShadeLayout_childrenHaveInsideMarginsOfZero() {
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
         enableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0)
@@ -443,6 +447,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     @Test
     fun testLargeScreenLayout_refactorFlagOff_qsAndNotifsTopMarginIsOfHeaderHeightResource() {
         mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
         setLargeScreen()
         val largeScreenHeaderResourceHeight = 100
         val largeScreenHeaderHelperHeight = 200
@@ -465,6 +470,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     @Test
     fun testLargeScreenLayout_refactorFlagOn_qsAndNotifsTopMarginIsOfHeaderHeightHelper() {
         mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
         setLargeScreen()
         val largeScreenHeaderResourceHeight = 100
         val largeScreenHeaderHelperHeight = 200
@@ -486,6 +492,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
     @Test
     fun testSmallScreenLayout_qsAndNotifsTopMarginIsZero() {
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
         setSmallScreen()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin).isEqualTo(0)
@@ -506,6 +513,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
     @Test
     fun testSinglePaneShadeLayout_isAlignedToParent() {
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
         disableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd)
