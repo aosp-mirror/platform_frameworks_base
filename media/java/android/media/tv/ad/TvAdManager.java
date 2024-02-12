@@ -18,6 +18,7 @@ package android.media.tv.ad;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
@@ -59,7 +60,7 @@ import java.util.concurrent.Executor;
  */
 @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
 @SystemService(Context.TV_AD_SERVICE)
-public class TvAdManager {
+public final class TvAdManager {
     // TODO: implement more methods and unhide APIs.
     private static final String TAG = "TvAdManager";
 
@@ -236,6 +237,76 @@ public class TvAdManager {
      * @see TvAdService.Session#sendTvAdSessionData(String, Bundle)
      */
     public static final String SESSION_DATA_KEY_REQUEST_ID = "request_id";
+
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, prefix = "SESSION_STATE_", value = {
+            SESSION_STATE_STOPPED,
+            SESSION_STATE_RUNNING,
+            SESSION_STATE_ERROR})
+    public @interface SessionState {}
+
+    /**
+     * Stopped (or not started) state of AD service session.
+     */
+    public static final int SESSION_STATE_STOPPED = 1;
+    /**
+     * Running state of AD service session.
+     */
+    public static final int SESSION_STATE_RUNNING = 2;
+    /**
+     * Error state of AD service session.
+     */
+    public static final int SESSION_STATE_ERROR = 3;
+
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, prefix = "ERROR_", value = {
+            ERROR_NONE,
+            ERROR_UNKNOWN,
+            ERROR_NOT_SUPPORTED,
+            ERROR_WEAK_SIGNAL,
+            ERROR_RESOURCE_UNAVAILABLE,
+            ERROR_BLOCKED,
+            ERROR_ENCRYPTED,
+            ERROR_UNKNOWN_CHANNEL,
+    })
+    public @interface ErrorCode {}
+
+    /**
+     * No error.
+     */
+    public static final int ERROR_NONE = 0;
+    /**
+     * Unknown error code.
+     */
+    public static final int ERROR_UNKNOWN = 1;
+    /**
+     * Error code for an unsupported channel.
+     */
+    public static final int ERROR_NOT_SUPPORTED = 2;
+    /**
+     * Error code for weak signal.
+     */
+    public static final int ERROR_WEAK_SIGNAL = 3;
+    /**
+     * Error code when resource (e.g. tuner) is unavailable.
+     */
+    public static final int ERROR_RESOURCE_UNAVAILABLE = 4;
+    /**
+     * Error code for blocked contents.
+     */
+    public static final int ERROR_BLOCKED = 5;
+    /**
+     * Error code when the key or module is missing for the encrypted channel.
+     */
+    public static final int ERROR_ENCRYPTED = 6;
+    /**
+     * Error code when the current channel is an unknown channel.
+     */
+    public static final int ERROR_UNKNOWN_CHANNEL = 7;
 
     private final ITvAdManager mService;
     private final int mUserId;
