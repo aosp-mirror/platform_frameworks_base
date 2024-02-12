@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ravenwood;
+package com.android.platform.test.ravenwood.bivalenttest;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnNonRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -26,25 +27,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class RavenwoodMinimumTest {
+public class RavenwoodRuleTest {
     @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
-            .setProcessApp()
-            .build();
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
-    public void testSimple() {
-        Assert.assertTrue(android.os.Process.isApplicationUid(android.os.Process.myUid()));
+    @DisabledOnRavenwood
+    public void testDeviceOnly() {
+        Assert.assertFalse(RavenwoodRule.isOnRavenwood());
     }
 
     @Test
-    @IgnoreUnderRavenwood
-    public void testIgnored() {
-        throw new RuntimeException("Shouldn't be executed under ravenwood");
+    @DisabledOnNonRavenwood
+    public void testRavenwoodOnly() {
+        Assert.assertTrue(RavenwoodRule.isOnRavenwood());
     }
 
-    @Test
-    public void testIgnored$noRavenwood() {
-        throw new RuntimeException("Shouldn't be executed under ravenwood");
-    }
+    // TODO: Add more tests
 }
