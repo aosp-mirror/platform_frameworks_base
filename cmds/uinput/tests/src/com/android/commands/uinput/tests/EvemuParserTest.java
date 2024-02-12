@@ -455,7 +455,7 @@ public class EvemuParserTest {
         assertThat(regEvent.getBus()).isEqualTo(0x001d);
         assertThat(regEvent.getVendorId()).isEqualTo(0x6cb);
         assertThat(regEvent.getProductId()).isEqualTo(0x0000);
-        // TODO(b/302297266): check version ID once it's supported
+        assertThat(regEvent.getVersionId()).isEqualTo(0x0000);
 
         assertThat(regEvent.getConfiguration().get(UinputControlCode.UI_SET_PROPBIT.getValue()))
                 .asList().containsExactly(0, 2);
