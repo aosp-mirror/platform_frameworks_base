@@ -71,6 +71,9 @@ import java.net.UnknownHostException;
  * releases due to changes in the logging implementation. For the methods that return an integer,
  * a positive value may be considered as a successful invocation.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
+        "com.android.hoststubgen.nativesubstitution.Log_host")
 public final class Log {
     /** @hide */
     @IntDef({ASSERT, ERROR, WARN, INFO, DEBUG, VERBOSE})

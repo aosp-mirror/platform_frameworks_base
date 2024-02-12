@@ -21,6 +21,7 @@ package android.util;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class UtilConfig {
     static boolean sThrowExceptionForUpperArrayOutOfBounds = true;
 

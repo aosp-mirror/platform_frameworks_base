@@ -53,6 +53,7 @@ import java.util.function.BiFunction;
  *
  * <p>This structure is <b>NOT</b> thread-safe.</p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ArrayMap<K, V> implements Map<K, V> {
     private static final boolean DEBUG = false;
     private static final String TAG = "ArrayMap";

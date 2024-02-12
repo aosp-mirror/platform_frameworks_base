@@ -29,6 +29,7 @@ import java.util.Arrays;
  * not provide full reg-exp support, only simple globbing that can not be
  * used maliciously.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PatternMatcher implements Parcelable {
     /**
      * Pattern type: the given pattern must exactly match the string it is
