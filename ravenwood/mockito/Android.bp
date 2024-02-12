@@ -13,6 +13,9 @@ android_ravenwood_test {
     srcs: [
         "test/**/*.java",
     ],
+    exclude_srcs: [
+        "test/**/*DeviceOnly*.java",
+    ],
     static_libs: [
         "junit",
         "truth",
@@ -30,6 +33,9 @@ android_test {
 
     srcs: [
         "test/**/*.java",
+    ],
+    exclude_srcs: [
+        "test/**/*RavenwoodOnly*.java",
     ],
     static_libs: [
         "junit",

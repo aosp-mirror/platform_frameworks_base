@@ -31,28 +31,6 @@ import org.junit.Test;
 public class RavenwoodMockitoTest {
     @Rule public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
-
-// Use this to mock static methods, which isn't supported by mockito 2.
-// Mockito supports static mocking since 3.4.0:
-// See: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#48
-
-//    private MockitoSession mMockingSession;
-//
-//    @Before
-//    public void setUp() {
-//        mMockingSession = mockitoSession()
-//                .strictness(Strictness.LENIENT)
-//                .mockStatic(RavenwoodMockitoTest.class)
-//                .startMocking();
-//    }
-//
-//    @After
-//    public void tearDown() {
-//        if (mMockingSession != null) {
-//            mMockingSession.finishMocking();
-//        }
-//    }
-
     @Test
     public void testMockJdkClass() {
         Process object = mock(Process.class);
