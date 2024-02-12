@@ -4137,6 +4137,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     // being uninstalled,
                     continue;
                 }
+                // Don't remove config permissions and lose their GIDs.
+                if (bp.getType() == Permission.TYPE_CONFIG && !bp.isReconciled()) {
+                    continue;
+                }
                 // The target package is the source of the current permission
                 // Set to changed for either install or uninstall
                 changed = true;
