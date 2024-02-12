@@ -487,6 +487,9 @@ public final class AutomaticZenRule implements Parcelable {
     public void validate() {
         if (Flags.modesApi()) {
             checkValidType(mType);
+            if (mDeviceEffects != null) {
+                mDeviceEffects.validate();
+            }
         }
     }
 

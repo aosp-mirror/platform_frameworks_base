@@ -1264,7 +1264,7 @@ public class ZenModeHelper {
                 : new ZenDeviceEffects.Builder().build();
 
         if (isFromApp) {
-            // Don't allow apps to toggle hidden effects.
+            // Don't allow apps to toggle hidden (non-public-API) effects.
             newEffects = new ZenDeviceEffects.Builder(newEffects)
                     .setShouldDisableAutoBrightness(oldEffects.shouldDisableAutoBrightness())
                     .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
@@ -1272,6 +1272,7 @@ public class ZenModeHelper {
                     .setShouldDisableTouch(oldEffects.shouldDisableTouch())
                     .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
                     .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
+                    .setExtraEffects(oldEffects.getExtraEffects())
                     .build();
         }
 
@@ -1310,6 +1311,9 @@ public class ZenModeHelper {
             }
             if (oldEffects.shouldMaximizeDoze() != newEffects.shouldMaximizeDoze()) {
                 userModifiedFields |= ZenDeviceEffects.FIELD_MAXIMIZE_DOZE;
+            }
+            if (!Objects.equals(oldEffects.getExtraEffects(), newEffects.getExtraEffects())) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_EXTRA_EFFECTS;
             }
             zenRule.zenDeviceEffectsUserModifiedFields = userModifiedFields;
         }

@@ -160,6 +160,7 @@ import com.android.server.UiServiceTestCase;
 import com.android.server.notification.ManagedServices.UserProfiles;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Correspondence;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.testing.junit.testparameterinjector.TestParameter;
@@ -2579,6 +2580,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
         ZenDeviceEffects original = new ZenDeviceEffects.Builder()
                 .setShouldDisableTapToWake(true)
+                .addExtraEffect("extra")
                 .build();
         String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
                 new AutomaticZenRule.Builder("Rule", CONDITION_ID)
@@ -2590,6 +2592,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ZenDeviceEffects updateFromApp = new ZenDeviceEffects.Builder()
                 .setShouldUseNightMode(true) // Good
                 .setShouldMaximizeDoze(true) // Bad
+                .addExtraEffect("should be rejected") // Bad
                 .build();
         mZenModeHelper.updateAutomaticZenRule(ruleId,
                 new AutomaticZenRule.Builder("Rule", CONDITION_ID)
@@ -2603,6 +2606,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new ZenDeviceEffects.Builder()
                         .setShouldUseNightMode(true) // From update.
                         .setShouldDisableTapToWake(true) // From original.
+                        .addExtraEffect("extra")
                         .build());
     }
 
@@ -4699,19 +4703,26 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         verify(mDeviceEffectsApplier).apply(eq(NO_EFFECTS), eq(UPDATE_ORIGIN_INIT));
 
         String ruleId = addRuleWithEffects(
-                new ZenDeviceEffects.Builder().setShouldDisplayGrayscale(true).build());
+                new ZenDeviceEffects.Builder()
+                        .setShouldDisplayGrayscale(true)
+                        .addExtraEffect("ONE")
+                        .build());
         mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, UPDATE_ORIGIN_APP,
                 CUSTOM_PKG_UID);
         mTestableLooper.processAllMessages();
         verify(mDeviceEffectsApplier).apply(
                 eq(new ZenDeviceEffects.Builder()
                         .setShouldDisplayGrayscale(true)
+                        .addExtraEffect("ONE")
                         .build()),
                 eq(UPDATE_ORIGIN_APP));
 
         // Now create and activate a second rule that adds more effects.
         String secondRuleId = addRuleWithEffects(
-                new ZenDeviceEffects.Builder().setShouldDimWallpaper(true).build());
+                new ZenDeviceEffects.Builder()
+                        .setShouldDimWallpaper(true)
+                        .addExtraEffect("TWO")
+                        .build());
         mZenModeHelper.setAutomaticZenRuleState(secondRuleId, CONDITION_TRUE, UPDATE_ORIGIN_APP,
                 CUSTOM_PKG_UID);
         mTestableLooper.processAllMessages();
@@ -4720,6 +4731,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 eq(new ZenDeviceEffects.Builder()
                         .setShouldDisplayGrayscale(true)
                         .setShouldDimWallpaper(true)
+                        .setExtraEffects(ImmutableSet.of("ONE", "TWO"))
                         .build()),
                 eq(UPDATE_ORIGIN_APP));
     }
@@ -4730,7 +4742,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
         verify(mDeviceEffectsApplier).apply(eq(NO_EFFECTS), eq(UPDATE_ORIGIN_INIT));
 
-        ZenDeviceEffects zde = new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build();
+        ZenDeviceEffects zde = new ZenDeviceEffects.Builder()
+                .setShouldUseNightMode(true)
+                .addExtraEffect("extra_effect")
+                .build();
         String ruleId = addRuleWithEffects(zde);
         mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, UPDATE_ORIGIN_APP,
                 CUSTOM_PKG_UID);
@@ -4796,7 +4811,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .setDeviceEffects(effects)
                 .build();
         return mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
-                UPDATE_ORIGIN_APP, "reasons", CUSTOM_PKG_UID);
+                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "reasons", Process.SYSTEM_UID);
     }
 
     @Test
