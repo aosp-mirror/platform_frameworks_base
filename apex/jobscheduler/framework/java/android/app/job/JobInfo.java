@@ -124,6 +124,15 @@ public class JobInfo implements Parcelable {
     @Overridable // Aid in testing
     public static final long ENFORCE_MINIMUM_TIME_WINDOWS = 311402873L;
 
+    /**
+     * Require that minimum latencies and override deadlines are nonnegative.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long REJECT_NEGATIVE_DELAYS_AND_DEADLINES = 323349338L;
+
     /** @hide */
     @IntDef(prefix = { "NETWORK_TYPE_" }, value = {
             NETWORK_TYPE_NONE,
@@ -692,14 +701,14 @@ public class JobInfo implements Parcelable {
      * @see JobInfo.Builder#setMinimumLatency(long)
      */
     public long getMinLatencyMillis() {
-        return minLatencyMillis;
+        return Math.max(0, minLatencyMillis);
     }
 
     /**
      * @see JobInfo.Builder#setOverrideDeadline(long)
      */
     public long getMaxExecutionDelayMillis() {
-        return maxExecutionDelayMillis;
+        return Math.max(0, maxExecutionDelayMillis);
     }
 
     /**
@@ -818,7 +827,7 @@ public class JobInfo implements Parcelable {
      * @hide
      */
     public boolean hasEarlyConstraint() {
-        return hasEarlyConstraint;
+        return hasEarlyConstraint && minLatencyMillis > 0;
     }
 
     /**
@@ -827,7 +836,7 @@ public class JobInfo implements Parcelable {
      * @hide
      */
     public boolean hasLateConstraint() {
-        return hasLateConstraint;
+        return hasLateConstraint && maxExecutionDelayMillis >= 0;
     }
 
     @Override
@@ -1869,6 +1878,13 @@ public class JobInfo implements Parcelable {
          * Because it doesn't make sense setting this property on a periodic job, doing so will
          * throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
+         *
+         * Negative latencies also don't make sense for a job and are indicative of an error,
+         * so starting in Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+         * setting a negative deadline will result in
+         * {@link android.app.job.JobInfo.Builder#build()} throwing an
+         * {@link java.lang.IllegalArgumentException}.
+         *
          * @param minLatencyMillis Milliseconds before which this job will not be considered for
          *                         execution.
          * @see JobInfo#getMinLatencyMillis()
@@ -1891,6 +1907,13 @@ public class JobInfo implements Parcelable {
          * Because it doesn't make sense setting this property on a periodic job, doing so will
          * throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
+         *
+         * <p>
+         * Negative deadlines also don't make sense for a job and are indicative of an error,
+         * so starting in Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+         * setting a negative deadline will result in
+         * {@link android.app.job.JobInfo.Builder#build()} throwing an
+         * {@link java.lang.IllegalArgumentException}.
          *
          * <p class="note">
          * Since a job will run once the deadline has passed regardless of the status of other
@@ -2189,13 +2212,15 @@ public class JobInfo implements Parcelable {
         public JobInfo build() {
             return build(Compatibility.isChangeEnabled(DISALLOW_DEADLINES_FOR_PREFETCH_JOBS),
                     Compatibility.isChangeEnabled(REJECT_NEGATIVE_NETWORK_ESTIMATES),
-                    Compatibility.isChangeEnabled(ENFORCE_MINIMUM_TIME_WINDOWS));
+                    Compatibility.isChangeEnabled(ENFORCE_MINIMUM_TIME_WINDOWS),
+                    Compatibility.isChangeEnabled(REJECT_NEGATIVE_DELAYS_AND_DEADLINES));
         }
 
         /** @hide */
         public JobInfo build(boolean disallowPrefetchDeadlines,
                 boolean rejectNegativeNetworkEstimates,
-                boolean enforceMinimumTimeWindows) {
+                boolean enforceMinimumTimeWindows,
+                boolean rejectNegativeDelaysAndDeadlines) {
             // This check doesn't need to be inside enforceValidity. It's an unnecessary legacy
             // check that would ideally be phased out instead.
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
@@ -2205,7 +2230,7 @@ public class JobInfo implements Parcelable {
             }
             JobInfo jobInfo = new JobInfo(this);
             jobInfo.enforceValidity(disallowPrefetchDeadlines, rejectNegativeNetworkEstimates,
-                    enforceMinimumTimeWindows);
+                    enforceMinimumTimeWindows, rejectNegativeDelaysAndDeadlines);
             return jobInfo;
         }
 
@@ -2225,7 +2250,8 @@ public class JobInfo implements Parcelable {
      */
     public final void enforceValidity(boolean disallowPrefetchDeadlines,
             boolean rejectNegativeNetworkEstimates,
-            boolean enforceMinimumTimeWindows) {
+            boolean enforceMinimumTimeWindows,
+            boolean rejectNegativeDelaysAndDeadlines) {
         // Check that network estimates require network type and are reasonable values.
         if ((networkDownloadBytes > 0 || networkUploadBytes > 0 || minimumNetworkChunkBytes > 0)
                 && networkRequest == null) {
@@ -2257,6 +2283,17 @@ public class JobInfo implements Parcelable {
         }
         if (minimumNetworkChunkBytes != NETWORK_BYTES_UNKNOWN && minimumNetworkChunkBytes <= 0) {
             throw new IllegalArgumentException("Minimum chunk size must be positive");
+        }
+
+        if (rejectNegativeDelaysAndDeadlines) {
+            if (minLatencyMillis < 0) {
+                throw new IllegalArgumentException(
+                        "Minimum latency is negative: " + minLatencyMillis);
+            }
+            if (maxExecutionDelayMillis < 0) {
+                throw new IllegalArgumentException(
+                        "Override deadline is negative: " + maxExecutionDelayMillis);
+            }
         }
 
         final boolean hasDeadline = maxExecutionDelayMillis != 0L;
