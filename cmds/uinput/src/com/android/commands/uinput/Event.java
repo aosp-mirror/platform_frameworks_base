@@ -99,6 +99,7 @@ public class Event {
     private int mVersionId;
     private int mBusId;
     private int[] mInjections;
+    private long mTimestampOffsetMicros = -1;
     private SparseArray<int[]> mConfiguration;
     private long mDurationNanos;
     private int mFfEffectsMax = 0;
@@ -139,11 +140,20 @@ public class Event {
     }
 
     /**
+     * Returns the number of microseconds that should be added to the previous {@code INJECT}
+     * event's timestamp to produce the timestamp for this {@code INJECT} event. A value of -1
+     * indicates that the current timestamp should be used instead.
+     */
+    public long getTimestampOffsetMicros() {
+        return mTimestampOffsetMicros;
+    }
+
+    /**
      * Returns a {@link SparseArray} describing the event codes that should be registered for the
      * device. The keys are uinput ioctl codes (such as those returned from {@link
      * UinputControlCode#getValue()}, while the values are arrays of event codes to be enabled with
      * those ioctls. For example, key 101 (corresponding to {@link UinputControlCode#UI_SET_KEYBIT})
-     * could have values 0x110 ({@code BTN_LEFT}, 0x111 ({@code BTN_RIGHT}), and 0x112
+     * could have values 0x110 ({@code BTN_LEFT}), 0x111 ({@code BTN_RIGHT}), and 0x112
      * ({@code BTN_MIDDLE}).
      */
     public SparseArray<int[]> getConfiguration() {
@@ -209,6 +219,10 @@ public class Event {
 
         public void setInjections(int[] events) {
             mEvent.mInjections = events;
+        }
+
+        public void setTimestampOffsetMicros(long offsetMicros) {
+            mEvent.mTimestampOffsetMicros = offsetMicros;
         }
 
         /**
