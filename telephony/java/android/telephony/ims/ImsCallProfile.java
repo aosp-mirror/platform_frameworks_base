@@ -16,6 +16,7 @@
 
 package android.telephony.ims;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -297,6 +298,16 @@ public final class ImsCallProfile implements Parcelable {
      */
     public static final String EXTRA_IS_BUSINESS_CALL =
             "android.telephony.ims.extra.IS_BUSINESS_CALL";
+
+    /**
+     * The vendor IMS stack populates this {@code string} extra; it is used to hold the display name
+     * passed via the P-Asserted-Identity SIP header’s display-name field
+     *
+     * Reference: RFC3325
+     */
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_BUSINESS_CALL_COMPOSER)
+    public static final String EXTRA_ASSERTED_DISPLAY_NAME =
+            "android.telephony.ims.extra.ASSERTED_DISPLAY_NAME";
 
     /**
      * Values for EXTRA_OIR / EXTRA_CNAP
