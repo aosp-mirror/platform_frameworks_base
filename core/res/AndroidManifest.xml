@@ -835,6 +835,7 @@
     <!-- Added in V -->
     <protected-broadcast android:name="android.intent.action.PROFILE_AVAILABLE" />
     <protected-broadcast android:name="android.intent.action.PROFILE_UNAVAILABLE" />
+    <protected-broadcast android:name="android.app.action.CONSOLIDATED_NOTIFICATION_POLICY_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
