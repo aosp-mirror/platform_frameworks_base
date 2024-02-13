@@ -25,9 +25,12 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Trace;
+import android.system.OsConstants;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+
+import libcore.io.IoBridge;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -523,19 +526,19 @@ public class BitmapFactory {
     public static Bitmap decodeFile(String pathName, Options opts) {
         validate(opts);
         Bitmap bm = null;
-        InputStream stream = null;
+        FileDescriptor fd = null;
         try {
-            stream = new FileInputStream(pathName);
-            bm = decodeStream(stream, null, opts);
+            fd = IoBridge.open(pathName, OsConstants.O_RDONLY);
+            bm = decodeFileDescriptor(fd, null, opts);
         } catch (Exception e) {
             /*  do nothing.
                 If the exception happened on open, bm will be null.
             */
-            Log.e("BitmapFactory", "Unable to decode stream: " + e);
+            Log.e("BitmapFactory", "Unable to decode file: " + e);
         } finally {
-            if (stream != null) {
+            if (fd != null) {
                 try {
-                    stream.close();
+                    IoBridge.closeAndSignalBlockedThreads(fd);
                 } catch (IOException e) {
                     // do nothing here
                 }
