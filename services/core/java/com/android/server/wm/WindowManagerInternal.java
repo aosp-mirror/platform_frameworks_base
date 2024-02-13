@@ -315,8 +315,7 @@ public abstract class WindowManagerInternal {
                 InputChannel source) {
             return state.register(display)
                 .thenApply(unused ->
-                    service.transferTouchFocus(source, state.getInputChannel(),
-                            true /* isDragDrop */));
+                    service.startDragAndDrop(source, state.getInputChannel()));
         }
 
         /**

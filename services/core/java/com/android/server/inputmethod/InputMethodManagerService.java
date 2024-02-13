@@ -5808,7 +5808,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 curHostInputToken = mCurHostInputToken;
             }
-            return mInputManagerInternal.transferTouchFocus(sourceInputToken, curHostInputToken);
+            return mInputManagerInternal.transferTouchGesture(sourceInputToken, curHostInputToken);
         }
 
         @Override

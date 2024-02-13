@@ -2603,7 +2603,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * Move the touch gesture from the currently touched window on this display to this window.
+     *
+     * @deprecated Use {@link
+     *   com.android.server.input.InputManagerInternal#transferTouchGesture(IBinder, IBinder)}.
      */
+    @Deprecated
     public boolean transferTouch() {
         return mWmService.mInputManager.transferTouch(mInputChannelToken, getDisplayId());
     }
