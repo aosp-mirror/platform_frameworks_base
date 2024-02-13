@@ -77,6 +77,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THREAD_NETWORK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_TIME;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ASSIST_CONTENT;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_VPN;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WALLPAPER;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
@@ -230,6 +231,7 @@ import static android.app.admin.flags.Flags.backupServiceSecurityLogEventEnabled
 import static android.app.admin.flags.Flags.dumpsysPolicyEngineMigrationEnabled;
 import static android.app.admin.flags.Flags.headlessDeviceOwnerSingleUserEnabled;
 import static android.app.admin.flags.Flags.policyEngineMigrationV2Enabled;
+import static android.app.admin.flags.Flags.assistContentUserRestrictionEnabled;
 import static android.content.Intent.ACTION_MANAGED_PROFILE_AVAILABLE;
 import static android.content.Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -13373,6 +13375,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             USER_RESTRICTION_PERMISSIONS.put(
                     UserManager.DISALLOW_THREAD_NETWORK,
                     new String[]{MANAGE_DEVICE_POLICY_THREAD_NETWORK});
+        }
+        if (assistContentUserRestrictionEnabled()) {
+            USER_RESTRICTION_PERMISSIONS.put(
+                    UserManager.DISALLOW_ASSIST_CONTENT,
+                    new String[]{MANAGE_DEVICE_POLICY_ASSIST_CONTENT});
         }
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, new String[]{MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION});
