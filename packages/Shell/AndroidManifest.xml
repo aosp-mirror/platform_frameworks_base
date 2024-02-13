@@ -924,6 +924,10 @@
     <!-- Permission required for CTS test - CtsPackageManagerTestCases-->
     <uses-permission android:name="android.permission.DOMAIN_VERIFICATION_AGENT" />
 
+    <!-- Permission required for Cts test - CtsInputTestCases -->
+    <uses-permission
+        android:name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
