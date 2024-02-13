@@ -1511,6 +1511,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            if (type == TYPE_PRESENTATION || type == TYPE_PRIVATE_PRESENTATION) {
+                mDisplayManagerInternal.onPresentation(displayContent.getDisplay().getDisplayId(),
+                        /*isShown=*/ true);
+            }
+
             if (type == TYPE_PRIVATE_PRESENTATION && !displayContent.isPrivate()) {
                 ProtoLog.w(WM_ERROR,
                         "Attempted to add private presentation window to a non-private display.  "
