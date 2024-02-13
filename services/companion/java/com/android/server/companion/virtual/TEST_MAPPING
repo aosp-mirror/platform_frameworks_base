@@ -33,6 +33,14 @@
       ]
     },
     {
+      "name": "CtsVirtualDevicesCameraTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
       "name": "CtsHardwareTestCases",
       "options": [
         {
@@ -54,10 +62,32 @@
           "exclude-annotation": "android.support.test.filters.FlakyTest"
         }
       ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsMediaAudioTestCases",
+      "options": [
+        {
+          "include-filter": "android.media.audio.cts.AudioFocusWithVdmTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
     },
     {
-      "name": "CtsVirtualDevicesCameraTestCases",
+      "name": "CtsPermissionTestCases",
       "options": [
+        {
+          "include-filter": "android.permissionmultidevice.cts.DeviceAwarePermissionGrantTest"
+        },
+        {
+          "include-filter": "android.permission.cts.DevicePermissionsTest"
+        },
+        {
+          "include-filter": "android.permission.cts.PermissionUpdateListenerTest"
+        },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
