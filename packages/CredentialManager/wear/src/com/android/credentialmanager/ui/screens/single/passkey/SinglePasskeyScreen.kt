@@ -42,7 +42,7 @@ import com.android.credentialmanager.ui.components.DismissChip
 import com.android.credentialmanager.ui.components.SignInHeader
 import com.android.credentialmanager.ui.components.SignInOptionsChip
 import com.android.credentialmanager.ui.screens.single.SingleAccountScreen
-import com.android.credentialmanager.ui.screens.single.UiState
+import com.android.credentialmanager.ui.screens.UiState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 
