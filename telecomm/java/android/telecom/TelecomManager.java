@@ -1611,6 +1611,26 @@ public class TelecomManager {
      * {@link PhoneAccount} when the upper bound limit, 10, has already been reached.
      *
      * @param account The complete {@link PhoneAccount}.
+     * @throws UnsupportedOperationException if the caller cannot modify phone state and the device
+     * does not have the Telecom feature.
+     * @throws SecurityException if:
+     * <ol>
+     *     <li>the caller cannot modify phone state and the phone account doesn't belong to the
+     *     calling user.</li>
+     *     <li>the caller is registering a self-managed phone and either they are not allowed to
+     *     manage their own calls or if the account is call capable, a connection manager, or a
+     *     sim account.</li>
+     *     <li>the caller is registering a sim account without the ability to do so.</li>
+     *     <li>the caller is registering a multi-user phone account but isn't a system app.</li>
+     *     <li>the account can make SIM-based voice calls but the caller cannot register sim
+     *     accounts or isn't a sim call manager.</li>
+     *     <li>the account defines the EXTRA_SKIP_CALL_FILTERING extra but the caller isn't
+     *     able to modify the phone state.</li>
+     *     <li>the caller is registering an account for a different user but isn't able to
+     *     interact across users.</li>
+     *     <li>if simultaneous calling is available and the phone account package name doesn't
+     *     correspond to the simultaneous calling accounts associated with this phone account.</li>
+     * </ol>
      */
     public void registerPhoneAccount(PhoneAccount account) {
         ITelecomService service = getTelecomService();
