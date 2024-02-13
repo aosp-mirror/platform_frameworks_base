@@ -32,6 +32,7 @@ import android.view.InputChannel;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
@@ -387,10 +388,20 @@ public interface InputMethod {
     /**
      * Checks if IME is ready to start stylus handwriting session.
      * If yes, {@link #startStylusHandwriting(int, InputChannel, List)} is called.
-     * @param requestId
+     *
+     * @param requestId identifier for the session start request
+     * @param connectionlessCallback the callback to receive the session result if starting a
+     *     connectionless handwriting session, or null if starting a regular session
+     * @param cursorAnchorInfo optional positional information about the view receiving stylus
+     *     events for a connectionless handwriting session
+     * @param isConnectionlessForDelegation whether the connectionless handwriting session is for
+     *     delegation. If true, the recognised text should be saved and can later be committed by
+     *     {@link #commitHandwritingDelegationTextIfAvailable}.
      * @hide
      */
-    default void canStartStylusHandwriting(int requestId) {
+    default void canStartStylusHandwriting(int requestId,
+            @Nullable IConnectionlessHandwritingCallback connectionlessCallback,
+            @Nullable CursorAnchorInfo cursorAnchorInfo, boolean isConnectionlessForDelegation) {
         // intentionally empty
     }
 
@@ -409,6 +420,26 @@ public interface InputMethod {
      */
     default void startStylusHandwriting(
             int requestId, @NonNull InputChannel channel, @Nullable List<MotionEvent> events) {
+        // intentionally empty
+    }
+
+    /**
+     * Commits recognised text that was previously saved from a connectionless handwriting session
+     * for delegation.
+     *
+     * @hide
+     */
+    default void commitHandwritingDelegationTextIfAvailable() {
+        // intentionally empty
+    }
+
+    /**
+     * Discards recognised text that was previously saved from a connectionless handwriting session
+     * for delegation.
+     *
+     * @hide
+     */
+    default void discardHandwritingDelegationText() {
         // intentionally empty
     }
 
