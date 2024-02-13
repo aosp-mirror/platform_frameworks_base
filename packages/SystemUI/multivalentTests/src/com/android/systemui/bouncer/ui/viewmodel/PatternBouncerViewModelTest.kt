@@ -32,7 +32,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
@@ -78,7 +77,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onShown() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
@@ -87,14 +86,14 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(message?.text).isEqualTo(ENTER_YOUR_PATTERN)
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
             assertThat(underTest.authenticationMethod).isEqualTo(AuthenticationMethodModel.Pattern)
         }
 
     @Test
     fun onDragStart() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
@@ -105,7 +104,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(message?.text).isEmpty()
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
         }
 
     @Test
@@ -147,7 +146,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onDragEnd_whenWrong() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
@@ -160,7 +159,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
             assertThat(message?.text).isEqualTo(WRONG_PATTERN)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
         }
 
     @Test
@@ -369,16 +368,15 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     }
 
     private fun TestScope.switchToScene(toScene: SceneKey) {
-        val currentScene by collectLastValue(sceneInteractor.desiredScene)
-        val bouncerShown = currentScene?.key != SceneKey.Bouncer && toScene == SceneKey.Bouncer
-        val bouncerHidden = currentScene?.key == SceneKey.Bouncer && toScene != SceneKey.Bouncer
-        sceneInteractor.changeScene(SceneModel(toScene), "reason")
-        sceneInteractor.onSceneChanged(SceneModel(toScene), "reason")
+        val currentScene by collectLastValue(sceneInteractor.currentScene)
+        val bouncerShown = currentScene != SceneKey.Bouncer && toScene == SceneKey.Bouncer
+        val bouncerHidden = currentScene == SceneKey.Bouncer && toScene != SceneKey.Bouncer
+        sceneInteractor.changeScene(toScene, "reason")
         if (bouncerShown) underTest.onShown()
         if (bouncerHidden) underTest.onHidden()
         runCurrent()
 
-        assertThat(currentScene).isEqualTo(SceneModel(toScene))
+        assertThat(currentScene).isEqualTo(toScene)
     }
 
     private fun TestScope.lockDeviceAndOpenPatternBouncer() {

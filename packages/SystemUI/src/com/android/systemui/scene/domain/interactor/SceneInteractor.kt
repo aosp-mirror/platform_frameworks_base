@@ -24,7 +24,8 @@ import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.TransitionKey
+import com.android.systemui.util.kotlin.pairwiseBy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,34 +56,25 @@ constructor(
 ) {
 
     /**
-     * The currently *desired* scene.
+     * The current scene.
      *
-     * **Important:** this value will _commonly be different_ from what is being rendered in the UI,
-     * by design.
-     *
-     * There are two intended sources for this value:
-     * 1. Programmatic requests to transition to another scene (calls to [changeScene]).
-     * 2. Reports from the UI about completing a transition to another scene (calls to
-     *    [onSceneChanged]).
-     *
-     * Both the sources above cause the value of this flow to change; however, they cause mismatches
-     * in different ways.
-     *
-     * **Updates from programmatic transitions**
-     *
-     * When an external bit of code asks the framework to switch to another scene, the value here
-     * will update immediately. Downstream, the UI will detect this change and initiate the
-     * transition animation. As the transition animation progresses, a threshold will be reached, at
-     * which point the UI and the state here will match each other.
-     *
-     * **Updates from the UI**
-     *
-     * When the user interacts with the UI, the UI runs a transition animation that tracks the user
-     * pointer (for example, the user's finger). During this time, the state value here and what the
-     * UI shows will likely not match. Once/if a threshold is met, the UI reports it and commits the
-     * change, making the value here match the UI again.
+     * Note that during a transition between scenes, more than one scene might be rendered but only
+     * one is considered the committed/current scene.
      */
-    val desiredScene: StateFlow<SceneModel> = repository.desiredScene
+    val currentScene: StateFlow<SceneKey> =
+        repository.currentScene
+            .pairwiseBy(initialValue = repository.currentScene.value) { from, to ->
+                logger.logSceneChangeCommitted(
+                    from = from,
+                    to = to,
+                )
+                to
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = repository.currentScene.value,
+            )
 
     /**
      * The current state of the transition.
@@ -146,14 +138,32 @@ constructor(
     /**
      * Requests a scene change to the given scene.
      *
-     * The change is animated. Therefore, while the value in [desiredScene] will update immediately,
-     * it will be some time before the UI will switch to the desired scene. The scene change
-     * requested is remembered here but served by the UI layer, which will start a transition
-     * animation. Once enough of the transition has occurred, the system will come into agreement
-     * between the [desiredScene] and the UI.
+     * The change is animated. Therefore, it will be some time before the UI will switch to the
+     * desired scene. Once enough of the transition has occurred, the [currentScene] will become
+     * [toScene] (unless the transition is canceled by user action or another call to this method).
      */
-    fun changeScene(scene: SceneModel, loggingReason: String) {
-        updateDesiredScene(scene, loggingReason, logger::logSceneChangeRequested)
+    fun changeScene(
+        toScene: SceneKey,
+        loggingReason: String,
+        transitionKey: TransitionKey? = null,
+    ) {
+        check(toScene != SceneKey.Gone || deviceUnlockedInteractor.isDeviceUnlocked.value) {
+            "Cannot change to the Gone scene while the device is locked. Logging reason for scene" +
+                " change was: $loggingReason"
+        }
+
+        val currentSceneKey = currentScene.value
+        if (currentSceneKey == toScene) {
+            return
+        }
+
+        logger.logSceneChangeRequested(
+            from = currentSceneKey,
+            to = toScene,
+            reason = loggingReason,
+        )
+
+        repository.changeScene(toScene, transitionKey)
     }
 
     /** Sets the visibility of the container. */
@@ -183,40 +193,5 @@ constructor(
     /** Handles a user input event. */
     fun onUserInput() {
         powerInteractor.onUserTouch()
-    }
-
-    /**
-     * Notifies that the UI has transitioned sufficiently to the given scene.
-     *
-     * *Not intended for external use!*
-     *
-     * Once a transition between one scene and another passes a threshold, the UI invokes this
-     * method to report it, updating the value in [desiredScene] to match what the UI shows.
-     */
-    fun onSceneChanged(scene: SceneModel, loggingReason: String) {
-        updateDesiredScene(scene, loggingReason, logger::logSceneChangeCommitted)
-    }
-
-    private fun updateDesiredScene(
-        scene: SceneModel,
-        loggingReason: String,
-        log: (from: SceneKey, to: SceneKey, loggingReason: String) -> Unit,
-    ) {
-        check(scene.key != SceneKey.Gone || deviceUnlockedInteractor.isDeviceUnlocked.value) {
-            "Cannot change to the Gone scene while the device is locked. Logging reason for scene" +
-                " change was: $loggingReason"
-        }
-
-        val currentSceneKey = desiredScene.value.key
-        if (currentSceneKey == scene.key) {
-            return
-        }
-
-        log(
-            /* from= */ currentSceneKey,
-            /* to= */ scene.key,
-            /* loggingReason= */ loggingReason,
-        )
-        repository.setDesiredScene(scene)
     }
 }

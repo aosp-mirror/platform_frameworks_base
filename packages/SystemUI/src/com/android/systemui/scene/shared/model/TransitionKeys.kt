@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,19 @@
 
 package com.android.systemui.scene.shared.model
 
-/** Models a scene. */
-data class SceneModel(
+/**
+ * Defines all known named transitions.
+ *
+ * These are the subset of transitions that can be referenced by key when asking for a scene change.
+ */
+object TransitionKeys {
 
-    /** The key of the scene. */
-    val key: SceneKey,
+    /** Reference to a scene transition that can collapse the shade scene instantly. */
+    val CollapseShadeInstantly = TransitionKey("CollapseShadeInstantly")
 
-    /** An optional name for the transition that led to this scene being the current scene. */
-    val transitionName: String? = null,
-)
+    /**
+     * Reference to a scene transition that can collapse the shade scene slightly faster than a
+     * normal collapse would.
+     */
+    val SlightlyFasterShadeCollapse = TransitionKey("SlightlyFasterShadeCollapse")
+}

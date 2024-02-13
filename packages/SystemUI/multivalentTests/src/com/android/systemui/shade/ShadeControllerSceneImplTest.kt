@@ -30,7 +30,6 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.CommandQueue
@@ -88,7 +87,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN the shade remains collapsed and the post-collapse action ran
-            assertThat(sceneInteractor.desiredScene.value.key).isEqualTo(SceneKey.Gone)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Gone)
             verify(testRunnable, times(1)).run()
         }
 
@@ -106,7 +105,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN the shade remains expanded and the post-collapse action did not run
-            assertThat(sceneInteractor.desiredScene.value.key).isEqualTo(SceneKey.Shade)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Shade)
             assertThat(shadeInteractor.isAnyFullyExpanded.value).isTrue()
             verify(testRunnable, never()).run()
         }
@@ -123,7 +122,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN the shade collapses back to lockscreen and the post-collapse action ran
-            assertThat(sceneInteractor.desiredScene.value.key).isEqualTo(SceneKey.Lockscreen)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Lockscreen)
         }
 
     @Test
@@ -138,7 +137,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN the shade collapses back to lockscreen and the post-collapse action ran
-            assertThat(sceneInteractor.desiredScene.value.key).isEqualTo(SceneKey.Gone)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Gone)
         }
 
     @Test
@@ -172,7 +171,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
         }
 
     private fun setScene(key: SceneKey) {
-        sceneInteractor.changeScene(SceneModel(key), "test")
+        sceneInteractor.changeScene(key, "test")
         sceneInteractor.setTransitionState(
             MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(key))
         )

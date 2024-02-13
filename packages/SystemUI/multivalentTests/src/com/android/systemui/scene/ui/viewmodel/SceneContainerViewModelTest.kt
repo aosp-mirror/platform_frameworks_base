@@ -23,11 +23,12 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,7 +42,10 @@ import org.junit.runner.RunWith
 class SceneContainerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
+    private val testScope by lazy { kosmos.testScope }
     private val interactor by lazy { kosmos.sceneInteractor }
+    private val fakeSceneDataSource = kosmos.fakeSceneDataSource
+
     private lateinit var underTest: SceneContainerViewModel
 
     @Before
@@ -55,16 +59,17 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun isVisible() = runTest {
-        val isVisible by collectLastValue(underTest.isVisible)
-        assertThat(isVisible).isTrue()
+    fun isVisible() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isVisible)
+            assertThat(isVisible).isTrue()
 
-        interactor.setVisible(false, "reason")
-        assertThat(isVisible).isFalse()
+            interactor.setVisible(false, "reason")
+            assertThat(isVisible).isFalse()
 
-        interactor.setVisible(true, "reason")
-        assertThat(isVisible).isTrue()
-    }
+            interactor.setVisible(true, "reason")
+            assertThat(isVisible).isTrue()
+        }
 
     @Test
     fun allSceneKeys() {
@@ -72,12 +77,13 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun sceneTransition() = runTest {
-        val currentScene by collectLastValue(underTest.currentScene)
-        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+    fun sceneTransition() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
 
-        underTest.onSceneChanged(SceneModel(SceneKey.Shade))
+            fakeSceneDataSource.changeScene(SceneKey.Shade)
 
-        assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
-    }
+            assertThat(currentScene).isEqualTo(SceneKey.Shade)
+        }
 }

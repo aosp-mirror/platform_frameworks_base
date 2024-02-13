@@ -32,7 +32,7 @@ interface Scene {
     val key: SceneKey
 
     /**
-     * The mapping between [UserAction] and destination [SceneModel]s.
+     * The mapping between [UserAction] and destination [UserActionResult]s.
      *
      * When the scene framework detects a user action, if the current scene has a map entry for that
      * user action, the framework starts a transition to the scene in the map.
@@ -40,7 +40,7 @@ interface Scene {
      * Once the [Scene] becomes the current one, the scene framework will read this property and set
      * up a collector to watch for new mapping values. If every map entry provided by the scene, the
      * framework will set up user input handling for its [UserAction] and, if such a user action is
-     * detected, initiate a transition to the specified [SceneModel].
+     * detected, initiate a transition to the specified [UserActionResult].
      *
      * Note that reading from this method does _not_ mean that any user action has occurred.
      * Instead, the property is read before any user action/gesture is detected so that the
@@ -51,7 +51,7 @@ interface Scene {
      * type is not currently active in the scene and should be ignored by the framework, while the
      * current scene is this one.
      */
-    val destinationScenes: StateFlow<Map<UserAction, SceneModel>>
+    val destinationScenes: StateFlow<Map<UserAction, UserActionResult>>
 }
 
 /** Enumerates all scene framework supported user actions. */

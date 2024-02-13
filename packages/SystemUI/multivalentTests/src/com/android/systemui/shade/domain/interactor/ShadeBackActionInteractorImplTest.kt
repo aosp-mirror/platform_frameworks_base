@@ -26,7 +26,6 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.shared.recents.utilities.Utilities
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -60,7 +59,7 @@ class ShadeBackActionInteractorImplTest : SysuiTestCase() {
             setScene(SceneKey.Shade)
             underTest.animateCollapseQs(true)
             runCurrent()
-            assertThat(sceneInteractor.desiredScene.value.key).isEqualTo(SceneKey.Shade)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Shade)
         }
 
     @Test
@@ -70,7 +69,7 @@ class ShadeBackActionInteractorImplTest : SysuiTestCase() {
             setScene(SceneKey.QuickSettings)
             underTest.animateCollapseQs(true)
             runCurrent()
-            assertThat(sceneInteractor.desiredScene.value.key).isEqualTo(SceneKey.Gone)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Gone)
         }
 
     @Test
@@ -80,7 +79,7 @@ class ShadeBackActionInteractorImplTest : SysuiTestCase() {
             setScene(SceneKey.QuickSettings)
             underTest.animateCollapseQs(true)
             runCurrent()
-            assertThat(sceneInteractor.desiredScene.value.key).isEqualTo(SceneKey.Lockscreen)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Lockscreen)
         }
 
     @Test
@@ -89,7 +88,7 @@ class ShadeBackActionInteractorImplTest : SysuiTestCase() {
             setScene(SceneKey.QuickSettings)
             underTest.animateCollapseQs(false)
             runCurrent()
-            assertThat(sceneInteractor.desiredScene.value.key).isEqualTo(SceneKey.Shade)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Shade)
         }
 
     private fun enterDevice() {
@@ -99,7 +98,7 @@ class ShadeBackActionInteractorImplTest : SysuiTestCase() {
     }
 
     private fun setScene(key: SceneKey) {
-        sceneInteractor.changeScene(SceneModel(key), "test")
+        sceneInteractor.changeScene(key, "test")
         sceneInteractor.setTransitionState(
             MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(key))
         )

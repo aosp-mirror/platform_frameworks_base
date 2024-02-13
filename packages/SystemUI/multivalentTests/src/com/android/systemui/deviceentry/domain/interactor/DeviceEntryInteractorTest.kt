@@ -32,7 +32,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -311,9 +310,9 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun showOrUnlockDevice_notLocked_switchesToGoneScene() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             switchToScene(SceneKey.Lockscreen)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
 
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
@@ -323,15 +322,15 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
             underTest.attemptDeviceEntry()
 
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+            assertThat(currentScene).isEqualTo(SceneKey.Gone)
         }
 
     @Test
     fun showOrUnlockDevice_authMethodNotSecure_switchesToGoneScene() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             switchToScene(SceneKey.Lockscreen)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
 
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
@@ -340,15 +339,15 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
             underTest.attemptDeviceEntry()
 
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+            assertThat(currentScene).isEqualTo(SceneKey.Gone)
         }
 
     @Test
     fun showOrUnlockDevice_authMethodSwipe_switchesToGoneScene() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             switchToScene(SceneKey.Lockscreen)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
 
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
@@ -358,7 +357,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
             underTest.attemptDeviceEntry()
 
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+            assertThat(currentScene).isEqualTo(SceneKey.Gone)
         }
 
     @Test
@@ -384,6 +383,6 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         }
 
     private fun switchToScene(sceneKey: SceneKey) {
-        sceneInteractor.changeScene(SceneModel(sceneKey), "reason")
+        sceneInteractor.changeScene(sceneKey, "reason")
     }
 }
