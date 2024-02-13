@@ -52,6 +52,7 @@ import java.util.function.Consumer;
  * additional work in this situation, you can create a subclass that
  * implements the {@link #onCallbackDied} method.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class RemoteCallbackList<E extends IInterface> {
     private static final String TAG = "RemoteCallbackList";
 

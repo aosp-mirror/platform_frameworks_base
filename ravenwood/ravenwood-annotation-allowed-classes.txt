@@ -130,6 +130,7 @@ android.os.Broadcaster
 android.os.Build
 android.os.Bundle
 android.os.BundleMerger
+android.os.CancellationSignal
 android.os.ConditionVariable
 android.os.DeadObjectException
 android.os.DeadSystemException
@@ -154,7 +155,10 @@ android.os.PatternMatcher
 android.os.PersistableBundle
 android.os.PowerComponents
 android.os.Process
+android.os.RemoteCallback
+android.os.RemoteCallbackList
 android.os.RemoteException
+android.os.ResultReceiver
 android.os.ServiceSpecificException
 android.os.StrictMode
 android.os.SystemClock
