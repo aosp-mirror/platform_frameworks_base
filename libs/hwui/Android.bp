@@ -155,6 +155,7 @@ cc_defaults {
         host: {
             static_libs: [
                 "libandroidfw",
+                "libhostgraphics",
                 "libutils",
             ],
         },
@@ -501,6 +502,17 @@ cc_library_headers {
     ],
     header_libs: ["android_graphics_jni_headers"],
     export_header_lib_headers: ["android_graphics_jni_headers"],
+    target: {
+        android: {
+            export_include_dirs: ["platform/android"],
+        },
+        host: {
+            export_include_dirs: ["platform/host"],
+        },
+        windows: {
+            enabled: true,
+        },
+    },
 }
 
 cc_defaults {
@@ -538,6 +550,7 @@ cc_defaults {
         "utils/Blur.cpp",
         "utils/Color.cpp",
         "utils/LinearAllocator.cpp",
+        "utils/StringUtils.cpp",
         "utils/TypefaceUtils.cpp",
         "utils/VectorDrawableUtils.cpp",
         "AnimationContext.cpp",
@@ -552,6 +565,7 @@ cc_defaults {
         "Mesh.cpp",
         "MemoryPolicy.cpp",
         "PathParser.cpp",
+        "ProfileData.cpp",
         "Properties.cpp",
         "PropertyValuesAnimatorSet.cpp",
         "PropertyValuesHolder.cpp",
@@ -569,12 +583,13 @@ cc_defaults {
         export_proto_headers: true,
     },
 
+    header_libs: ["libandroid_headers_private"],
+
     target: {
         android: {
-            header_libs: [
-                "libandroid_headers_private",
-                "libtonemap_headers",
-            ],
+            header_libs: ["libtonemap_headers"],
+
+            local_include_dirs: ["platform/android"],
 
             srcs: [
                 "hwui/AnimatedImageThread.cpp",
@@ -605,7 +620,6 @@ cc_defaults {
                 "thread/CommonPool.cpp",
                 "utils/GLUtils.cpp",
                 "utils/NdkUtils.cpp",
-                "utils/StringUtils.cpp",
                 "AutoBackendTextureRelease.cpp",
                 "DeferredLayerUpdater.cpp",
                 "DeviceInfo.cpp",
@@ -617,7 +631,6 @@ cc_defaults {
                 "FrameMetricsReporter.cpp",
                 "Layer.cpp",
                 "LayerUpdateQueue.cpp",
-                "ProfileData.cpp",
                 "ProfileDataContainer.cpp",
                 "Readback.cpp",
                 "TreeInfo.cpp",
@@ -627,6 +640,21 @@ cc_defaults {
 
             // Allow implicit fallthroughs in HardwareBitmapUploader.cpp until they are fixed.
             cflags: ["-Wno-implicit-fallthrough"],
+        },
+        host: {
+            header_libs: ["libnativebase_headers"],
+
+            local_include_dirs: ["platform/host"],
+
+            srcs: [
+                "platform/host/renderthread/CacheManager.cpp",
+                "platform/host/renderthread/RenderThread.cpp",
+                "platform/host/ProfileDataContainer.cpp",
+                "platform/host/Readback.cpp",
+                "platform/host/WebViewFunctorManager.cpp",
+            ],
+
+            cflags: ["-Wno-unused-private-field"],
         },
     },
 }
@@ -663,6 +691,7 @@ cc_defaults {
     header_libs: ["libandroid_headers_private"],
     target: {
         android: {
+            local_include_dirs: ["platform/android"],
             shared_libs: [
                 "libgui",
                 "libui",
