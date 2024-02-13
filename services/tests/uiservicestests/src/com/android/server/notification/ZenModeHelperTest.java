@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.app.AutomaticZenRule.TYPE_BEDTIME;
+import static android.app.AutomaticZenRule.TYPE_IMMERSIVE;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ACTIVATED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DEACTIVATED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DISABLED;
@@ -68,6 +69,7 @@ import static com.android.os.dnd.DNDProtoEnums.PEOPLE_STARRED;
 import static com.android.os.dnd.DNDProtoEnums.ROOT_CONFIG;
 import static com.android.os.dnd.DNDProtoEnums.STATE_ALLOW;
 import static com.android.os.dnd.DNDProtoEnums.STATE_DISALLOW;
+import static com.android.server.notification.ZenModeEventLogger.ACTIVE_RULE_TYPE_MANUAL;
 import static com.android.server.notification.ZenModeHelper.RULE_LIMIT_PER_PACKAGE;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
@@ -3551,6 +3553,89 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ZenModeEventLogger.ZenStateChangedEvent.DND_ACTIVE_RULES_CHANGED.getId());
         assertThat(mZenModeEventLogger.getNumRulesActive(1)).isEqualTo(0);
         assertThat(mZenModeEventLogger.getPolicyProto(1)).isNull();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testZenModeEventLog_activeRuleTypes() {
+        mTestFlagResolver.setFlagOverride(LOG_DND_STATE_EVENTS, true);
+        setupZenConfig();
+
+        // Event 1: turn on manual zen mode. Manual rule will have ACTIVE_RULE_TYPE_MANUAL
+        mZenModeHelper.setManualZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null,
+                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "", null, Process.SYSTEM_UID);
+
+        // Create bedtime rule
+        AutomaticZenRule bedtime = new AutomaticZenRule.Builder("Bedtime Mode (TM)", CONDITION_ID)
+                .setType(TYPE_BEDTIME)
+                .build();
+        String bedtimeRuleId = mZenModeHelper.addAutomaticZenRule("pkg", bedtime, UPDATE_ORIGIN_APP,
+                "reason", CUSTOM_PKG_UID);
+
+        // Create immersive rule
+        AutomaticZenRule immersive = new AutomaticZenRule.Builder("Immersed", CONDITION_ID)
+                .setType(TYPE_IMMERSIVE)
+                .build();
+        String immersiveId = mZenModeHelper.addAutomaticZenRule("pkg", immersive, UPDATE_ORIGIN_APP,
+                "reason", CUSTOM_PKG_UID);
+
+        // Event 2: Activate bedtime rule
+        mZenModeHelper.setAutomaticZenRuleState(bedtimeRuleId,
+                new Condition(bedtime.getConditionId(), "", STATE_TRUE, SOURCE_SCHEDULE),
+                UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        // Event 3: Turn immersive on
+        mZenModeHelper.setAutomaticZenRuleState(immersiveId,
+                new Condition(immersive.getConditionId(), "", STATE_TRUE, SOURCE_SCHEDULE),
+                UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        // Event 4: Turn off bedtime mode, leaving just unknown + immersive
+        mZenModeHelper.setAutomaticZenRuleState(bedtimeRuleId,
+                new Condition(bedtime.getConditionId(), "", STATE_FALSE, SOURCE_SCHEDULE),
+                UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        // Total of 4 events
+        assertEquals(4, mZenModeEventLogger.numLoggedChanges());
+
+        // First event: DND_TURNED_ON; active rules: 1; type is ACTIVE_RULE_TYPE_MANUAL
+        assertThat(mZenModeEventLogger.getEventId(0)).isEqualTo(
+                ZenModeEventLogger.ZenStateChangedEvent.DND_TURNED_ON.getId());
+        assertThat(mZenModeEventLogger.getChangedRuleType(0)).isEqualTo(
+                DNDProtoEnums.MANUAL_RULE);
+        assertThat(mZenModeEventLogger.getNumRulesActive(0)).isEqualTo(1);
+        int[] ruleTypes0 = mZenModeEventLogger.getActiveRuleTypes(0);
+        assertThat(ruleTypes0.length).isEqualTo(1);
+        assertThat(ruleTypes0[0]).isEqualTo(ACTIVE_RULE_TYPE_MANUAL);
+
+        // Second event: active rules: 2; types are TYPE_MANUAL and TYPE_BEDTIME
+        assertThat(mZenModeEventLogger.getChangedRuleType(1)).isEqualTo(
+                DNDProtoEnums.AUTOMATIC_RULE);
+        assertThat(mZenModeEventLogger.getNumRulesActive(1)).isEqualTo(2);
+        int[] ruleTypes1 = mZenModeEventLogger.getActiveRuleTypes(1);
+        assertThat(ruleTypes1.length).isEqualTo(2);
+        assertThat(ruleTypes1[0]).isEqualTo(TYPE_BEDTIME);
+        assertThat(ruleTypes1[1]).isEqualTo(ACTIVE_RULE_TYPE_MANUAL);
+
+        // Third event: active rules: 3
+        assertThat(mZenModeEventLogger.getEventId(2)).isEqualTo(
+                ZenModeEventLogger.ZenStateChangedEvent.DND_ACTIVE_RULES_CHANGED.getId());
+        assertThat(mZenModeEventLogger.getChangedRuleType(2)).isEqualTo(
+                DNDProtoEnums.AUTOMATIC_RULE);
+        int[] ruleTypes2 = mZenModeEventLogger.getActiveRuleTypes(2);
+        assertThat(ruleTypes2.length).isEqualTo(3);
+        assertThat(ruleTypes2[0]).isEqualTo(TYPE_BEDTIME);
+        assertThat(ruleTypes2[1]).isEqualTo(TYPE_IMMERSIVE);
+        assertThat(ruleTypes2[2]).isEqualTo(ACTIVE_RULE_TYPE_MANUAL);
+
+        // Fourth event: active rules 2, types are TYPE_MANUAL and TYPE_IMMERSIVE
+        assertThat(mZenModeEventLogger.getEventId(3)).isEqualTo(
+                ZenModeEventLogger.ZenStateChangedEvent.DND_ACTIVE_RULES_CHANGED.getId());
+        assertThat(mZenModeEventLogger.getChangedRuleType(3)).isEqualTo(
+                DNDProtoEnums.AUTOMATIC_RULE);
+        int[] ruleTypes3 = mZenModeEventLogger.getActiveRuleTypes(3);
+        assertThat(ruleTypes3.length).isEqualTo(2);
+        assertThat(ruleTypes3[0]).isEqualTo(TYPE_IMMERSIVE);
+        assertThat(ruleTypes3[1]).isEqualTo(ACTIVE_RULE_TYPE_MANUAL);
     }
 
     @Test

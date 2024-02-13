@@ -132,4 +132,9 @@ public class ZenModeEventLoggerFake extends ZenModeEventLogger {
         checkInRange(i);
         return mChanges.get(i).getAreChannelsBypassing();
     }
+
+    public int[] getActiveRuleTypes(int i) throws IllegalArgumentException {
+        checkInRange(i);
+        return mChanges.get(i).getActiveRuleTypes();
+    }
 }
