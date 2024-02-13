@@ -56,6 +56,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.BundleMerger;
+import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.IncidentManager;
 import android.os.Parcel;
@@ -73,6 +74,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.service.chooser.AdditionalContentContract;
 import android.service.chooser.ChooserAction;
 import android.service.chooser.ChooserResult;
 import android.telecom.PhoneAccount;
@@ -6064,6 +6066,62 @@ public class Intent implements Parcelable, Cloneable {
      */
     @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_ALBUM_TEXT)
     public static final int CHOOSER_CONTENT_TYPE_ALBUM = 1;
+
+    /**
+     * Optional argument used to provide a {@link ContentProvider} {@link Uri} to an
+     * {@link #ACTION_CHOOSER} Intent which allows additional toggleable items to be included
+     * in the sharing UI.
+     * <p>
+     * For example, this could be  used to show photos being shared in the context of the user's
+     * entire photo roll, with the option to change the set of photos being shared.
+     * <p>
+     * When this is provided in an {@link #ACTION_CHOOSER} Intent with an {@link #ACTION_SEND} or
+     * {@link #ACTION_SEND_MULTIPLE} target Intent, the sharesheet will query (see
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}) this URI to
+     * retrieve a set of additional items available for selection. The set of items returned by the
+     * content provider is expected to contain all the items from the {@link #EXTRA_STREAM}
+     * argument, in their relative order, which will be marked as selected. The URI's authority
+     * must be different from any shared items URI provided in {@link #EXTRA_STREAM} or returned by
+     * the provider.
+     *
+     * <p>The {@link Bundle} argument of the
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}
+     * method will contains the original intent Chooser has been launched with under the
+     * {@link #EXTRA_INTENT} key as a context for the current sharing session. The returned
+     * {@link android.database.Cursor} should contain
+     * {@link android.service.chooser.AdditionalContentContract.Columns#URI} column for the item URI
+     * and, optionally, {@link AdditionalContentContract.CursorExtraKeys#POSITION} extra that
+     * specifies the cursor starting position; the item at this position is expected to match the
+     * item specified by {@link #EXTRA_CHOOSER_FOCUSED_ITEM_POSITION}.</p>
+     *
+     * <p>When the user makes a selection change,
+     * {@link ContentProvider#call(String, String, Bundle)} method will be invoked with the "method"
+     * argument set to
+     * {@link android.service.chooser.AdditionalContentContract.MethodNames#ON_SELECTION_CHANGED},
+     * the "arg" argument set to this argument's value, and the "extras" {@link Bundle} argument
+     * containing {@link #EXTRA_INTENT} key containing the original intent Chooser has been launched
+     * with but with the modified target intent --Chooser will modify the target intent according to
+     * the selection changes made by the user.
+     * Applications may implement this method to change any of the following Chooser arguments by
+     * returning new values in the result bundle:
+     * {@link #EXTRA_CHOOSER_TARGETS}, {@link #EXTRA_ALTERNATE_INTENTS},
+     * {@link #EXTRA_CHOOSER_CUSTOM_ACTIONS},
+     * {@link #EXTRA_CHOOSER_MODIFY_SHARE_ACTION},
+     * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER}.</p>
+     */
+    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_PAYLOAD_TOGGLING)
+    public static final String EXTRA_CHOOSER_ADDITIONAL_CONTENT_URI =
+            "android.intent.extra.CHOOSER_ADDITIONAL_CONTENT_URI";
+
+    /**
+     * Optional argument to be used with {@link #EXTRA_CHOOSER_ADDITIONAL_CONTENT_URI}, used in
+     * combination with {@link #EXTRA_CHOOSER_ADDITIONAL_CONTENT_URI}.
+     * An integer, zero-based index into {@link #EXTRA_STREAM} argument indicating the item that
+     * should be focused by the Chooser in preview.
+     */
+    @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_PAYLOAD_TOGGLING)
+    public static final String EXTRA_CHOOSER_FOCUSED_ITEM_POSITION =
+            "android.intent.extra.CHOOSER_FOCUSED_ITEM_POSITION";
 
     /**
      * An {@code ArrayList} of {@code String} annotations describing content for
