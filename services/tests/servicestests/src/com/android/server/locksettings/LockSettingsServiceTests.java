@@ -16,6 +16,7 @@
 
 package com.android.server.locksettings;
 
+import static android.Manifest.permission.CONFIGURE_FACTORY_RESET_PROTECTION;
 import static android.security.Flags.FLAG_REPORT_PRIMARY_AUTH_ATTEMPTS;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
@@ -39,7 +40,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
+import android.content.Intent;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.gatekeeper.GateKeeperResponse;
@@ -239,6 +242,12 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     }
 
     @Test
+    public void testSetLockCredential_forPrimaryUser_sendsFrpNotification() throws Exception {
+        setCredential(PRIMARY_USER_ID, newPassword("password"));
+        checkRecordedFrpNotificationIntent();
+    }
+
+    @Test
     public void testSetLockCredential_forPrimaryUser_sendsCredentials() throws Exception {
         setCredential(PRIMARY_USER_ID, newPassword("password"));
         verify(mRecoverableKeyStoreManager)
@@ -320,6 +329,15 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
 
         verify(mFingerprintManager).removeAll(eq(MANAGED_PROFILE_USER_ID), any());
         verify(mFaceManager).removeAll(eq(MANAGED_PROFILE_USER_ID), any());
+    }
+
+    @Test
+    public void testClearLockCredential_sendsFrpNotification() throws Exception {
+        setCredential(PRIMARY_USER_ID, newPassword("password"));
+        checkRecordedFrpNotificationIntent();
+        mService.clearRecordedFrpNotificationData();
+        clearCredential(PRIMARY_USER_ID, newPassword("password"));
+        checkRecordedFrpNotificationIntent();
     }
 
     @Test
@@ -517,6 +535,23 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     @Test(expected=NullPointerException.class)
     public void testSetStringRejectsNullKey() {
         mService.setString(null, "value", 0);
+    }
+
+    private void checkRecordedFrpNotificationIntent() {
+        if (android.security.Flags.frpEnforcement()) {
+            Intent savedNotificationIntent = mService.getSavedFrpNotificationIntent();
+            assertNotNull(savedNotificationIntent);
+            UserHandle userHandle = mService.getSavedFrpNotificationUserHandle();
+            assertEquals(userHandle,
+                    UserHandle.of(mInjector.getUserManagerInternal().getMainUserId()));
+
+            String permission = mService.getSavedFrpNotificationPermission();
+            assertEquals(CONFIGURE_FACTORY_RESET_PROTECTION, permission);
+        } else {
+            assertNull(mService.getSavedFrpNotificationIntent());
+            assertNull(mService.getSavedFrpNotificationUserHandle());
+            assertNull(mService.getSavedFrpNotificationPermission());
+        }
     }
 
     private void checkPasswordHistoryLength(int userId, int expectedLen) {

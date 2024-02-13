@@ -19,6 +19,7 @@ package android.content;
 import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
+import static android.security.Flags.FLAG_FRP_ENFORCEMENT;
 import static android.service.chooser.Flags.FLAG_ENABLE_SHARESHEET_METADATA_EXTRA;
 
 import android.Manifest;
@@ -3900,6 +3901,26 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_IDLE_MAINTENANCE_END =
             "android.intent.action.ACTION_IDLE_MAINTENANCE_END";
+
+    /**
+     * Broadcast Action: A broadcast sent to the main user when the main user changes their
+     * Lock Screen Knowledge Factor, either because they changed the current value, or because
+     * they added or removed it.
+     *
+     * <p class="note">At present, this intent is only broadcast to listeners with the
+     * CONFIGURE_FACTORY_RESET_PROTECTION signature|privileged permiession.</p>
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_FRP_ENFORCEMENT)
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(protectedBroadcast = true)
+    public static final String
+            ACTION_MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTOR_CHANGED =
+            "android.intent.action.MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTOR_CHANGED";
 
     /**
      * Broadcast Action: a remote intent is to be broadcasted.
