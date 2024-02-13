@@ -29,6 +29,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.monet.ColorScheme
+import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect
 import com.android.systemui.surfaceeffects.ripple.MultiRippleController
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController
 
@@ -118,6 +119,7 @@ internal constructor(
         turbulenceNoiseController,
         ::AnimatingColorTransition
     )
+    var loadingEffect: LoadingEffect? = null
 
     val bgColor = context.getColor(com.google.android.material.R.color.material_dynamic_neutral20)
     val surfaceColor =
@@ -128,7 +130,6 @@ internal constructor(
             mediaViewHolder.albumView.backgroundTintList = colorList
             mediaViewHolder.gutsViewHolder.setSurfaceColor(surfaceColor)
         }
-
     val accentPrimary =
         animatingColorTransitionFactory(
             loadDefaultColor(R.attr.textColorPrimary),
@@ -139,6 +140,7 @@ internal constructor(
             mediaViewHolder.gutsViewHolder.setAccentPrimaryColor(accentPrimary)
             multiRippleController.updateColor(accentPrimary)
             turbulenceNoiseController.updateNoiseColor(accentPrimary)
+            loadingEffect?.updateColor(accentPrimary)
         }
 
     val accentSecondary =

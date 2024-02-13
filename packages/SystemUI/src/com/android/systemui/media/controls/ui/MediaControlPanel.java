@@ -41,6 +41,7 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.BitmapDrawable;
@@ -81,6 +82,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.widget.CachingIconView;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.ActivityIntentHelper;
+import com.android.systemui.Flags;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.GhostedViewTransitionAnimatorController;
 import com.android.systemui.bluetooth.BroadcastDialogController;
@@ -111,6 +113,9 @@ import com.android.systemui.res.R;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect;
+import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState;
+import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffectView;
 import com.android.systemui.surfaceeffects.ripple.MultiRippleController;
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView;
 import com.android.systemui.surfaceeffects.ripple.RippleAnimation;
@@ -248,13 +253,34 @@ public class MediaControlPanel {
     private String mCurrentBroadcastApp;
     private MultiRippleController mMultiRippleController;
     private TurbulenceNoiseController mTurbulenceNoiseController;
+    private LoadingEffect mLoadingEffect;
     private final GlobalSettings mGlobalSettings;
-
+    private final Random mRandom = new Random();
     private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig;
     private boolean mWasPlaying = false;
     private boolean mButtonClicked = false;
 
-    private final Random mRandom = new Random();
+    private final LoadingEffect.Companion.PaintDrawCallback mNoiseDrawCallback =
+            new LoadingEffect.Companion.PaintDrawCallback() {
+                @Override
+                public void onDraw(@NonNull Paint loadingPaint) {
+                    mMediaViewHolder.getLoadingEffectView().draw(loadingPaint);
+                }
+            };
+    private final LoadingEffect.Companion.AnimationStateChangedCallback mStateChangedCallback =
+            new LoadingEffect.Companion.AnimationStateChangedCallback() {
+                @Override
+                public void onStateChanged(@NonNull AnimationState oldState,
+                        @NonNull AnimationState newState) {
+                    LoadingEffectView loadingEffectView =
+                            mMediaViewHolder.getLoadingEffectView();
+                    if (newState == AnimationState.NOT_PLAYING) {
+                        loadingEffectView.setVisibility(View.INVISIBLE);
+                    } else {
+                        loadingEffectView.setVisibility(View.VISIBLE);
+                    }
+                }
+            };
 
     /**
      * Initialize a new control panel
@@ -456,6 +482,10 @@ public class MediaControlPanel {
 
         TurbulenceNoiseView turbulenceNoiseView = vh.getTurbulenceNoiseView();
         turbulenceNoiseView.setBlendMode(BlendMode.SCREEN);
+        LoadingEffectView loadingEffectView = vh.getLoadingEffectView();
+        loadingEffectView.setBlendMode(BlendMode.SCREEN);
+        loadingEffectView.setVisibility(View.INVISIBLE);
+
         mTurbulenceNoiseController = new TurbulenceNoiseController(turbulenceNoiseView);
 
         mColorSchemeTransition = new ColorSchemeTransition(
@@ -587,22 +617,41 @@ public class MediaControlPanel {
             }
         }
 
-        // Turbulence noise
         if (shouldPlayTurbulenceNoise()) {
+            // Need to create the config here to get the correct view size and color.
             if (mTurbulenceNoiseAnimationConfig == null) {
                 mTurbulenceNoiseAnimationConfig =
-                        createTurbulenceNoiseAnimation();
+                        createTurbulenceNoiseConfig();
             }
-            // Color will be correctly updated in ColorSchemeTransition.
-            mTurbulenceNoiseController.play(
-                    Type.SIMPLEX_NOISE,
-                    mTurbulenceNoiseAnimationConfig
-            );
-            mMainExecutor.executeDelayed(
-                    mTurbulenceNoiseController::finish,
-                    TURBULENCE_NOISE_PLAY_DURATION
-            );
+
+            if (Flags.shaderlibLoadingEffectRefactor()) {
+                if (mLoadingEffect == null) {
+                    mLoadingEffect = new LoadingEffect(
+                            Type.SIMPLEX_NOISE,
+                            mTurbulenceNoiseAnimationConfig,
+                            mNoiseDrawCallback,
+                            mStateChangedCallback
+                    );
+                    mColorSchemeTransition.setLoadingEffect(mLoadingEffect);
+                }
+
+                mLoadingEffect.play();
+                mMainExecutor.executeDelayed(
+                        mLoadingEffect::finish,
+                        TURBULENCE_NOISE_PLAY_DURATION
+                );
+            } else {
+                mTurbulenceNoiseController.play(
+                        Type.SIMPLEX_NOISE,
+                        mTurbulenceNoiseAnimationConfig
+                );
+                mMainExecutor.executeDelayed(
+                        mTurbulenceNoiseController::finish,
+                        TURBULENCE_NOISE_PLAY_DURATION
+                );
+            }
         }
+
         mButtonClicked = false;
         mWasPlaying = isPlaying();
 
@@ -1232,7 +1281,13 @@ public class MediaControlPanel {
         return mButtonClicked && !mWasPlaying && isPlaying();
     }
 
-    private TurbulenceNoiseAnimationConfig createTurbulenceNoiseAnimation() {
+    private TurbulenceNoiseAnimationConfig createTurbulenceNoiseConfig() {
+        View targetView = Flags.shaderlibLoadingEffectRefactor()
+                ? mMediaViewHolder.getLoadingEffectView() :
+                mMediaViewHolder.getTurbulenceNoiseView();
+        int width = targetView.getWidth();
+        int height = targetView.getHeight();
+
         return new TurbulenceNoiseAnimationConfig(
                 /* gridCount= */ 2.14f,
                 TurbulenceNoiseAnimationConfig.DEFAULT_LUMINOSITY_MULTIPLIER,
@@ -1242,10 +1297,11 @@ public class MediaControlPanel {
                 /* noiseMoveSpeedX= */ 0.42f,
                 /* noiseMoveSpeedY= */ 0f,
                 TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_SPEED_Z,
+                // Color will be correctly updated in ColorSchemeTransition.
                 /* color= */ mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
                 /* backgroundColor= */ Color.BLACK,
-                /* width= */ mMediaViewHolder.getTurbulenceNoiseView().getWidth(),
-                /* height= */ mMediaViewHolder.getTurbulenceNoiseView().getHeight(),
+                width,
+                height,
                 TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,
                 /* easeInDuration= */ 1350f,
                 /* easeOutDuration= */ 1350f,

@@ -40,6 +40,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.testing.AndroidTestingRunner
@@ -61,6 +62,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.ActivityIntentHelper
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
@@ -88,6 +90,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffectView
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimationConfig
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView
@@ -190,6 +193,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var dismissText: TextView
     private lateinit var multiRippleView: MultiRippleView
     private lateinit var turbulenceNoiseView: TurbulenceNoiseView
+    private lateinit var loadingEffectView: LoadingEffectView
 
     private lateinit var session: MediaSession
     private lateinit var device: MediaDeviceData
@@ -402,6 +406,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         multiRippleView = MultiRippleView(context, null)
         turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        loadingEffectView = LoadingEffectView(context, null)
 
         whenever(viewHolder.player).thenReturn(view)
         whenever(viewHolder.appIcon).thenReturn(appIcon)
@@ -447,6 +452,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         whenever(viewHolder.multiRippleView).thenReturn(multiRippleView)
         whenever(viewHolder.turbulenceNoiseView).thenReturn(turbulenceNoiseView)
+        whenever(viewHolder.loadingEffectView).thenReturn(loadingEffectView)
     }
 
     /** Initialize elements for the recommendation view holder */
@@ -2429,12 +2435,47 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         mainExecutor.execute {
             assertThat(turbulenceNoiseView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(loadingEffectView.visibility).isEqualTo(View.INVISIBLE)
 
             clock.advanceTime(
                 MediaControlPanel.TURBULENCE_NOISE_PLAY_DURATION +
                     TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS.toLong()
             )
 
+            assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
+            assertThat(loadingEffectView.visibility).isEqualTo(View.INVISIBLE)
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SHADERLIB_LOADING_EFFECT_REFACTOR)
+    fun playTurbulenceNoise_newLoadingEffect_finishesAfterDuration() {
+        val semanticActions =
+            MediaButton(
+                playOrPause =
+                    MediaAction(
+                        icon = null,
+                        action = {},
+                        contentDescription = "play",
+                        background = null
+                    )
+            )
+        val data = mediaData.copy(semanticActions = semanticActions)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.actionPlayPause.callOnClick()
+
+        mainExecutor.execute {
+            assertThat(loadingEffectView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
+
+            clock.advanceTime(
+                MediaControlPanel.TURBULENCE_NOISE_PLAY_DURATION +
+                    TurbulenceNoiseAnimationConfig.DEFAULT_EASING_DURATION_IN_MILLIS.toLong()
+            )
+
+            assertThat(loadingEffectView.visibility).isEqualTo(View.INVISIBLE)
             assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
         }
     }
@@ -2457,6 +2498,30 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         viewHolder.action0.callOnClick()
 
+        assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
+        assertThat(loadingEffectView.visibility).isEqualTo(View.INVISIBLE)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SHADERLIB_LOADING_EFFECT_REFACTOR)
+    fun playTurbulenceNoise_newLoadingEffect_whenPlaybackStateIsNotPlaying_doesNotPlayTurbulence() {
+        val semanticActions =
+            MediaButton(
+                custom0 =
+                    MediaAction(
+                        icon = null,
+                        action = {},
+                        contentDescription = "custom0",
+                        background = null
+                    ),
+            )
+        val data = mediaData.copy(semanticActions = semanticActions)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+
+        viewHolder.action0.callOnClick()
+
+        assertThat(loadingEffectView.visibility).isEqualTo(View.INVISIBLE)
         assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
     }
 
