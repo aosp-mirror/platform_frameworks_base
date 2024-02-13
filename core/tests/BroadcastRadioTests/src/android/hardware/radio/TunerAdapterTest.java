@@ -270,7 +270,7 @@ public final class TunerAdapterTest {
         int scanStatus = mRadioTuner.scan(RadioTuner.DIRECTION_DOWN, /* skipSubChannel= */ false);
 
         verify(mTunerMock).seek(/* directionDown= */ true, /* skipSubChannel= */ false);
-        assertWithMessage("Status for scaning")
+        assertWithMessage("Status for scanning")
                 .that(scanStatus).isEqualTo(RadioManager.STATUS_OK);
         verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onProgramInfoChanged(FM_PROGRAM_INFO);
     }
