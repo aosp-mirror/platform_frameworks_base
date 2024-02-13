@@ -126,21 +126,28 @@ class BubbleBarExpandedViewDragController(
     }
 
     private inner class MagnetListener : MagnetizedObject.MagnetListener {
-        override fun onStuckToTarget(target: MagnetizedObject.MagneticTarget) {
+        override fun onStuckToTarget(
+                target: MagnetizedObject.MagneticTarget,
+                draggedObject: MagnetizedObject<*>
+        ) {
             isStuckToDismiss = true
         }
 
         override fun onUnstuckFromTarget(
-            target: MagnetizedObject.MagneticTarget,
-            velX: Float,
-            velY: Float,
-            wasFlungOut: Boolean
+                target: MagnetizedObject.MagneticTarget,
+                draggedObject: MagnetizedObject<*>,
+                velX: Float,
+                velY: Float,
+                wasFlungOut: Boolean
         ) {
             isStuckToDismiss = false
             animationHelper.animateUnstuckFromDismissView()
         }
 
-        override fun onReleasedInTarget(target: MagnetizedObject.MagneticTarget) {
+        override fun onReleasedInTarget(
+                target: MagnetizedObject.MagneticTarget,
+                draggedObject: MagnetizedObject<*>
+        ) {
             onDismissed()
             dismissView.hide()
         }

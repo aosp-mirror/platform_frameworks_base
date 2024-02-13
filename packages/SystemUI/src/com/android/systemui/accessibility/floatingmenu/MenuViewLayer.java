@@ -229,20 +229,23 @@ class MenuViewLayer extends FrameLayout implements
         }
         mDragToInteractAnimationController.setMagnetListener(new MagnetizedObject.MagnetListener() {
             @Override
-            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject) {
                 mDragToInteractAnimationController.animateInteractMenu(
                         target.getTargetView().getId(), /* scaleUp= */ true);
             }
 
             @Override
             public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject,
                     float velocityX, float velocityY, boolean wasFlungOut) {
                 mDragToInteractAnimationController.animateInteractMenu(
                         target.getTargetView().getId(), /* scaleUp= */ false);
             }
 
             @Override
-            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject) {
                 dispatchAccessibilityAction(target.getTargetView().getId());
             }
         });

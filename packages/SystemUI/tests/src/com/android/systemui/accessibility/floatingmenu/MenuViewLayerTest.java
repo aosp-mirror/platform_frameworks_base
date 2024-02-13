@@ -455,6 +455,6 @@ public class MenuViewLayerTest extends SysuiTestCase {
         View view = mock(View.class);
         when(view.getId()).thenReturn(id);
         magnetListener.onReleasedInTarget(
-                new MagnetizedObject.MagneticTarget(view, 200));
+                new MagnetizedObject.MagneticTarget(view, 200), mock(MagnetizedObject.class));
     }
 }
