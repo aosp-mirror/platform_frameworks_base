@@ -51,6 +51,7 @@ import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
+import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
@@ -17299,5 +17300,34 @@ public class DevicePolicyManager {
     @UnsupportedAppUsage
     public boolean isOnboardingBugreportV2FlagEnabled() {
         return onboardingBugreportV2Enabled();
+    }
+
+    /**
+     * Returns the subscription ids of all subscriptions which was downloaded by the calling
+     * admin.
+     *
+     * <p> This returns only the subscriptions which were downloaded by the calling admin via
+     *      {@link android.telephony.euicc.EuiccManager#downloadSubscription}.
+     *      If a susbcription is returned by this method then in it subject to management controls
+     *      and cannot be removed by users.
+     *
+     * <p> Callable by device owners and profile owners.
+     *
+     * @throws SecurityException if the caller is not authorized to call this method
+     * @return ids of all managed subscriptions currently downloaded by an admin on the device
+     */
+    @FlaggedApi(FLAG_ESIM_MANAGEMENT_ENABLED)
+    @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS)
+    @NonNull
+    public Set<Integer> getSubscriptionsIds() {
+        throwIfParentInstance("getSubscriptionsIds");
+        if (mService != null) {
+            try {
+                return intArrayToSet(mService.getSubscriptionIds(mContext.getPackageName()));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return new HashSet<>();
     }
 }

@@ -3800,6 +3800,13 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to set policy related to subscriptions downloaded by an admin.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+            APIs protected by this permission on users different to the calling user.
+        @FlaggedApi("android.app.admin.flags.esim_management_enabled") -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS"
+        android:protectionLevel="internal|role" />
+
     <!-- Allows an application to set device policies outside the current user
         that are critical for securing data within the current user.
         <p>Holding this permission allows the use of other held MANAGE_DEVICE_POLICY_*
