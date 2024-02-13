@@ -74,6 +74,7 @@ import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.service.chooser.ChooserAction;
+import android.service.chooser.ChooserResult;
 import android.telecom.PhoneAccount;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
@@ -1060,7 +1061,7 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         if (sender != null) {
-            intent.putExtra(EXTRA_CHOSEN_COMPONENT_INTENT_SENDER, sender);
+            intent.putExtra(EXTRA_CHOOSER_RESULT_INTENT_SENDER, sender);
         }
 
         // Migrate any clip data and flags from target.
@@ -6306,6 +6307,25 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_CHOSEN_COMPONENT_INTENT_SENDER =
             "android.intent.extra.CHOSEN_COMPONENT_INTENT_SENDER";
+
+    /**
+     * An {@link IntentSender} that will be notified when a user successfully chooses a target
+     * component or initiates an action such as copy or edit within an {@link #ACTION_CHOOSER}
+     * activity. The IntentSender will have the extra {@link #EXTRA_CHOOSER_RESULT} describing
+     * the result.
+     */
+    @FlaggedApi(android.service.chooser.Flags.FLAG_ENABLE_CHOOSER_RESULT)
+    public static final String EXTRA_CHOOSER_RESULT_INTENT_SENDER =
+            "android.intent.extra.CHOOSER_RESULT_INTENT_SENDER";
+
+    /**
+     * A {@link ChooserResult} which describes how the sharing session completed.
+     * <p>
+     * An instance is supplied to the optional IntentSender provided to
+     * {@link #createChooser(Intent, CharSequence, IntentSender)} when the session completes.
+     */
+    @FlaggedApi(android.service.chooser.Flags.FLAG_ENABLE_CHOOSER_RESULT)
+    public static final String EXTRA_CHOOSER_RESULT = "android.intent.extra.CHOOSER_RESULT";
 
     /**
      * The {@link ComponentName} chosen by the user to complete an action.
