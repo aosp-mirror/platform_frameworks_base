@@ -6644,6 +6644,7 @@ package android.hardware.usb {
     method public int getSupportedRoleCombinations();
     method public int getUsbDataStatus();
     method public boolean isConnected();
+    method @FlaggedApi("android.hardware.usb.flags.enable_is_pd_compliant_api") public boolean isPdCompliant();
     method public boolean isPowerTransferLimited();
     method public boolean isRoleCombinationSupported(int, int);
     method public void writeToParcel(android.os.Parcel, int);
