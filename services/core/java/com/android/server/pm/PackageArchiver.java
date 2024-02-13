@@ -203,6 +203,9 @@ public class PackageArchiver {
         Objects.requireNonNull(intentSender);
         Objects.requireNonNull(userHandle);
 
+        Slog.i(TAG,
+                TextUtils.formatSimple("Requested archival of package %s for user %s.", packageName,
+                        userHandle.getIdentifier()));
         Computer snapshot = mPm.snapshotComputer();
         int binderUserId = userHandle.getIdentifier();
         int binderUid = Binder.getCallingUid();
@@ -227,7 +230,7 @@ public class PackageArchiver {
                 archiveStateStored[i] = createAndStoreArchiveState(packageName, users[i]);
             }
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.d(TAG, TextUtils.formatSimple("Failed to archive %s with message %s",
+            Slog.e(TAG, TextUtils.formatSimple("Failed to archive %s with message %s",
                     packageName, e.getMessage()));
             throw new ParcelableException(e);
         }
@@ -247,7 +250,7 @@ public class PackageArchiver {
                         binderPid)
         ).exceptionally(
                 e -> {
-                    Slog.d(TAG, TextUtils.formatSimple("Failed to archive %s with message %s",
+                    Slog.e(TAG, TextUtils.formatSimple("Failed to archive %s with message %s",
                             packageName, e.getMessage()));
                     sendFailureStatus(intentSender, packageName, e.getMessage());
                     return null;
