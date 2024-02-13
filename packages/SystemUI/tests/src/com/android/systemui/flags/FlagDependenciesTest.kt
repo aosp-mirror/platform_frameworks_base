@@ -17,6 +17,7 @@
 package com.android.systemui.flags
 
 import android.testing.AndroidTestingRunner
+import android.util.Log
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import java.io.PrintWriter
@@ -41,13 +42,20 @@ class FlagDependenciesTest : SysuiTestCase() {
         FlagDependencies(TestFeatureFlags(teamfood = teamfood), TestHandler())
 
     private class TestHandler : FlagDependenciesBase.Handler {
+        override val enableDependencies: Boolean
+            get() = true
         override fun warnAboutBadFlagConfiguration(
             all: List<FlagDependenciesBase.Dependency>,
             unmet: List<FlagDependenciesBase.Dependency>
         ) {
-            val title = "${unmet.size} invalid of ${all.size} flag dependencies"
+            val title = "Invalid flag dependencies: ${unmet.size}"
             val details = unmet.joinToString("\n")
             fail("$title:\n$details")
+        }
+
+        override fun onCollected(all: List<FlagDependenciesBase.Dependency>) {
+            Log.d("FlagDependencies", "All: ${all.size}")
+            all.forEach { Log.d("FlagDependencies", "  $it") }
         }
     }
 
