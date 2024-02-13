@@ -16,7 +16,6 @@
 
 package com.android.credentialmanager.ui.screens.single.signInWithProvider
 
-import android.graphics.drawable.Drawable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -48,7 +47,6 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnState
  * Screen that shows sign in with provider credential.
  *
  * @param credentialSelectorUiState The app bar view model.
- * @param screenIcon The view model corresponding to the home page.
  * @param columnState ScalingLazyColumn configuration to be be applied to SingleAccountScreen
  * @param modifier styling for composable
  * @param viewModel ViewModel that updates ui state for this screen
@@ -58,7 +56,6 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 @Composable
 fun SignInWithProviderScreen(
     credentialSelectorUiState: CredentialSelectorUiState.Get.SingleEntry,
-    screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
     viewModel: SignInWithProviderViewModel = hiltViewModel(),
@@ -72,7 +69,6 @@ fun SignInWithProviderScreen(
         UiState.CredentialScreen -> {
             SignInWithProviderScreen(
                 credentialSelectorUiState.entry,
-                screenIcon,
                 columnState,
                 modifier,
                 viewModel
@@ -104,7 +100,6 @@ fun SignInWithProviderScreen(
 @Composable
 fun SignInWithProviderScreen(
     entry: CredentialEntryInfo,
-    screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
     viewModel: SignInWithProviderViewModel,
@@ -112,7 +107,7 @@ fun SignInWithProviderScreen(
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
-                icon = screenIcon,
+                icon = entry.icon,
                 title = stringResource(R.string.use_sign_in_with_provider_title,
                     entry.providerDisplayName),
             )

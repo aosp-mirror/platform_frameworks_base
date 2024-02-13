@@ -18,7 +18,6 @@
 
 package com.android.credentialmanager.ui.screens.single.password
 
-import android.graphics.drawable.Drawable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -46,11 +45,19 @@ import com.android.credentialmanager.ui.screens.single.UiState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 
+/**
+ * Screen that shows sign in with provider credential.
+ *
+ * @param credentialSelectorUiState The app bar view model.
+ * @param columnState ScalingLazyColumn configuration to be be applied to SingleAccountScreen
+ * @param modifier styling for composable
+ * @param viewModel ViewModel that updates ui state for this screen
+ * @param navController handles navigation events from this screen
+ */
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun SinglePasswordScreen(
     credentialSelectorUiState: CredentialSelectorUiState.Get.SingleEntry,
-    screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
     viewModel: SinglePasswordScreenViewModel = hiltViewModel(),
@@ -64,7 +71,6 @@ fun SinglePasswordScreen(
         UiState.CredentialScreen -> {
             SinglePasswordScreen(
                 credentialSelectorUiState.entry,
-                screenIcon,
                 columnState,
                 modifier,
                 viewModel
@@ -96,7 +102,6 @@ fun SinglePasswordScreen(
 @Composable
 private fun SinglePasswordScreen(
     entry: CredentialEntryInfo,
-    screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
     viewModel: SinglePasswordScreenViewModel,
@@ -104,7 +109,7 @@ private fun SinglePasswordScreen(
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
-                icon = screenIcon,
+                icon = entry.icon,
                 title = stringResource(R.string.use_password_title),
             )
         },
