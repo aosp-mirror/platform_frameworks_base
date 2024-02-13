@@ -17,6 +17,7 @@
 package com.android.credentialmanager
 
 import android.content.Intent
+import android.credentials.selection.BaseDialogResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.credentialmanager.CredentialSelectorUiState.Get
@@ -27,6 +28,10 @@ import com.android.credentialmanager.model.get.ActionEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.mappers.toGet
 import android.util.Log
+import com.android.credentialmanager.CredentialSelectorUiState.Cancel
+import com.android.credentialmanager.CredentialSelectorUiState.Close
+import com.android.credentialmanager.CredentialSelectorUiState.Create
+import com.android.credentialmanager.CredentialSelectorUiState.Idle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -49,21 +54,21 @@ class CredentialSelectorViewModel @Inject constructor(
         ) { request, isPrimary, shouldClose ->
             if (shouldClose) {
                 Log.d(TAG, "Request finished, closing ")
-                return@combine CredentialSelectorUiState.Close
+                return@combine Close
             }
 
             when (request) {
-                null -> CredentialSelectorUiState.Idle
-                is Request.Cancel -> CredentialSelectorUiState.Cancel(request.appName)
-                is Request.Close -> CredentialSelectorUiState.Close
-                is Request.Create -> CredentialSelectorUiState.Create
+                null -> Idle
+                is Request.Cancel -> Cancel(request.appName)
+                is Request.Close -> Close
+                is Request.Create -> Create
                 is Request.Get -> request.toGet(isPrimary)
             }
         }
         .stateIn(
             viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = CredentialSelectorUiState.Idle,
+            initialValue = Idle,
         )
 
     fun updateRequest(intent: Intent) {
@@ -74,16 +79,14 @@ class CredentialSelectorViewModel @Inject constructor(
         Log.d(TAG, "OnBackPressed")
         when (uiState.value) {
             is Get.MultipleEntry -> isPrimaryScreen.value = true
-            else -> {
-                shouldClose.value = true
-                // TODO("b/300422310 - [Wear] Implement UI for cancellation request with message")
-            }
+            is Create, Close, is Cancel, Idle -> shouldClose.value = true
+            is Get.SingleEntry, is Get.SingleEntryPerAccount -> cancel()
         }
     }
 
     override fun cancel() {
+        credentialManagerClient.sendError(BaseDialogResult.RESULT_CODE_DIALOG_USER_CANCELED)
         shouldClose.value = true
-        // TODO("b/300422310 - [Wear] Implement UI for cancellation request with message")
     }
 
     override fun openSecondaryScreen() {
