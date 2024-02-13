@@ -58,7 +58,7 @@ class DesktopModeShellCommandHandler(private val controller: DesktopTasksControl
             return false
         }
 
-        return controller.moveToDesktopWithoutDecor(taskId, WindowContainerTransaction())
+        return controller.moveToDesktop(taskId, WindowContainerTransaction())
     }
 
     override fun printShellCommandHelp(pw: PrintWriter, prefix: String) {
