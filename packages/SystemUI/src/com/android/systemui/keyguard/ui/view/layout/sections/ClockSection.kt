@@ -24,7 +24,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
-import androidx.constraintlayout.widget.ConstraintSet.INVISIBLE
+import androidx.constraintlayout.widget.ConstraintSet.GONE
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
@@ -51,11 +51,6 @@ internal fun ConstraintSet.setVisibility(
     views: Iterable<View>,
     visibility: Int,
 ) = views.forEach { view -> this.setVisibility(view.id, visibility) }
-
-internal fun ConstraintSet.setAlpha(
-    views: Iterable<View>,
-    alpha: Float,
-) = views.forEach { view -> this.setAlpha(view.id, alpha) }
 
 open class ClockSection
 @Inject
@@ -105,7 +100,7 @@ constructor(
         // Add constraint between elements in clock and clock container
         return constraintSet.apply {
             setVisibility(getTargetClockFace(clock).views, VISIBLE)
-            setVisibility(getNonTargetClockFace(clock).views, INVISIBLE)
+            setVisibility(getNonTargetClockFace(clock).views, GONE)
             if (!keyguardClockViewModel.useLargeClock) {
                 connect(sharedR.id.bc_smartspace_view, TOP, sharedR.id.date_smartspace_view, BOTTOM)
             }
@@ -150,6 +145,7 @@ constructor(
             }
         }
     }
+
     open fun applyDefaultConstraints(constraints: ConstraintSet) {
         val guideline =
             if (keyguardClockViewModel.clockShouldBeCentered.value) PARENT_ID
@@ -168,8 +164,8 @@ constructor(
             largeClockTopMargin += getDimen(ENHANCED_SMARTSPACE_HEIGHT)
 
             connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
-            constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
             constrainWidth(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
+            constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
             constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
                 R.id.lockscreen_clock_view,
@@ -190,11 +186,10 @@ constructor(
                     context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
                         Utils.getStatusBarHeaderHeightKeyguard(context)
                 }
-            if (keyguardClockViewModel.useLargeClock) {
-                smallClockTopMargin -=
-                    context.resources.getDimensionPixelSize(customizationR.dimen.small_clock_height)
-            }
-            connect(R.id.lockscreen_clock_view, TOP, PARENT_ID, TOP, smallClockTopMargin)
+
+            create(R.id.small_clock_guideline_top, ConstraintSet.HORIZONTAL_GUIDELINE)
+            setGuidelineBegin(R.id.small_clock_guideline_top, smallClockTopMargin)
+            connect(R.id.lockscreen_clock_view, TOP, R.id.small_clock_guideline_top, BOTTOM)
         }
 
         constrainWeatherClockDateIconsBarrier(constraints)
