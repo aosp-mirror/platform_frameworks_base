@@ -26,7 +26,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
  * this class. If any method in this class is needed outside of CentralSurfacesImpl, it must be
  * pulled up into ShadeViewController.
  */
-interface ShadeSurface : ShadeViewController, ShadeBackActionInteractor {
+interface ShadeSurface : ShadeViewController, ShadeBackActionInteractor, ShadeLockscreenInteractor {
     /** Initialize objects instead of injecting to avoid circular dependencies. */
     fun initDependencies(
         centralSurfaces: CentralSurfaces,

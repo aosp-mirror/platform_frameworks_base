@@ -840,10 +840,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_indication_bottom_padding))
                 .thenReturn(indicationPadding);
         mNotificationPanelViewController.loadDimens();
-
-        mNotificationPanelViewController.setAmbientIndicationTop(
-                /* ambientIndicationTop= */ stackBottom - ambientPadding,
-                /* ambientTextVisible= */ true);
     }
 
     protected void triggerPositionClockAndNotifications() {

@@ -983,7 +983,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 this,
                 mStatusBarKeyguardViewManager,
                 getNotificationShadeWindowViewController(),
-                mShadeSurface,
                 mAmbientIndicationContainer);
         updateLightRevealScrimVisibility();
 

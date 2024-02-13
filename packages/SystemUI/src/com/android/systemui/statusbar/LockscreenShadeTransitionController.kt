@@ -31,9 +31,8 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
-import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.ShadeLockscreenInteractor
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -47,6 +46,7 @@ import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.wm.shell.animation.Interpolators
+import dagger.Lazy
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -81,9 +81,9 @@ constructor(
     qsTransitionControllerFactory: LockscreenShadeQsTransitionController.Factory,
     private val shadeRepository: ShadeRepository,
     private val shadeInteractor: ShadeInteractor,
-    private val powerInteractor: PowerInteractor,
     private val splitShadeStateController: SplitShadeStateController,
-    private val naturalScrollingSettingObserver: NaturalScrollingSettingObserver,
+    private val shadeLockscreenInteractorLazy: Lazy<ShadeLockscreenInteractor>,
+    naturalScrollingSettingObserver: NaturalScrollingSettingObserver,
 ) : Dumpable {
     private var pulseHeight: Float = 0f
 
@@ -92,7 +92,6 @@ constructor(
         private set
     private var useSplitShade: Boolean = false
     private lateinit var nsslController: NotificationStackScrollLayoutController
-    lateinit var shadeViewController: ShadeViewController
     lateinit var centralSurfaces: CentralSurfaces
     lateinit var qS: QS
 
@@ -165,7 +164,6 @@ constructor(
     val touchHelper =
         DragDownHelper(
             falsingManager,
-            falsingCollector,
             this,
             naturalScrollingSettingObserver,
             shadeRepository,
@@ -181,7 +179,7 @@ constructor(
     }
 
     private val keyguardTransitionController by lazy {
-        keyguardTransitionControllerFactory.create(shadeViewController)
+        keyguardTransitionControllerFactory.create(shadeLockscreenInteractorLazy.get())
     }
 
     private val qsTransitionController = qsTransitionControllerFactory.create { qS }
@@ -320,7 +318,7 @@ constructor(
                                 true /* drag down is always an open */
                             )
                         }
-                        shadeViewController.transitionToExpandedShade(delay)
+                        shadeLockscreenInteractorLazy.get().transitionToExpandedShade(delay)
                         callbacks.forEach {
                             it.setTransitionToFullShadeAmount(0f, /* animated= */ true, delay)
                         }
@@ -538,7 +536,7 @@ constructor(
             } else {
                 // Let's only animate notifications
                 animationHandler = { delay: Long ->
-                    shadeViewController.transitionToExpandedShade(delay)
+                    shadeLockscreenInteractorLazy.get().transitionToExpandedShade(delay)
                 }
             }
             goToLockedShadeInternal(expandedView, animationHandler, cancelAction = null)
@@ -661,7 +659,7 @@ constructor(
      */
     private fun performDefaultGoToFullShadeAnimation(delay: Long) {
         logger.logDefaultGoToFullShadeAnimation(delay)
-        shadeViewController.transitionToExpandedShade(delay)
+        shadeLockscreenInteractorLazy.get().transitionToExpandedShade(delay)
         animateAppear(delay)
     }
 
@@ -686,7 +684,7 @@ constructor(
         } else {
             pulseHeight = height
             val overflow = nsslController.setPulseHeight(height)
-            shadeViewController.setOverStretchAmount(overflow)
+            shadeLockscreenInteractorLazy.get().setOverStretchAmount(overflow)
             val transitionHeight = if (keyguardBypassController.bypassEnabled) height else 0.0f
             transitionToShadeAmountCommon(transitionHeight)
         }
@@ -760,7 +758,6 @@ constructor(
  */
 class DragDownHelper(
     private val falsingManager: FalsingManager,
-    private val falsingCollector: FalsingCollector,
     private val dragDownCallback: LockscreenShadeTransitionController,
     private val naturalScrollingSettingObserver: NaturalScrollingSettingObserver,
     private val shadeRepository: ShadeRepository,
@@ -852,7 +849,6 @@ class DragDownHelper(
         if (!isDraggingDown) {
             return false
         }
-        val x = event.x
         val y = event.y
         when (event.actionMasked) {
             MotionEvent.ACTION_MOVE -> {

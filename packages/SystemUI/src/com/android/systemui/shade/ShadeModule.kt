@@ -30,6 +30,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorSceneContainerImpl
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractorImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -88,6 +89,20 @@ abstract class ShadeModule {
             sceneContainerOn: Provider<ShadeBackActionInteractorImpl>,
             sceneContainerOff: Provider<NotificationPanelViewController>
         ): ShadeBackActionInteractor {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun provideShadeLockscreenInteractor(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<ShadeLockscreenInteractorImpl>,
+            sceneContainerOff: Provider<NotificationPanelViewController>
+        ): ShadeLockscreenInteractor {
             return if (sceneContainerFlags.isEnabled()) {
                 sceneContainerOn.get()
             } else {

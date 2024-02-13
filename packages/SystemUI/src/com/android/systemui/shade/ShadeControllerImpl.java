@@ -66,7 +66,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     private final StatusBarWindowController mStatusBarWindowController;
     private final DeviceProvisionedController mDeviceProvisionedController;
 
-    private final Lazy<ShadeViewController> mShadeViewControllerLazy;
+    private final Lazy<NotificationPanelViewController> mNpvc;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<NotificationGutsManager> mGutsManager;
 
@@ -89,7 +89,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
             DeviceProvisionedController deviceProvisionedController,
             NotificationShadeWindowController notificationShadeWindowController,
             WindowManager windowManager,
-            Lazy<ShadeViewController> shadeViewControllerLazy,
+            Lazy<NotificationPanelViewController> shadeViewControllerLazy,
             Lazy<AssistManager> assistManagerLazy,
             Lazy<NotificationGutsManager> gutsManager
     ) {
@@ -101,7 +101,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
         mCommandQueue = commandQueue;
         mMainExecutor = mainExecutor;
         mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
-        mShadeViewControllerLazy = shadeViewControllerLazy;
+        mNpvc = shadeViewControllerLazy;
         mStatusBarStateController = statusBarStateController;
         mStatusBarWindowController = statusBarWindowController;
         mDeviceProvisionedController = deviceProvisionedController;
@@ -122,7 +122,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     public void instantExpandShade() {
         // Make our window larger and the panel expanded.
         makeExpandedVisible(true /* force */);
-        getShadeViewController().expand(false /* animate */);
+        getNpvc().expand(false /* animate */);
         getCommandQueue().recomputeDisableFlags(mDisplayId, false /* animate */);
     }
 
@@ -134,29 +134,29 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
             return;
         }
         if (getNotificationShadeWindowView() != null
-                && getShadeViewController().canBeCollapsed()
+                && getNpvc().canBeCollapsed()
                 && (flags & CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL) == 0) {
             // release focus immediately to kick off focus change transition
             mNotificationShadeWindowController.setNotificationShadeFocusable(false);
 
             mNotificationShadeWindowViewController.cancelExpandHelper();
-            getShadeViewController().collapse(true, delayed, speedUpFactor);
+            getNpvc().collapse(true, delayed, speedUpFactor);
         }
     }
 
     @Override
     protected void expandToNotifications() {
-        getShadeViewController().expandToNotifications();
+        getNpvc().expandToNotifications();
     }
 
     @Override
     protected void expandToQs() {
-        getShadeViewController().expandToQs();
+        getNpvc().expandToQs();
     }
 
     @Override
     public boolean closeShadeIfOpen() {
-        if (!getShadeViewController().isFullyCollapsed()) {
+        if (!getNpvc().isFullyCollapsed()) {
             getCommandQueue().animateCollapsePanels(
                     CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
             notifyVisibilityChanged(false);
@@ -167,12 +167,12 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
 
     @Override
     public boolean isShadeFullyOpen() {
-        return getShadeViewController().isShadeFullyExpanded();
+        return getNpvc().isShadeFullyExpanded();
     }
 
     @Override
     public boolean isExpandingOrCollapsing() {
-        return getShadeViewController().isExpandingOrCollapsing();
+        return getNpvc().isExpandingOrCollapsing();
     }
     @Override
     public void postAnimateCollapseShade() {
@@ -191,13 +191,13 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
 
     @Override
     public void postOnShadeExpanded(Runnable executable) {
-        getShadeViewController().addOnGlobalLayoutListener(
+        getNpvc().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
                         if (getNotificationShadeWindowView().isVisibleToUser()) {
-                            getShadeViewController().removeOnGlobalLayoutListener(this);
-                            getShadeViewController().postToView(executable);
+                            getNpvc().removeOnGlobalLayoutListener(this);
+                            getNpvc().postToView(executable);
                         }
                     }
                 });
@@ -209,7 +209,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     }
 
     private boolean collapseShadeInternal() {
-        if (!getShadeViewController().isFullyCollapsed()) {
+        if (!getNpvc().isFullyCollapsed()) {
             // close the shade if it was open
             animateCollapseShadeForcedDelayed();
             notifyVisibilityChanged(false);
@@ -237,10 +237,10 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
 
     @Override
     public void cancelExpansionAndCollapseShade() {
-        if (getShadeViewController().isTracking()) {
+        if (getNpvc().isTracking()) {
             mNotificationShadeWindowViewController.cancelCurrentTouch();
         }
-        if (getShadeViewController().isPanelExpanded()
+        if (getNpvc().isPanelExpanded()
                 && mStatusBarStateController.getState() == StatusBarState.SHADE) {
             animateCollapseShade();
         }
@@ -266,7 +266,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
 
     @Override
     public void instantCollapseShade() {
-        getShadeViewController().instantCollapse();
+        getNpvc().instantCollapse();
         runPostCollapseActions();
     }
 
@@ -297,7 +297,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
         }
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
-        getShadeViewController().collapse(false, false, 1.0f);
+        getNpvc().collapse(false, false, 1.0f);
 
         mExpandedVisible = false;
         notifyVisibilityChanged(false);
@@ -319,7 +319,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
         notifyExpandedVisibleChanged(false);
         getCommandQueue().recomputeDisableFlags(
                 mDisplayId,
-                getShadeViewController().shouldHideStatusBarIconsWhenExpanded());
+                getNpvc().shouldHideStatusBarIconsWhenExpanded());
 
         // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
         // the bouncer appear animation.
@@ -368,15 +368,15 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
         return mNotificationShadeWindowViewController.getView();
     }
 
-    private ShadeViewController getShadeViewController() {
-        return mShadeViewControllerLazy.get();
+    private NotificationPanelViewController getNpvc() {
+        return mNpvc.get();
     }
 
     @Override
     public void start() {
         super.start();
-        getShadeViewController().setTrackingStartedListener(this::runPostCollapseActions);
-        getShadeViewController().setOpenCloseListener(
+        getNpvc().setTrackingStartedListener(this::runPostCollapseActions);
+        getNpvc().setOpenCloseListener(
                 new OpenCloseListener() {
                     @Override
                     public void onClosingFinished() {
