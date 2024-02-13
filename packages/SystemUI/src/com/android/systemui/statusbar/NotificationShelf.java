@@ -766,7 +766,6 @@ public class NotificationShelf extends ActivatableNotificationView {
             }
 
         } else if (viewEnd >= shelfClipStart
-                && view.isInShelf()
                 && (mAmbientState.isShadeExpanded()
                 || (!view.isPinned() && !view.isHeadsUpAnimatingAway()))) {
 
