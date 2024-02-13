@@ -36,6 +36,48 @@ flag {
 }
 
 flag {
+  name: "dedicated_device_control_api_enabled"
+  namespace: "enterprise"
+  description: "(API) Allow the device management role holder to control which platform features are available on dedicated devices."
+  bug: "281964214"
+}
+
+flag {
+  name: "permission_migration_for_zero_trust_api_enabled"
+  namespace: "enterprise"
+  description: "(API) Migrate existing APIs to permission based, and enable DMRH to call them to collect Zero Trust signals."
+  bug: "289520697"
+}
+
+flag {
+  name: "permission_migration_for_zero_trust_impl_enabled"
+  namespace: "enterprise"
+  description: "(Implementation) Migrate existing APIs to permission based, and enable DMRH to call them to collect Zero Trust signals."
+  bug: "289520697"
+}
+
+flag {
+  name: "device_theft_api_enabled"
+  namespace: "enterprise"
+  description: "Add new API for theft detection."
+  bug: "325073410"
+}
+
+flag {
+  name: "device_theft_impl_enabled"
+  namespace: "enterprise"
+  description: "Implementing new API for theft detection."
+  bug: "325073410"
+}
+
+flag {
+  name: "coexistence_migration_for_non_emm_management_enabled"
+  namespace: "enterprise"
+  description: "Migrate existing APIs to be coexistable, and enable DMRH to call them to support non-EMM device management."
+  bug: "289520697"
+}
+
+flag {
   name: "security_log_v2_enabled"
   namespace: "enterprise"
   description: "Improve access to security logging in the context of Zero Trust."
