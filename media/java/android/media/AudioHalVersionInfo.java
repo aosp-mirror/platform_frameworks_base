@@ -79,6 +79,9 @@ public final class AudioHalVersionInfo implements Parcelable, Comparable<AudioHa
     /**
      * List of all valid Audio HAL versions. This list need to be in sync with sAudioHALVersions
      * defined in frameworks/av/media/libaudiohal/FactoryHal.cpp.
+     *
+     * Note: update {@link android.media.audio.cts.AudioHalVersionInfoTest} CTS accordingly if
+     * there is a change to supported versions.
      */
     public static final @NonNull List<AudioHalVersionInfo> VERSIONS =
             List.of(AIDL_1_0, HIDL_7_1, HIDL_7_0, HIDL_6_0, HIDL_5_0);
