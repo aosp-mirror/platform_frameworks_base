@@ -412,6 +412,19 @@ package android.os {
     field public static final int VPN_UID = 1016; // 0x3f8
   }
 
+  @FlaggedApi("android.os.telemetry_apis_framework_initialization") public class ProfilingServiceManager {
+    method @NonNull public android.os.ProfilingServiceManager.ServiceRegisterer getProfilingServiceRegisterer();
+  }
+
+  public static class ProfilingServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor public ProfilingServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  public static final class ProfilingServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @Nullable public android.os.IBinder getOrThrow() throws android.os.ProfilingServiceManager.ServiceNotFoundException;
+  }
+
   public final class ServiceManager {
     method @NonNull public static String[] getDeclaredInstances(@NonNull String);
     method public static boolean isDeclared(@NonNull String);

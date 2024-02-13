@@ -146,6 +146,8 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
+import android.os.ProfilingFrameworkInitializer;
+import android.os.ProfilingServiceManager;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -8588,6 +8590,9 @@ public final class ActivityThread extends ClientTransactionHandler
         NfcFrameworkInitializer.setNfcServiceManager(new NfcServiceManager());
         DeviceConfigInitializer.setDeviceConfigServiceManager(new DeviceConfigServiceManager());
         SeFrameworkInitializer.setSeServiceManager(new SeServiceManager());
+        if (android.server.Flags.telemetryApisService()) {
+            ProfilingFrameworkInitializer.setProfilingServiceManager(new ProfilingServiceManager());
+        }
     }
 
     private void purgePendingResources() {
