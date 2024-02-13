@@ -68,6 +68,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.AlphaOptimizedButton;
 import com.android.wm.shell.common.TriangleShape;
@@ -668,6 +669,11 @@ public class BubbleExpandedView extends LinearLayout {
         }
     }
 
+    /** Sets the alpha for the pointer. */
+    public void setPointerAlpha(float alpha) {
+        mPointerView.setAlpha(alpha);
+    }
+
     /**
      * Get alpha from underlying {@code TaskView} if this view is for a bubble.
      * Or get alpha for the overflow view if this view is for overflow.
@@ -698,12 +704,14 @@ public class BubbleExpandedView extends LinearLayout {
         }
     }
 
-    /**
-     * Sets the alpha of the background and the pointer view.
-     */
+    /** Sets the alpha of the background. */
     public void setBackgroundAlpha(float alpha) {
-        mPointerView.setAlpha(alpha);
-        setAlpha(alpha);
+        if (Flags.enableNewBubbleAnimations()) {
+            setAlpha(alpha);
+        } else {
+            mPointerView.setAlpha(alpha);
+            setAlpha(alpha);
+        }
     }
 
     /**
