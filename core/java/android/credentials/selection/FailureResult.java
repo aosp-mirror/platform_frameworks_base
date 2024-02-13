@@ -23,6 +23,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.ResultReceiver;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,6 +38,24 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class FailureResult {
+
+    /**
+     * Sends the {@code failureResult} that caused the UI to stop back to the CredentialManager
+     * service.
+     *
+     * @param resultReceiver the ResultReceiver sent from the system service, that can be extracted
+     *                      from the launch intent via
+     *                      {@link IntentHelper#extractResultReceiver(Intent)}
+     */
+    public static void sendFailureResult(@NonNull ResultReceiver resultReceiver,
+            @NonNull FailureResult failureResult) {
+        FailureDialogResult result = failureResult.toFailureDialogResult();
+        Bundle resultData = new Bundle();
+        FailureDialogResult.addToBundle(result, resultData);
+        resultReceiver.send(failureResult.errorCodeToResultCode(),
+                resultData);
+    }
+
     @Nullable
     private final String mErrorMessage;
     @NonNull
@@ -53,6 +74,9 @@ public final class FailureResult {
     /**
      * The UI was stopped due to a failure, e.g. because it failed to parse the incoming data,
      * or it encountered an irrecoverable internal issue.
+     *
+     * This code also serves as a default value to use for failures that do not fall into any other
+     * error code category or for backward compatibility.
      */
     public static final int ERROR_CODE_UI_FAILURE = 0;
     /** The user intentionally canceled the dialog. */
