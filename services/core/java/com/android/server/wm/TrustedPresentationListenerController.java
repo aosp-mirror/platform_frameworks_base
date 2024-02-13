@@ -322,15 +322,17 @@ public class TrustedPresentationListenerController {
             var listener = trustedPresentationInfo.mListener;
             boolean lastState = trustedPresentationInfo.mLastComputedTrustedPresentationState;
             boolean newState =
-                    (alpha >= trustedPresentationInfo.mThresholds.minAlpha) && (fractionRendered
-                            >= trustedPresentationInfo.mThresholds.minFractionRendered);
+                    (alpha >= trustedPresentationInfo.mThresholds.getMinAlpha())
+                            && (fractionRendered >= trustedPresentationInfo.mThresholds
+                                    .getMinFractionRendered());
             trustedPresentationInfo.mLastComputedTrustedPresentationState = newState;
 
             ProtoLog.v(WM_DEBUG_TPL,
                     "lastState=%s newState=%s alpha=%f minAlpha=%f fractionRendered=%f "
                             + "minFractionRendered=%f",
-                    lastState, newState, alpha, trustedPresentationInfo.mThresholds.minAlpha,
-                    fractionRendered, trustedPresentationInfo.mThresholds.minFractionRendered);
+                    lastState, newState, alpha, trustedPresentationInfo.mThresholds.getMinAlpha(),
+                    fractionRendered, trustedPresentationInfo.mThresholds
+                            .getMinFractionRendered());
 
             if (lastState && !newState) {
                 // We were in the trusted presentation state, but now we left it,
@@ -350,13 +352,15 @@ public class TrustedPresentationListenerController {
                 trustedPresentationInfo.mEnteredTrustedPresentationStateTime = currTimeMs;
                 mHandler.postDelayed(() -> {
                     computeTpl(mLastWindowHandles);
-                }, (long) (trustedPresentationInfo.mThresholds.stabilityRequirementMs * 1.5));
+                }, (long) (trustedPresentationInfo.mThresholds
+                            .getStabilityRequirementMillis() * 1.5));
             }
 
             // Has the timer elapsed, but we are still in the state? Emit a callback if needed
             if (!trustedPresentationInfo.mLastReportedTrustedPresentationState && newState && (
                     currTimeMs - trustedPresentationInfo.mEnteredTrustedPresentationStateTime
-                            > trustedPresentationInfo.mThresholds.stabilityRequirementMs)) {
+                            > trustedPresentationInfo.mThresholds
+                                        .getStabilityRequirementMillis())) {
                 trustedPresentationInfo.mLastReportedTrustedPresentationState = true;
                 addListenerUpdate(listenerUpdates, listener,
                         trustedPresentationInfo.mId, /*presentationState*/ true);
@@ -413,15 +417,6 @@ public class TrustedPresentationListenerController {
             mThresholds = thresholds;
             mId = id;
             mListener = listener;
-            checkValid(thresholds);
-        }
-
-        private void checkValid(TrustedPresentationThresholds thresholds) {
-            if (thresholds.minAlpha <= 0 || thresholds.minFractionRendered <= 0
-                    || thresholds.stabilityRequirementMs < 1) {
-                throw new IllegalArgumentException(
-                        "TrustedPresentationThresholds values are invalid");
-            }
         }
     }
 }
