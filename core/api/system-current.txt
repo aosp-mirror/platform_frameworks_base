@@ -4835,6 +4835,39 @@ package android.hardware.camera2.params {
 
 }
 
+package android.hardware.devicestate {
+
+  @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceState {
+    method @IntRange(from=0x0) public int getIdentifier();
+    method @NonNull public String getName();
+    method public boolean hasProperties(@NonNull int...);
+    method public boolean hasProperty(int);
+    field public static final int PROPERTY_EMULATED_ONLY = 10; // 0xa
+    field public static final int PROPERTY_EXTENDED_DEVICE_STATE_EXTERNAL_DISPLAY = 15; // 0xf
+    field public static final int PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT = 17; // 0x11
+    field public static final int PROPERTY_FEATURE_REAR_DISPLAY = 16; // 0x10
+    field public static final int PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY = 12; // 0xc
+    field public static final int PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY = 11; // 0xb
+    field public static final int PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED = 1; // 0x1
+    field public static final int PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN = 2; // 0x2
+    field public static final int PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN = 3; // 0x3
+    field public static final int PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP = 13; // 0xd
+    field public static final int PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE = 14; // 0xe
+  }
+
+  @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceStateManager {
+    method @NonNull public java.util.List<android.hardware.devicestate.DeviceState> getSupportedDeviceStates();
+    method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
+    method public void unregisterCallback(@NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
+  }
+
+  public static interface DeviceStateManager.DeviceStateCallback {
+    method public default void onDeviceStateChanged(@NonNull android.hardware.devicestate.DeviceState);
+    method public default void onSupportedStatesChanged(@NonNull java.util.List<android.hardware.devicestate.DeviceState>);
+  }
+
+}
+
 package android.hardware.display {
 
   public final class AmbientBrightnessDayStats implements android.os.Parcelable {
