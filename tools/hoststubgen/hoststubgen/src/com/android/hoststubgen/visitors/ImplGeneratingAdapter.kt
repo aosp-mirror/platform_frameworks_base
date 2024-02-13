@@ -141,11 +141,6 @@ class ImplGeneratingAdapter(
             substituted: Boolean,
             superVisitor: MethodVisitor?,
     ): MethodVisitor? {
-        // Record statistics about visiting this method when visible.
-        if ((access and Opcodes.ACC_PRIVATE) == 0) {
-            options.stats.onVisitPolicyForMethod(currentClassName, policy)
-        }
-
         // Inject method log, if needed.
         var innerVisitor = superVisitor
 
