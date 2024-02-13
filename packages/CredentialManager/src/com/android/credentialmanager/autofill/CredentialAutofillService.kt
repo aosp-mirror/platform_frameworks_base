@@ -19,9 +19,10 @@ package com.android.credentialmanager.autofill
 import android.app.PendingIntent
 import android.app.assist.AssistStructure
 import android.content.Context
-import android.content.Intent
 import android.credentials.CredentialManager
 import android.credentials.GetCredentialRequest
+import android.credentials.GetCredentialResponse
+import android.credentials.GetCredentialException
 import android.credentials.GetCandidateCredentialsResponse
 import android.credentials.GetCandidateCredentialsException
 import android.credentials.CredentialOption
@@ -45,6 +46,7 @@ import android.service.autofill.SaveCallback
 import android.service.autofill.SaveRequest
 import android.service.credentials.CredentialProviderService
 import android.util.Log
+import android.content.Intent
 import android.view.autofill.AutofillId
 import android.view.autofill.IAutoFillManagerClient
 import android.widget.RemoteViews
@@ -63,7 +65,6 @@ import com.android.credentialmanager.model.get.CredentialEntryInfo
 import java.util.concurrent.Executors
 import org.json.JSONException
 import org.json.JSONObject
-
 
 class CredentialAutofillService : AutofillService() {
 
@@ -118,10 +119,16 @@ class CredentialAutofillService : AutofillService() {
         responseClientState.putBoolean(WEBVIEW_REQUESTED_CREDENTIAL_KEY, false)
         val getCredRequest: GetCredentialRequest? = getCredManRequest(structure, sessionId,
                 requestId, responseClientState)
+        // TODO(b/324635774): Use callback for validating. If the request is coming
+        // directly from the view, there should be a corresponding callback, otherwise
+        // we should fail fast,
+        val getCredCallback = getCredManCallback(structure)
         if (getCredRequest == null) {
             Log.i(TAG, "No credential manager request found")
             callback.onFailure("No credential manager request found")
             return
+        } else if (getCredCallback == null) {
+            Log.i(TAG, "No credential manager callback found")
         }
         val credentialManager: CredentialManager =
                 getSystemService(Context.CREDENTIAL_SERVICE) as CredentialManager
@@ -505,6 +512,42 @@ class CredentialAutofillService : AutofillService() {
         TODO("Not yet implemented")
     }
 
+    private fun getCredManCallback(structure: AssistStructure): OutcomeReceiver<
+            GetCredentialResponse, GetCredentialException>? {
+        return traverseStructureForCallback(structure)
+    }
+
+    private fun traverseStructureForCallback(
+            structure: AssistStructure
+    ): OutcomeReceiver<GetCredentialResponse, GetCredentialException>? {
+        val windowNodes: List<AssistStructure.WindowNode> =
+                structure.run {
+                    (0 until windowNodeCount).map { getWindowNodeAt(it) }
+                }
+
+        windowNodes.forEach { windowNode: AssistStructure.WindowNode ->
+            return traverseNodeForCallback(windowNode.rootViewNode)
+        }
+        return null
+    }
+
+    private fun traverseNodeForCallback(
+            viewNode: AssistStructure.ViewNode
+    ): OutcomeReceiver<GetCredentialResponse, GetCredentialException>? {
+        val children: List<AssistStructure.ViewNode> =
+                viewNode.run {
+                    (0 until childCount).map { getChildAt(it) }
+                }
+
+        children.forEach { childNode: AssistStructure.ViewNode ->
+            if (childNode.isFocused() && childNode.credentialManagerCallback != null) {
+                return childNode.credentialManagerCallback
+            }
+            return traverseNodeForCallback(childNode)
+        }
+        return null
+    }
+
     private fun getCredManRequest(
             structure: AssistStructure,
             sessionId: Int,
@@ -512,7 +555,7 @@ class CredentialAutofillService : AutofillService() {
             responseClientState: Bundle
     ): GetCredentialRequest? {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
-        traverseStructure(structure, credentialOptions, responseClientState)
+        traverseStructureForRequest(structure, credentialOptions, responseClientState)
 
         if (credentialOptions.isNotEmpty()) {
             val dataBundle = Bundle()
@@ -525,7 +568,7 @@ class CredentialAutofillService : AutofillService() {
         return null
     }
 
-    private fun traverseStructure(
+    private fun traverseStructureForRequest(
             structure: AssistStructure,
             cmRequests: MutableList<CredentialOption>,
             responseClientState: Bundle
@@ -536,18 +579,17 @@ class CredentialAutofillService : AutofillService() {
                 }
 
         windowNodes.forEach { windowNode: AssistStructure.WindowNode ->
-            traverseNode(windowNode.rootViewNode, cmRequests, responseClientState)
+            traverseNodeForRequest(windowNode.rootViewNode, cmRequests, responseClientState)
         }
     }
 
-    private fun traverseNode(
+    private fun traverseNodeForRequest(
             viewNode: AssistStructure.ViewNode,
             cmRequests: MutableList<CredentialOption>,
             responseClientState: Bundle
     ) {
         viewNode.autofillId?.let {
-            val options = getCredentialOptionsFromViewNode(viewNode, it, responseClientState)
-            cmRequests.addAll(options)
+            cmRequests.addAll(getCredentialOptionsFromViewNode(viewNode, it, responseClientState))
         }
 
         val children: List<AssistStructure.ViewNode> =
@@ -556,7 +598,7 @@ class CredentialAutofillService : AutofillService() {
                 }
 
         children.forEach { childNode: AssistStructure.ViewNode ->
-            traverseNode(childNode, cmRequests, responseClientState)
+            traverseNodeForRequest(childNode, cmRequests, responseClientState)
         }
     }
 
@@ -564,8 +606,16 @@ class CredentialAutofillService : AutofillService() {
             viewNode: AssistStructure.ViewNode,
             autofillId: AutofillId,
             responseClientState: Bundle
-    ): List<CredentialOption> {
+    ): MutableList<CredentialOption> {
+        if (viewNode.credentialManagerRequest != null &&
+                viewNode.credentialManagerCallback != null) {
+            val options = viewNode.credentialManagerRequest?.getCredentialOptions()
+            if (options != null) {
+                return options
+            }
+        }
         val credentialHints: MutableList<String> = mutableListOf()
+
         if (viewNode.autofillHints != null) {
             for (hint in viewNode.autofillHints!!) {
                 if (hint.startsWith(CRED_HINT_PREFIX)) {

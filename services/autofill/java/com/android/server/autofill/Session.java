@@ -127,6 +127,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
+import android.os.OutcomeReceiver;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -2828,9 +2829,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             replaceResponseLocked(authenticatedResponse, (FillResponse) result, newClientState);
         } else if (result instanceof GetCredentialResponse) {
             Slog.d(TAG, "Received GetCredentialResponse from authentication flow");
-            Dataset dataset = getDatasetFromCredentialResponse((GetCredentialResponse) result);
-            if (dataset != null) {
-                autoFill(requestId, datasetIdx, dataset, false, UI_TYPE_UNKNOWN);
+            boolean isCredmanCallbackInvoked = false;
+            if (Flags.autofillCredmanIntegration()) {
+                GetCredentialResponse response = (GetCredentialResponse) result;
+                isCredmanCallbackInvoked = invokeCredentialManagerCallback(response);
+            }
+
+            if (!isCredmanCallbackInvoked) {
+                Dataset dataset = getDatasetFromCredentialResponse(
+                    (GetCredentialResponse) result);
+                if (dataset != null) {
+                    autoFill(requestId, datasetIdx, dataset, false, UI_TYPE_UNKNOWN);
+                }
             }
         } else if (result instanceof Dataset) {
             if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
@@ -2866,6 +2876,49 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 AUTHENTICATION_RESULT_FAILURE);
             processNullResponseLocked(requestId, 0);
         }
+    }
+
+    private boolean invokeCredentialManagerCallback(GetCredentialResponse response) {
+        synchronized (mLock) {
+            return invokeCredentialManagerCallbackLocked(response);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean invokeCredentialManagerCallbackLocked(GetCredentialResponse response) {
+        AutofillId autofillId = response.getAutofillId();
+        if (autofillId != null) {
+            OutcomeReceiver<GetCredentialResponse,
+                    GetCredentialException> callback =
+                    getCredmanCallbackFromContextsLocked(autofillId);
+            if (callback != null) {
+                Slog.w(TAG, "Propagating response to Credential Manager callback");
+                callback.onResult(response);
+                return true;
+            } else {
+                Slog.w(TAG, "Received Credential Manager response but no callback found");
+            }
+        } else {
+            Slog.w(TAG, "Received Credential Manager response but no autofillId found");
+        }
+        return false;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private OutcomeReceiver<GetCredentialResponse,
+            GetCredentialException> getCredmanCallbackFromContextsLocked(
+            @NonNull AutofillId autofillId) {
+        final int numContexts = mContexts.size();
+        for (int i = numContexts - 1; i >= 0; i--) {
+            final FillContext context = mContexts.get(i);
+            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(),
+                    autofillId);
+            if (node != null) {
+                return node.getCredentialManagerCallback();
+            }
+        }
+        return null;
     }
 
     private Dataset getDatasetFromCredentialResponse(GetCredentialResponse result) {
@@ -5036,16 +5089,23 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 if (resultCode == SUCCESS_CREDMAN_SELECTOR) {
                     Slog.d(TAG, "onReceiveResult from Credential Manager bottom sheet");
+                    boolean isCredmanCallbackInvoked = false;
                     GetCredentialResponse getCredentialResponse =
                             resultData.getParcelable(
                                     CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE,
                                     GetCredentialResponse.class);
-                    Dataset datasetFromCredential = getDatasetFromCredentialResponse(
-                            getCredentialResponse);
-                    if (datasetFromCredential != null) {
-                        autoFill(requestId, /*datasetIndex=*/-1,
-                                datasetFromCredential, false,
-                                UI_TYPE_CREDMAN_BOTTOM_SHEET);
+
+                    isCredmanCallbackInvoked =
+                            invokeCredentialManagerCallback(getCredentialResponse);
+
+                    if (!isCredmanCallbackInvoked) {
+                        Dataset datasetFromCredential = getDatasetFromCredentialResponse(
+                                getCredentialResponse);
+                        if (datasetFromCredential != null) {
+                            autoFill(requestId, /*datasetIndex=*/-1,
+                                    datasetFromCredential, false,
+                                    UI_TYPE_CREDMAN_BOTTOM_SHEET);
+                        }
                     }
                 } else if (resultCode == FAILURE_CREDMAN_SELECTOR) {
                     GetCredentialException exception =  resultData.getParcelable(
