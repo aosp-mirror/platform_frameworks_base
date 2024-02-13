@@ -77,15 +77,15 @@ constructor(
         controller.setSuggestionCardIds(storeLocations.toSet())
     }
 
-    private val binder: IWalletContextualLocationsService.Stub
-    = object : IWalletContextualLocationsService.Stub() {
-        override fun addWalletCardsUpdatedListener(listener: IWalletCardsUpdatedListener) {
-            addWalletCardsUpdatedListenerInternal(listener)
+    private val binder: IWalletContextualLocationsService.Stub =
+        object : IWalletContextualLocationsService.Stub() {
+            override fun addWalletCardsUpdatedListener(listener: IWalletCardsUpdatedListener) {
+                addWalletCardsUpdatedListenerInternal(listener)
+            }
+            override fun onWalletContextualLocationsStateUpdated(storeLocations: List<String>) {
+                onWalletContextualLocationsStateUpdatedInternal(storeLocations)
+            }
         }
-        override fun onWalletContextualLocationsStateUpdated(storeLocations: List<String>) {
-            onWalletContextualLocationsStateUpdatedInternal(storeLocations)
-        }
-    }
 
     companion object {
         private const val TAG = "WalletContextualLocationsService"
