@@ -226,7 +226,7 @@ open class NotificationShelfTest : SysuiTestCase() {
 
         whenever(expandableView.minHeight).thenReturn(25)
         whenever(expandableView.shelfTransformationTarget).thenReturn(null) // use translationY
-        whenever(expandableView.isInShelf).thenReturn(true)
+        whenever(expandableView.isInShelf).thenReturn(false)
 
         whenever(ambientState.isOnKeyguard).thenReturn(true)
         whenever(ambientState.isExpansionChanging).thenReturn(false)

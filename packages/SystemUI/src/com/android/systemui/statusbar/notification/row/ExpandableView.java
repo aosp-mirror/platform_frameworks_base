@@ -720,6 +720,9 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         mInShelf = inShelf;
     }
 
+    /**
+     * @return true if the view is currently fully in the notification shelf.
+     */
     public boolean isInShelf() {
         return mInShelf;
     }
