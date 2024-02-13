@@ -3524,10 +3524,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                hasRestrictedWindow = displayContent.forAllWindows(windowState -> {
-                    return windowState.isOnScreen() && UserManager.isUserTypePrivateProfile(
-                            getUserManager().getProfileType(windowState.mShowUserId));
-                }, true /* traverseTopToBottom */);
+                hasRestrictedWindow = displayContent.forAllWindows(
+                        windowState -> windowState.isOnScreen() && (
+                                UserManager.isUserTypePrivateProfile(
+                                        getUserManager().getProfileType(windowState.mShowUserId))
+                                        || hasUserRestriction(
+                                        UserManager.DISALLOW_ASSIST_CONTENT,
+                                        windowState.mShowUserId)), true /* traverseTopToBottom */);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
