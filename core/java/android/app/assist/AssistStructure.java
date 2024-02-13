@@ -1,5 +1,7 @@
 package android.app.assist;
 
+import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
+
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1278,7 +1280,7 @@ public class AssistStructure implements Parcelable {
          *
          * @hide
          */
-        @FlaggedApi("autofill_credman_dev_integration")
+        @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
         @Nullable
         public GetCredentialRequest getCredentialManagerRequest() {
             return mGetCredentialRequest;
@@ -1291,7 +1293,7 @@ public class AssistStructure implements Parcelable {
          * @hide
          *
          */
-        @FlaggedApi("autofill_credman_dev_integration")
+        @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
         @Nullable
         public OutcomeReceiver<GetCredentialResponse,
                 GetCredentialException> getCredentialManagerCallback() {
