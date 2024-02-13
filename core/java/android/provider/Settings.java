@@ -11061,6 +11061,15 @@ public final class Settings {
         public static final String SEARCH_LONG_PRESS_HOME_ENABLED =
                 "search_long_press_home_enabled";
 
+
+        /**
+         * Whether or not the accessibility data streaming is enbled for the
+         * {@link VisualQueryDetectedResult#setAccessibilityDetectionData}.
+         * @hide
+         */
+        public static final String VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED =
+                "visual_query_accessibility_detection_enabled";
+
         /**
          * Control whether Night display is currently activated.
          * @hide
