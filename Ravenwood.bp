@@ -129,6 +129,9 @@ android_ravenwood_libgroup {
         "mockito-ravenwood-prebuilt",
         "inline-mockito-ravenwood-prebuilt",
     ],
+    jni_libs: [
+        "libandroid_runtime",
+    ],
 }
 
 android_ravenwood_libgroup {
