@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.hoststubgen.runtimehelper;
-
-import com.android.hoststubgen.hosthelper.HostTestException;
+package com.android.platform.test.ravenwood.runtimehelper;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -79,7 +77,7 @@ public class ClassLoadHook {
 
     private static void ensurePropertyNotSet(String key) {
         if (System.getProperty(key) != null) {
-            throw new HostTestException("System property \"" + key + "\" is set unexpectedly");
+            throw new RuntimeException("System property \"" + key + "\" is set unexpectedly");
         }
     }
 

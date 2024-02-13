@@ -73,7 +73,7 @@ import java.net.UnknownHostException;
  */
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 @android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
-        "com.android.hoststubgen.nativesubstitution.Log_host")
+        "com.android.platform.test.ravenwood.nativesubstitution.Log_host")
 public final class Log {
     /** @hide */
     @IntDef({ASSERT, ERROR, WARN, INFO, DEBUG, VERBOSE})

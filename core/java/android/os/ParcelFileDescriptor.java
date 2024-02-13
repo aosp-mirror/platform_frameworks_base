@@ -75,7 +75,8 @@ import java.nio.ByteOrder;
  * you to close it when done with it.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass("com.android.hoststubgen.nativesubstitution.ParcelFileDescriptor_host")
+@RavenwoodNativeSubstitutionClass(
+        "com.android.platform.test.ravenwood.nativesubstitution.ParcelFileDescriptor_host")
 public class ParcelFileDescriptor implements Parcelable, Closeable {
     private static final String TAG = "ParcelFileDescriptor";
 
