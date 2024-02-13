@@ -3641,6 +3641,18 @@
              <p> The default value is 40dp for {@link android.widget.TextView} and
              {@link android.widget.EditText}, and 0dp for all other views. -->
         <attr name="handwritingBoundsOffsetBottom" format="dimension" />
+
+        <!-- Sets whether this view renders sensitive content. -->
+        <!-- @FlaggedApi("android.view.flags.sensitive_content_app_protection_api") -->
+        <attr name="contentSensitivity">
+            <!-- Let the Android System use its heuristics to determine if the view renders
+             sensitive content. -->
+            <enum name="auto" value="0" />
+            <!-- This view renders sensitive content. -->
+            <enum name="sensitive" value="0x1" />
+            <!-- This view doesn't render sensitive content. -->
+            <enum name="notSensitive" value="0x2" />
+        </attr>
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
