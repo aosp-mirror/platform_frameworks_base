@@ -2474,11 +2474,12 @@ public class BubbleStackView extends FrameLayout
         // Let the expanded animation controller know that it shouldn't animate child adds/reorders
         // since we're about to animate collapsed.
         mExpandedAnimationController.notifyPreparingToCollapse();
-
+        final PointF collapsePosition = mStackAnimationController
+                .getStackPositionAlongNearestHorizontalEdge();
         updateOverflowDotVisibility(false /* expanding */);
         final Runnable collapseBackToStack = () ->
                 mExpandedAnimationController.collapseBackToStack(
-                        mStackAnimationController.getStackPositionAlongNearestHorizontalEdge(),
+                        collapsePosition,
                         /* fadeBubblesDuringCollapse= */ mRemovingLastBubbleWhileExpanded,
                         () -> {
                             mBubbleContainer.setActiveController(mStackAnimationController);
@@ -2501,7 +2502,8 @@ public class BubbleStackView extends FrameLayout
             }
             mExpandedViewAnimationController.reset();
         };
-        mExpandedViewAnimationController.animateCollapse(collapseBackToStack, after);
+        mExpandedViewAnimationController.animateCollapse(collapseBackToStack, after,
+                collapsePosition);
         if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
             // When the animation completes, we should no longer be showing the content.
             // This won't actually update content visibility immediately, if we are currently
