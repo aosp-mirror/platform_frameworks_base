@@ -22,6 +22,7 @@ import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -259,6 +260,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Test
     fun keyguardCallback_visibilityChanged_clockDozeCalled() =
         runBlocking(IMMEDIATE) {
+            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
             val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
             verify(keyguardUpdateMonitor).registerCallback(capture(captor))
 

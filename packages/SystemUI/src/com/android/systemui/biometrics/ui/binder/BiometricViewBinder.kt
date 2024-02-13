@@ -95,6 +95,7 @@ object BiometricViewBinder {
             view.resources.getColor(R.color.biometric_dialog_gray, view.context.theme)
 
         val logoView = view.requireViewById<ImageView>(R.id.logo)
+        val logoDescriptionView = view.requireViewById<TextView>(R.id.logo_description)
         val titleView = view.requireViewById<TextView>(R.id.title)
         val subtitleView = view.requireViewById<TextView>(R.id.subtitle)
         val descriptionView = view.requireViewById<TextView>(R.id.description)
@@ -103,6 +104,8 @@ object BiometricViewBinder {
 
         // set selected to enable marquee unless a screen reader is enabled
         logoView.isSelected =
+            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
+        logoDescriptionView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         titleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
@@ -165,6 +168,7 @@ object BiometricViewBinder {
             }
 
             logoView.setImageDrawable(viewModel.logo.first())
+            logoDescriptionView.text = viewModel.logoDescription.first()
             titleView.text = viewModel.title.first()
             subtitleView.text = viewModel.subtitle.first()
             descriptionView.text = viewModel.description.first()
@@ -197,6 +201,7 @@ object BiometricViewBinder {
                     viewsToHideWhenSmall =
                         listOf(
                             logoView,
+                            logoDescriptionView,
                             titleView,
                             subtitleView,
                             descriptionView,
@@ -205,6 +210,7 @@ object BiometricViewBinder {
                     viewsToFadeInOnSizeChange =
                         listOf(
                             logoView,
+                            logoDescriptionView,
                             titleView,
                             subtitleView,
                             descriptionView,

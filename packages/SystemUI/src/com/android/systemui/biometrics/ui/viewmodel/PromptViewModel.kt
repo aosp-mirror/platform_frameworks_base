@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
@@ -280,10 +281,30 @@ constructor(
                     it.logoBitmap != null -> BitmapDrawable(context.resources, it.logoBitmap)
                     else ->
                         try {
-                            context.packageManager.getApplicationIcon(it.opPackageName)
-                        } catch (e: PackageManager.NameNotFoundException) {
+                            val info = context.getApplicationInfo(it.opPackageName)
+                            context.packageManager.getApplicationIcon(info)
+                        } catch (e: Exception) {
                             Log.w(TAG, "Cannot find icon for package " + it.opPackageName, e)
                             null
+                        }
+                }
+            }
+            .distinctUntilChanged()
+
+    /** Logo description for the prompt. */
+    val logoDescription: Flow<String> =
+        promptSelectorInteractor.prompt
+            .map {
+                when {
+                    !customBiometricPrompt() || it == null -> ""
+                    it.logoDescription != null -> it.logoDescription
+                    else ->
+                        try {
+                            val info = context.getApplicationInfo(it.opPackageName)
+                            context.packageManager.getApplicationLabel(info).toString()
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Cannot find name for package " + it.opPackageName, e)
+                            ""
                         }
                 }
             }
@@ -681,6 +702,12 @@ constructor(
         private const val TAG = "PromptViewModel"
     }
 }
+
+private fun Context.getApplicationInfo(packageName: String): ApplicationInfo =
+    packageManager.getApplicationInfo(
+        packageName,
+        PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ANY_USER
+    )
 
 /** How the fingerprint sensor was started for the prompt. */
 enum class FingerprintStartMode {

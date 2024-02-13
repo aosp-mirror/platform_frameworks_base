@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.ApplicationInfo;
+import android.os.UserManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -297,11 +298,26 @@ public class ApplicationsStateTest {
     @Test
     public void testPersonalAndWorkFiltersDisplaysCorrectApps() {
         mEntry.showInPersonalTab = true;
+        mEntry.mProfileType = UserManager.USER_TYPE_FULL_SYSTEM;
         assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isTrue();
         assertThat(ApplicationsState.FILTER_WORK.filterApp(mEntry)).isFalse();
 
         mEntry.showInPersonalTab = false;
+        mEntry.mProfileType = UserManager.USER_TYPE_PROFILE_MANAGED;
         assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isFalse();
         assertThat(ApplicationsState.FILTER_WORK.filterApp(mEntry)).isTrue();
+    }
+
+    @Test
+    public void testPrivateProfileFilterDisplaysCorrectApps() {
+        mEntry.showInPersonalTab = true;
+        mEntry.mProfileType = UserManager.USER_TYPE_FULL_SYSTEM;
+        assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isTrue();
+        assertThat(ApplicationsState.FILTER_PRIVATE_PROFILE.filterApp(mEntry)).isFalse();
+
+        mEntry.showInPersonalTab = false;
+        mEntry.mProfileType = UserManager.USER_TYPE_PROFILE_PRIVATE;
+        assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isFalse();
+        assertThat(ApplicationsState.FILTER_PRIVATE_PROFILE.filterApp(mEntry)).isTrue();
     }
 }

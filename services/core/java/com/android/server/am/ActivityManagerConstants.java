@@ -1052,6 +1052,27 @@ final class ActivityManagerConstants extends ContentObserver {
     public volatile long mShortFgsProcStateExtraWaitDuration =
             DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION;
 
+    /** Timeout for a mediaProcessing FGS, in milliseconds. */
+    private static final String KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION =
+            "media_processing_fgs_timeout_duration";
+
+    /** @see #KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION */
+    static final long DEFAULT_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION = 6 * 60 * 60_000; // 6 hours
+
+    /** @see #KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION */
+    public volatile long mMediaProcessingFgsTimeoutDuration =
+            DEFAULT_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION;
+
+    /** Timeout for a dataSync FGS, in milliseconds. */
+    private static final String KEY_DATA_SYNC_FGS_TIMEOUT_DURATION =
+            "data_sync_fgs_timeout_duration";
+
+    /** @see #KEY_DATA_SYNC_FGS_TIMEOUT_DURATION */
+    static final long DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION = 6 * 60 * 60_000; // 6 hours
+
+    /** @see #KEY_DATA_SYNC_FGS_TIMEOUT_DURATION */
+    public volatile long mDataSyncFgsTimeoutDuration = DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION;
+
     /**
      * If enabled, when starting an application, the system will wait for a
      * {@link ActivityManagerService#finishAttachApplication} from the app before scheduling
@@ -1081,6 +1102,20 @@ final class ActivityManagerConstants extends ContentObserver {
     /** @see #KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION */
     public volatile long mShortFgsAnrExtraWaitDuration =
             DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION;
+
+    /**
+     * If a service of a timeout-enforced type doesn't finish within this duration after its
+     * timeout, then we'll declare an ANR.
+     * i.e. if the time limit for a type is 1 hour, and this extra duration is 10 seconds, then
+     * the app will be ANR'ed 1 hour and 10 seconds after it started.
+     */
+    private static final String KEY_FGS_ANR_EXTRA_WAIT_DURATION = "fgs_anr_extra_wait_duration";
+
+    /** @see #KEY_FGS_ANR_EXTRA_WAIT_DURATION */
+    static final long DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION = 10_000;
+
+    /** @see #KEY_FGS_ANR_EXTRA_WAIT_DURATION */
+    public volatile long mFgsAnrExtraWaitDuration = DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION;
 
     /** @see #KEY_USE_TIERED_CACHED_ADJ */
     public boolean USE_TIERED_CACHED_ADJ = DEFAULT_USE_TIERED_CACHED_ADJ;
@@ -1264,8 +1299,17 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION:
                                 updateShortFgsProcStateExtraWaitDuration();
                                 break;
+                            case KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION:
+                                updateMediaProcessingFgsTimeoutDuration();
+                                break;
+                            case KEY_DATA_SYNC_FGS_TIMEOUT_DURATION:
+                                updateDataSyncFgsTimeoutDuration();
+                                break;
                             case KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION:
                                 updateShortFgsAnrExtraWaitDuration();
+                                break;
+                            case KEY_FGS_ANR_EXTRA_WAIT_DURATION:
+                                updateFgsAnrExtraWaitDuration();
                                 break;
                             case KEY_PROACTIVE_KILLS_ENABLED:
                                 updateProactiveKillsEnabled();
@@ -2064,6 +2108,27 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
     }
 
+    private void updateMediaProcessingFgsTimeoutDuration() {
+        mMediaProcessingFgsTimeoutDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION,
+                DEFAULT_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION);
+    }
+
+    private void updateDataSyncFgsTimeoutDuration() {
+        mDataSyncFgsTimeoutDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_DATA_SYNC_FGS_TIMEOUT_DURATION,
+                DEFAULT_DATA_SYNC_FGS_TIMEOUT_DURATION);
+    }
+
+    private void updateFgsAnrExtraWaitDuration() {
+        mFgsAnrExtraWaitDuration = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_FGS_ANR_EXTRA_WAIT_DURATION,
+                DEFAULT_FGS_ANR_EXTRA_WAIT_DURATION);
+    }
+
     private void updateEnableWaitForFinishAttachApplication() {
         mEnableWaitForFinishAttachApplication = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -2294,6 +2359,13 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mShortFgsProcStateExtraWaitDuration);
         pw.print("  "); pw.print(KEY_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
         pw.print("="); pw.println(mShortFgsAnrExtraWaitDuration);
+
+        pw.print("  "); pw.print(KEY_MEDIA_PROCESSING_FGS_TIMEOUT_DURATION);
+        pw.print("="); pw.println(mMediaProcessingFgsTimeoutDuration);
+        pw.print("  "); pw.print(KEY_DATA_SYNC_FGS_TIMEOUT_DURATION);
+        pw.print("="); pw.println(mDataSyncFgsTimeoutDuration);
+        pw.print("  "); pw.print(KEY_FGS_ANR_EXTRA_WAIT_DURATION);
+        pw.print("="); pw.println(mFgsAnrExtraWaitDuration);
 
         pw.print("  "); pw.print(KEY_USE_TIERED_CACHED_ADJ);
         pw.print("="); pw.println(USE_TIERED_CACHED_ADJ);

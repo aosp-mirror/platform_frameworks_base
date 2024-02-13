@@ -49,7 +49,7 @@ import org.xmlpull.v1.XmlPullParser;
 import java.util.ArrayList;
 import java.util.List;
 
-class UsbUserSettingsManager {
+public class UsbUserSettingsManager {
     private static final String TAG = UsbUserSettingsManager.class.getSimpleName();
     private static final boolean DEBUG = false;
 
@@ -81,7 +81,7 @@ class UsbUserSettingsManager {
      *
      * @return The resolve infos of the activities that can handle the intent
      */
-    List<ResolveInfo> queryIntentActivities(@NonNull Intent intent) {
+    public List<ResolveInfo> queryIntentActivities(@NonNull Intent intent) {
         return mPackageManager.queryIntentActivitiesAsUser(intent, PackageManager.GET_META_DATA,
                 mUser.getIdentifier());
     }

@@ -942,6 +942,8 @@ interface IActivityManager {
 
     /** Returns if the service is a short-service is still "alive" and past the timeout. */
     boolean shouldServiceTimeOut(in ComponentName className, in IBinder token);
+    /** Returns if the service has a time-limit restricted type and is past the time limit. */
+    boolean hasServiceTimeLimitExceeded(in ComponentName className, in IBinder token);
 
     void registerUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")

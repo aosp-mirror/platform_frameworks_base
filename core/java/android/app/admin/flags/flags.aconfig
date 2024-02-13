@@ -76,3 +76,10 @@ flag {
   description: "Enable APIs to provision and manage eSIMs"
   bug: "295301164"
 }
+
+flag {
+  name: "headless_device_owner_single_user_enabled"
+  namespace: "enterprise"
+  description: "Add Headless DO support."
+  bug: "289515470"
+}

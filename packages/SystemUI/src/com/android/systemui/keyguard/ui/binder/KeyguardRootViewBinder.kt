@@ -48,6 +48,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
+import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.clocks.ClockController
@@ -112,6 +113,10 @@ object KeyguardRootViewBinder {
         }
 
         val burnInParams = MutableStateFlow(BurnInParameters())
+        val viewState =
+            ViewStateAccessor(
+                alpha = { view.alpha },
+            )
 
         val disposableHandle =
             view.repeatWhenAttached {
@@ -134,7 +139,7 @@ object KeyguardRootViewBinder {
 
                     if (keyguardBottomAreaRefactor()) {
                         launch {
-                            viewModel.alpha.collect { alpha ->
+                            viewModel.alpha(viewState).collect { alpha ->
                                 view.alpha = alpha
                                 childViews[statusViewId]?.alpha = alpha
                             }

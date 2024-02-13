@@ -14,6 +14,8 @@
 
 package android.testing;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -83,6 +85,57 @@ public class TestableLooper {
 
     private TestableLooper(Looper looper, boolean b) {
         setupQueue(looper);
+    }
+
+    /**
+     * Wrap the given runnable so that it will run blocking on the Looper that will be set up for
+     * the given test.
+     * <p>
+     * This method is required to support any TestRule which needs to run setup and/or teardown code
+     * on the TestableLooper. Whether using {@link AndroidTestingRunner} or
+     * {@link TestWithLooperRule}, the TestRule's Statement evaluates on the test instrumentation
+     * thread, rather than the TestableLooper thread, so access to the TestableLooper is required.
+     * However, {@link #get(Object)} will return {@code null} both before and after the inner
+     * statement is evaluated:
+     * <ul>
+     * <li>Before the test {@link #get} returns {@code null} because while the TestableLooperHolder
+     * is accessible in sLoopers, it has not been initialized with an actual TestableLooper yet.
+     * This method's use of the internal LooperFrameworkMethod ensures that all setup and teardown
+     * of the TestableLooper happen as it would for all other wrapped code blocks.
+     * <li>After the test {@link #get} can return {@code null} because many tests call
+     * {@link #remove} in the teardown method. The fact that this method returns a runnable allows
+     * it to be called before the test (when the TestableLooperHolder is still in sLoopers), and
+     * then executed as teardown after the test.
+     * </ul>
+     *
+     * @param test     the test instance (just like passed to {@link #get(Object)})
+     * @param runnable the operation that should eventually be run on the TestableLooper
+     * @return a runnable that will block the thread on which it is called until the given runnable
+     *          is finished.  Will be {@code null} if there is no looper for the given test.
+     * @hide
+     */
+    @Nullable
+    public static RunnableWithException wrapWithRunBlocking(
+            Object test, @NonNull RunnableWithException runnable) {
+        TestableLooperHolder looperHolder = sLoopers.get(test);
+        if (looperHolder == null) {
+            return null;
+        }
+        try {
+            FrameworkMethod base = new FrameworkMethod(runnable.getClass().getMethod("run"));
+            LooperFrameworkMethod wrapped = new LooperFrameworkMethod(base, looperHolder);
+            return () -> {
+                try {
+                    wrapped.invokeExplosively(runnable);
+                } catch (RuntimeException | Error e) {
+                    throw e;
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Looper getLooper() {

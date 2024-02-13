@@ -129,7 +129,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    // NOTE: pass 'null' to allow this test advances time on the main thread.
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(null);
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
