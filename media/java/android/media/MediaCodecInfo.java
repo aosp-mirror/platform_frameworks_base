@@ -20,6 +20,7 @@ import static android.media.Utils.intersectSortedDistinctRanges;
 import static android.media.Utils.sortDistinctRanges;
 import static android.media.codec.Flags.FLAG_DYNAMIC_COLOR_ASPECTS;
 import static android.media.codec.Flags.FLAG_HLG_EDITING;
+import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
@@ -741,6 +742,42 @@ public final class MediaCodecInfo {
         public static final String FEATURE_DynamicColorAspects = "dynamic-color-aspects";
 
         /**
+         * <b>video encoder only</b>: codec supports region of interest encoding.
+         * <p>
+         * RoI encoding support means the codec accepts information that specifies the relative
+         * importance of different portions of each video frame. This allows the encoder to
+         * separate a video frame into critical and non-critical regions, and use more bits
+         * (better quality) to represent the critical regions and de-prioritize non-critical
+         * regions. In other words, the encoder chooses a negative qp bias for the critical
+         * portions and a zero or positive qp bias for the non-critical portions.
+         * <p>
+         * At a basic level, if the encoder decides to encode each frame with a uniform
+         * quantization value 'qpFrame' and a 'qpBias' is chosen/suggested for an LCU of the
+         * frame, then the actual qp of the LCU will be 'qpFrame + qpBias', although this value
+         * can be clamped basing on the min-max configured qp bounds for the current encoding
+         * session.
+         * <p>
+         * In a shot, if a group of LCUs pan out quickly they can be marked as non-critical
+         * thereby enabling the encoder to reserve fewer bits during their encoding. Contrarily,
+         * LCUs that remain in shot for a prolonged duration can be encoded at better quality in
+         * one frame thereby setting-up an excellent long-term reference for all future frames.
+         * <p>
+         * Note that by offsetting the quantization of each LCU, the overall bit allocation will
+         * differ from the originally estimated bit allocation, and the encoder will adjust the
+         * frame quantization for subsequent frames to meet the bitrate target. An effective
+         * selection of critical regions can set-up a golden reference and this can compensate
+         * for the bit burden that was introduced due to encoding RoI's at better quality.
+         * On the other hand, an ineffective choice of critical regions might increase the
+         * quality of certain parts of the image but this can hamper quality in subsequent frames.
+         * <p>
+         * @see MediaCodec#PARAMETER_KEY_QP_OFFSET_MAP
+         * @see MediaCodec#PARAMETER_KEY_QP_OFFSET_RECTS
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_REGION_OF_INTEREST)
+        public static final String FEATURE_Roi = "region-of-interest";
+
+        /**
          * Query codec feature capabilities.
          * <p>
          * These features are supported to be used by the codec.  These
@@ -797,6 +834,9 @@ public final class MediaCodecInfo {
                 features.add(new Feature(FEATURE_HdrEditing, (1 << 5), false));
                 if (android.media.codec.Flags.hlgEditing()) {
                     features.add(new Feature(FEATURE_HlgEditing, (1 << 6), true));
+                }
+                if (android.media.codec.Flags.regionOfInterest()) {
+                    features.add(new Feature(FEATURE_Roi, (1 << 7), true));
                 }
 
                 // feature to exclude codec from REGULAR codec list
