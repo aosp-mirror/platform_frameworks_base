@@ -310,6 +310,7 @@ import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ITrustedPresentationListener;
+import android.window.IUnhandledDragListener;
 import android.window.InputTransferToken;
 import android.window.ScreenCapture;
 import android.window.SystemPerformanceHinter;
@@ -10025,5 +10026,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void onProcessActivityVisibilityChanged(int uid, boolean visible) {
         mScreenRecordingCallbackController.onProcessActivityVisibilityChanged(uid, visible);
+    }
+
+    /**
+     * Sets the listener to be called back when a cross-window drag and drop operation is unhandled
+     * (ie. not handled by any window which can handle the drag).
+     */
+    @Override
+    public void setUnhandledDragListener(IUnhandledDragListener listener) throws RemoteException {
+        mAtmService.enforceTaskPermission("setUnhandledDragListener");
+        synchronized (mGlobalLock) {
+            mDragDropController.setUnhandledDragListener(listener);
+        }
     }
 }

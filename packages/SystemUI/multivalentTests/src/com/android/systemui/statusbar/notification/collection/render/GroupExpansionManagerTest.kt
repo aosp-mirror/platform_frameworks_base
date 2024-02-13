@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
+import android.os.Build
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.assertLogsWtf
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -30,7 +32,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
-import org.junit.Assert.assertThrows
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -116,9 +118,9 @@ class GroupExpansionManagerTest : SysuiTestCase() {
         underTest.setGroupExpanded(summary1, false)
 
         // Expanding again should throw.
-        assertThrows(IllegalArgumentException::class.java) {
-            underTest.setGroupExpanded(summary1, true)
-        }
+        // TODO(b/320238410): Remove this check when robolectric supports wtf assertions.
+        Assume.assumeFalse(Build.FINGERPRINT.contains("robolectric"))
+        assertLogsWtf { underTest.setGroupExpanded(summary1, true) }
     }
 
     @Test

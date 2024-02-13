@@ -16,10 +16,12 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow.FlowBuilder
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -37,7 +39,7 @@ constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
 
-    private val transitionAnimation =
+    private val transitionAnimation: FlowBuilder =
         animationFlow.setup(
             duration = FromLockscreenTransitionInteractor.TO_GONE_DURATION,
             from = KeyguardState.LOCKSCREEN,
@@ -52,7 +54,26 @@ constructor(
             onCancel = { 1f },
         )
 
-    val lockscreenAlpha: Flow<Float> = shortcutsAlpha
+    fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha: Float? = null
+        return transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStep = {
+                if (startAlpha == null) {
+                    startAlpha = viewState.alpha()
+                }
+                MathUtils.lerp(startAlpha!!, 0f, it)
+            },
+            onFinish = {
+                startAlpha = null
+                0f
+            },
+            onCancel = {
+                startAlpha = null
+                1f
+            },
+        )
+    }
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)

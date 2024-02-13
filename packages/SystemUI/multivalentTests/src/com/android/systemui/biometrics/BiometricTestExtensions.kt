@@ -120,6 +120,7 @@ internal fun Collection<SensorPropertiesInternal?>.extractAuthenticatorTypes(): 
 internal fun promptInfo(
     logoRes: Int = -1,
     logoBitmap: Bitmap? = null,
+    logoDescription: String? = null,
     title: String = "title",
     subtitle: String = "sub",
     description: String = "desc",
@@ -132,6 +133,7 @@ internal fun promptInfo(
     val info = PromptInfo()
     info.logoRes = logoRes
     info.logoBitmap = logoBitmap
+    info.logoDescription = logoDescription
     info.title = title
     info.subtitle = subtitle
     info.description = description

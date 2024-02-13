@@ -40,6 +40,7 @@ sealed class BiometricPromptRequest(
         val contentView: PromptContentView? = info.contentView
         val logoRes: Int = info.logoRes
         val logoBitmap: Bitmap? = info.logoBitmap
+        val logoDescription: String? = info.logoDescription
         val negativeButtonText: String = info.negativeButtonText?.toString() ?: ""
     }
 

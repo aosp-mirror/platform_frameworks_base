@@ -42,6 +42,7 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
 @SmallTest
@@ -145,9 +146,33 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun onConfigurationChanged_multipleCalls_flagEnabled_updatesWindowHeightMultipleTimes() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
+
+        view.onConfigurationChanged(Configuration())
+        view.onConfigurationChanged(Configuration())
+        view.onConfigurationChanged(Configuration())
+        view.onConfigurationChanged(Configuration())
+
+        verify(windowController, times(4)).refreshStatusBarHeight()
+    }
+
+    @Test
     fun onConfigurationChanged_flagDisabled_doesNotUpdateWindowHeight() {
         mSetFlagsRule.disableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
 
+        view.onConfigurationChanged(Configuration())
+
+        verify(windowController, never()).refreshStatusBarHeight()
+    }
+
+    @Test
+    fun onConfigurationChanged_multipleCalls_flagDisabled_doesNotUpdateWindowHeight() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
+
+        view.onConfigurationChanged(Configuration())
+        view.onConfigurationChanged(Configuration())
+        view.onConfigurationChanged(Configuration())
         view.onConfigurationChanged(Configuration())
 
         verify(windowController, never()).refreshStatusBarHeight()

@@ -64,6 +64,7 @@ import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
 import com.android.wm.shell.draganddrop.DragAndDropController;
+import com.android.wm.shell.draganddrop.UnhandledDragController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
@@ -555,6 +556,14 @@ public abstract class WMShellModule {
     //
     // Drag and drop
     //
+
+    @WMSingleton
+    @Provides
+    static UnhandledDragController provideUnhandledDragController(
+            IWindowManager wmService,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new UnhandledDragController(wmService, mainExecutor);
+    }
 
     @WMSingleton
     @Provides

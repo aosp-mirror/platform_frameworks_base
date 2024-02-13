@@ -141,6 +141,7 @@ constructor(
                 if (field != value) {
                     field = value
                     checkIfPollingNeeded()
+                    _data = _data.copy(listening = value)
                 }
             }
 

@@ -43,7 +43,7 @@ import org.mockito.MockitoAnnotations
 @RunWithLooper(setAsMainLooper = true)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardSurfaceBehindParamsApplierTest : SysuiTestCase() {
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     private lateinit var underTest: KeyguardSurfaceBehindParamsApplier
     private lateinit var executor: FakeExecutor

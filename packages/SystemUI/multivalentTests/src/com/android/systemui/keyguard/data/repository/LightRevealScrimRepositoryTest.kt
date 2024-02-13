@@ -54,7 +54,7 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     private lateinit var powerInteractor: PowerInteractor
     private lateinit var underTest: LightRevealScrimRepositoryImpl
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     @Before
     fun setUp() {

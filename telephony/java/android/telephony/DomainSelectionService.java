@@ -831,7 +831,7 @@ public abstract class DomainSelectionService extends Service {
             @NonNull String tag, @NonNull String errorLogName) {
         try {
             CompletableFuture.runAsync(
-                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), executor).join();
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), executor);
         } catch (CancellationException | CompletionException e) {
             Rlog.w(tag, "Binder - " + errorLogName + " exception: " + e.getMessage());
         }

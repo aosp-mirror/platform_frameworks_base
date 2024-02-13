@@ -28,6 +28,7 @@ import android.service.notification.IConditionProvider;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeDiff;
+import android.util.LocalLog;
 import android.util.Log;
 import android.util.Slog;
 
@@ -37,26 +38,16 @@ import java.util.Date;
 import java.util.List;
 
 public class ZenLog {
-    private static final String TAG = "ZenLog";
-    // the ZenLog is *very* verbose, so be careful about setting this to true
-    private static final boolean DEBUG = false;
 
     private static final int SIZE = Build.IS_DEBUGGABLE ? 200 : 100;
 
-    private static final long[] TIMES = new long[SIZE];
-    private static final int[] TYPES = new int[SIZE];
-    private static final String[] MSGS = new String[SIZE];
-
-    private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+    private static final LocalLog STATE_CHANGES = new LocalLog(SIZE);
+    private static final LocalLog INTERCEPTION_EVENTS = new LocalLog(SIZE);
 
     private static final int TYPE_INTERCEPTED = 1;
-    private static final int TYPE_ALLOW_DISABLE = 2;
     private static final int TYPE_SET_RINGER_MODE_EXTERNAL = 3;
     private static final int TYPE_SET_RINGER_MODE_INTERNAL = 4;
-    private static final int TYPE_DOWNTIME = 5;
     private static final int TYPE_SET_ZEN_MODE = 6;
-    private static final int TYPE_UPDATE_ZEN_MODE = 7;
-    private static final int TYPE_EXIT_CONDITION = 8;
     private static final int TYPE_SUBSCRIBE = 9;
     private static final int TYPE_UNSUBSCRIBE = 10;
     private static final int TYPE_CONFIG = 11;
@@ -70,9 +61,6 @@ public class ZenLog {
     private static final int TYPE_RECORD_CALLER = 19;
     private static final int TYPE_CHECK_REPEAT_CALLER = 20;
     private static final int TYPE_ALERT_ON_UPDATED_INTERCEPT = 21;
-
-    private static int sNext;
-    private static int sSize;
 
     public static void traceIntercepted(NotificationRecord record, String reason) {
         append(TYPE_INTERCEPTED, record.getKey() + "," + reason);
@@ -104,10 +92,6 @@ public class ZenLog {
                 ringerModeToString(ringerModeExternalOut));
     }
 
-    public static void traceDowntimeAutotrigger(String result) {
-        append(TYPE_DOWNTIME, result);
-    }
-
     public static void traceSetZenMode(int zenMode, String reason) {
         append(TYPE_SET_ZEN_MODE, zenModeToString(zenMode) + "," + reason);
     }
@@ -120,21 +104,12 @@ public class ZenLog {
         append(TYPE_SET_CONSOLIDATED_ZEN_POLICY, policy.toString() + "," + reason);
     }
 
-    public static void traceUpdateZenMode(int fromMode, int toMode) {
-        append(TYPE_UPDATE_ZEN_MODE, zenModeToString(fromMode) + " -> " + zenModeToString(toMode));
-    }
-
-    public static void traceExitCondition(Condition c, ComponentName component, String reason) {
-        append(TYPE_EXIT_CONDITION, c + "," + componentToString(component) + "," + reason);
-    }
 
     public static void traceSetNotificationPolicy(String pkg, int targetSdk,
             NotificationManager.Policy policy) {
         String policyLog = "pkg=" + pkg + " targetSdk=" + targetSdk
                 + " NotificationPolicy=" + policy.toString();
         append(TYPE_SET_NOTIFICATION_POLICY, policyLog);
-        // TODO(b/180205791): remove when we can better surface apps that are changing policy
-        Log.d(TAG, "Zen Policy Changed: " + policyLog);
     }
 
     public static void traceSubscribe(Uri uri, IConditionProvider provider, RemoteException e) {
@@ -145,13 +120,14 @@ public class ZenLog {
         append(TYPE_UNSUBSCRIBE, uri + "," + subscribeResult(provider, e));
     }
 
-    public static void traceConfig(String reason, ZenModeConfig oldConfig,
-            ZenModeConfig newConfig) {
+    public static void traceConfig(String reason, ComponentName triggeringComponent,
+            ZenModeConfig oldConfig, ZenModeConfig newConfig, int callingUid) {
         ZenModeDiff.ConfigDiff diff = new ZenModeDiff.ConfigDiff(oldConfig, newConfig);
         if (diff == null || !diff.hasDiff()) {
             append(TYPE_CONFIG, reason + " no changes");
         } else {
             append(TYPE_CONFIG, reason
+                    + " - " + triggeringComponent + " : " + callingUid
                     + ",\n" + (newConfig != null ? newConfig.toString() : null)
                     + ",\n" + diff);
         }
@@ -204,13 +180,9 @@ public class ZenLog {
     private static String typeToString(int type) {
         switch (type) {
             case TYPE_INTERCEPTED: return "intercepted";
-            case TYPE_ALLOW_DISABLE: return "allow_disable";
             case TYPE_SET_RINGER_MODE_EXTERNAL: return "set_ringer_mode_external";
             case TYPE_SET_RINGER_MODE_INTERNAL: return "set_ringer_mode_internal";
-            case TYPE_DOWNTIME: return "downtime";
             case TYPE_SET_ZEN_MODE: return "set_zen_mode";
-            case TYPE_UPDATE_ZEN_MODE: return "update_zen_mode";
-            case TYPE_EXIT_CONDITION: return "exit_condition";
             case TYPE_SUBSCRIBE: return "subscribe";
             case TYPE_UNSUBSCRIBE: return "unsubscribe";
             case TYPE_CONFIG: return "config";
@@ -278,30 +250,27 @@ public class ZenLog {
     }
 
     private static void append(int type, String msg) {
-        synchronized(MSGS) {
-            TIMES[sNext] = System.currentTimeMillis();
-            TYPES[sNext] = type;
-            MSGS[sNext] = msg;
-            sNext = (sNext + 1) % SIZE;
-            if (sSize < SIZE) {
-                sSize++;
+        if (type == TYPE_INTERCEPTED || type == TYPE_NOT_INTERCEPTED
+                || type == TYPE_CHECK_REPEAT_CALLER || type == TYPE_RECORD_CALLER
+                || type == TYPE_MATCHES_CALL_FILTER || type == TYPE_ALERT_ON_UPDATED_INTERCEPT) {
+            synchronized (INTERCEPTION_EVENTS) {
+                INTERCEPTION_EVENTS.log(typeToString(type) + ": " +msg);
+            }
+        } else {
+            synchronized (STATE_CHANGES) {
+                STATE_CHANGES.log(typeToString(type) + ": " +msg);
             }
         }
-        if (DEBUG) Slog.d(TAG, typeToString(type) + ": " + msg);
     }
 
     public static void dump(PrintWriter pw, String prefix) {
-        synchronized(MSGS) {
-            final int start = (sNext - sSize + SIZE) % SIZE;
-            for (int i = 0; i < sSize; i++) {
-                final int j = (start + i) % SIZE;
-                pw.print(prefix);
-                pw.print(FORMAT.format(new Date(TIMES[j])));
-                pw.print(' ');
-                pw.print(typeToString(TYPES[j]));
-                pw.print(": ");
-                pw.println(MSGS[j]);
-            }
+        synchronized (INTERCEPTION_EVENTS) {
+            pw.printf(prefix  + "Interception Events:\n");
+            INTERCEPTION_EVENTS.dump(prefix, pw);
+        }
+        synchronized (STATE_CHANGES) {
+            pw.printf(prefix  + "State Changes:\n");
+            STATE_CHANGES.dump(prefix, pw);
         }
     }
 }

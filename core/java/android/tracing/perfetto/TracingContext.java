@@ -105,6 +105,5 @@ public class TracingContext<DataSourceInstanceType extends DataSourceInstance,
         return res;
     }
 
-    // private static native void nativeFlush(long nativeDataSourcePointer);
     private static native void nativeFlush(TracingContext thiz, long ctxPointer);
 }

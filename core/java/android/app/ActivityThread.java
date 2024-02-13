@@ -1232,6 +1232,15 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @Override
+        public final void scheduleTimeoutServiceForType(IBinder token, int startId, int fgsType) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "scheduleTimeoutServiceForType. token=" + token);
+            }
+            sendMessage(H.TIMEOUT_SERVICE_FOR_TYPE, token, startId, fgsType);
+        }
+
+        @Override
         public final void bindApplication(
                 String processName,
                 ApplicationInfo appInfo,
@@ -2288,6 +2297,8 @@ public final class ActivityThread extends ClientTransactionHandler
         public static final int INSTRUMENT_WITHOUT_RESTART = 170;
         public static final int FINISH_INSTRUMENTATION_WITHOUT_RESTART = 171;
 
+        public static final int TIMEOUT_SERVICE_FOR_TYPE = 172;
+
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -2341,6 +2352,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     case DUMP_RESOURCES: return "DUMP_RESOURCES";
                     case TIMEOUT_SERVICE: return "TIMEOUT_SERVICE";
                     case PING: return "PING";
+                    case TIMEOUT_SERVICE_FOR_TYPE: return "TIMEOUT_SERVICE_FOR_TYPE";
                 }
             }
             return Integer.toString(code);
@@ -2426,6 +2438,14 @@ public final class ActivityThread extends ClientTransactionHandler
                     break;
                 case PING:
                     ((RemoteCallback) msg.obj).sendResult(null);
+                    break;
+                case TIMEOUT_SERVICE_FOR_TYPE:
+                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                                "serviceTimeoutForType: " + msg.obj);
+                    }
+                    handleTimeoutServiceForType((IBinder) msg.obj, msg.arg1, msg.arg2);
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case CONFIGURATION_CHANGED:
                     mConfigurationController.handleConfigurationChanged((Configuration) msg.obj);
@@ -5136,6 +5156,26 @@ public final class ActivityThread extends ClientTransactionHandler
             Slog.wtf(TAG, "handleTimeoutService: token=" + token + " not found.");
         }
     }
+
+    private void handleTimeoutServiceForType(IBinder token, int startId, int fgsType) {
+        Service s = mServices.get(token);
+        if (s != null) {
+            try {
+                if (localLOGV) Slog.v(TAG, "Timeout service " + s);
+
+                s.callOnTimeLimitExceeded(startId, fgsType);
+            } catch (Exception e) {
+                if (!mInstrumentation.onException(s, e)) {
+                    throw new RuntimeException(
+                            "Unable to call onTimeLimitExceeded on service " + s + ": " + e, e);
+                }
+                Slog.i(TAG, "handleTimeoutServiceForType: exception for " + token, e);
+            }
+        } else {
+            Slog.wtf(TAG, "handleTimeoutServiceForType: token=" + token + " not found.");
+        }
+    }
+
     /**
      * Resume the activity.
      * @param r Target activity record.

@@ -50,6 +50,7 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGoneTransitionView
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
@@ -67,7 +68,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -100,21 +100,35 @@ constructor(
         setOf(AOD, LOCKSCREEN, DOZING, ALTERNATE_BOUNCER, PRIMARY_BOUNCER)
 
     private val edgeToAlphaViewModel =
-        mapOf<Edge?, Flow<Float>>(
+        mapOf<Edge?, (ViewStateAccessor) -> Flow<Float>>(
             Edge(from = LOCKSCREEN, to = DREAMING) to
-                lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
+                { _: ViewStateAccessor ->
+                    lockscreenToDreamingTransitionViewModel.lockscreenAlpha
+                },
             Edge(from = LOCKSCREEN, to = GONE) to
-                lockscreenToGoneTransitionViewModel.lockscreenAlpha,
+                { viewState: ViewStateAccessor ->
+                    lockscreenToGoneTransitionViewModel.lockscreenAlpha(viewState)
+                },
             Edge(from = ALTERNATE_BOUNCER, to = GONE) to
-                alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
+                { _: ViewStateAccessor ->
+                    alternateBouncerToGoneTransitionViewModel.lockscreenAlpha
+                },
             Edge(from = PRIMARY_BOUNCER, to = GONE) to
-                primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
+                { _: ViewStateAccessor ->
+                    primaryBouncerToGoneTransitionViewModel.lockscreenAlpha
+                },
             Edge(from = DREAMING, to = LOCKSCREEN) to
-                dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
+                { _: ViewStateAccessor ->
+                    dreamingToLockscreenTransitionViewModel.lockscreenAlpha
+                },
             Edge(from = LOCKSCREEN, to = OCCLUDED) to
-                lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
+                { _: ViewStateAccessor ->
+                    lockscreenToOccludedTransitionViewModel.lockscreenAlpha
+                },
             Edge(from = OCCLUDED, to = LOCKSCREEN) to
-                occludedToLockscreenTransitionViewModel.lockscreenAlpha,
+                { _: ViewStateAccessor ->
+                    occludedToLockscreenTransitionViewModel.lockscreenAlpha
+                },
         )
 
     private val lockscreenTransitionInProgress: Flow<Edge?> =
@@ -279,46 +293,63 @@ constructor(
                 initialValue = NotificationContainerBounds(),
             )
 
-    /** As QS is expanding, fade out notifications unless in splitshade */
-    private val alphaForQsExpansion: Flow<Float> =
-        interactor.configurationBasedDimensions.flatMapLatest {
-            if (it.useSplitShade) {
-                flowOf(1f)
-            } else {
-                shadeInteractor.qsExpansion.map { 1f - it }
+    /**
+     * Ensure view is visible when the shade/qs are expanded. Also, as QS is expanding, fade out
+     * notifications unless in splitshade.
+     */
+    private val alphaForShadeAndQsExpansion: Flow<Float> =
+        interactor.configurationBasedDimensions
+            .flatMapLatest { configurationBasedDimensions ->
+                combine(
+                    shadeInteractor.shadeExpansion,
+                    shadeInteractor.qsExpansion,
+                ) { shadeExpansion, qsExpansion ->
+                    if (shadeExpansion > 0f || qsExpansion > 0f) {
+                        if (configurationBasedDimensions.useSplitShade) {
+                            1f
+                        } else {
+                            // Fade as QS shade expands
+                            1f - qsExpansion
+                        }
+                    } else {
+                        // Not visible unless the shade/qs is visible
+                        0f
+                    }
+                }
             }
-        }
+            .distinctUntilChanged()
 
-    val expansionAlpha: Flow<Float> =
+    fun expansionAlpha(viewState: ViewStateAccessor): Flow<Float> {
         // Due to issues with the legacy shade, some shade expansion events are sent incorrectly,
         // such as when the shade resets. This can happen while the transition to/from LOCKSCREEN
         // is running. Therefore use a series of flatmaps to prevent unwanted interruptions while
         // those transitions are in progress. Without this, the alpha value will produce a visible
         // flicker.
-        lockscreenTransitionInProgress
+        return lockscreenTransitionInProgress
             .flatMapLatest { edge ->
-                edgeToAlphaViewModel.getOrElse(
+                edgeToAlphaViewModel.getOrDefault(
                     edge,
-                    {
+                    { _: ViewStateAccessor ->
                         isOnLockscreenWithoutShade.flatMapLatest { isOnLockscreenWithoutShade ->
                             combineTransform(
                                 keyguardInteractor.keyguardAlpha,
                                 shadeCollpaseFadeIn,
-                                alphaForQsExpansion,
-                            ) { alpha, shadeCollpaseFadeIn, alphaForQsExpansion ->
+                                alphaForShadeAndQsExpansion,
+                            ) { alpha, shadeCollpaseFadeIn, alphaForShadeAndQsExpansion ->
                                 if (isOnLockscreenWithoutShade) {
                                     if (!shadeCollpaseFadeIn) {
                                         emit(alpha)
                                     }
                                 } else {
-                                    emit(alphaForQsExpansion)
+                                    emit(alphaForShadeAndQsExpansion)
                                 }
                             }
                         }
                     }
-                )
+                )(viewState)
             }
             .distinctUntilChanged()
+    }
 
     /**
      * Returns a flow of the expected alpha while running a LOCKSCREEN<->GLANCEABLE_HUB transition

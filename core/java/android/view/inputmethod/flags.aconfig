@@ -62,3 +62,11 @@ flag {
     bug: "311791923"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "initiation_without_input_connection"
+    namespace: "input_method"
+    description: "Feature flag for initiating handwriting without InputConnection"
+    bug: "308827131"
+    is_fixed_read_only: true
+}

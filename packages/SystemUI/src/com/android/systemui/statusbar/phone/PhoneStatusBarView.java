@@ -132,9 +132,9 @@ public class PhoneStatusBarView extends FrameLayout {
         if (updateDisplayParameters()) {
             updateLayoutForCutout();
             requestLayout();
-            if (truncatedStatusBarIconsFix()) {
-                updateWindowHeight();
-            }
+        }
+        if (truncatedStatusBarIconsFix()) {
+            updateWindowHeight();
         }
     }
 

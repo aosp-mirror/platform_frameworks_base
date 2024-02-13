@@ -76,7 +76,7 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     private lateinit var chipAnimationController: SystemEventChipAnimationController
     private lateinit var systemStatusAnimationScheduler: SystemStatusAnimationScheduler
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     @Before
     fun setup() {

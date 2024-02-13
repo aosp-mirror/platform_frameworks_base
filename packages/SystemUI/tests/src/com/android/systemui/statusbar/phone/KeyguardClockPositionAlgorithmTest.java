@@ -45,6 +45,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -80,6 +81,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mStaticMockSession = mockitoSession()
+                .strictness(Strictness.WARN)
                 .mockStatic(BurnInHelperKt.class)
                 .mockStatic(LargeScreenHeaderHelper.class)
                 .startMocking();

@@ -40,6 +40,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.app.Person;
 import android.app.RemoteInput;
+import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
@@ -127,6 +128,7 @@ public final class NotificationEntry extends ListEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
+    public List<RemoteInputHistoryItem> remoteInputs = null;
     public String remoteInputMimeType;
     public Uri remoteInputUri;
     public ContentInfo remoteInputAttachment;

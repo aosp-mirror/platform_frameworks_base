@@ -54,6 +54,7 @@ aconfig_srcjars = [
     ":android.service.controls.flags-aconfig-java{.generated_srcjars}",
     ":android.service.dreams.flags-aconfig-java{.generated_srcjars}",
     ":android.service.notification.flags-aconfig-java{.generated_srcjars}",
+    ":android.service.appprediction.flags-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
     ":android.speech.flags-aconfig-java{.generated_srcjars}",
     ":android.systemserver.flags-aconfig-java{.generated_srcjars}",
@@ -125,6 +126,7 @@ stubs_defaults {
         "android.provider.flags-aconfig",
         "android.security.flags-aconfig",
         "android.server.app.flags-aconfig",
+        "android.service.appprediction.flags-aconfig",
         "android.service.autofill.flags-aconfig",
         "android.service.chooser.flags-aconfig",
         "android.service.controls.flags-aconfig",
@@ -726,6 +728,19 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+// App prediction
+aconfig_declarations {
+    name: "android.service.appprediction.flags-aconfig",
+    package: "android.service.appprediction.flags",
+    srcs: ["core/java/android/service/appprediction/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.service.appprediction.flags-aconfig-java",
+    aconfig_declarations: "android.service.appprediction.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Controls
 aconfig_declarations {
     name: "android.service.controls.flags-aconfig",
@@ -852,6 +867,13 @@ aconfig_declarations {
 java_aconfig_library {
     name: "device_policy_aconfig_flags_lib",
     aconfig_declarations: "device_policy_aconfig_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "device_policy_aconfig_flags_lib_host",
+    aconfig_declarations: "device_policy_aconfig_flags",
+    host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

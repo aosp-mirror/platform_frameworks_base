@@ -1350,41 +1350,57 @@ class UserController implements Handler.Callback {
     }
 
     /**
-     * For mDelayUserDataLocking mode, storage once unlocked is kept unlocked.
-     * Total number of unlocked user storage is limited by mMaxRunningUsers.
-     * If there are more unlocked users, evict and lock the least recently stopped user and
-     * lock that user's data. Regardless of the mode, ephemeral user is always locked
-     * immediately.
+     * Returns which user, if any, should be locked when the given user is stopped.
+     *
+     * For typical (non-mDelayUserDataLocking) devices and users, this will be the provided user.
+     *
+     * However, for some devices or users (based on {@link #canDelayDataLockingForUser(int)}),
+     * storage once unlocked is kept unlocked, even after the user is stopped, so the user to be
+     * locked (if any) may differ.
+     *
+     * For mDelayUserDataLocking devices, the total number of unlocked user storage is limited
+     * (currently by mMaxRunningUsers). If there are more unlocked users, evict and lock the least
+     * recently stopped user and lock that user's data.
+     *
+     * Regardless of the mode, ephemeral user is always locked immediately.
      *
      * @return user id to lock. UserHandler.USER_NULL will be returned if no user should be locked.
      */
     @GuardedBy("mLock")
     private int updateUserToLockLU(@UserIdInt int userId, boolean allowDelayedLocking) {
-        int userIdToLock = userId;
-        // TODO: Decouple the delayed locking flows from mMaxRunningUsers or rename the property to
-        // state maximum running unlocked users specifically
-        if (canDelayDataLockingForUser(userIdToLock) && allowDelayedLocking
-                && !getUserInfo(userId).isEphemeral()
-                && !hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, userId)) {
+        if (!canDelayDataLockingForUser(userId)
+                || !allowDelayedLocking
+                || getUserInfo(userId).isEphemeral()
+                || hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, userId)) {
+            return userId;
+        }
+
+        // Once we reach here, we are in a delayed locking scenario.
+        // Now, no user will be locked, unless the device's policy dictates we should based on the
+        // maximum of such users allowed for the device.
+        if (mDelayUserDataLocking) {
             // arg should be object, not index
             mLastActiveUsersForDelayedLocking.remove((Integer) userId);
             mLastActiveUsersForDelayedLocking.add(0, userId);
             int totalUnlockedUsers = mStartedUsers.size()
                     + mLastActiveUsersForDelayedLocking.size();
+            // TODO: Decouple the delayed locking flows from mMaxRunningUsers. These users aren't
+            //  running so this calculation shouldn't be based on this parameter. Also note that
+            //  that if these devices ever support background running users (such as profiles), the
+            //  implementation is incorrect since starting such users can cause the max to be
+            //  exceeded.
             if (totalUnlockedUsers > mMaxRunningUsers) { // should lock a user
-                userIdToLock = mLastActiveUsersForDelayedLocking.get(
+                final int userIdToLock = mLastActiveUsersForDelayedLocking.get(
                         mLastActiveUsersForDelayedLocking.size() - 1);
                 mLastActiveUsersForDelayedLocking
                         .remove(mLastActiveUsersForDelayedLocking.size() - 1);
-                Slogf.i(TAG, "finishUserStopped, stopping user:" + userId
-                        + " lock user:" + userIdToLock);
-            } else {
-                Slogf.i(TAG, "finishUserStopped, user:" + userId + ", skip locking");
-                // do not lock
-                userIdToLock = UserHandle.USER_NULL;
+                Slogf.i(TAG, "finishUserStopped: should stop user " + userId
+                        + " but should lock user " + userIdToLock);
+                return userIdToLock;
             }
         }
-        return userIdToLock;
+        Slogf.i(TAG, "finishUserStopped: should stop user " + userId + " but without any locking");
+        return UserHandle.USER_NULL;
     }
 
     /**
