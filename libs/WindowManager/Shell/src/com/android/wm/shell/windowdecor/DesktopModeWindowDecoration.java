@@ -299,12 +299,34 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
             boolean shouldSetTaskPositionAndCrop) {
+        final int captionLayoutId = getDesktopModeWindowDecorLayoutId(taskInfo.getWindowingMode());
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
-        relayoutParams.mLayoutResId =
-            getDesktopModeWindowDecorLayoutId(taskInfo.getWindowingMode());
+        relayoutParams.mLayoutResId = captionLayoutId;
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
         relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
+
+        // The "app controls" type caption bar should report the occluding elements as bounding
+        // rects to the insets system so that apps can draw in the empty space left in the center.
+        if (captionLayoutId == R.layout.desktop_mode_app_controls_window_decor) {
+            // The "app chip" section of the caption bar, it's aligned to the left and its width
+            // varies depending on the length of the app name, but we'll report its max width for
+            // now.
+            // TODO(b/316387515): consider reporting the true width after it's been laid out.
+            final RelayoutParams.OccludingCaptionElement appChipElement =
+                    new RelayoutParams.OccludingCaptionElement();
+            appChipElement.mWidthResId = R.dimen.desktop_mode_app_details_max_width;
+            appChipElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.START;
+            relayoutParams.mOccludingCaptionElements.add(appChipElement);
+            // The "controls" section of the caption bar (maximize, close btns). These are aligned
+            // to the right of the caption bar and have a fixed width.
+            // TODO(b/316387515): add additional padding for an exclusive drag-move region.
+            final RelayoutParams.OccludingCaptionElement controlsElement =
+                    new RelayoutParams.OccludingCaptionElement();
+            controlsElement.mWidthResId = R.dimen.desktop_mode_right_edge_buttons_width;
+            controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
+            relayoutParams.mOccludingCaptionElements.add(controlsElement);
+        }
         if (DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ taskInfo.isFocused)) {
             relayoutParams.mShadowRadiusId = taskInfo.isFocused
                     ? R.dimen.freeform_decor_shadow_focused_thickness

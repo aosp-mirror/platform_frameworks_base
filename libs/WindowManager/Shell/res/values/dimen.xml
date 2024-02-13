@@ -435,6 +435,9 @@
          Text varies in size, we will calculate that width separately. -->
     <dimen name="desktop_mode_app_details_width_minus_text">62dp</dimen>
 
+    <!-- 22dp padding + 24dp app icon + 16dp expand button + 86dp text (max) -->
+    <dimen name="desktop_mode_app_details_max_width">148dp</dimen>
+
     <!-- The width of the maximize menu in desktop mode. -->
     <dimen name="desktop_mode_maximize_menu_width">287dp</dimen>
 
