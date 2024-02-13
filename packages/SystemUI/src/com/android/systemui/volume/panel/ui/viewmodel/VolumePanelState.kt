@@ -22,10 +22,13 @@ import android.content.res.Configuration.Orientation
 /**
  * State of the Volume Panel itself.
  *
- * @property orientation is current Volume Panel orientation.
+ * @property orientation is current Volume Panel orientation
+ * @property isWideScreen is true when Volume Panel should use wide-screen layout and false the
+ *   otherwise
  */
 data class VolumePanelState(
     @Orientation val orientation: Int,
+    val isWideScreen: Boolean,
     val isVisible: Boolean,
 ) {
     init {
