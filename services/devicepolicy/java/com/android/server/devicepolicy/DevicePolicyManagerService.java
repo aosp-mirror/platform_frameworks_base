@@ -22339,6 +22339,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_CAMERA,
             MANAGE_DEVICE_POLICY_CERTIFICATES,
             MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE,
+            MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,
             MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES,
             MANAGE_DEVICE_POLICY_DEFAULT_SMS,
             MANAGE_DEVICE_POLICY_DISPLAY,
@@ -22423,6 +22424,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_CALLS,
                     MANAGE_DEVICE_POLICY_CAMERA,
                     MANAGE_DEVICE_POLICY_CERTIFICATES,
+                    MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,
                     MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES,
                     MANAGE_DEVICE_POLICY_DISPLAY,
                     MANAGE_DEVICE_POLICY_FACTORY_RESET,
@@ -23238,38 +23240,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private EnforcingAdmin enforceCanCallContentProtectionLocked(
-            ComponentName who, String callerPackageName) {
-        CallerIdentity caller = getCallerIdentity(who, callerPackageName);
-        final int userId = caller.getUserId();
-
-        EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
-                who,
-                MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,
-                caller.getPackageName(),
-                userId
-        );
-        if ((isDeviceOwner(caller) || isProfileOwner(caller))
-                && !canDPCManagedUserUseLockTaskLocked(userId)) {
-            throw new SecurityException(
-                    "User " + userId + " is not allowed to use content protection");
-        }
-        return enforcingAdmin;
-    }
-
-    private void enforceCanQueryContentProtectionLocked(
-            ComponentName who, String callerPackageName) {
-        CallerIdentity caller = getCallerIdentity(who, callerPackageName);
-        final int userId = caller.getUserId();
-
-        enforceCanQuery(MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, caller.getPackageName(), userId);
-        if ((isDeviceOwner(caller) || isProfileOwner(caller))
-                && !canDPCManagedUserUseLockTaskLocked(userId)) {
-            throw new SecurityException(
-                    "User " + userId + " is not allowed to use content protection");
-        }
-    }
-
     @Override
     public void setContentProtectionPolicy(
             ComponentName who, String callerPackageName, @ContentProtectionPolicy int policy)
@@ -23279,24 +23249,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        int userId = caller.getUserId();
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_CONTENT_PROTECTION_POLICY);
-
-        EnforcingAdmin enforcingAdmin;
-        synchronized (getLockObject()) {
-            enforcingAdmin = enforceCanCallContentProtectionLocked(who, caller.getPackageName());
-        }
+        EnforcingAdmin enforcingAdmin =
+                enforcePermissionAndGetEnforcingAdmin(
+                        who, MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, callerPackageName, userId);
 
         if (policy == CONTENT_PROTECTION_DISABLED) {
             mDevicePolicyEngine.removeLocalPolicy(
-                    PolicyDefinition.CONTENT_PROTECTION,
-                    enforcingAdmin,
-                    caller.getUserId());
+                    PolicyDefinition.CONTENT_PROTECTION, enforcingAdmin, userId);
         } else {
             mDevicePolicyEngine.setLocalPolicy(
                     PolicyDefinition.CONTENT_PROTECTION,
                     enforcingAdmin,
                     new IntegerPolicyValue(policy),
-                    caller.getUserId());
+                    userId);
         }
     }
 
@@ -23308,13 +23275,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller = getCallerIdentity(who, callerPackageName);
-        final int userHandle = caller.getUserId();
+        int userId = caller.getUserId();
+        enforceCanQuery(MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, callerPackageName, userId);
 
-        synchronized (getLockObject()) {
-            enforceCanQueryContentProtectionLocked(who, caller.getPackageName());
-        }
-        Integer policy = mDevicePolicyEngine.getResolvedPolicy(
-                PolicyDefinition.CONTENT_PROTECTION, userHandle);
+        Integer policy =
+                mDevicePolicyEngine.getResolvedPolicy(PolicyDefinition.CONTENT_PROTECTION, userId);
         if (policy == null) {
             return CONTENT_PROTECTION_DISABLED;
         } else {
