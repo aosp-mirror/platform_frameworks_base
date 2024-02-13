@@ -1066,12 +1066,8 @@ class ActivityClientController extends IActivityClientController.Stub {
     /**
      * Alert the client that the Picture-in-Picture state has changed.
      */
-    void onPictureInPictureStateChanged(@NonNull ActivityRecord r,
+    void onPictureInPictureUiStateChanged(@NonNull ActivityRecord r,
             PictureInPictureUiState pipState) {
-        if (!r.inPinnedWindowingMode()) {
-            throw new IllegalStateException("Activity is not in PIP mode");
-        }
-
         try {
             mService.getLifecycleManager().scheduleTransactionItem(r.app.getThread(),
                     PipStateTransactionItem.obtain(r.token, pipState));
