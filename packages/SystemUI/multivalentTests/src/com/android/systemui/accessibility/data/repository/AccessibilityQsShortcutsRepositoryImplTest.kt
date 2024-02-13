@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility.data.repository
 
 import android.provider.Settings
+import android.view.accessibility.AccessibilityManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -26,13 +27,22 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnit
+import org.mockito.junit.MockitoRule
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @android.platform.test.annotations.EnabledOnRavenwood
 class AccessibilityQsShortcutsRepositoryImplTest : SysuiTestCase() {
+    @Rule @JvmField val mockitoRule: MockitoRule = MockitoJUnit.rule()
+
+    // mocks
+    @Mock private lateinit var a11yManager: AccessibilityManager
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
     private val secureSettings = FakeSettings()
@@ -49,8 +59,17 @@ class AccessibilityQsShortcutsRepositoryImplTest : SysuiTestCase() {
             }
         }
 
-    private val underTest =
-        AccessibilityQsShortcutsRepositoryImpl(userA11yQsShortcutsRepositoryFactory)
+    private lateinit var underTest: AccessibilityQsShortcutsRepositoryImpl
+
+    @Before
+    fun setUp() {
+        underTest =
+            AccessibilityQsShortcutsRepositoryImpl(
+                a11yManager,
+                userA11yQsShortcutsRepositoryFactory,
+                testDispatcher
+            )
+    }
 
     @Test
     fun a11yQsShortcutTargetsForCorrectUsers() =
