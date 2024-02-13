@@ -1283,6 +1283,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.autoRevokePermissionsMode = params.autoRevokePermissionsMode;
             info.installFlags = params.installFlags;
             info.rollbackLifetimeMillis = params.rollbackLifetimeMillis;
+            info.rollbackImpactLevel = params.rollbackImpactLevel;
             info.isMultiPackage = params.isMultiPackage;
             info.isStaged = params.isStaged;
             info.rollbackDataPolicy = params.rollbackDataPolicy;
