@@ -57,6 +57,13 @@ flag {
 }
 
 flag {
+  name: "assist_content_user_restriction_enabled"
+  namespace: "enterprise"
+  description: "Prevent work data leakage by sending assist content to privileged apps."
+  bug: "322975406"
+}
+
+flag {
     name: "default_sms_personal_app_suspension_fix_enabled"
     namespace: "enterprise"
     description: "Exempt the default sms app of the context user for suspension when calling setPersonalAppsSuspended"
