@@ -42,5 +42,6 @@ java_test_host {
         "junit",
         "mockito",
         "objenesis",
+        "truth",
     ],
 }

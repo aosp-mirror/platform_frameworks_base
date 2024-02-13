@@ -16,15 +16,15 @@
 
 package com.android.protolog.tool
 
-import org.junit.Assert
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.OutputStream
 import java.util.jar.JarInputStream
+import org.junit.Assert
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
 class EndToEndTest {
 
@@ -47,11 +47,9 @@ class EndToEndTest {
                 logGroup = LogGroup("GROUP", true, false, "TAG_GROUP"),
                 commandOptions = CommandOptions(arrayOf("transform-protolog-calls",
                         "--protolog-class", "com.android.internal.protolog.common.ProtoLog",
-                        "--protolog-impl-class", "com.android.internal.protolog.ProtoLogImpl",
-                        "--protolog-cache-class",
-                        "com.android.server.wm.ProtoLogCache",
                         "--loggroups-class", "com.android.internal.protolog.ProtoLogGroup",
                         "--loggroups-jar", "not_required.jar",
+                        "--viewer-config-file-path", "not_required.pb",
                         "--output-srcjar", "out.srcjar",
                         "frameworks/base/org/example/Example.java"))
         )
@@ -80,7 +78,8 @@ class EndToEndTest {
                         "--protolog-class", "com.android.internal.protolog.common.ProtoLog",
                         "--loggroups-class", "com.android.internal.protolog.ProtoLogGroup",
                         "--loggroups-jar", "not_required.jar",
-                        "--viewer-conf", "out.json",
+                        "--viewer-config-type", "json",
+                        "--viewer-config", "out.json",
                         "frameworks/base/org/example/Example.java"))
         )
         val viewerConfigJson = assertLoadText(output, "out.json")
