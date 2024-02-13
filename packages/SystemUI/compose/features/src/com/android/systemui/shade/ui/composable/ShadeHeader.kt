@@ -20,6 +20,7 @@ package com.android.systemui.shade.ui.composable
 import android.view.ContextThemeWrapper
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateSceneFloatAsState
@@ -57,9 +59,11 @@ import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
+import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.composable.QuickSettings
 import com.android.systemui.scene.ui.composable.Shade as ShadeKey
+import com.android.systemui.shade.ui.composable.ShadeHeader.Dimensions.CollapsedHeight
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
@@ -72,7 +76,9 @@ import com.android.systemui.statusbar.policy.Clock
 object ShadeHeader {
     object Elements {
         val ExpandedContent = ElementKey("ShadeHeaderExpandedContent")
-        val CollapsedContent = ElementKey("ShadeHeaderCollapsedContent")
+        val CollapsedContentStart = ElementKey("ShadeHeaderCollapsedContentStart")
+        val CollapsedContentEnd = ElementKey("ShadeHeaderCollapsedContentEnd")
+        val PrivacyChip = ElementKey("PrivacyChip", scenePicker = LowestZIndexScenePicker)
     }
 
     object Keys {
@@ -106,15 +112,16 @@ fun SceneScope.CollapsedShadeHeader(
                 cutoutLocation != CutoutLocation.CENTER || formatProgress.value > 0.5f
             }
         }
+    val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsState()
 
     // This layout assumes it is globally positioned at (0, 0) and is the
     // same size as the screen.
     Layout(
-        modifier = modifier.element(ShadeHeader.Elements.CollapsedContent),
+        modifier = modifier,
         contents =
             listOf(
                 {
-                    Row {
+                    Row(modifier = Modifier.element(ShadeHeader.Elements.CollapsedContentStart)) {
                         AndroidView(
                             factory = { context ->
                                 Clock(
@@ -132,31 +139,44 @@ fun SceneScope.CollapsedShadeHeader(
                     }
                 },
                 {
-                    Row(horizontalArrangement = Arrangement.End) {
-                        SystemIconContainer {
-                            when (LocalWindowSizeClass.current.widthSizeClass) {
-                                WindowWidthSizeClass.Medium,
-                                WindowWidthSizeClass.Expanded ->
-                                    ShadeCarrierGroup(
-                                        viewModel = viewModel,
-                                        modifier = Modifier.align(Alignment.CenterVertically),
-                                    )
-                            }
-                            StatusIcons(
+                    if (isPrivacyChipVisible) {
+                        Box(modifier = Modifier.height(CollapsedHeight).fillMaxWidth()) {
+                            PrivacyChip(
                                 viewModel = viewModel,
-                                createTintedIconManager = createTintedIconManager,
-                                statusBarIconController = statusBarIconController,
-                                useExpandedFormat = useExpandedFormat,
-                                modifier =
-                                    Modifier.align(Alignment.CenterVertically)
-                                        .padding(end = 6.dp)
-                                        .weight(1f, fill = false)
+                                modifier = Modifier.align(Alignment.CenterEnd),
                             )
-                            BatteryIcon(
-                                createBatteryMeterViewController = createBatteryMeterViewController,
-                                useExpandedFormat = useExpandedFormat,
-                                modifier = Modifier.align(Alignment.CenterVertically),
-                            )
+                        }
+                    } else {
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            modifier = Modifier.element(ShadeHeader.Elements.CollapsedContentEnd)
+                        ) {
+                            SystemIconContainer {
+                                when (LocalWindowSizeClass.current.widthSizeClass) {
+                                    WindowWidthSizeClass.Medium,
+                                    WindowWidthSizeClass.Expanded ->
+                                        ShadeCarrierGroup(
+                                            viewModel = viewModel,
+                                            modifier = Modifier.align(Alignment.CenterVertically),
+                                        )
+                                }
+                                StatusIcons(
+                                    viewModel = viewModel,
+                                    createTintedIconManager = createTintedIconManager,
+                                    statusBarIconController = statusBarIconController,
+                                    useExpandedFormat = useExpandedFormat,
+                                    modifier =
+                                        Modifier.align(Alignment.CenterVertically)
+                                            .padding(end = 6.dp)
+                                            .weight(1f, fill = false)
+                                )
+                                BatteryIcon(
+                                    createBatteryMeterViewController =
+                                        createBatteryMeterViewController,
+                                    useExpandedFormat = useExpandedFormat,
+                                    modifier = Modifier.align(Alignment.CenterVertically),
+                                )
+                            }
                         }
                     }
                 },
@@ -223,66 +243,76 @@ fun SceneScope.ExpandedShadeHeader(
             .unsafeCompositionState(initialValue = 1f)
     val useExpandedFormat by
         remember(formatProgress) { derivedStateOf { formatProgress.value > 0.5f } }
+    val isPrivacyChipVisible by viewModel.isPrivacyChipVisible.collectAsState()
 
-    Column(
-        verticalArrangement = Arrangement.Bottom,
-        modifier =
-            modifier
-                .element(ShadeHeader.Elements.ExpandedContent)
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = ShadeHeader.Dimensions.ExpandedHeight)
-    ) {
-        Row {
-            AndroidView(
-                factory = { context ->
-                    Clock(ContextThemeWrapper(context, R.style.TextAppearance_QS_Status), null)
-                },
-                modifier =
-                    Modifier.align(Alignment.CenterVertically)
-                        // use graphicsLayer instead of Modifier.scale to anchor transform to
-                        // the (start, top) corner
-                        .graphicsLayer(
-                            scaleX = 2.57f,
-                            scaleY = 2.57f,
-                            transformOrigin =
-                                TransformOrigin(
-                                    when (LocalLayoutDirection.current) {
-                                        LayoutDirection.Ltr -> 0f
-                                        LayoutDirection.Rtl -> 1f
-                                    },
-                                    0.5f
-                                )
-                        ),
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            ShadeCarrierGroup(
-                viewModel = viewModel,
-                modifier = Modifier.align(Alignment.CenterVertically),
-            )
-        }
-        Spacer(modifier = Modifier.width(5.dp))
-        Row {
-            VariableDayDate(
-                viewModel = viewModel,
-                modifier = Modifier.widthIn(max = 90.dp).align(Alignment.CenterVertically),
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            SystemIconContainer {
-                StatusIcons(
+    Box(modifier = modifier) {
+        if (isPrivacyChipVisible) {
+            Box(modifier = Modifier.height(CollapsedHeight).fillMaxWidth()) {
+                PrivacyChip(
                     viewModel = viewModel,
-                    createTintedIconManager = createTintedIconManager,
-                    statusBarIconController = statusBarIconController,
-                    useExpandedFormat = useExpandedFormat,
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                )
+            }
+        }
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            modifier =
+                Modifier.element(ShadeHeader.Elements.ExpandedContent)
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = ShadeHeader.Dimensions.ExpandedHeight)
+        ) {
+            Row {
+                AndroidView(
+                    factory = { context ->
+                        Clock(ContextThemeWrapper(context, R.style.TextAppearance_QS_Status), null)
+                    },
                     modifier =
                         Modifier.align(Alignment.CenterVertically)
-                            .padding(end = 6.dp)
-                            .weight(1f, fill = false),
+                            // use graphicsLayer instead of Modifier.scale to anchor transform to
+                            // the (start, top) corner
+                            .graphicsLayer(
+                                scaleX = 2.57f,
+                                scaleY = 2.57f,
+                                transformOrigin =
+                                    TransformOrigin(
+                                        when (LocalLayoutDirection.current) {
+                                            LayoutDirection.Ltr -> 0f
+                                            LayoutDirection.Rtl -> 1f
+                                        },
+                                        0.5f
+                                    )
+                            ),
                 )
-                BatteryIcon(
-                    useExpandedFormat = useExpandedFormat,
-                    createBatteryMeterViewController = createBatteryMeterViewController,
+                Spacer(modifier = Modifier.weight(1f))
+                ShadeCarrierGroup(
+                    viewModel = viewModel,
                     modifier = Modifier.align(Alignment.CenterVertically),
                 )
+            }
+            Spacer(modifier = Modifier.width(5.dp))
+            Row {
+                VariableDayDate(
+                    viewModel = viewModel,
+                    modifier = Modifier.widthIn(max = 90.dp).align(Alignment.CenterVertically),
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                SystemIconContainer {
+                    StatusIcons(
+                        viewModel = viewModel,
+                        createTintedIconManager = createTintedIconManager,
+                        statusBarIconController = statusBarIconController,
+                        useExpandedFormat = useExpandedFormat,
+                        modifier =
+                            Modifier.align(Alignment.CenterVertically)
+                                .padding(end = 6.dp)
+                                .weight(1f, fill = false),
+                    )
+                    BatteryIcon(
+                        useExpandedFormat = useExpandedFormat,
+                        createBatteryMeterViewController = createBatteryMeterViewController,
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                    )
+                }
             }
         }
     }
@@ -359,7 +389,14 @@ private fun SceneScope.StatusIcons(
 ) {
     val carrierIconSlots =
         listOf(stringResource(id = com.android.internal.R.string.status_bar_mobile))
+    val cameraSlot = stringResource(id = com.android.internal.R.string.status_bar_camera)
+    val micSlot = stringResource(id = com.android.internal.R.string.status_bar_microphone)
+    val locationSlot = stringResource(id = com.android.internal.R.string.status_bar_location)
+
     val isSingleCarrier by viewModel.isSingleCarrier.collectAsState()
+    val isPrivacyChipEnabled by viewModel.isPrivacyChipEnabled.collectAsState()
+    val isMicCameraIndicationEnabled by viewModel.isMicCameraIndicationEnabled.collectAsState()
+    val isLocationIndicationEnabled by viewModel.isLocationIndicationEnabled.collectAsState()
 
     AndroidView(
         factory = { context ->
@@ -382,6 +419,25 @@ private fun SceneScope.StatusIcons(
             } else {
                 iconContainer.addIgnoredSlots(carrierIconSlots)
             }
+
+            if (isPrivacyChipEnabled) {
+                if (isMicCameraIndicationEnabled) {
+                    iconContainer.addIgnoredSlot(cameraSlot)
+                    iconContainer.addIgnoredSlot(micSlot)
+                } else {
+                    iconContainer.removeIgnoredSlot(cameraSlot)
+                    iconContainer.removeIgnoredSlot(micSlot)
+                }
+                if (isLocationIndicationEnabled) {
+                    iconContainer.addIgnoredSlot(locationSlot)
+                } else {
+                    iconContainer.removeIgnoredSlot(locationSlot)
+                }
+            } else {
+                iconContainer.removeIgnoredSlot(cameraSlot)
+                iconContainer.removeIgnoredSlot(micSlot)
+                iconContainer.removeIgnoredSlot(locationSlot)
+            }
         },
         modifier = modifier,
     )
@@ -394,7 +450,28 @@ private fun SystemIconContainer(
 ) {
     // TODO(b/298524053): add hover state for this container
     Row(
-        modifier = modifier.height(ShadeHeader.Dimensions.CollapsedHeight),
+        modifier = modifier.height(CollapsedHeight),
         content = content,
+    )
+}
+
+@Composable
+private fun SceneScope.PrivacyChip(
+    viewModel: ShadeHeaderViewModel,
+    modifier: Modifier = Modifier,
+) {
+    val privacyList by viewModel.privacyItems.collectAsState()
+
+    AndroidView(
+        factory = { context ->
+            val view =
+                OngoingPrivacyChip(context, null).also { privacyChip ->
+                    privacyChip.privacyList = privacyList
+                    privacyChip.setOnClickListener { viewModel.onPrivacyChipClicked(privacyChip) }
+                }
+            view
+        },
+        update = { it.privacyList = privacyList },
+        modifier = modifier.element(ShadeHeader.Elements.PrivacyChip),
     )
 }
