@@ -111,6 +111,8 @@ import com.android.server.pm.UserTypeFactory;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
+import com.google.common.collect.Range;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -155,6 +157,7 @@ public class UserControllerTest {
     private UserController mUserController;
     private TestInjector mInjector;
     private final HashMap<Integer, UserState> mUserStates = new HashMap<>();
+    private final HashMap<Integer, UserInfo> mUserInfos = new HashMap<>();
 
     private final KeyEvictedCallback mKeyEvictedCallback = (userId) -> { /* ignore */ };
 
@@ -587,25 +590,25 @@ public class UserControllerTest {
 
         setUpUser(TEST_USER_ID1, 0);
         setUpUser(TEST_USER_ID2, 0);
-        int numerOfUserSwitches = 1;
+        int numberOfUserSwitches = 1;
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
-                numerOfUserSwitches, false);
+                numberOfUserSwitches, false);
         // running: user 0, USER_ID
         assertTrue(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID}),
                 mUserController.getRunningUsersLU());
 
-        numerOfUserSwitches++;
+        numberOfUserSwitches++;
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID1, TEST_USER_ID,
-                numerOfUserSwitches, false);
+                numberOfUserSwitches, false);
         // running: user 0, USER_ID, USER_ID1
         assertFalse(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID, TEST_USER_ID1}),
                 mUserController.getRunningUsersLU());
 
-        numerOfUserSwitches++;
+        numberOfUserSwitches++;
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID2, TEST_USER_ID1,
-                numerOfUserSwitches, false);
+                numberOfUserSwitches, false);
         UserState ussUser2 = mUserStates.get(TEST_USER_ID2);
         // skip middle step and call this directly.
         mUserController.finishUserSwitch(ussUser2);
@@ -631,20 +634,20 @@ public class UserControllerTest {
 
         setUpUser(TEST_USER_ID1, 0);
         setUpUser(TEST_USER_ID2, 0);
-        int numerOfUserSwitches = 1;
+        int numberOfUserSwitches = 1;
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
-                numerOfUserSwitches, false);
+                numberOfUserSwitches, false);
         // running: user 0, USER_ID
         assertTrue(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID}),
                 mUserController.getRunningUsersLU());
-        numerOfUserSwitches++;
+        numberOfUserSwitches++;
 
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID1, TEST_USER_ID,
-                numerOfUserSwitches, true);
+                numberOfUserSwitches, true);
         // running: user 0, USER_ID1
         // stopped + unlocked: USER_ID
-        numerOfUserSwitches++;
+        numberOfUserSwitches++;
         assertTrue(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID1}),
                 mUserController.getRunningUsersLU());
@@ -659,7 +662,7 @@ public class UserControllerTest {
                 .lockCeStorage(anyInt());
 
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID2, TEST_USER_ID1,
-                numerOfUserSwitches, true);
+                numberOfUserSwitches, true);
         // running: user 0, USER_ID2
         // stopped + unlocked: USER_ID1
         // stopped + locked: USER_ID
@@ -672,6 +675,105 @@ public class UserControllerTest {
         waitForHandlerToComplete(FgThread.getHandler(), HANDLER_WAIT_TIME_MS);
         verify(mInjector.mStorageManagerMock, times(1))
                 .lockCeStorage(TEST_USER_ID);
+    }
+
+    /**
+     * Test that, in getRunningUsersLU, parents come after their profile, even if the profile was
+     * started afterwards.
+     */
+    @Test
+    public void testRunningUsersListOrder_parentAfterProfile() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 7, /* delayUserDataLocking= */ false);
+
+        final int PARENT_ID = 200;
+        final int PROFILE1_ID = 201;
+        final int PROFILE2_ID = 202;
+        final int FG_USER_ID = 300;
+        final int BG_USER_ID = 400;
+
+        setUpUser(PARENT_ID, 0).profileGroupId = PARENT_ID;
+        setUpUser(PROFILE1_ID, UserInfo.FLAG_PROFILE).profileGroupId = PARENT_ID;
+        setUpUser(PROFILE2_ID, UserInfo.FLAG_PROFILE).profileGroupId = PARENT_ID;
+        setUpUser(FG_USER_ID, 0).profileGroupId = FG_USER_ID;
+        setUpUser(BG_USER_ID, 0).profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
+        mUserController.onSystemReady(); // To set the profileGroupIds in UserController.
+
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID}),
+                mUserController.getRunningUsersLU());
+
+        int numberOfUserSwitches = 1;
+        addForegroundUserAndContinueUserSwitch(PARENT_ID, UserHandle.USER_SYSTEM,
+                numberOfUserSwitches, false);
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, PARENT_ID}),
+                mUserController.getRunningUsersLU());
+
+        assertThat(mUserController.startProfile(PROFILE1_ID, true, null)).isTrue();
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, PROFILE1_ID, PARENT_ID}),
+                mUserController.getRunningUsersLU());
+
+        numberOfUserSwitches++;
+        addForegroundUserAndContinueUserSwitch(FG_USER_ID, PARENT_ID,
+                numberOfUserSwitches, false);
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, PROFILE1_ID, PARENT_ID, FG_USER_ID}),
+                mUserController.getRunningUsersLU());
+
+        mUserController.startUser(BG_USER_ID, USER_START_MODE_BACKGROUND);
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, PROFILE1_ID, PARENT_ID, BG_USER_ID, FG_USER_ID}),
+                mUserController.getRunningUsersLU());
+
+        assertThat(mUserController.startProfile(PROFILE2_ID, true, null)).isTrue();
+        // Note for the future:
+        // It is not absolutely essential that PROFILE1 come before PROFILE2,
+        // nor that PROFILE1 come before BG_USER. We can change that policy later if we'd like.
+        // The important thing is that PROFILE1 and PROFILE2 precede PARENT,
+        // and that everything precedes OTHER.
+        assertEquals(Arrays.asList(new Integer[] {
+                SYSTEM_USER_ID, PROFILE1_ID, BG_USER_ID, PROFILE2_ID, PARENT_ID, FG_USER_ID}),
+                mUserController.getRunningUsersLU());
+    }
+
+    /**
+     * Test that, in getRunningUsersLU, the current user is always at the end, even if background
+     * users were started subsequently.
+     */
+    @Test
+    public void testRunningUsersListOrder_currentAtEnd() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 7, /* delayUserDataLocking= */ false);
+
+        final int CURRENT_ID = 200;
+        final int PROFILE_ID = 201;
+        final int BG_USER_ID = 400;
+
+        setUpUser(CURRENT_ID, 0).profileGroupId = CURRENT_ID;
+        setUpUser(PROFILE_ID, UserInfo.FLAG_PROFILE).profileGroupId = CURRENT_ID;
+        setUpUser(BG_USER_ID, 0).profileGroupId = BG_USER_ID;
+        mUserController.onSystemReady(); // To set the profileGroupIds in UserController.
+
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID}),
+                mUserController.getRunningUsersLU());
+
+        addForegroundUserAndContinueUserSwitch(CURRENT_ID, UserHandle.USER_SYSTEM, 1, false);
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, CURRENT_ID}),
+                mUserController.getRunningUsersLU());
+
+        mUserController.startUser(BG_USER_ID, USER_START_MODE_BACKGROUND);
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, BG_USER_ID, CURRENT_ID}),
+                mUserController.getRunningUsersLU());
+
+        assertThat(mUserController.startProfile(PROFILE_ID, true, null)).isTrue();
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, BG_USER_ID, PROFILE_ID, CURRENT_ID}),
+                mUserController.getRunningUsersLU());
     }
 
     /**
@@ -783,6 +885,52 @@ public class UserControllerTest {
         assertThrows(IllegalArgumentException.class,
                 () -> mUserController.stopProfile(TEST_USER_ID1));
         verifyUserUnassignedFromDisplayNeverCalled(TEST_USER_ID);
+    }
+
+    /** Test that stopping a profile doesn't also stop its parent, even if it's in background. */
+    @Test
+    public void testStopProfile_doesNotStopItsParent() throws Exception {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 5, /* delayUserDataLocking= */ false);
+
+        final Range<Integer> RUNNING_RANGE =
+                Range.closed(UserState.STATE_BOOTING, UserState.STATE_RUNNING_UNLOCKED);
+
+        final int PARENT_ID = TEST_USER_ID1;
+        final int PROFILE_ID = TEST_USER_ID2;
+        final int OTHER_ID = TEST_USER_ID3;
+
+        setUpUser(PARENT_ID, 0).profileGroupId = PARENT_ID;
+        setUpUser(PROFILE_ID, UserInfo.FLAG_PROFILE).profileGroupId = PARENT_ID;
+        setUpUser(OTHER_ID, 0).profileGroupId = OTHER_ID;
+        mUserController.onSystemReady(); // To set the profileGroupIds in UserController.
+
+        // Start the parent in the background
+        boolean started = mUserController.startUser(PARENT_ID, USER_START_MODE_BACKGROUND);
+        assertWithMessage("startUser(%s)", PARENT_ID).that(started).isTrue();
+        assertThat(mUserController.getStartedUserState(PARENT_ID).state).isIn(RUNNING_RANGE);
+
+        // Start the profile
+        started = mUserController.startProfile(PROFILE_ID, true, null);
+        assertWithMessage("startProfile(%s)", PROFILE_ID).that(started).isTrue();
+        assertThat(mUserController.getStartedUserState(PARENT_ID).state).isIn(RUNNING_RANGE);
+        assertThat(mUserController.getStartedUserState(PROFILE_ID).state).isIn(RUNNING_RANGE);
+
+        // Start an unrelated user
+        started = mUserController.startUser(OTHER_ID, USER_START_MODE_FOREGROUND);
+        assertWithMessage("startUser(%s)", OTHER_ID).that(started).isTrue();
+        assertThat(mUserController.getStartedUserState(PARENT_ID).state).isIn(RUNNING_RANGE);
+        assertThat(mUserController.getStartedUserState(PROFILE_ID).state).isIn(RUNNING_RANGE);
+        assertThat(mUserController.getStartedUserState(OTHER_ID).state).isIn(RUNNING_RANGE);
+
+        // Stop the profile and assert that its (background) parent didn't stop too
+        boolean stopped = mUserController.stopProfile(PROFILE_ID);
+        assertWithMessage("stopProfile(%s)", PROFILE_ID).that(stopped).isTrue();
+        if (mUserController.getStartedUserState(PROFILE_ID) != null) {
+            assertThat(mUserController.getStartedUserState(PROFILE_ID).state)
+                    .isNotIn(RUNNING_RANGE);
+        }
+        assertThat(mUserController.getStartedUserState(PARENT_ID).state).isIn(RUNNING_RANGE);
     }
 
     @Test
@@ -1152,11 +1300,11 @@ public class UserControllerTest {
         continueUserSwitchAssertions(oldUserId, newUserId, expectOldUserStopping);
     }
 
-    private void setUpUser(@UserIdInt int userId, @UserInfoFlag int flags) {
-        setUpUser(userId, flags, /* preCreated= */ false, /* userType */ null);
+    private UserInfo setUpUser(@UserIdInt int userId, @UserInfoFlag int flags) {
+        return setUpUser(userId, flags, /* preCreated= */ false, /* userType */ null);
     }
 
-    private void setUpUser(@UserIdInt int userId, @UserInfoFlag int flags, boolean preCreated,
+    private UserInfo setUpUser(@UserIdInt int userId, @UserInfoFlag int flags, boolean preCreated,
             @Nullable String userType) {
         if (userType == null) {
             userType = UserInfo.getDefaultUserType(flags);
@@ -1171,6 +1319,12 @@ public class UserControllerTest {
         assertThat(userTypeDetails).isNotNull();
         when(mInjector.mUserManagerInternalMock.getUserProperties(eq(userId)))
                 .thenReturn(userTypeDetails.getDefaultUserPropertiesReference());
+
+        mUserInfos.put(userId, userInfo);
+        when(mInjector.mUserManagerMock.getUsers(anyBoolean()))
+                .thenReturn(mUserInfos.values().stream().toList());
+
+        return userInfo;
     }
 
     private static List<String> getActions(List<Intent> intents) {

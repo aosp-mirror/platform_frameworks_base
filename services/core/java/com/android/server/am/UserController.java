@@ -276,7 +276,15 @@ class UserController implements Handler.Callback {
     private final SparseArray<UserState> mStartedUsers = new SparseArray<>();
 
     /**
-     * LRU list of history of current users.  Most recently current is at the end.
+     * LRU list of history of running users, in order of when we last needed to start them.
+     *
+     * Switching to a user will move it towards the end. Attempting to start a user/profile (even
+     * if it was already running) will move it towards the end.
+     *
+     * <p>Guarantees (by the end of startUser):
+     * <li>The current user will always be at the end, even if background users were started
+     * subsequently.
+     * <li>Parents always come later than (but not necessarily adjacent to) their profiles.
      */
     @GuardedBy("mLock")
     private final ArrayList<Integer> mUserLru = new ArrayList<>();
@@ -299,6 +307,9 @@ class UserController implements Handler.Callback {
     /**
      * Mapping from each known user ID to the profile group ID it is associated with.
      * <p>Users not present in this array have a profile group of NO_PROFILE_GROUP_ID.
+     *
+     * <p>For better or worse, this class sometimes assumes that the profileGroupId of a parent user
+     * is always identical with its userId. If that ever becomes false, this class needs updating.
      */
     @GuardedBy("mLock")
     private final SparseIntArray mUserProfileGroupIds = new SparseIntArray();
@@ -499,6 +510,23 @@ class UserController implements Handler.Callback {
         });
     }
 
+    /** Adds a user to mUserLru, moving it to the end of the list if it was already present. */
+    private void addUserToUserLru(@UserIdInt int userId) {
+        synchronized (mLock) {
+            final Integer userIdObj = userId;
+            mUserLru.remove(userIdObj);
+            mUserLru.add(userIdObj);
+
+            // Now also move the user's parent to the end (if applicable).
+            Integer parentIdObj = mUserProfileGroupIds.get(userId, UserInfo.NO_PROFILE_GROUP_ID);
+            if (parentIdObj != UserInfo.NO_PROFILE_GROUP_ID && !parentIdObj.equals(userIdObj)
+                    && mUserLru.remove(parentIdObj)) {
+                mUserLru.add(parentIdObj);
+            }
+        }
+    }
+
+    /** Returns a list of running users, in order of when they were started (oldest first). */
     @GuardedBy("mLock")
     @VisibleForTesting
     List<Integer> getRunningUsersLU() {
@@ -536,9 +564,9 @@ class UserController implements Handler.Callback {
 
     @GuardedBy("mLock")
     private void stopExcessRunningUsersLU(int maxRunningUsers, ArraySet<Integer> exemptedUsers) {
-        List<Integer> currentlyRunning = getRunningUsersLU();
-        Iterator<Integer> iterator = currentlyRunning.iterator();
-        while (currentlyRunning.size() > maxRunningUsers && iterator.hasNext()) {
+        List<Integer> currentlyRunningLru = getRunningUsersLU();
+        Iterator<Integer> iterator = currentlyRunningLru.iterator();
+        while (currentlyRunningLru.size() > maxRunningUsers && iterator.hasNext()) {
             Integer userId = iterator.next();
             if (userId == UserHandle.USER_SYSTEM
                     || userId == mCurrentUserId
@@ -551,6 +579,10 @@ class UserController implements Handler.Callback {
             if (stopUsersLU(userId, /* force= */ false, /* allowDelayedLocking= */ true,
                     /* stopUserCallback= */ null, /* keyEvictedCallback= */ null)
                     == USER_OP_SUCCESS) {
+                // Technically, stopUsersLU can remove more than one user when stopping a parent.
+                // But mUserLru is designed so that profiles always precede their parent, so this
+                // normally won't happen here, and therefore won't cause underestimating the number
+                // removed.
                 iterator.remove();
             }
         }
@@ -947,7 +979,7 @@ class UserController implements Handler.Callback {
     }
 
     /**
-     * Stops the user along with its related users. The method calls
+     * Stops the user along with its profiles. The method calls
      * {@link #getUsersToStopLU(int)} to determine the list of users that should be stopped.
      */
     @GuardedBy("mLock")
@@ -992,7 +1024,12 @@ class UserController implements Handler.Callback {
     }
 
     /**
-     * Stops a single User. This can also trigger locking user data out depending on device's
+     * Stops a single User.
+     *
+     * This should only ever be called by {@link #stopUsersLU},
+     * which is responsible to making sure any associated users are appropriately stopped too.
+     *
+     * This can also trigger locking user data out depending on device's
      * config ({@code mDelayUserDataLocking}) and arguments.
      *
      * In the default configuration for most device and users, users will be locked when stopping.
@@ -1425,7 +1462,8 @@ class UserController implements Handler.Callback {
 
     /**
      * Determines the list of users that should be stopped together with the specified
-     * {@code userId}. The returned list includes {@code userId}.
+     * {@code userId}, i.e. the user and its profiles (if the given user is a parent).
+     * The returned list includes {@code userId}.
      */
     @GuardedBy("mLock")
     private @NonNull int[] getUsersToStopLU(@UserIdInt int userId) {
@@ -1433,20 +1471,23 @@ class UserController implements Handler.Callback {
         IntArray userIds = new IntArray();
         userIds.add(userId);
         int userGroupId = mUserProfileGroupIds.get(userId, UserInfo.NO_PROFILE_GROUP_ID);
-        for (int i = 0; i < startedUsersSize; i++) {
-            UserState uss = mStartedUsers.valueAt(i);
-            int startedUserId = uss.mHandle.getIdentifier();
-            // Skip unrelated users (profileGroupId mismatch)
-            int startedUserGroupId = mUserProfileGroupIds.get(startedUserId,
-                    UserInfo.NO_PROFILE_GROUP_ID);
-            boolean sameGroup = (userGroupId != UserInfo.NO_PROFILE_GROUP_ID)
-                    && (userGroupId == startedUserGroupId);
-            // userId has already been added
-            boolean sameUserId = startedUserId == userId;
-            if (!sameGroup || sameUserId) {
-                continue;
+        if (userGroupId == userId) {
+            // The user is the parent of the profile group. Stop its profiles too.
+            for (int i = 0; i < startedUsersSize; i++) {
+                UserState uss = mStartedUsers.valueAt(i);
+                int startedUserId = uss.mHandle.getIdentifier();
+                // Skip unrelated users (profileGroupId mismatch)
+                int startedUserGroupId = mUserProfileGroupIds.get(startedUserId,
+                        UserInfo.NO_PROFILE_GROUP_ID);
+                boolean sameGroup = (userGroupId != UserInfo.NO_PROFILE_GROUP_ID)
+                        && (userGroupId == startedUserGroupId);
+                // userId has already been added
+                boolean sameUserId = startedUserId == userId;
+                if (!sameGroup || sameUserId) {
+                    continue;
+                }
+                userIds.add(startedUserId);
             }
-            userIds.add(startedUserId);
         }
         return userIds.toArray();
     }
@@ -1519,6 +1560,7 @@ class UserController implements Handler.Callback {
         });
     }
 
+    /** Starts all applicable profiles of the current user. */
     private void startProfiles() {
         int currentUserId = getCurrentUserId();
         if (DEBUG_MU) Slogf.i(TAG, "startProfilesLocked");
@@ -1711,6 +1753,7 @@ class UserController implements Handler.Callback {
             t.traceBegin("getStartedUserState");
             final int oldUserId = getCurrentUserId();
             if (oldUserId == userId) {
+                // The user we're requested to start is already the current user.
                 final UserState state = getStartedUserState(userId);
                 if (state == null) {
                     Slogf.wtf(TAG, "Current user has no UserState");
@@ -1793,10 +1836,12 @@ class UserController implements Handler.Callback {
                     t.traceEnd(); // updateStartedUserArrayStarting
                     return true;
                 }
-                final Integer userIdInt = userId;
-                mUserLru.remove(userIdInt);
-                mUserLru.add(userIdInt);
             }
+
+            // No matter what, the fact that we're requested to start the user (even if it is
+            // already running) puts it towards the end of the mUserLru list.
+            addUserToUserLru(userId);
+
             if (unlockListener != null) {
                 uss.mUnlockProgress.addListener(unlockListener);
             }
@@ -1835,12 +1880,10 @@ class UserController implements Handler.Callback {
                 }
 
             } else {
-                final Integer currentUserIdInt = mCurrentUserId;
                 updateProfileRelatedCaches();
-                synchronized (mLock) {
-                    mUserLru.remove(currentUserIdInt);
-                    mUserLru.add(currentUserIdInt);
-                }
+                // We are starting a non-foreground user. They have already been added to the end
+                // of mUserLru, so we need to ensure that the foreground user isn't displaced.
+                addUserToUserLru(mCurrentUserId);
             }
             t.traceEnd();
 
