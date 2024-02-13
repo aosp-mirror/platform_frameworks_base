@@ -19,6 +19,8 @@ package com.android.internal.protolog;
 import android.annotation.Nullable;
 import android.util.Slog;
 
+import com.android.internal.protolog.common.ILogger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -39,10 +41,10 @@ import java.util.zip.GZIPInputStream;
  */
 public class ProtoLogViewerConfigReader {
     private static final String TAG = "ProtoLogViewerConfigReader";
-    private Map<Integer, String> mLogMessageMap = null;
+    private Map<Long, String> mLogMessageMap = null;
 
     /** Returns message format string for its hash or null if unavailable. */
-    public synchronized String getViewerString(int messageHash) {
+    public synchronized String getViewerString(long messageHash) {
         if (mLogMessageMap != null) {
             return mLogMessageMap.get(messageHash);
         } else {
@@ -53,19 +55,19 @@ public class ProtoLogViewerConfigReader {
     /**
      * Reads the specified viewer configuration file. Does nothing if the config is already loaded.
      */
-    public synchronized void loadViewerConfig(PrintWriter pw, String viewerConfigFilename) {
+    public synchronized void loadViewerConfig(ILogger logger, String viewerConfigFilename) {
         try {
             loadViewerConfig(new GZIPInputStream(new FileInputStream(viewerConfigFilename)));
-            logAndPrintln(pw, "Loaded " + mLogMessageMap.size()
+            logger.log("Loaded " + mLogMessageMap.size()
                     + " log definitions from " + viewerConfigFilename);
         } catch (FileNotFoundException e) {
-            logAndPrintln(pw, "Unable to load log definitions: File "
+            logger.log("Unable to load log definitions: File "
                     + viewerConfigFilename + " not found." + e);
         } catch (IOException e) {
-            logAndPrintln(pw, "Unable to load log definitions: IOException while reading "
+            logger.log("Unable to load log definitions: IOException while reading "
                     + viewerConfigFilename + ". " + e);
         } catch (JSONException e) {
-            logAndPrintln(pw, "Unable to load log definitions: JSON parsing exception while reading "
+            logger.log("Unable to load log definitions: JSON parsing exception while reading "
                     + viewerConfigFilename + ". " + e);
         }
     }
@@ -95,7 +97,7 @@ public class ProtoLogViewerConfigReader {
         while (it.hasNext()) {
             String key = (String) it.next();
             try {
-                int hash = Integer.parseInt(key);
+                long hash = Long.parseLong(key);
                 JSONObject val = messages.getJSONObject(key);
                 String msg = val.getString("message");
                 mLogMessageMap.put(hash, msg);

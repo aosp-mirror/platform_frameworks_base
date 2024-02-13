@@ -16,13 +16,8 @@
 
 package com.android.protolog.tool
 
-import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.expr.MethodCallExpr
 
-interface ProtoLogCallProcessor {
-    fun process(
-        code: CompilationUnit,
-        logCallVisitor: ProtoLogCallVisitor?,
-        otherCallVisitor: MethodCallVisitor?,
-        fileName: String
-    ): CompilationUnit
+interface MethodCallVisitor {
+    fun processCall(call: MethodCallExpr)
 }
