@@ -55,8 +55,15 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     @GuardedBy("mLock")
     private boolean mIsClosed;
 
-    public MediaSession2Record(Session2Token sessionToken, MediaSessionService service,
-            Looper handlerLooper, int policies) {
+    private final int mPid;
+    private final ForegroundServiceDelegationOptions mForegroundServiceDelegationOptions;
+
+    public MediaSession2Record(
+            Session2Token sessionToken,
+            MediaSessionService service,
+            Looper handlerLooper,
+            int pid,
+            int policies) {
         // The lock is required to prevent `Controller2Callback` from using partially initialized
         // `MediaSession2Record.this`.
         synchronized (mLock) {
@@ -66,7 +73,27 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             mController = new MediaController2.Builder(service.getContext(), sessionToken)
                     .setControllerCallback(mHandlerExecutor, new Controller2Callback())
                     .build();
+            mPid = pid;
             mPolicies = policies;
+            mForegroundServiceDelegationOptions =
+                    new ForegroundServiceDelegationOptions.Builder()
+                            .setClientPid(mPid)
+                            .setClientUid(getUid())
+                            .setClientPackageName(getPackageName())
+                            .setClientAppThread(null)
+                            .setSticky(false)
+                            .setClientInstanceName(
+                                    "MediaSessionFgsDelegate_"
+                                            + getUid()
+                                            + "_"
+                                            + mPid
+                                            + "_"
+                                            + getPackageName())
+                            .setForegroundServiceTypes(0)
+                            .setDelegationService(
+                                    ForegroundServiceDelegationOptions
+                                            .DELEGATION_SERVICE_MEDIA_PLAYBACK)
+                            .build();
         }
     }
 
@@ -91,8 +118,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     @Override
     public ForegroundServiceDelegationOptions getForegroundServiceDelegationOptions() {
-        // TODO: Implement when MediaSession2 knows about its owner pid.
-        return null;
+        return mForegroundServiceDelegationOptions;
     }
 
     @Override
