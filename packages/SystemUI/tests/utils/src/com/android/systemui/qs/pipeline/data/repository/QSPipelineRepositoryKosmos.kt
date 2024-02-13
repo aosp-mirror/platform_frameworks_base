@@ -18,7 +18,17 @@ package com.android.systemui.qs.pipeline.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.fakeTileSpecRepository by Kosmos.Fixture { FakeTileSpecRepository() }
+/** This fake uses 0 as the minimum number of tiles. That means that no tiles is a valid state. */
+var Kosmos.fakeMinimumTilesRepository by Kosmos.Fixture { MinimumTilesFixedRepository(0) }
+val Kosmos.minimumTilesRepository: MinimumTilesRepository by
+    Kosmos.Fixture { fakeMinimumTilesRepository }
+
+var Kosmos.fakeDefaultTilesRepository by Kosmos.Fixture { FakeDefaultTilesRepository() }
+val Kosmos.defaultTilesRepository: DefaultTilesRepository by
+    Kosmos.Fixture { fakeDefaultTilesRepository }
+
+val Kosmos.fakeTileSpecRepository by
+    Kosmos.Fixture { FakeTileSpecRepository(defaultTilesRepository) }
 var Kosmos.tileSpecRepository: TileSpecRepository by Kosmos.Fixture { fakeTileSpecRepository }
 
 val Kosmos.fakeAutoAddRepository by Kosmos.Fixture { FakeAutoAddRepository() }

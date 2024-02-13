@@ -19,12 +19,12 @@ package com.android.systemui.qs.pipeline.data.repository
 import android.annotation.UserIdInt
 import android.content.res.Resources
 import android.util.SparseArray
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.res.R
 import com.android.systemui.retail.data.repository.RetailModeRepository
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -67,6 +67,9 @@ interface TileSpecRepository {
     suspend fun setTiles(@UserIdInt userId: Int, tiles: List<TileSpec>)
 
     suspend fun reconcileRestore(restoreData: RestoreData, currentAutoAdded: Set<TileSpec>)
+
+    /** Prepend the default list of tiles to the current set of tiles */
+    suspend fun prependDefault(@UserIdInt userId: Int)
 
     companion object {
         /** Position to indicate the end of the list */
@@ -150,6 +153,12 @@ constructor(
         userTileRepositories
             .get(restoreData.userId)
             ?.reconcileRestore(restoreData, currentAutoAdded)
+    }
+
+    override suspend fun prependDefault(
+        userId: Int,
+    ) {
+        userTileRepositories.get(userId)?.prependDefault()
     }
 
     companion object {
