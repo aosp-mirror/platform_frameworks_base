@@ -721,7 +721,8 @@ public class UserRestrictionsUtils {
                         if (!am.isProfileForeground(UserHandle.of(userId))
                                 && userId != UserHandle.USER_SYSTEM) {
                             try {
-                                ActivityManager.getService().stopUser(userId, false, null);
+                                ActivityManager.getService().stopUserExceptCertainProfiles(
+                                        userId, false, null);
                             } catch (RemoteException e) {
                                 throw e.rethrowAsRuntimeException();
                             }

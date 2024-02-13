@@ -87,7 +87,7 @@ public class BatteryStatsUserLifecycleTests {
 
         final boolean[] userStopped = new boolean[1];
         CountDownLatch stopUserLatch = new CountDownLatch(1);
-        mIam.stopUser(mTestUserId, true, new IStopUserCallback.Stub() {
+        mIam.stopUserWithCallback(mTestUserId, new IStopUserCallback.Stub() {
             @Override
             public void userStopped(int userId) throws RemoteException {
                 userStopped[0] = true;

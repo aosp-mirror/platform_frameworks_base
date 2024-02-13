@@ -246,6 +246,7 @@ class UserController implements Handler.Callback {
      *
      * <p>Note: Current and system user (and their related profiles) are never stopped when
      * switching users. Due to that, the actual number of running users can exceed mMaxRunningUsers
+     // TODO(b/310249114): Strongly consider *not* exempting the SYSTEM user's profile.
      */
     @GuardedBy("mLock")
     private int mMaxRunningUsers;
@@ -578,7 +579,8 @@ class UserController implements Handler.Callback {
             // from outside.
             Slogf.i(TAG, "Too many running users (%d). Attempting to stop user %d",
                     currentlyRunningLru.size(), userId);
-            if (stopUsersLU(userId, /* force= */ false, /* allowDelayedLocking= */ true,
+            if (stopUsersLU(userId,
+                    /* stopProfileRegardlessOfParent= */ false, /* allowDelayedLocking= */ true,
                     /* stopUserCallback= */ null, /* keyEvictedCallback= */ null)
                     == USER_OP_SUCCESS) {
                 // Technically, stopUsersLU can remove more than one user when stopping a parent.
@@ -875,7 +877,7 @@ class UserController implements Handler.Callback {
             Slogf.i(TAG, "Stopping pre-created user " + userInfo.toFullString());
             // Pre-created user was started right after creation so services could properly
             // intialize it; it should be stopped right away as it's not really a "real" user.
-            stopUser(userInfo.id, /* force= */ true, /* allowDelayedLocking= */ false,
+            stopUser(userInfo.id, /* allowDelayedLocking= */ false,
                     /* stopUserCallback= */ null, /* keyEvictedCallback= */ null);
             return;
         }
@@ -930,7 +932,7 @@ class UserController implements Handler.Callback {
     }
 
     int restartUser(final int userId, @UserStartMode int userStartMode) {
-        return stopUser(userId, /* force= */ true, /* allowDelayedLocking= */ false,
+        return stopUser(userId, /* allowDelayedLocking= */ false,
                 /* stopUserCallback= */ null, new KeyEvictedCallback() {
                     @Override
                     public void keyEvicted(@UserIdInt int userId) {
@@ -966,18 +968,24 @@ class UserController implements Handler.Callback {
 
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
         synchronized (mLock) {
-            return stopUsersLU(userId, /* force= */ true, /* allowDelayedLocking= */
-                    false, /* stopUserCallback= */ null, /* keyEvictedCallback= */ null)
+            return stopUsersLU(userId, /* allowDelayedLocking= */ false,
+                    /* stopUserCallback= */ null, /* keyEvictedCallback= */ null)
                     == ActivityManager.USER_OP_SUCCESS;
         }
     }
 
-    int stopUser(final int userId, final boolean force, boolean allowDelayedLocking,
+    int stopUser(final int userId, boolean allowDelayedLocking,
+            final IStopUserCallback stopUserCallback, KeyEvictedCallback keyEvictedCallback) {
+        return stopUser(userId, true, allowDelayedLocking, stopUserCallback, keyEvictedCallback);
+    }
+
+    int stopUser(final int userId,
+            final boolean stopProfileRegardlessOfParent, final boolean allowDelayedLocking,
             final IStopUserCallback stopUserCallback, KeyEvictedCallback keyEvictedCallback) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
         t.traceBegin("UserController"
-                + (force ? "-force" : "")
+                + (stopProfileRegardlessOfParent ? "-stopProfileRegardlessOfParent" : "")
                 + (allowDelayedLocking ? "-allowDelayedLocking" : "")
                 + (stopUserCallback != null ? "-withStopUserCallback" : "")
                 + "-" + userId + "-[stopUser]");
@@ -987,20 +995,32 @@ class UserController implements Handler.Callback {
 
             enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
             synchronized (mLock) {
-                return stopUsersLU(userId, force, allowDelayedLocking, stopUserCallback,
-                        keyEvictedCallback);
+                return stopUsersLU(userId, stopProfileRegardlessOfParent, allowDelayedLocking,
+                        stopUserCallback, keyEvictedCallback);
             }
         } finally {
             t.traceEnd();
         }
     }
 
+    /** Stops the user along with its profiles. */
+    @GuardedBy("mLock")
+    private int stopUsersLU(final int userId, boolean allowDelayedLocking,
+            final IStopUserCallback stopUserCallback, KeyEvictedCallback keyEvictedCallback) {
+        return stopUsersLU(userId, /* stopProfileRegardlessOfParent= */ true,
+                allowDelayedLocking, stopUserCallback, keyEvictedCallback);
+    }
+
     /**
      * Stops the user along with its profiles. The method calls
      * {@link #getUsersToStopLU(int)} to determine the list of users that should be stopped.
+     *
+     * @param stopProfileRegardlessOfParent whether to stop the profile regardless of who its
+     *                                      parent is, e.g. even if the parent is the current user
      */
     @GuardedBy("mLock")
-    private int stopUsersLU(final int userId, boolean force, boolean allowDelayedLocking,
+    private int stopUsersLU(final int userId,
+            boolean stopProfileRegardlessOfParent, boolean allowDelayedLocking,
             final IStopUserCallback stopUserCallback, KeyEvictedCallback keyEvictedCallback) {
         if (userId == UserHandle.USER_SYSTEM) {
             return USER_OP_ERROR_IS_SYSTEM;
@@ -1008,34 +1028,28 @@ class UserController implements Handler.Callback {
         if (isCurrentUserLU(userId)) {
             return USER_OP_IS_CURRENT;
         }
-        // TODO(b/324647580): Refactor the idea of "force" and clean up. In the meantime...
-        final int parentId = mUserProfileGroupIds.get(userId, UserInfo.NO_PROFILE_GROUP_ID);
-        if (parentId != UserInfo.NO_PROFILE_GROUP_ID && parentId != userId) {
-            if ((UserHandle.USER_SYSTEM == parentId || isCurrentUserLU(parentId)) && !force) {
-                return USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
+        if (!stopProfileRegardlessOfParent) {
+            final int parentId = mUserProfileGroupIds.get(userId, UserInfo.NO_PROFILE_GROUP_ID);
+            if (parentId != UserInfo.NO_PROFILE_GROUP_ID && parentId != userId) {
+                // TODO(b/310249114): Strongly consider *not* exempting the SYSTEM user's profile.
+                if ((UserHandle.USER_SYSTEM == parentId || isCurrentUserLU(parentId))) {
+                    return USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
+                }
             }
         }
-        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
-        int[] usersToStop = getUsersToStopLU(userId);
-        // If one of related users is system or current, no related users should be stopped
+        final int[] usersToStop = getUsersToStopLU(userId);
+
+        // Final safety check: abort if one of the users we would plan to stop must not be stopped.
+        // This should be impossible in the current code, but just in case.
         for (int relatedUserId : usersToStop) {
             if ((UserHandle.USER_SYSTEM == relatedUserId) || isCurrentUserLU(relatedUserId)) {
-                if (DEBUG_MU) {
-                    Slogf.i(TAG, "stopUsersLocked cannot stop related user " + relatedUserId);
-                }
-                // We still need to stop the requested user if it's a force stop.
-                if (force) {
-                    Slogf.i(TAG,
-                            "Force stop user " + userId + ". Related users will not be stopped");
-                    t.traceBegin("stopSingleUserLU-force-" + userId + "-[stopUser]");
-                    stopSingleUserLU(userId, allowDelayedLocking, stopUserCallback,
-                            keyEvictedCallback);
-                    t.traceEnd();
-                    return USER_OP_SUCCESS;
-                }
+                Slogf.e(TAG, "Cannot stop user %d because it is related to user %d. ",
+                        userId, relatedUserId);
                 return USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
             }
         }
+
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         if (DEBUG_MU) Slogf.i(TAG, "stopUsersLocked usersToStop=" + Arrays.toString(usersToStop));
         for (int userIdToStop : usersToStop) {
             t.traceBegin("stopSingleUserLU-" + userIdToStop + "-[stopUser]");
@@ -1304,8 +1318,8 @@ class UserController implements Handler.Callback {
             mInjector.activityManagerOnUserStopped(userId);
             // Clean up all state and processes associated with the user.
             // Kill all the processes for the user.
-            t.traceBegin("forceStopUser-" + userId + "-[stopUser]");
-            forceStopUser(userId, "finish user");
+            t.traceBegin("stopPackagesOfStoppedUser-" + userId + "-[stopUser]");
+            stopPackagesOfStoppedUser(userId, "finish user");
             t.traceEnd();
         }
 
@@ -1516,8 +1530,8 @@ class UserController implements Handler.Callback {
         return userIds.toArray();
     }
 
-    private void forceStopUser(@UserIdInt int userId, String reason) {
-        if (DEBUG_MU) Slogf.i(TAG, "forceStopUser(%d): %s", userId, reason);
+    private void stopPackagesOfStoppedUser(@UserIdInt int userId, String reason) {
+        if (DEBUG_MU) Slogf.i(TAG, "stopPackagesOfStoppedUser(%d): %s", userId, reason);
         mInjector.activityManagerForceStopPackage(userId, reason);
         if (mInjector.getUserManager().isPreCreated(userId)) {
             // Don't fire intent for precreated.
@@ -1566,8 +1580,7 @@ class UserController implements Handler.Callback {
             // This is a user to be stopped.
             Slogf.i(TAG, "Stopping background guest or ephemeral user " + oldUserId);
             synchronized (mLock) {
-                stopUsersLU(oldUserId, /* force= */ true, /* allowDelayedLocking= */ false,
-                        null, null);
+                stopUsersLU(oldUserId, /* allowDelayedLocking= */ false, null, null);
             }
         }
     }
@@ -2259,8 +2272,7 @@ class UserController implements Handler.Callback {
             // If running in background is disabled or mStopUserOnSwitch mode, stop the user.
             if (hasRestriction || shouldStopUserOnSwitch()) {
                 Slogf.i(TAG, "Stopping user %d and its profiles on user switch", oldUserId);
-                stopUsersLU(oldUserId, /* force= */ false, /* allowDelayedLocking= */ false,
-                        null, null);
+                stopUsersLU(oldUserId, /* allowDelayedLocking= */ false, null, null);
                 return;
             }
         }
@@ -2275,7 +2287,8 @@ class UserController implements Handler.Callback {
                 Slogf.i(TAG, "Stopping profile %d on user switch", profileUserId);
                 synchronized (mLock) {
                     stopUsersLU(profileUserId,
-                            /* force= */ true, /* allowDelayedLocking= */ false, null, null);
+                            /* stopProfileRegardlessOfParent= */ false,
+                            /* allowDelayedLocking= */ false, null, null);
                 }
             }
         }

@@ -12824,7 +12824,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Slogf.i(LOG_TAG, "Stopping user %d", userId);
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            switch (mInjector.getIActivityManager().stopUser(userId, true /*force*/, null)) {
+            switch (mInjector.getIActivityManager().stopUserWithCallback(userId, null)) {
                 case ActivityManager.USER_OP_SUCCESS:
                     return UserManager.USER_OPERATION_SUCCESS;
                 case ActivityManager.USER_OP_IS_CURRENT:
