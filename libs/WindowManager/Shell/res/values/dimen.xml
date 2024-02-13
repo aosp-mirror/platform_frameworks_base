@@ -67,10 +67,6 @@
     <dimen name="pip_resize_handle_margin">4dp</dimen>
     <dimen name="pip_resize_handle_padding">0dp</dimen>
 
-    <!-- PIP Split icon size and margin. -->
-    <dimen name="pip_split_icon_size">24dp</dimen>
-    <dimen name="pip_split_icon_margin">12dp</dimen>
-
     <!-- PIP stash offset size, which is the width of visible PIP region when stashed. -->
     <dimen name="pip_stash_offset">32dp</dimen>
 

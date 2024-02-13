@@ -149,11 +149,6 @@ public class PipTouchHandler {
         }
 
         @Override
-        public void onEnterSplit() {
-            mMotionHelper.expandIntoSplit();
-        }
-
-        @Override
         public void onPipDismiss() {
             mTouchState.removeDoubleTapTimeoutCallback();
             mMotionHelper.dismissPip();

@@ -24,9 +24,6 @@
     <!-- Label for PIP settings button [CHAR LIMIT=NONE]-->
     <string name="pip_phone_settings">Settings</string>
 
-    <!-- Label for the PIP enter split button [CHAR LIMIT=NONE] -->
-    <string name="pip_phone_enter_split">Enter split screen</string>
-
     <!-- Title of menu shown over picture-in-picture. Used for accessibility. -->
     <string name="pip_menu_title">Menu</string>
 
