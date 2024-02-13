@@ -42,6 +42,7 @@ import com.android.credentialmanager.ui.components.SignInOptionsChip
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
+import com.android.credentialmanager.model.CredentialType
 
 /**
  * Screen that shows multiple credentials to select from.
@@ -113,17 +114,25 @@ fun MultiCredentialsFoldScreen(
         columnState = columnState,
         modifier = modifier.fillMaxSize(),
     ) {
+        // flatten all credentials into one
+        val credentials = state.accounts.flatMap { it.sortedCredentialEntryList }
         item {
+            var title = stringResource(R.string.choose_sign_in_title)
+            if (credentials.all{ it.credentialType == CredentialType.PASSKEY }) {
+                title = stringResource(R.string.choose_passkey_title)
+            } else if (credentials.all { it.credentialType == CredentialType.PASSWORD }) {
+                title = stringResource(R.string.choose_password_title)
+            }
+
             SignInHeader(
                 icon = screenIcon,
-                title = stringResource(R.string.choose_sign_in_title),
+                title = title,
                 modifier = Modifier
                     .padding(top = 6.dp),
             )
         }
 
-        state.accounts.forEach {
-            it.sortedCredentialEntryList.forEach { credential: CredentialEntryInfo ->
+        credentials.forEach { credential: CredentialEntryInfo ->
                 item {
                     CredentialsScreenChip(
                         label = credential.userName,
@@ -133,7 +142,6 @@ fun MultiCredentialsFoldScreen(
                     )
                 }
             }
-        }
         item { SignInOptionsChip(onSignInOptionsClicked) }
         item { DismissChip(onCancelClicked) }
     }
