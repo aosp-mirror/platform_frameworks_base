@@ -73,6 +73,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_STATUS_BAR;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THREAD_NETWORK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_TIME;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
@@ -21850,6 +21851,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceOrSystemPermissionBasedAdminLocked();
             return admin != null ? admin.mWifiSsidPolicy : null;
         }
+    }
+
+    @Override
+    public boolean isTheftDetectionTriggered(String callerPackageName) {
+        final CallerIdentity caller = getCallerIdentity(callerPackageName);
+        if (!android.app.admin.flags.Flags.deviceTheftImplEnabled()) {
+            return false;
+        }
+        enforcePermission(MANAGE_DEVICE_POLICY_THEFT_DETECTION, caller.getPackageName(),
+                caller.getUserId());
+
+        //STOPSHIP: replace 1<<9 with
+        // LockPatternUtils.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST once ag/26042068 lands
+        return 0 != (mLockPatternUtils.getStrongAuthForUser(caller.getUserId()) & (1 << 9));
     }
 
     @Override

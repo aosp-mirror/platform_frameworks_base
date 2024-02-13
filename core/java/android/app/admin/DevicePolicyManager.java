@@ -44,6 +44,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SECURITY_LOGGING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_STATUS_BAR;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA;
@@ -17005,6 +17006,26 @@ public class DevicePolicyManager {
         }
         try {
             return mService.getWifiSsidPolicy(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     *
+     * Returns whether the device considers itself to be potentially stolen.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_THEFT_DETECTION)
+    @FlaggedApi(Flags.FLAG_DEVICE_THEFT_API_ENABLED)
+    public boolean isTheftDetectionTriggered() {
+        throwIfParentInstance("isTheftDetectionTriggered");
+        if (mService == null) {
+            return false;
+        }
+        try {
+            return mService.isTheftDetectionTriggered(mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

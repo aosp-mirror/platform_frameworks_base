@@ -194,6 +194,7 @@ package android {
     field public static final String MANAGE_DEFAULT_APPLICATIONS = "android.permission.MANAGE_DEFAULT_APPLICATIONS";
     field public static final String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final String MANAGE_DEVICE_POLICY_APP_EXEMPTIONS = "android.permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS";
+    field @FlaggedApi("android.app.admin.flags.device_theft_api_enabled") public static final String MANAGE_DEVICE_POLICY_THEFT_DETECTION = "android.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION";
     field @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") public static final String MANAGE_ENHANCED_CONFIRMATION_STATES = "android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES";
     field public static final String MANAGE_ETHERNET_NETWORKS = "android.permission.MANAGE_ETHERNET_NETWORKS";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
@@ -1315,6 +1316,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean isDpcDownloaded();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public boolean isManagedKiosk();
     method public boolean isSecondaryLockscreenEnabled(@NonNull android.os.UserHandle);
+    method @FlaggedApi("android.app.admin.flags.device_theft_api_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION) public boolean isTheftDetectionTriggered();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public boolean isUnattendedManagedKiosk();
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long);
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long, boolean);
