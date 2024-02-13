@@ -47,6 +47,7 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.LocaleList;
@@ -431,6 +432,41 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
         assertThat(a11yWindows, hasSize(2));
         assertThat(a11yWindows.get(0), windowId(frontWindowId));
         assertThat(a11yWindows.get(1), windowId(focusedWindowId));
+    }
+
+    @Test
+    public void onWindowsChanged_embeddedWindows_shouldOnlyReportHost() throws RemoteException {
+        final Rect embeddingBounds = new Rect(0, 0, 200, 100);
+
+        // The embedded window comes front of the host window.
+        final IBinder embeddedWindowLeashToken = Mockito.mock(IBinder.class);
+        final int embeddedWindowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
+                false, embeddedWindowLeashToken, USER_SYSTEM_ID);
+        final AccessibilityWindow embeddedWindow = createMockAccessibilityWindow(
+                mA11yWindowTokens.get(embeddedWindowId), Display.DEFAULT_DISPLAY);
+        setRegionForMockAccessibilityWindow(embeddedWindow, new Region(embeddingBounds));
+        mWindows.get(Display.DEFAULT_DISPLAY).set(0, embeddedWindow);
+
+        final IBinder hostWindowLeashToken = Mockito.mock(IBinder.class);
+        final int hostWindowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
+                false, hostWindowLeashToken, USER_SYSTEM_ID);
+        final AccessibilityWindow hostWindow = createMockAccessibilityWindow(
+                mA11yWindowTokens.get(hostWindowId), Display.DEFAULT_DISPLAY);
+        setRegionForMockAccessibilityWindow(hostWindow, new Region(embeddingBounds));
+        mWindows.get(Display.DEFAULT_DISPLAY).set(1, hostWindow);
+
+        mA11yWindowManager.associateEmbeddedHierarchyLocked(
+                hostWindowLeashToken, embeddedWindowLeashToken);
+
+        onAccessibilityWindowsChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
+
+        final List<AccessibilityWindowInfo> a11yWindows =
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
+        assertThat(a11yWindows, not(hasItem(windowId(embeddedWindowId))));
+        assertThat(a11yWindows.get(0), windowId(hostWindowId));
+        final Rect bounds = new Rect();
+        a11yWindows.get(0).getBoundsInScreen(bounds);
+        assertEquals(bounds, embeddingBounds);
     }
 
     @Test

@@ -527,14 +527,19 @@ public class AccessibilityWindowManager {
             final Region unaccountedSpace = new Region(0, 0, screenSize.x, screenSize.y);
             for (final AccessibilityWindow a11yWindow : visibleWindows) {
                 a11yWindow.getTouchableRegionInWindow(regionInWindow);
-                if (windowMattersToAccessibility(a11yWindow, regionInWindow, unaccountedSpace)) {
-                    final WindowInfo window = a11yWindow.getWindowInfo();
-                    if (window.token != null) {
+
+                final WindowInfo window = a11yWindow.getWindowInfo();
+                final int windowId = window.token != null
+                        ? findWindowIdLocked(userId, window.token)
+                        : AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+
+                if (windowMattersToAccessibilityLocked(a11yWindow, windowId, regionInWindow,
+                        unaccountedSpace)) {
+                    if (windowId >= 0) {
                         // Even if token is null, the window will be used in calculating visible
                         // windows, but is excluded from the accessibility window list.
                         window.regionInScreen.set(regionInWindow);
                         window.layer = addedWindows.size();
-                        final int windowId = findWindowIdLocked(userId, window.token);
                         updateWindowWithWindowAttributes(window, mWindowAttributes.get(windowId));
 
                         windows.add(window);
@@ -585,8 +590,8 @@ public class AccessibilityWindowManager {
             return windows;
         }
 
-        private static boolean windowMattersToAccessibility(AccessibilityWindow a11yWindow,
-                Region regionInScreen, Region unaccountedSpace) {
+        private boolean windowMattersToAccessibilityLocked(AccessibilityWindow a11yWindow,
+                int windowId, Region regionInScreen, Region unaccountedSpace) {
             if (a11yWindow.ignoreRecentsAnimationForAccessibility()) {
                 return false;
             }
@@ -600,6 +605,10 @@ public class AccessibilityWindowManager {
             // mode and the PIP menu.
             if (!a11yWindow.isTouchable()
                     && a11yWindow.getType() != TYPE_DOCK_DIVIDER && !a11yWindow.isPIPMenu()) {
+                return false;
+            }
+
+            if (isEmbeddedHierarchyWindowsLocked(windowId)) {
                 return false;
             }
 
@@ -983,14 +992,19 @@ public class AccessibilityWindowManager {
         private AccessibilityWindowInfo populateReportedWindowLocked(int userId,
                 WindowInfo window, SparseArray<AccessibilityWindowInfo> oldWindowsById) {
             final int windowId = findWindowIdLocked(userId, window.token);
-            if (windowId < 0) {
-                return null;
+
+            // With the flag enabled, createWindowInfoListLocked() already removes invalid windows.
+            if (!Flags.computeWindowChangesOnA11y()) {
+                if (windowId < 0) {
+                    return null;
+                }
+
+                // Don't need to add the embedded hierarchy windows into the a11y windows list.
+                if (isEmbeddedHierarchyWindowsLocked(windowId)) {
+                    return null;
+                }
             }
 
-            // Don't need to add the embedded hierarchy windows into the accessibility windows list.
-            if (isEmbeddedHierarchyWindowsLocked(windowId)) {
-                return null;
-            }
             final AccessibilityWindowInfo reportedWindow = AccessibilityWindowInfo.obtain();
 
             reportedWindow.setId(windowId);
@@ -1609,7 +1623,7 @@ public class AccessibilityWindowManager {
                 return getWindowTokensForUserLocked(userId).keyAt(userIndex);
             }
         }
-        return -1;
+        return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
     }
 
     /**
