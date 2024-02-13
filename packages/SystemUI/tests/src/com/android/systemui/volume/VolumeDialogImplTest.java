@@ -58,6 +58,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 
 import androidx.test.core.view.MotionEventBuilder;
 import androidx.test.filters.SmallTest;
@@ -111,6 +112,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     View mDrawerVibrate;
     View mDrawerMute;
     View mDrawerNormal;
+    ViewGroup mDialogRowsView;
     CaptionsToggleImageButton mODICaptionsIcon;
 
     private TestableLooper mTestableLooper;
@@ -221,6 +223,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             mDrawerNormal = mDrawerContainer.findViewById(R.id.volume_drawer_normal);
         }
         mODICaptionsIcon = mDialog.getDialogView().findViewById(R.id.odi_captions_icon);
+
+        mDialogRowsView = mDialog.getDialogView().findViewById(R.id.volume_dialog_rows);
 
         Prefs.putInt(mContext,
                 Prefs.Key.SEEN_RINGER_GUIDANCE_COUNT,
@@ -668,6 +672,45 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         }
         Assert.assertTrue("Did not log the captions tooltip dismiss button click.",
                 foundCaptionLog);
+    }
+
+    @Test
+    public void volumeSliderTracksTouch_logsStartAndStopTrackingUiEvents() {
+        UiEventLoggerFake logger = new UiEventLoggerFake();
+        Events.sUiEventLogger = logger;
+
+        mDialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processAllMessages();
+
+        MotionEvent down = MotionEventBuilder.newBuilder()
+                .setAction(MotionEvent.ACTION_DOWN).build();
+        MotionEvent up = MotionEventBuilder.newBuilder().setAction(MotionEvent.ACTION_UP).build();
+
+        SeekBar slider =
+                mDialogRowsView.getChildAt(0).findViewById(R.id.volume_row_slider);
+        slider.onTouchEvent(down);
+        slider.onTouchEvent(up);
+        mTestableLooper.moveTimeForward(300);
+        mTestableLooper.processAllMessages();
+
+        boolean foundStartTrackingTouch = false;
+        boolean foundStopTrackingTouch = false;
+        for (UiEventLoggerFake.FakeUiEvent event : logger.getLogs()) {
+            if (event.eventId
+                    == Events.VolumeDialogEvent.VOLUME_DIALOG_SLIDER_STARTED_TRACKING_TOUCH.getId()
+            ) {
+                foundStartTrackingTouch = true;
+            }
+            if (event.eventId
+                    == Events.VolumeDialogEvent.VOLUME_DIALOG_SLIDER_STOPPED_TRACKING_TOUCH.getId()
+            ) {
+                foundStopTrackingTouch = true;
+            }
+        }
+        Assert.assertTrue("Did not log the event of start tracking touch.",
+                foundStartTrackingTouch);
+        Assert.assertTrue("Did not log the event of stop tracking touch.",
+                foundStopTrackingTouch);
     }
 
     @Test
