@@ -3087,14 +3087,22 @@ public class WebView extends AbsoluteLayout
             return webviewPackage;
         }
 
-        IWebViewUpdateService service = WebViewFactory.getUpdateService();
-        if (service == null) {
-            return null;
-        }
-        try {
-            return service.getCurrentWebViewPackage();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (Flags.updateServiceIpcWrapper()) {
+            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
+            if (manager == null) {
+                return null;
+            }
+            return manager.getCurrentWebViewPackage();
+        } else {
+            IWebViewUpdateService service = WebViewFactory.getUpdateService();
+            if (service == null) {
+                return null;
+            }
+            try {
+                return service.getCurrentWebViewPackage();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 

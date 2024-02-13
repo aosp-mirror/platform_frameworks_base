@@ -50,6 +50,7 @@ import android.util.Log;
 import android.webkit.IWebViewUpdateService;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
+import android.webkit.WebViewUpdateManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -495,16 +496,26 @@ public class Utils {
             return sDefaultWebViewPackageName;
         }
 
-        try {
-            IWebViewUpdateService service = WebViewFactory.getUpdateService();
-            if (service != null) {
-                WebViewProviderInfo provider = service.getDefaultWebViewPackage();
-                if (provider != null) {
-                    sDefaultWebViewPackageName = provider.packageName;
-                }
+        WebViewProviderInfo provider = null;
+
+        if (android.webkit.Flags.updateServiceIpcWrapper()) {
+            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
+            if (manager != null) {
+                provider = manager.getDefaultWebViewPackage();
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException when trying to fetch default WebView package Name", e);
+        } else {
+            try {
+                IWebViewUpdateService service = WebViewFactory.getUpdateService();
+                if (service != null) {
+                    provider = service.getDefaultWebViewPackage();
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException when trying to fetch default WebView package Name", e);
+            }
+        }
+
+        if (provider != null) {
+            sDefaultWebViewPackageName = provider.packageName;
         }
         return sDefaultWebViewPackageName;
     }
