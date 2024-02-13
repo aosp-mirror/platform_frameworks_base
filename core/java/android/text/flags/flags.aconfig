@@ -110,3 +110,12 @@ flag {
   description: "A flag for replacing AndroidBidi with android.icu.text.Bidi."
   bug: "317144801"
 }
+
+flag {
+  name: "lazy_variation_instance"
+  namespace: "text"
+  description: "A flag for enabling lazy variation instance creation."
+  # Make read only, as it could be used before the Settings provider is initialized.
+  is_fixed_read_only: true
+  bug: "324676775"
+}
