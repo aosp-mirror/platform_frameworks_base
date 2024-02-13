@@ -2256,10 +2256,9 @@ public final class CachedAppOptimizer {
                         }
                     }
 
-                    // Check binder errors to frozen processes with a local freezer lock
-                    synchronized (mFreezerLock) {
-                        binderErrorLocked(pids);
-                    }
+                    // Check binder errors to frozen processes
+                    // Freezer lock is not required as we don't perform (un)freeze operations here
+                    binderErrorInternal(pids);
                 } break;
                 default:
                     return;
@@ -2618,7 +2617,7 @@ public final class CachedAppOptimizer {
         mFreezeHandler.sendEmptyMessage(BINDER_ERROR_MSG);
     }
 
-    private void binderErrorLocked(IntArray pids) {
+    private void binderErrorInternal(IntArray pids) {
         // PIDs that run out of async binder buffer when being frozen
         ArraySet<Integer> pidsAsync = (mFreezerBinderAsyncThreshold < 0) ? null : new ArraySet<>();
 
