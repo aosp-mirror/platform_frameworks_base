@@ -893,7 +893,8 @@
                 android:permissionGroup="android.permission-group.UNDEFINED"
                 android:label="@string/permlab_writeVerificationStateE2eeContactKeys"
                 android:description="@string/permdesc_writeVerificationStateE2eeContactKeys"
-                android:protectionLevel="signature|privileged" />
+                android:protectionLevel="signature|privileged"
+                android:featureFlag="android.provider.user_keys" />
 
     <!-- Allows an application to set default account for new contacts.
         <p> This permission is only granted to system applications fulfilling the Contacts app role.
@@ -1729,7 +1730,8 @@
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_cameraHeadlessSystemUser"
         android:description="@string/permdesc_cameraHeadlessSystemUser"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature"
+        android:featureFlag="com.android.internal.camera.flags.camera_hsum_permission" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device sensors                           -->
@@ -2322,7 +2324,8 @@
         @hide This should only be used by system apps.
     -->
     <permission android:name="android.permission.REGISTER_NSD_OFFLOAD_ENGINE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature"
+        android:featureFlag="com.android.net.flags.register_nsd_offload_engine" />
 
     <!-- ======================================= -->
     <!-- Permissions for short range, peripheral networks -->
@@ -2391,7 +2394,8 @@
          them from running without explicit user action.
     -->
     <permission android:name="android.permission.QUARANTINE_APPS"
-        android:protectionLevel="signature|verifier" />
+        android:protectionLevel="signature|verifier"
+        android:featureFlag="android.content.pm.quarantined_enabled" />
 
     <!-- Allows applications to discover and pair bluetooth devices.
          <p>Protection level: normal
@@ -2651,7 +2655,8 @@
          @FlaggedApi("com.android.window.flags.screen_recording_callbacks")
     -->
     <permission android:name="android.permission.DETECT_SCREEN_RECORDING"
-                android:protectionLevel="normal" />
+                android:protectionLevel="normal"
+                android:featureFlag="com.android.window.flags.screen_recording_callbacks" />
 
     <!-- ======================================== -->
     <!-- Permissions for factory reset protection -->
