@@ -18,14 +18,12 @@ package com.android.server.voiceinteraction;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
-import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
-import android.app.AppOpsManager;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
@@ -1544,34 +1542,6 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        @Override
-        @EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
-        public void setShouldReceiveSandboxedTrainingData(boolean allowed) {
-            super.setShouldReceiveSandboxedTrainingData_enforcePermission();
-
-            synchronized (this) {
-                if (mImpl == null) {
-                    throw new IllegalStateException(
-                            "setShouldReceiveSandboxedTrainingData without running voice "
-                                    + "interaction service");
-                }
-
-                enforceIsCallerPreinstalledAssistant();
-
-                int callingUid = Binder.getCallingUid();
-                final long caller = Binder.clearCallingIdentity();
-                try {
-                    AppOpsManager appOpsManager = (AppOpsManager)
-                            mContext.getSystemService(Context.APP_OPS_SERVICE);
-                    appOpsManager.setUidMode(
-                            AppOpsManager.OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                            callingUid, allowed ? AppOpsManager.MODE_ALLOWED :
-                                    AppOpsManager.MODE_ERRORED);
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
-                }
-            }
-        }
 
       //----------------- Model management APIs --------------------------------//
 
