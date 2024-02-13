@@ -71,10 +71,15 @@ data class ErrorFaceAuthenticationStatus(
      */
     fun isCancellationError() = msgId == FaceManager.FACE_ERROR_CANCELED
 
+    fun isUnableToProcessError() = msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS
+
     /** Method that checks if [msgId] is a hardware error. */
     fun isHardwareError() =
         msgId == FaceManager.FACE_ERROR_HW_UNAVAILABLE ||
             msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS
+
+    /** Method that checks if [msgId] is a timeout error. */
+    fun isTimeoutError() = msgId == FaceManager.FACE_ERROR_TIMEOUT
 
     companion object {
         /**

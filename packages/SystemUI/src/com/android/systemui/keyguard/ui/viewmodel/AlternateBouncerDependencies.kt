@@ -36,4 +36,5 @@ constructor(
     val udfpsIconViewModel: AlternateBouncerUdfpsIconViewModel,
     val udfpsAccessibilityOverlayViewModel:
         Lazy<AlternateBouncerUdfpsAccessibilityOverlayViewModel>,
+    val messageAreaViewModel: AlternateBouncerMessageAreaViewModel,
 )

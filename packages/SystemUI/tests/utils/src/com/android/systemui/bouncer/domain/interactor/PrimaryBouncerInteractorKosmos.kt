@@ -34,7 +34,8 @@ import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.mockito.mock
 
 var Kosmos.mockPrimaryBouncerInteractor by Kosmos.Fixture { mock<PrimaryBouncerInteractor>() }
-var Kosmos.primaryBouncerInteractor by
+
+val Kosmos.primaryBouncerInteractor by
     Kosmos.Fixture {
         PrimaryBouncerInteractor(
             repository = keyguardBouncerRepository,
