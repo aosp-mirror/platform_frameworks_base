@@ -772,8 +772,7 @@ public final class CameraManager {
                     "CameraDeviceSetup is not supported for Camera ID: " + cameraId);
         }
 
-        return new CameraDeviceSetupImpl(cameraId, /*cameraManager=*/ this,
-                mContext.getApplicationInfo().targetSdkVersion);
+        return new CameraDeviceSetupImpl(cameraId, /*cameraManager=*/ this, mContext);
     }
 
     /**
