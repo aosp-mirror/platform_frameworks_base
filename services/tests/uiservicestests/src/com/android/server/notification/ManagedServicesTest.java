@@ -16,6 +16,7 @@
 package com.android.server.notification;
 
 import static android.content.Context.DEVICE_POLICY_SERVICE;
+import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
@@ -62,6 +63,7 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -1981,6 +1983,22 @@ public class ManagedServicesTest extends UiServiceTestCase {
         service.rebindServices(false, profileUserId);
         assertThat(service.isComponentEnabledForCurrentProfiles(
                 new ComponentName("pkg1", "cmp1"))).isFalse();
+    }
+
+    @Test
+    @EnableFlags(FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testManagedServiceInfoIsSystemUi() {
+        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+
+        ManagedServices.ManagedServiceInfo service0 = service.new ManagedServiceInfo(
+                mock(IInterface.class), ComponentName.unflattenFromString("a/a"), 0, false,
+                mock(ServiceConnection.class), 26, 34);
+
+        service0.isSystemUi = true;
+        assertThat(service0.isSystemUi()).isTrue();
+        service0.isSystemUi = false;
+        assertThat(service0.isSystemUi()).isFalse();
     }
 
     private void mockServiceInfoWithMetaData(List<ComponentName> componentNames,

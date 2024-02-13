@@ -28,6 +28,15 @@
         android:scaleType="fitXY"/>
 
     <TextView
+        android:id="@+id/logo_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="@integer/biometric_dialog_text_gravity"
+        android:singleLine="true"
+        android:marqueeRepeatLimit="1"
+        android:ellipsize="marquee"/>
+
+    <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

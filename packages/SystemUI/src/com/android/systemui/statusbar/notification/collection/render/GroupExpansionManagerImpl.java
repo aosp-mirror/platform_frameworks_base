@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.render;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
@@ -40,6 +42,8 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpable {
+    private static final String TAG = "GroupExpansionaManagerImpl";
+
     private final DumpManager mDumpManager;
     private final GroupMembershipManager mGroupMembershipManager;
     private final Set<OnGroupExpansionChangeListener> mOnGroupChangeListeners = new HashSet<>();
@@ -100,7 +104,7 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
         NotificationEntry groupSummary = mGroupMembershipManager.getGroupSummary(entry);
         if (entry.getParent() == null) {
             if (expanded) {
-                throw new IllegalArgumentException("Cannot expand group that is not attached");
+                Log.wtf(TAG, "Cannot expand group that is not attached");
             } else {
                 // The entry is no longer attached, but we still want to make sure we don't have
                 // a stale expansion state.

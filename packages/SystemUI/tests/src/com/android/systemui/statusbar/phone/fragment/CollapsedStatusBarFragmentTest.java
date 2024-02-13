@@ -131,7 +131,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
     private List<StatusBarWindowStateListener> mStatusBarWindowStateListeners = new ArrayList<>();
 

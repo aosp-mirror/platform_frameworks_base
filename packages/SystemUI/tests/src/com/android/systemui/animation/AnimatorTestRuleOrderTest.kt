@@ -34,7 +34,7 @@ import org.junit.runner.RunWith
 @FlakyTest(bugId = 302149604)
 class AnimatorTestRuleOrderTest : SysuiTestCase() {
 
-    @get:Rule val animatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     var value1: Float = -1f
     var value2: Float = -1f

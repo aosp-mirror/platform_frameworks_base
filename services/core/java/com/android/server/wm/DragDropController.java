@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.View.DRAG_FLAG_GLOBAL;
+import static android.view.View.DRAG_FLAG_GLOBAL_SAME_APPLICATION;
+
 import static com.android.input.flags.Flags.enablePointerChoreographer;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -30,15 +33,20 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DragEvent;
 import android.view.IWindow;
 import android.view.InputDevice;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
+import android.window.IUnhandledDragCallback;
+import android.window.IUnhandledDragListener;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.WindowManagerInternal.IDragDropCallback;
 
 import java.util.Objects;
@@ -59,6 +67,7 @@ class DragDropController {
     static final int MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT = 1;
     static final int MSG_ANIMATION_END = 2;
     static final int MSG_REMOVE_DRAG_SURFACE_TIMEOUT = 3;
+    static final int MSG_UNHANDLED_DROP_LISTENER_TIMEOUT = 4;
 
     /**
      * Drag state per operation.
@@ -72,6 +81,21 @@ class DragDropController {
     private WindowManagerService mService;
     private final Handler mHandler;
 
+    // The unhandled drag listener for handling cross-window drags that end with no target window
+    private IUnhandledDragListener mUnhandledDragListener;
+    private final IBinder.DeathRecipient mUnhandledDragListenerDeathRecipient =
+            new IBinder.DeathRecipient() {
+        @Override
+        public void binderDied() {
+            synchronized (mService.mGlobalLock) {
+                if (hasPendingUnhandledDropCallback()) {
+                    onUnhandledDropCallback(false /* consumedByListeners */);
+                }
+                setUnhandledDragListener(null);
+            }
+        }
+    };
+
     /**
      * Callback which is used to sync drag state with the vendor-specific code.
      */
@@ -83,10 +107,16 @@ class DragDropController {
         mHandler = new DragHandler(service, looper);
     }
 
+    @VisibleForTesting
+    Handler getHandler() {
+        return mHandler;
+    }
+
     boolean dragDropActiveLocked() {
         return mDragState != null && !mDragState.isClosing();
     }
 
+    @VisibleForTesting
     boolean dragSurfaceRelinquishedToDropTarget() {
         return mDragState != null && mDragState.mRelinquishDragSurfaceToDropTarget;
     }
@@ -94,6 +124,32 @@ class DragDropController {
     void registerCallback(IDragDropCallback callback) {
         Objects.requireNonNull(callback);
         mCallback.set(callback);
+    }
+
+    /**
+     * Sets the listener for unhandled cross-window drags.
+     */
+    public void setUnhandledDragListener(IUnhandledDragListener listener) {
+        if (mUnhandledDragListener != null && mUnhandledDragListener.asBinder() != null) {
+            mUnhandledDragListener.asBinder().unlinkToDeath(
+                    mUnhandledDragListenerDeathRecipient, 0);
+        }
+        mUnhandledDragListener = listener;
+        if (listener != null && listener.asBinder() != null) {
+            try {
+                mUnhandledDragListener.asBinder().linkToDeath(
+                        mUnhandledDragListenerDeathRecipient, 0);
+            } catch (RemoteException e) {
+                mUnhandledDragListener = null;
+            }
+        }
+    }
+
+    /**
+     * Returns whether there is an unhandled drag listener set.
+     */
+    boolean hasUnhandledDragListener() {
+        return mUnhandledDragListener != null;
     }
 
     void sendDragStartedIfNeededLocked(WindowState window) {
@@ -247,6 +303,10 @@ class DragDropController {
         }
     }
 
+    /**
+     * This is called from the drop target window that received ACTION_DROP
+     * (see DragState#reportDropWindowLock()).
+     */
     void reportDropResult(IWindow window, boolean consumed) {
         IBinder token = window.asBinder();
         if (DEBUG_DRAG) {
@@ -273,20 +333,87 @@ class DragDropController {
                 // so be sure to halt the timeout even if the later WindowState
                 // lookup fails.
                 mHandler.removeMessages(MSG_DRAG_END_TIMEOUT, window.asBinder());
+
                 WindowState callingWin = mService.windowForClientLocked(null, window, false);
                 if (callingWin == null) {
                     Slog.w(TAG_WM, "Bad result-reporting window " + window);
                     return;  // !!! TODO: throw here?
                 }
 
-                mDragState.mDragResult = consumed;
-                mDragState.mRelinquishDragSurfaceToDropTarget = consumed
-                        && mDragState.targetInterceptsGlobalDrag(callingWin);
-                mDragState.endDragLocked();
+                // If the drop was not consumed by the target window, then check if it should be
+                // consumed by the system unhandled drag listener
+                if (!consumed && notifyUnhandledDrop(mDragState.mUnhandledDropEvent,
+                        "window-drop")) {
+                    // If the unhandled drag listener is notified, then defer ending the drag until
+                    // the listener calls back
+                    return;
+                }
+
+                final boolean relinquishDragSurfaceToDropTarget =
+                        consumed && mDragState.targetInterceptsGlobalDrag(callingWin);
+                mDragState.endDragLocked(consumed, relinquishDragSurfaceToDropTarget);
             }
         } finally {
             mCallback.get().postReportDropResult();
         }
+    }
+
+    /**
+     * Notifies the unhandled drag listener if needed.
+     * @return whether the listener was notified and subsequent drag completion should be deferred
+     *         until the listener calls back
+     */
+    boolean notifyUnhandledDrop(DragEvent dropEvent, String reason) {
+        final boolean isLocalDrag =
+                (mDragState.mFlags & (DRAG_FLAG_GLOBAL_SAME_APPLICATION | DRAG_FLAG_GLOBAL)) == 0;
+        if (!com.android.window.flags.Flags.delegateUnhandledDrags()
+                || mUnhandledDragListener == null
+                || isLocalDrag) {
+            // Skip if the flag is disabled, there is no unhandled-drag listener, or if this is a
+            // purely local drag
+            if (DEBUG_DRAG) Slog.d(TAG_WM, "Skipping unhandled listener "
+                    + "(listener=" + mUnhandledDragListener + ", flags=" + mDragState.mFlags + ")");
+            return false;
+        }
+        if (DEBUG_DRAG) Slog.d(TAG_WM, "Sending DROP to unhandled listener (" + reason + ")");
+        try {
+            // Schedule timeout for the unhandled drag listener to call back
+            sendTimeoutMessage(MSG_UNHANDLED_DROP_LISTENER_TIMEOUT, null, DRAG_TIMEOUT_MS);
+            mUnhandledDragListener.onUnhandledDrop(dropEvent, new IUnhandledDragCallback.Stub() {
+                @Override
+                public void notifyUnhandledDropComplete(boolean consumedByListener) {
+                    if (DEBUG_DRAG) Slog.d(TAG_WM, "Unhandled listener finished handling DROP");
+                    synchronized (mService.mGlobalLock) {
+                        onUnhandledDropCallback(consumedByListener);
+                    }
+                }
+            });
+            return true;
+        } catch (RemoteException e) {
+            Slog.e(TAG_WM, "Failed to call unhandled drag listener", e);
+            return false;
+        }
+    }
+
+    /**
+     * Called when the unhandled drag listener has completed handling the drop
+     * (if it was notififed).
+     */
+    @VisibleForTesting
+    void onUnhandledDropCallback(boolean consumedByListener) {
+        mHandler.removeMessages(MSG_UNHANDLED_DROP_LISTENER_TIMEOUT, null);
+        // If handled, then the listeners assume responsibility of cleaning up the drag surface
+        mDragState.mDragResult = consumedByListener;
+        mDragState.mRelinquishDragSurfaceToDropTarget = consumedByListener;
+        mDragState.closeLocked();
+    }
+
+    /**
+     * Returns whether we are currently waiting for the unhandled drag listener to callback after
+     * it was notified of an unhandled drag.
+     */
+    boolean hasPendingUnhandledDropCallback() {
+        return mHandler.hasMessages(MSG_UNHANDLED_DROP_LISTENER_TIMEOUT);
     }
 
     void cancelDragAndDrop(IBinder dragToken, boolean skipAnimation) {
@@ -436,8 +563,8 @@ class DragDropController {
                     synchronized (mService.mGlobalLock) {
                         // !!! TODO: ANR the drag-receiving app
                         if (mDragState != null) {
-                            mDragState.mDragResult = false;
-                            mDragState.endDragLocked();
+                            mDragState.endDragLocked(false /* consumed */,
+                                    false /* relinquishDragSurfaceToDropTarget */);
                         }
                     }
                     break;
@@ -470,6 +597,13 @@ class DragDropController {
                 case MSG_REMOVE_DRAG_SURFACE_TIMEOUT: {
                     synchronized (mService.mGlobalLock) {
                         mService.mTransactionFactory.get().remove((SurfaceControl) msg.obj).apply();
+                    }
+                    break;
+                }
+
+                case MSG_UNHANDLED_DROP_LISTENER_TIMEOUT: {
+                    synchronized (mService.mGlobalLock) {
+                        onUnhandledDropCallback(false /* consumedByListener */);
                     }
                     break;
                 }

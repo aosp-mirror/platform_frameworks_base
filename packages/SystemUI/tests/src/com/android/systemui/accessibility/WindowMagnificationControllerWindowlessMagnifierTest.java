@@ -132,7 +132,7 @@ import java.util.function.Supplier;
 public class WindowMagnificationControllerWindowlessMagnifierTest extends SysuiTestCase {
 
     @Rule
-    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 

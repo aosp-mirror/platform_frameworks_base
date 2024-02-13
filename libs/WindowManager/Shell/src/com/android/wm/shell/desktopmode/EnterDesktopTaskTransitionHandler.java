@@ -143,7 +143,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
 
         final SurfaceControl leash = change.getLeash();
         final Rect startBounds = change.getStartAbsBounds();
-        startT.setPosition(leash, startBounds.left, startBounds.right)
+        startT.setPosition(leash, startBounds.left, startBounds.top)
                 .setWindowCrop(leash, startBounds.width(), startBounds.height())
                 .show(leash);
         mDesktopModeWindowDecoration.showResizeVeil(startT, startBounds);
@@ -154,7 +154,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
         SurfaceControl.Transaction t = mTransactionSupplier.get();
         animator.addUpdateListener(animation -> {
             final Rect animationValue = (Rect) animator.getAnimatedValue();
-            t.setPosition(leash, animationValue.left, animationValue.right)
+            t.setPosition(leash, animationValue.left, animationValue.top)
                     .setWindowCrop(leash, animationValue.width(), animationValue.height())
                     .show(leash);
             mDesktopModeWindowDecoration.updateResizeVeil(t, animationValue);

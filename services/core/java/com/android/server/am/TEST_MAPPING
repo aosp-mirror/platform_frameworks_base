@@ -157,7 +157,6 @@
       ]
     },
     {
-      "file_patterns": ["Broadcast.*"],
       "name": "CtsContentTestCases",
       "options": [
         { "include-filter": "android.content.cts.BroadcastReceiverTest" },

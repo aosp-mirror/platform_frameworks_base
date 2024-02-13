@@ -21,6 +21,7 @@ import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STA
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.hardware.devicestate.DeviceState;
 import android.util.Dumpable;
 
 import java.lang.annotation.Retention;

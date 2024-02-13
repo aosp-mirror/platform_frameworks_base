@@ -34,6 +34,7 @@ public class PromptInfo implements Parcelable {
 
     @DrawableRes private int mLogoRes = -1;
     @Nullable private Bitmap mLogoBitmap;
+    @Nullable private String mLogoDescription;
     @NonNull private CharSequence mTitle;
     private boolean mUseDefaultTitle;
     @Nullable private CharSequence mSubtitle;
@@ -62,6 +63,7 @@ public class PromptInfo implements Parcelable {
     PromptInfo(Parcel in) {
         mLogoRes = in.readInt();
         mLogoBitmap = in.readTypedObject(Bitmap.CREATOR);
+        mLogoDescription = in.readString();
         mTitle = in.readCharSequence();
         mUseDefaultTitle = in.readBoolean();
         mSubtitle = in.readCharSequence();
@@ -106,6 +108,7 @@ public class PromptInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mLogoRes);
         dest.writeTypedObject(mLogoBitmap, 0);
+        dest.writeString(mLogoDescription);
         dest.writeCharSequence(mTitle);
         dest.writeBoolean(mUseDefaultTitle);
         dest.writeCharSequence(mSubtitle);
@@ -173,6 +176,8 @@ public class PromptInfo implements Parcelable {
             return true;
         } else if (mLogoBitmap != null) {
             return true;
+        } else if (mLogoDescription != null) {
+            return true;
         }
         return false;
     }
@@ -187,6 +192,10 @@ public class PromptInfo implements Parcelable {
     public void setLogoBitmap(@NonNull Bitmap logoBitmap) {
         mLogoBitmap = logoBitmap;
         checkOnlyOneLogoSet();
+    }
+
+    public void setLogoDescription(@NonNull String logoDescription) {
+        mLogoDescription = logoDescription;
     }
 
     public void setTitle(CharSequence title) {
@@ -280,6 +289,10 @@ public class PromptInfo implements Parcelable {
 
     public Bitmap getLogoBitmap() {
         return mLogoBitmap;
+    }
+
+    public String getLogoDescription() {
+        return mLogoDescription;
     }
 
     public CharSequence getTitle() {

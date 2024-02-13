@@ -873,6 +873,9 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Called when the corresponding TV input selected to a track.
+         *
+         * If the track is deselected and no track is currently selected,
+         * trackId is an empty string.
          */
         public void onTrackSelected(@TvTrackInfo.Type int type, @NonNull String trackId) {
         }
@@ -1844,6 +1847,10 @@ public abstract class TvInteractiveAppService extends Service {
         void notifyTrackSelected(int type, String trackId) {
             if (DEBUG) {
                 Log.d(TAG, "notifyTrackSelected (type=" + type + "trackId=" + trackId + ")");
+            }
+            // TvInputService accepts a Null String, but onTrackSelected expects NonNull.
+            if (trackId == null) {
+                trackId = "";
             }
             onTrackSelected(type, trackId);
         }

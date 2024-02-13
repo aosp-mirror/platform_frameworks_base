@@ -26,6 +26,7 @@ class BiometricPromptRequestTest : SysuiTestCase() {
     @Test
     fun biometricRequestFromPromptInfo() {
         val logoRes = R.drawable.ic_cake
+        val logoDescription = "test cake"
         val title = "what"
         val subtitle = "a"
         val description = "request"
@@ -41,6 +42,7 @@ class BiometricPromptRequestTest : SysuiTestCase() {
             BiometricPromptRequest.Biometric(
                 promptInfo(
                     logoRes = logoRes,
+                    logoDescription = logoDescription,
                     title = title,
                     subtitle = subtitle,
                     description = description,
@@ -53,6 +55,7 @@ class BiometricPromptRequestTest : SysuiTestCase() {
             )
 
         assertThat(request.logoRes).isEqualTo(logoRes)
+        assertThat(request.logoDescription).isEqualTo(logoDescription)
         assertThat(request.title).isEqualTo(title)
         assertThat(request.subtitle).isEqualTo(subtitle)
         assertThat(request.description).isEqualTo(description)

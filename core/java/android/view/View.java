@@ -43,6 +43,7 @@ import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFI
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
+import static com.android.window.flags.Flags.FLAG_DELEGATE_UNHANDLED_DRAGS;
 
 import static java.lang.Math.max;
 
@@ -68,6 +69,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UiThread;
+import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AutofillOptions;
 import android.content.ClipData;
@@ -5327,6 +5329,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public static final int DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION = 1 << 11;
+
+    /**
+     * Flag indicating that a drag can cross window boundaries (within the same application).  When
+     * {@link #startDragAndDrop(ClipData, DragShadowBuilder, Object, int)} is called
+     * with this flag set, only visible windows belonging to the same application (ie. share the
+     * same UID) with targetSdkVersion >= {@link android.os.Build.VERSION_CODES#N API 24} will be
+     * able to participate in the drag operation and receive the dragged content.
+     *
+     * If both DRAG_FLAG_GLOBAL_SAME_APPLICATION and DRAG_FLAG_GLOBAL are set, then
+     * DRAG_FLAG_GLOBAL_SAME_APPLICATION takes precedence and the drag will only go to visible
+     * windows from the same application.
+     */
+    @FlaggedApi(FLAG_DELEGATE_UNHANDLED_DRAGS)
+    public static final int DRAG_FLAG_GLOBAL_SAME_APPLICATION = 1 << 12;
+
+    /**
+     * Flag indicating that an unhandled drag should be delegated to the system to be started if no
+     * visible window wishes to handle the drop. When using this flag, the caller must provide
+     * ClipData with an Item that contains an immutable PendingIntent to an activity to be launched
+     * (not a broadcast, service, etc).  See
+     * {@link ClipData.Item.Builder#setPendingIntent(PendingIntent)}.
+     *
+     * The system can decide to launch the intent or not based on factors like the current screen
+     * size or windowing mode. If the system does not launch the intent, it will be canceled via the
+     * normal drag and drop flow.
+     */
+    @FlaggedApi(FLAG_DELEGATE_UNHANDLED_DRAGS)
+    public static final int DRAG_FLAG_START_PENDING_INTENT_ON_UNHANDLED_DRAG = 1 << 13;
 
     /**
      * Vertical scroll factor cached by {@link #getVerticalScrollFactor}.
@@ -28496,9 +28526,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             Log.w(VIEW_LOG_TAG, "startDragAndDrop called with an invalid surface.");
             return false;
         }
+        if ((flags & DRAG_FLAG_GLOBAL) != 0 && ((flags & DRAG_FLAG_GLOBAL_SAME_APPLICATION) != 0)) {
+            Log.w(VIEW_LOG_TAG, "startDragAndDrop called with both DRAG_FLAG_GLOBAL "
+                    + "and DRAG_FLAG_GLOBAL_SAME_APPLICATION, the drag will default to "
+                    + "DRAG_FLAG_GLOBAL_SAME_APPLICATION");
+            flags &= ~DRAG_FLAG_GLOBAL;
+        }
 
         if (data != null) {
-            data.prepareToLeaveProcess((flags & View.DRAG_FLAG_GLOBAL) != 0);
+            if (com.android.window.flags.Flags.delegateUnhandledDrags()) {
+                data.prepareToLeaveProcess(
+                        (flags & (DRAG_FLAG_GLOBAL_SAME_APPLICATION | DRAG_FLAG_GLOBAL)) != 0);
+                if ((flags & DRAG_FLAG_START_PENDING_INTENT_ON_UNHANDLED_DRAG) != 0) {
+                    if (!data.hasActivityPendingIntents()) {
+                        // Reset the flag if there is no launchable activity intent
+                        flags &= ~DRAG_FLAG_START_PENDING_INTENT_ON_UNHANDLED_DRAG;
+                        Log.w(VIEW_LOG_TAG, "startDragAndDrop called with "
+                                + "DRAG_FLAG_START_INTENT_ON_UNHANDLED_DRAG but the clip data "
+                                + "contains non-activity PendingIntents");
+                    }
+                }
+            } else {
+                data.prepareToLeaveProcess((flags & DRAG_FLAG_GLOBAL) != 0);
+            }
         }
 
         Rect bounds = new Rect();
@@ -28524,6 +28574,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (token != null) {
                     root.setLocalDragState(myLocalState);
                     mAttachInfo.mDragToken = token;
+                    mAttachInfo.mDragData = data;
                     mAttachInfo.mViewRootImpl.setDragStartedViewForAccessibility(this);
                     setAccessibilityDragStarted(true);
                 }
@@ -28601,8 +28652,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (mAttachInfo.mDragSurface != null) {
                     mAttachInfo.mDragSurface.release();
                 }
+                if (mAttachInfo.mDragData != null) {
+                    mAttachInfo.mDragData.cleanUpPendingIntents();
+                }
                 mAttachInfo.mDragSurface = surface;
                 mAttachInfo.mDragToken = token;
+                mAttachInfo.mDragData = data;
                 // Cache the local state object for delivery with DragEvents
                 root.setLocalDragState(myLocalState);
                 if (a11yEnabled) {
@@ -31516,10 +31571,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         IBinder mDragToken;
 
         /**
+         * Used to track the data of the current drag operation for cleanup later.
+         */
+        ClipData mDragData;
+
+        /**
          * The drag shadow surface for the current drag operation.
          */
         public Surface mDragSurface;
-
 
         /**
          * The view that currently has a tooltip displayed.

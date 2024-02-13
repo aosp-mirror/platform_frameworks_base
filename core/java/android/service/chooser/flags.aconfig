@@ -8,6 +8,13 @@ flag {
 }
 
 flag {
+    name: "enable_sharesheet_metadata_extra"
+    namespace: "intentresolver"
+    description: "This flag enables sharesheet metadata to be displayed to users."
+    bug: "318942069"
+}
+
+flag {
   name: "support_nfc_resolver"
   namespace: "systemui"
   description: "This flag controls the new NFC 'resolver' activity"
@@ -19,4 +26,11 @@ flag {
   namespace: "intentresolver"
   description: "This flag controls content toggling in Chooser"
   bug: "302691505"
+}
+
+flag {
+  name: "enable_chooser_result"
+  namespace: "intentresolver"
+  description: "Provides additional callbacks with information about user actions in ChooserResult"
+  bug: "263474465"
 }

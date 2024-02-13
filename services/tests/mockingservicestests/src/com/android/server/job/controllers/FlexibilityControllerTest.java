@@ -49,7 +49,6 @@ import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CONNECTIVI
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CONTENT_TRIGGER;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_FLEXIBLE;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_IDLE;
-import static com.android.server.job.controllers.JobStatus.MIN_WINDOW_FOR_FLEXIBILITY_MS;
 import static com.android.server.job.controllers.JobStatus.NO_LATEST_RUNTIME;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -410,10 +409,12 @@ public class FlexibilityControllerTest {
 
     @Test
     public void testOnConstantsUpdated_PercentsToDropConstraints() {
+        final long fallbackDuration = 12 * HOUR_IN_MILLIS;
         JobInfo.Builder jb = createJob(0)
-                .setOverrideDeadline(MIN_WINDOW_FOR_FLEXIBILITY_MS);
+                .setOverrideDeadline(HOUR_IN_MILLIS);
         JobStatus js = createJobStatus("testPercentsToDropConstraintsConfig", jb);
-        assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 5,
+        // Even though the override deadline is 1 hour, the fallback duration is still used.
+        assertEquals(FROZEN_TIME + fallbackDuration / 10 * 5,
                 mFlexibilityController.getNextConstraintDropTimeElapsedLocked(js));
         setDeviceConfigString(KEY_PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS,
                 "500=1|2|3|4"
@@ -441,13 +442,13 @@ public class FlexibilityControllerTest {
                 mFlexibilityController.mFcConfig.PERCENTS_TO_DROP_FLEXIBLE_CONSTRAINTS
                         .get(JobInfo.PRIORITY_MIN),
                 new int[]{54, 55, 56, 57});
-        assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10,
+        assertEquals(FROZEN_TIME + fallbackDuration / 10,
                 mFlexibilityController.getNextConstraintDropTimeElapsedLocked(js));
         js.setNumDroppedFlexibleConstraints(1);
-        assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 2,
+        assertEquals(FROZEN_TIME + fallbackDuration / 10 * 2,
                 mFlexibilityController.getNextConstraintDropTimeElapsedLocked(js));
         js.setNumDroppedFlexibleConstraints(2);
-        assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 3,
+        assertEquals(FROZEN_TIME + fallbackDuration / 10 * 3,
                 mFlexibilityController.getNextConstraintDropTimeElapsedLocked(js));
     }
 
@@ -504,37 +505,38 @@ public class FlexibilityControllerTest {
 
     @Test
     public void testGetNextConstraintDropTimeElapsedLocked() {
+        final long fallbackDuration = 50 * HOUR_IN_MILLIS;
         setDeviceConfigLong(KEY_FALLBACK_FLEXIBILITY_DEADLINE, 200 * HOUR_IN_MILLIS);
         setDeviceConfigString(KEY_FALLBACK_FLEXIBILITY_DEADLINES,
                 "500=" + HOUR_IN_MILLIS
                         + ",400=" + 25 * HOUR_IN_MILLIS
-                        + ",300=" + 50 * HOUR_IN_MILLIS
+                        + ",300=" + fallbackDuration
                         + ",200=" + 100 * HOUR_IN_MILLIS
                         + ",100=" + 200 * HOUR_IN_MILLIS);
 
         long nextTimeToDropNumConstraints;
 
         // no delay, deadline
-        JobInfo.Builder jb = createJob(0).setOverrideDeadline(MIN_WINDOW_FOR_FLEXIBILITY_MS);
+        JobInfo.Builder jb = createJob(0).setOverrideDeadline(HOUR_IN_MILLIS);
         JobStatus js = createJobStatus("time", jb);
 
         assertEquals(JobStatus.NO_EARLIEST_RUNTIME, js.getEarliestRunTime());
-        assertEquals(MIN_WINDOW_FOR_FLEXIBILITY_MS + FROZEN_TIME, js.getLatestRunTimeElapsed());
+        assertEquals(HOUR_IN_MILLIS + FROZEN_TIME, js.getLatestRunTimeElapsed());
         assertEquals(FROZEN_TIME, js.enqueueTime);
 
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
-        assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 5,
+        assertEquals(FROZEN_TIME + fallbackDuration / 10 * 5,
                 nextTimeToDropNumConstraints);
         js.setNumDroppedFlexibleConstraints(1);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
-        assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 6,
+        assertEquals(FROZEN_TIME + fallbackDuration / 10 * 6,
                 nextTimeToDropNumConstraints);
         js.setNumDroppedFlexibleConstraints(2);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
-        assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 7,
+        assertEquals(FROZEN_TIME + fallbackDuration / 10 * 7,
                 nextTimeToDropNumConstraints);
 
         // delay, no deadline
@@ -574,81 +576,83 @@ public class FlexibilityControllerTest {
 
         // delay, deadline
         jb = createJob(0)
-                .setOverrideDeadline(2 * MIN_WINDOW_FOR_FLEXIBILITY_MS)
-                .setMinimumLatency(MIN_WINDOW_FOR_FLEXIBILITY_MS);
+                .setOverrideDeadline(2 * HOUR_IN_MILLIS)
+                .setMinimumLatency(HOUR_IN_MILLIS);
         js = createJobStatus("time", jb);
 
-        final long windowStart = FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS;
+        final long windowStart = FROZEN_TIME + HOUR_IN_MILLIS;
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
-        assertEquals(windowStart + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 5,
+        assertEquals(windowStart + fallbackDuration / 10 * 5,
                 nextTimeToDropNumConstraints);
         js.setNumDroppedFlexibleConstraints(1);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
-        assertEquals(windowStart + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 6,
+        assertEquals(windowStart + fallbackDuration / 10 * 6,
                 nextTimeToDropNumConstraints);
         js.setNumDroppedFlexibleConstraints(2);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
-        assertEquals(windowStart + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 7,
+        assertEquals(windowStart + fallbackDuration / 10 * 7,
                 nextTimeToDropNumConstraints);
     }
 
     @Test
     public void testCurPercent() {
+        final long fallbackDuration = 10 * HOUR_IN_MILLIS;
+        setDeviceConfigString(KEY_FALLBACK_FLEXIBILITY_DEADLINES, "300=" + fallbackDuration);
         long deadline = 100 * MINUTE_IN_MILLIS;
         long nowElapsed = FROZEN_TIME;
         JobInfo.Builder jb = createJob(0).setOverrideDeadline(deadline);
         JobStatus js = createJobStatus("time", jb);
 
         assertEquals(FROZEN_TIME, mFlexibilityController.getLifeCycleBeginningElapsedLocked(js));
-        assertEquals(deadline + FROZEN_TIME,
+        assertEquals(FROZEN_TIME + fallbackDuration,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(js, nowElapsed, FROZEN_TIME));
-        nowElapsed = FROZEN_TIME + 60 * MINUTE_IN_MILLIS;
+        nowElapsed = FROZEN_TIME + 6 * HOUR_IN_MILLIS;
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
         assertEquals(60, mFlexibilityController.getCurPercentOfLifecycleLocked(js, nowElapsed));
 
-        nowElapsed = FROZEN_TIME + 130 * MINUTE_IN_MILLIS;
+        nowElapsed = FROZEN_TIME + 13 * HOUR_IN_MILLIS;
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
         assertEquals(100, mFlexibilityController.getCurPercentOfLifecycleLocked(js, nowElapsed));
 
-        nowElapsed = FROZEN_TIME + 95 * MINUTE_IN_MILLIS;
+        nowElapsed = FROZEN_TIME + 9 * HOUR_IN_MILLIS;
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
-        assertEquals(95, mFlexibilityController.getCurPercentOfLifecycleLocked(js, nowElapsed));
+        assertEquals(90, mFlexibilityController.getCurPercentOfLifecycleLocked(js, nowElapsed));
 
         nowElapsed = FROZEN_TIME;
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
-        long delay = MINUTE_IN_MILLIS;
-        deadline = 101 * MINUTE_IN_MILLIS;
+        long delay = HOUR_IN_MILLIS;
+        deadline = HOUR_IN_MILLIS + 100 * MINUTE_IN_MILLIS;
         jb = createJob(0).setOverrideDeadline(deadline).setMinimumLatency(delay);
         js = createJobStatus("time", jb);
 
         assertEquals(FROZEN_TIME + delay,
                 mFlexibilityController.getLifeCycleBeginningElapsedLocked(js));
-        assertEquals(deadline + FROZEN_TIME,
+        assertEquals(FROZEN_TIME + delay + fallbackDuration,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(js, nowElapsed,
                         FROZEN_TIME + delay));
 
-        nowElapsed = FROZEN_TIME + delay + 60 * MINUTE_IN_MILLIS;
+        nowElapsed = FROZEN_TIME + delay + 6 * HOUR_IN_MILLIS;
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
 
         assertEquals(60, mFlexibilityController.getCurPercentOfLifecycleLocked(js, nowElapsed));
 
-        nowElapsed = FROZEN_TIME + 130 * MINUTE_IN_MILLIS;
+        nowElapsed = FROZEN_TIME + 13 * HOUR_IN_MILLIS;
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
         assertEquals(100, mFlexibilityController.getCurPercentOfLifecycleLocked(js, nowElapsed));
 
-        nowElapsed = FROZEN_TIME + delay + 95 * MINUTE_IN_MILLIS;
+        nowElapsed = FROZEN_TIME + delay + 9 * HOUR_IN_MILLIS;
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
-        assertEquals(95, mFlexibilityController.getCurPercentOfLifecycleLocked(js, nowElapsed));
+        assertEquals(90, mFlexibilityController.getCurPercentOfLifecycleLocked(js, nowElapsed));
     }
 
     @Test
@@ -786,26 +790,27 @@ public class FlexibilityControllerTest {
         // deadline
         JobInfo.Builder jb = createJob(0).setOverrideDeadline(HOUR_IN_MILLIS);
         JobStatus js = createJobStatus("time", jb);
-        assertEquals(HOUR_IN_MILLIS + FROZEN_TIME,
-                mFlexibilityController.getLifeCycleEndElapsedLocked(js, nowElapsed, 0));
+        assertEquals(3 * HOUR_IN_MILLIS + js.enqueueTime,
+                mFlexibilityController
+                        .getLifeCycleEndElapsedLocked(js, nowElapsed, js.enqueueTime));
 
         // no deadline
-        assertEquals(FROZEN_TIME + 2 * HOUR_IN_MILLIS,
+        assertEquals(js.enqueueTime + 2 * HOUR_IN_MILLIS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(
                         createJobStatus("time", createJob(0).setPriority(JobInfo.PRIORITY_HIGH)),
-                        nowElapsed, 100L));
-        assertEquals(FROZEN_TIME + 3 * HOUR_IN_MILLIS,
+                        nowElapsed, js.enqueueTime));
+        assertEquals(js.enqueueTime + 3 * HOUR_IN_MILLIS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(
                         createJobStatus("time", createJob(0).setPriority(JobInfo.PRIORITY_DEFAULT)),
-                        nowElapsed, 100L));
-        assertEquals(FROZEN_TIME + 4 * HOUR_IN_MILLIS,
+                        nowElapsed, js.enqueueTime));
+        assertEquals(js.enqueueTime + 4 * HOUR_IN_MILLIS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(
                         createJobStatus("time", createJob(0).setPriority(JobInfo.PRIORITY_LOW)),
-                        nowElapsed, 100L));
-        assertEquals(FROZEN_TIME + 5 * HOUR_IN_MILLIS,
+                        nowElapsed, js.enqueueTime));
+        assertEquals(js.enqueueTime + 5 * HOUR_IN_MILLIS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(
                         createJobStatus("time", createJob(0).setPriority(JobInfo.PRIORITY_MIN)),
-                        nowElapsed, 100L));
+                        nowElapsed, js.enqueueTime));
     }
 
     @Test
@@ -871,14 +876,16 @@ public class FlexibilityControllerTest {
         mFlexibilityController.prepareForExecutionLocked(jsLow);
         mFlexibilityController.prepareForExecutionLocked(jsMin);
 
-        // deadline
-        JobInfo.Builder jb = createJob(0).setOverrideDeadline(HOUR_IN_MILLIS);
-        JobStatus js = createJobStatus("testGetLifeCycleEndElapsedLocked_ScoreAddition", jb);
-        assertEquals(HOUR_IN_MILLIS + FROZEN_TIME,
-                mFlexibilityController.getLifeCycleEndElapsedLocked(js, nowElapsed, 0));
+        final long longDeadlineMs = 14 * 24 * HOUR_IN_MILLIS;
+        JobInfo.Builder jbWithLongDeadline = createJob(0).setOverrideDeadline(longDeadlineMs);
+        JobStatus jsWithLongDeadline = createJobStatus(
+                "testGetLifeCycleEndElapsedLocked_ScoreAddition", jbWithLongDeadline);
+        JobInfo.Builder jbWithShortDeadline =
+                createJob(0).setOverrideDeadline(15 * MINUTE_IN_MILLIS);
+        JobStatus jsWithShortDeadline = createJobStatus(
+                "testGetLifeCycleEndElapsedLocked_ScoreAddition", jbWithShortDeadline);
 
         final long earliestMs = 123L;
-        // no deadline
         assertEquals(earliestMs + HOUR_IN_MILLIS + 5 * 15 * MINUTE_IN_MILLIS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(
                         createJobStatus("testGetLifeCycleEndElapsedLocked_ScoreAddition",
@@ -894,6 +901,9 @@ public class FlexibilityControllerTest {
                         createJobStatus("testGetLifeCycleEndElapsedLocked_ScoreAddition",
                                 createJob(0).setPriority(JobInfo.PRIORITY_DEFAULT)),
                         nowElapsed, earliestMs));
+        assertEquals(earliestMs + HOUR_IN_MILLIS + 3 * 15 * MINUTE_IN_MILLIS,
+                mFlexibilityController.getLifeCycleEndElapsedLocked(
+                        jsWithShortDeadline, nowElapsed, earliestMs));
         assertEquals(earliestMs + HOUR_IN_MILLIS + 2 * 15 * MINUTE_IN_MILLIS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(
                         createJobStatus("testGetLifeCycleEndElapsedLocked_ScoreAddition",
@@ -904,6 +914,9 @@ public class FlexibilityControllerTest {
                         createJobStatus("testGetLifeCycleEndElapsedLocked_ScoreAddition",
                                 createJob(0).setPriority(JobInfo.PRIORITY_MIN)),
                         nowElapsed, earliestMs));
+        assertEquals(jsWithLongDeadline.enqueueTime + longDeadlineMs,
+                mFlexibilityController.getLifeCycleEndElapsedLocked(
+                        jsWithLongDeadline, nowElapsed, earliestMs));
     }
 
     @Test
@@ -1033,8 +1046,8 @@ public class FlexibilityControllerTest {
         JobInfo.Builder jb = createJob(0);
         jb.setMinimumLatency(1);
         jb.setOverrideDeadline(2);
-        JobStatus js = createJobStatus("Disable Flexible When Job Has Short Window", jb);
-        assertFalse(js.hasFlexibilityConstraint());
+        JobStatus js = createJobStatus("testExceptions_ShortWindow", jb);
+        assertTrue(js.hasFlexibilityConstraint());
     }
 
     @Test

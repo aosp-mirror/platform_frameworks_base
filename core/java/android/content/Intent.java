@@ -19,6 +19,7 @@ package android.content;
 import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
+import static android.service.chooser.Flags.FLAG_ENABLE_SHARESHEET_METADATA_EXTRA;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -6154,6 +6155,17 @@ public class Intent implements Parcelable, Cloneable {
      * Android 10).
      */
     public static final String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
+
+    /**
+     * A CharSequence of additional text describing the content being shared. This text will be
+     * displayed to the user as a part of the sharesheet when included in an
+     * {@link #ACTION_CHOOSER} {@link Intent}.
+     *
+     * <p>e.g. When sharing a photo, metadata could inform the user that location data is included
+     * in the photo they are sharing.</p>
+     */
+    @FlaggedApi(FLAG_ENABLE_SHARESHEET_METADATA_EXTRA)
+    public static final String EXTRA_METADATA_TEXT = "android.intent.extra.METADATA_TEXT";
 
     /**
      * A {@link IntentSender} to start after instant app installation success.

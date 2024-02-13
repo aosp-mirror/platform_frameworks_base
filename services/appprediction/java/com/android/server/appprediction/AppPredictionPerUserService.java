@@ -31,6 +31,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.provider.DeviceConfig;
@@ -235,6 +236,18 @@ public class AppPredictionPerUserService extends
         resolveService(sessionId, false, sessionInfo.mUsesPeopleService,
                 s -> s.onDestroyPredictionSession(sessionId));
         sessionInfo.destroy();
+    }
+
+    /**
+     * Requests the service to provide AppPredictionService features info.
+     */
+    @GuardedBy("mLock")
+    public void requestServiceFeaturesLocked(@NonNull AppPredictionSessionId sessionId,
+            @NonNull IRemoteCallback callback) {
+        final AppPredictionSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+        if (sessionInfo == null) return;
+        resolveService(sessionId, true, sessionInfo.mUsesPeopleService,
+                s -> s.requestServiceFeatures(sessionId, callback));
     }
 
     @Override

@@ -154,8 +154,7 @@ will be unregistered. There is no explicit command for unregistering a device.
 
 #### `delay`
 
-Add a delay between the processing of commands. The delay will be timed from when the last delay
-ended, rather than from the current time, to allow for more precise timings to be produced.
+Add a delay to command processing
 
 | Field         | Type          | Description                |
 |:-------------:|:-------------:|:-------------------------- |
