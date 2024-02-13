@@ -77,6 +77,7 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") private int mCurSeq;
     @GuardedBy("ImfLock.class") private boolean mVisibleBound;
     @GuardedBy("ImfLock.class") private boolean mSupportsStylusHw;
+    @GuardedBy("ImfLock.class") private boolean mSupportsConnectionlessStylusHw;
 
     @Nullable private CountDownLatch mLatchForTesting;
 
@@ -243,8 +244,15 @@ final class InputMethodBindingController {
     /**
      * Returns {@code true} if current IME supports Stylus Handwriting.
      */
+    @GuardedBy("ImfLock.class")
     boolean supportsStylusHandwriting() {
         return mSupportsStylusHw;
+    }
+
+    /** Returns whether the current IME supports connectionless stylus handwriting sessions. */
+    @GuardedBy("ImfLock.class")
+    boolean supportsConnectionlessStylusHandwriting() {
+        return mSupportsConnectionlessStylusHw;
     }
 
     /**
@@ -297,6 +305,15 @@ final class InputMethodBindingController {
                     mSupportsStylusHw = info.supportsStylusHandwriting();
                     if (supportsStylusHwChanged) {
                         InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
+                    }
+                    boolean supportsConnectionlessStylusHwChanged =
+                            mSupportsConnectionlessStylusHw
+                                    != info.supportsConnectionlessStylusHandwriting();
+                    if (supportsConnectionlessStylusHwChanged) {
+                        mSupportsConnectionlessStylusHw =
+                                info.supportsConnectionlessStylusHandwriting();
+                        InputMethodManager
+                                .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
                     }
                     mService.initializeImeLocked(mCurMethod, mCurToken);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);

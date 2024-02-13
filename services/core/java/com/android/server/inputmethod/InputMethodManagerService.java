@@ -1980,7 +1980,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
+    public boolean isStylusHandwritingAvailableAsUser(
+            @UserIdInt int userId, boolean connectionless) {
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
@@ -1993,14 +1994,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             // Check if selected IME of current user supports handwriting.
             if (userId == mSettings.getUserId()) {
-                return mBindingController.supportsStylusHandwriting();
+                return mBindingController.supportsStylusHandwriting()
+                        && (!connectionless
+                                || mBindingController.supportsConnectionlessStylusHandwriting());
             }
             //TODO(b/197848765): This can be optimized by caching multi-user methodMaps/methodList.
             //TODO(b/210039666): use cache.
             final InputMethodSettings settings = queryMethodMapForUser(userId);
             final InputMethodInfo imi = settings.getMethodMap().get(
                     settings.getSelectedInputMethod());
-            return imi != null && imi.supportsStylusHandwriting();
+            return imi != null && imi.supportsStylusHandwriting()
+                    && (!connectionless || imi.supportsConnectionlessStylusHandwriting());
         }
     }
 

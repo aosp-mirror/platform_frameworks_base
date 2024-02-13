@@ -157,6 +157,8 @@
     <public name="useLocalePreferredLineHeightForMinimum"/>
     <!-- @FlaggedApi("android.view.flags.sensitive_content_app_protection_api") -->
     <public name="contentSensitivity" />
+    <!-- @FlaggedApi("android.view.inputmethod.connectionless_handwriting") -->
+    <public name="supportsConnectionlessStylusHandwriting" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">
