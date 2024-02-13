@@ -144,7 +144,7 @@ public class ProtoLogImplTest {
         ProtoLogImpl.d(TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d");
         verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.DEBUG), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class ProtoLogImplTest {
         ProtoLogImpl.v(TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d");
         verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.VERBOSE), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
     }
 
     @Test
@@ -164,7 +164,7 @@ public class ProtoLogImplTest {
         ProtoLogImpl.i(TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d");
         verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.INFO), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
     }
 
     @Test
@@ -175,7 +175,7 @@ public class ProtoLogImplTest {
                 4321, "test %d");
         verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.WARN), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
     }
 
     @Test
@@ -185,7 +185,7 @@ public class ProtoLogImplTest {
         ProtoLogImpl.e(TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d");
         verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.ERROR), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
     }
 
     @Test
@@ -196,7 +196,7 @@ public class ProtoLogImplTest {
                 1234, 4321, "test %d");
         verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.WTF), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
     }
 
     @Test
