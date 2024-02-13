@@ -309,9 +309,8 @@ Asset::Asset(void)
         return NULL;
     }
 
-    // We succeeded, so relinquish control of dataMap
     pAsset->mAccessMode = mode;
-    return std::move(pAsset);
+    return pAsset;
 }
 
 /*
@@ -328,9 +327,8 @@ Asset::Asset(void)
       return NULL;
   }
 
-  // We succeeded, so relinquish control of dataMap
   pAsset->mAccessMode = mode;
-  return std::move(pAsset);
+  return pAsset;
 }
 
 /*
