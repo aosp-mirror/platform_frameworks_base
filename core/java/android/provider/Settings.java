@@ -12286,6 +12286,14 @@ public final class Settings {
                 "extra_automatic_power_save_mode";
 
         /**
+         * Whether contextual screen timeout is enabled.
+         *
+         * @hide
+         */
+        public static final String CONTEXTUAL_SCREEN_TIMEOUT_ENABLED =
+                "contextual_screen_timeout_enabled";
+
+        /**
          * Whether lockscreen weather is enabled.
          *
          * @hide
