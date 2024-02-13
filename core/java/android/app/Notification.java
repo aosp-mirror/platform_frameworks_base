@@ -3020,6 +3020,43 @@ public class Notification implements Parcelable
     }
 
     /**
+     * @hide
+     */
+    public String loadHeaderAppName(Context context) {
+        CharSequence name = null;
+        // Check if there is a non-empty substitute app name and return that.
+        if (extras.containsKey(EXTRA_SUBSTITUTE_APP_NAME)) {
+            name = extras.getString(EXTRA_SUBSTITUTE_APP_NAME);
+            if (!TextUtils.isEmpty(name)) {
+                return name.toString();
+            }
+        }
+        // If not, try getting the app info from extras.
+        if (context == null) {
+            return null;
+        }
+        final PackageManager pm = context.getPackageManager();
+        if (TextUtils.isEmpty(name)) {
+            if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
+                final ApplicationInfo info = extras.getParcelable(EXTRA_BUILDER_APPLICATION_INFO,
+                        ApplicationInfo.class);
+                if (info != null) {
+                    name = pm.getApplicationLabel(info);
+                }
+            }
+        }
+        // If that's still empty, use the one from the context directly.
+        if (TextUtils.isEmpty(name)) {
+            name = pm.getApplicationLabel(context.getApplicationInfo());
+        }
+        // If there's still nothing, ¯\_(ツ)_/¯
+        if (TextUtils.isEmpty(name)) {
+            return null;
+        }
+        return name.toString();
+    }
+
+    /**
      * Removes heavyweight parts of the Notification object for archival or for sending to
      * listeners when the full contents are not necessary.
      * @hide
@@ -5769,34 +5806,7 @@ public class Notification implements Parcelable
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public String loadHeaderAppName() {
-            CharSequence name = null;
-            final PackageManager pm = mContext.getPackageManager();
-            if (mN.extras.containsKey(EXTRA_SUBSTITUTE_APP_NAME)) {
-                // only system packages which lump together a bunch of unrelated stuff
-                // may substitute a different name to make the purpose of the
-                // notification more clear. the correct package label should always
-                // be accessible via SystemUI.
-                final String pkg = mContext.getPackageName();
-                final String subName = mN.extras.getString(EXTRA_SUBSTITUTE_APP_NAME);
-                if (PackageManager.PERMISSION_GRANTED == pm.checkPermission(
-                        android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME, pkg)) {
-                    name = subName;
-                } else {
-                    Log.w(TAG, "warning: pkg "
-                            + pkg + " attempting to substitute app name '" + subName
-                            + "' without holding perm "
-                            + android.Manifest.permission.SUBSTITUTE_NOTIFICATION_APP_NAME);
-                }
-            }
-            if (TextUtils.isEmpty(name)) {
-                name = pm.getApplicationLabel(mContext.getApplicationInfo());
-            }
-            if (TextUtils.isEmpty(name)) {
-                // still nothing?
-                return null;
-            }
-
-            return String.valueOf(name);
+            return mN.loadHeaderAppName(mContext);
         }
 
         /**
