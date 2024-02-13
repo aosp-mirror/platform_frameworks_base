@@ -100,7 +100,7 @@ class MenuItemAccessibilityDelegate extends RecyclerViewAccessibilityDelegate.It
                     new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
                             R.id.action_edit,
                             res.getString(
-                                    R.string.accessibility_floating_button_action_remove_menu));
+                                    R.string.accessibility_floating_button_action_edit));
             info.addAction(edit);
         }
     }
