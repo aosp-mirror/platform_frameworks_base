@@ -95,9 +95,11 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.PowerWhitelistManager.REASON_NOTIFICATION_SERVICE;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_NULL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
+import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
@@ -160,6 +162,7 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.DurationMillisLong;
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.EnforcePermission;
 import android.annotation.FlaggedApi;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -176,6 +179,7 @@ import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.IActivityManager;
+import android.app.ICallNotificationEventCallback;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.ITransientNotificationCallback;
@@ -255,6 +259,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -729,6 +734,9 @@ public class NotificationManagerService extends SystemService {
     private NotificationUsageStats mUsageStats;
     private boolean mLockScreenAllowSecureNotifications = true;
     boolean mSystemExemptFromDismissal = false;
+    final ArrayMap<String, ArrayMap<Integer,
+            RemoteCallbackList<ICallNotificationEventCallback>>>
+            mCallNotificationEventCallbacks = new ArrayMap<>();
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
@@ -4888,6 +4896,94 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
+         * Register a listener to be notified when a call notification is posted or removed
+         * for a specific package and user.
+         * @param packageName Which package to monitor
+         * @param userHandle Which user to monitor
+         * @param listener Listener to register
+         */
+        @Override
+        @EnforcePermission(allOf = {
+                android.Manifest.permission.INTERACT_ACROSS_USERS,
+                android.Manifest.permission.ACCESS_NOTIFICATIONS})
+        public void registerCallNotificationEventListener(String packageName, UserHandle userHandle,
+                ICallNotificationEventCallback listener) {
+            registerCallNotificationEventListener_enforcePermission();
+
+            final int userId = userHandle.getIdentifier() != UserHandle.USER_CURRENT
+                    ? userHandle.getIdentifier() : mAmi.getCurrentUserId();
+
+            synchronized (mCallNotificationEventCallbacks) {
+                ArrayMap<Integer, RemoteCallbackList<ICallNotificationEventCallback>>
+                        callbacksForPackage =
+                        mCallNotificationEventCallbacks.getOrDefault(packageName, new ArrayMap<>());
+                RemoteCallbackList<ICallNotificationEventCallback> callbackList =
+                        callbacksForPackage.getOrDefault(userId, new RemoteCallbackList<>());
+
+                if (callbackList.register(listener)) {
+                    callbacksForPackage.put(userId, callbackList);
+                    mCallNotificationEventCallbacks.put(packageName, callbacksForPackage);
+                } else {
+                    Log.e(TAG,
+                            "registerCallNotificationEventListener failed to register listener: "
+                                + packageName + " " + userHandle + " " + listener);
+                    return;
+                }
+            }
+
+            synchronized (mNotificationLock) {
+                for (NotificationRecord r : mNotificationList) {
+                    if (r.getNotification().isStyle(Notification.CallStyle.class)
+                            && notificationMatchesUserId(r, userId, false)
+                            && r.getSbn().getPackageName().equals(packageName)) {
+                        try {
+                            listener.onCallNotificationPosted(packageName, r.getUser());
+                        } catch (RemoteException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * Unregister a listener that was previously
+         * registered with {@link #registerCallNotificationEventListener}
+         *
+         * @param packageName Which package to stop monitoring
+         * @param userHandle Which user to stop monitoring
+         * @param listener Listener to unregister
+         */
+        @Override
+        @EnforcePermission(allOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.ACCESS_NOTIFICATIONS})
+        public void unregisterCallNotificationEventListener(String packageName,
+                    UserHandle userHandle, ICallNotificationEventCallback listener) {
+            unregisterCallNotificationEventListener_enforcePermission();
+            synchronized (mCallNotificationEventCallbacks) {
+                final int userId = userHandle.getIdentifier() != UserHandle.USER_CURRENT
+                        ? userHandle.getIdentifier() : mAmi.getCurrentUserId();
+
+                ArrayMap<Integer, RemoteCallbackList<ICallNotificationEventCallback>>
+                        callbacksForPackage = mCallNotificationEventCallbacks.get(packageName);
+                if (callbacksForPackage == null) {
+                    return;
+                }
+                RemoteCallbackList<ICallNotificationEventCallback> callbackList =
+                        callbacksForPackage.get(userId);
+                if (callbackList == null) {
+                    return;
+                }
+                if (!callbackList.unregister(listener)) {
+                    Log.e(TAG,
+                            "unregisterCallNotificationEventListener listener not found for: "
+                            + packageName + " " + userHandle + " " + listener);
+                }
+            }
+        }
+
+        /**
          * Register a listener binder directly with the notification manager.
          *
          * Only works with system callers. Apps should extend
@@ -8698,6 +8794,11 @@ public class NotificationManagerService extends SystemService {
                                 }
                             });
                         }
+
+                        if (callstyleCallbackApi()) {
+                            notifyCallNotificationEventListenerOnRemoved(r);
+                        }
+
                         // ATTENTION: in a future release we will bail out here
                         // so that we do not play sounds, show lights, etc. for invalid
                         // notifications
@@ -10055,6 +10156,9 @@ public class NotificationManagerService extends SystemService {
                         mGroupHelper.onNotificationRemoved(r.getSbn());
                     }
                 });
+                if (callstyleCallbackApi()) {
+                    notifyCallNotificationEventListenerOnRemoved(r);
+                }
             }
 
             if (Flags.refactorAttentionHelper()) {
@@ -11729,6 +11833,10 @@ public class NotificationManagerService extends SystemService {
                 mNotificationRecordLogger.logNotificationPosted(report);
             }
         });
+
+        if (callstyleCallbackApi()) {
+            notifyCallNotificationEventListenerOnPosted(r);
+        }
     }
 
     @FlaggedApi(FLAG_LIFETIME_EXTENSION_REFACTOR)
@@ -12782,6 +12890,91 @@ public class NotificationManagerService extends SystemService {
                 }
             }
             return false;
+        }
+    }
+
+    @GuardedBy("mNotificationLock")
+    private void broadcastToCallNotificationEventCallbacks(
+            final RemoteCallbackList<ICallNotificationEventCallback> callbackList,
+            final NotificationRecord r,
+            boolean isPosted) {
+        if (callbackList != null) {
+            int numCallbacks = callbackList.beginBroadcast();
+            try {
+                for (int i = 0; i < numCallbacks; i++) {
+                    if (isPosted) {
+                        callbackList.getBroadcastItem(i)
+                                .onCallNotificationPosted(r.getSbn().getPackageName(), r.getUser());
+                    } else {
+                        callbackList.getBroadcastItem(i)
+                                .onCallNotificationRemoved(r.getSbn().getPackageName(),
+                                    r.getUser());
+                    }
+                }
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+            callbackList.finishBroadcast();
+        }
+    }
+
+    @GuardedBy("mNotificationLock")
+    void notifyCallNotificationEventListenerOnPosted(final NotificationRecord r) {
+        if (!r.getNotification().isStyle(Notification.CallStyle.class)) {
+            return;
+        }
+
+        synchronized (mCallNotificationEventCallbacks) {
+            ArrayMap<Integer, RemoteCallbackList<ICallNotificationEventCallback>>
+                    callbacksForPackage =
+                    mCallNotificationEventCallbacks.get(r.getSbn().getPackageName());
+            if (callbacksForPackage == null) {
+                return;
+            }
+
+            if (!r.getUser().equals(UserHandle.ALL)) {
+                broadcastToCallNotificationEventCallbacks(
+                        callbacksForPackage.get(r.getUser().getIdentifier()), r, true);
+                // Also notify the listeners registered for USER_ALL
+                broadcastToCallNotificationEventCallbacks(callbacksForPackage.get(USER_ALL), r,
+                        true);
+            } else {
+                // Notify listeners registered for any userId
+                for (RemoteCallbackList<ICallNotificationEventCallback> callbackList
+                        : callbacksForPackage.values()) {
+                    broadcastToCallNotificationEventCallbacks(callbackList, r, true);
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mNotificationLock")
+    void notifyCallNotificationEventListenerOnRemoved(final NotificationRecord r) {
+        if (!r.getNotification().isStyle(Notification.CallStyle.class)) {
+            return;
+        }
+
+        synchronized (mCallNotificationEventCallbacks) {
+            ArrayMap<Integer, RemoteCallbackList<ICallNotificationEventCallback>>
+                    callbacksForPackage =
+                    mCallNotificationEventCallbacks.get(r.getSbn().getPackageName());
+            if (callbacksForPackage == null) {
+                return;
+            }
+
+            if (!r.getUser().equals(UserHandle.ALL)) {
+                broadcastToCallNotificationEventCallbacks(
+                        callbacksForPackage.get(r.getUser().getIdentifier()), r, false);
+                // Also notify the listeners registered for USER_ALL
+                broadcastToCallNotificationEventCallbacks(callbacksForPackage.get(USER_ALL), r,
+                        false);
+            } else {
+                // Notify listeners registered for any userId
+                for (RemoteCallbackList<ICallNotificationEventCallback> callbackList
+                        : callbacksForPackage.values()) {
+                    broadcastToCallNotificationEventCallbacks(callbackList, r, false);
+                }
+            }
         }
     }
 

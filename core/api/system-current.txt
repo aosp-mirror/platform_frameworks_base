@@ -1040,11 +1040,18 @@ package android.app {
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public java.util.List<android.content.ComponentName> getEnabledNotificationListeners();
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
+    method @FlaggedApi("android.service.notification.callstyle_callback_api") @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.ACCESS_NOTIFICATIONS}) public void registerCallNotificationEventListener(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.NotificationManager.CallNotificationEventListener);
     method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
+    method @FlaggedApi("android.service.notification.callstyle_callback_api") @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.ACCESS_NOTIFICATIONS}) public void unregisterCallNotificationEventListener(@NonNull android.app.NotificationManager.CallNotificationEventListener);
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_CLOSE_NOTIFICATION_HANDLER_PANEL = "android.app.action.CLOSE_NOTIFICATION_HANDLER_PANEL";
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_OPEN_NOTIFICATION_HANDLER_PANEL = "android.app.action.OPEN_NOTIFICATION_HANDLER_PANEL";
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL = "android.app.action.TOGGLE_NOTIFICATION_HANDLER_PANEL";
+  }
+
+  @FlaggedApi("android.service.notification.callstyle_callback_api") public static interface NotificationManager.CallNotificationEventListener {
+    method @FlaggedApi("android.service.notification.callstyle_callback_api") public void onCallNotificationPosted(@NonNull String, @NonNull android.os.UserHandle);
+    method @FlaggedApi("android.service.notification.callstyle_callback_api") public void onCallNotificationRemoved(@NonNull String, @NonNull android.os.UserHandle);
   }
 
   public final class RemoteLockscreenValidationResult implements android.os.Parcelable {

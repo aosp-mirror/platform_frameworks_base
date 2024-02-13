@@ -163,6 +163,7 @@ import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.IActivityManager;
+import android.app.ICallNotificationEventCallback;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.IUriGrantsManager;
@@ -14590,6 +14591,120 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED, actual.getValue().getAction());
         assertFalse(actual.getValue().getBooleanExtra(EXTRA_KM_PRIVATE_NOTIFS_ALLOWED, true));
         assertFalse(mBinderService.getPrivateNotificationsAllowed());
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_CALLSTYLE_CALLBACK_API)
+    public void testCallNotificationListener_NotifiedOnPostCallStyle() throws Exception {
+        ICallNotificationEventCallback listener = mock(
+                ICallNotificationEventCallback.class);
+        when(listener.asBinder()).thenReturn(mock(IBinder.class));
+        mBinderService.registerCallNotificationEventListener(PKG, UserHandle.CURRENT, listener);
+        waitForIdle();
+
+        final UserHandle userHandle = UserHandle.getUserHandleForUid(mUid);
+        final NotificationRecord r = createAndPostCallStyleNotification(PKG, userHandle,
+                "testCallNotificationListener_NotifiedOnPostCallStyle");
+
+        verify(listener, times(1)).onCallNotificationPosted(PKG, userHandle);
+
+        mBinderService.cancelNotificationWithTag(PKG, PKG, r.getSbn().getTag(), r.getSbn().getId(),
+                r.getSbn().getUserId());
+        waitForIdle();
+
+        verify(listener, times(1)).onCallNotificationRemoved(PKG, userHandle);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_CALLSTYLE_CALLBACK_API)
+    public void testCallNotificationListener_NotNotifiedOnPostNonCallStyle() throws Exception {
+        ICallNotificationEventCallback listener = mock(
+                ICallNotificationEventCallback.class);
+        when(listener.asBinder()).thenReturn(mock(IBinder.class));
+        mBinderService.registerCallNotificationEventListener(PKG,
+                UserHandle.getUserHandleForUid(mUid), listener);
+        waitForIdle();
+
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId()).setSmallIcon(android.R.drawable.sym_def_app_icon);
+        final NotificationRecord r = createAndPostNotification(nb,
+                "testCallNotificationListener_NotNotifiedOnPostNonCallStyle");
+
+        verify(listener, never()).onCallNotificationPosted(anyString(), any());
+
+        mBinderService.cancelNotificationWithTag(PKG, PKG, r.getSbn().getTag(), r.getSbn().getId(),
+                r.getSbn().getUserId());
+        waitForIdle();
+
+        verify(listener, never()).onCallNotificationRemoved(anyString(), any());
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_CALLSTYLE_CALLBACK_API)
+    public void testCallNotificationListener_registerForUserAll_notifiedOnAnyUserId()
+            throws Exception {
+        ICallNotificationEventCallback listener = mock(
+                ICallNotificationEventCallback.class);
+        when(listener.asBinder()).thenReturn(mock(IBinder.class));
+        mBinderService.registerCallNotificationEventListener(PKG, UserHandle.ALL, listener);
+        waitForIdle();
+
+        final UserHandle otherUser = UserHandle.of(2);
+        final NotificationRecord r = createAndPostCallStyleNotification(PKG,
+                otherUser, "testCallNotificationListener_registerForUserAll_notifiedOnAnyUserId");
+
+        verify(listener, times(1)).onCallNotificationPosted(PKG, otherUser);
+
+        mBinderService.cancelNotificationWithTag(PKG, PKG, r.getSbn().getTag(), r.getSbn().getId(),
+                r.getSbn().getUserId());
+        waitForIdle();
+
+        verify(listener, times(1)).onCallNotificationRemoved(PKG, otherUser);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_CALLSTYLE_CALLBACK_API)
+    public void testCallNotificationListener_differentPackage_notNotified() throws Exception {
+        final String packageName = "package";
+        ICallNotificationEventCallback listener = mock(
+                ICallNotificationEventCallback.class);
+        when(listener.asBinder()).thenReturn(mock(IBinder.class));
+        mBinderService.registerCallNotificationEventListener(packageName, UserHandle.ALL, listener);
+        waitForIdle();
+
+        final NotificationRecord r = createAndPostCallStyleNotification(PKG,
+                UserHandle.of(mUserId),
+                "testCallNotificationListener_differentPackage_notNotified");
+
+        verify(listener, never()).onCallNotificationPosted(anyString(), any());
+
+        mBinderService.cancelNotificationWithTag(PKG, PKG, r.getSbn().getTag(), r.getSbn().getId(),
+                r.getSbn().getUserId());
+        waitForIdle();
+
+        verify(listener, never()).onCallNotificationRemoved(anyString(), any());
+    }
+
+    private NotificationRecord createAndPostCallStyleNotification(String packageName,
+            UserHandle userHandle, String testName) throws Exception {
+        Person person = new Person.Builder().setName("caller").build();
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setFlag(FLAG_USER_INITIATED_JOB, true)
+                .setStyle(Notification.CallStyle.forOngoingCall(
+                    person, mock(PendingIntent.class)))
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        StatusBarNotification sbn = new StatusBarNotification(packageName, packageName, 1,
+                testName, mUid, 0, nb.build(), userHandle, null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addEnqueuedNotification(r);
+        mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
+                r.getUid(), mPostNotificationTrackerFactory.newTracker(null)).run();
+        waitForIdle();
+
+        return mService.findNotificationLocked(
+                packageName, r.getSbn().getTag(), r.getSbn().getId(), r.getSbn().getUserId());
     }
 
     private NotificationRecord createAndPostNotification(Notification.Builder nb, String testName)
