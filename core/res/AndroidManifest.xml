@@ -5922,7 +5922,7 @@
     <permission android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to collect usage infomation about brightness slider changes.
+    <!-- Allows an application to collect usage information about brightness slider changes.
          <p>Not for use by third-party applications.</p>
          @hide
          @SystemApi
