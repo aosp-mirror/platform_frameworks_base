@@ -24,6 +24,7 @@ import android.annotation.TestApi;
  * @hide
  */
 @TestApi
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ProtoParseException extends RuntimeException {
 
     /**
