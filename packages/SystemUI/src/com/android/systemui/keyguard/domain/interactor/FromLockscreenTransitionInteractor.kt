@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
+import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
@@ -208,7 +209,10 @@ constructor(
                                     }
                                 transitionRepository.updateTransition(
                                     id,
-                                    1f - shadeExpansion,
+                                    // This maps the shadeExpansion to a much faster curve, to match
+                                    // the existing logic
+                                    1f -
+                                        MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, shadeExpansion),
                                     nextState,
                                 )
 

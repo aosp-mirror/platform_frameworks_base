@@ -212,6 +212,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mKosmos.getDeviceUnlockedInteractor());
 
         FakeSceneContainerFlags sceneContainerFlags = new FakeSceneContainerFlags();
+        KeyguardTransitionInteractor keyguardTransitionInteractor =
+                mKosmos.getKeyguardTransitionInteractor();
         KeyguardInteractor keyguardInteractor = new KeyguardInteractor(
                 mKeyguardRepository,
                 new FakeCommandQueue(),
@@ -220,10 +222,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 new FakeKeyguardBouncerRepository(),
                 new ConfigurationInteractor(configurationRepository),
                 mShadeRepository,
+                keyguardTransitionInteractor,
                 () -> sceneInteractor);
-
-        KeyguardTransitionInteractor keyguardTransitionInteractor =
-                mKosmos.getKeyguardTransitionInteractor();
 
         mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();
         mFromPrimaryBouncerTransitionInteractor =

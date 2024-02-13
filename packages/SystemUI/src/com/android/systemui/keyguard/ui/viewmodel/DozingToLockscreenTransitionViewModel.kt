@@ -50,6 +50,8 @@ constructor(
             onCancel = { 0f },
         )
 
+    val lockscreenAlpha: Flow<Float> = shortcutsAlpha
+
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(1f)
 }

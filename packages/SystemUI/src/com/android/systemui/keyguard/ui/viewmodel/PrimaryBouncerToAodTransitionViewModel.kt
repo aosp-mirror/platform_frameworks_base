@@ -57,6 +57,12 @@ constructor(
             }
         }
 
+    val lockscreenAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = FromPrimaryBouncerTransitionInteractor.TO_AOD_DURATION,
+            onStep = { it }
+        )
+
     override val deviceEntryParentViewAlpha: Flow<Float> =
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest {
             isUdfpsEnrolledAndEnabled ->
