@@ -420,3 +420,12 @@ flag {
     }
 }
 
+flag {
+   name: "get_connected_device_name_unsynchronized"
+   namespace: "systemui"
+   description: "Decide whether to fetch the connected bluetooth device name outside a synchronized block."
+   bug: "323995015"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+     }
+}
