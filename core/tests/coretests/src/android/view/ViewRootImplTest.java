@@ -660,10 +660,22 @@ public class ViewRootImplTest {
     public void votePreferredFrameRate_voteFrameRateCategory_aggregate() {
         View view = new View(sContext);
         attachViewToWindow(view);
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
         sInstrumentation.runOnMainSync(() -> {
-            ViewRootImpl viewRootImpl = view.getViewRootImpl();
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
                     FRAME_RATE_CATEGORY_NO_PREFERENCE);
+        });
+
+        // reset the frame rate category counts
+        for (int i = 0; i < 5; i++) {
+            sInstrumentation.runOnMainSync(() -> {
+                view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
+                view.invalidate();
+            });
+            sInstrumentation.waitForIdleSync();
+        }
+
+        sInstrumentation.runOnMainSync(() -> {
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_LOW);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_LOW);
             viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL);
@@ -721,6 +733,18 @@ public class ViewRootImplTest {
         sInstrumentation.runOnMainSync(() -> {
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
                     FRAME_RATE_CATEGORY_NO_PREFERENCE);
+        });
+
+        // reset the frame rate category counts
+        for (int i = 0; i < 5; i++) {
+            sInstrumentation.runOnMainSync(() -> {
+                view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
+                view.invalidate();
+            });
+            sInstrumentation.waitForIdleSync();
+        }
+
+        sInstrumentation.runOnMainSync(() -> {
             view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_LOW);
             view.invalidate();
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_LOW);
@@ -847,7 +871,18 @@ public class ViewRootImplTest {
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
                     FRAME_RATE_CATEGORY_NO_PREFERENCE);
             assertEquals(viewRootImpl.getPreferredFrameRate(), frameRate, 0.1);
+        });
 
+        // reset the frame rate category counts
+        for (int i = 0; i < 5; i++) {
+            sInstrumentation.runOnMainSync(() -> {
+                view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
+                view.invalidate();
+            });
+            sInstrumentation.waitForIdleSync();
+        }
+
+        sInstrumentation.runOnMainSync(() -> {
             view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_LOW);
             view.invalidate();
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_LOW);
@@ -882,18 +917,6 @@ public class ViewRootImplTest {
 
         ViewRootImpl viewRootImpl = view.getViewRootImpl();
 
-        // Frequent update
-        sInstrumentation.runOnMainSync(() -> {
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
-            view.invalidate();
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
-            view.invalidate();
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
-            view.invalidate();
-            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
-        });
-
         // In transistion from frequent update to infrequent update
         Thread.sleep(delay);
         sInstrumentation.runOnMainSync(() -> {
@@ -901,9 +924,28 @@ public class ViewRootImplTest {
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
         });
 
+        // reset the frame rate category counts
+        for (int i = 0; i < 5; i++) {
+            sInstrumentation.runOnMainSync(() -> {
+                view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
+                view.invalidate();
+            });
+            sInstrumentation.waitForIdleSync();
+        }
+
+        // In transistion from frequent update to infrequent update
+        Thread.sleep(delay);
+        sInstrumentation.runOnMainSync(() -> {
+            view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+        });
+
         // Infrequent update
         Thread.sleep(delay);
         sInstrumentation.runOnMainSync(() -> {
+            view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_DEFAULT);
             view.invalidate();
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_NORMAL);
         });
