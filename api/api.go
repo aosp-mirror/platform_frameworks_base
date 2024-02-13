@@ -79,7 +79,45 @@ func registerBuildComponents(ctx android.RegistrationContext) {
 
 var PrepareForCombinedApisTest = android.FixtureRegisterWithContext(registerBuildComponents)
 
+func (a *CombinedApis) apiFingerprintStubDeps() []string {
+	ret := []string{}
+	ret = append(
+		ret,
+		transformArray(a.properties.Bootclasspath, "", ".stubs")...,
+	)
+	ret = append(
+		ret,
+		transformArray(a.properties.Bootclasspath, "", ".stubs.system")...,
+	)
+	ret = append(
+		ret,
+		transformArray(a.properties.Bootclasspath, "", ".stubs.module_lib")...,
+	)
+	ret = append(
+		ret,
+		transformArray(a.properties.System_server_classpath, "", ".stubs.system_server")...,
+	)
+	return ret
+}
+
+func (a *CombinedApis) DepsMutator(ctx android.BottomUpMutatorContext) {
+	ctx.AddDependency(ctx.Module(), nil, a.apiFingerprintStubDeps()...)
+}
+
 func (a *CombinedApis) GenerateAndroidBuildActions(ctx android.ModuleContext) {
+	ctx.WalkDeps(func(child, parent android.Module) bool {
+		if _, ok := child.(java.AndroidLibraryDependency); ok && child.Name() != "framework-res" {
+			// Stubs of BCP and SSCP libraries should not have any dependencies on apps
+			// This check ensures that we do not run into circular dependencies when UNBUNDLED_BUILD_TARGET_SDK_WITH_API_FINGERPRINT=true
+			ctx.ModuleErrorf(
+				"Module %s is not a valid dependency of the stub library %s\n."+
+					"If this dependency has been added via `libs` of java_sdk_library, please move it to `impl_only_libs`\n",
+				child.Name(), parent.Name())
+			return false // error detected
+		}
+		return true
+	})
+
 }
 
 type genruleProps struct {
