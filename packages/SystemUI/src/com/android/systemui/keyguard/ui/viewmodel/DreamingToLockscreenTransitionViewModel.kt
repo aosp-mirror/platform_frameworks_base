@@ -30,9 +30,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapLatest
 
 /**
  * Breaks down DREAMING->LOCKSCREEN transition into discrete steps for corresponding views to
@@ -107,14 +105,6 @@ constructor(
             onCancel = { 0f },
         )
 
-    val deviceEntryBackgroundViewAlpha =
-        deviceEntryUdfpsInteractor.isUdfpsSupported.flatMapLatest { isUdfps ->
-            if (isUdfps) {
-                // immediately show; will fade in with deviceEntryParentViewAlpha
-                transitionAnimation.immediatelyTransitionTo(1f)
-            } else {
-                emptyFlow()
-            }
-        }
+    val deviceEntryBackgroundViewAlpha = transitionAnimation.immediatelyTransitionTo(1f)
     override val deviceEntryParentViewAlpha = lockscreenAlpha
 }
