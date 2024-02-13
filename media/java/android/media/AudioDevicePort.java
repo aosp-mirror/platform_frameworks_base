@@ -31,7 +31,7 @@ import java.util.List;
  * device at the boundary of the audio system.
  * In addition to base audio port attributes, the device descriptor contains:
  * - the device type (e.g AudioManager.DEVICE_OUT_SPEAKER)
- * - the device address (e.g MAC adddress for AD2P sink).
+ * - the device address (e.g MAC address for AD2P sink).
  * @see AudioPort
  * @hide
  */
