@@ -3056,6 +3056,14 @@ package android.service.notification {
     method @Deprecated public boolean isBound();
   }
 
+  @FlaggedApi("android.app.modes_api") public final class ZenDeviceEffects implements android.os.Parcelable {
+    method @NonNull public java.util.Set<java.lang.String> getExtraEffects();
+  }
+
+  @FlaggedApi("android.app.modes_api") public static final class ZenDeviceEffects.Builder {
+    method @NonNull public android.service.notification.ZenDeviceEffects.Builder setExtraEffects(@NonNull java.util.Set<java.lang.String>);
+  }
+
   public final class ZenPolicy implements android.os.Parcelable {
     method @FlaggedApi("android.app.modes_api") @NonNull public android.service.notification.ZenPolicy overwrittenWith(@Nullable android.service.notification.ZenPolicy);
   }
