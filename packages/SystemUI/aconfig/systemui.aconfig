@@ -519,3 +519,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "dedicated_notif_inflation_thread"
+    namespace: "systemui"
+    description: "Create a separate background thread for inflating notifications"
+    bug: "308967184"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
