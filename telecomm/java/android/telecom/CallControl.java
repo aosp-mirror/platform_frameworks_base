@@ -293,11 +293,49 @@ public final class CallControl {
         try {
             mServerInterface.setMuteState(isMuted,
                     new CallControlResultReceiver("requestMuteState", executor, callback));
-
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
+
+     /**
+     * Request a new video state for the ongoing call. This can only be changed if the application
+     * has registered a {@link PhoneAccount} with the
+     * {@link PhoneAccount#CAPABILITY_SUPPORTS_VIDEO_CALLING} and set the
+     * {@link CallAttributes#SUPPORTS_VIDEO_CALLING} when adding the call via
+     * {@link TelecomManager#addCall(CallAttributes, Executor, OutcomeReceiver,
+     *                                                      CallControlCallback, CallEventCallback)}
+     *
+     * @param videoState to report to Telecom. To see the valid argument to pass,
+      *                   see {@link CallAttributes.CallType}.
+     * @param executor   The {@link Executor} on which the {@link OutcomeReceiver} callback
+     *                   will be called on.
+     * @param callback   that will be completed on the Telecom side that details success or failure
+     *                   of the requested operation.
+     *
+     *                   {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
+     *                   switched the video state.
+     *
+     *                   {@link OutcomeReceiver#onError} will be called if Telecom has failed to set
+     *                   the new video state.  A {@link CallException} will be passed
+     *                   that details why the operation failed.
+     * @throws IllegalArgumentException if the argument passed for videoState is invalid.  To see a
+     * list of valid states, see {@link CallAttributes.CallType}.
+     */
+     @FlaggedApi(Flags.FLAG_TRANSACTIONAL_VIDEO_STATE)
+     public void requestVideoState(@CallAttributes.CallType int videoState,
+             @CallbackExecutor @NonNull Executor executor,
+             @NonNull OutcomeReceiver<Void, CallException> callback) {
+         validateVideoState(videoState);
+         Objects.requireNonNull(executor);
+         Objects.requireNonNull(callback);
+         try {
+             mServerInterface.requestVideoState(videoState, mCallId,
+                     new CallControlResultReceiver("requestVideoState", executor, callback));
+         } catch (RemoteException e) {
+             throw e.rethrowAsRuntimeException();
+         }
+     }
 
     /**
      * Raises an event to the {@link android.telecom.InCallService} implementations tracking this
