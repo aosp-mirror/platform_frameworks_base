@@ -17,6 +17,7 @@
 package com.android.systemui.communal.ui.compose
 
 import android.appwidget.AppWidgetHostView
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.SizeF
 import android.widget.FrameLayout
@@ -26,6 +27,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -77,6 +79,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -85,8 +89,10 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -101,6 +107,8 @@ import androidx.compose.ui.window.Popup
 import androidx.core.view.setPadding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
+import com.android.compose.ui.graphics.painter.rememberDrawablePainter
+import com.android.internal.R.dimen.system_app_widget_background_radius
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.ui.compose.Dimensions.CardOutlineWidth
@@ -178,7 +186,7 @@ fun CommunalHub(
                             // not display this button.
                             if (
                                 index == null ||
-                                    communalContent[index].isWidget() ||
+                                    communalContent[index].isWidgetContent() ||
                                     communalContent[index] is CommunalContentModel.CtaTileInViewMode
                             ) {
                                 isButtonToEditWidgetsShowing = true
@@ -330,7 +338,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                 DraggableItem(
                     dragDropState = dragDropState,
                     selected = selected,
-                    enabled = list[index] is CommunalContentModel.Widget,
+                    enabled = list[index].isWidgetContent(),
                     index = index,
                 ) { isDragging ->
                     CommunalContent(
@@ -539,9 +547,11 @@ private fun CommunalContent(
     widgetConfigurator: WidgetConfigurator? = null,
 ) {
     when (model) {
-        is CommunalContentModel.Widget ->
+        is CommunalContentModel.WidgetContent.Widget ->
             WidgetContent(viewModel, model, size, selected, widgetConfigurator, modifier)
         is CommunalContentModel.WidgetPlaceholder -> HighlightedItem(modifier)
+        is CommunalContentModel.WidgetContent.DisabledWidget ->
+            DisabledWidgetPlaceholder(model, modifier)
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
         is CommunalContentModel.CtaTileInEditMode ->
             CtaTileInEditModeContent(modifier, onOpenWidgetPicker)
@@ -672,7 +682,7 @@ private fun CtaTileInEditModeContent(
 @Composable
 private fun WidgetContent(
     viewModel: BaseCommunalViewModel,
-    model: CommunalContentModel.Widget,
+    model: CommunalContentModel.WidgetContent.Widget,
     size: SizeF,
     selected: Boolean,
     widgetConfigurator: WidgetConfigurator?,
@@ -690,8 +700,9 @@ private fun WidgetContent(
                         .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
                         .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
                 // Remove the extra padding applied to AppWidgetHostView to allow widgets to
-                // occupy the entire box. The added padding is now adjusted to leave only sufficient
-                // space for displaying the outline around the box when the widget is selected.
+                // occupy the entire box. The added padding is now adjusted to leave only
+                // sufficient space for displaying the outline around the box when the widget
+                // is selected.
                 view.setPadding(paddingInPx)
                 view
             },
@@ -716,7 +727,7 @@ private fun WidgetContent(
 @Composable
 fun WidgetConfigureButton(
     visible: Boolean,
-    model: CommunalContentModel.Widget,
+    model: CommunalContentModel.WidgetContent.Widget,
     modifier: Modifier = Modifier,
     widgetConfigurator: WidgetConfigurator,
 ) {
@@ -747,6 +758,38 @@ fun WidgetConfigureButton(
                 modifier = Modifier.padding(12.dp)
             )
         }
+    }
+}
+
+@Composable
+fun DisabledWidgetPlaceholder(
+    model: CommunalContentModel.WidgetContent.DisabledWidget,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val appInfo = model.appInfo
+    val icon: Icon =
+        if (appInfo == null || appInfo.icon == 0) {
+            Icon.createWithResource(context, android.R.drawable.sym_def_app_icon)
+        } else {
+            Icon.createWithResource(appInfo.packageName, appInfo.icon)
+        }
+
+    Column(
+        modifier =
+            modifier.background(
+                MaterialTheme.colorScheme.surfaceVariant,
+                RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+            ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            painter = rememberDrawablePainter(icon.loadDrawable(context)),
+            contentDescription = stringResource(R.string.icon_description_for_disabled_widget),
+            modifier = Modifier.size(48.dp),
+            colorFilter = ColorFilter.colorMatrix(Colors.DisabledColorFilter),
+        )
     }
 }
 
@@ -851,7 +894,7 @@ private fun firstIndexAtOffset(gridState: LazyGridState, offset: Offset): Int? =
 
 /** Returns the key of item if it's editable at the given index. Only widget is editable. */
 private fun keyAtIndexIfEditable(list: List<CommunalContentModel>, index: Int): String? =
-    if (index in list.indices && list[index].isWidget()) list[index].key else null
+    if (index in list.indices && list[index].isWidgetContent()) list[index].key else null
 
 data class ContentPaddingInPx(val start: Float, val top: Float) {
     fun toOffset(): Offset = Offset(start, top)
@@ -878,6 +921,31 @@ object Dimensions {
             horizontal = ToolbarButtonPaddingHorizontal,
         )
     val IconSize = 48.dp
+}
+
+private object Colors {
+    val DisabledColorFilter by lazy { disabledColorMatrix() }
+
+    /** Returns the disabled image filter. Ported over from [DisableImageView]. */
+    private fun disabledColorMatrix(): ColorMatrix {
+        val brightnessMatrix = ColorMatrix()
+        val brightnessAmount = 0.5f
+        val brightnessRgb = (255 * brightnessAmount).toInt().toFloat()
+        // Brightness: C-new = C-old*(1-amount) + amount
+        val scale = 1f - brightnessAmount
+        val mat = brightnessMatrix.values
+        mat[0] = scale
+        mat[6] = scale
+        mat[12] = scale
+        mat[4] = brightnessRgb
+        mat[9] = brightnessRgb
+        mat[14] = brightnessRgb
+
+        return ColorMatrix().apply {
+            setToSaturation(0F)
+            timesAssign(brightnessMatrix)
+        }
+    }
 }
 
 /** The resource id of communal hub accessible from UiAutomator. */

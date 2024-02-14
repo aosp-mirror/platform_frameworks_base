@@ -24,6 +24,7 @@ import com.android.systemui.communal.data.repository.CommunalPrefsRepository
 import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalContentSize.FULL
 import com.android.systemui.communal.shared.model.CommunalContentSize.HALF
@@ -278,14 +279,25 @@ constructor(
         }
 
     /** A list of widget content to be displayed in the communal hub. */
-    val widgetContent: Flow<List<CommunalContentModel.Widget>> =
-        widgetRepository.communalWidgets.map { widgets ->
-            filterWidgetsByExistingUsers(widgets).map Widget@{ widget ->
-                return@Widget CommunalContentModel.Widget(
-                    appWidgetId = widget.appWidgetId,
-                    providerInfo = widget.providerInfo,
-                    appWidgetHost = appWidgetHost,
-                )
+    val widgetContent: Flow<List<WidgetContent>> =
+        combine(
+            widgetRepository.communalWidgets.map { filterWidgetsByExistingUsers(it) },
+            communalSettingsInteractor.communalWidgetCategories
+        ) { widgets, allowedCategories ->
+            widgets.map { widget ->
+                if (widget.providerInfo.widgetCategory and allowedCategories != 0) {
+                    // At least one category this widget specified is allowed, so show it
+                    WidgetContent.Widget(
+                        appWidgetId = widget.appWidgetId,
+                        providerInfo = widget.providerInfo,
+                        appWidgetHost = appWidgetHost,
+                    )
+                } else {
+                    WidgetContent.DisabledWidget(
+                        appWidgetId = widget.appWidgetId,
+                        providerInfo = widget.providerInfo,
+                    )
+                }
             }
         }
 
