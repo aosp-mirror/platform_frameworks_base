@@ -798,6 +798,10 @@ public class LauncherAppsService extends SystemService {
         public ParceledListSlice getShortcutConfigActivities(
                 String callingPackage, String packageName, UserHandle user)
                 throws RemoteException {
+            // Not supported for user-profiles with items restricted on home screen.
+            if (!mShortcutServiceInternal.areShortcutsSupportedOnHomeScreen(user.getIdentifier())) {
+                return null;
+            }
             return queryActivitiesForUser(callingPackage,
                     new Intent(Intent.ACTION_CREATE_SHORTCUT).setPackage(packageName), user);
         }
@@ -1256,6 +1260,14 @@ public class LauncherAppsService extends SystemService {
         @Override
         public void pinShortcuts(String callingPackage, String packageName, List<String> ids,
                 UserHandle targetUser) {
+            if (!mShortcutServiceInternal
+                    .areShortcutsSupportedOnHomeScreen(targetUser.getIdentifier())) {
+                // Requires strict ACCESS_SHORTCUTS permission for user-profiles with items
+                // restricted on home screen.
+                ensureStrictAccessShortcutsPermission(callingPackage);
+            } else {
+                ensureShortcutPermission(callingPackage);
+            }
             ensureShortcutPermission(callingPackage);
             if (!canAccessProfile(targetUser.getIdentifier(), "Cannot pin shortcuts")) {
                 return;
