@@ -612,10 +612,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void refreshSecureSurfaceState() {
-        forAllWindows((w) -> {
-            if (w.mHasSurface) {
-                w.setSecureLocked(w.isSecureLocked());
-            }
+        forAllWindows(w -> {
+            w.setSecureLocked(w.isSecureLocked());
         }, true /* traverseTopToBottom */);
     }
 
