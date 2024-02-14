@@ -73,6 +73,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.AlwaysOnHotwordDetector;
+import android.service.voice.HotwordAudioStream;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetectionServiceFailure;
@@ -81,6 +83,7 @@ import android.service.voice.HotwordRejectedResult;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.VisualQueryDetectionServiceFailure;
+import android.service.voice.VoiceInteractionManagerInternal.WearableHotwordDetectionCallback;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
@@ -405,7 +408,83 @@ abstract class DetectorSession {
                 audioStream,
                 audioFormat,
                 options,
-                callback);
+                callback,
+                /* shouldCloseAudioStreamWithDelayOnDetect= */ true);
+    }
+
+    void startListeningFromWearableLocked(
+            ParcelFileDescriptor audioStream,
+            AudioFormat audioFormat,
+            PersistableBundle options,
+            WearableHotwordDetectionCallback wearableCallback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromWearableLocked");
+        }
+        IMicrophoneHotwordDetectionVoiceInteractionCallback voiceInteractionCallback =
+                new IMicrophoneHotwordDetectionVoiceInteractionCallback() {
+                    @Override
+                    public void onDetected(
+                            HotwordDetectedResult hotwordDetectedResult,
+                            AudioFormat audioFormatFromCallback,
+                            ParcelFileDescriptor audioStreamFromCallback) {
+                        wearableCallback.onDetected();
+                        try {
+                            // This uses the DSP hotword code path to send the result to
+                            // AlwaysOnHotwordDetector. DSP trigger and wearable trigger operates
+                            // independently.
+                            mCallback.onKeyphraseDetectedFromExternalSource(hotwordDetectedResult);
+                        } catch (RemoteException ex) {
+                            Slog.w(
+                                    TAG,
+                                    "RemoteException when sending HotwordDetectedResult to"
+                                        + " VoiceInteractionService.",
+                                    ex);
+                            wearableCallback.onError(
+                                    "RemoteException when sending HotwordDetectedResult to"
+                                        + " VoiceInteractionService.");
+                            notifyOnDetectorRemoteException();
+                        }
+
+                        // Close the local copies of the file descriptors after sending them to
+                        // another process.
+                        for (HotwordAudioStream resultAudioStream :
+                                hotwordDetectedResult.getAudioStreams()) {
+                            try {
+                                resultAudioStream.getAudioStreamParcelFileDescriptor().close();
+                            } catch (IOException ex) {
+                                Slog.i(
+                                        TAG,
+                                        "Unable to close audio stream parcel file descriptor,",
+                                        ex);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onHotwordDetectionServiceFailure(
+                            HotwordDetectionServiceFailure hotwordDetectionServiceFailure) {
+                        wearableCallback.onError(
+                                "onHotwordDetectionServiceFailure: "
+                                        + hotwordDetectionServiceFailure);
+                    }
+
+                    @Override
+                    public void onRejected(HotwordRejectedResult hotwordRejectedResult) {
+                        wearableCallback.onRejected();
+                    }
+
+                    @Override
+                    public IBinder asBinder() {
+                        // This callback will only be used locally within the same process.
+                        return null;
+                    }
+                };
+        handleExternalSourceHotwordDetectionLocked(
+                audioStream,
+                audioFormat,
+                options,
+                voiceInteractionCallback,
+                /* shouldCloseAudioStreamWithDelayOnDetect= */ false);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -413,7 +492,8 @@ abstract class DetectorSession {
             ParcelFileDescriptor audioStream,
             AudioFormat audioFormat,
             @Nullable PersistableBundle options,
-            IMicrophoneHotwordDetectionVoiceInteractionCallback callback) {
+            IMicrophoneHotwordDetectionVoiceInteractionCallback callback,
+            boolean shouldCloseAudioStreamWithDelayOnDetect) {
         if (DEBUG) {
             Slog.d(TAG, "#handleExternalSourceHotwordDetectionLocked");
         }
@@ -482,12 +562,22 @@ abstract class DetectorSession {
         // TODO: what if we cancelled and started a new one?
         mRemoteDetectionService.run(
                 service -> {
+                    PersistableBundle optionsToSend = options;
+                    if (android.app.wearable.Flags.enableHotwordWearableSensingApi()) {
+                        if (optionsToSend == null) {
+                            optionsToSend = new PersistableBundle();
+                        }
+                        optionsToSend.putBoolean(
+                                HotwordDetectionService
+                                        .KEY_SYSTEM_WILL_CLOSE_AUDIO_STREAM_AFTER_CALLBACK,
+                                shouldCloseAudioStreamWithDelayOnDetect);
+                    }
                     service.detectFromMicrophoneSource(
                             serviceAudioSource,
                             // TODO: consider making a proxy callback + copy of audio format
                             AUDIO_SOURCE_EXTERNAL,
                             audioFormat,
-                            options,
+                            optionsToSend,
                             new IDspHotwordDetectionCallback.Stub() {
                                 @Override
                                 public void onRejected(HotwordRejectedResult result)
@@ -530,18 +620,23 @@ abstract class DetectorSession {
                                                 getDetectorType(),
                                                 METRICS_EXTERNAL_SOURCE_DETECTED,
                                                 mVoiceInteractionServiceUid);
-                                        mScheduledExecutorService.schedule(
-                                                () -> {
-                                                    bestEffortClose(serviceAudioSink, audioSource);
-                                                },
-                                                EXTERNAL_HOTWORD_CLEANUP_MILLIS,
-                                                TimeUnit.MILLISECONDS);
-
+                                        if (shouldCloseAudioStreamWithDelayOnDetect) {
+                                            mScheduledExecutorService.schedule(
+                                                    () -> {
+                                                        bestEffortClose(
+                                                                serviceAudioSink, audioSource);
+                                                    },
+                                                    EXTERNAL_HOTWORD_CLEANUP_MILLIS,
+                                                    TimeUnit.MILLISECONDS);
+                                        }
                                         try {
                                             enforcePermissionsForDataDelivery();
                                         } catch (SecurityException e) {
-                                            Slog.w(TAG, "Ignoring #onDetected due to a "
-                                                    + "SecurityException", e);
+                                            Slog.w(
+                                                    TAG,
+                                                    "Ignoring #onDetected due to a "
+                                                            + "SecurityException",
+                                                    e);
                                             HotwordMetricsLogger.writeDetectorEvent(
                                                     getDetectorType(),
                                                     EXTERNAL_SOURCE_DETECT_SECURITY_EXCEPTION,
@@ -560,11 +655,16 @@ abstract class DetectorSession {
                                         }
                                         HotwordDetectedResult newResult;
                                         try {
-                                            newResult = mHotwordAudioStreamCopier
-                                                    .startCopyingAudioStreams(triggerResult);
+                                            newResult =
+                                                    mHotwordAudioStreamCopier
+                                                            .startCopyingAudioStreams(
+                                                                    triggerResult);
                                         } catch (IOException e) {
-                                            Slog.w(TAG, "Ignoring #onDetected due to a "
-                                                    + "IOException", e);
+                                            Slog.w(
+                                                    TAG,
+                                                    "Ignoring #onDetected due to a "
+                                                            + "IOException",
+                                                    e);
                                             // TODO: Write event
                                             try {
                                                 callback.onHotwordDetectionServiceFailure(
@@ -578,7 +678,12 @@ abstract class DetectorSession {
                                             return;
                                         }
                                         try {
-                                            callback.onDetected(newResult, /* audioFormat= */ null,
+                                            // The ParcelFileDescriptors in newResult might be
+                                            // closed after this call. Parcelling newResult can
+                                            // throw an exception
+                                            callback.onDetected(
+                                                    newResult,
+                                                    /* audioFormat= */ null,
                                                     /* audioStream= */ null);
                                         } catch (RemoteException e) {
                                             notifyOnDetectorRemoteException();
@@ -588,8 +693,7 @@ abstract class DetectorSession {
                                                 + HotwordDetectedResult.getUsageSize(newResult)
                                                 + " bits from hotword trusted process");
                                         if (mDebugHotwordLogging) {
-                                            Slog.i(TAG,
-                                                    "Egressed detected result: " + newResult);
+                                            Slog.i(TAG, "Egressed detected result: " + newResult);
                                         }
                                     }
                                 }

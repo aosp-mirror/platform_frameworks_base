@@ -16,6 +16,7 @@
 
 package com.android.server.voiceinteraction;
 
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
@@ -74,6 +75,7 @@ import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
+import android.service.voice.VoiceInteractionManagerInternal.WearableHotwordDetectionCallback;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.service.voice.VoiceInteractionSession;
@@ -318,6 +320,46 @@ public class VoiceInteractionManagerService extends SystemService {
                     userId);
             mServiceStub.mRoleObserver.onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT,
                                                 UserHandle.of(userId));
+        }
+
+        @Override
+        public void startListeningFromWearable(
+                ParcelFileDescriptor audioStreamFromWearable,
+                AudioFormat audioFormatFromWearable,
+                PersistableBundle options,
+                ComponentName targetVisComponentName,
+                int userId,
+                WearableHotwordDetectionCallback callback) {
+            Slog.d(TAG, "#startListeningFromWearable");
+            VoiceInteractionManagerServiceImpl impl = mServiceStub.mImpl;
+            if (impl == null) {
+                callback.onError(
+                        "Unable to start listening from wearable because the service impl is"
+                                + " null.");
+                return;
+            }
+            if (targetVisComponentName != null && !targetVisComponentName.equals(impl.mComponent)) {
+                callback.onError(
+                        TextUtils.formatSimple(
+                                "Unable to start listening from wearable because the target"
+                                    + " VoiceInteractionService %s is different from the current"
+                                    + " VoiceInteractionService %s",
+                                targetVisComponentName, impl.mComponent));
+                return;
+            }
+            if (userId != impl.mUser) {
+                callback.onError(
+                        TextUtils.formatSimple(
+                                "Unable to start listening from wearable because the target userId"
+                                    + " %s is different from the current"
+                                    + " VoiceInteractionManagerServiceImpl's userId %s",
+                                userId, impl.mUser));
+                return;
+            }
+            synchronized (mServiceStub) {
+                impl.startListeningFromWearableLocked(
+                        audioStreamFromWearable, audioFormatFromWearable, options, callback);
+            }
         }
     }
 
@@ -1706,7 +1748,10 @@ public class VoiceInteractionManagerService extends SystemService {
                     if (keyphrase.equals(phrase.getText())) {
                         ArraySet<Locale> locales = new ArraySet<>();
                         locales.add(phrase.getLocale());
-                        return new KeyphraseMetadata(phrase.getId(), phrase.getText(), locales,
+                        return new KeyphraseMetadata(
+                                phrase.getId(),
+                                phrase.getText(),
+                                locales,
                                 phrase.getRecognitionModes());
                     }
                 }

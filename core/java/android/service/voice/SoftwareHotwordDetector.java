@@ -223,6 +223,13 @@ class SoftwareHotwordDetector extends AbstractDetector {
         }
 
         @Override
+        public void onKeyphraseDetectedFromExternalSource(HotwordDetectedResult result) {
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onKeyphraseDetectedFromExternalSource event");
+            }
+        }
+
+        @Override
         public void onGenericSoundTriggerDetected(
                 SoundTrigger.GenericRecognitionEvent recognitionEvent) throws RemoteException {
             if (DEBUG) {

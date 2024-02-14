@@ -33,6 +33,10 @@ oneway interface IWearableSensingService {
     void provideData(in PersistableBundle data, in SharedMemory sharedMemory, in RemoteCallback callback);
     void registerDataRequestObserver(int dataType, in RemoteCallback dataRequestCallback, int dataRequestObserverId, in String packageName, in RemoteCallback statusCallback);
     void unregisterDataRequestObserver(int dataType, int dataRequestObserverId, in String packageName, in RemoteCallback statusCallback);
+    void startHotwordRecognition(in RemoteCallback wearableHotwordCallback, in RemoteCallback statusCallback);
+    void stopHotwordRecognition(in RemoteCallback statusCallback);
+    void onValidatedByHotwordDetectionService();
+    void stopActiveHotwordAudio();
     void startDetection(in AmbientContextEventRequest request, in String packageName,
             in RemoteCallback detectionResultCallback, in RemoteCallback statusCallback);
     void stopDetection(in String packageName);
