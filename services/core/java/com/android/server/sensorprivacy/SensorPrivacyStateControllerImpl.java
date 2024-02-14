@@ -16,8 +16,12 @@
 
 package com.android.server.sensorprivacy;
 
+import static android.hardware.SensorPrivacyManager.StateTypes.DISABLED;
+
+import android.annotation.FlaggedApi;
 import android.os.Handler;
 
+import com.android.internal.camera.flags.Flags;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.internal.util.function.pooled.PooledLambda;
 
@@ -78,6 +82,33 @@ class SensorPrivacyStateControllerImpl extends SensorPrivacyStateController {
             }
         }
         if (lastState.setEnabled(enabled)) {
+            notifyStateChangeLocked(toggleType, userId, sensor, lastState);
+            sendSetStateCallback(callbackHandler, callback, true);
+            return;
+        }
+        sendSetStateCallback(callbackHandler, callback, false);
+    }
+
+    @Override
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    void setStateLocked(int toggleType, int userId, int sensor, int state,
+            Handler callbackHandler, SetStateResultCallback callback) {
+        // Changing the SensorState's mEnabled updates the timestamp of its last change.
+        // A nonexistent state -> unmuted should not set the timestamp.
+        SensorState lastState = mPersistedState.getState(toggleType, userId, sensor);
+        if (lastState == null) {
+            if (state == DISABLED) {
+                sendSetStateCallback(callbackHandler, callback, false);
+                return;
+            } else {
+                SensorState sensorState = new SensorState(state);
+                mPersistedState.setState(toggleType, userId, sensor, sensorState);
+                notifyStateChangeLocked(toggleType, userId, sensor, sensorState);
+                sendSetStateCallback(callbackHandler, callback, true);
+                return;
+            }
+        }
+        if (lastState.setState(state)) {
             notifyStateChangeLocked(toggleType, userId, sensor, lastState);
             sendSetStateCallback(callbackHandler, callback, true);
             return;
