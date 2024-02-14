@@ -18,6 +18,7 @@ package android.view;
 
 import static android.content.res.Resources.ID_NULL;
 import static android.os.Trace.TRACE_TAG_APP;
+import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
 import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
@@ -6995,7 +6996,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #setCredentialManagerRequest
      */
-    @FlaggedApi("autofill_credman_dev_integration")
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     public void clearCredentialManagerRequest() {
         if (Log.isLoggable(AUTOFILL_LOG_TAG, Log.VERBOSE)) {
             Log.v(AUTOFILL_LOG_TAG, "clearCredentialManagerRequest called");
@@ -7027,7 +7028,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param callback to be invoked when either a response or an exception needs to be
      *                 propagated for the given view
      */
-    @FlaggedApi("autofill_credman_dev_integration")
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     public void setCredentialManagerRequest(@NonNull GetCredentialRequest request,
             @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
         Preconditions.checkNotNull(request, "request must not be null");
@@ -9944,7 +9945,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return The credential request associated with this View.
      */
-    @FlaggedApi("autofill_credman_dev_integration")
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     @Nullable
     public final GetCredentialRequest getCredentialManagerRequest() {
         if (mViewCredentialHandler == null) {
@@ -9968,7 +9969,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The callback associated with this view that will be invoked on a response from
      * {@link CredentialManager} .
      */
-    @FlaggedApi("autofill_credman_dev_integration")
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     @Nullable
     public final OutcomeReceiver<GetCredentialResponse,
             GetCredentialException> getCredentialManagerCallback() {

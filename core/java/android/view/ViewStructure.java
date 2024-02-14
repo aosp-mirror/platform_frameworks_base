@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
+
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -361,7 +363,7 @@ public abstract class ViewStructure {
      * {@link ViewStructure#setCredentialManagerRequest(GetCredentialRequest, OutcomeReceiver)}
      */
     @Nullable
-    @FlaggedApi("autofill_credman_dev_integration")
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     public GetCredentialRequest getCredentialManagerRequest() {
         return null;
     }
@@ -376,7 +378,7 @@ public abstract class ViewStructure {
      * {@link ViewStructure#setCredentialManagerRequest(GetCredentialRequest, OutcomeReceiver)}
      */
     @Nullable
-    @FlaggedApi("autofill_credman_dev_integration")
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     public OutcomeReceiver<
             GetCredentialResponse, GetCredentialException> getCredentialManagerCallback() {
         return null;
@@ -551,7 +553,7 @@ public abstract class ViewStructure {
      * @param request the request to be fired
      * @param callback the callback where the response or exception, is returned
      */
-    @FlaggedApi("autofill_credman_dev_integration")
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     public void setCredentialManagerRequest(@NonNull GetCredentialRequest request,
             @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {}
 
@@ -559,7 +561,7 @@ public abstract class ViewStructure {
      * Clears the credential request previously set through
      * {@link ViewStructure#setCredentialManagerRequest(GetCredentialRequest, OutcomeReceiver)}
      */
-    @FlaggedApi("autofill_credman_dev_integration")
+    @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     public void clearCredentialManagerRequest() {}
 
     /**
