@@ -22,6 +22,8 @@ import static android.view.Display.INVALID_DISPLAY;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.wm.shell.Flags.enableTaskbarNavbarUnification;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -289,32 +291,43 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
         verify(mCommandQueue, never()).addCallback(any(TaskbarDelegate.class));
     }
 
-
     @Test
     public void testConfigurationChange_taskbarNotInitialized() {
         Configuration configuration = mContext.getResources().getConfiguration();
-        when(Utilities.isLargeScreen(any())).thenReturn(true);
+        mNavigationBarController.mIsLargeScreen = true;
         mNavigationBarController.onConfigChanged(configuration);
         verify(mTaskbarDelegate, never()).onConfigurationChanged(configuration);
     }
 
     @Test
-    public void testConfigurationChangeUnfolding_taskbarInitialized() {
+    public void testConfigurationChange_taskbarInitialized() {
         Configuration configuration = mContext.getResources().getConfiguration();
-        when(Utilities.isLargeScreen(any())).thenReturn(true);
+        mNavigationBarController.mIsLargeScreen = true;
         when(mTaskbarDelegate.isInitialized()).thenReturn(true);
         mNavigationBarController.onConfigChanged(configuration);
         verify(mTaskbarDelegate, times(1)).onConfigurationChanged(configuration);
     }
 
     @Test
-    public void testConfigurationChangeFolding_taskbarInitialized() {
+    public void testShouldRenderTaskbar_taskbarNotRenderedOnPhone() {
+        mNavigationBarController.mIsLargeScreen = false;
+        mNavigationBarController.mIsPhone = true;
+        assertFalse(mNavigationBarController.supportsTaskbar());
+    }
+
+    @Test
+    public void testShouldRenderTaskbar_taskbarRenderedOnTabletOrUnfolded() {
+        mNavigationBarController.mIsLargeScreen = true;
+        mNavigationBarController.mIsPhone = false;
+        assertTrue(mNavigationBarController.supportsTaskbar());
+    }
+
+    @Test
+    public void testShouldRenderTaskbar_taskbarRenderedInFoldedState() {
         assumeTrue(enableTaskbarNavbarUnification());
 
-        Configuration configuration = mContext.getResources().getConfiguration();
-        when(Utilities.isLargeScreen(any())).thenReturn(false);
-        when(mTaskbarDelegate.isInitialized()).thenReturn(true);
-        mNavigationBarController.onConfigChanged(configuration);
-        verify(mTaskbarDelegate, times(1)).onConfigurationChanged(configuration);
+        mNavigationBarController.mIsLargeScreen = false;
+        mNavigationBarController.mIsPhone = false;
+        assertTrue(mNavigationBarController.supportsTaskbar());
     }
 }
