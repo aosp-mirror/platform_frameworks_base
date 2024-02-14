@@ -15,6 +15,7 @@
 // This is a cc_test just because it supports test_suites. This should be converted to something
 // like cc_binary_test_helper once supported, thus auto_gen_config:false below.
 package {
+    default_team: "trendy_team_platform_security",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
