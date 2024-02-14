@@ -20,6 +20,7 @@ import static android.media.Utils.intersectSortedDistinctRanges;
 import static android.media.Utils.sortDistinctRanges;
 import static android.media.codec.Flags.FLAG_DYNAMIC_COLOR_ASPECTS;
 import static android.media.codec.Flags.FLAG_HLG_EDITING;
+import static android.media.codec.Flags.FLAG_NULL_OUTPUT_SURFACE;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
 
 import android.annotation.FlaggedApi;
@@ -778,6 +779,17 @@ public final class MediaCodecInfo {
         public static final String FEATURE_Roi = "region-of-interest";
 
         /**
+         * <b>video decoder only</b>: codec supports detaching the
+         * output surface when in Surface mode.
+         * <p> If true, the codec can be configured in Surface mode
+         * without an actual surface (in detached surface mode).
+         * @see MediaCodec#CONFIGURE_FLAG_DETACHED_SURFACE
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_NULL_OUTPUT_SURFACE)
+        public static final String FEATURE_DetachedSurface = "detached-surface";
+
+        /**
          * Query codec feature capabilities.
          * <p>
          * These features are supported to be used by the codec.  These
@@ -813,6 +825,9 @@ public final class MediaCodecInfo {
                 features.add(new Feature(FEATURE_LowLatency,       (1 << 7), true));
                 if (android.media.codec.Flags.dynamicColorAspects()) {
                     features.add(new Feature(FEATURE_DynamicColorAspects, (1 << 8), true));
+                }
+                if (android.media.codec.Flags.nullOutputSurface()) {
+                    features.add(new Feature(FEATURE_DetachedSurface,     (1 << 9), true));
                 }
 
                 // feature to exclude codec from REGULAR codec list
