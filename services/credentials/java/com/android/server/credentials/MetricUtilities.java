@@ -531,7 +531,7 @@ public class MetricUtilities {
             int index = 0;
             for (CandidateBrowsingPhaseMetric metric : browsingPhaseMetrics) {
                 browsedClickedEntries[index] = metric.getEntryEnum();
-                browsedProviderUid[index] = metric.getProviderUid();
+                browsedProviderUid[index] = DEFAULT_INT_32;
                 index++;
             }
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_FINALNOUID_REPORTED,
