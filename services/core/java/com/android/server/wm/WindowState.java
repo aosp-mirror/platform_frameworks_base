@@ -1897,7 +1897,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return true;
         }
 
-        if (com.android.server.notification.Flags.sensitiveNotificationAppProtection()) {
+        if (android.permission.flags.Flags.sensitiveNotificationAppProtection()) {
             if (mWmService.mSensitiveContentPackages
                     .shouldBlockScreenCaptureForApp(getOwningPackage(), getOwningUid())) {
                 return true;

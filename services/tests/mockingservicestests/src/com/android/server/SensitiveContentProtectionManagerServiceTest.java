@@ -18,7 +18,7 @@ package com.android.server;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.server.notification.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
+import static android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

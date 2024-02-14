@@ -3014,7 +3014,7 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
         }
 
-        if (com.android.server.notification.Flags.sensitiveNotificationAppProtection()
+        if (android.permission.flags.Flags.sensitiveNotificationAppProtection()
                 || android.view.flags.Flags.sensitiveContentAppProtection()) {
             t.traceBegin("StartSensitiveContentProtectionManager");
             mSystemServiceManager.startService(SensitiveContentProtectionManagerService.class);
