@@ -60,6 +60,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_PHYSICAL_MEDIA;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_PRINTING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_PROFILES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_PROFILE_INTERACTION;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_RESET_PASSWORD;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_RESTRICT_PRIVATE_DNS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS;
@@ -85,6 +86,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WINDOWS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.MASTER_CLEAR;
+import static android.Manifest.permission.NOTIFY_PENDING_SYSTEM_UPDATE;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
@@ -236,6 +238,7 @@ import static android.app.admin.flags.Flags.backupServiceSecurityLogEventEnabled
 import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
 import static android.app.admin.flags.Flags.dumpsysPolicyEngineMigrationEnabled;
 import static android.app.admin.flags.Flags.headlessDeviceOwnerSingleUserEnabled;
+import static android.app.admin.flags.Flags.permissionMigrationForZeroTrustImplEnabled;
 import static android.app.admin.flags.Flags.policyEngineMigrationV2Enabled;
 import static android.app.admin.flags.Flags.assistContentUserRestrictionEnabled;
 import static android.app.admin.flags.Flags.securityLogV2Enabled;
@@ -16253,7 +16256,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void notifyPendingSystemUpdate(@Nullable SystemUpdateInfo info) {
         Preconditions.checkCallAuthorization(
-                hasCallingOrSelfPermission(permission.NOTIFY_PENDING_SYSTEM_UPDATE),
+                hasCallingOrSelfPermission(NOTIFY_PENDING_SYSTEM_UPDATE),
                 "Only the system update service can broadcast update information");
 
         mInjector.binderWithCleanCallingIdentity(() -> {
@@ -16294,12 +16297,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             // Send broadcasts to corresponding profile owners if any.
             for (final int userId : runningUserIds) {
+                final ComponentName profileOwnerPackage;
                 synchronized (getLockObject()) {
-                    final ComponentName profileOwnerPackage =
-                            mOwners.getProfileOwnerComponent(userId);
-                    if (profileOwnerPackage != null) {
-                        intent.setComponent(profileOwnerPackage);
-                        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+                    profileOwnerPackage = mOwners.getProfileOwnerComponent(userId);
+                }
+                if (profileOwnerPackage != null) {
+                    intent.setComponent(profileOwnerPackage);
+                    mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+                }
+
+                if (permissionMigrationForZeroTrustImplEnabled()) {
+                    final UserHandle user = UserHandle.of(userId);
+                    final String roleHolderPackage = getRoleHolderPackageNameOnUser(
+                            RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT, userId);
+                    if (roleHolderPackage != null) {
+                        broadcastExplicitIntentToPackage(intent, roleHolderPackage, user);
                     }
                 }
             }
@@ -16307,13 +16319,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public SystemUpdateInfo getPendingSystemUpdate(ComponentName admin) {
-        Objects.requireNonNull(admin, "ComponentName is null");
+    public SystemUpdateInfo getPendingSystemUpdate(ComponentName admin, String callerPackage) {
+        if (permissionMigrationForZeroTrustImplEnabled()) {
+            CallerIdentity caller = getCallerIdentity(admin, callerPackage);
+            enforcePermissions(new String[] {NOTIFY_PENDING_SYSTEM_UPDATE,
+                    MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES}, caller.getPackageName(),
+                    caller.getUserId());
+        } else {
+            Objects.requireNonNull(admin, "ComponentName is null");
 
-        final CallerIdentity caller = getCallerIdentity(admin);
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isProfileOwner(caller));
-
+            final CallerIdentity caller = getCallerIdentity(admin);
+            Preconditions.checkCallAuthorization(
+                    isDefaultDeviceOwner(caller) || isProfileOwner(caller));
+        }
         return mOwners.getSystemUpdateInfo();
     }
 
@@ -20817,14 +20835,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isProfileOwner(caller)
-                        || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
 
+        if (permissionMigrationForZeroTrustImplEnabled()) {
+            enforcePermission(MANAGE_DEVICE_POLICY_CERTIFICATES, caller.getPackageName());
+        } else {
+            Preconditions.checkCallAuthorization(
+                    isDefaultDeviceOwner(caller) || isProfileOwner(caller)
+                            || isCallerDelegate(caller, DELEGATION_CERT_INSTALL));
+        }
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
                     caller.getUserId());
-            final String esid = requiredAdmin.mEnrollmentSpecificId;
+            final String esid = requiredAdmin != null ? requiredAdmin.mEnrollmentSpecificId : null;
             return esid != null ? esid : "";
         }
     }
@@ -22495,7 +22517,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_WINDOWS,
             MANAGE_DEVICE_POLICY_WIPE_DATA,
             SET_TIME,
-            SET_TIME_ZONE
+            SET_TIME_ZONE,
+            MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES
     );
     private static final List<String> FINANCED_DEVICE_OWNER_PERMISSIONS = List.of(
             MANAGE_DEVICE_POLICY_ACROSS_USERS,
@@ -22559,7 +22582,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS,
                     MANAGE_DEVICE_POLICY_TIME,
                     MANAGE_DEVICE_POLICY_VPN,
-                    MANAGE_DEVICE_POLICY_WIPE_DATA
+                    MANAGE_DEVICE_POLICY_WIPE_DATA,
+                    MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES
             );
 
     /**

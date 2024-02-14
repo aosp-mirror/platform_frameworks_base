@@ -37,6 +37,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MTE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_PACKAGE_STATE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_PROFILE_INTERACTION;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_RESET_PASSWORD;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SCREEN_CAPTURE;
@@ -13416,17 +13417,25 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device or profile owners to get information about a pending system update.
+     * Get information about a pending system update.
+     *
+     * Can be called by device or profile owners, and starting from Android
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES}.
      *
      * @param admin Which profile or device owner this request is associated with.
      * @return Information about a pending system update or {@code null} if no update pending.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device, profile owner or holders of
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES}.
      * @see DeviceAdminReceiver#onSystemUpdatePending(Context, Intent, long)
      */
-    public @Nullable SystemUpdateInfo getPendingSystemUpdate(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES, conditional = true)
+    @SuppressLint("RequiresPermission")
+    @FlaggedApi(Flags.FLAG_PERMISSION_MIGRATION_FOR_ZERO_TRUST_API_ENABLED)
+    public @Nullable SystemUpdateInfo getPendingSystemUpdate(@Nullable ComponentName admin) {
         throwIfParentInstance("getPendingSystemUpdate");
         try {
-            return mService.getPendingSystemUpdate(admin);
+            return mService.getPendingSystemUpdate(admin, mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -16495,8 +16504,9 @@ public class DevicePolicyManager {
      * The identifier would be consistent even if the work profile is removed and enrolled again
      * (to the same organization), or the device is factory reset and re-enrolled.
      *
-     * Can only be called by the Profile Owner or Device Owner, if the
-     * {@link #setOrganizationId(String)} was previously called.
+     * Can only be called by the Profile Owner and Device Owner, and starting from Android
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES}.
      * If {@link #setOrganizationId(String)} was not called, then the returned value will be an
      * empty string.
      *
@@ -16509,8 +16519,12 @@ public class DevicePolicyManager {
      * and must switch to using this method.
      *
      * @return A stable, enrollment-specific identifier.
-     * @throws SecurityException if the caller is not a profile owner or device owner.
+     * @throws SecurityException if the caller is not a profile owner, device owner or holding the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
+    @SuppressLint("RequiresPermission")
+    @FlaggedApi(Flags.FLAG_PERMISSION_MIGRATION_FOR_ZERO_TRUST_API_ENABLED)
     @NonNull public String getEnrollmentSpecificId() {
         throwIfParentInstance("getEnrollmentSpecificId");
         if (mService == null) {
