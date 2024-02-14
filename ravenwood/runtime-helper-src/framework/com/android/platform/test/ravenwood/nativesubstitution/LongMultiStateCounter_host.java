@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.hoststubgen.nativesubstitution;
+package com.android.platform.test.ravenwood.nativesubstitution;
 
 import android.os.BadParcelableException;
 import android.os.Parcel;

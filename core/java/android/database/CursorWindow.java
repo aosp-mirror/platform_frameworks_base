@@ -40,7 +40,7 @@ import dalvik.system.CloseGuard;
  */
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 @android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
-        "com.android.hoststubgen.nativesubstitution.CursorWindow_host")
+        "com.android.platform.test.ravenwood.nativesubstitution.CursorWindow_host")
 public class CursorWindow extends SQLiteClosable implements Parcelable {
     private static final String STATS_TAG = "CursorWindowStats";
 

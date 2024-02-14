@@ -82,7 +82,7 @@ When a pure-Java implementation grows too large or complex to host within the or
 
 ```
 @RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass("com.android.hoststubgen.nativesubstitution.MyComplexClass_host")
+@RavenwoodNativeSubstitutionClass("com.android.platform.test.ravenwood.nativesubstitution.MyComplexClass_host")
 public class MyComplexClass {
     private static native void nativeDoThing(long nativePtr);
 ...

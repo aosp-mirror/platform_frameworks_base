@@ -93,16 +93,33 @@ java_library {
     ],
 }
 
+// Jars in "ravenwood-runtime" are set to the classpath, sorted alphabetically.
+// Rename some of the dependencies to make sure they're included in the intended order.
+java_genrule {
+    name: "100-framework-minus-apex.ravenwood",
+    cmd: "cp $(in) $(out)",
+    srcs: [":framework-minus-apex.ravenwood"],
+    out: ["100-framework-minus-apex.ravenwood.jar"],
+    visibility: ["//visibility:private"],
+}
+
+java_genrule {
+    // Use 200 to make sure it comes before the mainline stub ("all-updatable...").
+    name: "200-kxml2-android",
+    cmd: "cp $(in) $(out)",
+    srcs: [":kxml2-android"],
+    out: ["200-kxml2-android.jar"],
+    visibility: ["//visibility:private"],
+}
+
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     libs: [
-        // Prefixed with "200" to ensure it's sorted early in Tradefed classpath
-        // so that we provide a concrete implementation before Mainline stubs
+        "100-framework-minus-apex.ravenwood",
         "200-kxml2-android",
         "all-updatable-modules-system-stubs",
         "android.test.mock.ravenwood",
-        "framework-minus-apex.ravenwood",
-        "hoststubgen-helper-framework-runtime.ravenwood",
+        "ravenwood-helper-runtime",
         "hoststubgen-helper-runtime.ravenwood",
 
         // Provide runtime versions of utils linked in below

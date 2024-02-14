@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.hoststubgen.nativesubstitution;
+package com.android.platform.test.ravenwood.nativesubstitution;
 
 import static android.os.ParcelFileDescriptor.MODE_APPEND;
 import static android.os.ParcelFileDescriptor.MODE_CREATE;

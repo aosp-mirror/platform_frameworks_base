@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.hoststubgen.nativesubstitution;
+package com.android.platform.test.ravenwood.nativesubstitution;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
