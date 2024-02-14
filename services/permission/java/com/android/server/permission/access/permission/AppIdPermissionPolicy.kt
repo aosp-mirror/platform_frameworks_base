@@ -22,6 +22,7 @@ import android.content.pm.PermissionGroupInfo
 import android.content.pm.PermissionInfo
 import android.content.pm.SigningDetails
 import android.os.Build
+import android.permission.flags.Flags
 import android.util.Slog
 import com.android.internal.os.RoSystemProperties
 import com.android.internal.pm.permission.CompatibilityPermissionInfo
@@ -45,6 +46,7 @@ import com.android.server.pm.KnownPackages
 import com.android.server.pm.parsing.PackageInfoUtils
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageState
+import libcore.util.EmptyArray
 
 class AppIdPermissionPolicy : SchemePolicy() {
     private val persistence = AppIdPermissionPersistence()
@@ -72,40 +74,42 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     override fun MutateStateScope.onInitialized() {
-        newState.externalState.configPermissions.forEach { (permissionName, permissionEntry) ->
-            val oldPermission = newState.systemState.permissions[permissionName]
-            val newPermission =
-                if (oldPermission != null) {
-                    if (permissionEntry.gids != null) {
-                        oldPermission.copy(
-                            gids = permissionEntry.gids,
-                            areGidsPerUser = permissionEntry.perUser
-                        )
-                    } else {
-                        return@forEach
-                    }
-                } else {
-                    @Suppress("DEPRECATION")
-                    val permissionInfo =
-                        PermissionInfo().apply {
-                            name = permissionName
-                            packageName = PLATFORM_PACKAGE_NAME
-                            protectionLevel = PermissionInfo.PROTECTION_SIGNATURE
+        if (!Flags.newPermissionGidEnabled()) {
+            newState.externalState.configPermissions.forEach { (permissionName, permissionEntry) ->
+                val oldPermission = newState.systemState.permissions[permissionName]
+                val newPermission =
+                    if (oldPermission != null) {
+                        if (permissionEntry.gids != null) {
+                            oldPermission.copy(
+                                gids = permissionEntry.gids,
+                                areGidsPerUser = permissionEntry.perUser
+                            )
+                        } else {
+                            return@forEach
                         }
-                    if (permissionEntry.gids != null) {
-                        Permission(
-                            permissionInfo,
-                            false,
-                            Permission.TYPE_CONFIG,
-                            0,
-                            permissionEntry.gids,
-                            permissionEntry.perUser
-                        )
                     } else {
-                        Permission(permissionInfo, false, Permission.TYPE_CONFIG, 0)
+                        @Suppress("DEPRECATION")
+                        val permissionInfo =
+                            PermissionInfo().apply {
+                                name = permissionName
+                                packageName = PLATFORM_PACKAGE_NAME
+                                protectionLevel = PermissionInfo.PROTECTION_SIGNATURE
+                            }
+                        if (permissionEntry.gids != null) {
+                            Permission(
+                                permissionInfo,
+                                false,
+                                Permission.TYPE_CONFIG,
+                                0,
+                                permissionEntry.gids,
+                                permissionEntry.perUser
+                            )
+                        } else {
+                            Permission(permissionInfo, false, Permission.TYPE_CONFIG, 0)
+                        }
                     }
-                }
-            newState.mutateSystemState().mutatePermissions()[permissionName] = newPermission
+                newState.mutateSystemState().mutatePermissions()[permissionName] = newPermission
+            }
         }
     }
 
@@ -454,7 +458,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 )
                 return@forEachIndexed
             }
-            val newPermission =
+            var newPermission =
                 if (oldPermission != null && newPackageName != oldPermission.packageName) {
                     val oldPackageName = oldPermission.packageName
                     // Only allow system apps to redefine non-system permissions.
@@ -577,6 +581,24 @@ class AppIdPermissionPolicy : SchemePolicy() {
                         )
                     }
                 }
+            if (Flags.newPermissionGidEnabled()) {
+                var gids = EmptyArray.INT
+                var areGidsPerUser = false
+                if (!parsedPermission.isTree && packageState.isSystem) {
+                    newState.externalState.configPermissions[permissionName]?.let {
+                        gids = it.gids
+                        areGidsPerUser = it.perUser
+                    }
+                }
+                newPermission = Permission(
+                    newPermissionInfo,
+                    true,
+                    Permission.TYPE_MANIFEST,
+                    packageState.appId,
+                    gids,
+                    areGidsPerUser
+                )
+            }
 
             if (parsedPermission.isTree) {
                 newState.mutateSystemState().mutatePermissionTrees()[permissionName] = newPermission

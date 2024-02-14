@@ -64,3 +64,14 @@ flag {
   description: "enable Permission PREPARE_FACTORY_RESET."
   bug: "302016478"
 }
+
+flag {
+    name: "new_permission_gid_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enable new permission GID implementation"
+    bug: "325137277"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
