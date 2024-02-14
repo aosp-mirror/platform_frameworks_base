@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.draganddrop
 
+import android.app.ActivityManager.RunningTaskInfo
 import android.os.RemoteException
 import android.view.DragEvent
 import android.view.DragEvent.ACTION_DROP
@@ -32,12 +33,10 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
-import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.reset
-import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.reset
+import org.mockito.kotlin.verify
 
 /**
  * Tests for the unhandled drag controller.
@@ -45,18 +44,14 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class UnhandledDragControllerTest : ShellTestCase() {
-    @Mock
-    private lateinit var mIWindowManager: IWindowManager
-
-    @Mock
-    private lateinit var mMainExecutor: ShellExecutor
+    private val mIWindowManager = mock<IWindowManager>()
+    private val mMainExecutor = mock<ShellExecutor>()
 
     private lateinit var mController: GlobalDragListener
 
     @Before
     @Throws(RemoteException::class)
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
         mController = GlobalDragListener(mIWindowManager, mMainExecutor)
     }
 
@@ -81,7 +76,7 @@ class UnhandledDragControllerTest : ShellTestCase() {
         // Simulate an unhandled drop
         val dropEvent = DragEvent.obtain(ACTION_DROP, 0f, 0f, 0f, 0f, null, null, null,
             null, null, false)
-        val wmCallback = mock(IUnhandledDragCallback::class.java)
+        val wmCallback = mock<IUnhandledDragCallback>()
         mController.onUnhandledDrop(dropEvent, wmCallback)
 
         verify(wmCallback).notifyUnhandledDropComplete(ArgumentMatchers.eq(false))
@@ -102,14 +97,31 @@ class UnhandledDragControllerTest : ShellTestCase() {
         })
 
         // Simulate an unhandled drop
-        val dragSurface = mock(SurfaceControl::class.java)
+        val dragSurface = mock<SurfaceControl>()
         val dropEvent = DragEvent.obtain(ACTION_DROP, 0f, 0f, 0f, 0f, null, null, null,
             dragSurface, null, false)
-        val wmCallback = mock(IUnhandledDragCallback::class.java)
+        val wmCallback = mock<IUnhandledDragCallback>()
         mController.onUnhandledDrop(dropEvent, wmCallback)
 
         verify(wmCallback).notifyUnhandledDropComplete(ArgumentMatchers.eq(true))
         verify(dragSurface).release()
         assertEquals(lastDragEvent.get(0), dropEvent)
+    }
+
+    @Test
+    fun onCrossWindowDrop() {
+        val lastTaskInfo = arrayOfNulls<RunningTaskInfo>(1)
+
+        // Set a listener to listen for unhandled drops
+        mController.setListener(object : GlobalDragListenerCallback {
+            override fun onCrossWindowDrop(taskInfo: RunningTaskInfo) {
+                lastTaskInfo[0] = taskInfo
+            }
+        })
+
+        // Simulate a cross-window drop
+        val taskInfo = mock<RunningTaskInfo>()
+        mController.onCrossWindowDrop(taskInfo)
+        assertEquals(lastTaskInfo.get(0), taskInfo)
     }
 }

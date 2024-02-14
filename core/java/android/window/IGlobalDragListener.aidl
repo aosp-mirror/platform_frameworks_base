@@ -16,6 +16,7 @@
 
 package android.window;
 
+import android.app.ActivityManager;
 import android.view.DragEvent;
 import android.window.IUnhandledDragCallback;
 
@@ -24,6 +25,12 @@ import android.window.IUnhandledDragCallback;
  * {@hide}
  */
 oneway interface IGlobalDragListener {
+    /**
+     * Called when a cross-window drag is handled by another window.
+     * @param taskInfo the task containing the window that consumed the drop
+     */
+    void onCrossWindowDrop(in ActivityManager.RunningTaskInfo taskInfo);
+
     /**
      * Called when the user finishes the drag gesture but no windows have reported handling the
      * drop.  The DragEvent is populated with the drag surface for the listener to animate.  The

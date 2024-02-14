@@ -577,9 +577,12 @@ public abstract class WMShellModule {
             DisplayController displayController,
             UiEventLogger uiEventLogger,
             IconProvider iconProvider,
+            GlobalDragListener globalDragListener,
+            Transitions transitions,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new DragAndDropController(context, shellInit, shellController,
-                shellCommandHandler, displayController, uiEventLogger, iconProvider, mainExecutor);
+        return new DragAndDropController(context, shellInit, shellController, shellCommandHandler,
+                displayController, uiEventLogger, iconProvider, globalDragListener, transitions,
+                mainExecutor);
     }
 
     //

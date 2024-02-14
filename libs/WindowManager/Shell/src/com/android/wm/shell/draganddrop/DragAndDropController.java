@@ -35,6 +35,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_DRAG_AND_DROP;
 
+import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ClipDescription;
 import android.content.ComponentCallbacks2;
@@ -51,6 +52,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
@@ -71,6 +73,7 @@ import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -79,6 +82,7 @@ import java.util.ArrayList;
  * Handles the global drag and drop handling for the Shell.
  */
 public class DragAndDropController implements RemoteCallable<DragAndDropController>,
+        GlobalDragListener.GlobalDragListenerCallback,
         DisplayController.OnDisplaysChangedListener,
         View.OnDragListener, ComponentCallbacks2 {
 
@@ -90,6 +94,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
     private final DisplayController mDisplayController;
     private final DragAndDropEventLogger mLogger;
     private final IconProvider mIconProvider;
+    private final GlobalDragListener mGlobalDragListener;
+    private final Transitions mTransitions;
     private SplitScreenController mSplitScreen;
     private ShellExecutor mMainExecutor;
     private ArrayList<DragAndDropListener> mListeners = new ArrayList<>();
@@ -112,6 +118,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
             DisplayController displayController,
             UiEventLogger uiEventLogger,
             IconProvider iconProvider,
+            GlobalDragListener globalDragListener,
+            Transitions transitions,
             ShellExecutor mainExecutor) {
         mContext = context;
         mShellController = shellController;
@@ -119,6 +127,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         mDisplayController = displayController;
         mLogger = new DragAndDropEventLogger(uiEventLogger);
         mIconProvider = iconProvider;
+        mGlobalDragListener = globalDragListener;
+        mTransitions = transitions;
         mMainExecutor = mainExecutor;
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -136,6 +146,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_DRAG_AND_DROP,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
+        mGlobalDragListener.setListener(this);
     }
 
     private ExternalInterfaceBinder createExternalInterface() {
@@ -320,6 +331,14 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void onCrossWindowDrop(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
+        // Bring the task forward when an item is dropped on it
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reorder(taskInfo.token, true /* onTop */);
+        mTransitions.startTransition(WindowManager.TRANSIT_TO_FRONT, wct, null);
     }
 
     /**

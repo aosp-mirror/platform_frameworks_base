@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.draganddrop
 
+import android.app.ActivityManager
 import android.os.RemoteException
 import android.util.Log
 import android.view.DragEvent
@@ -31,13 +32,19 @@ import java.util.function.Consumer
  * Manages the listener and callbacks for unhandled global drags.
  */
 class GlobalDragListener(
-    val wmService: IWindowManager,
-    mainExecutor: ShellExecutor
+    private val wmService: IWindowManager,
+    private val mainExecutor: ShellExecutor
 ) {
     private var callback: GlobalDragListenerCallback? = null
 
     private val globalDragListener: IGlobalDragListener =
         object : IGlobalDragListener.Stub() {
+            override fun onCrossWindowDrop(taskInfo: ActivityManager.RunningTaskInfo) {
+                mainExecutor.execute() {
+                    this@GlobalDragListener.onCrossWindowDrop(taskInfo)
+                }
+            }
+
             override fun onUnhandledDrop(event: DragEvent, callback: IUnhandledDragCallback) {
                 mainExecutor.execute() {
                     this@GlobalDragListener.onUnhandledDrop(event, callback)
@@ -49,6 +56,11 @@ class GlobalDragListener(
      * Callbacks for global drag events.
      */
     interface GlobalDragListenerCallback {
+        /**
+         * Called when a global drag is successfully handled by another window.
+         */
+        fun onCrossWindowDrop(taskInfo: ActivityManager.RunningTaskInfo) {}
+
         /**
          * Called when a global drag is unhandled (ie. dropped outside of all visible windows, or
          * dropped on a window that does not want to handle it).
@@ -80,11 +92,19 @@ class GlobalDragListener(
     }
 
     @VisibleForTesting
+    fun onCrossWindowDrop(taskInfo: ActivityManager.RunningTaskInfo) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+            "onCrossWindowDrop: %s", taskInfo)
+        callback?.onCrossWindowDrop(taskInfo)
+    }
+
+    @VisibleForTesting
     fun onUnhandledDrop(dragEvent: DragEvent, wmCallback: IUnhandledDragCallback) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
             "onUnhandledDrop: %s", dragEvent)
         if (callback == null) {
             wmCallback.notifyUnhandledDropComplete(false)
+            return
         }
 
         callback?.onUnhandledDrop(dragEvent) {

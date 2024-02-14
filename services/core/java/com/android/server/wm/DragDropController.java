@@ -25,6 +25,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACT
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.content.ClipData;
 import android.content.Context;
 import android.hardware.input.InputManagerGlobal;
@@ -344,7 +345,20 @@ class DragDropController {
 
                 final boolean relinquishDragSurfaceToDropTarget =
                         consumed && mDragState.targetInterceptsGlobalDrag(callingWin);
+                final boolean isCrossWindowDrag = !mDragState.mLocalWin.equals(token);
                 mDragState.endDragLocked(consumed, relinquishDragSurfaceToDropTarget);
+
+                final Task droppedWindowTask = callingWin.getTask();
+                if (com.android.window.flags.Flags.delegateUnhandledDrags()
+                        && mGlobalDragListener != null && droppedWindowTask != null && consumed
+                        && isCrossWindowDrag) {
+                    try {
+                        mGlobalDragListener.onCrossWindowDrop(droppedWindowTask.getTaskInfo());
+                    } catch (RemoteException e) {
+                        Slog.e(TAG_WM, "Failed to call global drag listener for cross-window "
+                                + "drop", e);
+                    }
+                }
             }
         } finally {
             mCallback.get().postReportDropResult();
@@ -383,7 +397,7 @@ class DragDropController {
             });
             return true;
         } catch (RemoteException e) {
-            Slog.e(TAG_WM, "Failed to call unhandled drag listener", e);
+            Slog.e(TAG_WM, "Failed to call global drag listener for unhandled drop", e);
             return false;
         }
     }
