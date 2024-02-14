@@ -19,7 +19,9 @@ package com.android.systemui.surfaceeffects.loadingeffect
 import android.graphics.Paint
 import android.graphics.RenderEffect
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.model.SysUiStateTest
 import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState
 import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState.EASE_IN
@@ -31,18 +33,17 @@ import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion
 import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.RenderEffectDrawCallback
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimationConfig
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader
-import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class LoadingEffectTest : SysUiStateTest() {
 
-    private val fakeSystemClock = FakeSystemClock()
-    private val fakeExecutor = FakeExecutor(fakeSystemClock)
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     @Test
     fun play_paintCallback_triggersDrawCallback() {
@@ -61,14 +62,12 @@ class LoadingEffectTest : SysUiStateTest() {
                 animationStateChangedCallback = null
             )
 
-        fakeExecutor.execute {
-            assertThat(paintFromCallback).isNull()
+        assertThat(paintFromCallback).isNull()
 
-            loadingEffect.play()
-            fakeSystemClock.advanceTime(500L)
+        loadingEffect.play()
+        animatorTestRule.advanceTimeBy(500L)
 
-            assertThat(paintFromCallback).isNotNull()
-        }
+        assertThat(paintFromCallback).isNotNull()
     }
 
     @Test
@@ -88,25 +87,22 @@ class LoadingEffectTest : SysUiStateTest() {
                 animationStateChangedCallback = null
             )
 
-        fakeExecutor.execute {
-            assertThat(renderEffectFromCallback).isNull()
+        assertThat(renderEffectFromCallback).isNull()
 
-            loadingEffect.play()
-            fakeSystemClock.advanceTime(500L)
+        loadingEffect.play()
+        animatorTestRule.advanceTimeBy(500L)
 
-            assertThat(renderEffectFromCallback).isNotNull()
-        }
+        assertThat(renderEffectFromCallback).isNotNull()
     }
 
     @Test
     fun play_animationStateChangesInOrder() {
         val config = TurbulenceNoiseAnimationConfig()
-        val expectedStates = arrayOf(NOT_PLAYING, EASE_IN, MAIN, EASE_OUT, NOT_PLAYING)
-        val actualStates = mutableListOf(NOT_PLAYING)
+        val states = mutableListOf(NOT_PLAYING)
         val stateChangedCallback =
             object : AnimationStateChangedCallback {
                 override fun onStateChanged(oldState: AnimationState, newState: AnimationState) {
-                    actualStates.add(newState)
+                    states.add(newState)
                 }
             }
         val drawCallback =
@@ -121,16 +117,15 @@ class LoadingEffectTest : SysUiStateTest() {
                 stateChangedCallback
             )
 
-        val timeToAdvance =
-            config.easeInDuration + config.maxDuration + config.easeOutDuration + 100
+        loadingEffect.play()
 
-        fakeExecutor.execute {
-            loadingEffect.play()
+        // Execute all the animators by advancing each duration with some buffer.
+        animatorTestRule.advanceTimeBy(config.easeInDuration.toLong())
+        animatorTestRule.advanceTimeBy(config.maxDuration.toLong())
+        animatorTestRule.advanceTimeBy(config.easeOutDuration.toLong())
+        animatorTestRule.advanceTimeBy(500)
 
-            fakeSystemClock.advanceTime(timeToAdvance.toLong())
-
-            assertThat(actualStates).isEqualTo(expectedStates)
-        }
+        assertThat(states).containsExactly(NOT_PLAYING, EASE_IN, MAIN, EASE_OUT, NOT_PLAYING)
     }
 
     @Test
@@ -157,17 +152,15 @@ class LoadingEffectTest : SysUiStateTest() {
                 stateChangedCallback
             )
 
-        fakeExecutor.execute {
-            assertThat(numPlay).isEqualTo(0)
+        assertThat(numPlay).isEqualTo(0)
 
-            loadingEffect.play()
-            loadingEffect.play()
-            loadingEffect.play()
-            loadingEffect.play()
-            loadingEffect.play()
+        loadingEffect.play()
+        loadingEffect.play()
+        loadingEffect.play()
+        loadingEffect.play()
+        loadingEffect.play()
 
-            assertThat(numPlay).isEqualTo(1)
-        }
+        assertThat(numPlay).isEqualTo(1)
     }
 
     @Test
@@ -181,7 +174,7 @@ class LoadingEffectTest : SysUiStateTest() {
         val stateChangedCallback =
             object : AnimationStateChangedCallback {
                 override fun onStateChanged(oldState: AnimationState, newState: AnimationState) {
-                    if (oldState == MAIN && newState == NOT_PLAYING) {
+                    if (oldState == EASE_OUT && newState == NOT_PLAYING) {
                         isFinished = true
                     }
                 }
@@ -194,18 +187,17 @@ class LoadingEffectTest : SysUiStateTest() {
                 stateChangedCallback
             )
 
-        fakeExecutor.execute {
-            assertThat(isFinished).isFalse()
+        assertThat(isFinished).isFalse()
 
-            loadingEffect.play()
-            fakeSystemClock.advanceTime(config.easeInDuration.toLong() + 500L)
+        loadingEffect.play()
+        animatorTestRule.advanceTimeBy(config.easeInDuration.toLong() + 500L)
 
-            assertThat(isFinished).isFalse()
+        assertThat(isFinished).isFalse()
 
-            loadingEffect.finish()
+        loadingEffect.finish()
+        animatorTestRule.advanceTimeBy(config.easeOutDuration.toLong() + 500L)
 
-            assertThat(isFinished).isTrue()
-        }
+        assertThat(isFinished).isTrue()
     }
 
     @Test
@@ -232,13 +224,11 @@ class LoadingEffectTest : SysUiStateTest() {
                 stateChangedCallback
             )
 
-        fakeExecutor.execute {
-            assertThat(isFinished).isFalse()
+        assertThat(isFinished).isFalse()
 
-            loadingEffect.finish()
+        loadingEffect.finish()
 
-            assertThat(isFinished).isFalse()
-        }
+        assertThat(isFinished).isFalse()
     }
 
     @Test
