@@ -19,6 +19,7 @@ package android.provider;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -54,6 +55,8 @@ import android.telecom.TelecomManager;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.server.telecom.flags.Flags;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -427,6 +430,8 @@ public class CallLog {
             private double mLongitude = Double.NaN;
             private Uri mPictureUri;
             private int mIsPhoneAccountMigrationPending;
+            private boolean mIsBusinessCall;
+            private String mBusinessName;
 
             /**
              * @param callerInfo the CallerInfo object to get the target contact from.
@@ -645,15 +650,44 @@ public class CallLog {
             }
 
             /**
+             * @param isBusinessCall should be set if the caller is a business call
+             */
+            @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+            public @NonNull AddCallParametersBuilder setIsBusinessCall(boolean isBusinessCall) {
+                mIsBusinessCall = isBusinessCall;
+                return this;
+            }
+
+            /**
+             * @param businessName should be set if the caller is a business call
+             */
+            @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+            public @NonNull AddCallParametersBuilder setBusinessName(String businessName) {
+                mBusinessName = businessName;
+                return this;
+            }
+
+            /**
              * Builds the object
              */
             public @NonNull AddCallParams build() {
-                return new AddCallParams(mCallerInfo, mNumber, mPostDialDigits, mViaNumber,
-                        mPresentation, mCallType, mFeatures, mAccountHandle, mStart, mDuration,
-                        mDataUsage, mAddForAllUsers, mUserToBeInsertedTo, mIsRead, mCallBlockReason,
-                        mCallScreeningAppName, mCallScreeningComponentName, mMissedReason,
-                        mPriority, mSubject, mLatitude, mLongitude, mPictureUri,
-                        mIsPhoneAccountMigrationPending);
+                if (Flags.businessCallComposer()) {
+                    return new AddCallParams(mCallerInfo, mNumber, mPostDialDigits, mViaNumber,
+                            mPresentation, mCallType, mFeatures, mAccountHandle, mStart, mDuration,
+                            mDataUsage, mAddForAllUsers, mUserToBeInsertedTo, mIsRead,
+                            mCallBlockReason,
+                            mCallScreeningAppName, mCallScreeningComponentName, mMissedReason,
+                            mPriority, mSubject, mLatitude, mLongitude, mPictureUri,
+                            mIsPhoneAccountMigrationPending, mIsBusinessCall, mBusinessName);
+                } else {
+                    return new AddCallParams(mCallerInfo, mNumber, mPostDialDigits, mViaNumber,
+                            mPresentation, mCallType, mFeatures, mAccountHandle, mStart, mDuration,
+                            mDataUsage, mAddForAllUsers, mUserToBeInsertedTo, mIsRead,
+                            mCallBlockReason,
+                            mCallScreeningAppName, mCallScreeningComponentName, mMissedReason,
+                            mPriority, mSubject, mLatitude, mLongitude, mPictureUri,
+                            mIsPhoneAccountMigrationPending);
+                }
             }
         }
 
@@ -681,6 +715,8 @@ public class CallLog {
         private double mLongitude = Double.NaN;
         private Uri mPictureUri;
         private int mIsPhoneAccountMigrationPending;
+        private boolean mIsBusinessCall;
+        private String mBusinessName;
 
         private AddCallParams(CallerInfo callerInfo, String number, String postDialDigits,
                 String viaNumber, int presentation, int callType, int features,
@@ -715,6 +751,43 @@ public class CallLog {
             mLongitude = longitude;
             mPictureUri = pictureUri;
             mIsPhoneAccountMigrationPending = isPhoneAccountMigrationPending;
+        }
+
+        private AddCallParams(CallerInfo callerInfo, String number, String postDialDigits,
+                String viaNumber, int presentation, int callType, int features,
+                PhoneAccountHandle accountHandle, long start, int duration, long dataUsage,
+                boolean addForAllUsers, UserHandle userToBeInsertedTo, boolean isRead,
+                int callBlockReason,
+                CharSequence callScreeningAppName, String callScreeningComponentName,
+                long missedReason,
+                int priority, String subject, double latitude, double longitude, Uri pictureUri,
+                int isPhoneAccountMigrationPending, boolean isBusinessCall, String businessName) {
+            mCallerInfo = callerInfo;
+            mNumber = number;
+            mPostDialDigits = postDialDigits;
+            mViaNumber = viaNumber;
+            mPresentation = presentation;
+            mCallType = callType;
+            mFeatures = features;
+            mAccountHandle = accountHandle;
+            mStart = start;
+            mDuration = duration;
+            mDataUsage = dataUsage;
+            mAddForAllUsers = addForAllUsers;
+            mUserToBeInsertedTo = userToBeInsertedTo;
+            mIsRead = isRead;
+            mCallBlockReason = callBlockReason;
+            mCallScreeningAppName = callScreeningAppName;
+            mCallScreeningComponentName = callScreeningComponentName;
+            mMissedReason = missedReason;
+            mPriority = priority;
+            mSubject = subject;
+            mLatitude = latitude;
+            mLongitude = longitude;
+            mPictureUri = pictureUri;
+            mIsPhoneAccountMigrationPending = isPhoneAccountMigrationPending;
+            mIsBusinessCall = isBusinessCall;
+            mBusinessName = businessName;
         }
 
     }
@@ -914,6 +987,19 @@ public class CallLog {
          * <P>Type: TEXT</P>
          */
         public static final String NUMBER = "number";
+
+
+        /**
+         * Boolean indicating whether the call is a business call.
+         */
+        @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+        public static final String IS_BUSINESS_CALL = "is_business_call";
+
+        /**
+         * String that stores the asserted display name associated with business call.
+         */
+        @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
+        public static final String ASSERTED_DISPLAY_NAME = "asserted_display_name";
 
         /**
          * The number presenting rules set by the network.
@@ -1713,7 +1799,6 @@ public class CallLog {
             }
 
             ContentValues values = new ContentValues(14);
-
             values.put(NUMBER, params.mNumber);
             values.put(POST_DIAL_DIGITS, params.mPostDialDigits);
             values.put(VIA_NUMBER, params.mViaNumber);
@@ -1746,7 +1831,10 @@ public class CallLog {
                 values.put(COMPOSER_PHOTO_URI, params.mPictureUri.toString());
             }
             values.put(IS_PHONE_ACCOUNT_MIGRATION_PENDING, params.mIsPhoneAccountMigrationPending);
-
+            if (Flags.businessCallComposer()) {
+                values.put(IS_BUSINESS_CALL, Integer.valueOf(params.mIsBusinessCall ? 1 : 0));
+                values.put(ASSERTED_DISPLAY_NAME, params.mBusinessName);
+            }
             if ((params.mCallerInfo != null) && (params.mCallerInfo.getContactId() > 0)) {
                 // Update usage information for the number associated with the contact ID.
                 // We need to use both the number and the ID for obtaining a data ID since other

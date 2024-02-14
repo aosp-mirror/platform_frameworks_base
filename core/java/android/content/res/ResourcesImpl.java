@@ -200,7 +200,7 @@ public class ResourcesImpl {
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;
         mConfiguration.setToDefaults();
-        updateConfigurationImpl(config, metrics, displayAdjustments.getCompatibilityInfo(), true);
+        updateConfiguration(config, metrics, displayAdjustments.getCompatibilityInfo());
     }
 
     public DisplayAdjustments getDisplayAdjustments() {
@@ -402,12 +402,7 @@ public class ResourcesImpl {
     }
 
     public void updateConfiguration(Configuration config, DisplayMetrics metrics,
-            CompatibilityInfo compat) {
-        updateConfigurationImpl(config, metrics, compat, false);
-    }
-
-    private void updateConfigurationImpl(Configuration config, DisplayMetrics metrics,
-                                    CompatibilityInfo compat, boolean forceAssetsRefresh) {
+                                    CompatibilityInfo compat) {
         Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "ResourcesImpl#updateConfiguration");
         try {
             synchronized (mAccessLock) {
@@ -533,7 +528,7 @@ public class ResourcesImpl {
                     keyboardHidden = mConfiguration.keyboardHidden;
                 }
 
-                mAssets.setConfigurationInternal(mConfiguration.mcc, mConfiguration.mnc,
+                mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
                         defaultLocale,
                         selectedLocales,
                         mConfiguration.orientation,
@@ -544,7 +539,7 @@ public class ResourcesImpl {
                         mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
                         mConfiguration.screenLayout, mConfiguration.uiMode,
                         mConfiguration.colorMode, mConfiguration.getGrammaticalGender(),
-                        Build.VERSION.RESOURCES_SDK_INT, forceAssetsRefresh);
+                        Build.VERSION.RESOURCES_SDK_INT);
 
                 if (DEBUG_CONFIG) {
                     Slog.i(TAG, "**** Updating config of " + this + ": final config is "

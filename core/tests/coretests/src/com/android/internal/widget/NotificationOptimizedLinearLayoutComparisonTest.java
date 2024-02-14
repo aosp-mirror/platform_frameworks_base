@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.flags.Flags;
 
 import androidx.test.InstrumentationRegistry;
@@ -73,7 +74,7 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
 
     private static final int[] LAYOUT_PARAMS = {MATCH_PARENT, WRAP_CONTENT, 0, 50};
     private static final int[] CHILD_WEIGHTS = {0, 1};
-
+    private static final int[] CHILD_MARGINS = {0, 10, -10};
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
@@ -84,35 +85,96 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
         mContext = InstrumentationRegistry.getTargetContext();
     }
 
+
     @Test
     public void test() throws Throwable {
+        final List<View> controlChildren =
+                new ArrayList<>();
+        final List<View> testChildren =
+                new ArrayList<>();
+
+        final View controlChild1 = buildChildView();
+        final View controlChild2 = buildChildView();
+        controlChildren.add(controlChild1);
+        controlChildren.add(controlChild2);
+
+        final View testChild1 = buildChildView();
+        final View testChild2 = buildChildView();
+        testChildren.add(testChild1);
+        testChildren.add(testChild2);
+
+        final LinearLayout controlContainer = buildLayout(false, controlChildren);
+
+        final LinearLayout testContainer = buildLayout(true, testChildren);
+
+        final LinearLayout.LayoutParams firstChildLayoutParams = new LinearLayout.LayoutParams(0,
+                0);
+        final LinearLayout.LayoutParams secondChildLayoutParams = new LinearLayout.LayoutParams(0,
+                0);
+        controlChild1.setLayoutParams(firstChildLayoutParams);
+        controlChild2.setLayoutParams(secondChildLayoutParams);
+        testChild1.setLayoutParams(firstChildLayoutParams);
+        testChild2.setLayoutParams(secondChildLayoutParams);
+
         for (int orientation : ORIENTATIONS) {
-            for (int widthSpec : MEASURE_SPECS) {
-                for (int heightSpec : MEASURE_SPECS) {
-                    for (int firstChildGravity : GRAVITIES) {
-                        for (int secondChildGravity : GRAVITIES) {
-                            for (int firstChildLayoutWidth : LAYOUT_PARAMS) {
-                                for (int firstChildLayoutHeight : LAYOUT_PARAMS) {
-                                    for (int secondChildLayoutWidth : LAYOUT_PARAMS) {
-                                        for (int secondChildLayoutHeight : LAYOUT_PARAMS) {
+            controlContainer.setOrientation(orientation);
+            testContainer.setOrientation(orientation);
+
+            for (int firstChildLayoutWidth : LAYOUT_PARAMS) {
+                firstChildLayoutParams.width = firstChildLayoutWidth;
+                for (int firstChildLayoutHeight : LAYOUT_PARAMS) {
+                    firstChildLayoutParams.height = firstChildLayoutHeight;
+
+                    for (int secondChildLayoutWidth : LAYOUT_PARAMS) {
+                        secondChildLayoutParams.width = secondChildLayoutWidth;
+                        for (int secondChildLayoutHeight : LAYOUT_PARAMS) {
+                            secondChildLayoutParams.height = secondChildLayoutHeight;
+
+                            for (int firstChildMargin : CHILD_MARGINS) {
+                                firstChildLayoutParams.setMargins(firstChildMargin,
+                                        firstChildMargin, firstChildMargin, firstChildMargin);
+                                for (int secondChildMargin : CHILD_MARGINS) {
+                                    secondChildLayoutParams.setMargins(secondChildMargin,
+                                            secondChildMargin, secondChildMargin,
+                                            secondChildMargin);
+
+                                    for (int firstChildGravity : GRAVITIES) {
+                                        firstChildLayoutParams.gravity = firstChildGravity;
+                                        for (int secondChildGravity : GRAVITIES) {
+                                            secondChildLayoutParams.gravity = secondChildGravity;
+
                                             for (int firstChildWeight : CHILD_WEIGHTS) {
+                                                firstChildLayoutParams.weight = firstChildWeight;
                                                 for (int secondChildWeight : CHILD_WEIGHTS) {
-                                                    executeTest(/*testSpec =*/createTestSpec(
-                                                            orientation,
-                                                            widthSpec, heightSpec,
-                                                            firstChildLayoutWidth,
-                                                            firstChildLayoutHeight,
-                                                            secondChildLayoutWidth,
-                                                            secondChildLayoutHeight,
-                                                            firstChildGravity,
-                                                            secondChildGravity,
-                                                            firstChildWeight,
-                                                            secondChildWeight));
+                                                    secondChildLayoutParams.weight =
+                                                            secondChildWeight;
+
+                                                    for (int widthSpec : MEASURE_SPECS) {
+                                                        for (int heightSpec : MEASURE_SPECS) {
+                                                            executeTest(controlContainer,
+                                                                    testContainer,
+                                                                    createTestSpec(
+                                                                            orientation,
+                                                                            widthSpec, heightSpec,
+                                                                            firstChildLayoutWidth,
+                                                                            firstChildLayoutHeight,
+                                                                            secondChildLayoutWidth,
+                                                                            secondChildLayoutHeight,
+                                                                            firstChildGravity,
+                                                                            secondChildGravity,
+                                                                            firstChildWeight,
+                                                                            secondChildWeight,
+                                                                            firstChildMargin,
+                                                                            secondChildMargin)
+                                                            );
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
+
                             }
                         }
                     }
@@ -121,47 +183,8 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
         }
     }
 
-    private void executeTest(TestSpec testSpec) {
-        // GIVEN
-        final List<View> controlChildren =
-                new ArrayList<>();
-        final List<View> testChildren =
-                new ArrayList<>();
-
-        controlChildren.add(
-                buildChildView(
-                        testSpec.mFirstChildLayoutWidth,
-                        testSpec.mFirstChildLayoutHeight,
-                        testSpec.mFirstChildGravity,
-                        testSpec.mFirstChildWeight));
-        controlChildren.add(
-                buildChildView(
-                        testSpec.mSecondChildLayoutWidth,
-                        testSpec.mSecondChildLayoutHeight,
-                        testSpec.mSecondChildGravity,
-                        testSpec.mSecondChildWeight));
-
-        testChildren.add(
-                buildChildView(
-                        testSpec.mFirstChildLayoutWidth,
-                        testSpec.mFirstChildLayoutHeight,
-                        testSpec.mFirstChildGravity,
-                        testSpec.mFirstChildWeight));
-        testChildren.add(
-                buildChildView(
-                        testSpec.mSecondChildLayoutWidth,
-                        testSpec.mSecondChildLayoutHeight,
-                        testSpec.mSecondChildGravity,
-                        testSpec.mSecondChildWeight));
-
-        final LinearLayout controlContainer = buildLayout(false,
-                testSpec.mOrientation,
-                controlChildren);
-
-        final LinearLayout testContainer = buildLayout(true,
-                testSpec.mOrientation,
-                testChildren);
-
+    private void executeTest(LinearLayout controlContainer, LinearLayout testContainer,
+            TestSpec testSpec) {
         // WHEN
         controlContainer.measure(testSpec.mWidthSpec, testSpec.mHeightSpec);
         testContainer.measure(testSpec.mWidthSpec, testSpec.mHeightSpec);
@@ -170,6 +193,7 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
         // THEN
         assertLayoutsEqual("Test Case:" + testSpec, controlContainer, testContainer);
     }
+
 
     private static class TestSpec {
         private final int mOrientation;
@@ -183,6 +207,8 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
         private final int mSecondChildGravity;
         private final int mFirstChildWeight;
         private final int mSecondChildWeight;
+        private final int mFirstChildMargin;
+        private final int mSecondChildMargin;
 
         TestSpec(
                 int orientation,
@@ -195,7 +221,9 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
                 int firstChildGravity,
                 int secondChildGravity,
                 int firstChildWeight,
-                int secondChildWeight) {
+                int secondChildWeight,
+                int firstChildMargin,
+                int secondChildMargin) {
             mOrientation = orientation;
             mWidthSpec = widthSpec;
             mHeightSpec = heightSpec;
@@ -207,6 +235,8 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
             mSecondChildGravity = secondChildGravity;
             mFirstChildWeight = firstChildWeight;
             mSecondChildWeight = secondChildWeight;
+            mFirstChildMargin = firstChildMargin;
+            mSecondChildMargin = secondChildMargin;
         }
 
         @Override
@@ -223,6 +253,8 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
                     + ", mSecondChildGravity=" + mSecondChildGravity
                     + ", mFirstChildWeight=" + mFirstChildWeight
                     + ", mSecondChildWeight=" + mSecondChildWeight
+                    + ", mFirstChildMargin=" + mFirstChildMargin
+                    + ", mSecondChildMargin=" + mSecondChildMargin
                     + '}';
         }
 
@@ -246,15 +278,13 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
         }
     }
 
-    private LinearLayout buildLayout(boolean isNotificationOptimized,
-            @LinearLayout.OrientationMode int orientation, List<View> children) {
+    private LinearLayout buildLayout(boolean isNotificationOptimized, List<View> children) {
         final LinearLayout linearLayout;
         if (isNotificationOptimized) {
             linearLayout = new NotificationOptimizedLinearLayout(mContext);
         } else {
             linearLayout = new LinearLayout(mContext);
         }
-        linearLayout.setOrientation(orientation);
         for (int i = 0; i < children.size(); i++) {
             linearLayout.addView(children.get(i));
         }
@@ -262,7 +292,8 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
     }
 
     private void assertLayoutsEqual(String testCase, View controlView, View testView) {
-        mExpect.withMessage("MeasuredWidths are not equal. Test Case:" + testCase)
+        mExpect.withMessage(
+                        "MeasuredWidths are not equal. Test Case:" + testCase)
                 .that(testView.getMeasuredWidth()).isEqualTo(controlView.getMeasuredWidth());
         mExpect.withMessage("MeasuredHeights are not equal. Test Case:" + testCase)
                 .that(testView.getMeasuredHeight()).isEqualTo(controlView.getMeasuredHeight());
@@ -286,23 +317,12 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
         }
     }
 
-    private static class TestView extends View {
-        TestView(Context context) {
-            super(context);
-        }
-
-        @Override
-        public int getBaseline() {
-            return 5;
-        }
-    }
-
-
     private TestSpec createTestSpec(int orientation,
             int widthSpec, int heightSpec,
             int firstChildLayoutWidth, int firstChildLayoutHeight, int secondChildLayoutWidth,
             int secondChildLayoutHeight, int firstChildGravity, int secondChildGravity,
-            int firstChildWeight, int secondChildWeight) {
+            int firstChildWeight, int secondChildWeight, int firstChildMargin,
+            int secondChildMargin) {
 
         return new TestSpec(
                 orientation,
@@ -314,16 +334,16 @@ public class NotificationOptimizedLinearLayoutComparisonTest {
                 firstChildGravity,
                 secondChildGravity,
                 firstChildWeight,
-                secondChildWeight);
+                secondChildWeight,
+                firstChildMargin,
+                secondChildMargin);
     }
 
-    private View buildChildView(int childLayoutWidth, int childLayoutHeight,
-            int childGravity, int childWeight) {
-        final View childView = new TestView(mContext);
-        // Set desired size using LayoutParams
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(childLayoutWidth,
-                childLayoutHeight, childWeight);
-        params.gravity = childGravity;
+    private View buildChildView() {
+        final View childView = new TextView(mContext);
+        // this is initial value. We are going to mutate this layout params during the test.
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(MATCH_PARENT,
+                WRAP_CONTENT);
         childView.setLayoutParams(params);
         return childView;
     }

@@ -180,7 +180,8 @@ public interface ImeTracker {
             PHASE_CLIENT_ANIMATION_RUNNING,
             PHASE_CLIENT_ANIMATION_CANCEL,
             PHASE_CLIENT_ANIMATION_FINISHED_SHOW,
-            PHASE_CLIENT_ANIMATION_FINISHED_HIDE
+            PHASE_CLIENT_ANIMATION_FINISHED_HIDE,
+            PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Phase {}
@@ -239,7 +240,7 @@ public interface ImeTracker {
     /** Applied the IME visibility. */
     int PHASE_SERVER_APPLY_IME_VISIBILITY = ImeProtoEnums.PHASE_SERVER_APPLY_IME_VISIBILITY;
 
-    /** Created the show IME runner. */
+    /** Started the show IME runner. */
     int PHASE_WM_SHOW_IME_RUNNER = ImeProtoEnums.PHASE_WM_SHOW_IME_RUNNER;
 
     /** Ready to show IME. */
@@ -317,6 +318,10 @@ public interface ImeTracker {
 
     /** Finished the IME window insets hide animation. */
     int PHASE_CLIENT_ANIMATION_FINISHED_HIDE = ImeProtoEnums.PHASE_CLIENT_ANIMATION_FINISHED_HIDE;
+
+    /** Aborted the request to show the IME post layout. */
+    int PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT =
+            ImeProtoEnums.PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT;
 
     /**
      * Creates an IME show request tracking token.

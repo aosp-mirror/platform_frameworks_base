@@ -15,17 +15,28 @@
  */
 package com.android.wm.shell.bubbles.bar;
 
+import static android.view.View.SCALE_X;
+import static android.view.View.SCALE_Y;
+import static android.view.View.TRANSLATION_X;
+import static android.view.View.TRANSLATION_Y;
 import static android.view.View.VISIBLE;
+import static android.view.View.X;
+import static android.view.View.Y;
+
+import static com.android.wm.shell.animation.Interpolators.EMPHASIZED;
+import static com.android.wm.shell.animation.Interpolators.EMPHASIZED_DECELERATE;
+import static com.android.wm.shell.bubbles.bar.BubbleBarExpandedView.CORNER_RADIUS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.Size;
-import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
@@ -48,15 +59,16 @@ public class BubbleBarAnimationHelper {
     private static final float EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT = 0.1f;
     private static final float EXPANDED_VIEW_ANIMATE_OUT_SCALE_AMOUNT = .75f;
     private static final int EXPANDED_VIEW_ALPHA_ANIMATION_DURATION = 150;
-    private static final int EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION = 100;
-    private static final int EXPANDED_VIEW_ANIMATE_POSITION_DURATION = 300;
+    private static final int EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION = 400;
+    private static final int EXPANDED_VIEW_ANIMATE_TO_REST_DURATION = 400;
     private static final int EXPANDED_VIEW_DISMISS_DURATION = 250;
-    private static final int EXPANDED_VIEW_DRAG_ANIMATION_DURATION = 150;
+    private static final int EXPANDED_VIEW_DRAG_ANIMATION_DURATION = 400;
     /**
      * Additional scale applied to expanded view when it is positioned inside a magnetic target.
      */
-    private static final float EXPANDED_VIEW_IN_TARGET_SCALE = 0.6f;
-    private static final float EXPANDED_VIEW_DRAG_SCALE = 0.5f;
+    private static final float EXPANDED_VIEW_IN_TARGET_SCALE = 0.2f;
+    private static final float EXPANDED_VIEW_DRAG_SCALE = 0.4f;
+    private static final float DISMISS_VIEW_SCALE = 1.25f;
 
     /** Spring config for the expanded view scale-in animation. */
     private final PhysicsAnimator.SpringConfig mScaleInSpringConfig =
@@ -71,6 +83,9 @@ public class BubbleBarAnimationHelper {
 
     /** Animator for animating the expanded view's alpha (including the TaskView inside it). */
     private final ValueAnimator mExpandedViewAlphaAnimator = ValueAnimator.ofFloat(0f, 1f);
+
+    @Nullable
+    private Animator mRunningDragAnimator;
 
     private final Context mContext;
     private final BubbleBarLayerView mLayerView;
@@ -232,14 +247,18 @@ public class BubbleBarAnimationHelper {
             Log.w(TAG, "Trying to animate start drag without a bubble");
             return;
         }
-        bbev.setPivotX(bbev.getWidth() / 2f);
-        bbev.setPivotY(0f);
-        bbev.animate()
-                .scaleX(EXPANDED_VIEW_DRAG_SCALE)
-                .scaleY(EXPANDED_VIEW_DRAG_SCALE)
-                .setInterpolator(Interpolators.EMPHASIZED)
-                .setDuration(EXPANDED_VIEW_DRAG_ANIMATION_DURATION)
-                .start();
+        setDragPivot(bbev);
+        AnimatorSet animatorSet = new AnimatorSet();
+        // Corner radius gets scaled, apply the reverse scale to ensure we have the desired radius
+        final float cornerRadius = bbev.getDraggedCornerRadius() / EXPANDED_VIEW_DRAG_SCALE;
+        animatorSet.playTogether(
+                ObjectAnimator.ofFloat(bbev, SCALE_X, EXPANDED_VIEW_DRAG_SCALE),
+                ObjectAnimator.ofFloat(bbev, SCALE_Y, EXPANDED_VIEW_DRAG_SCALE),
+                ObjectAnimator.ofFloat(bbev, CORNER_RADIUS, cornerRadius)
+        );
+        animatorSet.setDuration(EXPANDED_VIEW_DRAG_ANIMATION_DURATION).setInterpolator(EMPHASIZED);
+        animatorSet.addListener(new DragAnimatorListenerAdapter(bbev));
+        startNewDragAnimation(animatorSet);
     }
 
     /**
@@ -258,6 +277,7 @@ public class BubbleBarAnimationHelper {
         int[] location = bbev.getLocationOnScreen();
         int diffFromBottom = mPositioner.getScreenRect().bottom - location[1];
 
+        cancelAnimations();
         bbev.animate()
                 // 2x distance from bottom so the view flies out
                 .translationYBy(diffFromBottom * 2)
@@ -276,19 +296,24 @@ public class BubbleBarAnimationHelper {
             return;
         }
         Point restPoint = getExpandedViewRestPosition(getExpandedViewSize());
-        bbev.animate()
-                .x(restPoint.x)
-                .y(restPoint.y)
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(EXPANDED_VIEW_ANIMATE_POSITION_DURATION)
-                .setInterpolator(Interpolators.EMPHASIZED_DECELERATE)
-                .withStartAction(() -> bbev.setAnimating(true))
-                .withEndAction(() -> {
-                    bbev.setAnimating(false);
-                    bbev.resetPivot();
-                })
-                .start();
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(
+                ObjectAnimator.ofFloat(bbev, X, restPoint.x),
+                ObjectAnimator.ofFloat(bbev, Y, restPoint.y),
+                ObjectAnimator.ofFloat(bbev, SCALE_X, 1f),
+                ObjectAnimator.ofFloat(bbev, SCALE_Y, 1f),
+                ObjectAnimator.ofFloat(bbev, CORNER_RADIUS, bbev.getRestingCornerRadius())
+        );
+        animatorSet.setDuration(EXPANDED_VIEW_ANIMATE_TO_REST_DURATION).setInterpolator(EMPHASIZED);
+        animatorSet.addListener(new DragAnimatorListenerAdapter(bbev) {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                bbev.resetPivot();
+            }
+        });
+        startNewDragAnimation(animatorSet);
     }
 
     /**
@@ -304,17 +329,7 @@ public class BubbleBarAnimationHelper {
             return;
         }
 
-        // Calculate scale of expanded view so it fits inside the magnetic target
-        float bbevMaxSide = Math.max(bbev.getWidth(), bbev.getHeight());
-        View targetView = target.getTargetView();
-        float targetMaxSide = Math.max(targetView.getWidth(), targetView.getHeight());
-        // Reduce target size to have some padding between the target and expanded view
-        targetMaxSide *= EXPANDED_VIEW_IN_TARGET_SCALE;
-        float scaleInTarget = targetMaxSide / bbevMaxSide;
-
-        // Scale around the top center of the expanded view. Same as when dragging.
-        bbev.setPivotX(bbev.getWidth() / 2f);
-        bbev.setPivotY(0);
+        setDragPivot(bbev);
 
         // When the view animates into the target, it is scaled down with the pivot at center top.
         // Find the point on the view that would be the center of the view at its final scale.
@@ -330,13 +345,13 @@ public class BubbleBarAnimationHelper {
         // Get scaled width of the view and adjust mTmpLocation so that point on x-axis is at the
         // center of the view at its current size.
         float currentWidth = bbev.getWidth() * bbev.getScaleX();
-        mTmpLocation[0] += currentWidth / 2;
+        mTmpLocation[0] += (int) (currentWidth / 2f);
         // Since pivotY is at the top of the view, at final scale, top coordinate of the view
         // remains the same.
         // Get height of the view at final scale and adjust mTmpLocation so that point on y-axis is
         // moved down by half of the height at final scale.
-        float targetHeight = bbev.getHeight() * scaleInTarget;
-        mTmpLocation[1] += targetHeight / 2;
+        float targetHeight = bbev.getHeight() * EXPANDED_VIEW_IN_TARGET_SCALE;
+        mTmpLocation[1] += (int) (targetHeight / 2f);
         // mTmpLocation is now set to the point on the view that will be the center of the view once
         // scale is applied.
 
@@ -344,41 +359,61 @@ public class BubbleBarAnimationHelper {
         float xDiff = target.getCenterOnScreen().x - mTmpLocation[0];
         float yDiff = target.getCenterOnScreen().y - mTmpLocation[1];
 
-        bbev.animate()
-                .translationX(bbev.getTranslationX() + xDiff)
-                .translationY(bbev.getTranslationY() + yDiff)
-                .scaleX(scaleInTarget)
-                .scaleY(scaleInTarget)
-                .setDuration(EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION)
-                .setInterpolator(Interpolators.EMPHASIZED)
-                .withStartAction(() -> bbev.setAnimating(true))
-                .withEndAction(() -> {
-                    bbev.setAnimating(false);
-                    if (endRunnable != null) {
-                        endRunnable.run();
-                    }
-                })
-                .start();
+        // Corner radius gets scaled, apply the reverse scale to ensure we have the desired radius
+        final float cornerRadius = bbev.getDraggedCornerRadius() / EXPANDED_VIEW_IN_TARGET_SCALE;
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(
+                // Move expanded view to the center of dismiss view
+                ObjectAnimator.ofFloat(bbev, TRANSLATION_X, bbev.getTranslationX() + xDiff),
+                ObjectAnimator.ofFloat(bbev, TRANSLATION_Y, bbev.getTranslationY() + yDiff),
+                // Scale expanded view down
+                ObjectAnimator.ofFloat(bbev, SCALE_X, EXPANDED_VIEW_IN_TARGET_SCALE),
+                ObjectAnimator.ofFloat(bbev, SCALE_Y, EXPANDED_VIEW_IN_TARGET_SCALE),
+                // Update corner radius for expanded view
+                ObjectAnimator.ofFloat(bbev, CORNER_RADIUS, cornerRadius),
+                // Scale dismiss view up
+                ObjectAnimator.ofFloat(target.getTargetView(), SCALE_X, DISMISS_VIEW_SCALE),
+                ObjectAnimator.ofFloat(target.getTargetView(), SCALE_Y, DISMISS_VIEW_SCALE)
+        );
+        animatorSet.setDuration(EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION).setInterpolator(
+                EMPHASIZED_DECELERATE);
+        animatorSet.addListener(new DragAnimatorListenerAdapter(bbev) {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if (endRunnable != null) {
+                    endRunnable.run();
+                }
+            }
+        });
+        startNewDragAnimation(animatorSet);
     }
 
     /**
      * Animate currently expanded view when it is released from dismiss view
      */
-    public void animateUnstuckFromDismissView() {
-        BubbleBarExpandedView expandedView = getExpandedView();
-        if (expandedView == null) {
+    public void animateUnstuckFromDismissView(MagneticTarget target) {
+        BubbleBarExpandedView bbev = getExpandedView();
+        if (bbev == null) {
             Log.w(TAG, "Trying to unsnap the expanded view from dismiss without a bubble");
             return;
         }
-        expandedView
-                .animate()
-                .scaleX(EXPANDED_VIEW_DRAG_SCALE)
-                .scaleY(EXPANDED_VIEW_DRAG_SCALE)
-                .setDuration(EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION)
-                .setInterpolator(Interpolators.EMPHASIZED)
-                .withStartAction(() -> expandedView.setAnimating(true))
-                .withEndAction(() -> expandedView.setAnimating(false))
-                .start();
+        setDragPivot(bbev);
+        // Corner radius gets scaled, apply the reverse scale to ensure we have the desired radius
+        final float cornerRadius = bbev.getDraggedCornerRadius() / EXPANDED_VIEW_DRAG_SCALE;
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(
+                ObjectAnimator.ofFloat(bbev, SCALE_X, EXPANDED_VIEW_DRAG_SCALE),
+                ObjectAnimator.ofFloat(bbev, SCALE_Y, EXPANDED_VIEW_DRAG_SCALE),
+                ObjectAnimator.ofFloat(bbev, CORNER_RADIUS, cornerRadius),
+                ObjectAnimator.ofFloat(target.getTargetView(), SCALE_X, 1f),
+                ObjectAnimator.ofFloat(target.getTargetView(), SCALE_Y, 1f)
+        );
+        animatorSet.setDuration(EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION).setInterpolator(
+                EMPHASIZED_DECELERATE);
+        animatorSet.addListener(new DragAnimatorListenerAdapter(bbev));
+        startNewDragAnimation(animatorSet);
     }
 
     /**
@@ -390,6 +425,10 @@ public class BubbleBarAnimationHelper {
         BubbleBarExpandedView bbev = getExpandedView();
         if (bbev != null) {
             bbev.animate().cancel();
+        }
+        if (mRunningDragAnimator != null) {
+            mRunningDragAnimator.cancel();
+            mRunningDragAnimator = null;
         }
     }
 
@@ -437,5 +476,36 @@ public class BubbleBarAnimationHelper {
         final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
         final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
         return new Size(width, height);
+    }
+
+    private void startNewDragAnimation(Animator animator) {
+        cancelAnimations();
+        mRunningDragAnimator = animator;
+        animator.start();
+    }
+
+    private static void setDragPivot(BubbleBarExpandedView bbev) {
+        bbev.setPivotX(bbev.getWidth() / 2f);
+        bbev.setPivotY(0f);
+    }
+
+    private class DragAnimatorListenerAdapter extends AnimatorListenerAdapter {
+
+        private final BubbleBarExpandedView mBubbleBarExpandedView;
+
+        DragAnimatorListenerAdapter(BubbleBarExpandedView bbev) {
+            mBubbleBarExpandedView = bbev;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            mBubbleBarExpandedView.setAnimating(true);
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mBubbleBarExpandedView.setAnimating(false);
+            mRunningDragAnimator = null;
+        }
     }
 }

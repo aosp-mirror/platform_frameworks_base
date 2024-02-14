@@ -27,6 +27,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OF
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -65,17 +66,21 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 /**
  * Persisted configuration for zen mode.
@@ -272,7 +277,12 @@ public class ZenModeConfig implements Parcelable {
     private static final String DEVICE_EFFECT_DISABLE_TOUCH = "zdeDisableTouch";
     private static final String DEVICE_EFFECT_MINIMIZE_RADIO_USAGE = "zdeMinimizeRadioUsage";
     private static final String DEVICE_EFFECT_MAXIMIZE_DOZE = "zdeMaximizeDoze";
+    private static final String DEVICE_EFFECT_EXTRAS = "zdeExtraEffects";
     private static final String DEVICE_EFFECT_USER_MODIFIED_FIELDS = "zdeUserModifiedFields";
+
+    private static final String ITEM_SEPARATOR = ",";
+    private static final String ITEM_SEPARATOR_ESCAPE = "\\";
+    private static final Pattern ITEM_SPLITTER_REGEX = Pattern.compile("(?<!\\\\),");
 
     @UnsupportedAppUsage
     public boolean allowAlarms = DEFAULT_ALLOW_ALARMS;
@@ -1099,6 +1109,7 @@ public class ZenModeConfig implements Parcelable {
                 .setShouldMinimizeRadioUsage(
                         safeBoolean(parser, DEVICE_EFFECT_MINIMIZE_RADIO_USAGE, false))
                 .setShouldMaximizeDoze(safeBoolean(parser, DEVICE_EFFECT_MAXIMIZE_DOZE, false))
+                .setExtraEffects(safeStringSet(parser, DEVICE_EFFECT_EXTRAS))
                 .build();
 
         return deviceEffects.hasEffects() ? deviceEffects : null;
@@ -1123,6 +1134,7 @@ public class ZenModeConfig implements Parcelable {
         writeBooleanIfTrue(out, DEVICE_EFFECT_MINIMIZE_RADIO_USAGE,
                 deviceEffects.shouldMinimizeRadioUsage());
         writeBooleanIfTrue(out, DEVICE_EFFECT_MAXIMIZE_DOZE, deviceEffects.shouldMaximizeDoze());
+        writeStringSet(out, DEVICE_EFFECT_EXTRAS, deviceEffects.getExtraEffects());
     }
 
     private static void writeBooleanIfTrue(TypedXmlSerializer out, String att, boolean value)
@@ -1130,6 +1142,26 @@ public class ZenModeConfig implements Parcelable {
         if (value) {
             out.attributeBoolean(null, att, true);
         }
+    }
+
+    private static void writeStringSet(TypedXmlSerializer out, String att, Set<String> values)
+            throws IOException {
+        if (values.isEmpty()) {
+            return;
+        }
+        // We escape each item  by replacing "\" by "\\" and "," by "\,". Then we concatenate with
+        // "," as separator. Reading performs the same operations in the opposite order.
+        List<String> escapedItems = new ArrayList<>();
+        for (String item : values) {
+            escapedItems.add(
+                    item
+                            .replace(ITEM_SEPARATOR_ESCAPE,
+                                    ITEM_SEPARATOR_ESCAPE + ITEM_SEPARATOR_ESCAPE)
+                            .replace(ITEM_SEPARATOR,
+                                    ITEM_SEPARATOR_ESCAPE + ITEM_SEPARATOR));
+        }
+        String serialized = String.join(ITEM_SEPARATOR, escapedItems);
+        out.attribute(null, att, serialized);
     }
 
     public static boolean isValidHour(int val) {
@@ -1180,6 +1212,26 @@ public class ZenModeConfig implements Parcelable {
     private static long safeLong(TypedXmlPullParser parser, String att, long defValue) {
         final String val = parser.getAttributeValue(null, att);
         return tryParseLong(val, defValue);
+    }
+
+    @NonNull
+    private static Set<String> safeStringSet(TypedXmlPullParser parser, String att) {
+        Set<String> values = new HashSet<>();
+
+        String serialized = parser.getAttributeValue(null, att);
+        if (!TextUtils.isEmpty(serialized)) {
+            // We split on every "," that is *not preceded* by the escape character "\".
+            // Then we reverse the escaping done on each individual item.
+            String[] escapedItems = ITEM_SPLITTER_REGEX.split(serialized);
+            for (String escapedItem : escapedItems) {
+                values.add(escapedItem
+                        .replace(ITEM_SEPARATOR_ESCAPE + ITEM_SEPARATOR_ESCAPE,
+                                ITEM_SEPARATOR_ESCAPE)
+                        .replace(ITEM_SEPARATOR_ESCAPE + ITEM_SEPARATOR,
+                                ITEM_SEPARATOR));
+            }
+        }
+        return values;
     }
 
     @Override

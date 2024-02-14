@@ -83,25 +83,6 @@ class AodToLockscreenTransitionViewModelTest : SysuiTestCase() {
             assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(1f)
         }
 
-    @Test
-    fun deviceEntryBackgroundView_rearFp_noUpdates() =
-        testScope.runTest {
-            fingerprintPropertyRepository.supportsRearFps()
-            val deviceEntryBackgroundViewAlpha by
-                collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
-            // no updates
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            assertThat(deviceEntryBackgroundViewAlpha).isNull()
-            repository.sendTransitionStep(step(0.1f))
-            assertThat(deviceEntryBackgroundViewAlpha).isNull()
-            repository.sendTransitionStep(step(0.3f))
-            assertThat(deviceEntryBackgroundViewAlpha).isNull()
-            repository.sendTransitionStep(step(0.6f))
-            assertThat(deviceEntryBackgroundViewAlpha).isNull()
-            repository.sendTransitionStep(step(1f))
-            assertThat(deviceEntryBackgroundViewAlpha).isNull()
-        }
-
     private fun step(
         value: Float,
         state: TransitionState = TransitionState.RUNNING

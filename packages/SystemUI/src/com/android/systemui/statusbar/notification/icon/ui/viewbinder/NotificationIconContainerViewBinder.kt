@@ -311,12 +311,13 @@ object NotificationIconContainerViewBinder {
                                 boundViewsByNotifKey[it.notifKey]?.first
                             }
                         val childCount = view.childCount
+                        val toRemove = mutableListOf<View>()
                         for (i in 0 until childCount) {
                             val actual = view.getChildAt(i)
                             val expected = expectedChildren.getOrNull(i)
                             if (expected == null) {
                                 Log.wtf(TAG, "[$logTag] Unexpected child $actual")
-                                view.removeView(actual)
+                                toRemove.add(actual)
                                 continue
                             }
                             if (actual === expected) {
@@ -324,6 +325,9 @@ object NotificationIconContainerViewBinder {
                             }
                             view.removeView(expected)
                             view.addView(expected, i)
+                        }
+                        for (child in toRemove) {
+                            view.removeView(child)
                         }
                     }
                 }

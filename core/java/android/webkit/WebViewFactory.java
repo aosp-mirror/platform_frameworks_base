@@ -285,10 +285,16 @@ public final class WebViewFactory {
             return LIBLOAD_WRONG_PACKAGE_NAME;
         }
 
+        Application initialApplication = AppGlobals.getInitialApplication();
         WebViewProviderResponse response = null;
         try {
-            response = getUpdateService().waitForAndGetProvider();
-        } catch (RemoteException e) {
+            if (Flags.updateServiceIpcWrapper()) {
+                response = initialApplication.getSystemService(WebViewUpdateManager.class)
+                        .waitForAndGetProvider();
+            } else {
+                response = getUpdateService().waitForAndGetProvider();
+            }
+        } catch (Exception e) {
             Log.e(LOGTAG, "error waiting for relro creation", e);
             return LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN;
         }
@@ -302,7 +308,7 @@ public final class WebViewFactory {
             return LIBLOAD_WRONG_PACKAGE_NAME;
         }
 
-        PackageManager packageManager = AppGlobals.getInitialApplication().getPackageManager();
+        PackageManager packageManager = initialApplication.getPackageManager();
         String libraryFileName;
         try {
             PackageInfo packageInfo = packageManager.getPackageInfo(packageName,
@@ -436,7 +442,12 @@ public final class WebViewFactory {
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
                     "WebViewUpdateService.waitForAndGetProvider()");
             try {
-                response = getUpdateService().waitForAndGetProvider();
+                if (Flags.updateServiceIpcWrapper()) {
+                    response = initialApplication.getSystemService(WebViewUpdateManager.class)
+                            .waitForAndGetProvider();
+                } else {
+                    response = getUpdateService().waitForAndGetProvider();
+                }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }

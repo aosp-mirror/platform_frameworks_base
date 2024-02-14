@@ -92,6 +92,7 @@ private const val SYS_BOOT_REASON_PROP = "sys.boot.reason.last"
 private const val REBOOT_MAINLINE_UPDATE = "reboot,mainline_update"
 private const val TAG = "BouncerMessageInteractor"
 
+/** Handles business logic for the primary bouncer message area. */
 @SysUISingleton
 class BouncerMessageInteractor
 @Inject

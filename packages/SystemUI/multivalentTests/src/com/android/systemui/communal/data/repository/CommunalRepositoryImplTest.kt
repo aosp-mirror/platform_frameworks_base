@@ -26,7 +26,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
@@ -80,7 +79,7 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             underTest = createRepositoryImpl(true)
 
-            sceneContainerRepository.setDesiredScene(SceneModel(key = SceneKey.Communal))
+            sceneContainerRepository.changeScene(SceneKey.Communal)
 
             val isCommunalHubShowing by collectLastValue(underTest.isCommunalHubShowing)
             assertThat(isCommunalHubShowing).isTrue()
@@ -91,7 +90,7 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             underTest = createRepositoryImpl(true)
 
-            sceneContainerRepository.setDesiredScene(SceneModel(key = SceneKey.Lockscreen))
+            sceneContainerRepository.changeScene(SceneKey.Lockscreen)
 
             val isCommunalHubShowing by collectLastValue(underTest.isCommunalHubShowing)
             assertThat(isCommunalHubShowing).isFalse()

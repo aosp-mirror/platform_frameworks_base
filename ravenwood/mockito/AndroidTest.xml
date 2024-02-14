@@ -22,8 +22,6 @@
         <option name="test-file-name" value="RavenwoodMockitoTest_device.apk" />
     </target_preparer>
 
-    <option name="test-tag" value="FrameworksMockingServicesTests" />
-
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.ravenwood.mockitotest" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />

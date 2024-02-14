@@ -19,12 +19,9 @@ package com.android.wm.shell.pip2.phone;
 import static android.view.WindowManager.SHELL_ROOT_LAYER_PIP;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.RemoteAction;
 import android.content.Context;
-import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -43,7 +40,6 @@ import com.android.wm.shell.common.pip.PipMediaController;
 import com.android.wm.shell.common.pip.PipMediaController.ActionListener;
 import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
-import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
@@ -97,26 +93,13 @@ public class PhonePipMenuController implements PipMenuController {
          * Called when the PIP requested to show the menu.
          */
         void onPipShowMenu();
-
-        /**
-         * Called when the PIP requested to enter Split.
-         */
-        void onEnterSplit();
     }
 
-    private final Matrix mMoveTransform = new Matrix();
-    private final Rect mTmpSourceBounds = new Rect();
-    private final RectF mTmpSourceRectF = new RectF();
-    private final RectF mTmpDestinationRectF = new RectF();
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
     private final PipMediaController mMediaController;
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
-
-    private final PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
-            mSurfaceControlTransactionFactory;
-    private final float[] mTmpTransform = new float[9];
 
     private final ArrayList<Listener> mListeners = new ArrayList<>();
     private final SystemWindows mSystemWindows;
@@ -151,9 +134,6 @@ public class PhonePipMenuController implements PipMenuController {
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
         mPipUiEventLogger = pipUiEventLogger;
-
-        mSurfaceControlTransactionFactory =
-                new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
     }
 
     public boolean isMenuVisible() {
@@ -244,13 +224,6 @@ public class PhonePipMenuController implements PipMenuController {
                 getPipMenuLayoutParams(mContext, MENU_WINDOW_TITLE, destinationBounds.width(),
                         destinationBounds.height()));
         updateMenuLayout(destinationBounds);
-    }
-
-    @Override
-    public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        if (mPipMenuView != null) {
-            mPipMenuView.onFocusTaskChanged(taskInfo);
-        }
     }
 
     /**
@@ -478,10 +451,6 @@ public class PhonePipMenuController implements PipMenuController {
 
     void onPipDismiss() {
         mListeners.forEach(Listener::onPipDismiss);
-    }
-
-    void onEnterSplit() {
-        mListeners.forEach(Listener::onEnterSplit);
     }
 
     /**

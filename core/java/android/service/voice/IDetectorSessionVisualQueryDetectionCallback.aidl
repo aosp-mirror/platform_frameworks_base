@@ -16,6 +16,7 @@
 
 package android.service.voice;
 
+import android.service.voice.VisualQueryAttentionResult;
 import android.service.voice.VisualQueryDetectedResult;
 
 /**
@@ -31,12 +32,12 @@ oneway interface IDetectorSessionVisualQueryDetectionCallback {
     /**
      * Called when the user attention is gained and intent to show the assistant icon in SysUI.
      */
-    void onAttentionGained();
+    void onAttentionGained(in VisualQueryAttentionResult attentionResult);
 
     /**
      * Called when the user attention is lost and intent to hide the assistant icon in SysUI.
      */
-    void onAttentionLost();
+    void onAttentionLost(int interactionIntention);
 
     /**
      * Called when the detected query is streamed.

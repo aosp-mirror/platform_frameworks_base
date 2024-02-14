@@ -49,15 +49,7 @@ class LegacyAppOpStateParser {
      */
     public int readState(AtomicFile file, SparseArray<SparseIntArray> uidModes,
             SparseArray<ArrayMap<String, SparseIntArray>> userPackageModes) {
-        FileInputStream stream;
-        try {
-            stream = file.openRead();
-        } catch (FileNotFoundException e) {
-            Slog.i(TAG, "No existing app ops " + file.getBaseFile() + "; starting empty");
-            return NO_FILE_VERSION;
-        }
-
-        try {
+        try (FileInputStream stream = file.openRead()) {
             TypedXmlPullParser parser = Xml.resolvePullParser(stream);
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
@@ -95,6 +87,9 @@ class LegacyAppOpStateParser {
                 }
             }
             return versionAtBoot;
+        } catch (FileNotFoundException e) {
+            Slog.i(TAG, "No existing app ops " + file.getBaseFile() + "; starting empty");
+            return NO_FILE_VERSION;
         } catch (XmlPullParserException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {

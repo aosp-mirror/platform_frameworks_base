@@ -921,7 +921,33 @@ package android.companion {
 package android.companion.virtual {
 
   public final class VirtualDeviceManager {
+    method public int getAudioPlaybackSessionId(int);
+    method public int getAudioRecordingSessionId(int);
+    method public int getDeviceIdForDisplayId(int);
+    method public int getDevicePolicy(int, int);
     method @FlaggedApi("android.companion.virtual.flags.interactive_screen_mirror") public boolean isVirtualDeviceOwnedMirrorDisplay(int);
+    method public void playSoundEffect(int, int);
+  }
+
+}
+
+package android.companion.virtual.camera {
+
+  @FlaggedApi("android.companion.virtual.flags.virtual_camera") public final class VirtualCamera implements java.io.Closeable {
+    method @NonNull public String getId();
+  }
+
+}
+
+package android.companion.virtual.sensor {
+
+  public final class VirtualSensor implements android.os.Parcelable {
+    ctor public VirtualSensor(int, int, @NonNull String);
+    method public int getHandle();
+  }
+
+  public final class VirtualSensorConfig implements android.os.Parcelable {
+    method public int getFlags();
   }
 
 }
@@ -988,6 +1014,7 @@ package android.content {
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
     method public void updateDeviceId(int);
+    method public abstract void updateDisplay(int);
     field public static final String ATTENTION_SERVICE = "attention";
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
     field public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
@@ -1001,6 +1028,7 @@ package android.content {
 
   public class ContextWrapper extends android.content.Context {
     method public int getDisplayId();
+    method public void updateDisplay(int);
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
@@ -2089,7 +2117,7 @@ package android.media.metrics {
 package android.media.projection {
 
   public final class MediaProjectionManager {
-    method @NonNull public android.content.Intent createScreenCaptureIntent(@Nullable android.app.ActivityOptions.LaunchCookie);
+    method @NonNull public android.content.Intent createScreenCaptureIntent(@NonNull android.app.ActivityOptions.LaunchCookie);
   }
 
 }
@@ -2707,17 +2735,17 @@ package android.os.vibrator {
 
 package android.os.vibrator.persistence {
 
-  @FlaggedApi("android.os.vibrator.enable_vibration_serialization_apis") public class ParsedVibration {
+  public class ParsedVibration {
     method @NonNull public java.util.List<android.os.VibrationEffect> getVibrationEffects();
     method @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
   }
 
-  @FlaggedApi("android.os.vibrator.enable_vibration_serialization_apis") public final class VibrationXmlParser {
+  public final class VibrationXmlParser {
     method @Nullable public static android.os.vibrator.persistence.ParsedVibration parseDocument(@NonNull java.io.Reader) throws java.io.IOException;
     method @Nullable public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.Reader) throws java.io.IOException;
   }
 
-  @FlaggedApi("android.os.vibrator.enable_vibration_serialization_apis") public final class VibrationXmlSerializer {
+  public final class VibrationXmlSerializer {
     method public static void serialize(@NonNull android.os.VibrationEffect, @NonNull java.io.Writer) throws java.io.IOException, android.os.vibrator.persistence.VibrationXmlSerializer.SerializationFailedException;
   }
 
@@ -3056,6 +3084,14 @@ package android.service.notification {
     method @Deprecated public boolean isBound();
   }
 
+  @FlaggedApi("android.app.modes_api") public final class ZenDeviceEffects implements android.os.Parcelable {
+    method @NonNull public java.util.Set<java.lang.String> getExtraEffects();
+  }
+
+  @FlaggedApi("android.app.modes_api") public static final class ZenDeviceEffects.Builder {
+    method @NonNull public android.service.notification.ZenDeviceEffects.Builder setExtraEffects(@NonNull java.util.Set<java.lang.String>);
+  }
+
   public final class ZenPolicy implements android.os.Parcelable {
     method @FlaggedApi("android.app.modes_api") @NonNull public android.service.notification.ZenPolicy overwrittenWith(@Nullable android.service.notification.ZenPolicy);
   }
@@ -3155,7 +3191,6 @@ package android.service.voice {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorForTest(@NonNull String, @NonNull java.util.Locale, @NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorForTest(@NonNull String, @NonNull java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull public final java.util.List<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> listModuleProperties();
-    method @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") @RequiresPermission(android.Manifest.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT) public final void resetHotwordTrainingDataEgressCountForTest();
     method public final void setTestModuleForAlwaysOnHotwordDetectorEnabled(boolean);
   }
 
@@ -3537,6 +3572,7 @@ package android.view {
   public final class Display {
     method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearUserPreferredDisplayMode();
     method @NonNull public android.view.Display.Mode getDefaultMode();
+    method public int getRemoveMode();
     method @NonNull public int[] getReportedHdrTypes();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method @Nullable public android.view.Display.Mode getSystemPreferredDisplayMode();
@@ -3901,7 +3937,7 @@ package android.view.inputmethod {
   }
 
   public final class InputMethodInfo implements android.os.Parcelable {
-    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, @NonNull String, boolean, @NonNull String);
+    ctor @FlaggedApi("android.view.inputmethod.connectionless_handwriting") public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, @NonNull String, boolean, boolean, @NonNull String);
     ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, int);
     field public static final int COMPONENT_NAME_MAX_LENGTH = 1000; // 0x3e8
     field public static final int MAX_IMES_PER_PACKAGE = 20; // 0x14

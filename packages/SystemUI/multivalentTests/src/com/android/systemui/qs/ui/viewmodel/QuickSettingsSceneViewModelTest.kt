@@ -29,8 +29,8 @@ import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
@@ -120,8 +120,8 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
-                        UserAction.Back to SceneModel(SceneKey.Shade),
-                        UserAction.Swipe(Direction.UP) to SceneModel(SceneKey.Shade),
+                        UserAction.Back to UserActionResult(SceneKey.Shade),
+                        UserAction.Swipe(Direction.UP) to UserActionResult(SceneKey.Shade),
                     )
                 )
         }
@@ -135,7 +135,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
-                        UserAction.Back to SceneModel(SceneKey.QuickSettings),
+                        UserAction.Back to UserActionResult(SceneKey.QuickSettings),
                     )
                 )
         }

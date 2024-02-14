@@ -7,6 +7,7 @@ import android.view.WindowInsets
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +34,7 @@ class SceneWindowRootView(
         flags: SceneContainerFlags,
         scenes: Set<Scene>,
         layoutInsetController: LayoutInsetsController,
+        sceneDataSourceDelegator: SceneDataSourceDelegator,
     ) {
         this.viewModel = viewModel
         setLayoutInsetsController(layoutInsetController)
@@ -46,7 +48,8 @@ class SceneWindowRootView(
             scenes = scenes,
             onVisibilityChangedInternal = { isVisible ->
                 super.setVisibility(if (isVisible) View.VISIBLE else View.INVISIBLE)
-            }
+            },
+            dataSourceDelegator = sceneDataSourceDelegator,
         )
     }
 

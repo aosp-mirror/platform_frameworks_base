@@ -263,12 +263,5 @@ abstract class AbstractDetector implements HotwordDetector {
                         result != null ? result : new HotwordRejectedResult.Builder().build());
             }));
         }
-
-        @Override
-        public void onTrainingData(HotwordTrainingData data) {
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
-                mCallback.onTrainingData(data);
-            }));
-        }
     }
 }

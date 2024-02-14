@@ -171,12 +171,27 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final MediaCommunicationManager.SessionCallback mSession2TokenCallback =
             new MediaCommunicationManager.SessionCallback() {
                 @Override
+                // TODO (b/324266224): Deprecate this method once other overload is published.
                 public void onSession2TokenCreated(Session2Token token) {
+                    addSession(token, Process.INVALID_PID);
+                }
+
+                @Override
+                public void onSession2TokenCreated(Session2Token token, int pid) {
+                    addSession(token, pid);
+                }
+
+                private void addSession(Session2Token token, int pid) {
                     if (DEBUG) {
                         Log.d(TAG, "Session2 is created " + token);
                     }
-                    MediaSession2Record record = new MediaSession2Record(token,
-                            MediaSessionService.this, mRecordThread.getLooper(), 0);
+                    MediaSession2Record record =
+                            new MediaSession2Record(
+                                    token,
+                                    MediaSessionService.this,
+                                    mRecordThread.getLooper(),
+                                    pid,
+                                    /* policies= */ 0);
                     synchronized (mLock) {
                         FullUserRecord user = getFullUserRecordLocked(record.getUserId());
                         if (user != null) {
@@ -583,7 +598,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
         ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
                 record.getForegroundServiceDelegationOptions();
-        if (foregroundServiceDelegationOptions == null) {
+        if (foregroundServiceDelegationOptions == null
+                || foregroundServiceDelegationOptions.mClientPid == Process.INVALID_PID) {
             // This record doesn't support FGS delegation. In practice, this is MediaSession2.
             return;
         }

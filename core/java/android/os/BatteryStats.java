@@ -1899,7 +1899,7 @@ public abstract class BatteryStats {
         public short batteryTemperature;
         // Battery voltage in millivolts (mV).
         @UnsupportedAppUsage
-        public char batteryVoltage;
+        public short batteryVoltage;
 
         // The charge of the battery in micro-Ampere-hours.
         public int batteryChargeUah;
@@ -2161,7 +2161,7 @@ public abstract class BatteryStats {
             batteryPlugType = (byte)((bat>>24)&0xf);
             int bat2 = src.readInt();
             batteryTemperature = (short)(bat2&0xffff);
-            batteryVoltage = (char)((bat2>>16)&0xffff);
+            batteryVoltage = (short) ((bat2 >> 16) & 0xffff);
             batteryChargeUah = src.readInt();
             modemRailChargeMah = src.readDouble();
             wifiRailChargeMah = src.readDouble();

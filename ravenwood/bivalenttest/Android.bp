@@ -1,0 +1,77 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+cc_library_shared {
+    name: "libravenwoodbivalenttest_jni",
+    host_supported: true,
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+
+    srcs: [
+        "jni/*.cpp",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libnativehelper",
+        "libutils",
+        "libcutils",
+    ],
+}
+
+android_ravenwood_test {
+    name: "RavenwoodBivalentTest",
+
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+    ],
+    srcs: [
+        "test/**/*.java",
+    ],
+    jni_libs: [
+        "libravenwoodbivalenttest_jni",
+    ],
+    sdk_version: "test_current",
+    auto_gen_config: true,
+}
+
+android_test {
+    name: "RavenwoodBivalentTest_device",
+
+    srcs: [
+        "test/**/*.java",
+    ],
+    static_libs: [
+        "junit",
+        "truth",
+
+        "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+
+        "ravenwood-junit",
+    ],
+    jni_libs: [
+        "libravenwoodbivalenttest_jni",
+    ],
+    test_suites: [
+        "device-tests",
+    ],
+    optimize: {
+        enabled: false,
+    },
+}

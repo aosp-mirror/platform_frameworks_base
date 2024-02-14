@@ -61,9 +61,18 @@ public class TvAdView extends ViewGroup {
      * The name of the method where the error happened, if applicable. For example, if there is an
      * error during signing, the request name is "onRequestSigning".
      * @see #notifyError(String, Bundle)
-     * @hide
      */
     public static final String ERROR_KEY_METHOD_NAME = "method_name";
+
+    /**
+     * The error code of an error.
+     *
+     * <p>It can be {@link TvAdManager#ERROR_WEAK_SIGNAL},
+     * {@link TvAdManager#ERROR_RESOURCE_UNAVAILABLE}, etc.
+     *
+     * @see #notifyError(String, Bundle)
+     */
+    public static final String ERROR_KEY_ERROR_CODE = "error_code";
 
     private final TvAdManager mTvAdManager;
 
@@ -486,7 +495,6 @@ public class TvAdView extends ViewGroup {
      * Sends current video bounds to related TV AD service.
      *
      * @param bounds the rectangle area for rendering the current video.
-     * @hide
      */
     public void sendCurrentVideoBounds(@NonNull Rect bounds) {
         if (DEBUG) {
@@ -502,7 +510,6 @@ public class TvAdView extends ViewGroup {
      *
      * @param channelUri The current channel URI; {@code null} if there is no currently tuned
      *                   channel.
-     * @hide
      */
     public void sendCurrentChannelUri(@Nullable Uri channelUri) {
         if (DEBUG) {
@@ -515,7 +522,6 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Sends track info list to related TV AD service.
-     * @hide
      */
     public void sendTrackInfoList(@Nullable List<TvTrackInfo> tracks) {
         if (DEBUG) {
@@ -532,7 +538,6 @@ public class TvAdView extends ViewGroup {
      * @param inputId The current TV input ID whose channel is tuned. {@code null} if no channel is
      *                tuned.
      * @see android.media.tv.TvInputInfo
-     * @hide
      */
     public void sendCurrentTvInputId(@Nullable String inputId) {
         if (DEBUG) {
@@ -553,7 +558,6 @@ public class TvAdView extends ViewGroup {
      * @param signingId the ID to identify the request. It's the same as the corresponding ID in
      *        {@link TvAdService.Session#requestSigning(String, String, String, byte[])}
      * @param result the signed result.
-     * @hide
      */
     public void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
         if (DEBUG) {
@@ -574,7 +578,7 @@ public class TvAdView extends ViewGroup {
      *     can also be added to the params.
      *
      * @see #ERROR_KEY_METHOD_NAME
-     * @hide
+     * @see #ERROR_KEY_ERROR_CODE
      */
     public void notifyError(@NonNull String errMsg, @NonNull Bundle params) {
         if (DEBUG) {
@@ -597,7 +601,6 @@ public class TvAdView extends ViewGroup {
      *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
      *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
      *             how to parse this data.
-     * @hide
      */
     public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType int type,
             @NonNull Bundle data) {
@@ -633,7 +636,6 @@ public class TvAdView extends ViewGroup {
      * @param callback the callback to receive events. MUST NOT be {@code null}.
      *
      * @see #clearCallback()
-     * @hide
      */
     public void setCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -649,7 +651,6 @@ public class TvAdView extends ViewGroup {
      * Clears the callback.
      *
      * @see #setCallback(Executor, TvAdCallback)
-     * @hide
      */
     public void clearCallback() {
         synchronized (mCallbackLock) {
@@ -845,7 +846,6 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Callback used to receive various status updates on the {@link TvAdView}.
-     * @hide
      */
     public abstract static class TvAdCallback {
 
@@ -897,6 +897,21 @@ public class TvAdView extends ViewGroup {
          */
         public void onRequestSigning(@NonNull String serviceId, @NonNull String signingId,
                 @NonNull String algorithm, @NonNull String alias, @NonNull byte[] data) {
+        }
+
+        /**
+         * This is called when the state of corresponding AD service is changed.
+         *
+         * @param serviceId The ID of the AD service bound to this view.
+         * @param state the current state.
+         * @param err the error code for error state. {@link TvAdManager#ERROR_NONE}
+         *              is used when the state is not
+         *              {@link TvAdManager#SESSION_STATE_ERROR}.
+         */
+        public void onStateChanged(
+                @NonNull String serviceId,
+                @TvAdManager.SessionState int state,
+                @TvAdManager.ErrorCode int err) {
         }
     }
 }

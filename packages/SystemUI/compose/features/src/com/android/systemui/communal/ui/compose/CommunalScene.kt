@@ -23,8 +23,8 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.scene.ui.composable.ComposableScene
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,10 +40,10 @@ constructor(
 ) : ComposableScene {
     override val key = SceneKey.Communal
 
-    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
-        MutableStateFlow<Map<UserAction, SceneModel>>(
+    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+        MutableStateFlow<Map<UserAction, UserActionResult>>(
                 mapOf(
-                    UserAction.Swipe(Direction.RIGHT) to SceneModel(SceneKey.Lockscreen),
+                    UserAction.Swipe(Direction.RIGHT) to UserActionResult(SceneKey.Lockscreen),
                 )
             )
             .asStateFlow()

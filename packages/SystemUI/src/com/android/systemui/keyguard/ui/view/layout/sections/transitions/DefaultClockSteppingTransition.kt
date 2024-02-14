@@ -24,12 +24,15 @@ import android.view.ViewGroup
 import com.android.app.animation.Interpolators
 import com.android.systemui.plugins.clocks.ClockController
 
-class DefaultClockSteppingTransition(private val clock: ClockController) : Transition() {
+class DefaultClockSteppingTransition(
+    private val clock: ClockController,
+) : Transition() {
     init {
         interpolator = Interpolators.LINEAR
         duration = KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION_MS
         addTarget(clock.largeClock.view)
     }
+
     private fun captureValues(transitionValues: TransitionValues) {
         transitionValues.values[PROP_BOUNDS_LEFT] = transitionValues.view.left
         val locationInWindowTmp = IntArray(2)

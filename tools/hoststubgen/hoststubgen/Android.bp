@@ -180,7 +180,6 @@ java_library {
         "framework-minus-apex.ravenwood",
     ],
     static_libs: [
-        "core-xml-for-device",
         "hoststubgen-helper-libcore-runtime.ravenwood",
     ],
 }

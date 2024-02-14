@@ -87,6 +87,7 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
+import com.android.systemui.biometrics.FaceHelpMessageDeferralFactory;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -270,7 +271,7 @@ public class KeyguardIndicationController {
             ScreenLifecycle screenLifecycle,
             KeyguardBypassController keyguardBypassController,
             AccessibilityManager accessibilityManager,
-            FaceHelpMessageDeferral faceHelpMessageDeferral,
+            FaceHelpMessageDeferralFactory faceHelpMessageDeferral,
             KeyguardLogger keyguardLogger,
             AlternateBouncerInteractor alternateBouncerInteractor,
             AlarmManager alarmManager,
@@ -308,7 +309,7 @@ public class KeyguardIndicationController {
         mIndicationHelper = indicationHelper;
         mKeyguardInteractor = keyguardInteractor;
 
-        mFaceAcquiredMessageDeferral = faceHelpMessageDeferral;
+        mFaceAcquiredMessageDeferral = faceHelpMessageDeferral.create();
         mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
         int[] msgIds = context.getResources().getIntArray(
                 com.android.systemui.res.R.array.config_face_help_msgs_when_fingerprint_enrolled);

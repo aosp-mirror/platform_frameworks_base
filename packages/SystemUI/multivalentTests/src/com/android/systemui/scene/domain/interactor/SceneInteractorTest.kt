@@ -29,7 +29,7 @@ import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +46,7 @@ class SceneInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
+    private val fakeSceneDataSource = kosmos.fakeSceneDataSource
 
     private lateinit var underTest: SceneInteractor
 
@@ -63,24 +64,24 @@ class SceneInteractorTest : SysuiTestCase() {
     @Test
     fun changeScene() =
         testScope.runTest {
-            val desiredScene by collectLastValue(underTest.desiredScene)
-            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
 
-            underTest.changeScene(SceneModel(SceneKey.Shade), "reason")
-            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Shade))
+            underTest.changeScene(SceneKey.Shade, "reason")
+            assertThat(currentScene).isEqualTo(SceneKey.Shade)
         }
 
     @Test
     fun changeScene_toGoneWhenUnl_doesNotThrow() =
         testScope.runTest {
-            val desiredScene by collectLastValue(underTest.desiredScene)
-            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
 
             kosmos.fakeDeviceEntryRepository.setUnlocked(true)
             runCurrent()
 
-            underTest.changeScene(SceneModel(SceneKey.Gone), "reason")
-            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Gone))
+            underTest.changeScene(SceneKey.Gone, "reason")
+            assertThat(currentScene).isEqualTo(SceneKey.Gone)
         }
 
     @Test(expected = IllegalStateException::class)
@@ -88,17 +89,18 @@ class SceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.fakeDeviceEntryRepository.setUnlocked(false)
 
-            underTest.changeScene(SceneModel(SceneKey.Gone), "reason")
+            underTest.changeScene(SceneKey.Gone, "reason")
         }
 
     @Test
-    fun onSceneChanged() =
+    fun sceneChanged_inDataSource() =
         testScope.runTest {
-            val desiredScene by collectLastValue(underTest.desiredScene)
-            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
 
-            underTest.onSceneChanged(SceneModel(SceneKey.Shade), "reason")
-            assertThat(desiredScene).isEqualTo(SceneModel(SceneKey.Shade))
+            fakeSceneDataSource.changeScene(SceneKey.Shade)
+
+            assertThat(currentScene).isEqualTo(SceneKey.Shade)
         }
 
     @Test
@@ -142,20 +144,20 @@ class SceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(underTest.desiredScene.value.key)
+                    ObservableTransitionState.Idle(underTest.currentScene.value)
                 )
             underTest.setTransitionState(transitionState)
 
             val transitionTo by collectLastValue(underTest.transitioningTo)
             assertThat(transitionTo).isNull()
 
-            underTest.changeScene(SceneModel(SceneKey.Shade), "reason")
+            underTest.changeScene(SceneKey.Shade, "reason")
             assertThat(transitionTo).isNull()
 
             val progress = MutableStateFlow(0f)
             transitionState.value =
                 ObservableTransitionState.Transition(
-                    fromScene = underTest.desiredScene.value.key,
+                    fromScene = underTest.currentScene.value,
                     toScene = SceneKey.Shade,
                     progress = progress,
                     isInitiatedByUserInput = false,

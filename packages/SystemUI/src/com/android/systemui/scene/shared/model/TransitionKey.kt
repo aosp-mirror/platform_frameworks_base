@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package com.android.systemui.scene.shared.model
 
-/** Models a scene. */
-data class SceneModel(
-
-    /** The key of the scene. */
-    val key: SceneKey,
-
-    /** An optional name for the transition that led to this scene being the current scene. */
-    val transitionName: String? = null,
+/**
+ * Key for a transition. This can be used to specify which transition spec should be used when
+ * starting the transition between two scenes.
+ */
+data class TransitionKey(
+    val debugName: String,
+    val identity: Any = Object(),
 )

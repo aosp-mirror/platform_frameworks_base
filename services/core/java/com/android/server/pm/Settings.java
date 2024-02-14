@@ -5025,6 +5025,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         pw.println();
         if (pkg != null) {
             pw.print(prefix); pw.print("  versionName="); pw.println(pkg.getVersionName());
+            pw.print(prefix); pw.print("  hiddenApiEnforcementPolicy="); pw.println(
+                    ps.getHiddenApiEnforcementPolicy());
             pw.print(prefix); pw.print("  usesNonSdkApi="); pw.println(pkg.isNonSdkApiRequested());
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, pkg); pw.println();
             final int apkSigningVersion = pkg.getSigningDetails().getSignatureSchemeVersion();

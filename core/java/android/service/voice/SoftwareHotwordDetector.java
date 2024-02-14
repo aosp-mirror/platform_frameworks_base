@@ -18,7 +18,6 @@ package android.service.voice;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.hardware.soundtrigger.SoundTrigger;
@@ -202,13 +201,6 @@ class SoftwareHotwordDetector extends AbstractDetector {
                         result != null ? result : new HotwordRejectedResult.Builder().build());
             }));
         }
-
-        @Override
-        public void onTrainingData(@NonNull HotwordTrainingData result) {
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
-                mCallback.onTrainingData(result);
-            }));
-        }
     }
 
     private static class InitializationStateListener
@@ -242,13 +234,6 @@ class SoftwareHotwordDetector extends AbstractDetector {
         public void onRejected(HotwordRejectedResult result) throws RemoteException {
             if (DEBUG) {
                 Slog.i(TAG, "Ignored #onRejected event");
-            }
-        }
-
-        @Override
-        public void onTrainingData(@NonNull HotwordTrainingData data) {
-            if (DEBUG) {
-                Slog.i(TAG, "Ignored #onTrainingData event");
             }
         }
 

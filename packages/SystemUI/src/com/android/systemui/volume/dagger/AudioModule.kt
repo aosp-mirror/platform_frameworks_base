@@ -16,11 +16,14 @@
 
 package com.android.systemui.volume.dagger
 
+import android.app.NotificationManager
 import android.content.Context
 import android.media.AudioManager
 import com.android.settingslib.media.data.repository.SpatializerRepository
 import com.android.settingslib.media.data.repository.SpatializerRepositoryImpl
 import com.android.settingslib.media.domain.interactor.SpatializerInteractor
+import com.android.settingslib.statusbar.notification.data.repository.NotificationsSoundPolicyRepository
+import com.android.settingslib.statusbar.notification.data.repository.NotificationsSoundPolicyRepositoryImpl
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
@@ -68,5 +71,19 @@ interface AudioModule {
         @Provides
         fun provideSpatializerInetractor(repository: SpatializerRepository): SpatializerInteractor =
             SpatializerInteractor(repository)
+
+        @Provides
+        fun provideNotificationsSoundPolicyRepository(
+            context: Context,
+            notificationManager: NotificationManager,
+            @Background coroutineContext: CoroutineContext,
+            @Application coroutineScope: CoroutineScope,
+        ): NotificationsSoundPolicyRepository =
+            NotificationsSoundPolicyRepositoryImpl(
+                context,
+                notificationManager,
+                coroutineScope,
+                coroutineContext,
+            )
     }
 }

@@ -20,8 +20,14 @@ import android.security.keystore.KeyAttestationApplicationId;
 
 /** @hide */
 interface IKeyAttestationApplicationIdProvider {
+    const int ERROR_GET_ATTESTATION_APPLICATION_ID_FAILED = 1;
+
     /**
      * Provides information describing the possible applications identified by a UID.
+     *
+     * In case of not getting package ids from uid return
+     * {@link #ERROR_GET_ATTESTATION_APPLICATION_ID_FAILED} to the caller.
+     *
      * @hide
      */
     KeyAttestationApplicationId getKeyAttestationApplicationId(int uid);

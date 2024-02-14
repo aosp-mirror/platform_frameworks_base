@@ -58,6 +58,7 @@ import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
+import com.android.systemui.biometrics.FaceHelpMessageDeferralFactory;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -135,6 +136,8 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
     protected KeyguardBypassController mKeyguardBypassController;
     @Mock
     protected AccessibilityManager mAccessibilityManager;
+    @Mock
+    protected FaceHelpMessageDeferralFactory mFaceHelpMessageDeferralFactory;
     @Mock
     protected FaceHelpMessageDeferral mFaceHelpMessageDeferral;
     @Mock
@@ -224,6 +227,8 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
                 .thenReturn(mDisclosureWithOrganization);
         when(mUserTracker.getUserId()).thenReturn(mCurrentUserId);
 
+        when(mFaceHelpMessageDeferralFactory.create()).thenReturn(mFaceHelpMessageDeferral);
+
         mIndicationHelper = new IndicationHelper(mKeyguardUpdateMonitor);
 
         mWakeLock = new WakeLockFake();
@@ -257,7 +262,7 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
                 mUserManager, mExecutor, mExecutor, mFalsingManager,
                 mAuthController, mLockPatternUtils, mScreenLifecycle,
                 mKeyguardBypassController, mAccessibilityManager,
-                mFaceHelpMessageDeferral, mock(KeyguardLogger.class),
+                mFaceHelpMessageDeferralFactory, mock(KeyguardLogger.class),
                 mAlternateBouncerInteractor,
                 mAlarmManager,
                 mUserTracker,

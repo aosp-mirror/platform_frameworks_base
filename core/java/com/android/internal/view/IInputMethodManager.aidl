@@ -17,12 +17,14 @@
 package com.android.internal.view;
 
 import android.os.ResultReceiver;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
 import android.window.ImeOnBackInvokedDispatcher;
 
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
@@ -144,6 +146,9 @@ interface IInputMethodManager {
 
     /** Start Stylus handwriting session **/
     void startStylusHandwriting(in IInputMethodClient client);
+    oneway void startConnectionlessStylusHandwriting(in IInputMethodClient client, int userId,
+            in CursorAnchorInfo cursorAnchorInfo, in String delegatePackageName,
+            in String delegatorPackageName, in IConnectionlessHandwritingCallback callback);
 
     /** Prepares delegation of starting stylus handwriting session to a different editor **/
     void prepareStylusHandwritingDelegation(in IInputMethodClient client,
@@ -158,7 +163,7 @@ interface IInputMethodManager {
     /** Returns {@code true} if currently selected IME supports Stylus handwriting. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
-    boolean isStylusHandwritingAvailableAsUser(int userId);
+    boolean isStylusHandwritingAvailableAsUser(int userId, boolean connectionless);
 
     /** add virtual stylus id for test Stylus handwriting session **/
     @EnforcePermission("TEST_INPUT_METHOD")

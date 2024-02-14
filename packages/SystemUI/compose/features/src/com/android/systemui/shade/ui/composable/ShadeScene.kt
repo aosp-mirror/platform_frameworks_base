@@ -54,8 +54,8 @@ import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.statusbar.phone.StatusBarIconController
@@ -108,7 +108,7 @@ constructor(
 ) : ComposableScene {
     override val key = SceneKey.Shade
 
-    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
+    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         viewModel.upDestinationSceneKey
             .map { sceneKey -> destinationScenes(up = sceneKey) }
             .stateIn(
@@ -139,10 +139,10 @@ constructor(
 
     private fun destinationScenes(
         up: SceneKey,
-    ): Map<UserAction, SceneModel> {
+    ): Map<UserAction, UserActionResult> {
         return mapOf(
-            UserAction.Swipe(Direction.UP) to SceneModel(up),
-            UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.QuickSettings),
+            UserAction.Swipe(Direction.UP) to UserActionResult(up),
+            UserAction.Swipe(Direction.DOWN) to UserActionResult(SceneKey.QuickSettings),
         )
     }
 }

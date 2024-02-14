@@ -47,6 +47,7 @@ import com.android.server.SystemService;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * System service manages media metrics.
@@ -79,6 +80,10 @@ public final class MediaMetricsManagerService extends SystemService {
     private static final String FAILED_TO_GET = "failed_to_get";
 
     private static final MediaItemInfo EMPTY_MEDIA_ITEM_INFO = new MediaItemInfo.Builder().build();
+    private static final Pattern PATTERN_KNOWN_EDITING_LIBRARY_NAMES =
+            Pattern.compile(
+                    "androidx\\.media3:media3-(transformer|muxer):"
+                            + "[\\d.]+(-(alpha|beta|rc)\\d\\d)?");
     private static final int DURATION_BUCKETS_BELOW_ONE_MINUTE = 8;
     private static final int DURATION_BUCKETS_COUNT = 13;
     private static final String AUDIO_MIME_TYPE_PREFIX = "audio/";
@@ -415,8 +420,11 @@ public final class MediaMetricsManagerService extends SystemService {
                             .setAtomId(798)
                             .writeString(sessionId)
                             .writeInt(event.getFinalState())
+                            .writeFloat(event.getFinalProgressPercent())
                             .writeInt(event.getErrorCode())
                             .writeLong(event.getTimeSinceCreatedMillis())
+                            .writeString(getFilteredLibraryName(event.getExporterName()))
+                            .writeString(getFilteredLibraryName(event.getMuxerName()))
                             .writeInt(getThroughputFps(event))
                             .writeInt(event.getInputMediaItemInfos().size())
                             .writeInt(inputMediaItemInfo.getSourceType())
@@ -627,6 +635,16 @@ public final class MediaMetricsManagerService extends SystemService {
                     return LOGGING_LEVEL_BLOCKED;
             }
         }
+    }
+
+    private static String getFilteredLibraryName(String libraryName) {
+        if (TextUtils.isEmpty(libraryName)) {
+            return "";
+        }
+        if (!PATTERN_KNOWN_EDITING_LIBRARY_NAMES.matcher(libraryName).matches()) {
+            return "";
+        }
+        return libraryName;
     }
 
     private static int getThroughputFps(EditingEndedEvent event) {

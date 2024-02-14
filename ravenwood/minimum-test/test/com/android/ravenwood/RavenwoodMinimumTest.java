@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class RavenwoodMinimumTest {
     @Rule
-    public RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
             .setProcessApp()
             .build();
 

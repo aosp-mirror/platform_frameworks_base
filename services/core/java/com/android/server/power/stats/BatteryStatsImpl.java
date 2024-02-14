@@ -842,7 +842,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private int mBatteryChargeUah;
     private int mBatteryHealth;
     private int mBatteryTemperature;
-    private int mBatteryVoltageMv = -1;
+    private int mBatteryVoltageMv;
 
     @NonNull
     private final BatteryStatsHistory mHistory;

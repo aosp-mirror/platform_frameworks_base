@@ -282,6 +282,7 @@ package android {
     field public static final String RADIO_SCAN_WITHOUT_LOCATION = "android.permission.RADIO_SCAN_WITHOUT_LOCATION";
     field public static final String READ_ACTIVE_EMERGENCY_SESSION = "android.permission.READ_ACTIVE_EMERGENCY_SESSION";
     field public static final String READ_APP_SPECIFIC_LOCALES = "android.permission.READ_APP_SPECIFIC_LOCALES";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String READ_BLOCKED_NUMBERS = "android.permission.READ_BLOCKED_NUMBERS";
     field public static final String READ_CARRIER_APP_INFO = "android.permission.READ_CARRIER_APP_INFO";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String READ_CLIPBOARD_IN_BACKGROUND = "android.permission.READ_CLIPBOARD_IN_BACKGROUND";
@@ -331,7 +332,6 @@ package android {
     field @FlaggedApi("android.app.usage.report_usage_stats_permission") public static final String REPORT_USAGE_STATS = "android.permission.REPORT_USAGE_STATS";
     field @Deprecated public static final String REQUEST_NETWORK_SCORES = "android.permission.REQUEST_NETWORK_SCORES";
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
-    field @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final String RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT = "android.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
     field public static final String RESTART_WIFI_SUBSYSTEM = "android.permission.RESTART_WIFI_SUBSYSTEM";
     field public static final String RESTORE_RUNTIME_PERMISSIONS = "android.permission.RESTORE_RUNTIME_PERMISSIONS";
@@ -409,6 +409,7 @@ package android {
     field public static final String WIFI_UPDATE_COEX_UNSAFE_CHANNELS = "android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS";
     field public static final String WIFI_UPDATE_USABILITY_STATS_SCORE = "android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE";
     field public static final String WRITE_ALLOWLISTED_DEVICE_CONFIG = "android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String WRITE_BLOCKED_NUMBERS = "android.permission.WRITE_BLOCKED_NUMBERS";
     field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field public static final String WRITE_DREAM_STATE = "android.permission.WRITE_DREAM_STATE";
     field public static final String WRITE_EMBEDDED_SUBSCRIPTIONS = "android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS";
@@ -1038,11 +1039,18 @@ package android.app {
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public java.util.List<android.content.ComponentName> getEnabledNotificationListeners();
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
+    method @FlaggedApi("android.service.notification.callstyle_callback_api") @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.ACCESS_NOTIFICATIONS}) public void registerCallNotificationEventListener(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.NotificationManager.CallNotificationEventListener);
     method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
+    method @FlaggedApi("android.service.notification.callstyle_callback_api") @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.ACCESS_NOTIFICATIONS}) public void unregisterCallNotificationEventListener(@NonNull android.app.NotificationManager.CallNotificationEventListener);
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_CLOSE_NOTIFICATION_HANDLER_PANEL = "android.app.action.CLOSE_NOTIFICATION_HANDLER_PANEL";
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_OPEN_NOTIFICATION_HANDLER_PANEL = "android.app.action.OPEN_NOTIFICATION_HANDLER_PANEL";
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL = "android.app.action.TOGGLE_NOTIFICATION_HANDLER_PANEL";
+  }
+
+  @FlaggedApi("android.service.notification.callstyle_callback_api") public static interface NotificationManager.CallNotificationEventListener {
+    method @FlaggedApi("android.service.notification.callstyle_callback_api") public void onCallNotificationPosted(@NonNull String, @NonNull android.os.UserHandle);
+    method @FlaggedApi("android.service.notification.callstyle_callback_api") public void onCallNotificationRemoved(@NonNull String, @NonNull android.os.UserHandle);
   }
 
   public final class RemoteLockscreenValidationResult implements android.os.Parcelable {
@@ -6642,6 +6650,7 @@ package android.hardware.usb {
     method public int getSupportedRoleCombinations();
     method public int getUsbDataStatus();
     method public boolean isConnected();
+    method @FlaggedApi("android.hardware.usb.flags.enable_is_pd_compliant_api") public boolean isPdCompliant();
     method public boolean isPowerTransferLimited();
     method public boolean isRoleCombinationSupported(int, int);
     method public void writeToParcel(android.os.Parcel, int);
@@ -11457,6 +11466,29 @@ package android.printservice.recommendation {
 
 package android.provider {
 
+  public static class BlockedNumberContract.BlockedNumbers {
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static void endBlockSuppression(@NonNull android.content.Context);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @NonNull @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static android.provider.BlockedNumberContract.BlockedNumbers.BlockSuppressionStatus getBlockSuppressionStatus(@NonNull android.content.Context);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static boolean getBlockedNumberSetting(@NonNull android.content.Context, @NonNull String);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static void notifyEmergencyContact(@NonNull android.content.Context);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static void setBlockedNumberSetting(@NonNull android.content.Context, @NonNull String, boolean);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static boolean shouldShowEmergencyCallNotification(@NonNull android.content.Context);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static int shouldSystemBlockNumber(@NonNull android.content.Context, @NonNull String, int, boolean);
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ACTION_BLOCK_SUPPRESSION_STATE_CHANGED = "android.provider.action.BLOCK_SUPPRESSION_STATE_CHANGED";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_BLOCK_PAYPHONE = "block_payphone_calls_setting";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_BLOCK_PRIVATE = "block_private_number_calls_setting";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE = "block_unavailable_calls_setting";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_BLOCK_UNKNOWN = "block_unknown_calls_setting";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED = "block_numbers_not_in_contacts_setting";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION = "show_emergency_call_notification";
+  }
+
+  @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final class BlockedNumberContract.BlockedNumbers.BlockSuppressionStatus {
+    ctor public BlockedNumberContract.BlockedNumbers.BlockSuppressionStatus(boolean, long);
+    method public boolean getIsSuppressed();
+    method public long getUntilTimestampMillis();
+  }
+
   public class CallLog {
     method @RequiresPermission(allOf={android.Manifest.permission.WRITE_CALL_LOG, android.Manifest.permission.INTERACT_ACROSS_USERS}) public static void storeCallComposerPicture(@NonNull android.content.Context, @NonNull java.io.InputStream, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.net.Uri,android.provider.CallLog.CallComposerLoggingException>);
   }
@@ -13259,7 +13291,6 @@ package android.service.voice {
   public static final class HotwordDetectionService.Callback {
     method public void onDetected(@NonNull android.service.voice.HotwordDetectedResult);
     method public void onRejected(@NonNull android.service.voice.HotwordRejectedResult);
-    method @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public void onTrainingData(@NonNull android.service.voice.HotwordTrainingData);
   }
 
   public final class HotwordDetectionServiceFailure implements android.os.Parcelable {
@@ -13275,8 +13306,6 @@ package android.service.voice {
     field public static final int ERROR_CODE_DETECT_TIMEOUT = 4; // 0x4
     field public static final int ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION = 5; // 0x5
     field public static final int ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE = 6; // 0x6
-    field @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final int ERROR_CODE_ON_TRAINING_DATA_EGRESS_LIMIT_EXCEEDED = 8; // 0x8
-    field @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final int ERROR_CODE_ON_TRAINING_DATA_SECURITY_EXCEPTION = 9; // 0x9
     field public static final int ERROR_CODE_REMOTE_EXCEPTION = 7; // 0x7
     field @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final int ERROR_CODE_SHUTDOWN_HDS_ON_VOICE_ACTIVATION_OP_DISABLED = 10; // 0xa
     field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
@@ -13299,7 +13328,6 @@ package android.service.voice {
     method public void onRecognitionPaused();
     method public void onRecognitionResumed();
     method public void onRejected(@NonNull android.service.voice.HotwordRejectedResult);
-    method @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public default void onTrainingData(@NonNull android.service.voice.HotwordTrainingData);
     method public default void onUnknownFailure(@NonNull String);
   }
 
@@ -13378,6 +13406,23 @@ package android.service.voice {
     field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
   }
 
+  @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final class VisualQueryAttentionResult implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=1, to=100) public int getEngagementLevel();
+    method public int getInteractionIntention();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.VisualQueryAttentionResult> CREATOR;
+    field public static final int INTERACTION_INTENTION_AUDIO_VISUAL = 0; // 0x0
+    field public static final int INTERACTION_INTENTION_VISUAL_ACCESSIBILITY = 1; // 0x1
+  }
+
+  public static final class VisualQueryAttentionResult.Builder {
+    ctor public VisualQueryAttentionResult.Builder();
+    method @NonNull public android.service.voice.VisualQueryAttentionResult build();
+    method @NonNull public android.service.voice.VisualQueryAttentionResult.Builder setEngagementLevel(@IntRange(from=1, to=100) int);
+    method @NonNull public android.service.voice.VisualQueryAttentionResult.Builder setInteractionIntention(int);
+  }
+
   @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public final class VisualQueryDetectedResult implements android.os.Parcelable {
     method public int describeContents();
     method public static int getMaxSpeakerId();
@@ -13398,7 +13443,9 @@ package android.service.voice {
     ctor public VisualQueryDetectionService();
     method public final void finishQuery() throws java.lang.IllegalStateException;
     method public final void gainedAttention();
+    method @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final void gainedAttention(@NonNull android.service.voice.VisualQueryAttentionResult);
     method public final void lostAttention();
+    method @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final void lostAttention(int);
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onStartDetection();
     method public void onStopDetection();
@@ -13840,6 +13887,7 @@ package android.telecom {
     field public static final int CAPABILITY_EMERGENCY_VIDEO_CALLING = 512; // 0x200
     field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
     field public static final String EXTRA_PLAY_CALL_RECORDING_TONE = "android.telecom.extra.PLAY_CALL_RECORDING_TONE";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String EXTRA_SKIP_CALL_FILTERING = "android.telecom.extra.SKIP_CALL_FILTERING";
     field public static final String EXTRA_SORT_ORDER = "android.telecom.extra.SORT_ORDER";
   }
 
@@ -16118,6 +16166,7 @@ package android.telephony.ims {
     field public static final int DIALSTRING_USSD = 2; // 0x2
     field public static final String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
     field public static final String EXTRA_ADDITIONAL_SIP_INVITE_FIELDS = "android.telephony.ims.extra.ADDITIONAL_SIP_INVITE_FIELDS";
+    field @FlaggedApi("com.android.server.telecom.flags.business_call_composer") public static final String EXTRA_ASSERTED_DISPLAY_NAME = "android.telephony.ims.extra.ASSERTED_DISPLAY_NAME";
     field public static final String EXTRA_CALL_DISCONNECT_CAUSE = "android.telephony.ims.extra.CALL_DISCONNECT_CAUSE";
     field public static final String EXTRA_CALL_NETWORK_TYPE = "android.telephony.ims.extra.CALL_NETWORK_TYPE";
     field @Deprecated public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";

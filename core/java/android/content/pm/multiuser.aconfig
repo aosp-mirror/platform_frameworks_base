@@ -135,3 +135,10 @@ flag {
     description: "Allow the use of a profileApiAvailability user property to exclude HIDDEN profiles in API results"
     bug: "316362775"
 }
+
+flag {
+    name: "enable_launcher_apps_hidden_profile_checks"
+    namespace: "profile_experiences"
+    description: "Enable extra check to limit access to hidden prfiles data in Launcher apps APIs."
+    bug: "321988638"
+}

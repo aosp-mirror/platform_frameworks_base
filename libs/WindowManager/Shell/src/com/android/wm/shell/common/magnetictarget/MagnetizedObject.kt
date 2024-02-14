@@ -91,8 +91,9 @@ abstract class MagnetizedObject<T : Any>(
          * to [onUnstuckFromTarget] or [onReleasedInTarget].
          *
          * @param target The target that the object is now stuck to.
+         * @param draggedObject The object that is stuck to the target.
          */
-        fun onStuckToTarget(target: MagneticTarget)
+        fun onStuckToTarget(target: MagneticTarget, draggedObject: MagnetizedObject<*>)
 
         /**
          * Called when the object is no longer stuck to a target. This means that either touch
@@ -110,6 +111,7 @@ abstract class MagnetizedObject<T : Any>(
          * and [maybeConsumeMotionEvent] is now returning false.
          *
          * @param target The target that this object was just unstuck from.
+         * @param draggedObject The object being unstuck from the target.
          * @param velX The X velocity of the touch gesture when it exited the magnetic field.
          * @param velY The Y velocity of the touch gesture when it exited the magnetic field.
          * @param wasFlungOut Whether the object was unstuck via a fling gesture. This means that
@@ -119,6 +121,7 @@ abstract class MagnetizedObject<T : Any>(
          */
         fun onUnstuckFromTarget(
             target: MagneticTarget,
+            draggedObject: MagnetizedObject<*>,
             velX: Float,
             velY: Float,
             wasFlungOut: Boolean
@@ -129,8 +132,9 @@ abstract class MagnetizedObject<T : Any>(
          * velocity to reach it.
          *
          * @param target The target that the object was released in.
+         * @param draggedObject The object released in the target.
          */
-        fun onReleasedInTarget(target: MagneticTarget)
+        fun onReleasedInTarget(target: MagneticTarget, draggedObject: MagnetizedObject<*>)
     }
 
     private val animator: PhysicsAnimator<T> = PhysicsAnimator.getInstance(underlyingObject)
@@ -386,7 +390,7 @@ abstract class MagnetizedObject<T : Any>(
             // animate sticking to the magnet.
             targetObjectIsStuckTo = targetObjectIsInMagneticFieldOf
             cancelAnimations()
-            magnetListener.onStuckToTarget(targetObjectIsInMagneticFieldOf!!)
+            magnetListener.onStuckToTarget(targetObjectIsInMagneticFieldOf!!, this)
             animateStuckToTarget(targetObjectIsInMagneticFieldOf, velX, velY, false, null)
 
             vibrateIfEnabled(VibrationEffect.EFFECT_HEAVY_CLICK)
@@ -397,7 +401,8 @@ abstract class MagnetizedObject<T : Any>(
             // move the object out of the target using its own movement logic.
             cancelAnimations()
             magnetListener.onUnstuckFromTarget(
-                    targetObjectIsStuckTo!!, velocityTracker.xVelocity, velocityTracker.yVelocity,
+                    targetObjectIsStuckTo!!, this,
+                    velocityTracker.xVelocity, velocityTracker.yVelocity,
                     wasFlungOut = false)
             targetObjectIsStuckTo = null
 
@@ -420,10 +425,11 @@ abstract class MagnetizedObject<T : Any>(
                     // the upward direction, tell the listener so the object can be animated out of
                     // the target.
                     magnetListener.onUnstuckFromTarget(
-                            targetObjectIsStuckTo!!, velX, velY, wasFlungOut = true)
+                            targetObjectIsStuckTo!!, this,
+                            velX, velY, wasFlungOut = true)
                 } else {
                     // If the object is stuck and not flung away, it was released inside the target.
-                    magnetListener.onReleasedInTarget(targetObjectIsStuckTo!!)
+                    magnetListener.onReleasedInTarget(targetObjectIsStuckTo!!, this)
                     vibrateIfEnabled(VibrationEffect.EFFECT_HEAVY_CLICK)
                 }
 
@@ -440,11 +446,11 @@ abstract class MagnetizedObject<T : Any>(
             if (flungToTarget != null) {
                 // If this is a fling-to-target, animate the object to the magnet and then release
                 // it.
-                magnetListener.onStuckToTarget(flungToTarget)
+                magnetListener.onStuckToTarget(flungToTarget, this)
                 targetObjectIsStuckTo = flungToTarget
 
                 animateStuckToTarget(flungToTarget, velX, velY, true) {
-                    magnetListener.onReleasedInTarget(flungToTarget)
+                    magnetListener.onReleasedInTarget(flungToTarget, this)
                     targetObjectIsStuckTo = null
                     vibrateIfEnabled(VibrationEffect.EFFECT_HEAVY_CLICK)
                 }

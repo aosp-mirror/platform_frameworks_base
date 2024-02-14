@@ -382,7 +382,7 @@ class HostStubGen(val options: HostStubGenOptions) {
                     stubOutStream.putNextEntry(newEntry)
                     convertClass(classInternalName, /*forImpl=*/false, bis,
                             stubOutStream, filter, packageRedirector, enableChecker, classes,
-                            errors, stats)
+                            errors, null)
                     stubOutStream.closeEntry()
                 }
             }
@@ -415,7 +415,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             enableChecker: Boolean,
             classes: ClassNodes,
             errors: HostStubGenErrors,
-            stats: HostStubGenStats,
+            stats: HostStubGenStats?,
             ) {
         val cr = ClassReader(input)
 

@@ -22,4 +22,12 @@ sealed class Screen(
     data object Loading : Screen("loading")
 
     data object SinglePasswordScreen : Screen("singlePasswordScreen")
+
+    data object SinglePasskeyScreen : Screen("singlePasskeyScreen")
+
+    data object SignInWithProviderScreen : Screen("signInWithProviderScreen")
+
+    data object MultipleCredentialsScreenFold : Screen("multipleCredentialsScreenFold")
+
+    data object MultipleCredentialsScreenFlatten : Screen("multipleCredentialsScreenFlatten")
 }

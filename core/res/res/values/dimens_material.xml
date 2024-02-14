@@ -204,4 +204,11 @@
     <dimen name="progress_bar_size_small">16dip</dimen>
     <dimen name="progress_bar_size_medium">48dp</dimen>
     <dimen name="progress_bar_size_large">76dp</dimen>
+
+    <!-- System corner radius baseline sizes. Used by Material styling of rounded corner shapes-->
+    <dimen name="system_corner_radius_xsmall">4dp</dimen>
+    <dimen name="system_corner_radius_small">8dp</dimen>
+    <dimen name="system_corner_radius_medium">16dp</dimen>
+    <dimen name="system_corner_radius_large">26dp</dimen>
+    <dimen name="system_corner_radius_xlarge">36dp</dimen>
 </resources>

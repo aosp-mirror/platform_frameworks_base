@@ -73,6 +73,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.ThreadAssert;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SystemSettings;
@@ -221,6 +222,13 @@ public interface KeyguardModule {
     @Provides
     static KeyguardQuickAffordancesMetricsLogger providesKeyguardQuickAffordancesMetricsLogger() {
         return new KeyguardQuickAffordancesMetricsLoggerImpl();
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static ThreadAssert providesThreadAssert() {
+        return new ThreadAssert();
     }
 
     /** Binds {@link KeyguardUpdateMonitor} as a {@link CoreStartable}. */
