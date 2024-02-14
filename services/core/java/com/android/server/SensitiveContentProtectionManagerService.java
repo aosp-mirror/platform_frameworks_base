@@ -19,6 +19,7 @@ package com.android.server;
 import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.server.notification.Flags.sensitiveNotificationAppProtection;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -50,8 +51,12 @@ import java.util.Set;
 public final class SensitiveContentProtectionManagerService extends SystemService {
     private static final String TAG = "SensitiveContentProtect";
     private static final boolean DEBUG = false;
+    private static final boolean sNotificationProtectionEnabled =
+            sensitiveNotificationAppProtection();
 
-    @VisibleForTesting NotificationListener mNotificationListener;
+    @VisibleForTesting
+    @Nullable
+    NotificationListener mNotificationListener;
     private @Nullable MediaProjectionManager mProjectionManager;
     private @Nullable WindowManagerInternal mWindowManager;
 
@@ -88,7 +93,9 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
 
     public SensitiveContentProtectionManagerService(@NonNull Context context) {
         super(context);
-        mNotificationListener = new NotificationListener();
+        if (sNotificationProtectionEnabled) {
+            mNotificationListener = new NotificationListener();
+        }
     }
 
     @Override
@@ -120,13 +127,15 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         //  handler, delegate, and binder death recipient
         mProjectionManager.addCallback(mProjectionCallback, getContext().getMainThreadHandler());
 
-        try {
-            mNotificationListener.registerAsSystemService(
-                    getContext(),
-                    new ComponentName(getContext(), NotificationListener.class),
-                    UserHandle.USER_ALL);
-        } catch (RemoteException e) {
-            // Intra-process call, should never happen.
+        if (sNotificationProtectionEnabled) {
+            try {
+                mNotificationListener.registerAsSystemService(
+                        getContext(),
+                        new ComponentName(getContext(), NotificationListener.class),
+                        UserHandle.USER_ALL);
+            } catch (RemoteException e) {
+                // Intra-process call, should never happen.
+            }
         }
     }
 
@@ -136,11 +145,12 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         if (mProjectionManager != null) {
             mProjectionManager.removeCallback(mProjectionCallback);
         }
-
-        try {
-            mNotificationListener.unregisterAsSystemService();
-        } catch (RemoteException e) {
-            // Intra-process call, should never happen.
+        if (sNotificationProtectionEnabled) {
+            try {
+                mNotificationListener.unregisterAsSystemService();
+            } catch (RemoteException e) {
+                // Intra-process call, should never happen.
+            }
         }
 
         if (mWindowManager != null) {
@@ -160,7 +170,9 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
 
         synchronized (mSensitiveContentProtectionLock) {
             mProjectionActive = true;
-            updateAppsThatShouldBlockScreenCapture();
+            if (sNotificationProtectionEnabled) {
+                updateAppsThatShouldBlockScreenCapture();
+            }
         }
     }
 
