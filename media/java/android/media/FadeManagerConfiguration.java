@@ -21,6 +21,7 @@ import static android.media.audiopolicy.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURA
 import android.annotation.DurationMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -274,7 +275,7 @@ public final class FadeManagerConfiguration implements Parcelable {
      * @throws IllegalArgumentException if the usage is invalid
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
-    @DurationMillisLong
+    @IntRange(from = 0) @DurationMillisLong
     public long getFadeOutDurationForUsage(@AudioAttributes.AttributeUsage int usage) {
         ensureFadingIsEnabled();
         validateUsage(usage);
@@ -290,7 +291,7 @@ public final class FadeManagerConfiguration implements Parcelable {
      * @throws IllegalArgumentException if the usage is invalid
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
-    @DurationMillisLong
+    @IntRange(from = 0) @DurationMillisLong
     public long getFadeInDurationForUsage(@AudioAttributes.AttributeUsage int usage) {
         ensureFadingIsEnabled();
         validateUsage(usage);
@@ -345,7 +346,7 @@ public final class FadeManagerConfiguration implements Parcelable {
      * @throws NullPointerException if the audio attributes is {@code null}
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
-    @DurationMillisLong
+    @IntRange(from = 0) @DurationMillisLong
     public long getFadeOutDurationForAudioAttributes(@NonNull AudioAttributes audioAttributes) {
         ensureFadingIsEnabled();
         return getDurationForVolumeShaperConfig(getVolumeShaperConfigFromWrapper(
@@ -361,7 +362,7 @@ public final class FadeManagerConfiguration implements Parcelable {
      * @throws NullPointerException if the audio attributes is {@code null}
      * @throws IllegalStateException if the fade state is set to {@link #FADE_STATE_DISABLED}
      */
-    @DurationMillisLong
+    @IntRange(from = 0) @DurationMillisLong
     public long getFadeInDurationForAudioAttributes(@NonNull AudioAttributes audioAttributes) {
         ensureFadingIsEnabled();
         return getDurationForVolumeShaperConfig(getVolumeShaperConfigFromWrapper(
@@ -428,7 +429,7 @@ public final class FadeManagerConfiguration implements Parcelable {
      *
      * @return delay in milliseconds
      */
-    @DurationMillisLong
+    @IntRange(from = 0) @DurationMillisLong
     public long getFadeInDelayForOffenders() {
         return mFadeInDelayForOffendersMillis;
     }
@@ -517,14 +518,14 @@ public final class FadeManagerConfiguration implements Parcelable {
     /**
      * Returns the default fade out duration (in milliseconds)
      */
-    public static @DurationMillisLong long getDefaultFadeOutDurationMillis() {
+    public static @IntRange(from = 1) @DurationMillisLong long getDefaultFadeOutDurationMillis() {
         return DEFAULT_FADE_OUT_DURATION_MS;
     }
 
     /**
      * Returns the default fade in duration (in milliseconds)
      */
-    public static @DurationMillisLong long getDefaultFadeInDurationMillis() {
+    public static @IntRange(from = 1) @DurationMillisLong long getDefaultFadeInDurationMillis() {
         return DEFAULT_FADE_IN_DURATION_MS;
     }
 
@@ -820,8 +821,8 @@ public final class FadeManagerConfiguration implements Parcelable {
          * @param fadeOutDurationMillis duration in milliseconds used for fading out
          * @param fadeInDurationMills duration in milliseconds used for fading in
          */
-        public Builder(@DurationMillisLong long fadeOutDurationMillis,
-                @DurationMillisLong long fadeInDurationMills) {
+        public Builder(@IntRange(from = 1) @DurationMillisLong long fadeOutDurationMillis,
+                @IntRange(from = 1) @DurationMillisLong long fadeInDurationMills) {
             mFadeOutDurationMillis = fadeOutDurationMillis;
             mFadeInDurationMillis = fadeInDurationMills;
         }
@@ -939,7 +940,7 @@ public final class FadeManagerConfiguration implements Parcelable {
          */
         @NonNull
         public Builder setFadeOutDurationForUsage(@AudioAttributes.AttributeUsage int usage,
-                @DurationMillisLong long fadeOutDurationMillis) {
+                @IntRange(from = 0) @DurationMillisLong long fadeOutDurationMillis) {
             validateUsage(usage);
             VolumeShaper.Configuration fadeOutVShaperConfig =
                     createVolShaperConfigForDuration(fadeOutDurationMillis, /* isFadeIn= */ false);
@@ -970,7 +971,7 @@ public final class FadeManagerConfiguration implements Parcelable {
          */
         @NonNull
         public Builder setFadeInDurationForUsage(@AudioAttributes.AttributeUsage int usage,
-                @DurationMillisLong long fadeInDurationMillis) {
+                @IntRange(from = 0) @DurationMillisLong long fadeInDurationMillis) {
             validateUsage(usage);
             VolumeShaper.Configuration fadeInVShaperConfig =
                     createVolShaperConfigForDuration(fadeInDurationMillis, /* isFadeIn= */ true);
@@ -1055,7 +1056,7 @@ public final class FadeManagerConfiguration implements Parcelable {
         @NonNull
         public Builder setFadeOutDurationForAudioAttributes(
                 @NonNull AudioAttributes audioAttributes,
-                @DurationMillisLong long fadeOutDurationMillis) {
+                @IntRange(from = 0) @DurationMillisLong long fadeOutDurationMillis) {
             Objects.requireNonNull(audioAttributes, "Audio attribute cannot be null");
             VolumeShaper.Configuration fadeOutVShaperConfig =
                     createVolShaperConfigForDuration(fadeOutDurationMillis, /* isFadeIn= */ false);
@@ -1087,7 +1088,7 @@ public final class FadeManagerConfiguration implements Parcelable {
          */
         @NonNull
         public Builder setFadeInDurationForAudioAttributes(@NonNull AudioAttributes audioAttributes,
-                @DurationMillisLong long fadeInDurationMillis) {
+                @IntRange(from = 0) @DurationMillisLong long fadeInDurationMillis) {
             Objects.requireNonNull(audioAttributes, "Audio attribute cannot be null");
             VolumeShaper.Configuration fadeInVShaperConfig =
                     createVolShaperConfigForDuration(fadeInDurationMillis, /* isFadeIn= */ true);
@@ -1336,7 +1337,8 @@ public final class FadeManagerConfiguration implements Parcelable {
          * @see #getFadeInDelayForOffenders()
          */
         @NonNull
-        public Builder setFadeInDelayForOffenders(@DurationMillisLong long delayMillis) {
+        public Builder setFadeInDelayForOffenders(
+                @IntRange(from = 0) @DurationMillisLong long delayMillis) {
             Preconditions.checkArgument(delayMillis >= 0, "Delay cannot be negative");
             mFadeInDelayForOffendersMillis = delayMillis;
             return this;
