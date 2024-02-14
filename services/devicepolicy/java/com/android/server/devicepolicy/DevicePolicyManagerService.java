@@ -101,6 +101,7 @@ import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTI
 import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_SUSPENSION;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_AFFILIATED;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
+import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
 import static android.app.admin.DeviceAdminInfo.USES_POLICY_FORCE_LOCK;
 import static android.app.admin.DeviceAdminInfo.USES_POLICY_WIPE_DATA;
 import static android.app.admin.DeviceAdminReceiver.ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED;
@@ -9524,7 +9525,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private int getHeadlessDeviceOwnerMode() {
         synchronized (getLockObject()) {
-            return getDeviceOwnerAdminLocked().info.getHeadlessDeviceOwnerMode();
+            ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+            if (deviceOwner == null) {
+                return HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
+            }
+            return deviceOwner.info.getHeadlessDeviceOwnerMode();
         }
     }
 
@@ -12281,17 +12286,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         final CallerIdentity caller = getCallerIdentity(admin);
 
+        // Only allow the system user to use this method
+        Preconditions.checkCallAuthorization(caller.getUserHandle().isSystem(),
+                "createAndManageUser was called from non-system user");
+        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_CREATE_AND_MANAGE_USER);
+
         if (headlessDeviceOwnerSingleUserEnabled()) {
             // Block this method if the device is in headless main user mode
             Preconditions.checkCallAuthorization(
                     getHeadlessDeviceOwnerMode() != HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER,
                     "createAndManageUser was called while in headless single user mode");
         }
-        // Only allow the system user to use this method
-        Preconditions.checkCallAuthorization(caller.getUserHandle().isSystem(),
-                "createAndManageUser was called from non-system user");
-        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
-        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_CREATE_AND_MANAGE_USER);
 
         final boolean ephemeral = (flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0;
         final boolean demo = (flags & DevicePolicyManager.MAKE_USER_DEMO) != 0
