@@ -10434,9 +10434,11 @@ package android.os {
     method public int getFlags();
     method public int getMode();
     field public static final int BUGREPORT_FLAG_DEFER_CONSENT = 2; // 0x2
+    field @FlaggedApi("android.app.admin.flags.onboarding_bugreport_v2_enabled") public static final int BUGREPORT_FLAG_KEEP_BUGREPORT_ON_RETRIEVAL = 4; // 0x4
     field public static final int BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA = 1; // 0x1
     field public static final int BUGREPORT_MODE_FULL = 0; // 0x0
     field public static final int BUGREPORT_MODE_INTERACTIVE = 1; // 0x1
+    field @FlaggedApi("android.app.admin.flags.onboarding_bugreport_v2_enabled") public static final int BUGREPORT_MODE_ONBOARDING = 7; // 0x7
     field public static final int BUGREPORT_MODE_REMOTE = 2; // 0x2
     field public static final int BUGREPORT_MODE_TELEPHONY = 4; // 0x4
     field public static final int BUGREPORT_MODE_WEAR = 3; // 0x3

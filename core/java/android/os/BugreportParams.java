@@ -21,7 +21,6 @@ import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.admin.flags.Flags;
-import android.compat.annotation.UnsupportedAppUsage;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -127,12 +126,8 @@ public final class BugreportParams {
 
     /**
      * Options for a lightweight bugreport intended to be taken for onboarding-related flows.
-     *
-     * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_ONBOARDING_BUGREPORT_V2_ENABLED)
-    @UnsupportedAppUsage
     public static final int BUGREPORT_MODE_ONBOARDING = IDumpstate.BUGREPORT_MODE_ONBOARDING;
 
     /**
@@ -180,10 +175,7 @@ public final class BugreportParams {
      * The bugreport may be retrieved multiple times using
      * {@link BugreportManager#retrieveBugreport(
      * String, ParcelFileDescriptor, Executor, BugreportManager.BugreportCallback)}.
-     *
-     * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_ONBOARDING_BUGREPORT_V2_ENABLED)
     public static final int BUGREPORT_FLAG_KEEP_BUGREPORT_ON_RETRIEVAL =
             IDumpstate.BUGREPORT_FLAG_KEEP_BUGREPORT_ON_RETRIEVAL;
