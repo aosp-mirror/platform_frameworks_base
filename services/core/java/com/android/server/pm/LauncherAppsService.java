@@ -1625,10 +1625,11 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        @NonNull
         public List<String> getPreInstalledSystemPackages(UserHandle user) {
             if (!canAccessProfile(user.getIdentifier(),
                     "Can't access preinstalled packages for another user")) {
-                return null;
+                return new ArrayList<>();
             }
             final long identity = Binder.clearCallingIdentity();
             try {

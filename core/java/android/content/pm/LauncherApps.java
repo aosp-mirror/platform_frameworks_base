@@ -17,6 +17,8 @@
 package android.content.pm;
 
 import static android.Manifest.permission;
+import static android.Manifest.permission.ACCESS_HIDDEN_PROFILES;
+import static android.Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 
 import android.annotation.CallbackExecutor;
@@ -779,15 +781,20 @@ public class LauncherApps {
 
     /**
      * Returns information related to a user which is useful for displaying UI elements
-     * to distinguish it from other users (eg, badges). Only system launchers should
-     * call this API.
+     * to distinguish it from other users (eg, badges).
      *
-     * @param userHandle user handle of the user for which LauncherUserInfo is requested
-     * @return the LauncherUserInfo object related to the user specified.
-     * @hide
+     * <p>If the user in question is a hidden profile like
+     * {@link UserManager.USER_TYPE_PROFILE_PRIVATE}, caller should have
+     * {@link android.app.role.RoleManager.ROLE_HOME} and either of the permissions required.
+     *
+     * @param userHandle user handle of the user for which LauncherUserInfo is requested.
+     * @return the {@link LauncherUserInfo} object related to the user specified, null in case
+     * the user is inaccessible.
      */
     @Nullable
     @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @RequiresPermission(conditional = true,
+            anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
     public final LauncherUserInfo getLauncherUserInfo(@NonNull UserHandle userHandle) {
         if (DEBUG) {
             Log.i(TAG, "getLauncherUserInfo " + userHandle);
@@ -823,17 +830,20 @@ public class LauncherApps {
      * </ul>
      * </p>
      *
-     *
+     * <p>If the user in question is a hidden profile
+     * {@link UserManager.USER_TYPE_PROFILE_PRIVATE}, caller should have
+     * {@link android.app.role.RoleManager.ROLE_HOME} and either of the permissions required.
      *
      * @param packageName the package for which intent sender to launch App Market Activity is
      *                    required.
      * @param user the profile for which intent sender to launch App Market Activity is required.
      * @return {@link IntentSender} object which launches the App Market Activity, null in case
      *         there is no such activity.
-     * @hide
      */
     @Nullable
     @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @RequiresPermission(conditional = true,
+            anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
     public IntentSender getAppMarketActivityIntent(@Nullable String packageName,
             @NonNull UserHandle user) {
         if (DEBUG) {
@@ -851,15 +861,21 @@ public class LauncherApps {
     /**
      * Returns the list of the system packages that are installed at user creation.
      *
-     * <p>An empty list denotes that all system packages are installed for that user at creation.
-     * This behaviour is inherited from the underlining UserManager API.
+     * <p>An empty list denotes that all system packages should be treated as pre-installed for that
+     * user at creation.
+     *
+     * <p>If the user in question is a hidden profile like
+     * {@link UserManager.USER_TYPE_PROFILE_PRIVATE}, caller should have
+     * {@link android.app.role.RoleManager.ROLE_HOME} and either of the permissions required.
      *
      * @param userHandle the user for which installed system packages are required.
      * @return {@link List} of {@link String}, representing the package name of the installed
      *        package. Can be empty but not null.
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @NonNull
+    @RequiresPermission(conditional = true,
+            anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
     public List<String> getPreInstalledSystemPackages(@NonNull UserHandle userHandle) {
         if (DEBUG) {
             Log.i(TAG, "getPreInstalledSystemPackages for user: " + userHandle);
