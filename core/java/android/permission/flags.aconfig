@@ -130,3 +130,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "ignore_process_text"
+    namespace: "permissions"
+    description: "Ignore activities that handle PROCESS_TEXT in TextView"
+    bug: "325356776"
+}
+
