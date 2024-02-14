@@ -953,6 +953,22 @@ public class ViewRootImplTest {
         });
     }
 
+    /**
+     * Test the IsFrameRatePowerSavingsBalanced values are properly set
+     */
+    @UiThreadTest
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_isFrameRatePowerSavingsBalanced() {
+        ViewRootImpl viewRootImpl = new ViewRootImpl(sContext,
+                sContext.getDisplayNoVerify());
+        assertEquals(viewRootImpl.isFrameRatePowerSavingsBalanced(), true);
+        viewRootImpl.setFrameRatePowerSavingsBalanced(false);
+        assertEquals(viewRootImpl.isFrameRatePowerSavingsBalanced(), false);
+        viewRootImpl.setFrameRatePowerSavingsBalanced(true);
+        assertEquals(viewRootImpl.isFrameRatePowerSavingsBalanced(), true);
+    }
+
     @Test
     public void forceInvertOffDarkThemeOff_forceDarkModeDisabled() {
         mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);

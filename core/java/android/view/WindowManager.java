@@ -4397,6 +4397,7 @@ public interface WindowManager extends ViewManager {
          * For variable refresh rate project.
          */
         private boolean mFrameRateBoostOnTouch = true;
+        private boolean mIsFrameRatePowerSavingsBalanced = true;
         private static boolean sToolkitSetFrameRateReadOnlyFlagValue =
                 android.view.flags.Flags.toolkitSetFrameRateReadOnly();
 
@@ -4861,6 +4862,36 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
+         * Set the value whether frameratepowersavingsbalance is enabled for this Window.
+         * This allows device to adjust refresh rate
+         * as needed and can be useful for power saving.
+         *
+         * @param enabled Whether we should enable frameratepowersavingsbalance.
+         */
+        @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+        public void setFrameRatePowerSavingsBalanced(boolean enabled) {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                mIsFrameRatePowerSavingsBalanced = enabled;
+            }
+        }
+
+        /**
+         * Get the value whether frameratepowersavingsbalance is enabled for this Window.
+         * This allows device to adjust refresh rate
+         * as needed and can be useful for power saving.
+         * by {@link #setFrameRatePowerSavingsBalanced(boolean)}
+         *
+         * @return Whether we should enable frameratepowersavingsbalance.
+         */
+        @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+        public boolean isFrameRatePowerSavingsBalanced() {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                return mIsFrameRatePowerSavingsBalanced;
+            }
+            return true;
+        }
+
+        /**
          * <p>
          * Blurs the screen behind the window. The effect is similar to that of {@link #dimAmount},
          * but instead of dimmed, the content behind the window will be blurred (or combined with
@@ -5013,6 +5044,7 @@ public interface WindowManager extends ViewManager {
             out.writeFloat(mDesiredHdrHeadroom);
             if (sToolkitSetFrameRateReadOnlyFlagValue) {
                 out.writeBoolean(mFrameRateBoostOnTouch);
+                out.writeBoolean(mIsFrameRatePowerSavingsBalanced);
             }
         }
 
@@ -5088,6 +5120,7 @@ public interface WindowManager extends ViewManager {
             mDesiredHdrHeadroom = in.readFloat();
             if (sToolkitSetFrameRateReadOnlyFlagValue) {
                 mFrameRateBoostOnTouch = in.readBoolean();
+                mIsFrameRatePowerSavingsBalanced = in.readBoolean();
             }
         }
 
@@ -5431,6 +5464,12 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
+            if (sToolkitSetFrameRateReadOnlyFlagValue
+                    && mIsFrameRatePowerSavingsBalanced != o.mIsFrameRatePowerSavingsBalanced) {
+                mIsFrameRatePowerSavingsBalanced = o.mIsFrameRatePowerSavingsBalanced;
+                changes |= LAYOUT_CHANGED;
+            }
+
             return changes;
         }
 
@@ -5657,6 +5696,11 @@ public interface WindowManager extends ViewManager {
                 sb.append(System.lineSeparator());
                 sb.append(prefix).append("  frameRateBoostOnTouch=");
                 sb.append(mFrameRateBoostOnTouch);
+            }
+            if (sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  dvrrWindowFrameRateHint=");
+                sb.append(mIsFrameRatePowerSavingsBalanced);
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());

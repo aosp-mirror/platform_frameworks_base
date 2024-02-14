@@ -55,4 +55,10 @@
     <style name="ViewDefaultBackground">
         <item name="android:background">#00000000</item>
     </style>
+    <style name="IsFrameRatePowerSavingsBalancedDisabled">
+        <item name="android:windowIsFrameRatePowerSavingsBalanced">false</item>
+    </style>
+    <style name="IsFrameRatePowerSavingsBalancedEnabled">
+        <item name="android:windowIsFrameRatePowerSavingsBalanced">true</item>
+    </style>
 </resources>
