@@ -4495,6 +4495,7 @@ package android.credentials.selection {
     ctor public FailureResult(int, @Nullable String);
     method public int getErrorCode();
     method @Nullable public String getErrorMessage();
+    method public static void sendFailureResult(@NonNull android.os.ResultReceiver, @NonNull android.credentials.selection.FailureResult);
     field public static final int ERROR_CODE_CANCELED_AND_LAUNCHED_SETTINGS = 2; // 0x2
     field public static final int ERROR_CODE_DIALOG_CANCELED_BY_USER = 1; // 0x1
     field public static final int ERROR_CODE_UI_FAILURE = 0; // 0x0
@@ -4556,17 +4557,13 @@ package android.credentials.selection {
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class RequestToken {
   }
 
-  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class ResultHelper {
-    method public static void sendFailureResult(@NonNull android.os.ResultReceiver, @NonNull android.credentials.selection.FailureResult);
-    method public static void sendUserSelectionResult(@NonNull android.os.ResultReceiver, @NonNull android.credentials.selection.UserSelectionResult);
-  }
-
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public final class UserSelectionResult {
     ctor public UserSelectionResult(@NonNull String, @NonNull String, @NonNull String, @Nullable android.credentials.selection.ProviderPendingIntentResponse);
     method @NonNull public String getEntryKey();
     method @NonNull public String getEntrySubkey();
     method @Nullable public android.credentials.selection.ProviderPendingIntentResponse getPendingIntentProviderResponse();
     method @NonNull public String getProviderId();
+    method public static void sendUserSelectionResult(@NonNull android.os.ResultReceiver, @NonNull android.credentials.selection.UserSelectionResult);
   }
 
 }

@@ -22,6 +22,9 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.ResultReceiver;
 
 import com.android.internal.util.Preconditions;
 
@@ -34,6 +37,22 @@ import com.android.internal.util.Preconditions;
 @SystemApi
 @FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public final class UserSelectionResult {
+    /**
+     * Sends the completed {@code userSelectionResult} back to the CredentialManager service.
+     *
+     * @param resultReceiver the ResultReceiver sent from the system service, that can be extracted
+     *                       from the launch intent via
+     *                       {@link IntentHelper#extractResultReceiver(Intent)}
+     */
+    public static void sendUserSelectionResult(@NonNull ResultReceiver resultReceiver,
+            @NonNull UserSelectionResult userSelectionResult) {
+        UserSelectionDialogResult result = userSelectionResult.toUserSelectionDialogResult();
+        Bundle resultData = new Bundle();
+        UserSelectionDialogResult.addToBundle(result, resultData);
+        resultReceiver.send(BaseDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION,
+                resultData);
+    }
+
     @NonNull
     private final String mProviderId;
     @NonNull
