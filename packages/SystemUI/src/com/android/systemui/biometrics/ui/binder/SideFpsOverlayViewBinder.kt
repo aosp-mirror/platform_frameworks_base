@@ -115,17 +115,11 @@ constructor(
     }
 
     private var overlayView: View? = null
-    private var lottie: LottieAnimationView? = null
 
     /** Show the side fingerprint sensor indicator */
     private fun show() {
-        overlayView?.let {
-            if (it.isAttachedToWindow) {
-                lottie = it.requireViewById<LottieAnimationView>(R.id.sidefps_animation)
-                lottie?.pauseAnimation()
-                lottie?.removeAllLottieOnCompositionLoadedListener()
-                windowManager.get().removeView(it)
-            }
+        if (overlayView?.isAttachedToWindow == true) {
+            return
         }
 
         overlayView = layoutInflater.get().inflate(R.layout.sidefps_view, null, false)
