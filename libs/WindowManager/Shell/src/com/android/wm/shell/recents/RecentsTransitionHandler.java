@@ -24,6 +24,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.wm.shell.util.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
 
@@ -929,7 +930,14 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 Slog.e(TAG, "Duplicate call to finish");
                 return;
             }
-            if (!toHome) {
+
+            boolean returningToApp = !toHome
+                    && !mWillFinishToHome
+                    && mPausingTasks != null
+                    && mState == STATE_NORMAL;
+            if (returningToApp && allAppsAreTranslucent(mPausingTasks)) {
+                mHomeTransitionObserver.notifyHomeVisibilityChanged(true);
+            } else if (!toHome) {
                 // For some transitions, we may have notified home activity that it became visible.
                 // We need to notify the observer that we are no longer going home.
                 mHomeTransitionObserver.notifyHomeVisibilityChanged(false);
@@ -948,7 +956,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 if (toHome) wct.reorder(mRecentsTask, true /* toTop */);
                 else wct.restoreTransientOrder(mRecentsTask);
             }
-            if (!toHome && !mWillFinishToHome && mPausingTasks != null && mState == STATE_NORMAL) {
+            if (returningToApp) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION, "  returning to app");
                 // The gesture is returning to the pausing-task(s) rather than continuing with
                 // recents, so end the transition by moving the app back to the top (and also
@@ -1048,6 +1056,18 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             }
         }
 
+        private boolean allAppsAreTranslucent(ArrayList<TaskState> tasks) {
+            if (tasks == null || tasks.isEmpty()) {
+                return false;
+            }
+            for (int i = tasks.size() - 1; i >= 0; --i) {
+                if (!tasks.get(i).mIsTranslucent) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private void cleanUpPausingOrClosingTask(TaskState task, WindowContainerTransaction wct,
                 SurfaceControl.Transaction finishTransaction, boolean sendUserLeaveHint) {
             if (!sendUserLeaveHint && task.isLeaf()) {
@@ -1118,6 +1138,9 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         /** The surface/leash of the task provided by Core. */
         SurfaceControl mTaskSurface;
 
+        /** True when the task is translucent.  */
+        final boolean mIsTranslucent;
+
         /** The (local) animation-leash created for this task. Only non-null for leafs. */
         @Nullable
         SurfaceControl mLeash;
@@ -1126,6 +1149,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             mToken = change.getContainer();
             mTaskInfo = change.getTaskInfo();
             mTaskSurface = change.getLeash();
+            mIsTranslucent = (change.getFlags() & FLAG_TRANSLUCENT) != 0;
             mLeash = leash;
         }
 
