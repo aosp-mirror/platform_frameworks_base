@@ -28,7 +28,6 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.common.ui.ConfigurationState
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
@@ -59,7 +58,7 @@ constructor(
     private lateinit var nic: NotificationIconContainer
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
         nic =
@@ -78,7 +77,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
 
@@ -99,7 +98,7 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
         val bottomMargin =
@@ -114,12 +113,9 @@ constructor(
                 BOTTOM
             }
         constraintSet.apply {
-            if (migrateClocksToBlueprint()) {
-                connect(nicId, TOP, R.id.smart_space_barrier_bottom, BOTTOM, bottomMargin)
-                setGoneMargin(nicId, BOTTOM, bottomMargin)
-            } else {
-                connect(nicId, TOP, R.id.keyguard_status_view, topAlignment, bottomMargin)
-            }
+            connect(nicId, TOP, R.id.smart_space_barrier_bottom, BOTTOM, bottomMargin)
+            setGoneMargin(nicId, BOTTOM, bottomMargin)
+
             connect(
                 nicId,
                 START,

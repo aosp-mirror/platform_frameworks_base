@@ -15,6 +15,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.ExpandHelper
 import com.android.systemui.Flags.nsslFalsingFix
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.biometrics.UdfpsKeyguardViewControllerLegacy
 import com.android.systemui.classifier.Classifier
@@ -23,7 +24,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll
 import com.android.systemui.plugins.ActivityStarter
@@ -890,7 +890,7 @@ class DragDownHelper(
                     isDraggingDown = false
                     isTrackpadReverseScroll = false
                     shadeRepository.setLegacyLockscreenShadeTracking(false)
-                    if (nsslFalsingFix() || KeyguardShadeMigrationNssl.isEnabled) {
+                    if (nsslFalsingFix() || migrateClocksToBlueprint()) {
                         return true
                     }
                 } else {

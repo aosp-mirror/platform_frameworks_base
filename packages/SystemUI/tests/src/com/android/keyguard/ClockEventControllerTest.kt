@@ -260,7 +260,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Test
     fun keyguardCallback_visibilityChanged_clockDozeCalled() =
         runBlocking(IMMEDIATE) {
-            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
+            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
             val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
             verify(keyguardUpdateMonitor).registerCallback(capture(captor))
 

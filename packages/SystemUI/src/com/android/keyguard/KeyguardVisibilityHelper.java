@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
@@ -23,7 +24,6 @@ import android.util.Property;
 import android.view.View;
 
 import com.android.app.animation.Interpolators;
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.statusbar.StatusBarState;
@@ -109,7 +109,7 @@ public class KeyguardVisibilityHelper {
                 animProps.setDelay(0).setDuration(160);
                 log("goingToFullShade && !keyguardFadingAway");
             }
-            if (KeyguardShadeMigrationNssl.isEnabled()) {
+            if (migrateClocksToBlueprint()) {
                 log("Using LockscreenToGoneTransition 1");
             } else {
                 PropertyAnimator.setProperty(
@@ -167,7 +167,7 @@ public class KeyguardVisibilityHelper {
                         animProps,
                         true /* animate */);
             } else if (mScreenOffAnimationController.shouldAnimateInKeyguard()) {
-                if (KeyguardShadeMigrationNssl.isEnabled()) {
+                if (migrateClocksToBlueprint()) {
                     log("Using GoneToAodTransition");
                     mKeyguardViewVisibilityAnimating = false;
                 } else {
@@ -183,7 +183,7 @@ public class KeyguardVisibilityHelper {
                 mView.setVisibility(View.VISIBLE);
             }
         } else {
-            if (KeyguardShadeMigrationNssl.isEnabled()) {
+            if (migrateClocksToBlueprint()) {
                 log("Using LockscreenToGoneTransition 2");
             } else {
                 log("Direct set Visibility to GONE");
