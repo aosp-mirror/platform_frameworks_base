@@ -4690,7 +4690,6 @@ public class SubscriptionManager {
      * @param subscriptionId the subId of the subscription
      * @param userHandle user handle of the user
      * @return {@code true} if subscription is associated with user
-     * {code true} if there are no subscriptions on device
      * else {@code false} if subscription is not associated with user.
      *
      * @throws IllegalArgumentException if subscription doesn't exist.
@@ -4713,6 +4712,37 @@ public class SubscriptionManager {
             } else {
                 Log.e(LOG_TAG, "[isSubscriptionAssociatedWithUser]: subscription service "
                         + "unavailable");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether the given subscription is associated with the calling user.
+     *
+     * @param subscriptionId the subscription ID of the subscription
+     * @return {@code true} if the subscription is associated with the user that the current process
+     *         is running in; {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if subscription doesn't exist.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @FlaggedApi(Flags.FLAG_SUBSCRIPTION_USER_ASSOCIATION_QUERY)
+    public boolean isSubscriptionAssociatedWithUser(int subscriptionId) {
+        if (!isValidSubscriptionId(subscriptionId)) {
+            throw new IllegalArgumentException("[isSubscriptionAssociatedWithCallingUser]: "
+                    + "Invalid subscriptionId: " + subscriptionId);
+        }
+
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                return iSub.isSubscriptionAssociatedWithCallingUser(subscriptionId);
+            } else {
+                throw new IllegalStateException("subscription service unavailable.");
             }
         } catch (RemoteException ex) {
             ex.rethrowAsRuntimeException();
