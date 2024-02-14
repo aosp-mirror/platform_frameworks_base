@@ -174,6 +174,12 @@ public final class DevicePolicyIdentifiers {
     public static final String USB_DATA_SIGNALING_POLICY = "usbDataSignaling";
 
     /**
+     * String identifier for {@link DevicePolicyManager#setRequiredPasswordComplexity}.
+     */
+    @FlaggedApi(Flags.FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
+    public static final String PASSWORD_COMPLEXITY_POLICY = "passwordComplexity";
+
+    /**
      * @hide
      */
     public static final String USER_RESTRICTION_PREFIX = "userRestriction_";
