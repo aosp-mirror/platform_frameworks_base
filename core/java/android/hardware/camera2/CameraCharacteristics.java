@@ -558,8 +558,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * on a particular SessionConfiguration.</p>
      *
      * @return List of CameraCharacteristic keys containing characterisitics specific to a session
-     * configuration. For Android 15, this list only contains CONTROL_ZOOM_RATIO_RANGE and
-     * SCALER_AVAILABLE_MAX_DIGITAL_ZOOM.
+     * configuration. If {@link #INFO_SESSION_CONFIGURATION_QUERY_VERSION} is
+     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, then this list will only contain
+     * CONTROL_ZOOM_RATIO_RANGE and SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
+     *
+     * @see INFO_SESSION_CONFIGURATION_QUERY_VERSION
      */
     @NonNull
     @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
