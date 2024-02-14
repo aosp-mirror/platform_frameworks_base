@@ -31,6 +31,7 @@ import com.android.app.animation.Interpolators
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
 import kotlin.math.abs
@@ -41,12 +42,13 @@ internal fun View.setRect(rect: Rect) =
 class ClockSizeTransition(
     config: IntraBlueprintTransition.Config,
     clockViewModel: KeyguardClockViewModel,
+    smartspaceViewModel: KeyguardSmartspaceViewModel,
 ) : TransitionSet() {
     init {
         ordering = ORDERING_TOGETHER
         if (config.type != Type.SmartspaceVisibility) {
-            addTransition(ClockFaceOutTransition(config, clockViewModel))
-            addTransition(ClockFaceInTransition(config, clockViewModel))
+            addTransition(ClockFaceOutTransition(config, clockViewModel, smartspaceViewModel))
+            addTransition(ClockFaceInTransition(config, clockViewModel, smartspaceViewModel))
         }
         addTransition(SmartspaceMoveTransition(config, clockViewModel))
     }
@@ -197,12 +199,13 @@ class ClockSizeTransition(
     class ClockFaceInTransition(
         config: IntraBlueprintTransition.Config,
         val viewModel: KeyguardClockViewModel,
+        val smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) : VisibilityBoundsTransition() {
         init {
             duration = CLOCK_IN_MILLIS
             startDelay = CLOCK_IN_START_DELAY_MILLIS
             interpolator = CLOCK_IN_INTERPOLATOR
-            captureSmartspace = !viewModel.useLargeClock
+            captureSmartspace = !viewModel.useLargeClock && smartspaceViewModel.isSmartspaceEnabled
 
             if (viewModel.useLargeClock) {
                 viewModel.clock?.let { it.largeClock.layout.views.forEach { addTarget(it) } }
@@ -252,11 +255,12 @@ class ClockSizeTransition(
     class ClockFaceOutTransition(
         config: IntraBlueprintTransition.Config,
         val viewModel: KeyguardClockViewModel,
+        val smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) : VisibilityBoundsTransition() {
         init {
             duration = CLOCK_OUT_MILLIS
             interpolator = CLOCK_OUT_INTERPOLATOR
-            captureSmartspace = viewModel.useLargeClock
+            captureSmartspace = viewModel.useLargeClock && smartspaceViewModel.isSmartspaceEnabled
 
             if (viewModel.useLargeClock) {
                 addTarget(R.id.lockscreen_clock_view)

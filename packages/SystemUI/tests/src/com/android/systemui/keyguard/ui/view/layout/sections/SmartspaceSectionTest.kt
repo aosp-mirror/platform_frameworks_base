@@ -88,6 +88,8 @@ class SmartspaceSectionTest : SysuiTestCase() {
         whenever(keyguardClockViewModel.hasCustomWeatherDataDisplay)
             .thenReturn(hasCustomWeatherDataDisplay)
         whenever(keyguardClockViewModel.clockShouldBeCentered).thenReturn(clockShouldBeCentered)
+        whenever(keyguardSmartspaceViewModel.isSmartspaceEnabled).thenReturn(true)
+
         constraintSet = ConstraintSet()
     }
 
@@ -103,7 +105,6 @@ class SmartspaceSectionTest : SysuiTestCase() {
 
     @Test
     fun testAddViews_smartspaceEnabled_dateWeatherDecoupled() {
-        whenever(keyguardSmartspaceViewModel.isSmartspaceEnabled).thenReturn(true)
         whenever(keyguardSmartspaceViewModel.isDateWeatherDecoupled).thenReturn(true)
         underTest.addViews(constraintLayout)
         assert(smartspaceView.parent == constraintLayout)
@@ -113,7 +114,6 @@ class SmartspaceSectionTest : SysuiTestCase() {
 
     @Test
     fun testAddViews_smartspaceEnabled_notDateWeatherDecoupled() {
-        whenever(keyguardSmartspaceViewModel.isSmartspaceEnabled).thenReturn(true)
         whenever(keyguardSmartspaceViewModel.isDateWeatherDecoupled).thenReturn(false)
         underTest.addViews(constraintLayout)
         assert(smartspaceView.parent == constraintLayout)
@@ -123,7 +123,6 @@ class SmartspaceSectionTest : SysuiTestCase() {
 
     @Test
     fun testConstraintsWhenNotHasCustomWeatherDataDisplay() {
-        whenever(keyguardSmartspaceViewModel.isSmartspaceEnabled).thenReturn(true)
         whenever(keyguardSmartspaceViewModel.isDateWeatherDecoupled).thenReturn(true)
         hasCustomWeatherDataDisplay.value = false
         underTest.addViews(constraintLayout)

@@ -20,10 +20,12 @@ import android.transition.TransitionSet
 import com.android.systemui.keyguard.ui.view.layout.sections.transitions.ClockSizeTransition
 import com.android.systemui.keyguard.ui.view.layout.sections.transitions.DefaultClockSteppingTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 
 class IntraBlueprintTransition(
     config: IntraBlueprintTransition.Config,
     clockViewModel: KeyguardClockViewModel,
+    smartspaceViewModel: KeyguardSmartspaceViewModel,
 ) : TransitionSet() {
 
     enum class Type(
@@ -56,7 +58,7 @@ class IntraBlueprintTransition(
             Type.NoTransition -> {}
             Type.DefaultClockStepping ->
                 addTransition(clockViewModel.clock?.let { DefaultClockSteppingTransition(it) })
-            else -> addTransition(ClockSizeTransition(config, clockViewModel))
+            else -> addTransition(ClockSizeTransition(config, clockViewModel, smartspaceViewModel))
         }
     }
 }

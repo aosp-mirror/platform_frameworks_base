@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSec
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultUdfpsAccessibilityOverlaySection
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule
+import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSliceViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.util.kotlin.getOrNull
 import java.util.Optional
@@ -60,6 +61,7 @@ constructor(
     communalTutorialIndicatorSection: CommunalTutorialIndicatorSection,
     clockSection: ClockSection,
     smartspaceSection: SmartspaceSection,
+    keyguardSliceViewSection: KeyguardSliceViewSection,
     udfpsAccessibilityOverlaySection: DefaultUdfpsAccessibilityOverlaySection,
 ) : KeyguardBlueprint {
     override val id: String = SHORTCUTS_BESIDE_UDFPS
@@ -78,6 +80,7 @@ constructor(
             aodBurnInSection,
             communalTutorialIndicatorSection,
             clockSection,
+            keyguardSliceViewSection,
             defaultDeviceEntrySection,
             udfpsAccessibilityOverlaySection, // Add LAST: Intentionally has z-order above others
         )
