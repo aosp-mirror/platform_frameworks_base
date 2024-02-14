@@ -482,6 +482,11 @@ public class VirtualDeviceManagerService extends SystemService {
                     }
                 });
             }
+            if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+                Counter.logIncrementWithUid(
+                        "virtual_devices.value_virtual_devices_created_with_uid_count",
+                        attributionSource.getUid());
+            }
             return virtualDevice;
         }
 

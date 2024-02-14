@@ -104,6 +104,7 @@ import android.widget.Toast;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.BlockedAppStreamingActivity;
+import com.android.modules.expresslog.Counter;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.GenericWindowPolicyController.RunningAppsChangedListener;
 import com.android.server.companion.virtual.audio.VirtualAudioController;
@@ -152,6 +153,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final int mOwnerUid;
     private final VirtualDeviceLog mVirtualDeviceLog;
     private final String mOwnerPackageName;
+    @NonNull
+    private final AttributionSource mAttributionSource;
     private final int mDeviceId;
     @Nullable
     private final String mPersistentDeviceId;
@@ -288,6 +291,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         super(PermissionEnforcer.fromContext(context));
         mVirtualDeviceLog = virtualDeviceLog;
         mOwnerPackageName = attributionSource.getPackageName();
+        mAttributionSource = attributionSource;
         UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(attributionSource.getUid());
         mContext = context.createContextAsUser(ownerUserHandle, 0);
         mAssociationInfo = associationInfo;
@@ -307,11 +311,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if (inputController == null) {
             mInputController = new InputController(
                     context.getMainThreadHandler(),
-                    context.getSystemService(WindowManager.class));
+                    context.getSystemService(WindowManager.class), mAttributionSource);
         } else {
             mInputController = inputController;
         }
-        mSensorController = new SensorController(this, mDeviceId,
+        mSensorController = new SensorController(this, mDeviceId, mAttributionSource,
                 mParams.getVirtualSensorCallback(), mParams.getVirtualSensorConfigs());
         mCameraAccessController = cameraAccessController;
         if (mCameraAccessController != null) {
@@ -620,7 +624,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
 
             if (mVirtualAudioController == null) {
-                mVirtualAudioController = new VirtualAudioController(mContext);
+                mVirtualAudioController = new VirtualAudioController(mContext, mAttributionSource);
                 GenericWindowPolicyController gwpc = mVirtualDisplays.get(
                         displayId).getWindowPolicyController();
                 mVirtualAudioController.startListening(gwpc, routingCallback,
@@ -1028,7 +1032,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if (mVirtualCameraController == null) {
             throw new UnsupportedOperationException("Virtual camera controller is not available");
         }
-        mVirtualCameraController.registerCamera(cameraConfig);
+        mVirtualCameraController.registerCamera(cameraConfig, mAttributionSource);
     }
 
     @Override // Binder call
@@ -1110,6 +1114,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final GenericWindowPolicyController gwpc = new GenericWindowPolicyController(
                 FLAG_SECURE,
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                mAttributionSource,
                 getAllowedUserHandles(),
                 activityLaunchAllowedByDefault,
                 mActivityPolicyExemptions,
@@ -1179,6 +1184,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             Binder.restoreCallingIdentity(token);
         }
 
+        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+            Counter.logIncrementWithUid(
+                    "virtual_devices.value_virtual_display_created_count",
+                    mAttributionSource.getUid());
+        }
         return displayId;
     }
 
@@ -1220,6 +1230,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if ((display.getFlags() & FLAG_SECURE) == 0) {
             showToastWhereUidIsRunning(uid, com.android.internal.R.string.vdm_secure_window,
                     Toast.LENGTH_LONG, mContext.getMainLooper());
+
+            if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+                Counter.logIncrementWithUid(
+                        "virtual_devices.value_secure_window_blocked_count",
+                        mAttributionSource.getUid());
+            }
         }
     }
 
