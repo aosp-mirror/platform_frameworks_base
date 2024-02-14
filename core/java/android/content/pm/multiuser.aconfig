@@ -142,3 +142,10 @@ flag {
     description: "Enable extra check to limit access to hidden prfiles data in Launcher apps APIs."
     bug: "321988638"
 }
+
+flag {
+    name: "reorder_wallpaper_during_user_switch"
+    namespace: "multiuser"
+    description: "Reorder loading home and lock screen wallpapers during a user switch."
+    bug: "324911115"
+}
