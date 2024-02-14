@@ -18,14 +18,14 @@ package com.android.systemui.volume.panel.component.button.ui.composable
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,42 +34,41 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.Expandable
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
-import com.android.systemui.volume.panel.component.button.ui.viewmodel.ToggleButtonViewModel
+import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
 import com.android.systemui.volume.panel.ui.composable.ComposeVolumePanelUiComponent
 import com.android.systemui.volume.panel.ui.composable.VolumePanelComposeScope
 import kotlinx.coroutines.flow.StateFlow
 
-/** [ComposeVolumePanelUiComponent] implementing a toggleable button from a bottom row. */
-class ToggleButtonComponent(
-    private val viewModelFlow: StateFlow<ToggleButtonViewModel?>,
-    private val onCheckedChange: (isChecked: Boolean) -> Unit
+/** [ComposeVolumePanelUiComponent] implementing a clickable button from a bottom row. */
+class ButtonComponent(
+    private val viewModelFlow: StateFlow<ButtonViewModel?>,
+    private val onClick: (Expandable) -> Unit
 ) : ComposeVolumePanelUiComponent {
 
     @Composable
     override fun VolumePanelComposeScope.Content(modifier: Modifier) {
         val viewModelByState by viewModelFlow.collectAsState()
         val viewModel = viewModelByState ?: return
+
         Column(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            OutlinedIconToggleButton(
+            Expandable(
                 modifier = Modifier.height(64.dp).fillMaxWidth(),
-                checked = viewModel.isChecked,
-                onCheckedChange = onCheckedChange,
+                color = MaterialTheme.colorScheme.primaryContainer,
                 shape = RoundedCornerShape(28.dp),
-                colors =
-                    IconButtonDefaults.outlinedIconToggleButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
-                border = BorderStroke(8.dp, MaterialTheme.colorScheme.surface),
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                borderStroke = BorderStroke(8.dp, MaterialTheme.colorScheme.surface),
+                onClick = onClick,
             ) {
-                Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
+                }
             }
             Text(
                 text = viewModel.label.toString(),
