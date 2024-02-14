@@ -4758,9 +4758,13 @@ package android.hardware.camera2.extension {
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public final class CameraOutputSurface {
     ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public CameraOutputSurface(@NonNull android.view.Surface, @NonNull android.util.Size);
+    method @FlaggedApi("com.android.internal.camera.flags.extension_10_bit") public int getColorSpace();
+    method @FlaggedApi("com.android.internal.camera.flags.extension_10_bit") public long getDynamicRangeProfile();
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int getImageFormat();
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public android.util.Size getSize();
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public android.view.Surface getSurface();
+    method @FlaggedApi("com.android.internal.camera.flags.extension_10_bit") public void setColorSpace(int);
+    method @FlaggedApi("com.android.internal.camera.flags.extension_10_bit") public void setDynamicRangeProfile(long);
   }
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public class CharacteristicsMap {

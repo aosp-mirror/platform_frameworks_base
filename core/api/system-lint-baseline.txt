@@ -535,6 +535,10 @@ ListenerLast: android.telephony.satellite.SatelliteManager#stopSatelliteTransmis
     Listeners should always be at end of argument list (method `stopSatelliteTransmissionUpdates`)
 
 
+MethodNameUnits: android.hardware.camera2.extension.CameraOutputSurface#getColorSpace():
+    Expected method name units to be `Bytes`, was `Space` in `getColorSpace`
+
+
 MissingGetterMatchingBuilder: android.service.voice.HotwordTrainingData.Builder#addTrainingAudio(android.service.voice.HotwordTrainingAudio):
     android.service.voice.HotwordTrainingData does not declare a `getTrainingAudios()` method matching method android.service.voice.HotwordTrainingData.Builder.addTrainingAudio(android.service.voice.HotwordTrainingAudio)
 MissingGetterMatchingBuilder: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallViaAudioProcessing(boolean):

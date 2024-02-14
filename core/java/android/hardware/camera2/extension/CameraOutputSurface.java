@@ -18,8 +18,11 @@ package android.hardware.camera2.extension;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.graphics.ImageFormat;
+import android.hardware.camera2.params.ColorSpaceProfiles;
+import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.util.Size;
 import android.view.Surface;
@@ -65,6 +68,8 @@ public final class CameraOutputSurface {
         mOutputSurface.size = new android.hardware.camera2.extension.Size();
         mOutputSurface.size.width = size.getWidth();
         mOutputSurface.size.height = size.getHeight();
+        mOutputSurface.dynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        mOutputSurface.colorSpace = ColorSpaceProfiles.UNSPECIFIED;
     }
 
     /**
@@ -94,5 +99,49 @@ public final class CameraOutputSurface {
     @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public @ImageFormat.Format int getImageFormat() {
         return mOutputSurface.imageFormat;
+    }
+
+    /**
+     * Return the dynamic range profile. The default
+     * dynamicRangeProfile is
+     * {@link android.hardware.camera2.params.DynamicRangeProfiles.STANDARD}
+     * unless specified by CameraOutputSurface.setDynamicRangeProfile.
+     */
+    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
+    public @DynamicRangeProfiles.Profile long getDynamicRangeProfile() {
+        return mOutputSurface.dynamicRangeProfile;
+    }
+
+    /**
+     * Return the color space. The default colorSpace is
+     * {@link android.hardware.camera2.params.ColorSpaceProfiles.UNSPECIFIED}
+     * unless specified by CameraOutputSurface.setColorSpace.
+     */
+    @SuppressLint("MethodNameUnits")
+    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
+    public int getColorSpace() {
+        return mOutputSurface.colorSpace;
+    }
+
+    /**
+     * Set the dynamic range profile. The default dynamicRangeProfile
+     * will be {@link android.hardware.camera2.params.DynamicRangeProfiles.STANDARD}
+     * unless explicitly set using this method.
+     */
+    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
+    public void setDynamicRangeProfile(
+            @DynamicRangeProfiles.Profile long dynamicRangeProfile) {
+        mOutputSurface.dynamicRangeProfile = dynamicRangeProfile;
+    }
+
+    /**
+     * Set the color space. The default colorSpace
+     * will be
+     * {@link android.hardware.camera2.params.ColorSpaceProfiles.UNSPECIFIED}
+     * unless explicitly set using this method.
+     */
+    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
+    public void setColorSpace(int colorSpace) {
+        mOutputSurface.colorSpace = colorSpace;
     }
 }

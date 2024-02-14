@@ -1461,6 +1461,7 @@ UnflaggedApi: android.graphics.text.PositionedGlyphs#getItalicOverride(int):
     New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getItalicOverride(int)
 UnflaggedApi: android.graphics.text.PositionedGlyphs#getWeightOverride(int):
     New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getWeightOverride(int)
+
 UnflaggedApi: android.hardware.camera2.ExtensionCaptureRequest:
     New API must be flagged with @FlaggedApi: class android.hardware.camera2.ExtensionCaptureRequest
 UnflaggedApi: android.hardware.camera2.ExtensionCaptureRequest#ExtensionCaptureRequest():
