@@ -8612,6 +8612,12 @@ public final class ViewRootImpl implements ViewParent,
         if (mView != null) {
             mView.requestKeyboardShortcuts(list, deviceId);
         }
+        int numGroups = list.size();
+        for (int i = 0; i < numGroups; ++i) {
+            final KeyboardShortcutGroup group = list.get(i);
+            group.setPackageName(mBasePackageName);
+
+        }
         data.putParcelableArrayList(WindowManager.PARCEL_KEY_SHORTCUTS_ARRAY, list);
         try {
             receiver.send(0, data);
