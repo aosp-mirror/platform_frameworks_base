@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.ImageFormat;
+import android.hardware.camera2.CameraCharacteristics.Key;
 import android.hardware.camera2.extension.IAdvancedExtenderImpl;
 import android.hardware.camera2.extension.ICameraExtensionsProxyService;
 import android.hardware.camera2.extension.IImageCaptureExtenderImpl;
@@ -35,6 +36,8 @@ import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.SizeList;
 import android.hardware.camera2.impl.CameraExtensionUtils;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.ExtensionKey;
+import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Binder;
@@ -1497,4 +1500,28 @@ public final class CameraExtensionCharacteristics {
 
         return Collections.unmodifiableSet(ret);
     }
+
+
+    /**
+     * <p>Minimum and maximum padding zoom factors supported by this camera device for
+     * {@link android.hardware.camera2.ExtensionCaptureRequest#EFV_PADDING_ZOOM_FACTOR } used for
+     * the {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * extension.</p>
+     * <p>The minimum and maximum padding zoom factors supported by the device for
+     * {@link android.hardware.camera2.ExtensionCaptureRequest#EFV_PADDING_ZOOM_FACTOR } used as part of the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * extension feature. This extension specific camera characteristic can be queried using
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#get}.</p>
+     * <p><b>Units</b>: A pair of padding zoom factors in floating-points:
+     * (minPaddingZoomFactor, maxPaddingZoomFactor)</p>
+     * <p><b>Range of valid values:</b><br></p>
+     * <p>1.0 &lt; minPaddingZoomFactor &lt;= maxPaddingZoomFactor</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @ExtensionKey
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<android.util.Range<Float>> EFV_PADDING_ZOOM_FACTOR_RANGE =
+            CameraCharacteristics.EFV_PADDING_ZOOM_FACTOR_RANGE;
 }
