@@ -5891,6 +5891,17 @@
           use glyph bound's as a source of text width.  -->
         <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
         <attr name="useBoundsForWidth" format="boolean" />
+
+
+        <!-- Whether to shift the drawing offset for prevent clipping start drawing offset.
+          This value is ignored when the useBoundsForWidth attribute is false.
+
+          If this value is false, the TextView draws text from the zero X coordinate. This is
+          useful for aligning multiple TextViews vertically.
+          If this value is true, the TextView shift the drawing offset not to clip the
+          stroke in the region where the X coordinate is negative. -->
+        <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+        <attr name="shiftDrawingOffsetForStartOverhang" format="boolean" />
         <!-- Whether to use the locale preferred line height for the minimum line height.
 
           This flag is useful for preventing jitter of entering letters into empty EditText.

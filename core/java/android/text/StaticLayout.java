@@ -24,6 +24,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -454,6 +455,35 @@ public class StaticLayout extends Layout {
         }
 
         /**
+         * Set true for shifting the drawing x offset for showing overhang at the start position.
+         *
+         * This flag is ignored if the {@link #getUseBoundsForWidth()} is false.
+         *
+         * If this value is false, the Layout draws text from the zero even if there is a glyph
+         * stroke in a region where the x coordinate is negative.
+         *
+         * If this value is true, the Layout draws text with shifting the x coordinate of the
+         * drawing bounding box.
+         *
+         * This value is false by default.
+         *
+         * @param shiftDrawingOffsetForStartOverhang true for shifting the drawing offset for
+         *                                          showing the stroke that is in the region where
+         *                                          the x coordinate is negative.
+         * @see #setUseBoundsForWidth(boolean)
+         * @see #getUseBoundsForWidth()
+         */
+        @NonNull
+        // The corresponding getter is getShiftDrawingOffsetForStartOverhang()
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+        public Builder setShiftDrawingOffsetForStartOverhang(
+                boolean shiftDrawingOffsetForStartOverhang) {
+            mShiftDrawingOffsetForStartOverhang = shiftDrawingOffsetForStartOverhang;
+            return this;
+        }
+
+        /**
          * Internal API that tells underlying line breaker that calculating bounding boxes even if
          * the line break is performed with advances. This is useful for DynamicLayout internal
          * implementation because it uses bounding box as well as advances.
@@ -566,6 +596,7 @@ public class StaticLayout extends Layout {
         private boolean mAddLastLineLineSpacing;
         private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
         private boolean mUseBoundsForWidth;
+        private boolean mShiftDrawingOffsetForStartOverhang;
         private boolean mCalculateBounds;
         @Nullable private Paint.FontMetrics mMinimumFontMetrics;
 
@@ -599,6 +630,7 @@ public class StaticLayout extends Layout {
                 JUSTIFICATION_MODE_NONE,
                 null,  // lineBreakConfig,
                 false,  // useBoundsForWidth
+                false,  // shiftDrawingOffsetForStartOverhang
                 null  // minimumFontMetrics
         );
 
@@ -677,7 +709,7 @@ public class StaticLayout extends Layout {
                 b.mIncludePad, b.mFallbackLineSpacing, b.mEllipsizedWidth, b.mEllipsize,
                 b.mMaxLines, b.mBreakStrategy, b.mHyphenationFrequency, b.mLeftIndents,
                 b.mRightIndents, b.mJustificationMode, b.mLineBreakConfig, b.mUseBoundsForWidth,
-                b.mMinimumFontMetrics);
+                b.mShiftDrawingOffsetForStartOverhang, b.mMinimumFontMetrics);
 
         mColumns = columnSize;
         if (b.mEllipsize != null) {
