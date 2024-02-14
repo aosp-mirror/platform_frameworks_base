@@ -539,6 +539,10 @@ public final class WindowManagerImpl implements WindowManager {
             @NonNull InputTransferToken hostInputTransferToken,
             @NonNull SurfaceControl surfaceControl, @NonNull Choreographer choreographer,
             @NonNull SurfaceControlInputReceiver receiver) {
+        Objects.requireNonNull(hostInputTransferToken);
+        Objects.requireNonNull(surfaceControl);
+        Objects.requireNonNull(choreographer);
+        Objects.requireNonNull(receiver);
         return mGlobal.registerBatchedSurfaceControlInputReceiver(displayId, hostInputTransferToken,
                 surfaceControl, choreographer, receiver);
     }
@@ -549,18 +553,24 @@ public final class WindowManagerImpl implements WindowManager {
             @NonNull InputTransferToken hostInputTransferToken,
             @NonNull SurfaceControl surfaceControl, @NonNull Looper looper,
             @NonNull SurfaceControlInputReceiver receiver) {
+        Objects.requireNonNull(hostInputTransferToken);
+        Objects.requireNonNull(surfaceControl);
+        Objects.requireNonNull(looper);
+        Objects.requireNonNull(receiver);
         return mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId,
                 hostInputTransferToken, surfaceControl, looper, receiver);
     }
 
     @Override
     public void unregisterSurfaceControlInputReceiver(@NonNull SurfaceControl surfaceControl) {
+        Objects.requireNonNull(surfaceControl);
         mGlobal.unregisterSurfaceControlInputReceiver(surfaceControl);
     }
 
     @Override
     @Nullable
     public IBinder getSurfaceControlInputClientToken(@NonNull SurfaceControl surfaceControl) {
+        Objects.requireNonNull(surfaceControl);
         return mGlobal.getSurfaceControlInputClientToken(surfaceControl);
     }
 

@@ -6098,7 +6098,7 @@ public interface WindowManager extends ViewManager {
      * receive batched input event. For those events that are batched, the invocation will happen
      * once per {@link Choreographer} frame, and other input events will be delivered immediately.
      * This is different from
-     * { #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
      * Looper, SurfaceControlInputReceiver)} in that the input events are received batched. The
      * caller must invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to clean up
      * the resources when no longer needing to use the {@link SurfaceControlInputReceiver}
@@ -6167,10 +6167,9 @@ public interface WindowManager extends ViewManager {
      * <p>
      * Must be called on the same {@link Looper} thread to which was passed to the
      * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
-     * Choreographer,
-     * SurfaceControlInputReceiver)} or
-     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl, Looper,
-     * SurfaceControlInputReceiver)}
+     * Choreographer, SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Looper, SurfaceControlInputReceiver)}
      *
      * @param surfaceControl The SurfaceControl to remove and unregister the input channel for.
      */
@@ -6181,12 +6180,12 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
-     * Returns the input client token for the {@link SurfaceControl}. This will only return non null
-     * if the SurfaceControl was registered for input via
-     * { #registerBatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Choreographer,
-     * SurfaceControlInputReceiver)} or
-     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl, Looper,
-     * SurfaceControlInputReceiver)}.
+     * Returns the input client token for the {@link SurfaceControl}. This will only return non
+     * null if the SurfaceControl was registered for input via
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Looper, SurfaceControlInputReceiver)}.
      * <p>
      * This is helpful for testing to ensure the test waits for the layer to be registered with
      * SurfaceFlinger and Input before proceeding with the test.
