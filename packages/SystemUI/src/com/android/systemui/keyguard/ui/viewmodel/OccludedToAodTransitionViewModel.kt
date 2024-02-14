@@ -54,7 +54,6 @@ constructor(
             startTime = 233.milliseconds,
             duration = 250.milliseconds,
             onStep = { it },
-            onStart = { 0f },
         )
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
