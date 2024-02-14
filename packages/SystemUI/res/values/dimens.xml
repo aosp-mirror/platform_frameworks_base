@@ -1857,6 +1857,7 @@
     <dimen name="dream_overlay_y_offset">80dp</dimen>
     <dimen name="dream_overlay_entry_y_offset">40dp</dimen>
     <dimen name="dream_overlay_exit_y_offset">40dp</dimen>
+    <dimen name="dream_overlay_exit_x_offset">824dp</dimen>
 
     <dimen name="status_view_margin_horizontal">0dp</dimen>
 

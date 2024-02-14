@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
-import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -361,10 +360,11 @@ constructor(
             return
         }
 
-        glanceableHubTransitions.listenForLockscreenAndHubTransition(
+        glanceableHubTransitions.listenForGlanceableHubTransition(
             transitionName = "listenForLockscreenToGlanceableHub",
             transitionOwnerName = TAG,
-            toScene = CommunalSceneKey.Communal
+            fromState = KeyguardState.LOCKSCREEN,
+            toState = KeyguardState.GLANCEABLE_HUB,
         )
     }
 

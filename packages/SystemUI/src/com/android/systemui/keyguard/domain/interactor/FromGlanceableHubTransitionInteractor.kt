@@ -20,7 +20,6 @@ import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
 import com.android.systemui.Flags
-import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -80,10 +79,11 @@ constructor(
      * transition.
      */
     private fun listenForHubToLockscreen() {
-        glanceableHubTransitions.listenForLockscreenAndHubTransition(
+        glanceableHubTransitions.listenForGlanceableHubTransition(
             transitionName = "listenForHubToLockscreen",
             transitionOwnerName = TAG,
-            toScene = CommunalSceneKey.Blank,
+            fromState = KeyguardState.GLANCEABLE_HUB,
+            toState = KeyguardState.LOCKSCREEN,
         )
     }
 
