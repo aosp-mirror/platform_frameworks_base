@@ -42,6 +42,7 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationListener
@@ -121,12 +122,13 @@ data class TestMocksModule(
     @get:Provides val systemUIDialogManager: SystemUIDialogManager = mock(),
     @get:Provides val deviceEntryIconTransitions: Set<DeviceEntryIconTransition> = emptySet(),
     @get:Provides val communalInteractor: CommunalInteractor = mock(),
+    @get:Provides val sceneLogger: SceneLogger = mock(),
 
     // log buffers
     @get:[Provides BroadcastDispatcherLog]
     val broadcastDispatcherLogger: LogBuffer = mock(),
     @get:[Provides SceneFrameworkLog]
-    val sceneLogger: LogBuffer = mock(),
+    val sceneLogBuffer: LogBuffer = mock(),
     @get:[Provides BiometricLog]
     val biometricLogger: LogBuffer = mock(),
     @get:Provides val lsShadeTransitionLogger: LSShadeTransitionLogger = mock(),

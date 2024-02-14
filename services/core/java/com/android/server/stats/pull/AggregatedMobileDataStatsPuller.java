@@ -30,7 +30,9 @@ import android.util.StatsEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.selinux.RateLimiter;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -131,19 +133,36 @@ class AggregatedMobileDataStatsPuller {
 
     private final Handler mMobileDataStatsHandler;
 
+    private final RateLimiter mRateLimiter;
+
     AggregatedMobileDataStatsPuller(NetworkStatsManager networkStatsManager) {
+        if (DEBUG) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                        TAG + "-AggregatedMobileDataStatsPullerInit");
+            }
+        }
+
+        mRateLimiter = new RateLimiter(/* window= */ Duration.ofSeconds(1));
+
         mUidStats = new ArrayMap<>();
         mUidPreviousState = new SparseIntArray();
 
         mNetworkStatsManager = networkStatsManager;
 
-        if (mNetworkStatsManager != null) {
-            updateNetworkStats(mNetworkStatsManager);
-        }
-
         HandlerThread mMobileDataStatsHandlerThread = new HandlerThread("MobileDataStatsHandler");
         mMobileDataStatsHandlerThread.start();
         mMobileDataStatsHandler = new Handler(mMobileDataStatsHandlerThread.getLooper());
+
+        if (mNetworkStatsManager != null) {
+            mMobileDataStatsHandler.post(
+                    () -> {
+                        updateNetworkStats(mNetworkStatsManager);
+                    });
+        }
+        if (DEBUG) {
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+        }
     }
 
     public void noteUidProcessState(int uid, int state, long unusedElapsedRealtime,
@@ -180,18 +199,20 @@ class AggregatedMobileDataStatsPuller {
     }
 
     private void noteUidProcessStateImpl(int uid, int state) {
-        // noteUidProcessStateLocked can be called back to back several times while
-        // the updateNetworkStatsLocked loops over several stats for multiple uids
-        // and during the first call in a batch of proc state change event it can
-        // contain info for uid with unknown previous state yet which can happen due to a few
-        // reasons:
-        // - app was just started
-        // - app was started before the ActivityManagerService
-        // as result stats would be created with state == ActivityManager.PROCESS_STATE_UNKNOWN
-        if (mNetworkStatsManager != null) {
-            updateNetworkStats(mNetworkStatsManager);
-        } else {
-            Slog.w(TAG, "noteUidProcessStateLocked() can not get mNetworkStatsManager");
+        if (mRateLimiter.tryAcquire()) {
+            // noteUidProcessStateImpl can be called back to back several times while
+            // the updateNetworkStats loops over several stats for multiple uids
+            // and during the first call in a batch of proc state change event it can
+            // contain info for uid with unknown previous state yet which can happen due to a few
+            // reasons:
+            // - app was just started
+            // - app was started before the ActivityManagerService
+            // as result stats would be created with state == ActivityManager.PROCESS_STATE_UNKNOWN
+            if (mNetworkStatsManager != null) {
+                updateNetworkStats(mNetworkStatsManager);
+            } else {
+                Slog.w(TAG, "noteUidProcessStateLocked() can not get mNetworkStatsManager");
+            }
         }
         mUidPreviousState.put(uid, state);
     }

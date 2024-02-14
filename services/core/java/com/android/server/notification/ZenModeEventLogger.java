@@ -26,6 +26,7 @@ import static android.service.notification.NotificationServiceProto.RULE_TYPE_UN
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.Flags;
 import android.app.NotificationManager;
 import android.content.pm.PackageManager;
@@ -33,6 +34,7 @@ import android.os.Process;
 import android.service.notification.DNDPolicyProto;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ConfigChangeOrigin;
+import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.notification.ZenModeDiff;
 import android.service.notification.ZenPolicy;
 import android.util.ArrayMap;
@@ -46,6 +48,9 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -57,6 +62,9 @@ class ZenModeEventLogger {
 
     // Placeholder int for unknown zen mode, to distinguish from "off".
     static final int ZEN_MODE_UNKNOWN = -1;
+
+    // Special rule type for manual rule. Keep in sync with ActiveRuleType in dnd_enums.proto.
+    protected static final int ACTIVE_RULE_TYPE_MANUAL = 999;
 
     // Object for tracking config changes and policy changes associated with an overall zen
     // mode change.
@@ -192,7 +200,8 @@ class ZenModeEventLogger {
                 /* bool user_action = 6 */ mChangeState.getIsUserAction(),
                 /* int32 package_uid = 7 */ mChangeState.getPackageUid(),
                 /* DNDPolicyProto current_policy = 8 */ mChangeState.getDNDPolicyProto(),
-                /* bool are_channels_bypassing = 9 */ mChangeState.getAreChannelsBypassing());
+                /* bool are_channels_bypassing = 9 */ mChangeState.getAreChannelsBypassing(),
+                /* ActiveRuleType active_rule_types = 10 */ mChangeState.getActiveRuleTypes());
     }
 
     /**
@@ -371,33 +380,43 @@ class ZenModeEventLogger {
         }
 
         /**
+         * Get a list of the active rules in the provided config. This is a helper function for
+         * other methods that then use this information to get the number and type of active
+         * rules available.
+         */
+        @SuppressLint("WrongConstant")  // special case for log-only type on manual rule
+        @NonNull List<ZenRule> activeRulesList(ZenModeConfig config) {
+            ArrayList<ZenRule> rules = new ArrayList<>();
+            if (config == null) {
+                return rules;
+            }
+
+            if (config.manualRule != null) {
+                // If the manual rule is non-null, then it's active. We make a copy and set the rule
+                // type so that the correct value gets logged.
+                ZenRule rule = config.manualRule.copy();
+                rule.type = ACTIVE_RULE_TYPE_MANUAL;
+                rules.add(rule);
+            }
+
+            if (config.automaticRules != null) {
+                for (ZenModeConfig.ZenRule rule : config.automaticRules.values()) {
+                    if (rule != null && rule.isAutomaticActive()) {
+                        rules.add(rule);
+                    }
+                }
+            }
+            return rules;
+        }
+
+        /**
          * Get the number of active rules represented in a zen mode config. Because this is based
          * on a config, this does not take into account the zen mode at the time of the config,
          * which means callers need to take the zen mode into account for whether the rules are
          * actually active.
          */
         int numActiveRulesInConfig(ZenModeConfig config) {
-            // If the config is null, return early
-            if (config == null) {
-                return 0;
-            }
-
-            int rules = 0;
-            // Loop through the config and check:
-            //  - does a manual rule exist? (if it's non-null, it's active)
-            //  - how many automatic rules are active, as defined by isAutomaticActive()?
-            if (config.manualRule != null) {
-                rules++;
-            }
-
-            if (config.automaticRules != null) {
-                for (ZenModeConfig.ZenRule rule : config.automaticRules.values()) {
-                    if (rule != null && rule.isAutomaticActive()) {
-                        rules++;
-                    }
-                }
-            }
-            return rules;
+            return activeRulesList(config).size();
         }
 
         // Determine the number of (automatic & manual) rules active after the change takes place.
@@ -409,6 +428,34 @@ class ZenModeEventLogger {
                 }
             }
             return numActiveRulesInConfig(mNewConfig);
+        }
+
+        /**
+         * Return a list of the types of each of the active rules in the configuration.
+         * Only available when {@code MODES_API} is active; otherwise returns an empty list.
+         */
+        int[] getActiveRuleTypes() {
+            if (!Flags.modesApi() || mNewZenMode == ZEN_MODE_OFF) {
+                return new int[0];
+            }
+
+            ArrayList<Integer> activeTypes = new ArrayList<>();
+            List<ZenRule> activeRules = activeRulesList(mNewConfig);
+            if (activeRules.size() == 0) {
+                return new int[0];
+            }
+
+            for (ZenRule rule : activeRules) {
+                activeTypes.add(rule.type);
+            }
+
+            // Sort the list of active types to have a consistent order in the atom
+            Collections.sort(activeTypes);
+            int[] out = new int[activeTypes.size()];
+            for (int i = 0; i < activeTypes.size(); i++) {
+                out[i] = activeTypes.get(i);
+            }
+            return out;
         }
 
         /**

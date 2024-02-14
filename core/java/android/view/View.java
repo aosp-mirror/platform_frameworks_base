@@ -6394,6 +6394,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_handwritingBoundsOffsetBottom:
                     mHandwritingBoundsOffsetBottom = a.getDimension(attr, 0);
                     break;
+                case R.styleable.View_contentSensitivity:
+                    setContentSensitivity(a.getInt(attr, CONTENT_SENSITIVITY_AUTO));
+                    break;
             }
         }
 
@@ -22299,6 +22302,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Retrieve a unique token identifying the window this view is attached to.
      * @return Return the window's token for use in
      * {@link WindowManager.LayoutParams#token WindowManager.LayoutParams.token}.
+     * This token maybe null if this view is not attached to a window.
+     * @see #isAttachedToWindow() for current window attach state
+     * @see OnAttachStateChangeListener to listen to window attach/detach state changes
      */
     public IBinder getWindowToken() {
         return mAttachInfo != null ? mAttachInfo.mWindowToken : null;

@@ -1093,6 +1093,66 @@ Todo: android.provider.ContactsContract.RawContacts#newEntityIterator(android.da
     Documentation mentions 'TODO'
 
 
+UnflaggedApi: android.R.color#on_surface_disabled_material:
+    New API must be flagged with @FlaggedApi: field android.R.color.on_surface_disabled_material
+UnflaggedApi: android.R.color#outline_disabled_material:
+    New API must be flagged with @FlaggedApi: field android.R.color.outline_disabled_material
+UnflaggedApi: android.R.color#surface_disabled_material:
+    New API must be flagged with @FlaggedApi: field android.R.color.surface_disabled_material
+UnflaggedApi: android.R.color#system_error_0:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_0
+UnflaggedApi: android.R.color#system_error_10:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_10
+UnflaggedApi: android.R.color#system_error_100:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_100
+UnflaggedApi: android.R.color#system_error_1000:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_1000
+UnflaggedApi: android.R.color#system_error_200:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_200
+UnflaggedApi: android.R.color#system_error_300:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_300
+UnflaggedApi: android.R.color#system_error_400:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_400
+UnflaggedApi: android.R.color#system_error_50:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_50
+UnflaggedApi: android.R.color#system_error_500:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_500
+UnflaggedApi: android.R.color#system_error_600:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_600
+UnflaggedApi: android.R.color#system_error_700:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_700
+UnflaggedApi: android.R.color#system_error_800:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_800
+UnflaggedApi: android.R.color#system_error_900:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_error_900
+UnflaggedApi: android.R.color#system_on_surface_disabled:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_on_surface_disabled
+UnflaggedApi: android.R.color#system_on_surface_disabled_dark:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_on_surface_disabled_dark
+UnflaggedApi: android.R.color#system_on_surface_disabled_light:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_on_surface_disabled_light
+UnflaggedApi: android.R.color#system_outline_disabled:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_outline_disabled
+UnflaggedApi: android.R.color#system_outline_disabled_dark:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_outline_disabled_dark
+UnflaggedApi: android.R.color#system_outline_disabled_light:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_outline_disabled_light
+UnflaggedApi: android.R.color#system_surface_disabled:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_surface_disabled
+UnflaggedApi: android.R.color#system_surface_disabled_dark:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_surface_disabled_dark
+UnflaggedApi: android.R.color#system_surface_disabled_light:
+    New API must be flagged with @FlaggedApi: field android.R.color.system_surface_disabled_light
+UnflaggedApi: android.R.dimen#system_corner_radius_large:
+    New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_large
+UnflaggedApi: android.R.dimen#system_corner_radius_medium:
+    New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_medium
+UnflaggedApi: android.R.dimen#system_corner_radius_small:
+    New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_small
+UnflaggedApi: android.R.dimen#system_corner_radius_xlarge:
+    New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_xlarge
+UnflaggedApi: android.R.dimen#system_corner_radius_xsmall:
+    New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_xsmall
 UnflaggedApi: android.accessibilityservice.AccessibilityService#OVERLAY_RESULT_INTERNAL_ERROR:
     New API must be flagged with @FlaggedApi: field android.accessibilityservice.AccessibilityService.OVERLAY_RESULT_INTERNAL_ERROR
 UnflaggedApi: android.accessibilityservice.AccessibilityService#OVERLAY_RESULT_INVALID:

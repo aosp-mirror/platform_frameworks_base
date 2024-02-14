@@ -44,7 +44,7 @@ public class EvemuParser implements EventParser {
      * recordings, this will always be the same.
      */
     private static final int DEVICE_ID = 1;
-    private static final int REGISTRATION_DELAY_MILLIS = 500;
+    private static final int REGISTRATION_DELAY_NANOS = 500_000_000;
 
     private static class CommentAwareReader {
         private final LineNumberReader mReader;
@@ -152,7 +152,7 @@ public class EvemuParser implements EventParser {
         final Event.Builder delayEb = new Event.Builder();
         delayEb.setId(DEVICE_ID);
         delayEb.setCommand(Event.Command.DELAY);
-        delayEb.setDurationMillis(REGISTRATION_DELAY_MILLIS);
+        delayEb.setDurationNanos(REGISTRATION_DELAY_NANOS);
         mQueuedEvents.add(delayEb.build());
     }
 
@@ -175,7 +175,6 @@ public class EvemuParser implements EventParser {
             throw new ParsingException(
                     "Invalid timestamp '" + parts[0] + "' (should contain a single '.')", mReader);
         }
-        // TODO(b/310958309): use timeMicros to set the timestamp on the event being sent.
         final long timeMicros =
                 parseLong(timeParts[0], 10) * 1_000_000 + parseInt(timeParts[1], 10);
         final Event.Builder eb = new Event.Builder();
@@ -192,21 +191,18 @@ public class EvemuParser implements EventParser {
             return eb.build();
         } else {
             final long delayMicros = timeMicros - mLastEventTimeMicros;
-            // The shortest delay supported by Handler.sendMessageAtTime (used for timings by the
-            // Device class) is 1ms, so ignore time differences smaller than that.
-            if (delayMicros < 1000) {
-                mLastEventTimeMicros = timeMicros;
+            eb.setTimestampOffsetMicros(delayMicros);
+            if (delayMicros == 0) {
                 return eb.build();
-            } else {
-                // Send a delay now, and queue the actual event for the next call.
-                mQueuedEvents.add(eb.build());
-                mLastEventTimeMicros = timeMicros;
-                final Event.Builder delayEb = new Event.Builder();
-                delayEb.setId(DEVICE_ID);
-                delayEb.setCommand(Event.Command.DELAY);
-                delayEb.setDurationMillis((int) (delayMicros / 1000));
-                return delayEb.build();
             }
+            // Send a delay now, and queue the actual event for the next call.
+            mQueuedEvents.add(eb.build());
+            mLastEventTimeMicros = timeMicros;
+            final Event.Builder delayEb = new Event.Builder();
+            delayEb.setId(DEVICE_ID);
+            delayEb.setCommand(Event.Command.DELAY);
+            delayEb.setDurationNanos(delayMicros * 1000);
+            return delayEb.build();
         }
     }
 

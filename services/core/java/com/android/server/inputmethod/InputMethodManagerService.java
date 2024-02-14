@@ -123,6 +123,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
@@ -145,6 +146,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
@@ -204,6 +206,7 @@ import java.util.OptionalInt;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -1980,7 +1983,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
+    public boolean isStylusHandwritingAvailableAsUser(
+            @UserIdInt int userId, boolean connectionless) {
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
@@ -1993,14 +1997,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             // Check if selected IME of current user supports handwriting.
             if (userId == mSettings.getUserId()) {
-                return mBindingController.supportsStylusHandwriting();
+                return mBindingController.supportsStylusHandwriting()
+                        && (!connectionless
+                                || mBindingController.supportsConnectionlessStylusHandwriting());
             }
             //TODO(b/197848765): This can be optimized by caching multi-user methodMaps/methodList.
             //TODO(b/210039666): use cache.
             final InputMethodSettings settings = queryMethodMapForUser(userId);
             final InputMethodInfo imi = settings.getMethodMap().get(
                     settings.getSelectedInputMethod());
-            return imi != null && imi.supportsStylusHandwriting();
+            return imi != null && imi.supportsStylusHandwriting()
+                    && (!connectionless || imi.supportsConnectionlessStylusHandwriting());
         }
     }
 
@@ -3374,6 +3381,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void startStylusHandwriting(IInputMethodClient client) {
         startStylusHandwriting(client, false /* usesDelegation */);
+    }
+
+    @BinderThread
+    @Override
+    public void startConnectionlessStylusHandwriting(IInputMethodClient client, int userId,
+            @Nullable CursorAnchorInfo cursorAnchorInfo, @Nullable String delegatePackageName,
+            @Nullable String delegatorPackageName,
+            @NonNull IConnectionlessHandwritingCallback callback) {
+        // TODO(b/300979854)
     }
 
     private void startStylusHandwriting(IInputMethodClient client, boolean usesDelegation) {
@@ -5988,7 +6004,23 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @BinderThread
         private void dumpAsProtoNoCheck(FileDescriptor fd) {
             final ProtoOutputStream proto = new ProtoOutputStream(fd);
+            // Dump in the format of an ImeTracing trace with a single entry.
+            final long magicNumber =
+                    ((long) InputMethodManagerServiceTraceFileProto.MAGIC_NUMBER_H << 32)
+                            | InputMethodManagerServiceTraceFileProto.MAGIC_NUMBER_L;
+            final long timeOffsetNs = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis())
+                    - SystemClock.elapsedRealtimeNanos();
+            proto.write(InputMethodManagerServiceTraceFileProto.MAGIC_NUMBER,
+                    magicNumber);
+            proto.write(InputMethodManagerServiceTraceFileProto.REAL_TO_ELAPSED_TIME_OFFSET_NANOS,
+                    timeOffsetNs);
+            final long token = proto.start(InputMethodManagerServiceTraceFileProto.ENTRY);
+            proto.write(InputMethodManagerServiceTraceProto.ELAPSED_REALTIME_NANOS,
+                    SystemClock.elapsedRealtimeNanos());
+            proto.write(InputMethodManagerServiceTraceProto.WHERE,
+                    "InputMethodManagerService.mPriorityDumper#dumpAsProtoNoCheck");
             dumpDebug(proto, InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
+            proto.end(token);
             proto.flush();
         }
     };

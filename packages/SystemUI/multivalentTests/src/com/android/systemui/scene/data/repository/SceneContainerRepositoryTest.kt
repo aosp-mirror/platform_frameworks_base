@@ -28,7 +28,6 @@ import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -63,21 +62,21 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun desiredScene() =
+    fun currentScene() =
         testScope.runTest {
             val underTest = kosmos.sceneContainerRepository
-            val currentScene by collectLastValue(underTest.desiredScene)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
 
-            underTest.setDesiredScene(SceneModel(SceneKey.Shade))
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
+            underTest.changeScene(SceneKey.Shade)
+            assertThat(currentScene).isEqualTo(SceneKey.Shade)
         }
 
     @Test(expected = IllegalStateException::class)
-    fun setDesiredScene_noSuchSceneInContainer_throws() {
+    fun changeScene_noSuchSceneInContainer_throws() {
         kosmos.sceneKeys = listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
         val underTest = kosmos.sceneContainerRepository
-        underTest.setDesiredScene(SceneModel(SceneKey.Shade))
+        underTest.changeScene(SceneKey.Shade)
     }
 
     @Test

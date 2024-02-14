@@ -420,3 +420,23 @@ flag {
     }
 }
 
+flag {
+   name: "get_connected_device_name_unsynchronized"
+   namespace: "systemui"
+   description: "Decide whether to fetch the connected bluetooth device name outside a synchronized block."
+   bug: "323995015"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+    name: "update_user_switcher_background"
+    namespace: "systemui"
+    description: "Decide whether to update user switcher in background thread."
+    bug: "322745650"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+

@@ -6553,6 +6553,28 @@ public abstract class Context {
     public static final String CONTACT_KEYS_SERVICE = "contact_keys";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.ProfilingManager}.
+     *
+     * @see #getSystemService(String)
+     */
+    @FlaggedApi(android.os.Flags.FLAG_TELEMETRY_APIS_FRAMEWORK_INITIALIZATION)
+    public static final String PROFILING_SERVICE = "profiling";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.webkit.WebViewUpdateManager} for accessing the WebView update service.
+     *
+     * @see #getSystemService(String)
+     * @see android.webkit.WebViewUpdateManager
+     * @hide
+     */
+    @FlaggedApi(android.webkit.Flags.FLAG_UPDATE_SERVICE_IPC_WRAPPER)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("ServiceName")
+    public static final String WEBVIEW_UPDATE_SERVICE = "webviewupdate";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
@@ -7706,9 +7728,13 @@ public abstract class Context {
     }
 
     /**
+     * Updates the display association of this Context with the display with the given ID.
+     *
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public abstract void updateDisplay(int displayId);
 
     /**

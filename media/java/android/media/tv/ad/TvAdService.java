@@ -280,7 +280,6 @@ public abstract class TvAdService extends Service {
 
         /**
          * Requests the bounds of the current video.
-         * @hide
          */
         @CallSuper
         public void requestCurrentVideoBounds() {
@@ -304,7 +303,6 @@ public abstract class TvAdService extends Service {
 
         /**
          * Requests the URI of the current channel.
-         * @hide
          */
         @CallSuper
         public void requestCurrentChannelUri() {
@@ -328,7 +326,6 @@ public abstract class TvAdService extends Service {
 
         /**
          * Requests the list of {@link TvTrackInfo}.
-         * @hide
          */
         @CallSuper
         public void requestTrackInfoList() {
@@ -354,7 +351,6 @@ public abstract class TvAdService extends Service {
          * Requests current TV input ID.
          *
          * @see android.media.tv.TvInputInfo
-         * @hide
          */
         @CallSuper
         public void requestCurrentTvInputId() {
@@ -393,7 +389,6 @@ public abstract class TvAdService extends Service {
          * @param data the original bytes to be signed.
          *
          * @see #onSigningResult(String, byte[])
-         * @hide
          */
         @CallSuper
         public void requestSigning(@NonNull String signingId, @NonNull String algorithm,
@@ -535,28 +530,24 @@ public abstract class TvAdService extends Service {
          * Receives current video bounds.
          *
          * @param bounds the rectangle area for rendering the current video.
-         * @hide
          */
         public void onCurrentVideoBounds(@NonNull Rect bounds) {
         }
 
         /**
          * Receives current channel URI.
-         * @hide
          */
         public void onCurrentChannelUri(@Nullable Uri channelUri) {
         }
 
         /**
          * Receives track list.
-         * @hide
          */
         public void onTrackInfoList(@NonNull List<TvTrackInfo> tracks) {
         }
 
         /**
          * Receives current TV input ID.
-         * @hide
          */
         public void onCurrentTvInputId(@Nullable String inputId) {
         }
@@ -569,7 +560,6 @@ public abstract class TvAdService extends Service {
          * @param result the signed result.
          *
          * @see #requestSigning(String, String, String, byte[])
-         * @hide
          */
         public void onSigningResult(@NonNull String signingId, @NonNull byte[] result) {
         }
@@ -584,7 +574,6 @@ public abstract class TvAdService extends Service {
          *     "onRequestSigning" can also be added to the params.
          *
          * @see TvAdView#ERROR_KEY_METHOD_NAME
-         * @hide
          */
         public void onError(@NonNull String errMsg, @NonNull Bundle params) {
         }
@@ -601,7 +590,6 @@ public abstract class TvAdService extends Service {
          *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
          *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
          *             how to parse this data.
-         * @hide
          */
         public void onTvMessage(@TvInputManager.TvMessageType int type,
                 @NonNull Bundle data) {
@@ -666,6 +654,30 @@ public abstract class TvAdService extends Service {
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in sendTvAdSessionData", e);
                     }
+                }
+            });
+        }
+
+        /**
+         * Notifies when the session state is changed.
+         *
+         * @param state the current session state.
+         * @param err the error code for error state. {@link TvAdManager#ERROR_NONE} is
+         *            used when the state is not {@link TvAdManager#SESSION_STATE_ERROR}.
+         */
+        @CallSuper
+        public void notifySessionStateChanged(
+                @TvAdManager.SessionState int state,
+                @TvAdManager.ErrorCode int err) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    if (DEBUG) {
+                        Log.d(TAG, "notifySessionStateChanged (state="
+                                + state + "; err=" + err + ")");
+                    }
+                    // TODO: handle session callback
                 }
             });
         }

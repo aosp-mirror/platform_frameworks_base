@@ -53,14 +53,14 @@ constructor(
     private var dateView: View? = null
 
     private var smartspaceVisibilityListener: OnGlobalLayoutListener? = null
+    private var pastVisibility: Int = -1
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) {
-            return
-        }
+        if (!migrateClocksToBlueprint()) return
         smartspaceView = smartspaceController.buildAndConnectView(constraintLayout)
         weatherView = smartspaceController.buildAndConnectWeatherView(constraintLayout)
         dateView = smartspaceController.buildAndConnectDateView(constraintLayout)
+        pastVisibility = smartspaceView?.visibility ?: View.GONE
         if (keyguardSmartspaceViewModel.isSmartspaceEnabled) {
             constraintLayout.addView(smartspaceView)
             if (keyguardSmartspaceViewModel.isDateWeatherDecoupled) {
@@ -69,26 +69,20 @@ constructor(
             }
         }
         keyguardUnlockAnimationController.lockscreenSmartspace = smartspaceView
-        smartspaceVisibilityListener =
-            object : OnGlobalLayoutListener {
-                var pastVisibility = GONE
-                override fun onGlobalLayout() {
-                    smartspaceView?.let {
-                        val newVisibility = it.visibility
-                        if (pastVisibility != newVisibility) {
-                            keyguardSmartspaceInteractor.setBcSmartspaceVisibility(newVisibility)
-                            pastVisibility = newVisibility
-                        }
-                    }
+        smartspaceVisibilityListener = OnGlobalLayoutListener {
+            smartspaceView?.let {
+                val newVisibility = it.visibility
+                if (pastVisibility != newVisibility) {
+                    keyguardSmartspaceInteractor.setBcSmartspaceVisibility(newVisibility)
+                    pastVisibility = newVisibility
                 }
             }
+        }
         smartspaceView?.viewTreeObserver?.addOnGlobalLayoutListener(smartspaceVisibilityListener)
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) {
-            return
-        }
+        if (!migrateClocksToBlueprint()) return
         KeyguardSmartspaceViewBinder.bind(
             constraintLayout,
             keyguardClockViewModel,
@@ -98,9 +92,7 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!migrateClocksToBlueprint()) {
-            return
-        }
+        if (!migrateClocksToBlueprint()) return
         val horizontalPaddingStart =
             context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
                 context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
@@ -196,9 +188,7 @@ constructor(
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) {
-            return
-        }
+        if (!migrateClocksToBlueprint()) return
         listOf(smartspaceView, dateView, weatherView).forEach {
             it?.let {
                 if (it.parent == constraintLayout) {
@@ -211,6 +201,9 @@ constructor(
     }
 
     private fun updateVisibility(constraintSet: ConstraintSet) {
+        // This may update the visibility of the smartspace views
+        smartspaceController.requestSmartspaceUpdate()
+
         constraintSet.apply {
             setVisibility(
                 sharedR.id.weather_smartspace_view,

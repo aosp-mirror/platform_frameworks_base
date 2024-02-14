@@ -826,16 +826,11 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isPinned()) {
-                if (NotificationsImprovedHunAnimation.isEnabled()) {
-                    // Make sure row yTranslation is at the HUN yTranslation,
-                    // which accounts for AmbientState.stackTopMargin in split-shade.
-                    childState.setYTranslation(headsUpTranslation);
-                } else {
-                    // Make sure row yTranslation is at maximum the HUN yTranslation,
-                    // which accounts for AmbientState.stackTopMargin in split-shade.
-                    childState.setYTranslation(
-                            Math.max(childState.getYTranslation(), headsUpTranslation));
-                }
+                // Make sure row yTranslation is at at least the HUN yTranslation,
+                // which accounts for AmbientState.stackTopMargin in split-shade.
+                // Once we start opening the shade, we keep the previously calculated translation.
+                childState.setYTranslation(
+                        Math.max(childState.getYTranslation(), headsUpTranslation));
                 childState.height = Math.max(row.getIntrinsicHeight(), childState.height);
                 childState.hidden = false;
                 ExpandableViewState topState =

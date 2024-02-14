@@ -38,6 +38,7 @@ import static android.view.inputmethod.InputMethodManagerProto.SERVED_VIEW;
 import static com.android.internal.inputmethod.StartInputReason.BOUND_TO_IMMS;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.DisplayContext;
 import android.annotation.DrawableRes;
 import android.annotation.DurationMillisLong;
@@ -108,6 +109,7 @@ import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.DirectBootAwareness;
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IInputMethodSession;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
@@ -134,6 +136,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -566,8 +569,15 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     private PropertyInvalidatedCache<Integer, Boolean> mStylusHandwritingAvailableCache;
 
+    /** Cached value for {@link #isConnectionlessStylusHandwritingAvailable} for userId. */
+    @GuardedBy("mH")
+    private PropertyInvalidatedCache<Integer, Boolean>
+            mConnectionlessStylusHandwritingAvailableCache;
+
     private static final String CACHE_KEY_STYLUS_HANDWRITING_PROPERTY =
             "cache_key.system_server.stylus_handwriting";
+    private static final String CACHE_KEY_CONNECTIONLESS_STYLUS_HANDWRITING_PROPERTY =
+            "cache_key.system_server.connectionless_stylus_handwriting";
 
     @GuardedBy("mH")
     private int mCursorSelStart;
@@ -689,6 +699,17 @@ public final class InputMethodManager {
      */
     public static void invalidateLocalStylusHandwritingAvailabilityCaches() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_STYLUS_HANDWRITING_PROPERTY);
+    }
+
+    /**
+     * Calling this will invalidate the local connectionless stylus handwriting availability cache,
+     * which forces the next query in any process to recompute the cache.
+     *
+     * @hide
+     */
+    public static void invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches() {
+        PropertyInvalidatedCache.invalidateCache(
+                CACHE_KEY_CONNECTIONLESS_STYLUS_HANDWRITING_PROPERTY);
     }
 
     private static boolean isAutofillUIShowing(View servedView) {
@@ -1584,13 +1605,37 @@ public final class InputMethodManager {
                     @Override
                     public Boolean recompute(Integer userId) {
                         return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(
-                                userId);
+                                userId, /* connectionless= */ false);
                     }
                 };
             }
             isAvailable = mStylusHandwritingAvailableCache.query(user.getIdentifier());
         }
         return isAvailable;
+    }
+
+    /**
+     * Returns {@code true} if the currently selected IME supports connectionless stylus handwriting
+     * sessions and is enabled.
+     */
+    @FlaggedApi(Flags.FLAG_CONNECTIONLESS_HANDWRITING)
+    public boolean isConnectionlessStylusHandwritingAvailable() {
+        if (ActivityThread.currentApplication() == null) {
+            return false;
+        }
+        synchronized (mH) {
+            if (mConnectionlessStylusHandwritingAvailableCache == null) {
+                mConnectionlessStylusHandwritingAvailableCache = new PropertyInvalidatedCache<>(
+                        /* maxEntries= */ 4, CACHE_KEY_CONNECTIONLESS_STYLUS_HANDWRITING_PROPERTY) {
+                    @Override
+                    public Boolean recompute(@NonNull Integer userId) {
+                        return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(
+                                userId, /* connectionless= */ true);
+                    }
+                };
+            }
+            return mConnectionlessStylusHandwritingAvailableCache.query(UserHandle.myUserId());
+        }
     }
 
     /**
@@ -2433,6 +2478,127 @@ public final class InputMethodManager {
     }
 
     /**
+     * Starts a connectionless stylus handwriting session. A connectionless session differs from a
+     * regular stylus handwriting session in that the IME does not use an input connection to
+     * communicate with a text editor. Instead, the IME directly returns recognised handwritten text
+     * via a callback.
+     *
+     * <p>The {code cursorAnchorInfo} may be used by the IME to improve the handwriting recognition
+     * accuracy and user experience of the handwriting session. Usually connectionless handwriting
+     * is used for a view which appears like a text editor but does not really support text editing.
+     * For best results, the {code cursorAnchorInfo} should be populated as it would be for a real
+     * text editor (for example, the insertion marker location can be set to where the user would
+     * expect it to be, even if there is no visible cursor).
+     *
+     * @param view the view receiving stylus events
+     * @param cursorAnchorInfo positional information about the view receiving stylus events
+     * @param callbackExecutor the executor to run the callback on
+     * @param callback the callback to receive the result
+     */
+    @FlaggedApi(Flags.FLAG_CONNECTIONLESS_HANDWRITING)
+    public void startConnectionlessStylusHandwriting(@NonNull View view,
+            @Nullable CursorAnchorInfo cursorAnchorInfo,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull ConnectionlessHandwritingCallback callback) {
+        startConnectionlessStylusHandwritingInternal(
+                view, cursorAnchorInfo, null, null, callbackExecutor, callback);
+    }
+
+    /**
+     * Starts a connectionless stylus handwriting session (see {@link
+     * #startConnectionlessStylusHandwriting}) and additionally enables the recognised handwritten
+     * text to be later committed to a text editor using {@link
+     * #acceptStylusHandwritingDelegation(View)}.
+     *
+     * <p>After a connectionless session started using this method completes successfully, a text
+     * editor view, called the delegate view, may call {@link
+     * #acceptStylusHandwritingDelegation(View)} which will request the IME to commit the recognised
+     * handwritten text from the connectionless session to the delegate view.
+     *
+     * <p>The delegate view must belong to the same package as the delegator view for the delegation
+     * to succeed. If the delegate view belongs to a different package, use {@link
+     * #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String, Executor,
+     * ConnectionlessHandwritingCallback)} instead.
+     *
+     * @param delegatorView the view receiving stylus events
+     * @param cursorAnchorInfo positional information about the view receiving stylus events
+     * @param callbackExecutor the executor to run the callback on
+     * @param callback the callback to receive the result
+     */
+    @FlaggedApi(Flags.FLAG_CONNECTIONLESS_HANDWRITING)
+    public void startConnectionlessStylusHandwritingForDelegation(@NonNull View delegatorView,
+            @Nullable CursorAnchorInfo cursorAnchorInfo,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull ConnectionlessHandwritingCallback callback) {
+        String delegatorPackageName = delegatorView.getContext().getOpPackageName();
+        startConnectionlessStylusHandwritingInternal(delegatorView, cursorAnchorInfo,
+                delegatorPackageName, delegatorPackageName, callbackExecutor, callback);
+    }
+
+    /**
+     * Starts a connectionless stylus handwriting session (see {@link
+     * #startConnectionlessStylusHandwriting}) and additionally enables the recognised handwritten
+     * text to be later committed to a text editor using {@link
+     * #acceptStylusHandwritingDelegation(View, String)}.
+     *
+     * <p>After a connectionless session started using this method completes successfully, a text
+     * editor view, called the delegate view, may call {@link
+     * #acceptStylusHandwritingDelegation(View, String)} which will request the IME to commit the
+     * recognised handwritten text from the connectionless session to the delegate view.
+     *
+     * <p>The delegate view must belong to {@code delegatePackageName} for the delegation to
+     * succeed.
+     *
+     * @param delegatorView the view receiving stylus events
+     * @param cursorAnchorInfo positional information about the view receiving stylus events
+     * @param delegatePackageName name of the package containing the delegate view which will accept
+     *     the delegation
+     * @param callbackExecutor the executor to run the callback on
+     * @param callback the callback to receive the result
+     */
+    @FlaggedApi(Flags.FLAG_CONNECTIONLESS_HANDWRITING)
+    public void startConnectionlessStylusHandwritingForDelegation(@NonNull View delegatorView,
+            @Nullable CursorAnchorInfo cursorAnchorInfo,
+            @NonNull String delegatePackageName,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull ConnectionlessHandwritingCallback callback) {
+        Objects.requireNonNull(delegatePackageName);
+        String delegatorPackageName = delegatorView.getContext().getOpPackageName();
+        startConnectionlessStylusHandwritingInternal(delegatorView, cursorAnchorInfo,
+                delegatorPackageName, delegatePackageName, callbackExecutor, callback);
+    }
+
+    private void startConnectionlessStylusHandwritingInternal(@NonNull View view,
+            @Nullable CursorAnchorInfo cursorAnchorInfo,
+            @Nullable String delegatorPackageName,
+            @Nullable String delegatePackageName,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull ConnectionlessHandwritingCallback callback) {
+        Objects.requireNonNull(view);
+        Objects.requireNonNull(callbackExecutor);
+        Objects.requireNonNull(callback);
+        // Re-dispatch if there is a context mismatch.
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            fallbackImm.startConnectionlessStylusHandwritingInternal(view, cursorAnchorInfo,
+                    delegatorPackageName, delegatePackageName, callbackExecutor, callback);
+        }
+
+        checkFocus();
+        synchronized (mH) {
+            if (view.getViewRootImpl() != mCurRootView) {
+                Log.w(TAG, "Ignoring startConnectionlessStylusHandwriting: "
+                        + "View's window does not have focus.");
+                return;
+            }
+            IInputMethodManagerGlobalInvoker.startConnectionlessStylusHandwriting(
+                    mClient, UserHandle.myUserId(), cursorAnchorInfo,
+                    delegatePackageName, delegatorPackageName,
+                    new ConnectionlessHandwritingCallbackProxy(callbackExecutor, callback));
+        }
+    }
+
+    /**
      * Prepares delegation of starting stylus handwriting session to a different editor in same
      * or different window than the view on which initial handwriting stroke was detected.
      *
@@ -2511,12 +2677,18 @@ public final class InputMethodManager {
      * {@link #acceptStylusHandwritingDelegation(View, String)} instead.</p>
      *
      * @param delegateView delegate view capable of receiving input via {@link InputConnection}
-     *  on which {@link #startStylusHandwriting(View)} will be called.
      * @return {@code true} if view belongs to same application package as used in
-     *  {@link #prepareStylusHandwritingDelegation(View)} and handwriting session can start.
-     * @see #acceptStylusHandwritingDelegation(View, String)
+     *  {@link #prepareStylusHandwritingDelegation(View)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View)
+     * @see #acceptStylusHandwritingDelegation(View, String)
      */
+    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
+    // <p>Otherwise, if the delegator view previously started delegation using {@link
+    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo)},
+    // requests the IME to commit the recognised handwritten text from the connectionless session to
+    // the delegate view.
+    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
+    //     CursorAnchorInfo)
     public boolean acceptStylusHandwritingDelegation(@NonNull View delegateView) {
         return startStylusHandwritingInternal(
                 delegateView, delegateView.getContext().getOpPackageName(),
@@ -2533,13 +2705,19 @@ public final class InputMethodManager {
      * {@link #acceptStylusHandwritingDelegation(View)} instead.</p>
      *
      * @param delegateView delegate view capable of receiving input via {@link InputConnection}
-     *  on which {@link #startStylusHandwriting(View)} will be called.
      * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
-     * @return {@code true} if view belongs to allowed delegate package declared in
-     *  {@link #prepareStylusHandwritingDelegation(View, String)} and handwriting session can start.
+     * @return {@code true} if view belongs to allowed delegate package declared in {@link
+     *     #prepareStylusHandwritingDelegation(View, String)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
      */
+    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
+    // <p>Otherwise, if the delegator view previously started delegation using {@link
+    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo,
+    // String)}, requests the IME to commit the recognised handwritten text from the connectionless
+    // session to the delegate view.
+    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
+    //     CursorAnchorInfo, String)
     public boolean acceptStylusHandwritingDelegation(
             @NonNull View delegateView, @NonNull String delegatorPackageName) {
         Objects.requireNonNull(delegatorPackageName);
@@ -2556,15 +2734,21 @@ public final class InputMethodManager {
      * <p>Note: If delegator and delegate are in the same application package, use {@link
      * #acceptStylusHandwritingDelegation(View)} instead.
      *
-     * @param delegateView delegate view capable of receiving input via {@link InputConnection} on
-     *     which {@link #startStylusHandwriting(View)} will be called.
+     * @param delegateView delegate view capable of receiving input via {@link InputConnection}
      * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
      * @param flags {@link #HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED} or {@code 0}
      * @return {@code true} if view belongs to allowed delegate package declared in {@link
-     *     #prepareStylusHandwritingDelegation(View, String)} and handwriting session can start.
+     *     #prepareStylusHandwritingDelegation(View, String)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
      */
+    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
+    // <p>Otherwise, if the delegator view previously started delegation using {@link
+    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo,
+    // String)}, requests the IME to commit the recognised handwritten text from the connectionless
+    // session to the delegate view.
+    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
+    //     CursorAnchorInfo, String)
     @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
     public boolean acceptStylusHandwritingDelegation(
             @NonNull View delegateView, @NonNull String delegatorPackageName,
@@ -4313,6 +4497,73 @@ public final class InputMethodManager {
      */
     public interface FinishedInputEventCallback {
         public void onFinishedInputEvent(Object token, boolean handled);
+    }
+
+    private static class ConnectionlessHandwritingCallbackProxy
+            extends IConnectionlessHandwritingCallback.Stub {
+        private final Object mLock = new Object();
+
+        @Nullable
+        @GuardedBy("mLock")
+        private Executor mExecutor;
+
+        @Nullable
+        @GuardedBy("mLock")
+        private ConnectionlessHandwritingCallback mCallback;
+
+        ConnectionlessHandwritingCallbackProxy(
+                @NonNull Executor executor, @NonNull ConnectionlessHandwritingCallback callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResult(CharSequence text) {
+            Executor executor;
+            ConnectionlessHandwritingCallback callback;
+            synchronized (mLock) {
+                if (mExecutor == null || mCallback == null) {
+                    return;
+                }
+                executor = mExecutor;
+                callback = mCallback;
+                mExecutor = null;
+                mCallback = null;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (TextUtils.isEmpty(text)) {
+                    executor.execute(() -> callback.onError(
+                            ConnectionlessHandwritingCallback
+                                    .CONNECTIONLESS_HANDWRITING_ERROR_NO_TEXT_RECOGNIZED));
+                } else {
+                    executor.execute(() -> callback.onResult(text));
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void onError(int errorCode) {
+            Executor executor;
+            ConnectionlessHandwritingCallback callback;
+            synchronized (mLock) {
+                if (mExecutor == null || mCallback == null) {
+                    return;
+                }
+                executor = mExecutor;
+                callback = mCallback;
+                mExecutor = null;
+                mCallback = null;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                executor.execute(() -> callback.onError(errorCode));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
     }
 
     private final class ImeInputEventSender extends InputEventSender {

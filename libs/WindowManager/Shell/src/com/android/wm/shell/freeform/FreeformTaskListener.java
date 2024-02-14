@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.freeform;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM;
 
 import android.app.ActivityManager.RunningTaskInfo;
@@ -151,6 +153,9 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
 
     @Override
     public void onFocusTaskChanged(RunningTaskInfo taskInfo) {
+        if (taskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+            return;
+        }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG,
                 "Freeform Task Focus Changed: #%d focused=%b",
                 taskInfo.taskId, taskInfo.isFocused);

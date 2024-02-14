@@ -309,7 +309,12 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
     private static void readBatteryLevelInt(int batteryLevelInt, BatteryStats.HistoryItem out) {
         out.batteryLevel = (byte) ((batteryLevelInt & 0xfe000000) >>> 25);
         out.batteryTemperature = (short) ((batteryLevelInt & 0x01ff8000) >>> 15);
-        out.batteryVoltage = (char) ((batteryLevelInt & 0x00007ffe) >>> 1);
+        int voltage = ((batteryLevelInt & 0x00007ffe) >>> 1);
+        if (voltage == 0x3FFF) {
+            voltage = -1;
+        }
+
+        out.batteryVoltage = (short) voltage;
     }
 
     /**

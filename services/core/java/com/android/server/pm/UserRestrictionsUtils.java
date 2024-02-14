@@ -154,7 +154,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
             UserManager.DISALLOW_CONFIG_DEFAULT_APPS,
             UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
-            UserManager.DISALLOW_SIM_GLOBALLY
+            UserManager.DISALLOW_SIM_GLOBALLY,
+            UserManager.DISALLOW_ASSIST_CONTENT
     });
 
     public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(
@@ -230,7 +231,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE,
             UserManager.DISALLOW_UNMUTE_DEVICE,
-            UserManager.DISALLOW_CAMERA
+            UserManager.DISALLOW_CAMERA,
+            UserManager.DISALLOW_ASSIST_CONTENT
     );
 
     /**

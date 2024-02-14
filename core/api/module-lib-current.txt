@@ -102,6 +102,7 @@ package android.content {
     method @NonNull public android.os.UserHandle getUser();
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
+    field @FlaggedApi("android.webkit.update_service_ipc_wrapper") public static final String WEBVIEW_UPDATE_SERVICE = "webviewupdate";
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
@@ -412,6 +413,19 @@ package android.os {
     field public static final int VPN_UID = 1016; // 0x3f8
   }
 
+  @FlaggedApi("android.os.telemetry_apis_framework_initialization") public class ProfilingServiceManager {
+    method @NonNull public android.os.ProfilingServiceManager.ServiceRegisterer getProfilingServiceRegisterer();
+  }
+
+  public static class ProfilingServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor public ProfilingServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  public static final class ProfilingServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @Nullable public android.os.IBinder getOrThrow() throws android.os.ProfilingServiceManager.ServiceNotFoundException;
+  }
+
   public final class ServiceManager {
     method @NonNull public static String[] getDeclaredInstances(@NonNull String);
     method public static boolean isDeclared(@NonNull String);
@@ -633,6 +647,37 @@ package android.view.accessibility {
   public final class AccessibilityManager {
     method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean startFlashNotificationSequence(@NonNull android.content.Context, int);
     method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean stopFlashNotificationSequence(@NonNull android.content.Context);
+  }
+
+}
+
+package android.webkit {
+
+  @FlaggedApi("android.webkit.update_service_ipc_wrapper") public class WebViewBootstrapFrameworkInitializer {
+    method public static void registerServiceWrappers();
+  }
+
+  @FlaggedApi("android.webkit.update_service_ipc_wrapper") public final class WebViewProviderResponse implements android.os.Parcelable {
+    ctor public WebViewProviderResponse(@Nullable android.content.pm.PackageInfo, int);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.webkit.WebViewProviderResponse> CREATOR;
+    field public static final int STATUS_FAILED_LISTING_WEBVIEW_PACKAGES = 4; // 0x4
+    field public static final int STATUS_FAILED_WAITING_FOR_RELRO = 3; // 0x3
+    field public static final int STATUS_SUCCESS = 0; // 0x0
+    field @Nullable public final android.content.pm.PackageInfo packageInfo;
+    field public final int status;
+  }
+
+  @FlaggedApi("android.webkit.update_service_ipc_wrapper") public final class WebViewUpdateManager {
+    method @Nullable @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public String changeProviderAndSetting(@NonNull String);
+    method @NonNull public android.webkit.WebViewProviderInfo[] getAllWebViewPackages();
+    method @Nullable public android.content.pm.PackageInfo getCurrentWebViewPackage();
+    method @Nullable public String getCurrentWebViewPackageName();
+    method @FlaggedApi("android.webkit.update_service_v2") @NonNull public android.webkit.WebViewProviderInfo getDefaultWebViewPackage();
+    method @Nullable public static android.webkit.WebViewUpdateManager getInstance();
+    method @NonNull public android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
+    method @NonNull public android.webkit.WebViewProviderResponse waitForAndGetProvider();
   }
 
 }

@@ -26,7 +26,7 @@ import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.client.CredentialManagerClient
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import com.android.credentialmanager.ui.screens.single.UiState
+import com.android.credentialmanager.ui.screens.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject

@@ -33,6 +33,8 @@ android_test {
         "platform-test-annotations",
         "truth",
         "UsbManagerTestLib",
+        "flag-junit",
+        "TestParameterInjector",
     ],
     jni_libs: [
         // Required for ExtendedMockito

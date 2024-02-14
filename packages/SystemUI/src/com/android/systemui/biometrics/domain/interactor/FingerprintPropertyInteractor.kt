@@ -39,6 +39,8 @@ constructor(
     configurationInteractor: ConfigurationInteractor,
     displayStateInteractor: DisplayStateInteractor,
 ) {
+    val isUdfps: Flow<Boolean> = repository.sensorType.map { it.isUdfps() }
+
     /**
      * Devices with multiple physical displays use unique display ids to determine which sensor is
      * on the active physical display. This value represents a unique physical display id.

@@ -18,6 +18,7 @@ package android.platform.test.ravenwood;
 
 import static android.platform.test.ravenwood.RavenwoodRule.ENABLE_PROBE_IGNORED;
 import static android.platform.test.ravenwood.RavenwoodRule.IS_ON_RAVENWOOD;
+import static android.platform.test.ravenwood.RavenwoodRule.shouldEnableOnDevice;
 import static android.platform.test.ravenwood.RavenwoodRule.shouldEnableOnRavenwood;
 import static android.platform.test.ravenwood.RavenwoodRule.shouldStillIgnoreInProbeIgnoreMode;
 
@@ -42,6 +43,7 @@ public class RavenwoodClassRule implements TestRule {
     public Statement apply(Statement base, Description description) {
         // No special treatment when running outside Ravenwood; run tests as-is
         if (!IS_ON_RAVENWOOD) {
+            Assume.assumeTrue(shouldEnableOnDevice(description));
             return base;
         }
 

@@ -30,7 +30,7 @@ import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransitionType
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -39,6 +39,8 @@ import com.android.systemui.shared.clocks.DEFAULT_CLOCK_ID
 import kotlinx.coroutines.launch
 
 object KeyguardClockViewBinder {
+    private val TAG = KeyguardClockViewBinder::class.simpleName!!
+
     @JvmStatic
     fun bind(
         clockSection: ClockSection,
@@ -68,9 +70,7 @@ object KeyguardClockViewBinder {
                     if (!migrateClocksToBlueprint()) return@launch
                     viewModel.clockSize.collect {
                         updateBurnInLayer(keyguardRootView, viewModel)
-                        blueprintInteractor.refreshBlueprintWithTransition(
-                            IntraBlueprintTransitionType.ClockSize
-                        )
+                        blueprintInteractor.refreshBlueprint(Type.ClockSize)
                     }
                 }
                 launch {
@@ -83,13 +83,9 @@ object KeyguardClockViewBinder {
                                 it.largeClock.config.hasCustomPositionUpdatedAnimation &&
                                     it.config.id == DEFAULT_CLOCK_ID
                             ) {
-                                blueprintInteractor.refreshBlueprintWithTransition(
-                                    IntraBlueprintTransitionType.DefaultClockStepping
-                                )
+                                blueprintInteractor.refreshBlueprint(Type.DefaultClockStepping)
                             } else {
-                                blueprintInteractor.refreshBlueprintWithTransition(
-                                    IntraBlueprintTransitionType.DefaultTransition
-                                )
+                                blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
                             }
                         }
                     }
@@ -102,9 +98,7 @@ object KeyguardClockViewBinder {
                             if (
                                 viewModel.useLargeClock && it.config.id == "DIGITAL_CLOCK_WEATHER"
                             ) {
-                                blueprintInteractor.refreshBlueprintWithTransition(
-                                    IntraBlueprintTransitionType.DefaultTransition
-                                )
+                                blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
                             }
                         }
                     }
@@ -112,6 +106,7 @@ object KeyguardClockViewBinder {
             }
         }
     }
+
     @VisibleForTesting
     fun updateBurnInLayer(
         keyguardRootView: ConstraintLayout,
@@ -171,6 +166,7 @@ object KeyguardClockViewBinder {
             }
         }
     }
+
     fun applyConstraints(
         clockSection: ClockSection,
         rootView: ConstraintLayout,

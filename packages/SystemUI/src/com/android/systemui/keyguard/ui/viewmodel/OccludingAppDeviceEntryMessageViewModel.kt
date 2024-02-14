@@ -18,8 +18,8 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.BiometricMessage
-import com.android.systemui.keyguard.domain.interactor.OccludingAppDeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.OccludingAppDeviceEntryInteractor
+import com.android.systemui.deviceentry.shared.model.BiometricMessage
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

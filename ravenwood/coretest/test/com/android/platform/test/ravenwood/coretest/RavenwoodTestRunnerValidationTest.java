@@ -17,7 +17,7 @@ package com.android.platform.test.ravenwood.coretest;
 
 import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.runner.AndroidJUnit4; // Intentionally use the deprecated one.
 
 import org.junit.Assume;
 import org.junit.Rule;

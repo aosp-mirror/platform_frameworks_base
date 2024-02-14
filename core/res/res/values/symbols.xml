@@ -5244,6 +5244,7 @@
   <java-symbol name="materialColorPrimary" type="attr"/>
   <java-symbol name="materialColorSecondary" type="attr"/>
   <java-symbol name="materialColorTertiary" type="attr"/>
+  <java-symbol name="materialColorError" type="attr"/>
 
   <java-symbol type="attr" name="actionModeUndoDrawable" />
   <java-symbol type="attr" name="actionModeRedoDrawable" />
@@ -5355,4 +5356,11 @@
   <java-symbol type="drawable" name="ic_satellite_alt_24px" />
 
   <java-symbol type="bool" name="config_watchlistUseFileHashesCache" />
+
+  <!-- System corner radius baseline sizes. Used by Material styling of rounded corner shapes-->
+  <java-symbol type="dimen" name="system_corner_radius_xsmall" />
+  <java-symbol type="dimen" name="system_corner_radius_small" />
+  <java-symbol type="dimen" name="system_corner_radius_medium" />
+  <java-symbol type="dimen" name="system_corner_radius_large" />
+  <java-symbol type="dimen" name="system_corner_radius_xlarge" />
 </resources>

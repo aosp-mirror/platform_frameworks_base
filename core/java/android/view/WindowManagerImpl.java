@@ -520,11 +520,16 @@ public final class WindowManagerImpl implements WindowManager {
     public void registerTrustedPresentationListener(@NonNull IBinder window,
             @NonNull TrustedPresentationThresholds thresholds, @NonNull Executor executor,
             @NonNull Consumer<Boolean> listener) {
+        Objects.requireNonNull(window, "window must not be null");
+        Objects.requireNonNull(thresholds, "thresholds must not be null");
+        Objects.requireNonNull(executor, "executor must not be null");
+        Objects.requireNonNull(listener, "listener must not be null");
         mGlobal.registerTrustedPresentationListener(window, thresholds, executor, listener);
     }
 
     @Override
     public void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
         mGlobal.unregisterTrustedPresentationListener(listener);
     }
 

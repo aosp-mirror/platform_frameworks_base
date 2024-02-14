@@ -155,6 +155,10 @@
     <public name="languageSettingsActivity"/>
     <!-- @FlaggedApi("com.android.text.flags.fix_line_height_for_locale") -->
     <public name="useLocalePreferredLineHeightForMinimum"/>
+    <!-- @FlaggedApi("android.view.flags.sensitive_content_app_protection_api") -->
+    <public name="contentSensitivity" />
+    <!-- @FlaggedApi("android.view.inputmethod.connectionless_handwriting") -->
+    <public name="supportsConnectionlessStylusHandwriting" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">
@@ -171,9 +175,31 @@
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b90000">
+    <!-- System corner radius baseline sizes. Used by Material styling of rounded corner shapes-->
+    <public name="system_corner_radius_xsmall" />
+    <public name="system_corner_radius_small" />
+    <public name="system_corner_radius_medium" />
+    <public name="system_corner_radius_large" />
+    <public name="system_corner_radius_xlarge" />
   </staging-public-group>
 
   <staging-public-group type="color" first-id="0x01b80000">
+    <public name="system_surface_disabled"/>
+    <public name="system_on_surface_disabled"/>
+    <public name="system_outline_disabled"/>
+    <public name="system_error_0"/>
+    <public name="system_error_10"/>
+    <public name="system_error_50"/>
+    <public name="system_error_100"/>
+    <public name="system_error_200"/>
+    <public name="system_error_300"/>
+    <public name="system_error_400"/>
+    <public name="system_error_500"/>
+    <public name="system_error_600"/>
+    <public name="system_error_700"/>
+    <public name="system_error_800"/>
+    <public name="system_error_900"/>
+    <public name="system_error_1000"/>
   </staging-public-group>
 
   <staging-public-group type="array" first-id="0x01b70000">

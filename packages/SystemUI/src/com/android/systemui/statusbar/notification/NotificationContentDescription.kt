@@ -20,35 +20,14 @@ package com.android.systemui.statusbar.notification
 
 import android.app.Notification
 import android.content.Context
-import android.content.pm.ApplicationInfo
 import android.text.TextUtils
-import android.util.Log
 import androidx.annotation.MainThread
 import com.android.systemui.res.R
 
-/**
- * Returns accessibility content description for a given notification.
- *
- * NOTE: This is a relatively slow call.
- */
+/** Returns accessibility content description for a given notification. */
 @MainThread
 fun contentDescForNotification(c: Context, n: Notification?): CharSequence {
-    var appName = ""
-    try {
-        val builder = Notification.Builder.recoverBuilder(c, n)
-        appName = builder.loadHeaderAppName()
-    } catch (e: RuntimeException) {
-        Log.e("ContentDescription", "Unable to recover builder", e)
-        // Trying to get the app name from the app info instead.
-        val appInfo =
-            n?.extras?.getParcelable(
-                Notification.EXTRA_BUILDER_APPLICATION_INFO,
-                ApplicationInfo::class.java
-            )
-        if (appInfo != null) {
-            appName = appInfo.loadLabel(c.packageManager).toString()
-        }
-    }
+    val appName = n?.loadHeaderAppName(c) ?: ""
     val title = n?.extras?.getCharSequence(Notification.EXTRA_TITLE)
     val text = n?.extras?.getCharSequence(Notification.EXTRA_TEXT)
     val ticker = n?.tickerText

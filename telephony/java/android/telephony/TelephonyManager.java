@@ -10629,20 +10629,27 @@ public class TelephonyManager {
     }
 
     /**
-     * Call composer status OFF from user setting.
+     * Call composer status <b>OFF</b> from user setting.
      */
     public static final int CALL_COMPOSER_STATUS_OFF = 0;
 
     /**
-     * Call composer status ON from user setting.
+     * Call composer status <b>ON</b> from user setting.
      */
     public static final int CALL_COMPOSER_STATUS_ON = 1;
+
+    /**
+     * Call composer status <b>Business Only</b> from user setting.
+     */
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_BUSINESS_CALL_COMPOSER)
+    public static final int CALL_COMPOSER_STATUS_BUSINESS_ONLY = 2;
 
     /** @hide */
     @IntDef(prefix = {"CALL_COMPOSER_STATUS_"},
             value = {
                 CALL_COMPOSER_STATUS_ON,
                 CALL_COMPOSER_STATUS_OFF,
+                CALL_COMPOSER_STATUS_BUSINESS_ONLY
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CallComposerStatus {}
@@ -10663,9 +10670,16 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
     public void setCallComposerStatus(@CallComposerStatus int status) {
-        if (status > CALL_COMPOSER_STATUS_ON
-                || status < CALL_COMPOSER_STATUS_OFF) {
-            throw new IllegalArgumentException("requested status is invalid");
+        if (com.android.server.telecom.flags.Flags.businessCallComposer()) {
+            if (status > CALL_COMPOSER_STATUS_BUSINESS_ONLY
+                    || status < CALL_COMPOSER_STATUS_OFF) {
+                throw new IllegalArgumentException("requested status is invalid");
+            }
+        } else {
+            if (status > CALL_COMPOSER_STATUS_ON
+                    || status < CALL_COMPOSER_STATUS_OFF) {
+                throw new IllegalArgumentException("requested status is invalid");
+            }
         }
         try {
             ITelephony telephony = getITelephony();

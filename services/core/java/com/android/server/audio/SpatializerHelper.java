@@ -26,6 +26,7 @@ import static com.android.media.audio.Flags.dsaOverBtLeAudio;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.AudioAttributes;
@@ -1611,6 +1612,9 @@ public class SpatializerHelper {
         pw.println("\tsupports binaural:" + mBinauralSupported + " / transaural:"
                 + mTransauralSupported);
         pw.println("\tmSpatOutput:" + mSpatOutput);
+        pw.println("\thas FEATURE_AUDIO_SPATIAL_HEADTRACKING_LOW_LATENCY:"
+                + mAudioService.mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_AUDIO_SPATIAL_HEADTRACKING_LOW_LATENCY));
     }
 
     private static String spatStateString(int state) {

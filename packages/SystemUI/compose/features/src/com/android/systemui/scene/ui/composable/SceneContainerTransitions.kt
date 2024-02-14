@@ -1,6 +1,8 @@
 package com.android.systemui.scene.ui.composable
 
 import com.android.compose.animation.scene.transitions
+import com.android.systemui.scene.shared.model.TransitionKeys.CollapseShadeInstantly
+import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToShadeTransition
@@ -26,10 +28,38 @@ import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettings
 val SceneContainerTransitions = transitions {
     from(Bouncer, to = Gone) { bouncerToGoneTransition() }
     from(Gone, to = Shade) { goneToShadeTransition() }
+    from(
+        Gone,
+        to = Shade,
+        key = CollapseShadeInstantly.asComposeAware(),
+    ) {
+        goneToShadeTransition(durationScale = 0.0)
+    }
+    from(
+        Gone,
+        to = Shade,
+        key = SlightlyFasterShadeCollapse.asComposeAware(),
+    ) {
+        goneToShadeTransition(durationScale = 0.9)
+    }
     from(Gone, to = QuickSettings) { goneToQuickSettingsTransition() }
     from(Lockscreen, to = Bouncer) { lockscreenToBouncerTransition() }
     from(Lockscreen, to = Communal) { lockscreenToCommunalTransition() }
     from(Lockscreen, to = Shade) { lockscreenToShadeTransition() }
+    from(
+        Lockscreen,
+        to = Shade,
+        key = CollapseShadeInstantly.asComposeAware(),
+    ) {
+        lockscreenToShadeTransition(durationScale = 0.0)
+    }
+    from(
+        Lockscreen,
+        to = Shade,
+        key = SlightlyFasterShadeCollapse.asComposeAware(),
+    ) {
+        lockscreenToShadeTransition(durationScale = 0.9)
+    }
     from(Lockscreen, to = QuickSettings) { lockscreenToQuickSettingsTransition() }
     from(Lockscreen, to = Gone) { lockscreenToGoneTransition() }
     from(Shade, to = QuickSettings) { shadeToQuickSettingsTransition() }

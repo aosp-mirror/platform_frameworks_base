@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
@@ -87,6 +88,7 @@ object ComposeFacade : BaseComposeFacade {
         viewModel: SceneContainerViewModel,
         windowInsets: StateFlow<WindowInsets?>,
         sceneByKey: Map<SceneKey, Scene>,
+        dataSourceDelegator: SceneDataSourceDelegator,
     ): View {
         throwComposeUnavailableError()
     }

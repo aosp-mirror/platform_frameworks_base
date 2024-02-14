@@ -12,12 +12,9 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -41,11 +38,12 @@ class WalletContextualLocationsServiceTest : SysuiTestCase() {
     private lateinit var underTest: WalletContextualLocationsService
     private lateinit var testScope: TestScope
     private var listenerRegisteredCount: Int = 0
-    private val listener: IWalletCardsUpdatedListener.Stub = object : IWalletCardsUpdatedListener.Stub() {
-        override fun registerNewWalletCards(cards: List<WalletCard?>) {
-            listenerRegisteredCount++
+    private val listener: IWalletCardsUpdatedListener.Stub =
+        object : IWalletCardsUpdatedListener.Stub() {
+            override fun registerNewWalletCards(cards: List<WalletCard?>) {
+                listenerRegisteredCount++
+            }
         }
-    }
 
     @Before
     @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,50 +58,56 @@ class WalletContextualLocationsServiceTest : SysuiTestCase() {
         featureFlags.set(Flags.ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS, true)
         listenerRegisteredCount = 0
 
-        underTest = WalletContextualLocationsService(controller, featureFlags, testScope.backgroundScope)
+        underTest =
+            WalletContextualLocationsService(controller, featureFlags, testScope.backgroundScope)
     }
 
     @Test
     @kotlinx.coroutines.ExperimentalCoroutinesApi
-    fun addListener() = testScope.runTest {
-        underTest.addWalletCardsUpdatedListenerInternal(listener)
-        assertThat(listenerRegisteredCount).isEqualTo(1)
-  }
+    fun addListener() =
+        testScope.runTest {
+            underTest.addWalletCardsUpdatedListenerInternal(listener)
+            assertThat(listenerRegisteredCount).isEqualTo(1)
+        }
 
     @Test
     @kotlinx.coroutines.ExperimentalCoroutinesApi
-    fun addStoreLocations() = testScope.runTest {
-        underTest.onWalletContextualLocationsStateUpdatedInternal(ArrayList<String>())
-        verify(controller, times(1)).setSuggestionCardIds(anySet())
-    }
+    fun addStoreLocations() =
+        testScope.runTest {
+            underTest.onWalletContextualLocationsStateUpdatedInternal(ArrayList<String>())
+            verify(controller, times(1)).setSuggestionCardIds(anySet())
+        }
 
     @Test
     @kotlinx.coroutines.ExperimentalCoroutinesApi
-    fun updateListenerAndLocationsState() = testScope.runTest {
-        // binds to the service and adds a listener
-        val underTestStub = getInterface
-        underTestStub.addWalletCardsUpdatedListener(listener)
-        assertThat(listenerRegisteredCount).isEqualTo(1)
+    fun updateListenerAndLocationsState() =
+        testScope.runTest {
+            // binds to the service and adds a listener
+            val underTestStub = getInterface
+            underTestStub.addWalletCardsUpdatedListener(listener)
+            assertThat(listenerRegisteredCount).isEqualTo(1)
 
-        // sends a list of card IDs to the controller
-        underTestStub.onWalletContextualLocationsStateUpdated(ArrayList<String>())
-        verify(controller, times(1)).setSuggestionCardIds(anySet())
+            // sends a list of card IDs to the controller
+            underTestStub.onWalletContextualLocationsStateUpdated(ArrayList<String>())
+            verify(controller, times(1)).setSuggestionCardIds(anySet())
 
-        // adds another listener
-        fakeWalletCards.update{ updatedFakeWalletCards }
-        runCurrent()
-        assertThat(listenerRegisteredCount).isEqualTo(2)
+            // adds another listener
+            fakeWalletCards.update { updatedFakeWalletCards }
+            runCurrent()
+            assertThat(listenerRegisteredCount).isEqualTo(2)
 
-        // sends another list of card IDs to the controller
-        underTestStub.onWalletContextualLocationsStateUpdated(ArrayList<String>())
-        verify(controller, times(2)).setSuggestionCardIds(anySet())
-    }
+            // sends another list of card IDs to the controller
+            underTestStub.onWalletContextualLocationsStateUpdated(ArrayList<String>())
+            verify(controller, times(2)).setSuggestionCardIds(anySet())
+        }
 
     private val fakeWalletCards: MutableStateFlow<List<WalletCard>>
         get() {
             val intent = Intent(getContext(), WalletContextualLocationsService::class.java)
-            val pi: PendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE)
-            val icon: Icon = Icon.createWithBitmap(Bitmap.createBitmap(70, 50, Bitmap.Config.ARGB_8888))
+            val pi: PendingIntent =
+                PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            val icon: Icon =
+                Icon.createWithBitmap(Bitmap.createBitmap(70, 50, Bitmap.Config.ARGB_8888))
             val walletCards: ArrayList<WalletCard> = ArrayList<WalletCard>()
             walletCards.add(WalletCard.Builder("card1", icon, "card", pi).build())
             walletCards.add(WalletCard.Builder("card2", icon, "card", pi).build())
@@ -113,8 +117,10 @@ class WalletContextualLocationsServiceTest : SysuiTestCase() {
     private val updatedFakeWalletCards: List<WalletCard>
         get() {
             val intent = Intent(getContext(), WalletContextualLocationsService::class.java)
-            val pi: PendingIntent = PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE)
-            val icon: Icon = Icon.createWithBitmap(Bitmap.createBitmap(70, 50, Bitmap.Config.ARGB_8888))
+            val pi: PendingIntent =
+                PendingIntent.getActivity(getContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            val icon: Icon =
+                Icon.createWithBitmap(Bitmap.createBitmap(70, 50, Bitmap.Config.ARGB_8888))
             val walletCards: ArrayList<WalletCard> = ArrayList<WalletCard>()
             walletCards.add(WalletCard.Builder("card3", icon, "card", pi).build())
             return walletCards

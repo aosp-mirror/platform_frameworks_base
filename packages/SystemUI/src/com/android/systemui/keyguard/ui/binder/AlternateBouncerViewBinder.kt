@@ -62,6 +62,11 @@ object AlternateBouncerViewBinder {
                 alternateBouncerDependencies.udfpsAccessibilityOverlayViewModel,
         )
 
+        AlternateBouncerMessageAreaViewBinder.bind(
+            view = view.requireViewById(R.id.alternate_bouncer_message_area),
+            viewModel = alternateBouncerDependencies.messageAreaViewModel,
+        )
+
         val scrim = view.requireViewById(R.id.alternate_bouncer_scrim) as ScrimView
         val viewModel = alternateBouncerDependencies.viewModel
         val swipeUpAnywhereGestureHandler =

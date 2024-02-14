@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.keyguard.domain.interactor
+package com.android.systemui.deviceentry.domain.interactor
 
 import android.content.Context
 import android.content.Intent
@@ -22,7 +22,10 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.shared.model.BiometricMessage
+import com.android.systemui.deviceentry.shared.model.FingerprintLockoutMessage
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.plugins.ActivityStarter
@@ -40,7 +43,6 @@ import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 /** Business logic for handling authentication events when an app is occluding the lockscreen. */
@@ -77,16 +79,15 @@ constructor(
     private val fingerprintLockoutEvents: Flow<Unit> =
         fingerprintAuthRepository.authenticationStatus
             .ifKeyguardOccludedByApp()
-            .filter { it is ErrorFingerprintAuthenticationStatus && it.isLockoutMessage() }
+            .filter { it is ErrorFingerprintAuthenticationStatus && it.isLockoutError() }
             .map {} // maps FingerprintAuthenticationStatus => Unit
     val message: Flow<BiometricMessage?> =
-        merge(
-                biometricMessageInteractor.fingerprintErrorMessage.filterNot {
-                    it.isFingerprintLockoutMessage()
-                },
-                biometricMessageInteractor.fingerprintFailMessage,
-                biometricMessageInteractor.fingerprintHelpMessage,
-            )
+        biometricMessageInteractor.fingerprintMessage
+            .filterNot { fingerprintMessage ->
+                // On lockout, the device will show the bouncer. Let's not show the message
+                // before the transition or else it'll look flickery.
+                fingerprintMessage is FingerprintLockoutMessage
+            }
             .ifKeyguardOccludedByApp(/* elseFlow */ flowOf(null))
 
     init {

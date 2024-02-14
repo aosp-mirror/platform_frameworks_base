@@ -67,10 +67,6 @@
     <dimen name="pip_resize_handle_margin">4dp</dimen>
     <dimen name="pip_resize_handle_padding">0dp</dimen>
 
-    <!-- PIP Split icon size and margin. -->
-    <dimen name="pip_split_icon_size">24dp</dimen>
-    <dimen name="pip_split_icon_margin">12dp</dimen>
-
     <!-- PIP stash offset size, which is the width of visible PIP region when stashed. -->
     <dimen name="pip_stash_offset">32dp</dimen>
 
@@ -266,6 +262,10 @@
     <dimen name="bubble_bar_manage_menu_item_height">52dp</dimen>
     <!-- Size of the icons in the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_item_icon_size">20dp</dimen>
+    <!-- Corner radius for expanded view when bubble bar is used -->
+    <dimen name="bubble_bar_expanded_view_corner_radius">16dp</dimen>
+    <!-- Corner radius for expanded view while it is being dragged -->
+    <dimen name="bubble_bar_expanded_view_corner_radius_dragged">28dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
     <dimen name="compat_button_margin">24dp</dimen>
@@ -434,6 +434,9 @@
     <!-- 22dp padding + 24dp app icon + 16dp expand button.
          Text varies in size, we will calculate that width separately. -->
     <dimen name="desktop_mode_app_details_width_minus_text">62dp</dimen>
+
+    <!-- 22dp padding + 24dp app icon + 16dp expand button + 86dp text (max) -->
+    <dimen name="desktop_mode_app_details_max_width">148dp</dimen>
 
     <!-- The width of the maximize menu in desktop mode. -->
     <dimen name="desktop_mode_maximize_menu_width">287dp</dimen>

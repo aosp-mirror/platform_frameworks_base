@@ -82,18 +82,21 @@ public class DragToInteractAnimationControllerTest extends SysuiTestCase {
 
         mDragToInteractAnimationController.setMagnetListener(new MagnetizedObject.MagnetListener() {
             @Override
-            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject) {
 
             }
 
             @Override
             public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
-                    float velX, float velY, boolean wasFlungOut) {
+                    @NonNull MagnetizedObject<?> draggedObject, float velX, float velY,
+                    boolean wasFlungOut) {
 
             }
 
             @Override
-            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject) {
 
             }
         });

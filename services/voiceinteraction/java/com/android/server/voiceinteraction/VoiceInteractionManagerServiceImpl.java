@@ -61,7 +61,6 @@ import android.os.SharedMemory;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.voice.HotwordDetector;
-import android.service.voice.HotwordTrainingDataLimitEnforcer;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
@@ -74,7 +73,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.internal.app.IVoiceActionCheckCallback;
@@ -996,12 +994,6 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             pw.println("  Active session:");
             mActiveSession.dump("    ", pw);
         }
-    }
-
-    @VisibleForTesting
-    void resetHotwordTrainingDataEgressCountForTest() {
-        HotwordTrainingDataLimitEnforcer.getInstance(mContext.getApplicationContext())
-                        .resetTrainingDataEgressCount();
     }
 
     void startLocked() {

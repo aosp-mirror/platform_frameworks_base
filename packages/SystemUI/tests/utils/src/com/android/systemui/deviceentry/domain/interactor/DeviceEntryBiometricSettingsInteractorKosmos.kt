@@ -13,25 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.scene.shared.model
 
-import dagger.Module
-import dagger.Provides
+package com.android.systemui.deviceentry.domain.interactor
 
-@Module
-data class FakeSceneContainerConfigModule(
-    @get:Provides
-    val sceneContainerConfig: SceneContainerConfig =
-        SceneContainerConfig(
-            sceneKeys =
-                listOf(
-                    SceneKey.QuickSettings,
-                    SceneKey.Shade,
-                    SceneKey.Lockscreen,
-                    SceneKey.Bouncer,
-                    SceneKey.Gone,
-                    SceneKey.Communal,
-                ),
-            initialSceneKey = SceneKey.Lockscreen,
-        ),
-)
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.kosmos.Kosmos
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
+@ExperimentalCoroutinesApi
+val Kosmos.deviceEntryBiometricSettingsInteractor by
+    Kosmos.Fixture {
+        DeviceEntryBiometricSettingsInteractor(
+            repository = biometricSettingsRepository,
+        )
+    }

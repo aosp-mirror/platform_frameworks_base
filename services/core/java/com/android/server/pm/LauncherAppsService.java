@@ -38,6 +38,7 @@ import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
 
 import static com.android.server.pm.PackageArchiver.isArchivingEnabled;
 
+import android.Manifest;
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -52,6 +53,7 @@ import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
+import android.app.role.RoleManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -84,7 +86,9 @@ import android.content.pm.ShortcutQueryWrapper;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.graphics.Rect;
+import android.multiuser.Flags;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -211,6 +215,7 @@ public class LauncherAppsService extends SystemService {
 
         private final Context mContext;
         private final UserManager mUm;
+        private final RoleManager mRoleManager;
         private final IPackageManager mIPM;
         private final UserManagerInternal mUserManagerInternal;
         private final UsageStatsManagerInternal mUsageStatsManagerInternal;
@@ -247,6 +252,7 @@ public class LauncherAppsService extends SystemService {
             mContext = context;
             mIPM = AppGlobals.getPackageManager();
             mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            mRoleManager = mContext.getSystemService(RoleManager.class);
             mUserManagerInternal = Objects.requireNonNull(
                     LocalServices.getService(UserManagerInternal.class));
             mUsageStatsManagerInternal = Objects.requireNonNull(
@@ -451,7 +457,6 @@ public class LauncherAppsService extends SystemService {
 
         private boolean canAccessProfile(int callingUid, int callingUserId, int callingPid,
                 int targetUserId, String message) {
-
             if (targetUserId == callingUserId) return true;
             if (injectHasInteractAcrossUsersFullPermission(callingPid, callingUid)) {
                 return true;
@@ -465,6 +470,14 @@ public class LauncherAppsService extends SystemService {
                             + targetUserId + " from " + callingUserId + " not allowed");
                     return false;
                 }
+
+                if (areHiddenApisChecksEnabled()
+                        && mUm.getUserProperties(UserHandle.of(targetUserId))
+                                        .getProfileApiVisibility()
+                                == UserProperties.PROFILE_API_VISIBILITY_HIDDEN
+                        && !canAccessHiddenProfileInjected(callingUid, callingPid)) {
+                    return false;
+                }
             } finally {
                 injectRestoreCallingIdentity(ident);
             }
@@ -473,8 +486,41 @@ public class LauncherAppsService extends SystemService {
                     message, true);
         }
 
+        boolean areHiddenApisChecksEnabled() {
+            return android.os.Flags.allowPrivateProfile()
+                    && Flags.enableLauncherAppsHiddenProfileChecks()
+                    && Flags.enablePermissionToAccessHiddenProfiles();
+        }
+
         private void verifyCallingPackage(String callingPackage) {
             verifyCallingPackage(callingPackage, injectBinderCallingUid());
+        }
+
+        boolean canAccessHiddenProfileInjected(int callingUid, int callingPid) {
+            AndroidPackage callingPackage = mPackageManagerInternal.getPackage(callingUid);
+            if (callingPackage == null) {
+                return false;
+            }
+
+            if (!mRoleManager
+                    .getRoleHoldersAsUser(
+                            RoleManager.ROLE_HOME, UserHandle.getUserHandleForUid(callingUid))
+                    .contains(callingPackage.getPackageName())) {
+                return false;
+            }
+
+            if (mContext.checkPermission(
+                            Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL, callingPid, callingUid)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+
+            // TODO(b/321988638): add option to disable with a flag
+            return mContext.checkPermission(
+                            android.Manifest.permission.ACCESS_HIDDEN_PROFILES,
+                            callingPid,
+                            callingUid)
+                    == PackageManager.PERMISSION_GRANTED;
         }
 
         @VisibleForTesting // We override it in unit tests
@@ -1566,11 +1612,6 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public @Nullable LauncherUserInfo getLauncherUserInfo(@NonNull UserHandle user) {
-            // Only system launchers, which have access to recents should have access to this API.
-            // TODO(b/303803157): Add the new permission check if we decide to have one.
-            if (!mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())) {
-                throw new SecurityException("Caller is not the recents app");
-            }
             if (!canAccessProfile(user.getIdentifier(),
                     "Can't access LauncherUserInfo for another user")) {
                 return null;
@@ -1585,11 +1626,6 @@ public class LauncherAppsService extends SystemService {
 
         @Override
         public List<String> getPreInstalledSystemPackages(UserHandle user) {
-            // Only system launchers, which have access to recents should have access to this API.
-            // TODO(b/303803157): Update access control for this API to default Launcher app.
-            if (!mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())) {
-                throw new SecurityException("Caller is not the recents app");
-            }
             if (!canAccessProfile(user.getIdentifier(),
                     "Can't access preinstalled packages for another user")) {
                 return null;
@@ -1610,11 +1646,6 @@ public class LauncherAppsService extends SystemService {
         @Override
         public @Nullable IntentSender getAppMarketActivityIntent(@NonNull String callingPackage,
                 @Nullable String packageName, @NonNull UserHandle user) {
-            // Only system launchers, which have access to recents should have access to this API.
-            // TODO(b/303803157): Update access control for this API to default Launcher app.
-            if (!mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())) {
-                throw new SecurityException("Caller is not the recents app");
-            }
             if (!canAccessProfile(user.getIdentifier(),
                     "Can't access AppMarketActivity for another user")) {
                 return null;

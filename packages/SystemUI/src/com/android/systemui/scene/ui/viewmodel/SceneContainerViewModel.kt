@@ -22,7 +22,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,18 +43,10 @@ constructor(
     val allSceneKeys: List<SceneKey> = sceneInteractor.allSceneKeys()
 
     /** The scene that should be rendered. */
-    val currentScene: StateFlow<SceneModel> = sceneInteractor.desiredScene
+    val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
     /** Whether the container is visible. */
     val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
-
-    /** Notifies that the UI has transitioned sufficiently to the given scene. */
-    fun onSceneChanged(scene: SceneModel) {
-        sceneInteractor.onSceneChanged(
-            scene = scene,
-            loggingReason = SCENE_TRANSITION_LOGGING_REASON,
-        )
-    }
 
     /**
      * Binds the given flow so the system remembers it.

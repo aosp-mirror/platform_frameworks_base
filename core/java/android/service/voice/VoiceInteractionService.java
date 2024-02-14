@@ -444,20 +444,6 @@ public class VoiceInteractionService extends Service {
         }
     }
 
-    /** Reset hotword training data egressed count.
-     *  @hide */
-    @TestApi
-    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
-    @RequiresPermission(Manifest.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT)
-    public final void resetHotwordTrainingDataEgressCountForTest() {
-        Log.i(TAG, "Resetting hotword training data egress count for test.");
-        try {
-            mSystemService.resetHotwordTrainingDataEgressCountForTest();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     /**
      * Creates an {@link AlwaysOnHotwordDetector} for the given keyphrase and locale.
      * This instance must be retained and used by the client.
