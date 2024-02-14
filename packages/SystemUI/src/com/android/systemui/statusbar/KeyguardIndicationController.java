@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import static android.adaptiveauth.Flags.enableAdaptiveAuth;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_MANAGEMENT_DISCLOSURE;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.KEYGUARD_NAMED_MANAGEMENT_DISCLOSURE;
@@ -32,6 +33,7 @@ import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.IMPORTANT_MSG_MIN_DURATION;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_IS_DISMISSIBLE;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ADAPTIVE_AUTH;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
@@ -454,6 +456,9 @@ public class KeyguardIndicationController {
         updateLockScreenAlignmentMsg();
         updateLockScreenLogoutView();
         updateLockScreenPersistentUnlockMsg();
+        if (enableAdaptiveAuth()) {
+            updateLockScreenAdaptiveAuthMsg(userId);
+        }
     }
 
     private void updateOrganizedOwnedDevice() {
@@ -737,6 +742,22 @@ public class KeyguardIndicationController {
                     false);
         } else {
             mRotateTextViewController.hideIndication(INDICATION_TYPE_LOGOUT);
+        }
+    }
+
+    private void updateLockScreenAdaptiveAuthMsg(int userId) {
+        final boolean deviceLocked = mKeyguardUpdateMonitor.isDeviceLockedByAdaptiveAuth(userId);
+        if (deviceLocked) {
+            mRotateTextViewController.updateIndication(
+                    INDICATION_TYPE_ADAPTIVE_AUTH,
+                    new KeyguardIndication.Builder()
+                            .setMessage(mContext
+                                    .getString(R.string.kg_prompt_after_adaptive_auth_lock))
+                            .setTextColor(mInitialTextColorState)
+                            .build(),
+                    true);
+        } else {
+            mRotateTextViewController.hideIndication(INDICATION_TYPE_ADAPTIVE_AUTH);
         }
     }
 

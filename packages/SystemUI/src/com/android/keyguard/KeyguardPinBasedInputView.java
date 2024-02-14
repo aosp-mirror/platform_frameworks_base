@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_ADAPTIVE_AUTH_REQUEST;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT;
@@ -138,6 +139,8 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
                 return R.string.kg_prompt_reason_timeout_pin;
             case PROMPT_REASON_TRUSTAGENT_EXPIRED:
                 return R.string.kg_prompt_reason_timeout_pin;
+            case PROMPT_REASON_ADAPTIVE_AUTH_REQUEST:
+                return R.string.kg_prompt_after_adaptive_auth_lock;
             case PROMPT_REASON_NONE:
                 return 0;
             default:
