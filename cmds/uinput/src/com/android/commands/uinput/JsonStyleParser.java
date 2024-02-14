@@ -71,7 +71,8 @@ public class JsonStyleParser implements EventParser {
                         case "configuration" -> eb.setConfiguration(readConfiguration());
                         case "ff_effects_max" -> eb.setFfEffectsMax(readInt());
                         case "abs_info" -> eb.setAbsInfo(readAbsInfoArray());
-                        case "duration" -> eb.setDurationMillis(readInt());
+                        // Duration is specified in milliseconds in the JSON-style format.
+                        case "duration" -> eb.setDurationNanos(readInt() * 1_000_000L);
                         case "port" -> eb.setInputPort(mReader.nextString());
                         case "syncToken" -> eb.setSyncToken(mReader.nextString());
                         default -> mReader.skipValue();

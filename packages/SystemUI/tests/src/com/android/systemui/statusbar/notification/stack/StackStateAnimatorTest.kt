@@ -18,8 +18,10 @@ package com.android.systemui.statusbar.notification.stack
 
 import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
@@ -31,10 +33,12 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.any
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.description
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verify
@@ -45,7 +49,10 @@ private const val HEADS_UP_ABOVE_SCREEN = 80
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@RunWithLooper
 class StackStateAnimatorTest : SysuiTestCase() {
+
+    @get:Rule val animatorTestRule = AnimatorTestRule(this)
 
     private lateinit var stackStateAnimator: StackStateAnimator
     private val stackScroller: NotificationStackScrollLayout = mock()
@@ -112,13 +119,16 @@ class StackStateAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun startAnimationForEvents_startsHeadsUpDisappearAnim() {
+        val disappearDuration = ANIMATION_DURATION_HEADS_UP_DISAPPEAR.toLong()
         val event = AnimationEvent(view, AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR)
+        clearInvocations(view)
         stackStateAnimator.startAnimationForEvents(arrayListOf(event), 0)
 
         verify(view)
             .performRemoveAnimation(
-                /* duration= */ eq(ANIMATION_DURATION_HEADS_UP_DISAPPEAR.toLong()),
+                /* duration= */ eq(disappearDuration),
                 /* delay= */ eq(0L),
                 /* translationDirection= */ eq(0f),
                 /* isHeadsUpAnimation= */ eq(true),
@@ -127,9 +137,12 @@ class StackStateAnimatorTest : SysuiTestCase() {
                 /* animationListener= */ any()
             )
 
+        animatorTestRule.advanceTimeBy(disappearDuration) // move to the end of SSA animations
         runnableCaptor.value.run() // execute the end runnable
 
-        verify(view, description("should be called at the end of the animation"))
+        verify(view, description("should be translated to the heads up appear start"))
+            .translationY = -stackStateAnimator.mHeadsUpAppearStartAboveScreen
+        verify(view, description("should be called at the end of the disappear animation"))
             .removeFromTransientContainer()
     }
 

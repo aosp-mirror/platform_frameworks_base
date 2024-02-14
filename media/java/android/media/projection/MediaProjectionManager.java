@@ -180,7 +180,7 @@ public final class MediaProjectionManager {
     @SuppressLint("UnflaggedApi")
     @TestApi
     @NonNull
-    public Intent createScreenCaptureIntent(@Nullable LaunchCookie launchCookie) {
+    public Intent createScreenCaptureIntent(@NonNull LaunchCookie launchCookie) {
         Intent i = createScreenCaptureIntent();
         i.putExtra(EXTRA_LAUNCH_COOKIE, launchCookie);
         return i;

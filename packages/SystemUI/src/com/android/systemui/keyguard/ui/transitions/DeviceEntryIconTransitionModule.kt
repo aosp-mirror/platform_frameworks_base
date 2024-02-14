@@ -23,6 +23,7 @@ import com.android.systemui.keyguard.ui.viewmodel.AodToLockscreenTransitionViewM
 import com.android.systemui.keyguard.ui.viewmodel.DozingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToAodTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.GoneToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGoneTransitionViewModel
@@ -113,6 +114,12 @@ abstract class DeviceEntryIconTransitionModule {
     @Binds
     @IntoSet
     abstract fun goneToAod(impl: GoneToAodTransitionViewModel): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun goneToLockscreen(
+        impl: GoneToLockscreenTransitionViewModel
+    ): DeviceEntryIconTransition
 
     @Binds
     @IntoSet

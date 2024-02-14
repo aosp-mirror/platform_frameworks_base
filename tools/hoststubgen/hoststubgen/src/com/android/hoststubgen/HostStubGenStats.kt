@@ -17,6 +17,7 @@ package com.android.hoststubgen
 
 import com.android.hoststubgen.asm.toHumanReadableClassName
 import com.android.hoststubgen.filters.FilterPolicyWithReason
+import org.objectweb.asm.Opcodes
 import java.io.PrintWriter
 
 open class HostStubGenStats {
@@ -28,11 +29,25 @@ open class HostStubGenStats {
 
     private val stats = mutableMapOf<String, Stats>()
 
-    fun onVisitPolicyForMethod(fullClassName: String, policy: FilterPolicyWithReason) {
+    fun onVisitPolicyForMethod(fullClassName: String, methodName: String, descriptor: String,
+                               policy: FilterPolicyWithReason, access: Int) {
+        // Ignore methods that aren't public
+        if ((access and Opcodes.ACC_PUBLIC) == 0) return
+        // Ignore methods that are abstract
+        if ((access and Opcodes.ACC_ABSTRACT) != 0) return
+        // Ignore methods where policy isn't relevant
         if (policy.isIgnoredForStats) return
 
         val packageName = resolvePackageName(fullClassName)
         val className = resolveClassName(fullClassName)
+
+        // Ignore methods for certain generated code
+        if (className.endsWith("Proto")
+                or className.endsWith("ProtoEnums")
+                or className.endsWith("LogTags")
+                or className.endsWith("StatsLog")) {
+            return
+        }
 
         val packageStats = stats.getOrPut(packageName) { Stats() }
         val classStats = packageStats.children.getOrPut(className) { Stats() }

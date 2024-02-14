@@ -23,17 +23,12 @@ import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 
 fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
-    // TODO: b/301206470 returning a hard coded state for MVP
-    if (true) return CredentialSelectorUiState.Get.SingleEntry(
-        providerInfos
-            .flatMap { it.credentialEntryList }
-            .first { it.credentialType == CredentialType.PASSWORD }
-    )
     val accounts = providerInfos
         .flatMap { it.credentialEntryList }
         .groupBy { it.userName}
         .entries
         .toList()
+
     return if (isPrimary) {
         if (accounts.size == 1) {
             CredentialSelectorUiState.Get.SingleEntry(
@@ -57,6 +52,5 @@ fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
 }
 val comparator = compareBy<CredentialEntryInfo> { entryInfo ->
     // Passkey type always go first
-    entryInfo.credentialType.let{ if (it == CredentialType.PASSKEY) 0 else 1 }
-}
-    .thenByDescending{ it.lastUsedTimeMillis }
+    entryInfo.credentialType.let { if (it == CredentialType.PASSKEY) 0 else 1 }
+}.thenByDescending { it.lastUsedTimeMillis ?: 0 }

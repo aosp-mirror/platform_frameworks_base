@@ -102,7 +102,7 @@ constructor(
 
     override val isCommunalHubShowing: Flow<Boolean> =
         if (sceneContainerFlags.isEnabled()) {
-            sceneContainerRepository.desiredScene.map { scene -> scene.key == SceneKey.Communal }
+            sceneContainerRepository.currentScene.map { sceneKey -> sceneKey == SceneKey.Communal }
         } else {
             desiredScene.map { sceneKey -> sceneKey == CommunalSceneKey.Communal }
         }

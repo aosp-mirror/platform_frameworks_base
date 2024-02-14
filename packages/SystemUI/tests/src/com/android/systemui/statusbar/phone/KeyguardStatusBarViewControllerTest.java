@@ -147,6 +147,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private KeyguardStatusBarView mKeyguardStatusBarView;
     private KeyguardStatusBarViewController mController;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+    private final FakeExecutor mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
     private final TestScope mTestScope = TestScopeProvider.getTestScope();
     private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
@@ -214,6 +215,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mSecureSettings,
                 mCommandQueue,
                 mFakeExecutor,
+                mBackgroundExecutor,
                 mLogger,
                 mNotificationMediaManager,
                 mStatusOverlayHoverListenerFactory

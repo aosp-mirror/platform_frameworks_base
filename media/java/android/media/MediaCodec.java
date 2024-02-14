@@ -16,6 +16,10 @@
 
 package android.media;
 
+import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
+
+import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
+
 import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -51,7 +55,6 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,7 +65,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
 /**
  MediaCodec class can be used to access low-level media codecs, i.e. encoder/decoder components.
  It is part of the Android low-level multimedia support infrastructure (normally used together
@@ -4936,6 +4938,68 @@ final public class MediaCodec {
      * @see #setParameters(Bundle)
      */
     public static final String PARAMETER_KEY_TUNNEL_PEEK = "tunnel-peek";
+
+    /**
+     * Set the region of interest as QpOffset-Map on the next queued input frame.
+     * <p>
+     * The associated value is a byte array containing quantization parameter (QP) offsets in
+     * raster scan order for the entire frame at 16x16 granularity. The size of the byte array
+     * shall be ((frame_width + 15) / 16) * ((frame_height + 15) / 16), where frame_width and
+     * frame_height correspond to width and height configured using {@link MediaFormat#KEY_WIDTH}
+     * and {@link MediaFormat#KEY_HEIGHT} keys respectively. During encoding, if the coding unit
+     * size is larger than 16x16, then the qpOffset information of all 16x16 blocks that
+     * encompass the coding unit is combined and used. The QP of target block will be calculated
+     * as 'frameQP + offsetQP'. If the result exceeds minQP or maxQP configured then the value
+     * may be clamped. Negative offset results in blocks encoded at lower QP than frame QP and
+     * positive offsets will result in encoding blocks at higher QP than frame QP. If the areas
+     * of negative QP and positive QP are chosen wisely, the overall viewing experience can be
+     * improved.
+     * <p>
+     * If byte array size is too small than the expected size, components may ignore the
+     * configuration silently. If the byte array exceeds the expected size, components shall use
+     * the initial portion and ignore the rest.
+     * <p>
+     * The scope of this key is throughout the encoding session until it is reconfigured during
+     * running state.
+     * <p>
+     * @see #setParameters(Bundle)
+     */
+    @FlaggedApi(FLAG_REGION_OF_INTEREST)
+    public static final String PARAMETER_KEY_QP_OFFSET_MAP = "qp-offset-map";
+
+    /**
+     * Set the region of interest as QpOffset-Rects on the next queued input frame.
+     * <p>
+     * The associated value is a String in the format "Top1,Left1-Bottom1,Right1=Offset1;Top2,
+     * Left2-Bottom2,Right2=Offset2;...". Co-ordinates (Top, Left), (Top, Right), (Bottom, Left)
+     * and (Bottom, Right) form the vertices of bounding box of region of interest in pixels.
+     * Pixel (0, 0) points to the top-left corner of the frame. Offset is the suggested
+     * quantization parameter (QP) offset of the blocks in the bounding box. The bounding box
+     * will get stretched outwards to align to LCU boundaries during encoding. The Qp Offset is
+     * integral and shall be in the range [-128, 127]. The QP of target block will be calculated
+     * as frameQP + offsetQP. If the result exceeds minQP or maxQP configured then the value may
+     * be clamped. Negative offset results in blocks encoded at lower QP than frame QP and
+     * positive offsets will result in blocks encoded at higher QP than frame QP. If the areas of
+     * negative QP and positive QP are chosen wisely, the overall viewing experience can be
+     * improved.
+     * <p>
+     * If Roi rect is not valid that is bounding box width is < 0 or bounding box height is < 0,
+     * components may ignore the configuration silently. If Roi rect extends outside frame
+     * boundaries, then rect shall be clamped to the frame boundaries.
+     * <p>
+     * The scope of this key is throughout the encoding session until it is reconfigured during
+     * running state.
+     * <p>
+     * The maximum number of contours (rectangles) that can be specified for a given input frame
+     * is device specific. Implementations will drop/ignore the rectangles that are beyond their
+     * supported limit. Hence it is preferable to place the rects in descending order of
+     * importance. Transitively, if the bounding boxes overlap, then the most preferred
+     * rectangle's qp offset (earlier rectangle qp offset) will be used to quantize the block.
+     * <p>
+     * @see #setParameters(Bundle)
+     */
+    @FlaggedApi(FLAG_REGION_OF_INTEREST)
+    public static final String PARAMETER_KEY_QP_OFFSET_RECTS = "qp-offset-rects";
 
     /**
      * Communicate additional parameter changes to the component instance.

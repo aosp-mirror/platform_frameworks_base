@@ -88,6 +88,8 @@ import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recordissue.RecordIssueModule;
 import com.android.systemui.retail.dagger.RetailModeModule;
+import com.android.systemui.scene.shared.model.SceneDataSource;
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator;
 import com.android.systemui.scene.ui.view.WindowRootViewComponent;
 import com.android.systemui.screenrecord.ScreenRecordModule;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
@@ -393,4 +395,7 @@ public abstract class SystemUIModule {
     @IntoMap
     @ClassKey(SystemUISecondaryUserService.class)
     abstract Service bindsSystemUISecondaryUserService(SystemUISecondaryUserService service);
+
+    @Binds
+    abstract SceneDataSource bindSceneDataSource(SceneDataSourceDelegator delegator);
 }

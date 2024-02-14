@@ -85,6 +85,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     private val bigGap = px(R.dimen.notification_section_divider_height)
     private val smallGap = px(R.dimen.notification_section_divider_height_lockscreen)
+    private val scrimPadding = px(R.dimen.notification_side_paddings)
 
     @Before
     fun setUp() {
@@ -116,6 +117,18 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
         resetViewStates_stackMargin_changesHunYTranslation()
+    }
+
+    @Test
+    fun resetViewStates_defaultHunWhenShadeIsOpening_yTranslationIsInset() {
+        whenever(notificationRow.isPinned).thenReturn(true)
+        whenever(notificationRow.isHeadsUp).thenReturn(true)
+
+        // scroll the panel over the HUN inset
+        ambientState.stackY = stackScrollAlgorithm.mHeadsUpInset + bigGap
+
+        // the HUN translation should be the panel scroll position + the scrim padding
+        resetViewStates_hunYTranslationIs(ambientState.stackY + scrimPadding)
     }
 
     @Test

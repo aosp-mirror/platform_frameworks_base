@@ -464,11 +464,12 @@ public abstract class Layout {
             @Nullable Path selectionPath,
             @Nullable Paint selectionPaint,
             int cursorOffsetVertical) {
+        float leftShift = 0;
         if (mUseBoundsForWidth) {
-            canvas.save();
             RectF drawingRect = computeDrawingBoundingBox();
             if (drawingRect.left < 0) {
-                canvas.translate(-drawingRect.left, 0);
+                leftShift = -drawingRect.left;
+                canvas.translate(leftShift, 0);
             }
         }
         final long lineRange = getLineRangeForDraw(canvas);
@@ -479,8 +480,10 @@ public abstract class Layout {
         drawWithoutText(canvas, highlightPaths, highlightPaints, selectionPath, selectionPaint,
                 cursorOffsetVertical, firstLine, lastLine);
         drawText(canvas, firstLine, lastLine);
-        if (mUseBoundsForWidth) {
-            canvas.restore();
+        if (leftShift != 0) {
+            // Manually translate back to the original position because of b/324498002, using
+            // save/restore disappears the toggle switch drawables.
+            canvas.translate(-leftShift, 0);
         }
     }
 

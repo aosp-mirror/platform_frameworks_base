@@ -21,6 +21,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.voice.VisualQueryAttentionResult;
 import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 
@@ -157,12 +158,14 @@ public class AssistManager {
     private final IVisualQueryDetectionAttentionListener mVisualQueryDetectionAttentionListener =
             new IVisualQueryDetectionAttentionListener.Stub() {
                 @Override
-                public void onAttentionGained() {
+                public void onAttentionGained(VisualQueryAttentionResult attentionResult) {
+                    // TODO (b/319132184): Implemented this with different types.
                     handleVisualAttentionChanged(true);
                 }
 
                 @Override
-                public void onAttentionLost() {
+                public void onAttentionLost(int interactionIntention) {
+                    //TODO (b/319132184): Implemented this with different types.
                     handleVisualAttentionChanged(false);
                 }
             };
@@ -472,6 +475,7 @@ public class AssistManager {
                 });
     }
 
+    // TODO (b/319132184): Implemented this with different types.
     private void handleVisualAttentionChanged(boolean attentionGained) {
         final StatusBarManager statusBarManager = mContext.getSystemService(StatusBarManager.class);
         if (statusBarManager != null) {

@@ -32,6 +32,7 @@ import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_SYSTEM;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
+import static android.media.audio.Flags.featureSpatialAudioHeadtrackingLowLatency;
 import static android.media.audio.Flags.focusFreezeTestApi;
 import static android.media.audiopolicy.Flags.enableFadeManagerConfiguration;
 import static android.os.Process.FIRST_APPLICATION_UID;
@@ -4519,6 +4520,10 @@ public class AudioService extends IAudioService.Stub
         pw.println("\nFun with Flags: ");
         pw.println("\tandroid.media.audio.autoPublicVolumeApiHardening:"
                 + autoPublicVolumeApiHardening());
+        pw.println("\tandroid.media.audio.Flags.automaticBtDeviceType:"
+                + automaticBtDeviceType());
+        pw.println("\tandroid.media.audio.featureSpatialAudioHeadtrackingLowLatency:"
+                + featureSpatialAudioHeadtrackingLowLatency());
         pw.println("\tandroid.media.audio.focusFreezeTestApi:"
                 + focusFreezeTestApi());
         pw.println("\tcom.android.media.audio.disablePrescaleAbsoluteVolume:"

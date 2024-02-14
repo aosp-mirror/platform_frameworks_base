@@ -1797,7 +1797,6 @@ public class VibratorManagerServiceTest {
         cancelVibrate(service);  // Clean up long effect.
     }
 
-    @FlakyTest
     @Test
     public void onExternalVibration_withNewSameImportanceButRepeating_cancelsOngoingVibration()
             throws Exception {

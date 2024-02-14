@@ -48,6 +48,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCATION;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_TASK;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MOBILE_NETWORK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MODIFY_USERS;
@@ -76,6 +77,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THREAD_NETWORK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_TIME;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ASSIST_CONTENT;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_VPN;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WALLPAPER;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
@@ -229,6 +231,7 @@ import static android.app.admin.flags.Flags.backupServiceSecurityLogEventEnabled
 import static android.app.admin.flags.Flags.dumpsysPolicyEngineMigrationEnabled;
 import static android.app.admin.flags.Flags.headlessDeviceOwnerSingleUserEnabled;
 import static android.app.admin.flags.Flags.policyEngineMigrationV2Enabled;
+import static android.app.admin.flags.Flags.assistContentUserRestrictionEnabled;
 import static android.content.Intent.ACTION_MANAGED_PROFILE_AVAILABLE;
 import static android.content.Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -446,6 +449,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.telecom.TelecomManager;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -13372,6 +13376,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     UserManager.DISALLOW_THREAD_NETWORK,
                     new String[]{MANAGE_DEVICE_POLICY_THREAD_NETWORK});
         }
+        if (assistContentUserRestrictionEnabled()) {
+            USER_RESTRICTION_PERMISSIONS.put(
+                    UserManager.DISALLOW_ASSIST_CONTENT,
+                    new String[]{MANAGE_DEVICE_POLICY_ASSIST_CONTENT});
+        }
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, new String[]{MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION});
         USER_RESTRICTION_PERMISSIONS.put(
@@ -22330,6 +22339,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_CAMERA,
             MANAGE_DEVICE_POLICY_CERTIFICATES,
             MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE,
+            MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,
             MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES,
             MANAGE_DEVICE_POLICY_DEFAULT_SMS,
             MANAGE_DEVICE_POLICY_DISPLAY,
@@ -22343,6 +22353,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_LOCK,
             MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
             MANAGE_DEVICE_POLICY_LOCK_TASK,
+            MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS,
             MANAGE_DEVICE_POLICY_MICROPHONE,
             MANAGE_DEVICE_POLICY_MOBILE_NETWORK,
             MANAGE_DEVICE_POLICY_MODIFY_USERS,
@@ -22413,6 +22424,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_CALLS,
                     MANAGE_DEVICE_POLICY_CAMERA,
                     MANAGE_DEVICE_POLICY_CERTIFICATES,
+                    MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,
                     MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES,
                     MANAGE_DEVICE_POLICY_DISPLAY,
                     MANAGE_DEVICE_POLICY_FACTORY_RESET,
@@ -22423,7 +22435,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_LOCATION,
                     MANAGE_DEVICE_POLICY_LOCK,
                     MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
-                    MANAGE_DEVICE_POLICY_CERTIFICATES,
+                    MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS,
                     MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION,
                     MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
                     MANAGE_DEVICE_POLICY_PACKAGE_STATE,
@@ -23228,38 +23240,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private EnforcingAdmin enforceCanCallContentProtectionLocked(
-            ComponentName who, String callerPackageName) {
-        CallerIdentity caller = getCallerIdentity(who, callerPackageName);
-        final int userId = caller.getUserId();
-
-        EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
-                who,
-                MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,
-                caller.getPackageName(),
-                userId
-        );
-        if ((isDeviceOwner(caller) || isProfileOwner(caller))
-                && !canDPCManagedUserUseLockTaskLocked(userId)) {
-            throw new SecurityException(
-                    "User " + userId + " is not allowed to use content protection");
-        }
-        return enforcingAdmin;
-    }
-
-    private void enforceCanQueryContentProtectionLocked(
-            ComponentName who, String callerPackageName) {
-        CallerIdentity caller = getCallerIdentity(who, callerPackageName);
-        final int userId = caller.getUserId();
-
-        enforceCanQuery(MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, caller.getPackageName(), userId);
-        if ((isDeviceOwner(caller) || isProfileOwner(caller))
-                && !canDPCManagedUserUseLockTaskLocked(userId)) {
-            throw new SecurityException(
-                    "User " + userId + " is not allowed to use content protection");
-        }
-    }
-
     @Override
     public void setContentProtectionPolicy(
             ComponentName who, String callerPackageName, @ContentProtectionPolicy int policy)
@@ -23269,24 +23249,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        int userId = caller.getUserId();
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_CONTENT_PROTECTION_POLICY);
-
-        EnforcingAdmin enforcingAdmin;
-        synchronized (getLockObject()) {
-            enforcingAdmin = enforceCanCallContentProtectionLocked(who, caller.getPackageName());
-        }
+        EnforcingAdmin enforcingAdmin =
+                enforcePermissionAndGetEnforcingAdmin(
+                        who, MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, callerPackageName, userId);
 
         if (policy == CONTENT_PROTECTION_DISABLED) {
             mDevicePolicyEngine.removeLocalPolicy(
-                    PolicyDefinition.CONTENT_PROTECTION,
-                    enforcingAdmin,
-                    caller.getUserId());
+                    PolicyDefinition.CONTENT_PROTECTION, enforcingAdmin, userId);
         } else {
             mDevicePolicyEngine.setLocalPolicy(
                     PolicyDefinition.CONTENT_PROTECTION,
                     enforcingAdmin,
                     new IntegerPolicyValue(policy),
-                    caller.getUserId());
+                    userId);
         }
     }
 
@@ -23298,13 +23275,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller = getCallerIdentity(who, callerPackageName);
-        final int userHandle = caller.getUserId();
+        int userId = caller.getUserId();
+        enforceCanQuery(MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, callerPackageName, userId);
 
-        synchronized (getLockObject()) {
-            enforceCanQueryContentProtectionLocked(who, caller.getPackageName());
-        }
-        Integer policy = mDevicePolicyEngine.getResolvedPolicy(
-                PolicyDefinition.CONTENT_PROTECTION, userHandle);
+        Integer policy =
+                mDevicePolicyEngine.getResolvedPolicy(PolicyDefinition.CONTENT_PROTECTION, userId);
         if (policy == null) {
             return CONTENT_PROTECTION_DISABLED;
         } else {
@@ -24011,5 +23986,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } catch (Exception e) {
             Slogf.d(LOG_TAG, "Unable to get stacktrace");
         }
+    }
+
+    @Override
+    public int[] getSubscriptionIds(String callerPackageName) {
+        final CallerIdentity caller = getCallerIdentity(callerPackageName);
+        enforceCanQuery(
+                MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS,
+                caller.getPackageName(),
+                caller.getUserId());
+        return getSubscriptionIdsInternal(callerPackageName).toArray();
+    }
+
+    private IntArray getSubscriptionIdsInternal(String callerPackageName) {
+        SubscriptionManager subscriptionManager =
+                mContext.getSystemService(SubscriptionManager.class);
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            IntArray adminOwnedSubscriptions = new IntArray();
+            List<SubscriptionInfo> subs = subscriptionManager.getAvailableSubscriptionInfoList();
+            int subCount = (subs != null) ? subs.size() : 0;
+            for (int i = 0; i < subCount; i++) {
+                SubscriptionInfo sub = subs.get(i);
+                if (sub.getGroupOwner()
+                        .equals(callerPackageName)) {
+                    adminOwnedSubscriptions.add(sub.getSubscriptionId());
+                }
+            }
+            return adminOwnedSubscriptions;
+        });
     }
 }

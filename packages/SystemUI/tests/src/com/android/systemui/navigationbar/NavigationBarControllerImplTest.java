@@ -20,7 +20,10 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.wm.shell.Flags.enableTaskbarNavbarUnification;
 
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -47,7 +50,6 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.FakeDisplayTracker;
@@ -140,6 +142,8 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testCreateNavigationBarsIncludeDefaultTrue() {
+        assumeFalse(enableTaskbarNavbarUnification());
+
         // Large screens may be using taskbar and the logic is different
         mNavigationBarController.mIsLargeScreen = false;
         doNothing().when(mNavigationBarController).createNavigationBar(any(), any(), any());
@@ -295,9 +299,20 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testConfigurationChange_taskbarInitialized() {
+    public void testConfigurationChangeUnfolding_taskbarInitialized() {
         Configuration configuration = mContext.getResources().getConfiguration();
         when(Utilities.isLargeScreen(any())).thenReturn(true);
+        when(mTaskbarDelegate.isInitialized()).thenReturn(true);
+        mNavigationBarController.onConfigChanged(configuration);
+        verify(mTaskbarDelegate, times(1)).onConfigurationChanged(configuration);
+    }
+
+    @Test
+    public void testConfigurationChangeFolding_taskbarInitialized() {
+        assumeTrue(enableTaskbarNavbarUnification());
+
+        Configuration configuration = mContext.getResources().getConfiguration();
+        when(Utilities.isLargeScreen(any())).thenReturn(false);
         when(mTaskbarDelegate.isInitialized()).thenReturn(true);
         mNavigationBarController.onConfigChanged(configuration);
         verify(mTaskbarDelegate, times(1)).onConfigurationChanged(configuration);

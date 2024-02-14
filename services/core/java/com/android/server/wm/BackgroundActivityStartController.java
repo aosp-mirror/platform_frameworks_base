@@ -67,6 +67,7 @@ import android.util.Slog;
 import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.UiThread;
@@ -221,7 +222,7 @@ public class BackgroundActivityStartController {
         return activity != null && packageName.equals(activity.getPackageName());
     }
 
-    private class BalState {
+    @VisibleForTesting class BalState {
 
         private final String mCallingPackage;
         private final int mCallingUid;
@@ -381,7 +382,7 @@ public class BackgroundActivityStartController {
             if (uid == 0) {
                 return "root[debugOnly]";
             }
-            String name = mService.mContext.getPackageManager().getNameForUid(uid);
+            String name = mService.getPackageManagerInternalLocked().getNameForUid(uid);
             if (name == null) {
                 name = "uid=" + uid;
             }
@@ -1195,7 +1196,7 @@ public class BackgroundActivityStartController {
         }
     }
 
-    private void showToast(String toastText) {
+    @VisibleForTesting void showToast(String toastText) {
         UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
                 toastText, Toast.LENGTH_LONG).show());
     }
@@ -1609,7 +1610,7 @@ public class BackgroundActivityStartController {
         return finalVerdict;
     }
 
-    private static void writeBalAllowedLog(String activityName, int code, BalState state) {
+    @VisibleForTesting void writeBalAllowedLog(String activityName, int code, BalState state) {
         FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
                 activityName,
                 code,

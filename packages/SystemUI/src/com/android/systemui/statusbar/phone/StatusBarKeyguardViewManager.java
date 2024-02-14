@@ -439,8 +439,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
         mBypassController = bypassController;
         mNotificationContainer = notificationContainer;
-        mKeyguardMessageAreaController = mKeyguardMessageAreaFactory.create(
-                centralSurfaces.getKeyguardMessageArea());
+        if (!DeviceEntryUdfpsRefactor.isEnabled()) {
+            mKeyguardMessageAreaController = mKeyguardMessageAreaFactory.create(
+                    centralSurfaces.getKeyguardMessageArea());
+        }
+
         mCentralSurfacesRegistered = true;
 
         registerListeners();
@@ -863,6 +866,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         final boolean isShowingAlternateBouncer = mAlternateBouncerInteractor.isVisibleState();
         if (mKeyguardMessageAreaController != null) {
+            DeviceEntryUdfpsRefactor.assertInLegacyMode();
             mKeyguardMessageAreaController.setIsVisible(isShowingAlternateBouncer);
             mKeyguardMessageAreaController.setMessage("");
         }
@@ -1447,6 +1451,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void setKeyguardMessage(String message, ColorStateList colorState) {
         if (mAlternateBouncerInteractor.isVisibleState()) {
             if (mKeyguardMessageAreaController != null) {
+                DeviceEntryUdfpsRefactor.assertInLegacyMode();
                 mKeyguardMessageAreaController.setMessage(message);
             }
         } else {

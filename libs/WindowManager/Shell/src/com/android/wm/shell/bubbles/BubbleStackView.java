@@ -441,43 +441,42 @@ public class BubbleStackView extends FrameLayout
     /** Magnet listener that handles animating and dismissing individual dragged-out bubbles. */
     private final MagnetizedObject.MagnetListener mIndividualBubbleMagnetListener =
             new MagnetizedObject.MagnetListener() {
+
                 @Override
-                public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                    if (mExpandedAnimationController.getDraggedOutBubble() == null) {
-                        return;
+                public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                        @NonNull MagnetizedObject draggedObject) {
+                    if (draggedObject.getUnderlyingObject() instanceof View view) {
+                        animateDismissBubble(view, true);
                     }
-                    animateDismissBubble(
-                            mExpandedAnimationController.getDraggedOutBubble(), true);
                 }
 
                 @Override
                 public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                        @NonNull MagnetizedObject draggedObject,
                         float velX, float velY, boolean wasFlungOut) {
-                    if (mExpandedAnimationController.getDraggedOutBubble() == null) {
-                        return;
-                    }
-                    animateDismissBubble(
-                            mExpandedAnimationController.getDraggedOutBubble(), false);
+                    if (draggedObject.getUnderlyingObject() instanceof View view) {
+                        animateDismissBubble(view, false);
 
-                    if (wasFlungOut) {
-                        mExpandedAnimationController.snapBubbleBack(
-                                mExpandedAnimationController.getDraggedOutBubble(), velX, velY);
-                        mDismissView.hide();
-                    } else {
-                        mExpandedAnimationController.onUnstuckFromTarget();
+                        if (wasFlungOut) {
+                            mExpandedAnimationController.snapBubbleBack(view, velX, velY);
+                            mDismissView.hide();
+                        } else {
+                            mExpandedAnimationController.onUnstuckFromTarget();
+                        }
                     }
                 }
 
                 @Override
-                public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                    if (mExpandedAnimationController.getDraggedOutBubble() == null) {
-                        return;
+                public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                        @NonNull MagnetizedObject<?> draggedObject) {
+                    if (draggedObject.getUnderlyingObject() instanceof View view) {
+                        mExpandedAnimationController.dismissDraggedOutBubble(
+                                view /* bubble */,
+                                mDismissView.getHeight() /* translationYBy */,
+                                () -> dismissBubbleIfExists(
+                                        mBubbleData.getBubbleWithView(view)) /* after */);
                     }
 
-                    mExpandedAnimationController.dismissDraggedOutBubble(
-                            mExpandedAnimationController.getDraggedOutBubble() /* bubble */,
-                            mDismissView.getHeight() /* translationYBy */,
-                            BubbleStackView.this::dismissMagnetizedObject /* after */);
                     mDismissView.hide();
                 }
             };
@@ -487,12 +486,14 @@ public class BubbleStackView extends FrameLayout
             new MagnetizedObject.MagnetListener() {
                 @Override
                 public void onStuckToTarget(
-                        @NonNull MagnetizedObject.MagneticTarget target) {
+                        @NonNull MagnetizedObject.MagneticTarget target,
+                        @NonNull MagnetizedObject<?> draggedObject) {
                     animateDismissBubble(mBubbleContainer, true);
                 }
 
                 @Override
                 public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                        @NonNull MagnetizedObject<?> draggedObject,
                         float velX, float velY, boolean wasFlungOut) {
                     animateDismissBubble(mBubbleContainer, false);
                     if (wasFlungOut) {
@@ -505,14 +506,14 @@ public class BubbleStackView extends FrameLayout
                 }
 
                 @Override
-                public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                        @NonNull MagnetizedObject<?> draggedObject) {
                     mStackAnimationController.animateStackDismissal(
                             mDismissView.getHeight() /* translationYBy */,
                             () -> {
+                                mBubbleData.dismissAll(Bubbles.DISMISS_USER_GESTURE);
                                 resetDismissAnimator();
-                                dismissMagnetizedObject();
-                            }
-                    );
+                            } /*after */);
                     mDismissView.hide();
                 }
             };
@@ -2757,19 +2758,6 @@ public class BubbleStackView extends FrameLayout
     /** Passes the MotionEvent to the magnetized object and returns true if it was consumed. */
     private boolean passEventToMagnetizedObject(MotionEvent event) {
         return mMagnetizedObject != null && mMagnetizedObject.maybeConsumeMotionEvent(event);
-    }
-
-    /**
-     * Dismisses the magnetized object - either an individual bubble, if we're expanded, or the
-     * stack, if we're collapsed.
-     */
-    private void dismissMagnetizedObject() {
-        if (mIsExpanded) {
-            final View draggedOutBubbleView = (View) mMagnetizedObject.getUnderlyingObject();
-            dismissBubbleIfExists(mBubbleData.getBubbleWithView(draggedOutBubbleView));
-        } else {
-            mBubbleData.dismissAll(Bubbles.DISMISS_USER_GESTURE);
-        }
     }
 
     private void dismissBubbleIfExists(@Nullable BubbleViewProvider bubble) {

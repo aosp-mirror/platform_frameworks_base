@@ -26,8 +26,8 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.scene.ui.composable.ComposableScene
 import dagger.Lazy
 import javax.inject.Inject
@@ -49,7 +49,7 @@ constructor(
 ) : ComposableScene {
     override val key = SceneKey.Lockscreen
 
-    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
+    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         combine(viewModel.upDestinationSceneKey, viewModel.leftDestinationSceneKey, ::Pair)
             .map { (upKey, leftKey) -> destinationScenes(up = upKey, left = leftKey) }
             .stateIn(
@@ -75,13 +75,13 @@ constructor(
     private fun destinationScenes(
         up: SceneKey?,
         left: SceneKey?,
-    ): Map<UserAction, SceneModel> {
+    ): Map<UserAction, UserActionResult> {
         return buildMap {
-            up?.let { this[UserAction.Swipe(Direction.UP)] = SceneModel(up) }
-            left?.let { this[UserAction.Swipe(Direction.LEFT)] = SceneModel(left) }
+            up?.let { this[UserAction.Swipe(Direction.UP)] = UserActionResult(up) }
+            left?.let { this[UserAction.Swipe(Direction.LEFT)] = UserActionResult(left) }
             this[UserAction.Swipe(fromEdge = Edge.TOP, direction = Direction.DOWN)] =
-                SceneModel(SceneKey.QuickSettings)
-            this[UserAction.Swipe(direction = Direction.DOWN)] = SceneModel(SceneKey.Shade)
+                UserActionResult(SceneKey.QuickSettings)
+            this[UserAction.Swipe(direction = Direction.DOWN)] = UserActionResult(SceneKey.Shade)
         }
     }
 }

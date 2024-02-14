@@ -40,7 +40,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -164,9 +163,9 @@ constructor(
         applicationScope.launch {
             // TODO (b/308001302): Move this to a bouncer specific interactor.
             bouncerInteractor.onImeHiddenByUser.collectLatest {
-                if (sceneInteractor.desiredScene.value.key == SceneKey.Bouncer) {
+                if (sceneInteractor.currentScene.value == SceneKey.Bouncer) {
                     sceneInteractor.changeScene(
-                        scene = SceneModel(SceneKey.Lockscreen),
+                        toScene = SceneKey.Lockscreen,
                         loggingReason = "IME hidden",
                     )
                 }
@@ -353,8 +352,8 @@ constructor(
         }
 
         applicationScope.launch {
-            sceneInteractor.desiredScene
-                .map { it.key == SceneKey.Bouncer }
+            sceneInteractor.currentScene
+                .map { it == SceneKey.Bouncer }
                 .distinctUntilChanged()
                 .collect { switchedToBouncerScene ->
                     if (switchedToBouncerScene) {
@@ -422,7 +421,7 @@ constructor(
 
     private fun switchToScene(targetSceneKey: SceneKey, loggingReason: String) {
         sceneInteractor.changeScene(
-            scene = SceneModel(targetSceneKey),
+            toScene = targetSceneKey,
             loggingReason = loggingReason,
         )
     }

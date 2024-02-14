@@ -19,7 +19,6 @@ package com.android.systemui.shade.domain.interactor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -44,7 +43,7 @@ constructor(
                 } else {
                     SceneKey.Shade
                 }
-            sceneInteractor.changeScene(SceneModel(key), "animateCollapseQs")
+            sceneInteractor.changeScene(key, "animateCollapseQs")
         }
     }
 

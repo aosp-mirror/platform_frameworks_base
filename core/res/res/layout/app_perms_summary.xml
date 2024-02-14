@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<!-- Describes permission item consisting of a group name and the list of permisisons under the group -->
+<!-- Describes permission item consisting of a group name and the list of permissions under the group -->
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"

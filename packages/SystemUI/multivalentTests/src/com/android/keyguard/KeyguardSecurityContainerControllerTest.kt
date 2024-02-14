@@ -64,9 +64,10 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.shared.model.FakeSceneDataSource
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DevicePostureController
@@ -170,6 +171,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     private lateinit var deviceEntryInteractor: DeviceEntryInteractor
     @Mock private lateinit var primaryBouncerInteractor: Lazy<PrimaryBouncerInteractor>
     private lateinit var sceneTransitionStateFlow: MutableStateFlow<ObservableTransitionState>
+    private lateinit var fakeSceneDataSource: FakeSceneDataSource
 
     private lateinit var underTest: KeyguardSecurityContainerController
 
@@ -245,6 +247,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Lockscreen))
         sceneInteractor.setTransitionState(sceneTransitionStateFlow)
         deviceEntryInteractor = kosmos.deviceEntryInteractor
+
+        fakeSceneDataSource = kosmos.fakeSceneDataSource
 
         underTest =
             KeyguardSecurityContainerController(
@@ -810,7 +814,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // is
             // not enough to trigger a dismissal of the keyguard.
             underTest.onViewAttached()
-            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer, null), "reason")
+            fakeSceneDataSource.pause()
+            sceneInteractor.changeScene(SceneKey.Bouncer, "reason")
             sceneTransitionStateFlow.value =
                 ObservableTransitionState.Transition(
                     SceneKey.Lockscreen,
@@ -820,7 +825,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer, null), "reason")
+            fakeSceneDataSource.unpause(expectedScene = SceneKey.Bouncer)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Bouncer)
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyInt())
@@ -829,7 +834,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // keyguard.
             kosmos.fakeDeviceEntryRepository.setUnlocked(true)
             runCurrent()
-            sceneInteractor.changeScene(SceneModel(SceneKey.Gone, null), "reason")
+            fakeSceneDataSource.pause()
+            sceneInteractor.changeScene(SceneKey.Gone, "reason")
             sceneTransitionStateFlow.value =
                 ObservableTransitionState.Transition(
                     SceneKey.Bouncer,
@@ -839,7 +845,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")
+            fakeSceneDataSource.unpause(expectedScene = SceneKey.Gone)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
             runCurrent()
             verify(viewMediatorCallback).keyguardDone(anyInt())
@@ -847,7 +853,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // While listening, moving back to the bouncer scene does not dismiss the keyguard
             // again.
             clearInvocations(viewMediatorCallback)
-            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer, null), "reason")
+            fakeSceneDataSource.pause()
+            sceneInteractor.changeScene(SceneKey.Bouncer, "reason")
             sceneTransitionStateFlow.value =
                 ObservableTransitionState.Transition(
                     SceneKey.Gone,
@@ -857,7 +864,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer, null), "reason")
+            fakeSceneDataSource.unpause(expectedScene = SceneKey.Bouncer)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Bouncer)
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyInt())
@@ -866,7 +873,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // scene
             // does not dismiss the keyguard while we're not listening.
             underTest.onViewDetached()
-            sceneInteractor.changeScene(SceneModel(SceneKey.Gone, null), "reason")
+            fakeSceneDataSource.pause()
+            sceneInteractor.changeScene(SceneKey.Gone, "reason")
             sceneTransitionStateFlow.value =
                 ObservableTransitionState.Transition(
                     SceneKey.Bouncer,
@@ -876,13 +884,14 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")
+            fakeSceneDataSource.unpause(expectedScene = SceneKey.Gone)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyInt())
 
             // While not listening, moving to the lockscreen does not dismiss the keyguard.
-            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen, null), "reason")
+            fakeSceneDataSource.pause()
+            sceneInteractor.changeScene(SceneKey.Lockscreen, "reason")
             sceneTransitionStateFlow.value =
                 ObservableTransitionState.Transition(
                     SceneKey.Gone,
@@ -892,7 +901,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen, null), "reason")
+            fakeSceneDataSource.unpause(expectedScene = SceneKey.Lockscreen)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Lockscreen)
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyInt())
@@ -900,7 +909,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // Reattaching the view starts listening again so moving from the bouncer scene to the
             // gone scene now does dismiss the keyguard again, this time from lockscreen.
             underTest.onViewAttached()
-            sceneInteractor.changeScene(SceneModel(SceneKey.Gone, null), "reason")
+            fakeSceneDataSource.pause()
+            sceneInteractor.changeScene(SceneKey.Gone, "reason")
             sceneTransitionStateFlow.value =
                 ObservableTransitionState.Transition(
                     SceneKey.Lockscreen,
@@ -910,7 +920,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                     isUserInputOngoing = flowOf(false),
                 )
             runCurrent()
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")
+            fakeSceneDataSource.unpause(expectedScene = SceneKey.Gone)
             sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
             runCurrent()
             verify(viewMediatorCallback).keyguardDone(anyInt())

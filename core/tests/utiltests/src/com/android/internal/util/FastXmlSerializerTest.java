@@ -45,7 +45,6 @@ import java.nio.charset.StandardCharsets;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-@IgnoreUnderRavenwood(blockedBy = Xml.class)
 public class FastXmlSerializerTest {
     private static final String TAG = "FastXmlSerializerTest";
 
@@ -146,6 +145,7 @@ public class FastXmlSerializerTest {
 
     @Test
     @LargeTest
+    @IgnoreUnderRavenwood(reason = "Long test runtime")
     public void testAllCharacters() throws Exception {
         boolean ok = true;
         for (int i = 0; i < 0xffff; i++) {

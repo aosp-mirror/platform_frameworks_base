@@ -19,7 +19,6 @@ package com.android.server.voiceinteraction;
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.LOG_COMPAT_CHANGE;
 import static android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG;
-import static android.Manifest.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
@@ -30,8 +29,6 @@ import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATU
 import static android.service.voice.HotwordDetectionService.INITIALIZATION_STATUS_UNKNOWN;
 import static android.service.voice.HotwordDetectionService.KEY_INITIALIZATION_STATUS;
 import static android.service.voice.HotwordDetectionServiceFailure.ERROR_CODE_COPY_AUDIO_DATA_FAILURE;
-import static android.service.voice.HotwordDetectionServiceFailure.ERROR_CODE_ON_TRAINING_DATA_EGRESS_LIMIT_EXCEEDED;
-import static android.service.voice.HotwordDetectionServiceFailure.ERROR_CODE_ON_TRAINING_DATA_SECURITY_EXCEPTION;
 
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_ERROR;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__RESULT__CALLBACK_INIT_STATE_SUCCESS;
@@ -51,10 +48,6 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENT
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_SECURITY_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_UNEXPECTED_CALLBACK;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECT_UNEXPECTED_CALLBACK;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_EGRESS_LIMIT_REACHED;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_REMOTE_EXCEPTION;
-import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_SECURITY_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_EVENT_EGRESS_SIZE__EVENT_TYPE__HOTWORD_DETECTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_EVENT_EGRESS_SIZE__EVENT_TYPE__HOTWORD_REJECTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_EVENT_EGRESS_SIZE__EVENT_TYPE__HOTWORD_TRAINING_DATA;
@@ -76,9 +69,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
@@ -87,8 +78,6 @@ import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordDetector;
 import android.service.voice.HotwordRejectedResult;
-import android.service.voice.HotwordTrainingData;
-import android.service.voice.HotwordTrainingDataLimitEnforcer;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.VisualQueryDetectionServiceFailure;
@@ -99,7 +88,6 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.infra.AndroidFuture;
-import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.policy.AppOpsPolicy;
 import com.android.server.voiceinteraction.VoiceInteractionManagerServiceImpl.DetectorRemoteExceptionListener;
@@ -141,9 +129,6 @@ abstract class DetectorSession {
 
     private static final String HOTWORD_DETECTION_OP_MESSAGE =
             "Providing hotword detection result to VoiceInteractionService";
-
-    private static final String HOTWORD_TRAINING_DATA_OP_MESSAGE =
-            "Providing hotword training data to VoiceInteractionService";
 
     // The error codes are used for onHotwordDetectionServiceFailure callback.
     // Define these due to lines longer than 100 characters.
@@ -529,31 +514,11 @@ abstract class DetectorSession {
                                         if (result != null) {
                                             Slog.i(TAG, "Egressed 'hotword rejected result' "
                                                     + "from hotword trusted process");
-                                            logEgressSizeStats(result);
                                             if (mDebugHotwordLogging) {
                                                 Slog.i(TAG, "Egressed detected result: " + result);
                                             }
                                         }
                                     }
-                                }
-
-                                @Override
-                                public void onTrainingData(HotwordTrainingData data)
-                                        throws RemoteException {
-                                    sendTrainingData(new TrainingDataEgressCallback() {
-                                        @Override
-                                        public void onHotwordDetectionServiceFailure(
-                                                HotwordDetectionServiceFailure failure)
-                                                throws RemoteException {
-                                            callback.onHotwordDetectionServiceFailure(failure);
-                                        }
-
-                                        @Override
-                                        public void onTrainingData(HotwordTrainingData data)
-                                                throws RemoteException {
-                                            callback.onTrainingData(data);
-                                        }
-                                    }, data);
                                 }
 
                                 @Override
@@ -622,7 +587,6 @@ abstract class DetectorSession {
                                         Slog.i(TAG, "Egressed "
                                                 + HotwordDetectedResult.getUsageSize(newResult)
                                                 + " bits from hotword trusted process");
-                                        logEgressSizeStats(newResult);
                                         if (mDebugHotwordLogging) {
                                             Slog.i(TAG,
                                                     "Egressed detected result: " + newResult);
@@ -637,134 +601,6 @@ abstract class DetectorSession {
         HotwordMetricsLogger.writeDetectorEvent(getDetectorType(),
                 HOTWORD_DETECTOR_EVENTS__EVENT__START_EXTERNAL_SOURCE_DETECTION,
                 mVoiceInteractionServiceUid);
-    }
-
-    void logEgressSizeStats(HotwordTrainingData data) {
-        logEgressSizeStats(data, HOTWORD_EVENT_TYPE_TRAINING_DATA);
-    }
-
-    void logEgressSizeStats(HotwordDetectedResult data) {
-        logEgressSizeStats(data, HOTWORD_EVENT_TYPE_DETECTION);
-
-    }
-
-    void logEgressSizeStats(HotwordRejectedResult data) {
-        logEgressSizeStats(data, HOTWORD_EVENT_TYPE_REJECTION);
-    }
-
-    /** Logs event size stats for events egressed from trusted hotword detection service. */
-    private void logEgressSizeStats(Parcelable data, int eventType) {
-        BackgroundThread.getExecutor().execute(() -> {
-            Parcel parcel = Parcel.obtain();
-            parcel.writeValue(data);
-            int dataSizeBytes = parcel.dataSize();
-            parcel.recycle();
-
-            HotwordMetricsLogger.writeHotwordDataEgressSize(eventType, dataSizeBytes,
-                    getDetectorType(), mVoiceInteractionServiceUid);
-        });
-    }
-
-    /** Used to send training data.
-     *
-     * @hide
-     */
-    interface TrainingDataEgressCallback {
-        /** Called to send training data */
-        void onTrainingData(HotwordTrainingData trainingData) throws RemoteException;
-
-        /** Called to inform failure to send training data. */
-        void onHotwordDetectionServiceFailure(HotwordDetectionServiceFailure failure) throws
-                RemoteException;
-
-    }
-
-    /** Default implementation to send training data from {@link HotwordDetectionService}
-     *  to {@link HotwordDetector}.
-     *
-     * <p> Verifies RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA permission has been
-     * granted and training data egress is within daily limit.
-     *
-     * @param callback used to send training data or inform of failures to send training data.
-     * @param data training data to egress.
-     *
-     * @hide
-     */
-    void sendTrainingData(
-            TrainingDataEgressCallback callback, HotwordTrainingData data) throws RemoteException {
-        Slog.d(TAG, "onTrainingData()");
-        int detectorType = getDetectorType();
-        HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                detectorType,
-                HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA,
-                mVoiceInteractionServiceUid);
-
-        // Check training data permission is granted.
-        try {
-            enforcePermissionForTrainingDataDelivery();
-        } catch (SecurityException e) {
-            Slog.w(TAG, "Ignoring training data due to a SecurityException", e);
-            HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                    detectorType,
-                    HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_SECURITY_EXCEPTION,
-                    mVoiceInteractionServiceUid);
-            try {
-                callback.onHotwordDetectionServiceFailure(
-                        new HotwordDetectionServiceFailure(
-                                ERROR_CODE_ON_TRAINING_DATA_SECURITY_EXCEPTION,
-                                "Security exception occurred"
-                                        + "in #onTrainingData method."));
-            } catch (RemoteException e1) {
-                notifyOnDetectorRemoteException();
-                HotwordMetricsLogger.writeDetectorEvent(
-                        detectorType,
-                        HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
-                        mVoiceInteractionServiceUid);
-                throw e1;
-            }
-            return;
-        }
-
-        // Check whether within daily egress limit.
-        boolean withinEgressLimit = HotwordTrainingDataLimitEnforcer.getInstance(mContext)
-                                                                    .incrementEgressCount();
-        if (!withinEgressLimit) {
-            Slog.d(TAG, "Ignoring training data as exceeded egress limit.");
-            HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                    detectorType,
-                    HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_EGRESS_LIMIT_REACHED,
-                    mVoiceInteractionServiceUid);
-            try {
-                callback.onHotwordDetectionServiceFailure(
-                        new HotwordDetectionServiceFailure(
-                                ERROR_CODE_ON_TRAINING_DATA_EGRESS_LIMIT_EXCEEDED,
-                                "Training data egress limit exceeded."));
-            } catch (RemoteException e) {
-                notifyOnDetectorRemoteException();
-                HotwordMetricsLogger.writeDetectorEvent(
-                        detectorType,
-                        HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
-                        mVoiceInteractionServiceUid);
-                throw e;
-            }
-            return;
-        }
-
-        try {
-            Slog.i(TAG, "Egressing training data from hotword trusted process.");
-            if (mDebugHotwordLogging) {
-                Slog.d(TAG, "Egressing hotword training data " + data);
-            }
-            callback.onTrainingData(data);
-        } catch (RemoteException e) {
-            notifyOnDetectorRemoteException();
-            HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                    detectorType,
-                    HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__TRAINING_DATA_REMOTE_EXCEPTION,
-                    mVoiceInteractionServiceUid);
-            throw e;
-        }
-        logEgressSizeStats(data);
     }
 
     void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
@@ -950,27 +786,6 @@ abstract class DetectorSession {
                 }
                 enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
                         CAPTURE_AUDIO_HOTWORD, HOTWORD_DETECTION_OP_MESSAGE);
-            }
-        });
-    }
-
-    /**
-     * Enforces permission for training data delivery.
-     *
-     * <p> Throws a {@link SecurityException} if training data egress permission is not granted.
-     */
-    void enforcePermissionForTrainingDataDelivery() {
-        Binder.withCleanCallingIdentity(() -> {
-            synchronized (mLock) {
-                enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
-                        RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                        HOTWORD_TRAINING_DATA_OP_MESSAGE);
-
-                mAppOpsManager.noteOpNoThrow(
-                        AppOpsManager.OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                        mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                        mVoiceInteractorIdentity.attributionTag,
-                        HOTWORD_TRAINING_DATA_OP_MESSAGE);
             }
         });
     }

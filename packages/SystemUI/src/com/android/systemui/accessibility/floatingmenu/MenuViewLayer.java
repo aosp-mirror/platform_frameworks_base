@@ -92,6 +92,20 @@ class MenuViewLayer extends FrameLayout implements
         MenuView.OnMoveToTuckedListener {
     private static final int SHOW_MESSAGE_DELAY_MS = 3000;
 
+    /**
+     * Counter indicating the FAB was dragged to the Dismiss action button.
+     *
+     * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
+     */
+    static final String TEX_METRIC_DISMISS = "accessibility.value_fab_shortcut_action_dismiss";
+
+    /**
+     * Counter indicating the FAB was dragged to the Edit action button.
+     *
+     * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
+     */
+    static final String TEX_METRIC_EDIT = "accessibility.value_fab_shortcut_action_edit";
+
     private final WindowManager mWindowManager;
     private final MenuView mMenuView;
     private final MenuListViewTouchHandler mMenuListViewTouchHandler;
@@ -229,20 +243,23 @@ class MenuViewLayer extends FrameLayout implements
         }
         mDragToInteractAnimationController.setMagnetListener(new MagnetizedObject.MagnetListener() {
             @Override
-            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject) {
                 mDragToInteractAnimationController.animateInteractMenu(
                         target.getTargetView().getId(), /* scaleUp= */ true);
             }
 
             @Override
             public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject,
                     float velocityX, float velocityY, boolean wasFlungOut) {
                 mDragToInteractAnimationController.animateInteractMenu(
                         target.getTargetView().getId(), /* scaleUp= */ false);
             }
 
             @Override
-            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                    @NonNull MagnetizedObject<?> draggedObject) {
                 dispatchAccessibilityAction(target.getTargetView().getId());
             }
         });
@@ -457,9 +474,11 @@ class MenuViewLayer extends FrameLayout implements
             } else {
                 hideMenuAndShowMessage();
             }
+            mMenuView.incrementTexMetricForAllTargets(TEX_METRIC_DISMISS);
         } else if (id == R.id.action_edit
                 && Flags.floatingMenuDragToEdit()) {
             mMenuView.gotoEditScreen();
+            mMenuView.incrementTexMetricForAllTargets(TEX_METRIC_EDIT);
         }
         mDismissView.hide();
         mDragToInteractView.hide();

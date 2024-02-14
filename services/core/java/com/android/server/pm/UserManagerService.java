@@ -1466,7 +1466,7 @@ public class UserManagerService extends IUserManager.Stub {
             if (userType != null && !userType.equals(profile.userType)) {
                 continue;
             }
-            if (excludeHidden && isProfileHidden(userId)) {
+            if (excludeHidden && isProfileHidden(profile.id)) {
                 continue;
             }
             result.add(profile.id);

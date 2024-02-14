@@ -48,8 +48,6 @@ fun CredentialsScreenChip(
         {
             Text(
                 text = label,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = if (secondaryLabel != null) 1 else 2,
             )

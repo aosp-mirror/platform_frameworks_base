@@ -1344,6 +1344,8 @@
         <!-- A color that passes accessibility guidelines for text/iconography when drawn on top
              of tertiary. @hide -->
         <attr name="materialColorTertiary" format="color"/>
+        <!-- The error color for the app, intended to draw attention to error conditions. @hide -->
+        <attr name="materialColorError" format="color"/>
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -3641,6 +3643,18 @@
              <p> The default value is 40dp for {@link android.widget.TextView} and
              {@link android.widget.EditText}, and 0dp for all other views. -->
         <attr name="handwritingBoundsOffsetBottom" format="dimension" />
+
+        <!-- Sets whether this view renders sensitive content. -->
+        <!-- @FlaggedApi("android.view.flags.sensitive_content_app_protection_api") -->
+        <attr name="contentSensitivity">
+            <!-- Let the Android System use its heuristics to determine if the view renders
+             sensitive content. -->
+            <enum name="auto" value="0" />
+            <!-- This view renders sensitive content. -->
+            <enum name="sensitive" value="0x1" />
+            <!-- This view doesn't render sensitive content. -->
+            <enum name="notSensitive" value="0x2" />
+        </attr>
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -3966,6 +3980,26 @@
             {@link android.inputmethodservice.InputMethodService#onFinishInput()}.
         -->
         <attr name="supportsStylusHandwriting" format="boolean" />
+        <!-- Specifies whether the IME supports connectionless stylus handwriting sessions. A
+             connectionless session differs from a regular session in that the IME does not use an
+             input connection to communicate with a text editor. Instead, the IME directly returns
+             recognised handwritten text via an {@link
+             android.inputmethodservice.InputMethodService} handwriting lifecycle API.
+
+             <p>If the IME supports connectionless sessions, apps or framework may start a
+             connectionless session when a stylus motion event sequence begins. {@link
+             android.inputmethodservice.InputMethodService#onStartConnectionlessStylusHandwriting}
+             is called. If the IME is ready for stylus input, it should return {code true} to start
+             the basic mode session. As in the regular session, the IME will receive stylus motion
+             events to the stylus handwriting window and should render ink to a view in this window.
+             When the user has stopped handwriting, the IME should end the session and deliver the
+             result by calling {@link
+             android.inputmethodservice.InputMethodService#finishConnectionlessStylusHandwriting}.
+
+             The default value is {code false}. If {code true}, {@link
+             android.R.attr#supportsStylusHandwriting} should also be {code true}.
+        -->
+        <attr name="supportsConnectionlessStylusHandwriting" format="boolean" />
         <!-- Class name of an activity that allows the user to modify the stylus handwriting
             settings for this service -->
         <attr name="stylusHandwritingSettingsActivity" format="string" />

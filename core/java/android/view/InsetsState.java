@@ -128,6 +128,8 @@ public class InsetsState implements Parcelable {
         final Rect relativeFrameMax = new Rect(frame);
         @InsetsType int forceConsumingTypes = 0;
         @InsetsType int suppressScrimTypes = 0;
+        final Rect[][] typeBoundingRectsMap = new Rect[Type.SIZE][];
+        final Rect[][] typeMaxBoundingRectsMap = new Rect[Type.SIZE][];
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
             final @InsetsType int type = source.getType();
@@ -141,7 +143,7 @@ public class InsetsState implements Parcelable {
             }
 
             processSource(source, relativeFrame, false /* ignoreVisibility */, typeInsetsMap,
-                    idSideMap, typeVisibilityMap);
+                    idSideMap, typeVisibilityMap, typeBoundingRectsMap);
 
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
@@ -154,7 +156,7 @@ public class InsetsState implements Parcelable {
                 }
                 processSource(ignoringVisibilitySource, relativeFrameMax,
                         true /* ignoreVisibility */, typeMaxInsetsMap, null /* idSideMap */,
-                        null /* typeVisibilityMap */);
+                        null /* typeVisibilityMap */, typeMaxBoundingRectsMap);
             }
         }
         final int softInputAdjustMode = legacySoftInputMode & SOFT_INPUT_MASK_ADJUST;
@@ -175,7 +177,8 @@ public class InsetsState implements Parcelable {
                 calculateRelativeRoundedCorners(frame),
                 calculateRelativePrivacyIndicatorBounds(frame),
                 calculateRelativeDisplayShape(frame),
-                compatInsetsTypes, (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
+                compatInsetsTypes, (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0,
+                typeBoundingRectsMap, typeMaxBoundingRectsMap, frame.width(), frame.height());
     }
 
     private DisplayCutout calculateRelativeCutout(Rect frame) {
@@ -328,12 +331,13 @@ public class InsetsState implements Parcelable {
 
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,
             Insets[] typeInsetsMap, @Nullable @InternalInsetsSide SparseIntArray idSideMap,
-            @Nullable boolean[] typeVisibilityMap) {
+            @Nullable boolean[] typeVisibilityMap, Rect[][] typeBoundingRectsMap) {
         Insets insets = source.calculateInsets(relativeFrame, ignoreVisibility);
+        final Rect[] boundingRects = source.calculateBoundingRects(relativeFrame, ignoreVisibility);
 
         final int type = source.getType();
         processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
-                insets, type);
+                typeBoundingRectsMap, insets, boundingRects, type);
 
         if (type == Type.MANDATORY_SYSTEM_GESTURES) {
             // Mandatory system gestures are also system gestures.
@@ -342,24 +346,25 @@ public class InsetsState implements Parcelable {
             //       ability to set systemGestureInsets() independently from
             //       mandatorySystemGestureInsets() in the Builder.
             processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
-                    insets, Type.SYSTEM_GESTURES);
+                    typeBoundingRectsMap, insets, boundingRects, Type.SYSTEM_GESTURES);
         }
         if (type == Type.CAPTION_BAR) {
             // Caption should also be gesture and tappable elements. This should not be needed when
             // the caption is added from the shell, as the shell can add other types at the same
             // time.
             processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
-                    insets, Type.SYSTEM_GESTURES);
+                    typeBoundingRectsMap, insets, boundingRects, Type.SYSTEM_GESTURES);
             processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
-                    insets, Type.MANDATORY_SYSTEM_GESTURES);
+                    typeBoundingRectsMap, insets, boundingRects, Type.MANDATORY_SYSTEM_GESTURES);
             processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
-                    insets, Type.TAPPABLE_ELEMENT);
+                    typeBoundingRectsMap, insets, boundingRects, Type.TAPPABLE_ELEMENT);
         }
     }
 
     private void processSourceAsPublicType(InsetsSource source, Insets[] typeInsetsMap,
             @InternalInsetsSide @Nullable SparseIntArray idSideMap,
-            @Nullable boolean[] typeVisibilityMap, Insets insets, int type) {
+            @Nullable boolean[] typeVisibilityMap, Rect[][] typeBoundingRectsMap,
+            Insets insets, Rect[] boundingRects, int type) {
         int index = indexOf(type);
 
         // Don't put Insets.NONE into typeInsetsMap. Otherwise, two WindowInsets can be considered
@@ -384,6 +389,22 @@ public class InsetsState implements Parcelable {
                 idSideMap.put(source.getId(), insetSide);
             }
         }
+
+        if (typeBoundingRectsMap != null && boundingRects.length > 0) {
+            final Rect[] existing = typeBoundingRectsMap[index];
+            if (existing == null) {
+                typeBoundingRectsMap[index] = boundingRects;
+            } else {
+                typeBoundingRectsMap[index] = concatenate(existing, boundingRects);
+            }
+        }
+    }
+
+    private static Rect[] concatenate(Rect[] a, Rect[] b) {
+        final Rect[] c = new Rect[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
     }
 
     /**

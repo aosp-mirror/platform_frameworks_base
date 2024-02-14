@@ -27,7 +27,10 @@ import com.android.systemui.coroutines.collectValues
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.scene.SceneContainerFrameworkModule
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.model.SceneDataSource
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
@@ -52,6 +55,7 @@ import kotlinx.coroutines.test.runTest
             TestMocksModule::class,
             CoroutineTestScopeModule::class,
             FakeSystemUiModule::class,
+            SceneContainerFrameworkModule::class,
         ]
 )
 interface SysUITestModule {
@@ -63,6 +67,7 @@ interface SysUITestModule {
     @Binds @Main fun bindMainResources(resources: Resources): Resources
     @Binds fun bindBroadcastDispatcher(fake: FakeBroadcastDispatcher): BroadcastDispatcher
     @Binds @SysUISingleton fun bindsShadeInteractor(sii: ShadeInteractorImpl): ShadeInteractor
+    @Binds fun bindSceneDataSource(delegator: SceneDataSourceDelegator): SceneDataSource
 
     companion object {
         @Provides

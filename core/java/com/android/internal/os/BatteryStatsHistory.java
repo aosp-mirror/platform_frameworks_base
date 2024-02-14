@@ -1146,7 +1146,7 @@ public class BatteryStatsHistory {
             mHistoryCur.batteryHealth = (byte) health;
             mHistoryCur.batteryPlugType = (byte) plugType;
             mHistoryCur.batteryTemperature = (short) temperature;
-            mHistoryCur.batteryVoltage = (char) voltageMv;
+            mHistoryCur.batteryVoltage = (short) voltageMv;
             mHistoryCur.batteryChargeUah = chargeUah;
         }
     }
@@ -2010,7 +2010,11 @@ public class BatteryStatsHistory {
         int bits = 0;
         bits = setBitField(bits, h.batteryLevel, 25, 0xfe000000 /* 7F << 25 */);
         bits = setBitField(bits, h.batteryTemperature, 15, 0x01ff8000 /* 3FF << 15 */);
-        bits = setBitField(bits, h.batteryVoltage, 1, 0x00007ffe /* 3FFF << 1 */);
+        short voltage = (short) h.batteryVoltage;
+        if (voltage == -1) {
+            voltage = 0x3FFF;
+        }
+        bits = setBitField(bits, voltage, 1, 0x00007ffe /* 3FFF << 1 */);
         return bits;
     }
 

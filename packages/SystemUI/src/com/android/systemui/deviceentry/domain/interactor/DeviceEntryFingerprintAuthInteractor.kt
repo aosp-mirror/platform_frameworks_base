@@ -18,8 +18,10 @@ package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterIsInstance
@@ -30,9 +32,6 @@ class DeviceEntryFingerprintAuthInteractor
 constructor(
     repository: DeviceEntryFingerprintAuthRepository,
 ) {
-    val fingerprintFailure: Flow<FailFingerprintAuthenticationStatus> =
-        repository.authenticationStatus.filterIsInstance<FailFingerprintAuthenticationStatus>()
-
     /** Whether fingerprint authentication is currently running or not */
     val isRunning: Flow<Boolean> = repository.isRunning
 
@@ -41,4 +40,11 @@ constructor(
         repository.authenticationStatus
 
     val isLockedOut: Flow<Boolean> = repository.isLockedOut
+
+    val fingerprintFailure: Flow<FailFingerprintAuthenticationStatus> =
+        repository.authenticationStatus.filterIsInstance<FailFingerprintAuthenticationStatus>()
+    val fingerprintError: Flow<ErrorFingerprintAuthenticationStatus> =
+        repository.authenticationStatus.filterIsInstance<ErrorFingerprintAuthenticationStatus>()
+    val fingerprintHelp: Flow<HelpFingerprintAuthenticationStatus> =
+        repository.authenticationStatus.filterIsInstance<HelpFingerprintAuthenticationStatus>()
 }

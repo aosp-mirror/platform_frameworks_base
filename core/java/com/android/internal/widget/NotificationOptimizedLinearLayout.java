@@ -53,6 +53,7 @@ import java.util.List;
  * - LinearLayout doesn't have <code>weightSum</code>.
  * - Horizontal LinearLayout's width should be measured EXACTLY.
  * - Horizontal LinearLayout shouldn't need baseLineAlignment.
+ * - Horizontal LinearLayout shouldn't have any child that has negative left or right margin.
  * - Vertical LinearLayout shouldn't have MATCH_PARENT children when it is not measured EXACTLY.
  *
  * @hide
@@ -88,7 +89,7 @@ public class NotificationOptimizedLinearLayout extends LinearLayout {
         final View weightedChildView = getSingleWeightedChild();
         mShouldUseOptimizedLayout =
                 isUseOptimizedLinearLayoutFlagEnabled() && weightedChildView != null
-                        && isLinearLayoutUsable(widthMeasureSpec, heightMeasureSpec);
+                        && isOptimizationPossible(widthMeasureSpec, heightMeasureSpec);
 
         if (mShouldUseOptimizedLayout) {
             onMeasureOptimized(weightedChildView, widthMeasureSpec, heightMeasureSpec);
@@ -118,7 +119,7 @@ public class NotificationOptimizedLinearLayout extends LinearLayout {
      * @param heightMeasureSpec The height measurement specification.
      * @return `true` if optimization is possible, `false` otherwise.
      */
-    private boolean isLinearLayoutUsable(int widthMeasureSpec, int heightMeasureSpec) {
+    private boolean isOptimizationPossible(int widthMeasureSpec, int heightMeasureSpec) {
         final boolean hasWeightSum = getWeightSum() > 0.0f;
         if (hasWeightSum) {
             logSkipOptimizedOnMeasure("Has weightSum.");
@@ -142,7 +143,33 @@ public class NotificationOptimizedLinearLayout extends LinearLayout {
             logSkipOptimizedOnMeasure("Need to apply baseline.");
             return false;
         }
+
+        if (requiresNegativeMarginHandlingForHorizontalLinearLayout()) {
+            logSkipOptimizedOnMeasure("Need to handle negative margins.");
+            return false;
+        }
         return true;
+    }
+
+    /**
+     * @return if the horizontal linearlayout requires to handle negative margins in its children.
+     * In that case, we can't use excessSpace because LinearLayout negative margin handling for
+     * excess space and WRAP_CONTENT is different.
+     */
+    private boolean requiresNegativeMarginHandlingForHorizontalLinearLayout() {
+        if (getOrientation() == VERTICAL) {
+            return false;
+        }
+
+        final List<View> activeChildren = getActiveChildren();
+        for (int i = 0; i < activeChildren.size(); i++) {
+            final View child = activeChildren.get(i);
+            final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
+            if (lp.leftMargin < 0 || lp.rightMargin < 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -337,94 +364,81 @@ public class NotificationOptimizedLinearLayout extends LinearLayout {
      */
     private void measureVerticalOptimized(@NonNull View weightedChildView, int widthMeasureSpec,
             int heightMeasureSpec) {
-        final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int totalLength = 0;
         int maxWidth = 0;
-        int usedHeight = 0;
-        final List<View> activeChildren = getActiveChildren();
-        final int activeChildCount = activeChildren.size();
+        final int availableHeight = MeasureSpec.getSize(heightMeasureSpec);
+        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
-        final boolean isContentFirstItem = !activeChildren.isEmpty() && activeChildren.get(0)
-                == weightedChildView;
-
-        final boolean isContentLastItem = !activeChildren.isEmpty() && activeChildren.get(
-                activeChildCount - 1) == weightedChildView;
-
-        final int horizontalPaddings = getPaddingLeft() + getPaddingRight();
-
-        // 1. Measure other child views.
-        for (int i = 0; i < activeChildCount; i++) {
-            final View child = activeChildren.get(i);
-            if (child == weightedChildView) {
+        // 1. Measure all unweighted children
+        for (int i = 0; i < getChildCount(); i++) {
+            final View child = getChildAt(i);
+            if (child == null || child.getVisibility() == GONE) {
                 continue;
             }
+
             final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
 
-            int requiredVerticalPadding = lp.topMargin + lp.bottomMargin;
-            if (!isContentFirstItem && i == 0) {
-                requiredVerticalPadding += getPaddingTop();
-            }
-            if (!isContentLastItem && i == activeChildCount - 1) {
-                requiredVerticalPadding += getPaddingBottom();
+            if (child == weightedChildView) {
+                // In excessMode, LinearLayout add  weighted child top and bottom margins to
+                // totalLength when their sum is positive.
+                if (lp.height == 0 && heightMode == MeasureSpec.EXACTLY) {
+                    totalLength = Math.max(totalLength, totalLength + lp.topMargin
+                            + lp.bottomMargin);
+                }
+                continue;
             }
 
-            child.measure(ViewGroup.getChildMeasureSpec(widthMeasureSpec,
-                            horizontalPaddings + lp.leftMargin + lp.rightMargin,
-                            child.getLayoutParams().width),
-                    ViewGroup.getChildMeasureSpec(heightMeasureSpec, requiredVerticalPadding,
-                            lp.height));
+            measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            // LinearLayout only adds measured children heights and its top and bottom margins
+            // to totalLength when their sum is positive.
+            totalLength = Math.max(totalLength,
+                    totalLength + child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
             maxWidth = Math.max(maxWidth,
                     child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
-            usedHeight += child.getMeasuredHeight() + requiredVerticalPadding;
         }
 
-        // measure content
+        // Add padding to totalLength that we are going to use for remaining space.
+        totalLength += mPaddingTop + mPaddingBottom;
+
+        // 2. generate measure spec for weightedChildView.
         final MarginLayoutParams lp = (MarginLayoutParams) weightedChildView.getLayoutParams();
+        // height should be AT_MOST for non EXACT cases.
+        final int childHeightMeasureMode =
+                heightMode == MeasureSpec.EXACTLY ? MeasureSpec.EXACTLY : MeasureSpec.AT_MOST;
+        final int childHeightMeasureSpec;
 
-        int usedSpace = usedHeight + lp.topMargin + lp.bottomMargin;
-        if (isContentFirstItem) {
-            usedSpace += getPaddingTop();
+        // In excess mode, LinearLayout measures weighted children with remaining space. Otherwise,
+        // it is measured with remaining space just like other children.
+        if (lp.height == 0 && heightMode == MeasureSpec.EXACTLY) {
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                    Math.max(0, availableHeight - totalLength), childHeightMeasureMode);
+        } else {
+            final int usedHeight = lp.topMargin + lp.bottomMargin + totalLength;
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                    Math.max(0, availableHeight - usedHeight), childHeightMeasureMode);
         }
-        if (isContentLastItem) {
-            usedSpace += getPaddingBottom();
-        }
+        final int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
+                mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin, lp.width);
 
-        final int availableWidth = MeasureSpec.getSize(widthMeasureSpec);
-        final int availableHeight = MeasureSpec.getSize(heightMeasureSpec);
-
-        final int childWidthMeasureSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec,
-                horizontalPaddings + lp.leftMargin + lp.rightMargin, lp.width);
-
-        // 2. Calculate remaining height for weightedChildView.
-        final int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                Math.max(0, availableHeight - usedSpace), MeasureSpec.AT_MOST);
-
-        // 3. Measure weightedChildView with the remaining remaining space.
+        // 3. Measure weightedChildView with the remaining space.
         weightedChildView.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+
+        totalLength = Math.max(totalLength,
+                totalLength + weightedChildView.getMeasuredHeight() + lp.topMargin
+                        + lp.bottomMargin);
+
         maxWidth = Math.max(maxWidth,
                 weightedChildView.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
 
-        final int totalUsedHeight = usedSpace + weightedChildView.getMeasuredHeight();
+        // Add padding to width
+        maxWidth += getPaddingLeft() + getPaddingRight();
 
-        final int measuredWidth;
-        if (widthMode == MeasureSpec.EXACTLY) {
-            measuredWidth = availableWidth;
-        } else {
-            measuredWidth = maxWidth + getPaddingStart() + getPaddingEnd();
-        }
-
-        final int measuredHeight;
-        if (heightMode == MeasureSpec.EXACTLY) {
-            measuredHeight = availableHeight;
-        } else {
-            measuredHeight = totalUsedHeight;
-        }
-
-        // 4. Set the container size
-        setMeasuredDimension(
-                resolveSize(Math.max(getSuggestedMinimumWidth(), measuredWidth),
-                        widthMeasureSpec),
-                Math.max(getSuggestedMinimumHeight(), measuredHeight));
+        // Resolve final dimensions
+        final int finalWidth = resolveSizeAndState(Math.max(maxWidth, getSuggestedMinimumWidth()),
+                widthMeasureSpec, 0);
+        final int finalHeight = resolveSizeAndState(
+                Math.max(totalLength, getSuggestedMinimumHeight()), heightMeasureSpec, 0);
+        setMeasuredDimension(finalWidth, finalHeight);
     }
 
     @NonNull

@@ -652,8 +652,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         private String getForceVoiceInteractionServicePackage(Resources res) {
-            String interactorPackage =
-                    res.getString(com.android.internal.R.string.config_forceVoiceInteractionServicePackage);
+            String interactorPackage = res.getString(
+                    com.android.internal.R.string.config_forceVoiceInteractionServicePackage);
             return TextUtils.isEmpty(interactorPackage) ? null : interactorPackage;
         }
 
@@ -1545,29 +1545,6 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        @android.annotation.EnforcePermission(
-                android.Manifest.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT)
-        public void resetHotwordTrainingDataEgressCountForTest() {
-            super.resetHotwordTrainingDataEgressCountForTest_enforcePermission();
-            synchronized (this) {
-                enforceIsCurrentVoiceInteractionService();
-
-                if (mImpl == null) {
-                    Slog.w(TAG, "resetHotwordTrainingDataEgressCountForTest without running"
-                            + " voice interaction service");
-                    return;
-                }
-                final long caller = Binder.clearCallingIdentity();
-                try {
-                    mImpl.resetHotwordTrainingDataEgressCountForTest();
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
-                }
-
-            }
-        }
-
-        @Override
         @EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
         public void setShouldReceiveSandboxedTrainingData(boolean allowed) {
             super.setShouldReceiveSandboxedTrainingData_enforcePermission();
@@ -1807,7 +1784,8 @@ public class VoiceInteractionManagerService extends SystemService {
                     enforceIsCurrentVoiceInteractionService();
 
                     if (callback == null || recognitionConfig == null || bcp47Locale == null) {
-                        throw new IllegalArgumentException("Illegal argument(s) in startRecognition");
+                        throw new IllegalArgumentException(
+                                "Illegal argument(s) in startRecognition");
                     }
                     if (runInBatterySaverMode) {
                         enforceCallingPermission(
@@ -2413,7 +2391,8 @@ public class VoiceInteractionManagerService extends SystemService {
                         UserHandle.USER_ALL);
             }
 
-            @Override public void onChange(boolean selfChange) {
+            @Override
+            public void onChange(boolean selfChange) {
                 synchronized (VoiceInteractionManagerServiceStub.this) {
                     switchImplementationIfNeededLocked(false);
                 }
@@ -2446,7 +2425,8 @@ public class VoiceInteractionManagerService extends SystemService {
         PackageMonitor mPackageMonitor = new PackageMonitor() {
 
             @Override
-            public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
+            public boolean onHandleForceStop(Intent intent, String[] packages, int uid,
+                    boolean doit) {
                 if (DEBUG) Slog.d(TAG, "onHandleForceStop uid=" + uid + " doit=" + doit);
 
                 int userHandle = UserHandle.getUserId(uid);

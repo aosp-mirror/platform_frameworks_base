@@ -25,7 +25,6 @@ import static android.util.RotationUtils.rotateBounds;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
@@ -112,7 +111,7 @@ import java.util.function.IntConsumer;
  * see also {@link PipMotionHelper}.
  */
 public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
-        DisplayController.OnDisplaysChangedListener, ShellTaskOrganizer.FocusListener {
+        DisplayController.OnDisplaysChangedListener {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
 
     /**
@@ -390,7 +389,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mMainExecutor.execute(() -> {
                 mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_PIP);
             });
-            mTaskOrganizer.addFocusListener(this);
             mPipTransitionController.setPipOrganizer(this);
             displayController.addDisplayWindowListener(this);
             pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
@@ -1023,11 +1021,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         applyNewPictureInPictureParams(newParams);
         mPictureInPictureParams = newParams;
-    }
-
-    @Override
-    public void onFocusTaskChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        mPipMenuController.onFocusTaskChanged(taskInfo);
     }
 
     @Override

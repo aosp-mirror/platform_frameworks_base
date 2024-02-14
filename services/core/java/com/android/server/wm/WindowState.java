@@ -2332,6 +2332,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dc.mTapExcludedWindows.remove(this);
         }
 
+        if (type == TYPE_PRESENTATION || type == TYPE_PRIVATE_PRESENTATION) {
+            mWmService.mDisplayManagerInternal.onPresentation(dc.getDisplay().getDisplayId(),
+                    /*isShown=*/ false);
+        }
+
         // Remove this window from mTapExcludeProvidingWindows. If it was not registered, this will
         // not do anything.
         dc.mTapExcludeProvidingWindows.remove(this);

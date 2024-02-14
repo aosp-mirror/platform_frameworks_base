@@ -72,6 +72,6 @@ data class FilterPolicyWithReason (
                     || reason.contains("is-enum")
                     || reason.contains("is-synthetic-method")
                     || reason.contains("special-class")
-                    || reason.contains("substitute-from")
+                    || reason.contains("substitute-to")
         }
 }

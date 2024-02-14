@@ -36,7 +36,6 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
@@ -66,7 +65,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             )
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeDeviceEntryRepository.setUnlocked(true)
-            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
+            sceneInteractor.changeScene(SceneKey.Lockscreen, "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
         }
@@ -79,7 +78,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pin
             )
             kosmos.fakeDeviceEntryRepository.setUnlocked(false)
-            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
+            sceneInteractor.changeScene(SceneKey.Lockscreen, "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
         }

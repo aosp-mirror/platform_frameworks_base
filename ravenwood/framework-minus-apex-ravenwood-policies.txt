@@ -89,6 +89,7 @@ class android.util.UtilConfig stubclass
 
 # Internals
 class com.android.internal.util.FileRotator stubclass
+class com.android.internal.util.FastXmlSerializer stubclass
 class com.android.internal.util.HexDump stubclass
 class com.android.internal.util.MessageUtils stubclass
 class com.android.internal.util.Preconditions stubclass

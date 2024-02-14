@@ -9778,6 +9778,13 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORTS_CALL_COMPOSER_BOOL = "supports_call_composer_bool";
 
     /**
+     * Indicates if the carrier supports a business call composer.
+     */
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_BUSINESS_CALL_COMPOSER)
+    public static final String KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL =
+            "supports_business_call_composer_bool";
+
+    /**
      * Indicates the carrier server url that serves the call composer picture.
      */
     public static final String KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING =
@@ -10861,6 +10868,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL, false);
         sDefaults.putString(KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING, "");
         sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
         sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, true);

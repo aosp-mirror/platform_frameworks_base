@@ -613,4 +613,6 @@ interface IDevicePolicyManager {
 
     void setContentProtectionPolicy(in ComponentName who, String callerPackageName, int policy);
     int getContentProtectionPolicy(in ComponentName who, String callerPackageName);
+
+    int[] getSubscriptionIds(String callerPackageName);
 }

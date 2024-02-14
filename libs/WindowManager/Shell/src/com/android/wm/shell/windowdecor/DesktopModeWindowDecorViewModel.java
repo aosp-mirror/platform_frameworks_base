@@ -211,6 +211,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mDisplayInsetsController.addInsetsChangedListener(mContext.getDisplayId(),
                 new DesktopModeOnInsetsChangedListener());
+        mDesktopTasksController.ifPresent(c -> c.setOnTaskResizeAnimationListener(
+                new DeskopModeOnTaskResizeAnimationListener()));
     }
 
     @Override
@@ -356,7 +358,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     // App sometimes draws before the insets from WindowDecoration#relayout have
                     // been added, so they must be added here
                     mWindowDecorByTaskId.get(mTaskId).addCaptionInset(wct);
-                    mDesktopTasksController.get().moveToDesktop(decoration, mTaskId, wct);
+                    mDesktopTasksController.get().moveToDesktop(mTaskId, wct);
                     closeOtherSplitTask(mTaskId);
                 }
                 decoration.closeHandleMenu();
@@ -387,25 +389,23 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     return;
                 }
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
-                mDesktopTasksController.ifPresent(c -> c.toggleDesktopTaskSize(
-                        taskInfo, decoration));
+                mDesktopTasksController.ifPresent(c -> c.toggleDesktopTaskSize(taskInfo));
                 decoration.closeHandleMenu();
             } else if (id == R.id.maximize_menu_maximize_button) {
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
-                mDesktopTasksController.ifPresent(c -> c.toggleDesktopTaskSize(
-                        taskInfo, mWindowDecorByTaskId.get(taskInfo.taskId)));
+                mDesktopTasksController.ifPresent(c -> c.toggleDesktopTaskSize(taskInfo));
                 decoration.closeHandleMenu();
                 decoration.closeMaximizeMenu();
             } else if (id == R.id.maximize_menu_snap_left_button) {
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
                 mDesktopTasksController.ifPresent(c -> c.snapToHalfScreen(
-                        taskInfo, mWindowDecorByTaskId.get(taskInfo.taskId), SnapPosition.LEFT));
+                        taskInfo, SnapPosition.LEFT));
                 decoration.closeHandleMenu();
                 decoration.closeMaximizeMenu();
             } else if (id == R.id.maximize_menu_snap_right_button) {
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
                 mDesktopTasksController.ifPresent(c -> c.snapToHalfScreen(
-                        taskInfo, mWindowDecorByTaskId.get(taskInfo.taskId), SnapPosition.RIGHT));
+                        taskInfo, SnapPosition.RIGHT));
                 decoration.closeHandleMenu();
                 decoration.closeMaximizeMenu();
             }
@@ -558,7 +558,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
             mDesktopTasksController.ifPresent(c -> {
                 final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
-                c.toggleDesktopTaskSize(decoration.mTaskInfo, decoration);
+                c.toggleDesktopTaskSize(decoration.mTaskInfo);
             });
             return true;
         }
@@ -761,7 +761,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                                     relevantDecor.mTaskInfo, relevantDecor.mTaskSurface);
                             mDesktopTasksController.ifPresent(
                                     c -> c.startDragToDesktop(relevantDecor.mTaskInfo,
-                                            mMoveToDesktopAnimator, relevantDecor));
+                                            mMoveToDesktopAnimator));
                         }
                     }
                     if (mMoveToDesktopAnimator != null) {
@@ -1019,6 +1019,34 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         pw.println(innerPrefix + "mEventReceiversByDisplay=" + mEventReceiversByDisplay);
         pw.println(innerPrefix + "mWindowDecorByTaskId=" + mWindowDecorByTaskId);
     }
+
+    private class DeskopModeOnTaskResizeAnimationListener
+            implements OnTaskResizeAnimationListener {
+        @Override
+        public void onAnimationStart(int taskId, Transaction t, Rect bounds) {
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+            if (decoration == null)  {
+                t.apply();
+                return;
+            }
+            decoration.showResizeVeil(t, bounds);
+        }
+
+        @Override
+        public void onBoundsChange(int taskId, Transaction t, Rect bounds) {
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+            if (decoration == null) return;
+            decoration.updateResizeVeil(t, bounds);
+        }
+
+        @Override
+        public void onAnimationEnd(int taskId) {
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+            if (decoration == null) return;
+            decoration.hideResizeVeil();
+        }
+    }
+
 
     private class DragStartListenerImpl
             implements DragPositioningCallbackUtility.DragStartListener {
