@@ -11941,7 +11941,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // style + self managed call - bypasses block
         when(mTelecomManager.isInSelfManagedCall(
-                r.getSbn().getPackageName(), r.getUser(), true)).thenReturn(true);
+                r.getSbn().getPackageName(), true)).thenReturn(true);
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
                 r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
 
@@ -12024,7 +12024,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // style + self managed call - bypasses block
         mService.clearNotifications();
         reset(mUsageStats);
-        when(mTelecomManager.isInSelfManagedCall(r.getSbn().getPackageName(), r.getUser(), true))
+        when(mTelecomManager.isInSelfManagedCall(r.getSbn().getPackageName(), true))
                 .thenReturn(true);
 
         mService.addEnqueuedNotification(r);
