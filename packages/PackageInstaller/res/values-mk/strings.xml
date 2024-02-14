@@ -113,8 +113,7 @@
     <string name="unarchive_body_text" msgid="8244155079861708964">"Апликацијава ќе почне да се презема во заднина"</string>
     <string name="restore" msgid="8460854736328970444">"Враќање"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Офлајн сте"</string>
-    <!-- no translation found for unarchive_error_offline_body (2256042209364094099) -->
-    <skip />
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"За да ја вратите апликацијава, проверете ја интернет-врската и обидете се повторно"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Нешто тргна наопаку"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Се јави проблем при обидот за враќање на апликацијава"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Нема доволно простор"</string>

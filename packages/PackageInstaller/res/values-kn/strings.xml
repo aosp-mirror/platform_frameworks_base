@@ -113,8 +113,7 @@
     <string name="unarchive_body_text" msgid="8244155079861708964">"ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಡೌನ್‌ಲೋಡ್ ಆಗಲು ಈ ಆ್ಯಪ್ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ"</string>
     <string name="restore" msgid="8460854736328970444">"ಮರುಸ್ಥಾಪಿಸಿ"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"ನೀವು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿರುವಿರಿ"</string>
-    <!-- no translation found for unarchive_error_offline_body (2256042209364094099) -->
-    <skip />
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಲು, ನಿಮ್ಮ ಇಂಟರ್ನೆಟ್ ಕನೆಕ್ಷನ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ ಹಾಗೂ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"ಏನೋ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಲು ಪ್ರಯತ್ನಿಸುವಾಗ ಸಮಸ್ಯೆ ಕಂಡುಬಂದಿದೆ"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"ಸಾಕಷ್ಟು ಸಂಗ್ರಹಣೆ ಇಲ್ಲ"</string>
