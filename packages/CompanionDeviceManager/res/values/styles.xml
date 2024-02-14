@@ -59,8 +59,10 @@
 
     <style name="VendorHelperBackButton"
            parent="@android:style/Widget.Material.Button.Borderless.Colored">
-        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginStart">12dp</item>
+        <item name="android:layout_marginEnd">12dp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@android:color/system_neutral1_900</item>
