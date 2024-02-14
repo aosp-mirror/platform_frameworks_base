@@ -30,15 +30,21 @@ object FoldableTestUtils {
         assumeTrue("Test should be launched on a foldable device",
             foldedDeviceStates.isNotEmpty())
 
-        val folded =
-            DeviceState(foldedDeviceStates.maxOrNull()!! /* identifier */,
-                "" /* name */,
-                emptySet() /* properties */)
-        val unfolded =
-            DeviceState(folded.identifier + 1 /* identifier */,
-                "" /* name */,
-                emptySet() /* properties */)
+        val folded = getDeviceState(
+            identifier = foldedDeviceStates.maxOrNull()!!
+        )
+        val unfolded = getDeviceState(
+            identifier = folded.identifier + 1
+        )
         return FoldableDeviceStates(folded = folded, unfolded = unfolded)
+    }
+
+    private fun getDeviceState(identifier: Int): DeviceState {
+        return DeviceState(
+            DeviceState.Configuration.Builder(
+                identifier, "" /* name */
+            ).build()
+        )
     }
 }
 

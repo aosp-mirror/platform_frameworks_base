@@ -57,6 +57,8 @@ import org.junit.runner.RunWith;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -69,17 +71,21 @@ import javax.annotation.Nullable;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public final class DeviceStateManagerServiceTest {
-    private static final DeviceState DEFAULT_DEVICE_STATE =
-            new DeviceState(0, "DEFAULT", 0 /* flags */);
-    private static final DeviceState OTHER_DEVICE_STATE =
-            new DeviceState(1, "OTHER", 0 /* flags */);
-    private static final DeviceState
-            DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
-            new DeviceState(2, "DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP",
-                    DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP /* flags */);
+    private static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(
+            new DeviceState.Configuration.Builder(0, "DEFAULT").build());
+    private static final DeviceState OTHER_DEVICE_STATE = new DeviceState(
+            new DeviceState.Configuration.Builder(1, "DEFAULT").build());
+    private static final DeviceState DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
+            new DeviceState(new DeviceState.Configuration.Builder(2,
+                    "DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP")
+                    .setSystemProperties(new HashSet<>(List.of(
+                            DeviceState.PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)))
+                    .build());
+
     // A device state that is not reported as being supported for the default test provider.
-    private static final DeviceState UNSUPPORTED_DEVICE_STATE =
-            new DeviceState(255, "UNSUPPORTED", 0 /* flags */);
+    private static final DeviceState UNSUPPORTED_DEVICE_STATE = new DeviceState(
+            new DeviceState.Configuration.Builder(255, "UNSUPPORTED")
+                    .build());
 
     private static final int[] SUPPORTED_DEVICE_STATE_IDENTIFIERS =
             new int[]{DEFAULT_DEVICE_STATE.getIdentifier(), OTHER_DEVICE_STATE.getIdentifier(),
@@ -201,9 +207,8 @@ public final class DeviceStateManagerServiceTest {
 
     @Test
     public void baseStateChanged_invalidState() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            mProvider.setState(INVALID_DEVICE_STATE);
-        });
+        assertThrows(IllegalArgumentException.class,
+                () -> mProvider.setState(INVALID_DEVICE_STATE));
 
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
@@ -636,7 +641,8 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 OTHER_DEVICE_STATE.getIdentifier());
 
-        mProvider.notifySupportedDeviceStates(new DeviceState[]{ DEFAULT_DEVICE_STATE });
+        mProvider.notifySupportedDeviceStates(
+                new DeviceState[]{DEFAULT_DEVICE_STATE});
         flushHandler();
 
         // Request is canceled because the state is no longer supported.
@@ -739,11 +745,12 @@ public final class DeviceStateManagerServiceTest {
 
     @Test
     public void requestBaseStateOverride_cancelledByBaseStateUpdate() throws RemoteException {
-        final DeviceState testDeviceState = new DeviceState(2, "TEST", 0);
+        final DeviceState testDeviceState = new DeviceState(new DeviceState.Configuration.Builder(2,
+                "TEST").build());
         TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
         mService.getBinderService().registerCallback(callback);
-        mProvider.notifySupportedDeviceStates(
-                new DeviceState[]{DEFAULT_DEVICE_STATE, OTHER_DEVICE_STATE, testDeviceState });
+        mProvider.notifySupportedDeviceStates(new DeviceState[]{DEFAULT_DEVICE_STATE,
+                OTHER_DEVICE_STATE, testDeviceState});
         flushHandler();
 
         final IBinder token = new Binder();
@@ -892,7 +899,8 @@ public final class DeviceStateManagerServiceTest {
      * @param isOverrideState whether a state override is active.
      */
     private void assertDeviceStateConditions(
-            DeviceState state, DeviceState baseState, boolean isOverrideState) {
+            DeviceState state, DeviceState baseState,
+            boolean isOverrideState) {
         assertEquals(mService.getCommittedState(), Optional.of(state));
         assertEquals(mService.getBaseState(), Optional.of(baseState));
         assertEquals(mSysPropSetter.getValue(),
@@ -970,10 +978,11 @@ public final class DeviceStateManagerServiceTest {
     }
 
     private static final class TestDeviceStateProvider implements DeviceStateProvider {
-        private DeviceState[] mSupportedDeviceStates = new DeviceState[]{
-                DEFAULT_DEVICE_STATE,
-                OTHER_DEVICE_STATE,
-                DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP};
+        private DeviceState[] mSupportedDeviceStates =
+                new DeviceState[]{
+                        DEFAULT_DEVICE_STATE,
+                        OTHER_DEVICE_STATE,
+                        DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP};
 
         @Nullable private final DeviceState mInitialState;
         private Listener mListener;

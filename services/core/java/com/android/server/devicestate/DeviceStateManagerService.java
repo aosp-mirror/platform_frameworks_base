@@ -19,7 +19,8 @@ package com.android.server.devicestate;
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.hardware.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
@@ -408,7 +409,7 @@ public final class DeviceStateManagerService extends SystemService {
             mDeviceStates.clear();
             for (int i = 0; i < supportedDeviceStates.length; i++) {
                 DeviceState state = supportedDeviceStates[i];
-                if (state.hasFlag(FLAG_CANCEL_OVERRIDE_REQUESTS)) {
+                if (state.hasProperty(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS)) {
                     hasTerminalDeviceState = true;
                 }
                 mDeviceStates.put(state.getIdentifier(), state);
@@ -453,7 +454,7 @@ public final class DeviceStateManagerService extends SystemService {
      * Returns the {@link DeviceState} with the supplied {@code identifier}, or {@code null} if
      * there is no device state with the identifier.
      */
-    @Nullable
+    @NonNull
     private Optional<DeviceState> getStateLocked(int identifier) {
         return Optional.ofNullable(mDeviceStates.get(identifier));
     }
@@ -468,7 +469,7 @@ public final class DeviceStateManagerService extends SystemService {
     private void setBaseState(int identifier) {
         synchronized (mLock) {
             final Optional<DeviceState> baseStateOptional = getStateLocked(identifier);
-            if (!baseStateOptional.isPresent()) {
+            if (baseStateOptional.isEmpty()) {
                 throw new IllegalArgumentException("Base state is not supported");
             }
 
@@ -484,7 +485,7 @@ public final class DeviceStateManagerService extends SystemService {
             }
             mBaseState = Optional.of(baseState);
 
-            if (baseState.hasFlag(FLAG_CANCEL_OVERRIDE_REQUESTS)) {
+            if (baseState.hasProperty(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS)) {
                 mOverrideRequestController.cancelOverrideRequest();
             }
             mOverrideRequestController.handleBaseStateChanged(identifier);
@@ -1023,7 +1024,7 @@ public final class DeviceStateManagerService extends SystemService {
     }
 
     private Set<Integer> readFoldedStates() {
-        Set<Integer> foldedStates = new HashSet();
+        Set<Integer> foldedStates = new HashSet<>();
         int[] mFoldedStatesArray = getContext().getResources().getIntArray(
                 com.android.internal.R.array.config_foldedDeviceStates);
         for (int i = 0; i < mFoldedStatesArray.length; i++) {
@@ -1338,7 +1339,7 @@ public final class DeviceStateManagerService extends SystemService {
         }
         int identifier = mActiveOverride.get().getRequestedStateIdentifier();
         DeviceState deviceState = mDeviceStates.get(identifier);
-        return deviceState.hasFlag(DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP);
+        return deviceState.hasProperty(PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP);
     }
 
     private class OverrideRequestScreenObserver implements
