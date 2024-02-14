@@ -21,7 +21,6 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
 
@@ -616,30 +615,6 @@ class TransitionController {
         return changeInfo != null && changeInfo.mRotation != targetRotation;
     }
 
-    /**
-     * @see #requestTransitionIfNeeded(int, int, WindowContainer, WindowContainer, RemoteTransition)
-     */
-    @Nullable
-    Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
-            @NonNull WindowContainer trigger) {
-        return requestTransitionIfNeeded(type, 0 /* flags */, trigger, trigger /* readyGroupRef */);
-    }
-
-    /**
-     * @see #requestTransitionIfNeeded(int, int, WindowContainer, WindowContainer, RemoteTransition)
-     */
-    @Nullable
-    Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
-            @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger,
-            @NonNull WindowContainer readyGroupRef) {
-        return requestTransitionIfNeeded(type, flags, trigger, readyGroupRef,
-                null /* remoteTransition */, null /* displayChange */);
-    }
-
-    private static boolean isExistenceType(@WindowManager.TransitionType int type) {
-        return type == TRANSIT_OPEN || type == TRANSIT_CLOSE;
-    }
-
     /** Sets the sync method for the display change. */
     private void setDisplaySyncMethod(@NonNull TransitionRequestInfo.DisplayChange displayChange,
             @NonNull DisplayContent displayContent) {
@@ -672,21 +647,17 @@ class TransitionController {
      * start it. Collection can start immediately.
      * @param trigger if non-null, this is the first container that will be collected
      * @param readyGroupRef Used to identify which ready-group this request is for.
-     * @return the created transition if created or null otherwise.
+     * @return the created transition if created or null otherwise (already global collecting)
      */
     @Nullable
     Transition requestTransitionIfNeeded(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags, @Nullable WindowContainer trigger,
-            @NonNull WindowContainer readyGroupRef, @Nullable RemoteTransition remoteTransition,
-            @Nullable TransitionRequestInfo.DisplayChange displayChange) {
+            @NonNull WindowContainer readyGroupRef) {
         if (mTransitionPlayer == null) {
             return null;
         }
         Transition newTransition = null;
         if (isCollecting()) {
-            if (displayChange != null) {
-                Slog.e(TAG, "Provided displayChange for a non-new request", new Throwable());
-            }
             // Make the collecting transition wait until this request is ready.
             mCollectingTransition.setReady(readyGroupRef, false);
             if ((flags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
@@ -695,18 +666,26 @@ class TransitionController {
             }
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
-                    trigger != null ? trigger.asTask() : null, remoteTransition, displayChange);
-            if (newTransition != null && displayChange != null && trigger != null
-                    && trigger.asDisplayContent() != null) {
-                setDisplaySyncMethod(displayChange, trigger.asDisplayContent());
-            }
+                    trigger != null ? trigger.asTask() : null, null /* remote */, null /* disp */);
         }
-        if (trigger != null) {
-            if (isExistenceType(type)) {
-                collectExistenceChange(trigger);
-            } else {
-                collect(trigger);
-            }
+        return newTransition;
+    }
+
+    /**
+     * Creates a transition and asks the TransitionPlayer (Shell) to
+     * start it. Collection can start immediately.
+     * @param trigger if non-null, this is the first container that will be collected
+     * @return the created transition if created or null otherwise.
+     */
+    @NonNull
+    Transition requestStartDisplayTransition(@WindowManager.TransitionType int type,
+            @WindowManager.TransitionFlags int flags, @NonNull DisplayContent trigger,
+            @Nullable RemoteTransition remoteTransition,
+            @Nullable TransitionRequestInfo.DisplayChange displayChange) {
+        final Transition newTransition = createTransition(type, flags);
+        requestStartTransition(newTransition, null /* trigger */, remoteTransition, displayChange);
+        if (displayChange != null) {
+            setDisplaySyncMethod(displayChange, trigger);
         }
         return newTransition;
     }
@@ -770,20 +749,10 @@ class TransitionController {
      * @return the new transition if it was created for this request, `null` otherwise.
      */
     Transition requestCloseTransitionIfNeeded(@NonNull WindowContainer<?> wc) {
-        if (mTransitionPlayer == null) return null;
-        Transition out = null;
-        if (wc.isVisibleRequested()) {
-            if (!isCollecting()) {
-                out = requestStartTransition(createTransition(TRANSIT_CLOSE, 0 /* flags */),
-                        wc.asTask(), null /* remoteTransition */, null /* displayChange */);
-            }
-            collectExistenceChange(wc);
-        } else {
-            // Removing a non-visible window doesn't require a transition, but if there is one
-            // collecting, this should be a member just in case.
-            collect(wc);
-        }
-        return out;
+        if (mTransitionPlayer == null || isCollecting()) return null;
+        if (!wc.isVisibleRequested()) return null;
+        return requestStartTransition(createTransition(TRANSIT_CLOSE, 0 /* flags */), wc.asTask(),
+                null /* remoteTransition */, null /* displayChange */);
     }
 
     /** @see Transition#collect */

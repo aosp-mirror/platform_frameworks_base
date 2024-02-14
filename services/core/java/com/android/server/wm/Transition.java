@@ -856,6 +856,19 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     /**
+     * Collects a window container which will be removed or invisible.
+     */
+    void collectClose(@NonNull WindowContainer<?> wc) {
+        if (wc.isVisibleRequested()) {
+            collectExistenceChange(wc);
+        } else {
+            // Removing a non-visible window doesn't require a transition, but if there is one
+            // collecting, this should be a member just in case.
+            collect(wc);
+        }
+    }
+
+    /**
      * @return {@code true} if `wc` is a participant or is a descendant of one.
      */
     boolean isInTransition(WindowContainer wc) {
