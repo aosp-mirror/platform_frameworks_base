@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"বন্ধ কৰক"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"বিস্তাৰ কৰক"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ছেটিং"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"বিভাজিত স্ক্ৰীন ম’ডলৈ যাওক"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"মেনু"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"চিত্ৰৰ ভিতৰৰ চিত্ৰ মেনু"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> চিত্ৰৰ ভিতৰৰ চিত্ৰত আছে"</string>
