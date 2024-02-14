@@ -19,10 +19,11 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
+import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
-import android.os.IBinder;
+import android.os.Looper;
 import android.window.InputTransferToken;
 import android.window.SurfaceSyncGroup;
 
@@ -180,32 +181,25 @@ public interface AttachedSurfaceControl {
     }
 
     /**
-     * Gets the token used for associating this {@link AttachedSurfaceControl} with
-     * {@link SurfaceControlViewHost} instances.
-     *
-     * <p>This token should be passed to {@link SurfaceControlViewHost}'s constructor.
-     * This token will be {@code null} if the window does not have an input channel.
-     *
-     * @return The SurfaceControlViewHost link token.
-     */
-    @Nullable
-    @FlaggedApi(Flags.FLAG_GET_HOST_TOKEN_API)
-    default IBinder getHostToken() {
-        throw new UnsupportedOperationException("The getHostToken needs to be "
-            + "implemented before making this call.");
-    }
-
-    /**
      * Gets the token used for associating this {@link AttachedSurfaceControl} with an embedded
      * {@link SurfaceControlViewHost} or {@link SurfaceControl}
      *
-     * @return The SurfaceControlViewHost link token.  This can return {@code null} if the
-     * {@link AttachedSurfaceControl} was created with no registered input
-     * @hide
+     * <p>This token should be passed to
+     * {@link SurfaceControlViewHost#SurfaceControlViewHost(Context, Display, InputTransferToken)}
+     * or
+     * {@link WindowManager#registerBatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Choreographer, SurfaceControlInputReceiver)} or
+     * {@link WindowManager#registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Looper, SurfaceControlInputReceiver)}
+     *
+     * @return The SurfaceControlViewHost link token.
+     * @throws IllegalStateException if the {@link AttachedSurfaceControl} was created with no
+     * registered input
      */
-    @Nullable
+    @NonNull
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
     default InputTransferToken getInputTransferToken() {
-        throw new UnsupportedOperationException("The getHostToken needs to be "
+        throw new UnsupportedOperationException("The getInputTransferToken needs to be "
                 + "implemented before making this call.");
     }
 
