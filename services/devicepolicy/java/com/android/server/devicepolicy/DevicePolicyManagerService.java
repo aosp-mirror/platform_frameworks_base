@@ -29,9 +29,11 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_RESTRICTIONS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIO_OUTPUT;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_AUTOFILL;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_BLOCK_UNINSTALL;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_BLUETOOTH;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CALLS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA_TOGGLE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CERTIFICATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION;
@@ -50,6 +52,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_TASK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE_TOGGLE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MOBILE_NETWORK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MODIFY_USERS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MTE;
@@ -22423,14 +22426,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return result;
         });
     }
-
-    // Permission that will need to be created in V.
-    private static final String MANAGE_DEVICE_POLICY_BLOCK_UNINSTALL =
-            "manage_device_policy_block_uninstall";
-    private static final String MANAGE_DEVICE_POLICY_CAMERA_TOGGLE =
-            "manage_device_policy_camera_toggle";
-    private static final String MANAGE_DEVICE_POLICY_MICROPHONE_TOGGLE =
-            "manage_device_policy_microphone_toggle";
 
     // DPC types
     private static final int NOT_A_DPC = -1;
