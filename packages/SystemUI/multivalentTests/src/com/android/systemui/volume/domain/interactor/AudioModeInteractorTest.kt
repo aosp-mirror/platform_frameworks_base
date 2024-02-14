@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.volume.domain.interactor
+package com.android.systemui.volume.domain.interactor
 
 import android.media.AudioManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.BaseTest
-import com.android.settingslib.volume.data.repository.FakeAudioRepository
+import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
+import com.android.systemui.SysuiTestCase
+import com.android.systemui.volume.data.repository.FakeAudioRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -34,7 +35,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-class AudioModeInteractorTest : BaseTest() {
+class AudioModeInteractorTest : SysuiTestCase() {
 
     private val testScope = TestScope()
     private val fakeAudioRepository = FakeAudioRepository()
