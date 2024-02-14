@@ -16,13 +16,24 @@
 
 package android.media.tv;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.media.tv.flags.Flags;
+import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/** @hide */
-public class SignalingDataResponse extends BroadcastInfoResponse implements Parcelable {
+
+/**
+ * A response for the signaling data from the broadcast signal.
+ *
+ * @see SignalingDataRequest
+ * @see SignalingDataInfo
+ */
+@FlaggedApi(Flags.FLAG_TIAF_V_APIS)
+public final class SignalingDataResponse extends BroadcastInfoResponse implements Parcelable {
     public static final @NonNull Parcelable.Creator<SignalingDataResponse> CREATOR =
             new Parcelable.Creator<SignalingDataResponse>() {
                 @Override
@@ -37,34 +48,44 @@ public class SignalingDataResponse extends BroadcastInfoResponse implements Parc
             };
     private static final @TvInputManager.BroadcastInfoType int RESPONSE_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_SIGNALING_DATA;
-    private final @NonNull int[] mTableIds;
-    private final int mMetadataTypes;
+    private final @NonNull List<String> mSignalingDataTypes;
     private final @NonNull List<SignalingDataInfo> mSignalingDataInfoList;
+
+    static SignalingDataResponse createFromParcelBody(Parcel in) {
+        return new SignalingDataResponse(in);
+    }
 
     public SignalingDataResponse(
             int requestId,
             int sequence,
             @ResponseResult int responseResult,
-            @NonNull int[] tableIds,
-            int metadataTypes,
+            @NonNull List<String> signalingDataTypes,
             @NonNull List<SignalingDataInfo> signalingDataInfoList) {
         super(RESPONSE_TYPE, requestId, sequence, responseResult);
-        this.mTableIds = tableIds;
-        com.android.internal.util.AnnotationValidations.validate(NonNull.class, null, mTableIds);
-        this.mMetadataTypes = metadataTypes;
+        mSignalingDataTypes = signalingDataTypes;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSignalingDataTypes);
         this.mSignalingDataInfoList = signalingDataInfoList;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSignalingDataInfoList);
     }
 
-    public @NonNull int[] getTableIds() {
-        return mTableIds;
+    /**
+     * Gets a list of types of metadata that are contained in this response.
+     *
+     * <p> A list of types available are defined in {@link SignalingDataRequest}.
+     * For more information about these types, see A/344:2023-5 9.2.10 - Query Signaling Data API.
+     *
+     * @return A list of types of metadata that are contained in this response.
+     */
+    public @NonNull List<String> getSignalingDataTypes() {
+        return mSignalingDataTypes;
     }
 
-    public int getMetadataTypes() {
-        return mMetadataTypes;
-    }
-
+    /**
+     * Gets a list of {@link SignalingDataInfo} contained in this response.
+     * @return A list of {@link SignalingDataInfo} contained in this response.
+     */
     public @NonNull List<SignalingDataInfo> getSignalingDataInfoList() {
         return mSignalingDataInfoList;
     }
@@ -72,8 +93,7 @@ public class SignalingDataResponse extends BroadcastInfoResponse implements Parc
     @Override
     public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeIntArray(mTableIds);
-        dest.writeInt(mMetadataTypes);
+        dest.writeStringList(mSignalingDataTypes);
         dest.writeParcelableList(mSignalingDataInfoList, flags);
     }
 
@@ -85,14 +105,14 @@ public class SignalingDataResponse extends BroadcastInfoResponse implements Parc
     SignalingDataResponse(@NonNull android.os.Parcel in) {
         super(RESPONSE_TYPE, in);
 
-        int[] tableIds = in.createIntArray();
-        int metadataTypes = in.readInt();
+        List<String> types = new ArrayList<String>();
+        in.readStringList(types);
         List<SignalingDataInfo> signalingDataInfoList = new java.util.ArrayList<>();
         in.readParcelableList(signalingDataInfoList, SignalingDataInfo.class.getClassLoader());
 
-        this.mTableIds = tableIds;
-        com.android.internal.util.AnnotationValidations.validate(NonNull.class, null, mTableIds);
-        this.mMetadataTypes = metadataTypes;
+        this.mSignalingDataTypes = types;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSignalingDataTypes);
         this.mSignalingDataInfoList = signalingDataInfoList;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSignalingDataInfoList);
