@@ -153,26 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>  <xliff:g id="TIME_DELAY">{2}</xliff:g> секундтан кейін"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Басқа нөмірге бағытталмады"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: қайта бағытталған жоқ."</string>
-    <!-- no translation found for scCellularNetworkSecurityTitle (90330018476923559) -->
-    <skip />
-    <!-- no translation found for scCellularNetworkSecuritySummary (8659128412709908263) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueTitle (3737384845335568193) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummary (3870743771498510600) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedTitle (8426373579673205292) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedSummary (6437468449554283998) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (2069674849204163569) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (3577092996366374833) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueActionSettings (8378372959891478470) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueActionLearnMore (7896642417214757769) -->
-    <skip />
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Ұялы желі қауіпсіздігі"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Параметрлерді қарап шығу"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Құрылғы идентификаторы пайдаланылды"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Желі (<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> байланысы) құрылғының бірегей идентификаторын (IMSI) <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> және <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> аралығында <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> рет жазып алды."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"\"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\" желісіне қосылу шифрланды"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Қазір қауіпсіздеу ұялы желіге қосылып тұрсыз."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"\"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>\" желісіне қосылу шифрланбаған"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Шифрланбаған ұялы желіге қосылғансыз. Қоңырауларды, хабарлар мен деректерді басқалар қолға түсіруі мүмкін."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Ұялы желі қауіпсіздігінің параметрлері"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Толық ақпарат"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Функция коды толық."</string>
     <string name="fcError" msgid="5325116502080221346">"Байланыс мәселесі немесе функция коды жарамсыз."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Жарайды"</string>
@@ -390,10 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Ұялы таратылым хабарлары алынғаннан кейін, олардың бағытын өзгерту үшін қолданбаға ұялы таратылым модулімен байланыстыруға мүмкіндік береді. Ұялы таратылым ескертулері кей аймақтарда төтенше жағдайлар туралы хабарлау үшін беріледі. Төтенше жағдай туралы ұялы таратылым хабары алынғаннан кейін, зиянды қолданбалар құрылғы жұмысына кедергі келтіруі мүмкін."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Қазіргі қоңырауларды басқару"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Қолданбаға құрылғыдағы қазіргі қоңыраулар туралы мәліметтерді көруге және басқаруға мүмкіндік береді."</string>
-    <!-- no translation found for permlab_accessLastKnownCellId (7638226620825665130) -->
-    <skip />
-    <!-- no translation found for permdesc_accessLastKnownCellId (6664621339249308857) -->
-    <skip />
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Белгілі соңғы ұялы байланыс идентификаторын пайдалану."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Қолданба телефония қызметі берген белгілі соңғы ұялы байланыс идентификаторын пайдалануға рұқсат алады."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"ұялы хабар тарату хабарларын оқу"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Қолданбаға ұялы таратылым хабарларын оқу мүмкіндігін береді. Ұялы таратылым дабылдары кейбір аймақтарда төтенше жағдай туралы ескерту үшін қолданылады. Төтенше ұялы хабарлар келгенде залалды қолданбалар құрылғының жұмысына кедергі жасауы мүмкін."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"жазылған ағындарды оқу"</string>
@@ -565,10 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Қолданбаға телефонның инфрақызыл қабылдағышын қолдану мүмкіндігін береді."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"артқы фонды орнату"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Қолданбаға жүйелік экранның артқы фонын орнатуға рұқсат береді."</string>
-    <!-- no translation found for permlab_accessHiddenProfile (8607094418491556823) -->
-    <skip />
-    <!-- no translation found for permdesc_accessHiddenProfile (1543153202481009676) -->
-    <skip />
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Жасырын профильдерге кіру"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Қолданбаға жасырын профильдерге кіру рұқсатын береді."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"артқы фон өлшемін реттеу"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Қолданбаға жүйелік экранның артқы фонының өлшемі туралы кеңестерді орнатуға рұқсат береді."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"уақыт аймағын реттеу"</string>
@@ -680,18 +666,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Саусақ ізі аутентификацияланды"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Бет танылды"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Бет танылды, \"Растау\" түймесін басыңыз"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Саусақ ізі жабдығы қолжетімді емес."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Саусақ ізін орнату мүмкін емес."</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Саусақ ізін реттеу уақыты өтіп кетті. Қайталап көріңіз."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Саусақ ізі операциясынан бас тартылған."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Пайдаланушы саусақ ізі операциясынан бас тартты."</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Тым көп әрекет жасалды. Орнына экран құлпын пайдаланыңыз."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Тым көп әрекет жасалды. Орнына экран құлпын пайдаланыңыз."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Саусақ ізін өңдеу мүмкін емес. Қайталап көріңіз."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Саусақ іздері тіркелмеген."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Бұл құрылғыда саусақ ізін оқу сканері жоқ."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчик уақытша өшірулі."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Саусақ ізін оқу сканерін пайдалану мүмкін емес. Жөндеу қызметіне барыңыз."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Бұл құрылғыда саусақ ізін оқу сканері жоқ"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Қуат түймесі басулы."</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>-саусақ"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Саусақ ізін пайдалану"</string>
@@ -837,10 +829,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Қолданбаға жиілігі 200 Гц-тен жоғары датчик деректерінің үлгісін таңдауға рұқсат береді."</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"қолданбаны автоматты түрде жаңарту"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Бұған дейін орнатылған қолданбаның автоматты түрде жаңартылуына мүмкіндік береді."</string>
-    <!-- no translation found for permlab_writeVerificationStateE2eeContactKeys (3990742344778360457) -->
-    <skip />
-    <!-- no translation found for permdesc_writeVerificationStateE2eeContactKeys (8453156829747427041) -->
-    <skip />
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"тура шифрлаумен қорғалған және басқа қолданбаларға тиесілі контакт кілттерін тексеру күйлерін жаңарту"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Қолданбаға тура шифрлаумен қорғалған және басқа қолданбаларға тиесілі контакт кілттерін тексеру күйлерін жаңартуға рұқсат береді."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Құпия сөз ережелерін тағайындау"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Экран құлпын ашу әрекеттерін бақылау"</string>
@@ -2402,12 +2392,8 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Сынақ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Жалпы"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
-    <!-- no translation found for satellite_notification_title (4026338973463121526) -->
-    <skip />
-    <!-- no translation found for satellite_notification_summary (5207364139430767162) -->
-    <skip />
-    <!-- no translation found for satellite_notification_open_message (4149234979688273729) -->
-    <skip />
-    <!-- no translation found for satellite_notification_how_it_works (3132069321977520519) -->
-    <skip />
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Жерсерік қызметіне автоматты түрде қосылды"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Мобильдік не Wi-Fi желісіне қосылмастан хабар жібере аласыз және ала аласыз."</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages қолданбасын ашу"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Бұл қалай орындалады?"</string>
 </resources>
