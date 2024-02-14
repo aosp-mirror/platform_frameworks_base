@@ -79,7 +79,45 @@ func registerBuildComponents(ctx android.RegistrationContext) {
 
 var PrepareForCombinedApisTest = android.FixtureRegisterWithContext(registerBuildComponents)
 
+func (a *CombinedApis) apiFingerprintStubDeps() []string {
+	ret := []string{}
+	ret = append(
+		ret,
+		transformArray(a.properties.Bootclasspath, "", ".stubs")...,
+	)
+	ret = append(
+		ret,
+		transformArray(a.properties.Bootclasspath, "", ".stubs.system")...,
+	)
+	ret = append(
+		ret,
+		transformArray(a.properties.Bootclasspath, "", ".stubs.module_lib")...,
+	)
+	ret = append(
+		ret,
+		transformArray(a.properties.System_server_classpath, "", ".stubs.system_server")...,
+	)
+	return ret
+}
+
+func (a *CombinedApis) DepsMutator(ctx android.BottomUpMutatorContext) {
+	ctx.AddDependency(ctx.Module(), nil, a.apiFingerprintStubDeps()...)
+}
+
 func (a *CombinedApis) GenerateAndroidBuildActions(ctx android.ModuleContext) {
+	ctx.WalkDeps(func(child, parent android.Module) bool {
+		if _, ok := child.(java.AndroidLibraryDependency); ok && child.Name() != "framework-res" {
+			// Stubs of BCP and SSCP libraries should not have any dependencies on apps
+			// This check ensures that we do not run into circular dependencies when UNBUNDLED_BUILD_TARGET_SDK_WITH_API_FINGERPRINT=true
+			ctx.ModuleErrorf(
+				"Module %s is not a valid dependency of the stub library %s\n."+
+					"If this dependency has been added via `libs` of java_sdk_library, please move it to `impl_only_libs`\n",
+				child.Name(), parent.Name())
+			return false // error detected
+		}
+		return true
+	})
+
 }
 
 type genruleProps struct {
@@ -130,7 +168,7 @@ type MergedTxtDefinition struct {
 	Scope string
 }
 
-func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
+func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition, stubsTypeSuffix string, doDist bool) {
 	metalavaCmd := "$(location metalava)"
 	// Silence reflection warnings. See b/168689341
 	metalavaCmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
@@ -140,7 +178,7 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	if txt.Scope != "public" {
 		filename = txt.Scope + "-" + filename
 	}
-	moduleName := ctx.ModuleName() + "-" + filename
+	moduleName := ctx.ModuleName() + stubsTypeSuffix + filename
 
 	props := genruleProps{}
 	props.Name = proptools.StringPtr(moduleName)
@@ -148,17 +186,19 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	props.Out = []string{filename}
 	props.Cmd = proptools.StringPtr(metalavaCmd + "$(in) --out $(out)")
 	props.Srcs = append([]string{txt.BaseTxt}, createSrcs(txt.Modules, txt.ModuleTag)...)
-	props.Dists = []android.Dist{
-		{
-			Targets: []string{"droidcore"},
-			Dir:     proptools.StringPtr("api"),
-			Dest:    proptools.StringPtr(filename),
-		},
-		{
-			Targets: []string{"api_txt", "sdk"},
-			Dir:     proptools.StringPtr("apistubs/android/" + txt.Scope + "/api"),
-			Dest:    proptools.StringPtr(txt.DistFilename),
-		},
+	if doDist {
+		props.Dists = []android.Dist{
+			{
+				Targets: []string{"droidcore"},
+				Dir:     proptools.StringPtr("api"),
+				Dest:    proptools.StringPtr(filename),
+			},
+			{
+				Targets: []string{"api_txt", "sdk"},
+				Dir:     proptools.StringPtr("apistubs/android/" + txt.Scope + "/api"),
+				Dest:    proptools.StringPtr(txt.DistFilename),
+			},
+		}
 	}
 	props.Visibility = []string{"//visibility:public"}
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
@@ -343,7 +383,7 @@ func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules []str
 	ctx.CreateModule(android.FileGroupFactory, &props)
 }
 
-func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
+func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string, baseTxtModulePrefix, stubsTypeSuffix string, doDist bool) {
 	var textFiles []MergedTxtDefinition
 
 	tagSuffix := []string{".api.txt}", ".removed-api.txt}"}
@@ -352,7 +392,7 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename:  f,
 			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-" + f,
+			BaseTxt:      ":" + baseTxtModulePrefix + f,
 			Modules:      bootclasspath,
 			ModuleTag:    "{.public" + tagSuffix[i],
 			Scope:        "public",
@@ -360,7 +400,7 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename:  f,
 			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-system-" + f,
+			BaseTxt:      ":" + baseTxtModulePrefix + "system-" + f,
 			Modules:      bootclasspath,
 			ModuleTag:    "{.system" + tagSuffix[i],
 			Scope:        "system",
@@ -368,7 +408,7 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename:  f,
 			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-module-lib-" + f,
+			BaseTxt:      ":" + baseTxtModulePrefix + "module-lib-" + f,
 			Modules:      bootclasspath,
 			ModuleTag:    "{.module-lib" + tagSuffix[i],
 			Scope:        "module-lib",
@@ -376,14 +416,14 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename:  f,
 			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-system-server-" + f,
+			BaseTxt:      ":" + baseTxtModulePrefix + "system-server-" + f,
 			Modules:      system_server_classpath,
 			ModuleTag:    "{.system-server" + tagSuffix[i],
 			Scope:        "system-server",
 		})
 	}
 	for _, txt := range textFiles {
-		createMergedTxt(ctx, txt)
+		createMergedTxt(ctx, txt, stubsTypeSuffix, doDist)
 	}
 }
 
@@ -465,7 +505,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 		bootclasspath = append(bootclasspath, a.properties.Conditional_bootclasspath...)
 		sort.Strings(bootclasspath)
 	}
-	createMergedTxts(ctx, bootclasspath, system_server_classpath)
+	createMergedTxts(ctx, bootclasspath, system_server_classpath, "non-updatable-", "-", false)
+	createMergedTxts(ctx, bootclasspath, system_server_classpath, "non-updatable-exportable-", "-exportable-", true)
 
 	createMergedPublicStubs(ctx, bootclasspath)
 	createMergedSystemStubs(ctx, bootclasspath)
