@@ -1785,7 +1785,11 @@ public class UserManager {
     /**
      * Specifies whether the user is allowed to modify default apps in settings.
      *
-     * <p>This restriction can be set by device or profile owner.
+     * <p>A device owner and a profile owner can set this restriction. When it is set by a
+     * device owner, it applies globally - i.e., modifying of default apps in Settings for all
+     * users is disallowed. When it is set by a profile owner on the primary user or by a profile
+     * owner of an organization-owned managed profile on the parent profile, modifying of
+     * default apps in Settings for the primary user is disallowed.
      *
      * <p>The default value is <code>false</code>.
      *
