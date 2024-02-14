@@ -22,6 +22,8 @@ import static android.app.Notification.FLAG_GROUP_SUMMARY;
 import static android.app.Notification.FLAG_LOCAL_ONLY;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
+import static android.app.Notification.VISIBILITY_PRIVATE;
+import static android.app.Notification.VISIBILITY_PUBLIC;
 
 import android.annotation.NonNull;
 import android.app.Notification;
@@ -145,7 +147,8 @@ public class GroupHelper {
                     mUngroupedNotifications.getOrDefault(key, new ArrayMap<>());
 
             NotificationAttributes attr = new NotificationAttributes(sbn.getNotification().flags,
-                    sbn.getNotification().getSmallIcon(), sbn.getNotification().color);
+                    sbn.getNotification().getSmallIcon(), sbn.getNotification().color,
+                    sbn.getNotification().visibility);
             children.put(sbn.getKey(), attr);
             mUngroupedNotifications.put(key, children);
 
@@ -158,25 +161,29 @@ public class GroupHelper {
         if (notificationsToGroup.size() > 0) {
             if (autogroupSummaryExists) {
                 NotificationAttributes attr = new NotificationAttributes(flags,
-                        sbn.getNotification().getSmallIcon(), sbn.getNotification().color);
+                        sbn.getNotification().getSmallIcon(), sbn.getNotification().color,
+                        VISIBILITY_PRIVATE);
                 if (Flags.autogroupSummaryIconUpdate()) {
-                    attr = updateAutobundledSummaryIcon(sbn.getPackageName(), childrenAttr, attr);
+                    attr = updateAutobundledSummaryAttributes(sbn.getPackageName(), childrenAttr,
+                            attr);
                 }
 
                 mCallback.updateAutogroupSummary(sbn.getUserId(), sbn.getPackageName(), attr);
             } else {
                 Icon summaryIcon = sbn.getNotification().getSmallIcon();
                 int summaryIconColor = sbn.getNotification().color;
+                int summaryVisibility = VISIBILITY_PRIVATE;
                 if (Flags.autogroupSummaryIconUpdate()) {
-                    // Calculate the initial summary icon and icon color
-                    NotificationAttributes iconAttr = getAutobundledSummaryIconAndColor(
+                    // Calculate the initial summary icon, icon color and visibility
+                    NotificationAttributes iconAttr = getAutobundledSummaryAttributes(
                             sbn.getPackageName(), childrenAttr);
                     summaryIcon = iconAttr.icon;
                     summaryIconColor = iconAttr.iconColor;
+                    summaryVisibility = iconAttr.visibility;
                 }
 
                 NotificationAttributes attr = new NotificationAttributes(flags, summaryIcon,
-                        summaryIconColor);
+                        summaryIconColor, summaryVisibility);
                 mCallback.addAutoGroupSummary(sbn.getUserId(), sbn.getPackageName(), sbn.getKey(),
                         attr);
             }
@@ -238,18 +245,19 @@ public class GroupHelper {
             mCallback.removeAutoGroupSummary(userId, sbn.getPackageName());
         } else {
             NotificationAttributes attr = new NotificationAttributes(summaryFlags,
-                    sbn.getNotification().getSmallIcon(), sbn.getNotification().color);
-            boolean iconUpdated = false;
+                    sbn.getNotification().getSmallIcon(), sbn.getNotification().color,
+                    VISIBILITY_PRIVATE);
+            boolean attributesUpdated = false;
             if (Flags.autogroupSummaryIconUpdate()) {
-                NotificationAttributes newAttr = updateAutobundledSummaryIcon(sbn.getPackageName(),
-                        childrenAttrs, attr);
+                NotificationAttributes newAttr = updateAutobundledSummaryAttributes(
+                        sbn.getPackageName(), childrenAttrs, attr);
                 if (!newAttr.equals(attr)) {
-                    iconUpdated = true;
+                    attributesUpdated = true;
                     attr = newAttr;
                 }
             }
 
-            if (updateSummaryFlags || iconUpdated) {
+            if (updateSummaryFlags || attributesUpdated) {
                 mCallback.updateAutogroupSummary(userId, sbn.getPackageName(), attr);
             }
         }
@@ -268,12 +276,13 @@ public class GroupHelper {
         }
     }
 
-    NotificationAttributes getAutobundledSummaryIconAndColor(@NonNull String packageName,
+    NotificationAttributes getAutobundledSummaryAttributes(@NonNull String packageName,
             @NonNull List<NotificationAttributes> childrenAttr) {
         Icon newIcon = null;
         boolean childrenHaveSameIcon = true;
         int newColor = Notification.COLOR_INVALID;
         boolean childrenHaveSameColor = true;
+        int newVisibility = VISIBILITY_PRIVATE;
 
         // Both the icon drawable and the icon background color are updated according to this rule:
         // - if all child icons are identical => use the common icon
@@ -296,6 +305,10 @@ public class GroupHelper {
                     childrenHaveSameColor = false;
                 }
             }
+            // Check for visibility. If at least one child is public, then set to public
+            if (state.visibility == VISIBILITY_PUBLIC) {
+                newVisibility = VISIBILITY_PUBLIC;
+            }
         }
         if (!childrenHaveSameIcon) {
             newIcon = getMonochromeAppIcon(packageName);
@@ -304,13 +317,13 @@ public class GroupHelper {
             newColor = COLOR_DEFAULT;
         }
 
-        return new NotificationAttributes(0, newIcon, newColor);
+        return new NotificationAttributes(0, newIcon, newColor, newVisibility);
     }
 
-    NotificationAttributes updateAutobundledSummaryIcon(@NonNull String packageName,
+    NotificationAttributes updateAutobundledSummaryAttributes(@NonNull String packageName,
             @NonNull List<NotificationAttributes> childrenAttr,
             @NonNull NotificationAttributes oldAttr) {
-        NotificationAttributes newAttr = getAutobundledSummaryIconAndColor(packageName,
+        NotificationAttributes newAttr = getAutobundledSummaryAttributes(packageName,
                 childrenAttr);
         Icon newIcon = newAttr.icon;
         int newColor = newAttr.iconColor;
@@ -321,7 +334,7 @@ public class GroupHelper {
             newColor = oldAttr.iconColor;
         }
 
-        return new NotificationAttributes(oldAttr.flags, newIcon, newColor);
+        return new NotificationAttributes(oldAttr.flags, newIcon, newColor, newAttr.visibility);
     }
 
     /**
@@ -358,17 +371,20 @@ public class GroupHelper {
         public final int flags;
         public final int iconColor;
         public final Icon icon;
+        public final int visibility;
 
-        public NotificationAttributes(int flags, Icon icon, int iconColor) {
+        public NotificationAttributes(int flags, Icon icon, int iconColor, int visibility) {
             this.flags = flags;
             this.icon = icon;
             this.iconColor = iconColor;
+            this.visibility = visibility;
         }
 
         public NotificationAttributes(@NonNull NotificationAttributes attr) {
             this.flags = attr.flags;
             this.icon = attr.icon;
             this.iconColor = attr.iconColor;
+            this.visibility = attr.visibility;
         }
 
         @Override
@@ -379,12 +395,13 @@ public class GroupHelper {
             if (!(o instanceof NotificationAttributes that)) {
                 return false;
             }
-            return flags == that.flags && iconColor == that.iconColor && icon.sameAs(that.icon);
+            return flags == that.flags && iconColor == that.iconColor && icon.sameAs(that.icon)
+                    && visibility == that.visibility;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(flags, iconColor, icon);
+            return Objects.hash(flags, iconColor, icon, visibility);
         }
     }
 
