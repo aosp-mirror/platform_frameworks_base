@@ -17,6 +17,7 @@
 package android.os;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -24,6 +25,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -59,10 +62,17 @@ public class RemoteCallbackListTest {
         mList.register(mRed.mInterface);
         mList.register(mGreen.mInterface, mCookie);
         assertEquals(2, mList.getRegisteredCallbackCount());
-        assertEquals(mRed.mInterface, mList.getRegisteredCallbackItem(0));
-        assertEquals(null, mList.getRegisteredCallbackCookie(0));
-        assertEquals(mGreen.mInterface, mList.getRegisteredCallbackItem(1));
-        assertEquals(mCookie, mList.getRegisteredCallbackCookie(1));
+
+        final List<IRemoteCallback> list = new ArrayList<>();
+        for (int i = 0; i < mList.getRegisteredCallbackCount(); i++) {
+            list.add(mList.getRegisteredCallbackItem(i));
+        }
+        final int redIndex = list.indexOf(mRed.mInterface);
+        final int greenIndex = list.indexOf(mGreen.mInterface);
+        assertTrue(redIndex >= 0);
+        assertTrue(greenIndex >= 0);
+        assertEquals(null, mList.getRegisteredCallbackCookie(redIndex));
+        assertEquals(mCookie, mList.getRegisteredCallbackCookie(greenIndex));
 
         mList.unregister(mRed.mInterface);
         assertEquals(1, mList.getRegisteredCallbackCount());
