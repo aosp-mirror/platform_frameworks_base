@@ -19,6 +19,7 @@ aconfig_srcjars = [
     ":android.content.res.flags-aconfig-java{.generated_srcjars}",
     ":android.crashrecovery.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
+    ":android.media.codec-aconfig-java{.generated_srcjars}",
     ":android.media.playback.flags-aconfig-java{.generated_srcjars}",
     ":android.net.vcn.flags-aconfig-java{.generated_srcjars}",
     ":android.nfc.flags-aconfig-java{.generated_srcjars}",

@@ -215,7 +215,8 @@ class Rollback {
                 /* packages */ new ArrayList<>(),
                 /* isStaged */ isStaged,
                 /* causePackages */ new ArrayList<>(),
-                /* committedSessionId */ -1);
+                /* committedSessionId */ -1,
+                /* rollbackImpactLevel */ PackageManager.ROLLBACK_USER_IMPACT_LOW);
         mUserId = userId;
         mInstallerPackageName = installerPackageName;
         mBackupDir = backupDir;
@@ -394,7 +395,8 @@ class Rollback {
      */
     @WorkerThread
     boolean enableForPackage(String packageName, long newVersion, long installedVersion,
-            boolean isApex, String sourceDir, String[] splitSourceDirs, int rollbackDataPolicy) {
+            boolean isApex, String sourceDir, String[] splitSourceDirs, int rollbackDataPolicy,
+            @PackageManager.RollbackImpactLevel int rollbackImpactLevel) {
         assertInWorkerThread();
         try {
             RollbackStore.backupPackageCodePath(this, packageName, sourceDir);
@@ -415,6 +417,10 @@ class Rollback {
                 isApex, false /* isApkInApex */, new ArrayList<>(), rollbackDataPolicy);
 
         info.getPackages().add(packageRollbackInfo);
+
+        if (info.getRollbackImpactLevel() < rollbackImpactLevel) {
+            info.setRollbackImpactLevel(rollbackImpactLevel);
+        }
         return true;
     }
 
