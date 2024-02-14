@@ -974,7 +974,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
     private static boolean getMgf1DigestSetterFlag() {
         try {
-            return Flags.mgf1DigestSetter();
+            return Flags.mgf1DigestSetterV2();
         } catch (SecurityException e) {
             Log.w(TAG, "Cannot read MGF1 Digest setter flag value", e);
             return false;
