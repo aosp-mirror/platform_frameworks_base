@@ -105,7 +105,7 @@ class RowAppearanceCoordinatorTest : SysuiTestCase() {
     @Test
     fun testSetLastAudiblyAlerted() {
         afterRenderEntryListener.onAfterRenderEntry(entry1, controller1)
-        verify(controller1).setLastAudiblyAlertedMs(eq(17.toLong()))
+        verify(controller1).setLastAudibleMs(eq(17.toLong()))
     }
 
     @Test

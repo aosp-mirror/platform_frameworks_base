@@ -431,8 +431,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
     }
 
     @Override
-    public void setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
-        mView.setLastAudiblyAlertedMs(lastAudiblyAlertedMs);
+    public void setLastAudibleMs(long lastAudibleMs) {
+        mView.setLastAudiblyAlertedMs(lastAudibleMs);
     }
 
     @Override

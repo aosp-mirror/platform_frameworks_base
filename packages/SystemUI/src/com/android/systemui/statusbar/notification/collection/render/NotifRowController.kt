@@ -29,10 +29,10 @@ interface NotifRowController {
     fun setSystemExpanded(systemExpanded: Boolean)
 
     /**
-     * Sets the timestamp that the notification was last audibly alerted, which the row uses to
+     * Sets the timestamp that the notification was last audible, which the row uses to
      * show a bell icon in the header which indicates to the user which notification made a noise.
      */
-    fun setLastAudiblyAlertedMs(lastAudiblyAlertedMs: Long)
+    fun setLastAudibleMs(lastAudibleMs: Long)
 
     /** Shows the given feedback icon, or hides the icon if null. */
     fun setFeedbackIcon(icon: FeedbackIcon?)
