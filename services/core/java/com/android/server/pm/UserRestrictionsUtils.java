@@ -270,7 +270,7 @@ public class UserRestrictionsUtils {
      * Special user restrictions that profile owner of an organization-owned managed profile can
      * set on the parent profile instance to apply them on the personal profile.
      */
-    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS =
+    private static final Set<String> PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_LOCAL_RESTRICTIONS =
             Sets.newArraySet(
                     UserManager.DISALLOW_CONFIG_BLUETOOTH,
                     UserManager.DISALLOW_CONFIG_LOCATION,
@@ -293,7 +293,9 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
                     UserManager.DISALLOW_UNMUTE_MICROPHONE,
                     UserManager.DISALLOW_CONFIG_DEFAULT_APPS,
-                    UserManager.DISALLOW_ADD_PRIVATE_PROFILE
+                    UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                    UserManager.DISALLOW_CONFIG_BRIGHTNESS,
+                    UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT
     );
 
     /**
@@ -536,7 +538,7 @@ public class UserRestrictionsUtils {
     public static boolean canParentOfProfileOwnerOfOrganizationOwnedDeviceChange(
             String restriction) {
         return PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_GLOBAL_RESTRICTIONS.contains(restriction)
-                || PROFILE_OWNER_ORGANIZATION_OWNED_LOCAL_RESTRICTIONS.contains(restriction);
+                || PROFILE_OWNER_ORGANIZATION_OWNED_PARENT_LOCAL_RESTRICTIONS.contains(restriction);
     }
 
     /**
