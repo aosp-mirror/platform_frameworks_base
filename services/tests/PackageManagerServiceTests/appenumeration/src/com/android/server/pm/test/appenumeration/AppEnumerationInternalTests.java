@@ -16,36 +16,32 @@
 
 package com.android.server.pm.test.appenumeration;
 
+import static android.content.Context.MEDIA_PROJECTION_SERVICE;
+
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.IPackageManager;
 import android.content.pm.ProviderInfo;
+import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjectionManager;
 import android.os.Process;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.util.test.LocalServiceKeeperRule;
-import com.android.server.media.projection.MediaProjectionManagerService;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,17 +73,9 @@ public class AppEnumerationInternalTests {
 
     private IPackageManager mIPackageManager;
 
-    @Rule
-    public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
-
-    @Mock private ActivityManagerInternal mActivityManagerInternal;
-
     @Before
     public void setup() {
-        initMocks(this);
         mIPackageManager = AppGlobals.getPackageManager();
-        mLocalServiceKeeperRule.overrideLocalService(ActivityManagerInternal.class,
-                mActivityManagerInternal);
     }
 
     @After
@@ -181,11 +169,11 @@ public class AppEnumerationInternalTests {
     public void mediaProjectionManager_createProjection_canSeeForceQueryable()
             throws Exception {
         installPackage(SHARED_USER_APK_PATH, true /* forceQueryable */);
-        final Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        final MediaProjectionManagerService mediaProjectionManager =
-                new MediaProjectionManagerService(context);
+        final IMediaProjectionManager mediaProjectionManager =
+                IMediaProjectionManager.Stub.asInterface(
+                        ServiceManager.getService(MEDIA_PROJECTION_SERVICE));
 
-        assertThat(mediaProjectionManager.createProjectionInternal(0 /* uid */, TARGET_SHARED_USER,
+        assertThat(mediaProjectionManager.createProjection(0 /* uid */, TARGET_SHARED_USER,
                 MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */))
                 .isNotNull();
     }
@@ -193,13 +181,12 @@ public class AppEnumerationInternalTests {
     @Test
     public void mediaProjectionManager_createProjection_cannotSeeTarget() {
         installPackage(SHARED_USER_APK_PATH, false /* forceQueryable */);
-        final Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        final MediaProjectionManagerService mediaProjectionManager =
-                new MediaProjectionManagerService(context);
+        final IMediaProjectionManager mediaProjectionManager =
+                IMediaProjectionManager.Stub.asInterface(
+                        ServiceManager.getService(MEDIA_PROJECTION_SERVICE));
 
         Assert.assertThrows(IllegalArgumentException.class,
-                () -> mediaProjectionManager.createProjectionInternal(0 /* uid */,
-                        TARGET_SHARED_USER,
+                () -> mediaProjectionManager.createProjection(0 /* uid */, TARGET_SHARED_USER,
                         MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */));
     }
 
