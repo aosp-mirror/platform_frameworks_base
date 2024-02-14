@@ -240,7 +240,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     @Override
     protected boolean canRestoreAnyVersion() {
-        return false;
+        return true;
     }
 
     @Override
