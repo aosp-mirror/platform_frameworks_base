@@ -1,4 +1,4 @@
-per-file *Notification* = set noparent
+# per-file *Notification* = set noparent
 per-file *Notification* = file:../notification/OWNERS
 
 per-file NotificationIcon* = ccassidy@google.com, evanlaird@google.com, pixel@google.com

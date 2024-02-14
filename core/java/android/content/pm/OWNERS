@@ -2,7 +2,7 @@
 
 file:/PACKAGE_MANAGER_OWNERS
 
-per-file PackageParser.java = set noparent
+# per-file PackageParser.java = set noparent
 per-file PackageParser.java = chiuwinson@google.com,patb@google.com
 per-file *Capability* = file:/core/java/android/content/pm/SHORTCUT_OWNERS
 per-file *Shortcut* = file:/core/java/android/content/pm/SHORTCUT_OWNERS
