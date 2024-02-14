@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.dagger
 
+import com.android.systemui.volume.panel.component.anc.AncModule
 import com.android.systemui.volume.panel.component.bottombar.BottomBarModule
 import com.android.systemui.volume.panel.component.captioning.CaptioningModule
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory
@@ -45,6 +46,7 @@ import kotlinx.coroutines.CoroutineScope
             UiModule::class,
             // Components modules
             BottomBarModule::class,
+            AncModule::class,
             CaptioningModule::class,
         ]
 )

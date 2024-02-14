@@ -22,4 +22,5 @@ object VolumePanelComponents {
 
     const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
     const val CAPTIONING: VolumePanelComponentKey = "captioning"
+    const val ANC: VolumePanelComponentKey = "anc"
 }
