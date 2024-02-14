@@ -733,7 +733,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         if (mPanelExpansionFraction != panelExpansionFraction) {
             if (panelExpansionFraction != 0f
-                    && mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
+                    && mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()
+                    && mState != ScrimState.UNLOCKED) {
                 mAnimatingPanelExpansionOnUnlock = true;
             } else if (panelExpansionFraction == 0f) {
                 mAnimatingPanelExpansionOnUnlock = false;
