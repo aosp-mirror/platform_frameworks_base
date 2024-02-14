@@ -52,6 +52,7 @@ import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
+import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
@@ -17347,5 +17348,47 @@ public class DevicePolicyManager {
             }
         }
         return new HashSet<>();
+    }
+
+    /**
+     * Controls the maximum storage size allowed for policies associated with an admin.
+     * Setting a limit of -1 effectively removes any storage restrictions.
+     *
+     * @param storageLimit Maximum storage allowed in bytes. Use -1 to disable limits.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED)
+    public void setMaxPolicyStorageLimit(int storageLimit) {
+        if (mService != null) {
+            try {
+                mService.setMaxPolicyStorageLimit(mContext.getPackageName(), storageLimit);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Retrieves the current maximum storage limit for policies associated with an admin.
+     *
+     * @return The maximum storage limit in bytes, or -1 if no limit is enforced.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED)
+    public int getMaxPolicyStorageLimit() {
+        if (mService != null) {
+            try {
+                return mService.getMaxPolicyStorageLimit(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return -1;
     }
 }

@@ -12042,8 +12042,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (packageList != null) {
-            for (String pkg : packageList) {
-                PolicySizeVerifier.enforceMaxPackageNameLength(pkg);
+            if (!devicePolicySizeTrackingEnabled()) {
+                for (String pkg : packageList) {
+                    PolicySizeVerifier.enforceMaxPackageNameLength(pkg);
+                }
             }
 
             List<InputMethodInfo> enabledImes = mInjector.binderWithCleanCallingIdentity(() ->
@@ -14362,8 +14364,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setLockTaskPackages(ComponentName who, String callerPackageName, String[] packages)
             throws SecurityException {
         Objects.requireNonNull(packages, "packages is null");
-        for (String pkg : packages) {
-            PolicySizeVerifier.enforceMaxPackageNameLength(pkg);
+        if (!devicePolicySizeTrackingEnabled()) {
+            for (String pkg : packages) {
+                PolicySizeVerifier.enforceMaxPackageNameLength(pkg);
+            }
         }
 
         CallerIdentity caller = getCallerIdentity(who, callerPackageName);
@@ -24075,5 +24079,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return adminOwnedSubscriptions;
         });
+
+    }
+
+    @Override
+    public void setMaxPolicyStorageLimit(String callerPackageName, int storageLimit) {
+        if (!devicePolicySizeTrackingEnabled()) {
+            return;
+        }
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        enforcePermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, caller.getPackageName(),
+                caller.getUserId());
+
+        mDevicePolicyEngine.setMaxPolicyStorageLimit(storageLimit);
+    }
+
+    @Override
+    public int getMaxPolicyStorageLimit(String callerPackageName) {
+        if (!devicePolicySizeTrackingEnabled()) {
+            return -1;
+        }
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        enforcePermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, caller.getPackageName(),
+                caller.getUserId());
+
+        return mDevicePolicyEngine.getMaxPolicyStorageLimit();
     }
 }

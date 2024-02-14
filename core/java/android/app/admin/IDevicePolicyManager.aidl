@@ -615,4 +615,7 @@ interface IDevicePolicyManager {
     int getContentProtectionPolicy(in ComponentName who, String callerPackageName);
 
     int[] getSubscriptionIds(String callerPackageName);
+
+    void setMaxPolicyStorageLimit(String packageName, int storageLimit);
+    int getMaxPolicyStorageLimit(String packageName);
 }
