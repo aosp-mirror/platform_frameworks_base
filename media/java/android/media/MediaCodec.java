@@ -3212,12 +3212,62 @@ final public class MediaCodec {
         }
     }
 
+    /**
+     * Similar to {@link #queueInputBuffers queueInputBuffers} but submits multiple access units
+     * in a buffer that is potentially encrypted.
+     * <strong>Check out further notes at {@link #queueInputBuffers queueInputBuffers}.</strong>
+     *
+     * @param index The index of a client-owned input buffer previously returned
+     *              in a call to {@link #dequeueInputBuffer}.
+     * @param bufferInfos ArrayDeque of {@link MediaCodec.BufferInfo} that describes the
+     *                    contents in the buffer. The ArrayDeque and the BufferInfo objects provided
+     *                    can be recycled by the caller for re-use.
+     * @param cryptoInfos ArrayDeque of {@link MediaCodec.CryptoInfo} objects to facilitate the
+     *                    decryption of the contents. The ArrayDeque and the CryptoInfo objects
+     *                    provided can be reused immediately after the call returns. These objects
+     *                    should correspond to bufferInfo objects to ensure correct decryption.
+     * @throws IllegalStateException if not in the Executing state or not in asynchronous mode.
+     * @throws MediaCodec.CodecException upon codec error.
+     * @throws IllegalArgumentException upon if bufferInfos is empty, contains null, or if the
+     *                    access units are not contiguous.
+     * @throws CryptoException if an error occurs while attempting to decrypt the buffer.
+     *              An error code associated with the exception helps identify the
+     *              reason for the failure.
+     */
+    @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+    public final void queueSecureInputBuffers(
+            int index,
+            @NonNull ArrayDeque<BufferInfo> bufferInfos,
+            @NonNull ArrayDeque<CryptoInfo> cryptoInfos) {
+        synchronized(mBufferLock) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
+                throw new IncompatibleWithBlockModelException("queueSecureInputBuffers() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please use getQueueRequest() to queue buffers");
+            }
+            invalidateByteBufferLocked(mCachedInputBuffers, index, true /* input */);
+            mDequeuedInputBuffers.remove(index);
+        }
+        try {
+            native_queueSecureInputBuffers(
+                    index, bufferInfos.toArray(), cryptoInfos.toArray());
+        } catch (CryptoException | IllegalStateException | IllegalArgumentException e) {
+            revalidateByteBuffer(mCachedInputBuffers, index, true /* input */);
+            throw e;
+        }
+    }
+
     private native final void native_queueSecureInputBuffer(
             int index,
             int offset,
             @NonNull CryptoInfo info,
             long presentationTimeUs,
             int flags) throws CryptoException;
+
+    private native final void native_queueSecureInputBuffers(
+            int index,
+            @NonNull Object[] bufferInfos,
+            @NonNull Object[] cryptoInfos) throws CryptoException, CodecException;
 
     /**
      * Returns the index of an input buffer to be filled with valid data
@@ -3464,7 +3514,7 @@ final public class MediaCodec {
             mLinearBlock = block;
             mOffset = offset;
             mSize = size;
-            mCryptoInfo = null;
+            mCryptoInfos.clear();
             return this;
         }
 
@@ -3498,7 +3548,44 @@ final public class MediaCodec {
             mLinearBlock = block;
             mOffset = offset;
             mSize = size;
-            mCryptoInfo = cryptoInfo;
+            mCryptoInfos.clear();
+            mCryptoInfos.add(cryptoInfo);
+            return this;
+        }
+
+        /**
+         * Set an encrypted linear block to this queue request. Exactly one buffer must be
+         * set for a queue request before calling {@link #queue}. The block can contain multiple
+         * access units and if present should be laid out contiguously and without gaps.
+         *
+         * @param block The linear block object
+         * @param bufferInfos ArrayDeque of {@link MediaCodec.BufferInfo} that describes the
+         *                    contents in the buffer. The ArrayDeque and the BufferInfo objects
+         *                    provided can be recycled by the caller for re-use.
+         * @param cryptoInfos ArrayDeque of {@link MediaCodec.CryptoInfo} that describes the
+         *                    structure of the encrypted input samples. The ArrayDeque and the
+         *                    BufferInfo objects provided can be recycled by the caller for re-use.
+         * @return this object
+         * @throws IllegalStateException if a buffer is already set
+         * @throws IllegalArgumentException upon if bufferInfos is empty, contains null, or if the
+         *                     access units are not contiguous.
+         */
+        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+        public @NonNull QueueRequest setMultiFrameEncryptedLinearBlock(
+                @NonNull LinearBlock block,
+                @NonNull ArrayDeque<MediaCodec.BufferInfo> bufferInfos,
+                @NonNull ArrayDeque<MediaCodec.CryptoInfo> cryptoInfos) {
+            if (!isAccessible()) {
+                throw new IllegalStateException("The request is stale");
+            }
+            if (mLinearBlock != null || mHardwareBuffer != null) {
+                throw new IllegalStateException("Cannot set block twice");
+            }
+            mLinearBlock = block;
+            mBufferInfos.clear();
+            mBufferInfos.addAll(bufferInfos);
+            mCryptoInfos.clear();
+            mCryptoInfos.addAll(cryptoInfos);
             return this;
         }
 
@@ -3708,8 +3795,10 @@ final public class MediaCodec {
                 mBufferInfos.add(info);
             }
             if (mLinearBlock != null) {
+
                 mCodec.native_queueLinearBlock(
-                        mIndex, mLinearBlock, mCryptoInfo,
+                        mIndex, mLinearBlock,
+                        mCryptoInfos.isEmpty() ? null : mCryptoInfos.toArray(),
                         mBufferInfos.toArray(),
                         mTuningKeys, mTuningValues);
             } else if (mHardwareBuffer != null) {
@@ -3724,11 +3813,11 @@ final public class MediaCodec {
             mLinearBlock = null;
             mOffset = 0;
             mSize = 0;
-            mCryptoInfo = null;
             mHardwareBuffer = null;
             mPresentationTimeUs = 0;
             mFlags = 0;
             mBufferInfos.clear();
+            mCryptoInfos.clear();
             mTuningKeys.clear();
             mTuningValues.clear();
             return this;
@@ -3748,11 +3837,11 @@ final public class MediaCodec {
         private LinearBlock mLinearBlock = null;
         private int mOffset = 0;
         private int mSize = 0;
-        private MediaCodec.CryptoInfo mCryptoInfo = null;
         private HardwareBuffer mHardwareBuffer = null;
         private long mPresentationTimeUs = 0;
         private @BufferFlag int mFlags = 0;
         private final ArrayDeque<BufferInfo> mBufferInfos = new ArrayDeque<>();
+        private final ArrayDeque<CryptoInfo> mCryptoInfos = new ArrayDeque<>();
         private final ArrayList<String> mTuningKeys = new ArrayList<>();
         private final ArrayList<Object> mTuningValues = new ArrayList<>();
 
@@ -3762,7 +3851,7 @@ final public class MediaCodec {
     private native void native_queueLinearBlock(
             int index,
             @NonNull LinearBlock block,
-            @Nullable CryptoInfo cryptoInfo,
+            @Nullable Object[] cryptoInfos,
             @NonNull Object[] bufferInfos,
             @NonNull ArrayList<String> keys,
             @NonNull ArrayList<Object> values);
