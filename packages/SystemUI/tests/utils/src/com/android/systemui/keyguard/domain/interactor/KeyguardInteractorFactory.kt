@@ -23,6 +23,7 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -30,6 +31,8 @@ import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
  * Simply put, I got tired of adding a constructor argument and then having to tweak dozens of
@@ -50,6 +53,11 @@ object KeyguardInteractorFactory {
         sceneInteractor: SceneInteractor = mock(),
         powerInteractor: PowerInteractor = PowerInteractorFactory.create().powerInteractor,
     ): WithDependencies {
+        // Mock this until the class is replaced by kosmos
+        val keyguardTransitionInteractor: KeyguardTransitionInteractor = mock()
+        val currentKeyguardStateFlow = MutableSharedFlow<KeyguardState>()
+        whenever(keyguardTransitionInteractor.currentKeyguardState)
+            .thenReturn(currentKeyguardStateFlow)
         return WithDependencies(
             repository = repository,
             commandQueue = commandQueue,
@@ -67,6 +75,7 @@ object KeyguardInteractorFactory {
                 configurationInteractor = ConfigurationInteractor(configurationRepository),
                 shadeRepository = shadeRepository,
                 sceneInteractorProvider = { sceneInteractor },
+                keyguardTransitionInteractor = keyguardTransitionInteractor,
                 powerInteractor = powerInteractor,
             ),
         )

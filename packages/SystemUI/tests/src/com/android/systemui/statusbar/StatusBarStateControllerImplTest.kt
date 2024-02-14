@@ -122,6 +122,10 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         val shadeRepository = FakeShadeRepository()
         val sceneContainerFlags = FakeSceneContainerFlags()
         val configurationRepository = FakeConfigurationRepository()
+        val keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
+        fromLockscreenTransitionInteractor = kosmos.fromLockscreenTransitionInteractor
+        fromPrimaryBouncerTransitionInteractor = kosmos.fromPrimaryBouncerTransitionInteractor
+
         val keyguardInteractor =
             KeyguardInteractor(
                 keyguardRepository,
@@ -131,11 +135,9 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 FakeKeyguardBouncerRepository(),
                 ConfigurationInteractor(configurationRepository),
                 shadeRepository,
+                keyguardTransitionInteractor,
                 { kosmos.sceneInteractor },
             )
-        val keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
-        fromLockscreenTransitionInteractor = kosmos.fromLockscreenTransitionInteractor
-        fromPrimaryBouncerTransitionInteractor = kosmos.fromPrimaryBouncerTransitionInteractor
 
         whenever(deviceEntryUdfpsInteractor.isUdfpsSupported).thenReturn(emptyFlow())
         shadeInteractor =

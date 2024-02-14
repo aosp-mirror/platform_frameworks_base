@@ -1158,9 +1158,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // Occluded->Lockscreen
         collectFlow(mView, mKeyguardTransitionInteractor.getOccludedToLockscreenTransition(),
                 mOccludedToLockscreenTransition, mMainDispatcher);
-        collectFlow(mView, mOccludedToLockscreenTransitionViewModel.getLockscreenAlpha(),
-                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
         if (!KeyguardShadeMigrationNssl.isEnabled()) {
+            collectFlow(mView, mOccludedToLockscreenTransitionViewModel.getLockscreenAlpha(),
+                    setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
             collectFlow(mView,
                     mOccludedToLockscreenTransitionViewModel.getLockscreenTranslationY(),
                     setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
@@ -1169,9 +1169,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // Lockscreen->Dreaming
         collectFlow(mView, mKeyguardTransitionInteractor.getLockscreenToDreamingTransition(),
                 mLockscreenToDreamingTransition, mMainDispatcher);
-        collectFlow(mView, mLockscreenToDreamingTransitionViewModel.getLockscreenAlpha(),
-                setDreamLockscreenTransitionAlpha(mNotificationStackScrollLayoutController),
-                mMainDispatcher);
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
+            collectFlow(mView, mLockscreenToDreamingTransitionViewModel.getLockscreenAlpha(),
+                    setDreamLockscreenTransitionAlpha(mNotificationStackScrollLayoutController),
+                    mMainDispatcher);
+        }
         collectFlow(mView, mLockscreenToDreamingTransitionViewModel.lockscreenTranslationY(
                 mLockscreenToDreamingTransitionTranslationY),
                 setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
@@ -1179,8 +1181,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // Gone->Dreaming
         collectFlow(mView, mKeyguardTransitionInteractor.getGoneToDreamingTransition(),
                 mGoneToDreamingTransition, mMainDispatcher);
-        collectFlow(mView, mGoneToDreamingTransitionViewModel.getLockscreenAlpha(),
-                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
+            collectFlow(mView, mGoneToDreamingTransitionViewModel.getLockscreenAlpha(),
+                    setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+        }
         collectFlow(mView, mGoneToDreamingTransitionViewModel.lockscreenTranslationY(
                 mGoneToDreamingTransitionTranslationY),
                 setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
@@ -1188,16 +1192,18 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // Lockscreen->Occluded
         collectFlow(mView, mKeyguardTransitionInteractor.getLockscreenToOccludedTransition(),
                 mLockscreenToOccludedTransition, mMainDispatcher);
-        collectFlow(mView, mLockscreenToOccludedTransitionViewModel.getLockscreenAlpha(),
-                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
         if (!KeyguardShadeMigrationNssl.isEnabled()) {
+            collectFlow(mView, mLockscreenToOccludedTransitionViewModel.getLockscreenAlpha(),
+                    setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
             collectFlow(mView, mLockscreenToOccludedTransitionViewModel.getLockscreenTranslationY(),
                     setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
         }
 
         // Primary bouncer->Gone (ensures lockscreen content is not visible on successful auth)
-        collectFlow(mView, mPrimaryBouncerToGoneTransitionViewModel.getLockscreenAlpha(),
-                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
+            collectFlow(mView, mPrimaryBouncerToGoneTransitionViewModel.getLockscreenAlpha(),
+                    setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+        }
     }
 
     @VisibleForTesting
@@ -2734,6 +2740,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void updateKeyguardBottomAreaAlpha() {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
+            return;
+        }
         if (mIsOcclusionTransitionRunning) {
             return;
         }

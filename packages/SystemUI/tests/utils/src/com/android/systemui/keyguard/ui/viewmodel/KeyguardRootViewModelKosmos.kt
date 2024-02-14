@@ -37,14 +37,24 @@ val Kosmos.keyguardRootViewModel by Fixture {
         communalInteractor = communalInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         notificationsKeyguardInteractor = notificationsKeyguardInteractor,
-        aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
-        lockscreenToGoneTransitionViewModel = lockscreenToGoneTransitionViewModel,
         alternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel,
+        aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
+        dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
+        glanceableHubToLockscreenTransitionViewModel = glanceableHubToLockscreenTransitionViewModel,
+        lockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel,
+        lockscreenToGlanceableHubTransitionViewModel = lockscreenToGlanceableHubTransitionViewModel,
+        lockscreenToGoneTransitionViewModel = lockscreenToGoneTransitionViewModel,
+        lockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel,
+        lockscreenToPrimaryBouncerTransitionViewModel =
+            lockscreenToPrimaryBouncerTransitionViewModel,
+        occludedToAodTransitionViewModel = occludedToAodTransitionViewModel,
+        occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
+        primaryBouncerToAodTransitionViewModel = primaryBouncerToAodTransitionViewModel,
         primaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel,
+        primaryBouncerToLockscreenTransitionViewModel =
+            primaryBouncerToLockscreenTransitionViewModel,
         screenOffAnimationController = screenOffAnimationController,
         aodBurnInViewModel = aodBurnInViewModel,
         aodAlphaViewModel = aodAlphaViewModel,
-        lockscreenToGlanceableHubTransitionViewModel = lockscreenToGlanceableHubTransitionViewModel,
-        glanceableHubToLockscreenTransitionViewModel = glanceableHubToLockscreenTransitionViewModel,
     )
 }

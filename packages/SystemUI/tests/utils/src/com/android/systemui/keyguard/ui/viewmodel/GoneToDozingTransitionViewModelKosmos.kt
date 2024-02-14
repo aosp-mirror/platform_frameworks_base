@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,13 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.aodAlphaViewModel by Fixture {
-    AodAlphaViewModel(
-        keyguardTransitionInteractor = keyguardTransitionInteractor,
-        goneToAodTransitionViewModel = goneToAodTransitionViewModel,
-        goneToDozingTransitionViewModel = goneToDozingTransitionViewModel,
+val Kosmos.goneToDozingTransitionViewModel by Fixture {
+    GoneToDozingTransitionViewModel(
+        animationFlow = keyguardTransitionAnimationFlow,
     )
 }

@@ -19,15 +19,15 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 
 /** Models UI state for the alpha of the AOD (always-on display). */
@@ -35,27 +35,28 @@ import kotlinx.coroutines.flow.onStart
 class AodAlphaViewModel
 @Inject
 constructor(
-    keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
+    goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
+    goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
 ) {
 
     /** The alpha level for the entire lockscreen while in AOD. */
     val alpha: Flow<Float> =
-        combine(
-                keyguardTransitionInteractor.transitionValue(KeyguardState.GONE).onStart {
-                    emit(0f)
-                },
-                merge(
-                    keyguardInteractor.keyguardAlpha,
-                    occludedToLockscreenTransitionViewModel.lockscreenAlpha,
-                )
-            ) { transitionToGone, alpha ->
-                if (transitionToGone == 1f) {
-                    // Ensures content is not visible when in GONE state
-                    0f
-                } else {
-                    alpha
+        combineTransform(
+                keyguardTransitionInteractor.transitions,
+                goneToAodTransitionViewModel.enterFromTopAnimationAlpha.onStart { emit(0f) },
+                goneToDozingTransitionViewModel.lockscreenAlpha.onStart { emit(0f) },
+            ) { step, goneToAodAlpha, goneToDozingAlpha ->
+                if (step.to == GONE) {
+                    // When transitioning to GONE, only emit a value when complete as other
+                    // transitions may be controlling the alpha fade
+                    if (step.value == 1f) {
+                        emit(0f)
+                    }
+                } else if (step.from == GONE && step.to == AOD) {
+                    emit(goneToAodAlpha)
+                } else if (step.from == GONE && step.to == DOZING) {
+                    emit(goneToDozingAlpha)
                 }
             }
             .distinctUntilChanged()

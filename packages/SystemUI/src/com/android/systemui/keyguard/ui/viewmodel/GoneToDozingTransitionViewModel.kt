@@ -17,50 +17,35 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_DOZING_DURATION
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
-import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Breaks down LOCKSCREEN->PRIMARY BOUNCER transition into discrete steps for corresponding views to
- * consume.
- */
+/** Breaks down GONE->DOZING transition into discrete steps for corresponding views to consume. */
 @ExperimentalCoroutinesApi
 @SysUISingleton
-class LockscreenToPrimaryBouncerTransitionViewModel
+class GoneToDozingTransitionViewModel
 @Inject
 constructor(
-    shadeDependentFlows: ShadeDependentFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+) {
+
     private val transitionAnimation =
         animationFlow.setup(
-            duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
-            from = KeyguardState.LOCKSCREEN,
-            to = KeyguardState.PRIMARY_BOUNCER,
+            duration = TO_DOZING_DURATION,
+            from = KeyguardState.GONE,
+            to = KeyguardState.DOZING,
         )
 
-    val shortcutsAlpha: Flow<Float> =
+    val lockscreenAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
-            duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
-            onStep = { 1f - it }
-        )
-
-    val lockscreenAlpha: Flow<Float> = shortcutsAlpha
-
-    override val deviceEntryParentViewAlpha: Flow<Float> =
-        shadeDependentFlows.transitionFlow(
-            flowWhenShadeIsNotExpanded =
-                transitionAnimation.sharedFlow(
-                    duration = 250.milliseconds,
-                    onStep = { 1f - it },
-                    onFinish = { 0f }
-                ),
-            flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f)
+            duration = 500.milliseconds,
+            onStep = { 0f },
+            onCancel = { 1f },
+            onFinish = { 1f },
         )
 }
