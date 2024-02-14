@@ -32,8 +32,6 @@ android_test {
         "androidx.test.runner",
         "truth",
         "Harrier",
-        "frameworks-base-testutils",
-        "services.core",
     ],
     platform_apis: true,
     certificate: "platform",

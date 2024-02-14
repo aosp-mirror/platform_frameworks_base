@@ -75,12 +75,12 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.internal.util.test.LocalServiceKeeperRule;
+import com.android.server.LocalServices;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -164,17 +164,15 @@ public class MediaProjectionManagerServiceTest {
     @Captor
     private ArgumentCaptor<ContentRecordingSession> mSessionCaptor;
 
-    @Rule
-    public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
-
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mWatcherCallback.asBinder()).thenReturn(new Binder());
 
-        mLocalServiceKeeperRule.overrideLocalService(ActivityManagerInternal.class, mAmInternal);
-        mLocalServiceKeeperRule.overrideLocalService(WindowManagerInternal.class,
-                mWindowManagerInternal);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class, mAmInternal);
+        LocalServices.removeServiceForTest(WindowManagerInternal.class);
+        LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
 
         mContext = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
@@ -187,6 +185,12 @@ public class MediaProjectionManagerServiceTest {
         mAppInfo.targetSdkVersion = 32;
 
         mService = new MediaProjectionManagerService(mContext);
+    }
+
+    @After
+    public void tearDown() {
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.removeServiceForTest(WindowManagerInternal.class);
     }
 
     @Test
@@ -384,16 +388,16 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions(
                 service);
         // No starts yet, and not timed out yet - so still valid.
-        assertThat(projection.isValidInternal()).isTrue();
+        assertThat(projection.isValid()).isTrue();
 
         // Only one start - so still valid.
         projection.start(mIMediaProjectionCallback);
-        assertThat(projection.isValidInternal()).isTrue();
+        assertThat(projection.isValid()).isTrue();
 
         // Second start - technically allowed to start again, without stopping in between.
         // Token should no longer be valid.
         projection.start(mIMediaProjectionCallback);
-        assertThat(projection.isValidInternal()).isFalse();
+        assertThat(projection.isValid()).isFalse();
     }
 
     @Test
@@ -403,17 +407,17 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions(
                 service);
         // No starts yet, and not timed out yet - so still valid.
-        assertThat(projection.isValidInternal()).isTrue();
+        assertThat(projection.isValid()).isTrue();
 
         // Only one start - so still valid.
         projection.start(mIMediaProjectionCallback);
-        assertThat(projection.isValidInternal()).isTrue();
+        assertThat(projection.isValid()).isTrue();
 
         projection.stop();
 
         // Second start - so not valid.
         projection.start(mIMediaProjectionCallback);
-        assertThat(projection.isValidInternal()).isFalse();
+        assertThat(projection.isValid()).isFalse();
     }
 
     @Test
@@ -438,7 +442,7 @@ public class MediaProjectionManagerServiceTest {
         mClock.fastForward(projection.mDefaultTimeoutMs + 10);
 
         // Immediate timeout - so no longer valid.
-        assertThat(projection.isValidInternal()).isFalse();
+        assertThat(projection.isValid()).isFalse();
     }
 
     @Test
@@ -448,10 +452,10 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions(
                 service);
         // Simulate MediaProjection#createVirtualDisplay being invoked previously.
-        projection.notifyVirtualDisplayCreatedInternal(10);
+        projection.notifyVirtualDisplayCreated(10);
 
         // Trying to re-use token on another MediaProjection#createVirtualDisplay - no longer valid.
-        assertThat(projection.isValidInternal()).isFalse();
+        assertThat(projection.isValid()).isFalse();
     }
 
     // TODO(269273190): Test flag using compat annotations instead.
@@ -467,7 +471,7 @@ public class MediaProjectionManagerServiceTest {
         // Second start - so not valid.
         projection.start(mIMediaProjectionCallback);
 
-        assertThrows(SecurityException.class, projection::isValidInternal);
+        assertThrows(SecurityException.class, projection::isValid);
     }
 
     // TODO(269273190): Test flag using compat annotations instead.
@@ -484,7 +488,7 @@ public class MediaProjectionManagerServiceTest {
         // Second start - so not valid.
         projection.start(mIMediaProjectionCallback);
 
-        assertThat(projection.isValidInternal()).isFalse();
+        assertThat(projection.isValid()).isFalse();
     }
 
     @Test
@@ -623,7 +627,7 @@ public class MediaProjectionManagerServiceTest {
         mService.setUserReviewGrantedConsentResult(RECORD_CONTENT_DISPLAY, projection);
 
         // Virtual Display is finally created.
-        projection.notifyVirtualDisplayCreatedInternal(10);
+        projection.notifyVirtualDisplayCreated(10);
         verifySetSessionWithContent(ContentRecordingSession.RECORD_CONTENT_DISPLAY);
     }
 
@@ -726,7 +730,7 @@ public class MediaProjectionManagerServiceTest {
             throws Exception {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
         projection.start(mIMediaProjectionCallback);
-        projection.notifyVirtualDisplayCreatedInternal(10);
+        projection.notifyVirtualDisplayCreated(10);
         // Waiting for user to review consent.
         assertThat(mService.isCurrentProjection(projection)).isTrue();
         doReturn(true).when(mWindowManagerInternal).setContentRecordingSession(
@@ -781,9 +785,9 @@ public class MediaProjectionManagerServiceTest {
             @RecordContent int recordedContent)
             throws NameNotFoundException {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
-        projection.setLaunchCookieInternal(new LaunchCookie());
+        projection.setLaunchCookie(new LaunchCookie());
         projection.start(mIMediaProjectionCallback);
-        projection.notifyVirtualDisplayCreatedInternal(10);
+        projection.notifyVirtualDisplayCreated(10);
         // Waiting for user to review consent.
         doReturn(true).when(mWindowManagerInternal).setContentRecordingSession(
                 any(ContentRecordingSession.class));
@@ -804,7 +808,7 @@ public class MediaProjectionManagerServiceTest {
             throws NameNotFoundException {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
         projection.start(mIMediaProjectionCallback);
-        projection.notifyVirtualDisplayCreatedInternal(10);
+        projection.notifyVirtualDisplayCreated(10);
         // Waiting for user to review consent.
         doReturn(true).when(mWindowManagerInternal).setContentRecordingSession(
                 eq(mWaitingDisplaySession));
@@ -822,7 +826,7 @@ public class MediaProjectionManagerServiceTest {
     public void testSetUserReviewGrantedConsentResult_displayMirroring_noPriorSession()
             throws NameNotFoundException {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
-        projection.setLaunchCookieInternal(new LaunchCookie());
+        projection.setLaunchCookie(new LaunchCookie());
         projection.start(mIMediaProjectionCallback);
         // Skip setting the prior session details.
 
@@ -841,7 +845,7 @@ public class MediaProjectionManagerServiceTest {
     public void testSetUserReviewGrantedConsentResult_displayMirroring_sessionNotWaiting()
             throws NameNotFoundException {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
-        projection.setLaunchCookieInternal(new LaunchCookie());
+        projection.setLaunchCookie(new LaunchCookie());
         projection.start(mIMediaProjectionCallback);
         // Session is not waiting for user's consent.
         doReturn(true).when(mWindowManagerInternal).setContentRecordingSession(

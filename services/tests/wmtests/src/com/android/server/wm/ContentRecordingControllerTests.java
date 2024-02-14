@@ -24,15 +24,12 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 import android.platform.test.annotations.Presubmit;
 import android.view.ContentRecordingSession;
 
 import androidx.test.filters.SmallTest;
-
-import com.android.server.wm.ContentRecorder.MediaProjectionManagerWrapper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,11 +68,6 @@ public class ContentRecordingControllerTests extends WindowTestsBase {
         mVirtualDisplayId = mVirtualDisplayContent.getDisplayId();
         mWm.mRoot.onDisplayAdded(mVirtualDisplayId);
         spyOn(mVirtualDisplayContent);
-        final MediaProjectionManagerWrapper
-                mediaProjectionManagerWrapper = mock(MediaProjectionManagerWrapper.class);
-        final ContentRecorder contentRecorder = new ContentRecorder(mVirtualDisplayContent,
-                mediaProjectionManagerWrapper, /* correctForAnisotropicPixels= */ false);
-        mVirtualDisplayContent.setContentRecorder(contentRecorder);
 
         mDefaultSession.setVirtualDisplayId(mVirtualDisplayId);
         mWaitingDisplaySession.setVirtualDisplayId(mVirtualDisplayId);
