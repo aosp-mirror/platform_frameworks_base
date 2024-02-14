@@ -237,6 +237,7 @@ import static android.app.admin.flags.Flags.dumpsysPolicyEngineMigrationEnabled;
 import static android.app.admin.flags.Flags.headlessDeviceOwnerSingleUserEnabled;
 import static android.app.admin.flags.Flags.policyEngineMigrationV2Enabled;
 import static android.app.admin.flags.Flags.assistContentUserRestrictionEnabled;
+import static android.app.admin.flags.Flags.securityLogV2Enabled;
 import static android.content.Intent.ACTION_MANAGED_PROFILE_AVAILABLE;
 import static android.content.Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -3376,9 +3377,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     applyProfileRestrictionsIfDeviceOwnerLocked();
 
                     // TODO: Is this the right place to trigger the migration?
-                    if (shouldMigrateToDevicePolicyEngine()) {
-                        migratePoliciesToDevicePolicyEngine();
+                    if (shouldMigrateV1ToDevicePolicyEngine()) {
+                        migrateV1PoliciesToDevicePolicyEngine();
                     }
+                    migratePoliciesToPolicyEngineLocked();
                 }
                 maybeStartSecurityLogMonitorOnActivityManagerReady();
                 break;
@@ -3390,6 +3392,48 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 ensureDeviceOwnerUserStarted(); // TODO Consider better place to do this.
                 break;
         }
+    }
+
+    @GuardedBy("getLockObject()")
+    private void maybeMigrateSecurityLoggingPolicyLocked() {
+        if (!securityLogV2Enabled() || mOwners.isSecurityLoggingMigrated()) {
+            return;
+        }
+
+        try {
+            migrateSecurityLoggingPolicyInternalLocked();
+        } catch (Exception e) {
+            Slog.e(LOG_TAG, "Failed to properly migrate security logging to policy engine", e);
+        }
+
+        Slog.i(LOG_TAG, "Marking security logging policy migration complete");
+        mOwners.markSecurityLoggingMigrated();
+    }
+
+    @GuardedBy("getLockObject()")
+    private void migrateSecurityLoggingPolicyInternalLocked() {
+        Slog.i(LOG_TAG, "Migrating security logging policy to policy engine");
+        if (!mInjector.securityLogGetLoggingEnabledProperty()) {
+            Slog.i(LOG_TAG, "Security logs not enabled, exiting");
+            return;
+        }
+
+        // Security logging can be enabled either by DO or by COPE PO.
+        final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+        if (admin == null) {
+            Slog.wtf(LOG_TAG, "Security logging is enabled, but no appropriate admin found");
+            return;
+        }
+
+        EnforcingAdmin enforcingAdmin =
+                EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                        admin.info.getComponent(),
+                        admin.getUserHandle().getIdentifier(),
+                        admin);
+        mDevicePolicyEngine.setGlobalPolicy(
+                PolicyDefinition.SECURITY_LOGGING,
+                enforcingAdmin,
+                new BooleanPolicyValue(true));
     }
 
     private void applyManagedSubscriptionsPolicyIfRequired() {
@@ -15721,6 +15765,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return enforcingUsers;
         }
 
+        @Override
+        public void enforceSecurityLoggingPolicy(boolean enabled) {
+            enforceLoggingPolicy(enabled);
+        }
+
         private List<EnforcingUser> getEnforcingUsers(Set<EnforcingAdmin> admins) {
             List<EnforcingUser> enforcingUsers = new ArrayList();
             ComponentName deviceOwner = mOwners.getDeviceOwnerComponent();
@@ -15735,6 +15784,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             return enforcingUsers;
+        }
+    }
+
+    private void enforceLoggingPolicy(boolean securityLoggingEnabled) {
+        Slogf.i(LOG_TAG, "Enforcing security logging, securityLoggingEnabled: %b",
+                securityLoggingEnabled);
+        SecurityLog.setLoggingEnabledProperty(securityLoggingEnabled);
+        if (securityLoggingEnabled) {
+            mSecurityLogMonitor.start(getSecurityLoggingEnabledUser());
+            synchronized (getLockObject()) {
+                maybePauseDeviceWideLoggingLocked();
+            }
+        } else {
+            mSecurityLogMonitor.stop();
         }
     }
 
@@ -17586,19 +17649,32 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setSecurityLoggingEnabled(ComponentName admin, String packageName,
+    public void setSecurityLoggingEnabled(ComponentName who, String packageName,
             boolean enabled) {
         if (!mHasFeature) {
             return;
         }
-        final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        final CallerIdentity caller = getCallerIdentity(who, packageName);
 
-        synchronized (getLockObject()) {
-            if (isPermissionCheckFlagEnabled()) {
-                enforcePermission(MANAGE_DEVICE_POLICY_SECURITY_LOGGING, caller.getPackageName(),
-                        UserHandle.USER_ALL);
+        if (securityLogV2Enabled()) {
+            EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(
+                    who,
+                    MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
+                    caller.getPackageName(),
+                    caller.getUserId());
+            if (enabled) {
+                mDevicePolicyEngine.setGlobalPolicy(
+                        PolicyDefinition.SECURITY_LOGGING,
+                        admin,
+                        new BooleanPolicyValue(true));
             } else {
-                if (admin != null) {
+                mDevicePolicyEngine.removeGlobalPolicy(
+                        PolicyDefinition.SECURITY_LOGGING,
+                        admin);
+            }
+        } else {
+            synchronized (getLockObject()) {
+                if (who != null) {
                     Preconditions.checkCallAuthorization(
                             isProfileOwnerOfOrganizationOwnedDevice(caller)
                                     || isDefaultDeviceOwner(caller));
@@ -17607,17 +17683,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     Preconditions.checkCallAuthorization(
                             isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
                 }
-            }
 
-            if (enabled == mInjector.securityLogGetLoggingEnabledProperty()) {
-                return;
-            }
-            mInjector.securityLogSetLoggingEnabledProperty(enabled);
-            if (enabled) {
-                mSecurityLogMonitor.start(getSecurityLoggingEnabledUser());
-                maybePauseDeviceWideLoggingLocked();
-            } else {
-                mSecurityLogMonitor.stop();
+                if (enabled == mInjector.securityLogGetLoggingEnabledProperty()) {
+                    return;
+                }
+                mInjector.securityLogSetLoggingEnabledProperty(enabled);
+                if (enabled) {
+                    mSecurityLogMonitor.start(getSecurityLoggingEnabledUser());
+                    maybePauseDeviceWideLoggingLocked();
+                } else {
+                    mSecurityLogMonitor.stop();
+                }
             }
         }
         DevicePolicyEventLogger
@@ -17633,25 +17709,35 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
 
-        synchronized (getLockObject()) {
-            if (!isSystemUid(getCallerIdentity())) {
-                final CallerIdentity caller = getCallerIdentity(admin, packageName);
-                if (isPermissionCheckFlagEnabled()) {
-                    enforcePermission(MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
-                            caller.getPackageName(), UserHandle.USER_ALL);
-                } else {
-                    if (admin != null) {
-                        Preconditions.checkCallAuthorization(
-                                isProfileOwnerOfOrganizationOwnedDevice(caller)
-                                        || isDefaultDeviceOwner(caller));
-                    } else {
-                        // A delegate app passes a null admin component, which is expected
-                        Preconditions.checkCallAuthorization(
-                                isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
-                    }
-                }
-            }
+        final CallerIdentity caller = getCallerIdentity(admin, packageName);
+        if (isSystemUid(caller)) {
+            // Settings uses this for privacy transparency.
+            // TODO: create a separate @hidden API for settings.
             return mInjector.securityLogGetLoggingEnabledProperty();
+        }
+
+        if (securityLogV2Enabled()) {
+            final EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                    admin,
+                    MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
+                    caller.getPackageName(),
+                    caller.getUserId());
+            final Boolean policy = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
+                    PolicyDefinition.SECURITY_LOGGING, enforcingAdmin);
+            return Boolean.TRUE.equals(policy);
+        } else {
+            synchronized (getLockObject()) {
+                if (admin != null) {
+                    Preconditions.checkCallAuthorization(
+                            isProfileOwnerOfOrganizationOwnedDevice(caller)
+                                    || isDefaultDeviceOwner(caller));
+                } else {
+                    // A delegate app passes a null admin component, which is expected
+                    Preconditions.checkCallAuthorization(
+                            isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
+                }
+                return mInjector.securityLogGetLoggingEnabledProperty();
+            }
         }
     }
 
@@ -17727,17 +17813,32 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
-        if (isPermissionCheckFlagEnabled()) {
-            Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
-                    || areAllUsersAffiliatedWithDeviceLocked());
 
-            enforcePermission(MANAGE_DEVICE_POLICY_SECURITY_LOGGING, caller.getPackageName(),
-                    UserHandle.USER_ALL);
+        if (securityLogV2Enabled()) {
+            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                    admin,
+                    MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
+                    caller.getPackageName(),
+                    caller.getUserId());
+
+            synchronized (getLockObject()) {
+                Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
+                        || areAllUsersAffiliatedWithDeviceLocked());
+            }
+
+            Boolean policy = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
+                    PolicyDefinition.SECURITY_LOGGING, enforcingAdmin);
+
+            if (!Boolean.TRUE.equals(policy)) {
+                Slogf.e(LOG_TAG, "%s hasn't enabled security logging but tries to retrieve logs",
+                        caller.getPackageName());
+                return null;
+            }
         } else {
             if (admin != null) {
                 Preconditions.checkCallAuthorization(
                         isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        || isDefaultDeviceOwner(caller));
+                                || isDefaultDeviceOwner(caller));
             } else {
                 // A delegate app passes a null admin component, which is expected
                 Preconditions.checkCallAuthorization(
@@ -17745,10 +17846,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
                     || areAllUsersAffiliatedWithDeviceLocked());
-        }
 
-        if (!mInjector.securityLogGetLoggingEnabledProperty()) {
-            return null;
+            if (!mInjector.securityLogGetLoggingEnabledProperty()) {
+                return null;
+            }
         }
 
         recordSecurityLogRetrievalTime();
@@ -17758,7 +17859,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .createEvent(DevicePolicyEnums.RETRIEVE_SECURITY_LOGS)
                 .setAdmin(caller.getPackageName())
                 .write();
-        return logs != null ? new ParceledListSlice<SecurityEvent>(logs) : null;
+        return logs != null ? new ParceledListSlice<>(logs) : null;
     }
 
     @Override
@@ -23477,10 +23578,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS));
         return mInjector.binderWithCleanCallingIdentity(() -> {
             boolean canForceMigration = forceMigration && !hasNonTestOnlyActiveAdmins();
-            if (!canForceMigration && !shouldMigrateToDevicePolicyEngine()) {
+            if (!canForceMigration && !shouldMigrateV1ToDevicePolicyEngine()) {
                 return false;
             }
-            return migratePoliciesToDevicePolicyEngine();
+            return migrateV1PoliciesToDevicePolicyEngine();
         });
     }
 
@@ -23503,14 +23604,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         });
     }
 
-    private boolean shouldMigrateToDevicePolicyEngine() {
+    private boolean shouldMigrateV1ToDevicePolicyEngine() {
         return mInjector.binderWithCleanCallingIdentity(() -> !mOwners.isMigratedToPolicyEngine());
     }
 
     /**
+     * Migrates the initial set of policies to use policy engine.
      * @return {@code true} if policies were migrated successfully, {@code false} otherwise.
      */
-    private boolean migratePoliciesToDevicePolicyEngine() {
+    private boolean migrateV1PoliciesToDevicePolicyEngine() {
         return mInjector.binderWithCleanCallingIdentity(() -> {
             try {
                 synchronized (getLockObject()) {
@@ -23535,6 +23637,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return false;
             }
         });
+    }
+
+    /**
+     * Migrates the rest of policies to use policy engine.
+     */
+    @GuardedBy("getLockObject()")
+    private void migratePoliciesToPolicyEngineLocked() {
+        maybeMigrateSecurityLoggingPolicyLocked();
     }
 
     private void migrateAutoTimezonePolicy() {
