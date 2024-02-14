@@ -199,7 +199,7 @@ public final class EditingEndedEvent extends Event implements Parcelable {
     /** Input audio was edited. */
     public static final long OPERATION_TYPE_AUDIO_EDIT = 1L << 3;
 
-    /** Input video samples were writted (muxed) directly to the output file without transcoding. */
+    /** Input video samples were written (muxed) directly to the output file without transcoding. */
     public static final long OPERATION_TYPE_VIDEO_TRANSMUX = 1L << 4;
 
     /** Input audio samples were written (muxed) directly to the output file without transcoding. */
@@ -272,7 +272,8 @@ public final class EditingEndedEvent extends Event implements Parcelable {
     }
 
     /**
-     * Returns the name of the library implementing the exporting operation, or {@code null} if
+     * Returns the name of the library implementing the exporting operation, for example, a Maven
+     * artifact ID like "androidx.media3.media3-transformer:1.3.0-beta01", or {@code null} if
      * unknown.
      */
     @Nullable
@@ -281,8 +282,8 @@ public final class EditingEndedEvent extends Event implements Parcelable {
     }
 
     /**
-     * Returns the name of the library implementing the media muxing operation, or {@code null} if
-     * unknown.
+     * Returns the name of the library implementing the media muxing operation, for example, a Maven
+     * artifact ID like "androidx.media3.media3-muxer:1.3.0-beta01", or {@code null} if unknown.
      */
     @Nullable
     public String getMuxerName() {
