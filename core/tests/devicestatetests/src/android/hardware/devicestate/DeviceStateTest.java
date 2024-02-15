@@ -16,8 +16,8 @@
 
 package android.hardware.devicestate;
 
-import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
-import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER;
+import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -39,18 +39,18 @@ import org.junit.runners.JUnit4;
 public final class DeviceStateTest {
     @Test
     public void testConstruct() {
-        final DeviceState state = new DeviceState(MINIMUM_DEVICE_STATE /* identifier */,
+        final DeviceState state = new DeviceState(MINIMUM_DEVICE_STATE_IDENTIFIER /* identifier */,
                 "TEST_CLOSED" /* name */, DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS /* flags */);
-        assertEquals(state.getIdentifier(), MINIMUM_DEVICE_STATE);
+        assertEquals(state.getIdentifier(), MINIMUM_DEVICE_STATE_IDENTIFIER);
         assertEquals(state.getName(), "TEST_CLOSED");
         assertEquals(state.getFlags(), DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS);
     }
 
     @Test
     public void testConstruct_nullName() {
-        final DeviceState state = new DeviceState(MAXIMUM_DEVICE_STATE /* identifier */,
+        final DeviceState state = new DeviceState(MAXIMUM_DEVICE_STATE_IDENTIFIER /* identifier */,
                 null /* name */, 0/* flags */);
-        assertEquals(state.getIdentifier(), MAXIMUM_DEVICE_STATE);
+        assertEquals(state.getIdentifier(), MAXIMUM_DEVICE_STATE_IDENTIFIER);
         assertNull(state.getName());
         assertEquals(state.getFlags(), 0);
     }
@@ -58,7 +58,8 @@ public final class DeviceStateTest {
     @Test
     public void testConstruct_tooLargeIdentifier() {
         assertThrows(IllegalArgumentException.class, () -> {
-            final DeviceState state = new DeviceState(MAXIMUM_DEVICE_STATE + 1 /* identifier */,
+            final DeviceState state = new DeviceState(
+                    MAXIMUM_DEVICE_STATE_IDENTIFIER + 1 /* identifier */,
                     null /* name */, 0 /* flags */);
         });
     }
@@ -66,7 +67,8 @@ public final class DeviceStateTest {
     @Test
     public void testConstruct_tooSmallIdentifier() {
         assertThrows(IllegalArgumentException.class, () -> {
-            final DeviceState state = new DeviceState(MINIMUM_DEVICE_STATE - 1 /* identifier */,
+            final DeviceState state = new DeviceState(
+                    MINIMUM_DEVICE_STATE_IDENTIFIER - 1 /* identifier */,
                     null /* name */, 0 /* flags */);
         });
     }
