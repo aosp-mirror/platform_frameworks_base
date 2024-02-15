@@ -28,6 +28,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
@@ -35,7 +36,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.inputmethod.domain.interactor.InputMethodInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
@@ -72,7 +72,7 @@ class BouncerViewModel(
     private val simBouncerInteractor: SimBouncerInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
     private val selectedUserInteractor: SelectedUserInteractor,
-    flags: SceneContainerFlags,
+    flags: ComposeBouncerFlags,
     selectedUser: Flow<UserViewModel>,
     users: Flow<List<UserViewModel>>,
     userSwitcherMenu: Flow<List<UserActionViewModel>>,
@@ -233,7 +233,7 @@ class BouncerViewModel(
     private var lockoutCountdownJob: Job? = null
 
     init {
-        if (flags.isEnabled()) {
+        if (flags.isComposeBouncerOrSceneContainerEnabled()) {
             // Keeps the lockout dialog up-to-date.
             applicationScope.launch {
                 bouncerInteractor.onLockoutStarted.collect {
@@ -478,7 +478,7 @@ object BouncerViewModelModule {
         actionButtonInteractor: BouncerActionButtonInteractor,
         authenticationInteractor: AuthenticationInteractor,
         selectedUserInteractor: SelectedUserInteractor,
-        flags: SceneContainerFlags,
+        flags: ComposeBouncerFlags,
         userSwitcherViewModel: UserSwitcherViewModel,
         clock: SystemClock,
         devicePolicyManager: DevicePolicyManager,
