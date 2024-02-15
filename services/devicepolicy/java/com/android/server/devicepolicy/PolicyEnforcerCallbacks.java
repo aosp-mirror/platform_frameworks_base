@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IntentFilterPolicyKey;
 import android.app.admin.LockTaskPolicy;
 import android.app.admin.PackagePermissionPolicyKey;
@@ -125,6 +126,14 @@ final class PolicyEnforcerCallbacks {
                 throw new IllegalStateException(notPossible);
             }
         }
+    }
+
+    static boolean enforceSecurityLogging(
+            @Nullable Boolean value, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        final var dpmi = LocalServices.getService(DevicePolicyManagerInternal.class);
+        dpmi.enforceSecurityLoggingPolicy(Boolean.TRUE.equals(value));
+        return true;
     }
 
     static boolean setLockTask(

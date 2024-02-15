@@ -263,6 +263,10 @@ public class SystemConfig {
     // location settings are off, for emergency purposes, as read from the configuration files.
     final ArrayMap<String, ArraySet<String>> mAllowIgnoreLocationSettings = new ArrayMap<>();
 
+    // These are the packages that are allow-listed to be able to access camera when
+    // the camera privacy state is for driver assistance apps only.
+    final ArrayMap<String, Boolean> mAllowlistCameraPrivacy = new ArrayMap<>();
+
     // These are the action strings of broadcasts which are whitelisted to
     // be delivered anonymously even to apps which target O+.
     final ArraySet<String> mAllowImplicitBroadcasts = new ArraySet<>();
@@ -481,6 +485,10 @@ public class SystemConfig {
 
     public ArrayMap<String, ArraySet<String>> getAllowedAssociations() {
         return mAllowedAssociations;
+    }
+
+    public ArrayMap<String, Boolean> getCameraPrivacyAllowlist() {
+        return mAllowlistCameraPrivacy;
     }
 
     public ArraySet<String> getBugreportWhitelistedPackages() {
@@ -1056,6 +1064,22 @@ public class SystemConfig {
                                         tags.add(attributionTag);
                                     }
                                 }
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "camera-privacy-allowlisted-app" : {
+                        if (allowOverrideAppRestrictions) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            boolean isMandatory = XmlUtils.readBooleanAttribute(
+                                    parser, "mandatory", false);
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mAllowlistCameraPrivacy.put(pkgname, isMandatory);
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);

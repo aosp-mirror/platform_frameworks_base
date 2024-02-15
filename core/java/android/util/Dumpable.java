@@ -23,6 +23,7 @@ import java.io.PrintWriter;
 /**
  * Represents an object whose state can be dumped into a {@link PrintWriter}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public interface Dumpable {
 
     /**

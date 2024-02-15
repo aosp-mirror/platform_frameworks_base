@@ -65,6 +65,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ProtoInputStream extends ProtoStream {
 
     public static final int NO_MORE_FIELDS = -1;

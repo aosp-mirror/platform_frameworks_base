@@ -36,7 +36,7 @@ import com.android.systemui.plugins.clocks.ClockMetadata
 import com.android.systemui.plugins.clocks.ClockProvider
 import com.android.systemui.plugins.clocks.ClockProviderPlugin
 import com.android.systemui.plugins.clocks.ClockSettings
-import com.android.systemui.util.Assert
+import com.android.systemui.util.ThreadAssert
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -89,6 +89,7 @@ open class ClockRegistry(
     val keepAllLoaded: Boolean,
     subTag: String,
     var isTransitClockEnabled: Boolean = false,
+    val assert: ThreadAssert = ThreadAssert(),
 ) {
     private val TAG = "${ClockRegistry::class.simpleName} ($subTag)"
     private val logger: Logger =
@@ -286,7 +287,7 @@ open class ClockRegistry(
 
     @OpenForTesting
     open fun querySettings() {
-        assertNotMainThread()
+        assert.isNotMainThread()
         val result =
             try {
                 val json =
@@ -313,7 +314,7 @@ open class ClockRegistry(
 
     @OpenForTesting
     open fun applySettings(value: ClockSettings?) {
-        assertNotMainThread()
+        assert.isNotMainThread()
 
         try {
             value?.metadata?.put(KEY_TIMESTAMP, System.currentTimeMillis())
@@ -339,16 +340,6 @@ open class ClockRegistry(
         settings = value
     }
 
-    @OpenForTesting
-    protected open fun assertMainThread() {
-        Assert.isMainThread()
-    }
-
-    @OpenForTesting
-    protected open fun assertNotMainThread() {
-        Assert.isNotMainThread()
-    }
-
     private var isClockChanged = AtomicBoolean(false)
     private fun triggerOnCurrentClockChanged() {
         val shouldSchedule = isClockChanged.compareAndSet(false, true)
@@ -357,7 +348,7 @@ open class ClockRegistry(
         }
 
         scope.launch(mainDispatcher) {
-            assertMainThread()
+            assert.isMainThread()
             isClockChanged.set(false)
             clockChangeListeners.forEach { it.onCurrentClockChanged() }
         }
@@ -371,7 +362,7 @@ open class ClockRegistry(
         }
 
         scope.launch(mainDispatcher) {
-            assertMainThread()
+            assert.isMainThread()
             isClockListChanged.set(false)
             clockChangeListeners.forEach { it.onAvailableClocksChanged() }
         }
@@ -585,7 +576,7 @@ open class ClockRegistry(
      * Calling from main thread to make sure the access is thread safe.
      */
     fun registerClockChangeListener(listener: ClockChangeListener) {
-        assertMainThread()
+        assert.isMainThread()
         clockChangeListeners.add(listener)
     }
 
@@ -595,7 +586,7 @@ open class ClockRegistry(
      * Calling from main thread to make sure the access is thread safe.
      */
     fun unregisterClockChangeListener(listener: ClockChangeListener) {
-        assertMainThread()
+        assert.isMainThread()
         clockChangeListeners.remove(listener)
     }
 

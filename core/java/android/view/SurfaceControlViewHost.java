@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -32,6 +33,8 @@ import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.window.ISurfaceSyncGroup;
 import android.window.InputTransferToken;
 import android.window.WindowTokenClient;
+
+import com.android.window.flags.Flags;
 
 import dalvik.system.CloseGuard;
 
@@ -347,6 +350,25 @@ public class SurfaceControlViewHost {
             @Nullable IBinder hostToken) {
         this(context, display, hostToken == null ? null : new InputTransferToken(hostToken),
                 "untracked");
+
+    }
+
+    /**
+     * Construct a new SurfaceControlViewHost. The root Surface will be
+     * allocated internally and is accessible via getSurfacePackage().
+     * <p>
+     * The hostInputTransferToken parameter allows the host and embedded to be associated with
+     * each other to allow transferring touch gesture and focus. This is also used for ANR
+     * reporting. It's accessible from {@link AttachedSurfaceControl#getInputTransferToken()}.
+     *
+     * @param context                The Context object for your activity or application.
+     * @param display                The Display the hierarchy will be placed on.
+     * @param hostInputTransferToken The host input transfer token, as discussed above.
+     */
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    public SurfaceControlViewHost(@NonNull Context context, @NonNull Display display,
+            @Nullable InputTransferToken hostInputTransferToken) {
+        this(context, display, hostInputTransferToken, "untracked");
     }
 
     /**

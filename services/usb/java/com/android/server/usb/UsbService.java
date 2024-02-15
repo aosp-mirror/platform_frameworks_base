@@ -781,6 +781,20 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USB)
+    @Override
+    public boolean isModeChangeSupported(String portId) {
+        isModeChangeSupported_enforcePermission();
+        Objects.requireNonNull(portId, "portId must not be null");
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mPortManager != null ? mPortManager.isModeChangeSupported(portId) : false;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     @Override
     public void setPortRoles(String portId, int powerRole, int dataRole) {
         Objects.requireNonNull(portId, "portId must not be null");

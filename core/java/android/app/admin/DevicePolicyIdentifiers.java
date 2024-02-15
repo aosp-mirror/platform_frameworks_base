@@ -16,6 +16,8 @@
 
 package android.app.admin;
 
+import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
+
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
@@ -43,6 +45,12 @@ public final class DevicePolicyIdentifiers {
      * String identifier for {@link DevicePolicyManager#setPermissionGrantState}.
      */
     public static final String PERMISSION_GRANT_POLICY = "permissionGrant";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setSecurityLoggingEnabled}.
+     */
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    public static final String SECURITY_LOGGING_POLICY = "securityLogging";
 
     /**
      * String identifier for {@link DevicePolicyManager#setLockTaskPackages}.
@@ -172,6 +180,12 @@ public final class DevicePolicyIdentifiers {
      */
     @FlaggedApi(Flags.FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
     public static final String USB_DATA_SIGNALING_POLICY = "usbDataSignaling";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setRequiredPasswordComplexity}.
+     */
+    @FlaggedApi(Flags.FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
+    public static final String PASSWORD_COMPLEXITY_POLICY = "passwordComplexity";
 
     /**
      * @hide

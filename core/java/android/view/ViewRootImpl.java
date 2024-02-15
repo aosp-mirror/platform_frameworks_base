@@ -103,7 +103,6 @@ import android.accessibilityservice.AccessibilityService;
 import android.animation.AnimationHandler;
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -240,7 +239,6 @@ import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.SurfaceCallbackHelper;
 import com.android.modules.expresslog.Counter;
-import com.android.window.flags.Flags;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11220,25 +11218,15 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * @return Returns a token used for associating the root surface
-     * to {@link SurfaceControlViewHost}.
-     */
-    @Nullable
-    @Override
-    @FlaggedApi(Flags.FLAG_GET_HOST_TOKEN_API)
-    public IBinder getHostToken() {
-        return getInputToken();
-    }
-
-    /**
      * {@inheritDoc}
      */
-    @Nullable
+    @NonNull
     @Override
     public InputTransferToken getInputTransferToken() {
         IBinder inputToken = getInputToken();
         if (inputToken == null) {
-            return null;
+            throw new IllegalStateException(
+                    "Called getInputTransferToken for Window with no input channel");
         }
         return new InputTransferToken(inputToken);
     }

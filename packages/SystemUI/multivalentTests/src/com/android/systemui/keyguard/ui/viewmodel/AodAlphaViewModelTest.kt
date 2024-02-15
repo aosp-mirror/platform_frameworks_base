@@ -25,6 +25,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
@@ -42,49 +44,69 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class AodAlphaViewModelTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var occludedToLockscreenTransitionViewModel:
-        OccludedToLockscreenTransitionViewModel
+    @Mock private lateinit var goneToAodTransitionViewModel: GoneToAodTransitionViewModel
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
-    private val occludedToLockscreenAlpha = MutableStateFlow(0f)
 
     private lateinit var underTest: AodAlphaViewModel
+
+    private val enterFromTopAnimationAlpha = MutableStateFlow(0f)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(occludedToLockscreenTransitionViewModel.lockscreenAlpha)
-            .thenReturn(occludedToLockscreenAlpha)
-        kosmos.occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel
+        whenever(goneToAodTransitionViewModel.enterFromTopAnimationAlpha)
+            .thenReturn(enterFromTopAnimationAlpha)
+        kosmos.goneToAodTransitionViewModel = goneToAodTransitionViewModel
 
         underTest = kosmos.aodAlphaViewModel
     }
 
     @Test
-    fun alpha() =
+    fun alpha_WhenGoneToAod() =
         testScope.runTest {
             val alpha by collectLastValue(underTest.alpha)
 
             keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.OFF,
-                to = KeyguardState.LOCKSCREEN,
+                from = KeyguardState.AOD,
+                to = KeyguardState.GONE,
                 testScope = testScope,
             )
-
-            keyguardRepository.setKeyguardAlpha(0.1f)
-            assertThat(alpha).isEqualTo(0.1f)
-            keyguardRepository.setKeyguardAlpha(0.5f)
-            assertThat(alpha).isEqualTo(0.5f)
-            keyguardRepository.setKeyguardAlpha(0.2f)
-            assertThat(alpha).isEqualTo(0.2f)
-            keyguardRepository.setKeyguardAlpha(0f)
             assertThat(alpha).isEqualTo(0f)
-            occludedToLockscreenAlpha.value = 0.8f
-            assertThat(alpha).isEqualTo(0.8f)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.AOD,
+                testScope = testScope,
+            )
+            enterFromTopAnimationAlpha.value = 0.5f
+            assertThat(alpha).isEqualTo(0.5f)
+
+            enterFromTopAnimationAlpha.value = 1f
+            assertThat(alpha).isEqualTo(1f)
+        }
+
+    @Test
+    fun alpha_WhenGoneToDozing() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.GONE,
+                testScope = testScope,
+            )
+            assertThat(alpha).isEqualTo(0f)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.DOZING,
+                testScope = testScope,
+            )
+            assertThat(alpha).isEqualTo(1f)
         }
 
     @Test
@@ -92,17 +114,53 @@ class AodAlphaViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val alpha by collectLastValue(underTest.alpha)
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GONE,
-                testScope = testScope,
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            assertThat(alpha).isNull()
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.5f,
+                )
+            )
+            assertThat(alpha).isNull()
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 1f,
+                )
+            )
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun enterFromTopAlpha() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha)
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    transitionState = TransitionState.STARTED,
+                )
             )
 
-            keyguardRepository.setKeyguardAlpha(0.1f)
-            assertThat(alpha).isEqualTo(0f)
-            keyguardRepository.setKeyguardAlpha(0.5f)
-            assertThat(alpha).isEqualTo(0f)
-            keyguardRepository.setKeyguardAlpha(1f)
-            assertThat(alpha).isEqualTo(0f)
+            enterFromTopAnimationAlpha.value = 0.2f
+            assertThat(alpha).isEqualTo(0.2f)
+
+            enterFromTopAnimationAlpha.value = 1f
+            assertThat(alpha).isEqualTo(1f)
         }
 }

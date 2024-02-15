@@ -43,6 +43,7 @@ import java.util.stream.Stream;
  * Unless a method specifies otherwise, a null value for a collection is treated as an empty
  * collection of that type.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class CollectionUtils {
     private CollectionUtils() { /* cannot be instantiated */ }
 

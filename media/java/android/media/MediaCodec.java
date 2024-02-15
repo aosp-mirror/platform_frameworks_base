@@ -16,6 +16,11 @@
 
 package android.media;
 
+import static android.media.codec.Flags.FLAG_NULL_OUTPUT_SURFACE;
+import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
+
+import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
+
 import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -51,7 +56,6 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,7 +66,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
 /**
  MediaCodec class can be used to access low-level media codecs, i.e. encoder/decoder components.
  It is part of the Android low-level multimedia support infrastructure (normally used together
@@ -2211,6 +2214,18 @@ final public class MediaCodec {
      */
     public static final int CONFIGURE_FLAG_USE_CRYPTO_ASYNC = 4;
 
+    /**
+     * Configure the codec with a detached output surface.
+     * <p>
+     * This flag is only defined for a video decoder. MediaCodec
+     * configured with this flag will be in Surface mode even though
+     * the surface parameter is null.
+     *
+     * @see detachOutputSurface
+     */
+    @FlaggedApi(FLAG_NULL_OUTPUT_SURFACE)
+    public static final int CONFIGURE_FLAG_DETACHED_SURFACE = 8;
+
     /** @hide */
     @IntDef(
         flag = true,
@@ -2391,6 +2406,31 @@ final public class MediaCodec {
     }
 
     private native void native_setSurface(@NonNull Surface surface);
+
+    /**
+     *  Detach the current output surface of a codec.
+     *  <p>
+     *  Detaches the currently associated output Surface from the
+     *  MediaCodec decoder. This allows the SurfaceView or other
+     *  component holding the Surface to be safely destroyed or
+     *  modified without affecting the decoder's operation. After
+     *  calling this method (and after it returns), the decoder will
+     *  enter detached-Surface mode and will no longer render
+     *  output.
+     *
+     *  @throws IllegalStateException if the codec was not
+     *                                configured in surface mode.
+     *  @see CONFIGURE_FLAG_DETACHED_SURFACE
+     */
+    @FlaggedApi(FLAG_NULL_OUTPUT_SURFACE)
+    public void detachOutputSurface() {
+        if (!mHasSurface) {
+            throw new IllegalStateException("codec was not configured for an output surface");
+        }
+        // note: we still have a surface in detached mode, so keep mHasSurface
+        // we also technically allow calling detachOutputSurface multiple times in a row
+        // native_detachSurface();
+    }
 
     /**
      * Create a persistent input surface that can be used with codecs that normally have an input
@@ -3210,12 +3250,62 @@ final public class MediaCodec {
         }
     }
 
+    /**
+     * Similar to {@link #queueInputBuffers queueInputBuffers} but submits multiple access units
+     * in a buffer that is potentially encrypted.
+     * <strong>Check out further notes at {@link #queueInputBuffers queueInputBuffers}.</strong>
+     *
+     * @param index The index of a client-owned input buffer previously returned
+     *              in a call to {@link #dequeueInputBuffer}.
+     * @param bufferInfos ArrayDeque of {@link MediaCodec.BufferInfo} that describes the
+     *                    contents in the buffer. The ArrayDeque and the BufferInfo objects provided
+     *                    can be recycled by the caller for re-use.
+     * @param cryptoInfos ArrayDeque of {@link MediaCodec.CryptoInfo} objects to facilitate the
+     *                    decryption of the contents. The ArrayDeque and the CryptoInfo objects
+     *                    provided can be reused immediately after the call returns. These objects
+     *                    should correspond to bufferInfo objects to ensure correct decryption.
+     * @throws IllegalStateException if not in the Executing state or not in asynchronous mode.
+     * @throws MediaCodec.CodecException upon codec error.
+     * @throws IllegalArgumentException upon if bufferInfos is empty, contains null, or if the
+     *                    access units are not contiguous.
+     * @throws CryptoException if an error occurs while attempting to decrypt the buffer.
+     *              An error code associated with the exception helps identify the
+     *              reason for the failure.
+     */
+    @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+    public final void queueSecureInputBuffers(
+            int index,
+            @NonNull ArrayDeque<BufferInfo> bufferInfos,
+            @NonNull ArrayDeque<CryptoInfo> cryptoInfos) {
+        synchronized(mBufferLock) {
+            if (mBufferMode == BUFFER_MODE_BLOCK) {
+                throw new IncompatibleWithBlockModelException("queueSecureInputBuffers() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please use getQueueRequest() to queue buffers");
+            }
+            invalidateByteBufferLocked(mCachedInputBuffers, index, true /* input */);
+            mDequeuedInputBuffers.remove(index);
+        }
+        try {
+            native_queueSecureInputBuffers(
+                    index, bufferInfos.toArray(), cryptoInfos.toArray());
+        } catch (CryptoException | IllegalStateException | IllegalArgumentException e) {
+            revalidateByteBuffer(mCachedInputBuffers, index, true /* input */);
+            throw e;
+        }
+    }
+
     private native final void native_queueSecureInputBuffer(
             int index,
             int offset,
             @NonNull CryptoInfo info,
             long presentationTimeUs,
             int flags) throws CryptoException;
+
+    private native final void native_queueSecureInputBuffers(
+            int index,
+            @NonNull Object[] bufferInfos,
+            @NonNull Object[] cryptoInfos) throws CryptoException, CodecException;
 
     /**
      * Returns the index of an input buffer to be filled with valid data
@@ -3462,7 +3552,7 @@ final public class MediaCodec {
             mLinearBlock = block;
             mOffset = offset;
             mSize = size;
-            mCryptoInfo = null;
+            mCryptoInfos.clear();
             return this;
         }
 
@@ -3496,7 +3586,44 @@ final public class MediaCodec {
             mLinearBlock = block;
             mOffset = offset;
             mSize = size;
-            mCryptoInfo = cryptoInfo;
+            mCryptoInfos.clear();
+            mCryptoInfos.add(cryptoInfo);
+            return this;
+        }
+
+        /**
+         * Set an encrypted linear block to this queue request. Exactly one buffer must be
+         * set for a queue request before calling {@link #queue}. The block can contain multiple
+         * access units and if present should be laid out contiguously and without gaps.
+         *
+         * @param block The linear block object
+         * @param bufferInfos ArrayDeque of {@link MediaCodec.BufferInfo} that describes the
+         *                    contents in the buffer. The ArrayDeque and the BufferInfo objects
+         *                    provided can be recycled by the caller for re-use.
+         * @param cryptoInfos ArrayDeque of {@link MediaCodec.CryptoInfo} that describes the
+         *                    structure of the encrypted input samples. The ArrayDeque and the
+         *                    BufferInfo objects provided can be recycled by the caller for re-use.
+         * @return this object
+         * @throws IllegalStateException if a buffer is already set
+         * @throws IllegalArgumentException upon if bufferInfos is empty, contains null, or if the
+         *                     access units are not contiguous.
+         */
+        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+        public @NonNull QueueRequest setMultiFrameEncryptedLinearBlock(
+                @NonNull LinearBlock block,
+                @NonNull ArrayDeque<MediaCodec.BufferInfo> bufferInfos,
+                @NonNull ArrayDeque<MediaCodec.CryptoInfo> cryptoInfos) {
+            if (!isAccessible()) {
+                throw new IllegalStateException("The request is stale");
+            }
+            if (mLinearBlock != null || mHardwareBuffer != null) {
+                throw new IllegalStateException("Cannot set block twice");
+            }
+            mLinearBlock = block;
+            mBufferInfos.clear();
+            mBufferInfos.addAll(bufferInfos);
+            mCryptoInfos.clear();
+            mCryptoInfos.addAll(cryptoInfos);
             return this;
         }
 
@@ -3708,8 +3835,10 @@ final public class MediaCodec {
                 mBufferInfos.add(info);
             }
             if (mLinearBlock != null) {
+
                 mCodec.native_queueLinearBlock(
-                        mIndex, mLinearBlock, mCryptoInfo,
+                        mIndex, mLinearBlock,
+                        mCryptoInfos.isEmpty() ? null : mCryptoInfos.toArray(),
                         mBufferInfos.toArray(),
                         mTuningKeys, mTuningValues);
             } else if (mHardwareBuffer != null) {
@@ -3724,11 +3853,11 @@ final public class MediaCodec {
             mLinearBlock = null;
             mOffset = 0;
             mSize = 0;
-            mCryptoInfo = null;
             mHardwareBuffer = null;
             mPresentationTimeUs = 0;
             mFlags = 0;
             mBufferInfos.clear();
+            mCryptoInfos.clear();
             mTuningKeys.clear();
             mTuningValues.clear();
             return this;
@@ -3748,11 +3877,11 @@ final public class MediaCodec {
         private LinearBlock mLinearBlock = null;
         private int mOffset = 0;
         private int mSize = 0;
-        private MediaCodec.CryptoInfo mCryptoInfo = null;
         private HardwareBuffer mHardwareBuffer = null;
         private long mPresentationTimeUs = 0;
         private @BufferFlag int mFlags = 0;
         private final ArrayDeque<BufferInfo> mBufferInfos = new ArrayDeque<>();
+        private final ArrayDeque<CryptoInfo> mCryptoInfos = new ArrayDeque<>();
         private final ArrayList<String> mTuningKeys = new ArrayList<>();
         private final ArrayList<Object> mTuningValues = new ArrayList<>();
 
@@ -3762,7 +3891,7 @@ final public class MediaCodec {
     private native void native_queueLinearBlock(
             int index,
             @NonNull LinearBlock block,
-            @Nullable CryptoInfo cryptoInfo,
+            @Nullable Object[] cryptoInfos,
             @NonNull Object[] bufferInfos,
             @NonNull ArrayList<String> keys,
             @NonNull ArrayList<Object> values);
@@ -4936,6 +5065,68 @@ final public class MediaCodec {
      * @see #setParameters(Bundle)
      */
     public static final String PARAMETER_KEY_TUNNEL_PEEK = "tunnel-peek";
+
+    /**
+     * Set the region of interest as QpOffset-Map on the next queued input frame.
+     * <p>
+     * The associated value is a byte array containing quantization parameter (QP) offsets in
+     * raster scan order for the entire frame at 16x16 granularity. The size of the byte array
+     * shall be ((frame_width + 15) / 16) * ((frame_height + 15) / 16), where frame_width and
+     * frame_height correspond to width and height configured using {@link MediaFormat#KEY_WIDTH}
+     * and {@link MediaFormat#KEY_HEIGHT} keys respectively. During encoding, if the coding unit
+     * size is larger than 16x16, then the qpOffset information of all 16x16 blocks that
+     * encompass the coding unit is combined and used. The QP of target block will be calculated
+     * as 'frameQP + offsetQP'. If the result exceeds minQP or maxQP configured then the value
+     * may be clamped. Negative offset results in blocks encoded at lower QP than frame QP and
+     * positive offsets will result in encoding blocks at higher QP than frame QP. If the areas
+     * of negative QP and positive QP are chosen wisely, the overall viewing experience can be
+     * improved.
+     * <p>
+     * If byte array size is too small than the expected size, components may ignore the
+     * configuration silently. If the byte array exceeds the expected size, components shall use
+     * the initial portion and ignore the rest.
+     * <p>
+     * The scope of this key is throughout the encoding session until it is reconfigured during
+     * running state.
+     * <p>
+     * @see #setParameters(Bundle)
+     */
+    @FlaggedApi(FLAG_REGION_OF_INTEREST)
+    public static final String PARAMETER_KEY_QP_OFFSET_MAP = "qp-offset-map";
+
+    /**
+     * Set the region of interest as QpOffset-Rects on the next queued input frame.
+     * <p>
+     * The associated value is a String in the format "Top1,Left1-Bottom1,Right1=Offset1;Top2,
+     * Left2-Bottom2,Right2=Offset2;...". Co-ordinates (Top, Left), (Top, Right), (Bottom, Left)
+     * and (Bottom, Right) form the vertices of bounding box of region of interest in pixels.
+     * Pixel (0, 0) points to the top-left corner of the frame. Offset is the suggested
+     * quantization parameter (QP) offset of the blocks in the bounding box. The bounding box
+     * will get stretched outwards to align to LCU boundaries during encoding. The Qp Offset is
+     * integral and shall be in the range [-128, 127]. The QP of target block will be calculated
+     * as frameQP + offsetQP. If the result exceeds minQP or maxQP configured then the value may
+     * be clamped. Negative offset results in blocks encoded at lower QP than frame QP and
+     * positive offsets will result in blocks encoded at higher QP than frame QP. If the areas of
+     * negative QP and positive QP are chosen wisely, the overall viewing experience can be
+     * improved.
+     * <p>
+     * If Roi rect is not valid that is bounding box width is < 0 or bounding box height is < 0,
+     * components may ignore the configuration silently. If Roi rect extends outside frame
+     * boundaries, then rect shall be clamped to the frame boundaries.
+     * <p>
+     * The scope of this key is throughout the encoding session until it is reconfigured during
+     * running state.
+     * <p>
+     * The maximum number of contours (rectangles) that can be specified for a given input frame
+     * is device specific. Implementations will drop/ignore the rectangles that are beyond their
+     * supported limit. Hence it is preferable to place the rects in descending order of
+     * importance. Transitively, if the bounding boxes overlap, then the most preferred
+     * rectangle's qp offset (earlier rectangle qp offset) will be used to quantize the block.
+     * <p>
+     * @see #setParameters(Bundle)
+     */
+    @FlaggedApi(FLAG_REGION_OF_INTEREST)
+    public static final String PARAMETER_KEY_QP_OFFSET_RECTS = "qp-offset-rects";
 
     /**
      * Communicate additional parameter changes to the component instance.

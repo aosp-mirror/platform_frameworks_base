@@ -19,14 +19,17 @@ package android.service.voice;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.ComponentName;
+import android.media.AudioFormat;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 
 import com.android.internal.annotations.Immutable;
 
 /**
- * @hide
- * Private interface to the VoiceInteractionManagerService for use by ActivityManagerService.
+ * @hide Private interface to the VoiceInteractionManagerService for use within system_server.
  */
 public abstract class VoiceInteractionManagerInternal {
 
@@ -77,6 +80,25 @@ public abstract class VoiceInteractionManagerInternal {
     public abstract void onPreCreatedUserConversion(@UserIdInt int userId);
 
     /**
+     * Called by {@link com.android.server.wearable.WearableSensingManagerPerUserService} when a
+     * wearable starts sending audio data for hotword detection.
+     *
+     * @param audioStream The audio data.
+     * @param audioFormat The format of the audio data.
+     * @param options Options supporting hotword detection.
+     * @param targetVisComponentName The target VoiceInteractionService ComponentName
+     * @param userId The user ID of the calling wearable service
+     * @param callback The callback to notify the caller of the hotword detection result.
+     */
+    public abstract void startListeningFromWearable(
+            ParcelFileDescriptor audioStream,
+            AudioFormat audioFormat,
+            PersistableBundle options,
+            ComponentName targetVisComponentName,
+            int userId,
+            WearableHotwordDetectionCallback callback);
+
+    /**
      * Provides the uids of the currently active
      * {@link android.service.voice.HotwordDetectionService} and its owning package. The
      * HotwordDetectionService is an isolated service, so it has a separate uid.
@@ -100,5 +122,21 @@ public abstract class VoiceInteractionManagerInternal {
         public int getOwnerUid() {
             return mOwnerUid;
         }
+    }
+
+    /**
+     * Callback for returning the detected hotword result to the wearable.
+     *
+     * @hide
+     */
+    public interface WearableHotwordDetectionCallback {
+        /** Called when hotword is detected. */
+        void onDetected();
+
+        /** Called when hotword is not detected. */
+        void onRejected();
+
+        /** Called when an unexpected error occurs. */
+        void onError(String errorMessage);
     }
 }

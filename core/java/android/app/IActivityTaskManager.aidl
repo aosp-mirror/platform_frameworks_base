@@ -332,8 +332,10 @@ interface IActivityTaskManager {
 
     /**
      * When the Picture-in-picture state has changed.
+     * @param pipState the {@link PictureInPictureUiState} is sent to current pip task if there is
+     * any -or- the top most task (state like entering PiP does not require a pinned task).
      */
-    void onPictureInPictureStateChanged(in PictureInPictureUiState pipState);
+    void onPictureInPictureUiStateChanged(in PictureInPictureUiState pipState);
 
     /**
      * Re-attach navbar to the display during a recents transition.

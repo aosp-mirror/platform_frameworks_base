@@ -1017,7 +1017,8 @@ public final class MediaRouter2 {
         updateRoutesOnHandler(currentRoutes);
 
         RoutingSessionInfo oldInfo = mSystemController.getRoutingSessionInfo();
-        mSystemController.setRoutingSessionInfo(currentSystemSessionInfo);
+        mSystemController.setRoutingSessionInfo(ensureClientPackageNameForSystemSession(
+                currentSystemSessionInfo, mContext.getPackageName()));
         if (!oldInfo.equals(currentSystemSessionInfo)) {
             notifyControllerUpdated(mSystemController);
         }
@@ -1438,6 +1439,25 @@ public final class MediaRouter2 {
         for (ControllerCallbackRecord record : mControllerCallbackRecords) {
             record.mExecutor.execute(() -> record.mCallback.onControllerUpdated(controller));
         }
+    }
+
+    /**
+     * Sets the routing session's {@linkplain RoutingSessionInfo#getClientPackageName() client
+     * package name} to {@code packageName} if empty and returns the session.
+     *
+     * <p>This method must only be used for {@linkplain RoutingSessionInfo#isSystemSession()
+     * system routing sessions}.
+     */
+    private static RoutingSessionInfo ensureClientPackageNameForSystemSession(
+            @NonNull RoutingSessionInfo sessionInfo, @NonNull String packageName) {
+        if (!sessionInfo.isSystemSession()
+                || !TextUtils.isEmpty(sessionInfo.getClientPackageName())) {
+            return sessionInfo;
+        }
+
+        return new RoutingSessionInfo.Builder(sessionInfo)
+                .setClientPackageName(packageName)
+                .build();
     }
 
     /** Callback for receiving events about media route discovery. */
@@ -2891,25 +2911,6 @@ public final class MediaRouter2 {
         }
 
         /**
-         * Sets the routing session's {@linkplain RoutingSessionInfo#getClientPackageName() client
-         * package name} to {@link #mClientPackageName} if empty and returns the session.
-         *
-         * <p>This method must only be used for {@linkplain RoutingSessionInfo#isSystemSession()
-         * system routing sessions}.
-         */
-        private RoutingSessionInfo ensureClientPackageNameForSystemSession(
-                RoutingSessionInfo sessionInfo) {
-            if (!sessionInfo.isSystemSession()
-                    || !TextUtils.isEmpty(sessionInfo.getClientPackageName())) {
-                return sessionInfo;
-            }
-
-            return new RoutingSessionInfo.Builder(sessionInfo)
-                    .setClientPackageName(mClientPackageName)
-                    .build();
-        }
-
-        /**
          * Requests the release of a {@linkplain RoutingSessionInfo routing session}. Calls {@link
          * #onSessionReleasedOnHandler(RoutingSessionInfo)} on success.
          *
@@ -2997,7 +2998,7 @@ public final class MediaRouter2 {
             RoutingController oldController;
             if (oldSession.isSystemSession()) {
                 mSystemController.setRoutingSessionInfo(
-                        ensureClientPackageNameForSystemSession(oldSession));
+                        ensureClientPackageNameForSystemSession(oldSession, mClientPackageName));
                 oldController = mSystemController;
             } else {
                 oldController = new RoutingController(oldSession);
@@ -3006,7 +3007,7 @@ public final class MediaRouter2 {
             RoutingController newController;
             if (newSession.isSystemSession()) {
                 mSystemController.setRoutingSessionInfo(
-                        ensureClientPackageNameForSystemSession(newSession));
+                        ensureClientPackageNameForSystemSession(newSession, mClientPackageName));
                 newController = mSystemController;
             } else {
                 newController = new RoutingController(newSession);
@@ -3033,7 +3034,7 @@ public final class MediaRouter2 {
             RoutingController controller;
             if (session.isSystemSession()) {
                 mSystemController.setRoutingSessionInfo(
-                        ensureClientPackageNameForSystemSession(session));
+                        ensureClientPackageNameForSystemSession(session, mClientPackageName));
                 controller = mSystemController;
             } else {
                 controller = new RoutingController(session);
@@ -3303,7 +3304,8 @@ public final class MediaRouter2 {
         public RoutingSessionInfo getSystemSessionInfo() {
             RoutingSessionInfo currentSystemSessionInfo = null;
             try {
-                currentSystemSessionInfo = mMediaRouterService.getSystemSessionInfo();
+                currentSystemSessionInfo = ensureClientPackageNameForSystemSession(
+                        mMediaRouterService.getSystemSessionInfo(), mContext.getPackageName());
             } catch (RemoteException ex) {
                 ex.rethrowFromSystemServer();
             }

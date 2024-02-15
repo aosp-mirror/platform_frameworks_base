@@ -535,19 +535,19 @@ public final class WindowManagerImpl implements WindowManager {
 
     @Override
     public void registerBatchedSurfaceControlInputReceiver(int displayId,
-            @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
-            @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
-        mGlobal.registerBatchedSurfaceControlInputReceiver(displayId,
-                new InputTransferToken(hostToken),
+            @NonNull InputTransferToken hostInputTransferToken,
+            @NonNull SurfaceControl surfaceControl, @NonNull Choreographer choreographer,
+            @NonNull SurfaceControlInputReceiver receiver) {
+        mGlobal.registerBatchedSurfaceControlInputReceiver(displayId, hostInputTransferToken,
                 surfaceControl, choreographer, receiver);
     }
 
     @Override
-    public void registerUnbatchedSurfaceControlInputReceiver(
-            int displayId, @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
-            @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
-        mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId,
-                new InputTransferToken(hostToken),
+    public void registerUnbatchedSurfaceControlInputReceiver(int displayId,
+            @NonNull InputTransferToken hostInputTransferToken,
+            @NonNull SurfaceControl surfaceControl, @NonNull Looper looper,
+            @NonNull SurfaceControlInputReceiver receiver) {
+        mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId, hostInputTransferToken,
                 surfaceControl, looper, receiver);
     }
 

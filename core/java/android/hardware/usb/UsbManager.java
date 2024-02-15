@@ -1474,6 +1474,21 @@ public class UsbManager {
     }
 
     /**
+     * Checks if the given port supports mode change. Should only be called by
+     * {@link UsbPort#isModeChangeSupported}.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    boolean isModeChangeSupported(UsbPort port) {
+        try {
+            return mService.isModeChangeSupported(port.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Should only be called by {@link UsbPort#setRoles}.
      *
      * @hide

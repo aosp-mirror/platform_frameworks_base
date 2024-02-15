@@ -39,7 +39,10 @@ public class ProcessWrapper {
     /**
      * Returns {@link UserHandle} as returned statically by {@link Process#myUserHandle()}.
      *
-     * Please strongly consider using {@link com.android.systemui.settings.UserTracker} instead.
+     * This should not be used to get the "current" user. This information only applies to the
+     * current process, not the current state of SystemUI. Please use
+     * {@link com.android.systemui.settings.UserTracker} if you want to learn about the currently
+     * active user in SystemUI.
      */
     public UserHandle myUserHandle() {
         return Process.myUserHandle();

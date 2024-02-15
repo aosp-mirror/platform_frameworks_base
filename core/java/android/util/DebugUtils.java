@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 /**
  * <p>Various utilities for debugging and logging.</p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class DebugUtils {
     /** @hide */ public DebugUtils() {}
 

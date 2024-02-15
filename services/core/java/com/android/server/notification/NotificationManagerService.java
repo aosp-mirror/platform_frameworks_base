@@ -1038,15 +1038,17 @@ public class NotificationManagerService extends SystemService {
         }
         int oldFlags = summary.getSbn().getNotification().flags;
 
-        boolean iconUpdated =
+        boolean attributesUpdated =
                 !summaryAttr.icon.sameAs(summary.getSbn().getNotification().getSmallIcon())
-                || summaryAttr.iconColor != summary.getSbn().getNotification().color;
+                || summaryAttr.iconColor != summary.getSbn().getNotification().color
+                || summaryAttr.visibility != summary.getSbn().getNotification().visibility;
 
-        if (oldFlags != summaryAttr.flags || iconUpdated) {
+        if (oldFlags != summaryAttr.flags || attributesUpdated) {
             summary.getSbn().getNotification().flags =
                     summaryAttr.flags != GroupHelper.FLAG_INVALID ? summaryAttr.flags : oldFlags;
             summary.getSbn().getNotification().setSmallIcon(summaryAttr.icon);
             summary.getSbn().getNotification().color = summaryAttr.iconColor;
+            summary.getSbn().getNotification().visibility = summaryAttr.visibility;
             mHandler.post(new EnqueueNotificationRunnable(userId, summary, isAppForeground,
                     mPostNotificationTrackerFactory.newTracker(null)));
         }
@@ -2939,7 +2941,8 @@ public class NotificationManagerService extends SystemService {
             public void addAutoGroupSummary(int userId, String pkg, String triggeringKey,
                     NotificationAttributes summaryAttr) {
                 NotificationRecord r = createAutoGroupSummary(userId, pkg, triggeringKey,
-                        summaryAttr.flags, summaryAttr.icon, summaryAttr.iconColor);
+                        summaryAttr.flags, summaryAttr.icon, summaryAttr.iconColor,
+                        summaryAttr.visibility);
                 if (r != null) {
                     final boolean isAppForeground =
                             mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
@@ -6725,7 +6728,7 @@ public class NotificationManagerService extends SystemService {
 
     // Creates a 'fake' summary for a package that has exceeded the solo-notification limit.
     NotificationRecord createAutoGroupSummary(int userId, String pkg, String triggeringKey,
-            int flagsToSet, Icon summaryIcon, int summaryIconColor) {
+            int flagsToSet, Icon summaryIcon, int summaryIconColor, int summaryVisibilty) {
         NotificationRecord summaryRecord = null;
         boolean isPermissionFixed = mPermissionHelper.isPermissionFixed(pkg, userId);
         synchronized (mNotificationLock) {
@@ -6760,6 +6763,7 @@ public class NotificationManagerService extends SystemService {
                                 .setGroup(GroupHelper.AUTOGROUP_KEY)
                                 .setFlag(flagsToSet, true)
                                 .setColor(summaryIconColor)
+                                .setVisibility(summaryVisibilty)
                                 .build();
                 summaryNotification.extras.putAll(extras);
                 Intent appIntent = getContext().getPackageManager().getLaunchIntentForPackage(pkg);

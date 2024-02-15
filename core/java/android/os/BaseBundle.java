@@ -43,6 +43,7 @@ import java.util.function.BiFunction;
  * should work directly with either the {@link Bundle} or
  * {@link PersistableBundle} subclass.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BaseBundle {
     /** @hide */
     protected static final String TAG = "Bundle";

@@ -16,6 +16,7 @@
 
 #include <SkFontMetrics.h>
 #include <SkRRect.h>
+#include <SkTextBlob.h>
 #include <com_android_graphics_hwui_flags.h>
 
 #include "../utils/Color.h"
@@ -66,7 +67,7 @@ public:
      * @param bounds bounds of the text. Only required if high contrast text mode is enabled.
      */
     DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas, const Paint& paint, float x,
-                    float y, float totalAdvance, const minikin::MinikinRect& bounds)
+                    float y, float totalAdvance)
             : layout(layout)
             , canvas(canvas)
             , paint(paint)
@@ -74,8 +75,7 @@ public:
             , y(y)
             , totalAdvance(totalAdvance)
             , underlinePosition(0)
-            , underlineThickness(0)
-            , bounds(bounds) {}
+            , underlineThickness(0) {}
 
     void operator()(size_t start, size_t end) {
         auto glyphFunc = [&](uint16_t* text, float* positions) {
@@ -106,12 +106,32 @@ public:
             simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, &outlinePaint);
             outlinePaint.setStyle(SkPaint::kStrokeAndFill_Style);
             if (flags::high_contrast_text_small_text_rect()) {
-                auto bgBounds(bounds);
-                auto padding = kHighContrastTextBorderWidth + 0.1f * paint.getSkFont().getSize();
-                bgBounds.offset(x, y);
-                canvas->drawRect(bgBounds.mLeft - padding, bgBounds.mTop - padding,
-                                 bgBounds.mRight + padding, bgBounds.mBottom + padding,
-                                 outlinePaint);
+                const SkFont& font = paint.getSkFont();
+                auto padding = kHighContrastTextBorderWidth + 0.1f * font.getSize();
+
+                // Draw the background only behind each glyph's bounds. We do this instead of using
+                // the bounds of the entire layout, because the layout includes alignment whitespace
+                // etc which can obscure other text from separate passes (e.g. emojis).
+                // Merge all the glyph bounds into one rect for this line, since drawing a rect for
+                // each glyph is expensive.
+                SkRect glyphBounds;
+                SkRect bgBounds;
+                for (size_t i = start; i < end; i++) {
+                    auto glyph = layout.getGlyphId(i);
+
+                    font.getBounds(reinterpret_cast<const SkGlyphID*>(&glyph), 1, &glyphBounds,
+                                   &paint);
+                    glyphBounds.offset(layout.getX(i), layout.getY(i));
+
+                    bgBounds.join(glyphBounds);
+                }
+
+                if (!bgBounds.isEmpty()) {
+                    bgBounds.offset(x, y);
+                    bgBounds.outset(padding, padding);
+                    canvas->drawRect(bgBounds.fLeft, bgBounds.fTop, bgBounds.fRight,
+                                     bgBounds.fBottom, outlinePaint);
+                }
             } else {
                 canvas->drawGlyphs(glyphFunc, glyphCount, outlinePaint, x, y, totalAdvance);
             }
@@ -169,7 +189,6 @@ private:
     float totalAdvance;
     float underlinePosition;
     float underlineThickness;
-    const minikin::MinikinRect& bounds;
 };
 
 }  // namespace android

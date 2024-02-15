@@ -75,6 +75,7 @@ aconfig_srcjars = [
     ":com.android.internal.pm.pkg.component.flags-aconfig-java{.generated_srcjars}",
     ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
     ":com.android.media.flags.editing-aconfig-java{.generated_srcjars}",
+    ":com.android.media.flags.projection-aconfig-java{.generated_srcjars}",
     ":com.android.net.thread.flags-aconfig-java{.generated_srcjars}",
     ":com.android.server.flags.services-aconfig-java{.generated_srcjars}",
     ":com.android.text.flags-aconfig-java{.generated_srcjars}",
@@ -563,6 +564,21 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com.android.media.flags.editing-aconfig-java",
     aconfig_declarations: "com.android.media.flags.editing-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// MediaProjection
+aconfig_declarations {
+    name: "com.android.media.flags.projection-aconfig",
+    package: "com.android.media.projection.flags",
+    srcs: [
+        "media/java/android/media/flags/projection.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "com.android.media.flags.projection-aconfig-java",
+    aconfig_declarations: "com.android.media.flags.projection-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

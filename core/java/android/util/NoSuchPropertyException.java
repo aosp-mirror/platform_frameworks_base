@@ -21,6 +21,7 @@ package android.util;
  *
  * @see Property#of(java.lang.Class, java.lang.Class, java.lang.String)
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class NoSuchPropertyException extends RuntimeException {
 
     public NoSuchPropertyException(String s) {

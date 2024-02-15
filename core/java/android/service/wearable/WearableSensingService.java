@@ -37,6 +37,7 @@ import android.os.RemoteCallback;
 import android.os.SharedMemory;
 import android.service.ambientcontext.AmbientContextDetectionResult;
 import android.service.ambientcontext.AmbientContextDetectionServiceStatus;
+import android.service.voice.HotwordAudioStream;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -83,6 +84,14 @@ public abstract class WearableSensingService extends Service {
      */
     public static final String STATUS_RESPONSE_BUNDLE_KEY =
             "android.app.wearable.WearableSensingStatusBundleKey";
+
+    /**
+     * The bundle key for hotword audio stream, used in {@code RemoteCallback#sendResult}.
+     *
+     * @hide
+     */
+    public static final String HOTWORD_AUDIO_STREAM_BUNDLE_KEY =
+            "android.app.wearable.HotwordAudioStreamBundleKey";
 
     /**
      * The {@link Intent} that must be declared as handled by the service. To be supported, the
@@ -179,6 +188,50 @@ public abstract class WearableSensingService extends Service {
                     Consumer<Integer> statusConsumer = createWearableStatusConsumer(statusCallback);
                     WearableSensingService.this.onDataRequestObserverUnregistered(
                             dataType, packageName, dataRequester, statusConsumer);
+                }
+
+                @Override
+                public void startHotwordRecognition(
+                        RemoteCallback wearableHotwordCallback, RemoteCallback statusCallback) {
+                    Consumer<HotwordAudioStream> hotwordAudioConsumer =
+                            (hotwordAudioStream) -> {
+                                Bundle bundle = new Bundle();
+                                bundle.putParcelable(
+                                        HOTWORD_AUDIO_STREAM_BUNDLE_KEY, hotwordAudioStream);
+                                wearableHotwordCallback.sendResult(bundle);
+                            };
+                    Consumer<Integer> statusConsumer =
+                            response -> {
+                                Bundle bundle = new Bundle();
+                                bundle.putInt(STATUS_RESPONSE_BUNDLE_KEY, response);
+                                statusCallback.sendResult(bundle);
+                            };
+                    WearableSensingService.this.onStartHotwordRecognition(
+                            hotwordAudioConsumer, statusConsumer);
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public void stopHotwordRecognition(RemoteCallback statusCallback) {
+                    Consumer<Integer> statusConsumer =
+                            response -> {
+                                Bundle bundle = new Bundle();
+                                bundle.putInt(STATUS_RESPONSE_BUNDLE_KEY, response);
+                                statusCallback.sendResult(bundle);
+                            };
+                    WearableSensingService.this.onStopHotwordRecognition(statusConsumer);
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public void onValidatedByHotwordDetectionService() {
+                    WearableSensingService.this.onValidatedByHotwordDetectionService();
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public void stopActiveHotwordAudio() {
+                    WearableSensingService.this.onStopHotwordAudioStream();
                 }
 
                 /** {@inheritDoc} */
@@ -377,6 +430,100 @@ public abstract class WearableSensingService extends Service {
     }
 
     /**
+     * Called when the wearable is requested to start hotword recognition.
+     *
+     * <p>This method is expected to be overridden by a derived class. The implementation should
+     * store the {@code hotwordAudioConsumer} and send it the audio data when first-stage hotword is
+     * detected from the wearable. It should also send a {@link
+     * WearableSensingManager#STATUS_SUCCESS} status code to the {@code statusConsumer} unless it
+     * encounters an error condition described by a status code listed in {@link
+     * WearableSensingManager}, such as {@link WearableSensingManager#STATUS_WEARABLE_UNAVAILABLE},
+     * in which case it should return the corresponding status code.
+     *
+     * <p>The implementation should also store the {@code statusConsumer}. If the wearable stops
+     * listening for hotword for any reason other than {@link #onStopListeningForHotword(Consumer)}
+     * being invoked, it should send an appropriate status code listed in {@link
+     * WearableSensingManager} to {@code statusConsumer}. If the error condition cannot be described
+     * by any of those status codes, it should send a {@link WearableSensingManager#STATUS_UNKNOWN}.
+     *
+     * <p>If this method is called again, the implementation should use the new {@code
+     * hotwordAudioConsumer} and discard any previous ones it received.
+     *
+     * <p>At this time, the {@code timestamp} field in the {@link HotwordAudioStream} is not used
+     * and will be discarded by the system.
+     *
+     * @param hotwordAudioConsumer The consumer for the wearable hotword audio data.
+     * @param statusConsumer The consumer for the service status.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+    @BinderThread
+    public void onStartHotwordRecognition(
+            @NonNull Consumer<HotwordAudioStream> hotwordAudioConsumer,
+            @NonNull Consumer<Integer> statusConsumer) {
+        if (Flags.enableUnsupportedOperationStatusCode()) {
+            statusConsumer.accept(WearableSensingManager.STATUS_UNSUPPORTED_OPERATION);
+        }
+    }
+
+    /**
+     * Called when the wearable is requested to stop hotword recognition.
+     *
+     * <p>This method is expected to be overridden by a derived class. It should send a {@link
+     * WearableSensingManager#STATUS_SUCCESS} status code to the {@code statusConsumer} unless it
+     * encounters an error condition described by a status code listed in {@link
+     * WearableSensingManager}, such as {@link WearableSensingManager#STATUS_WEARABLE_UNAVAILABLE},
+     * in which case it should return the corresponding status code.
+     *
+     * @param statusConsumer The consumer for the service status.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+    @BinderThread
+    public void onStopHotwordRecognition(@NonNull Consumer<Integer> statusConsumer) {
+        if (Flags.enableUnsupportedOperationStatusCode()) {
+            statusConsumer.accept(WearableSensingManager.STATUS_UNSUPPORTED_OPERATION);
+        }
+    }
+
+    /**
+     * Called when hotword audio data sent to the {@code hotwordAudioConsumer} in {@link
+     * #onStartListeningForHotword(Consumer, Consumer)} is accepted by the
+     * {@link android.service.voice.HotwordDetectionService} as valid hotword.
+     *
+     * <p>After the implementation of this class sends the hotword audio data to the {@code
+     * hotwordAudioConsumer} in {@link #onStartListeningForHotword(Consumer,
+     * Consumer)}, the system will forward the data into {@link
+     * android.service.voice.HotwordDetectionService} (which runs in an isolated process) for
+     * second-stage hotword detection. If accepted as valid hotword there, this method will be
+     * called, and then the system will send the data to the currently active {@link
+     * android.service.voice.AlwaysOnHotwordDetector} (which may not run in an isolated process).
+     *
+     * <p>This method is expected to be overridden by a derived class. The implementation must
+     * request the wearable to turn on the microphone indicator to notify the user that audio data
+     * is being used outside of the isolated environment.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+    @BinderThread
+    public void onValidatedByHotwordDetectionService() {}
+
+    /**
+     * Called when the currently active hotword audio stream is no longer needed.
+     *
+     * <p>This method can be called as a result of hotword rejection by {@link
+     * android.service.voice.HotwordDetectionService}, or the {@link
+     * android.service.voice.AlwaysOnHotwordDetector} closing the data stream it received, or a
+     * non-recoverable error occurred before the data reaches the {@link
+     * android.service.voice.HotwordDetectionService} or the {@link
+     * android.service.voice.AlwaysOnHotwordDetector}.
+     *
+     * <p>This method is expected to be overridden by a derived class. The implementation should
+     * stop sending hotword audio data to the {@code hotwordAudioConsumer} in {@link
+     * #onStartListeningForHotword(Consumer, Consumer)}
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+    @BinderThread
+    public void onStopHotwordAudioStream() {}
+
+    /**
      * Called when a client app requests starting detection of the events in the request. The
      * implementation should keep track of whether the user has explicitly consented to detecting
      * the events using on-going ambient sensor (e.g. microphone), and agreed to share the
@@ -460,4 +607,6 @@ public abstract class WearableSensingService extends Service {
             statusCallback.sendResult(bundle);
         };
     }
+
+
 }

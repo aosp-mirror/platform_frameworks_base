@@ -244,44 +244,11 @@ class DesktopTasksController(
     fun moveToDesktop(
             taskId: Int,
             wct: WindowContainerTransaction = WindowContainerTransaction()
-    ) {
+    ): Boolean {
         shellTaskOrganizer.getRunningTaskInfo(taskId)?.let {
             task -> moveToDesktop(task, wct)
-        }
-    }
-
-    /** Move a task with given `taskId` to desktop without decor */
-    fun moveToDesktopWithoutDecor(
-        taskId: Int,
-        wct: WindowContainerTransaction
-    ): Boolean {
-        val task = shellTaskOrganizer.getRunningTaskInfo(taskId) ?: return false
-        moveToDesktopWithoutDecor(task, wct)
+        } ?: return false
         return true
-    }
-
-    /**
-     * Move a task to desktop without decor
-     */
-    private fun moveToDesktopWithoutDecor(
-        task: RunningTaskInfo,
-        wct: WindowContainerTransaction
-    ) {
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: moveToDesktopWithoutDecor taskId=%d",
-            task.taskId
-        )
-        exitSplitIfApplicable(wct, task)
-        // Bring other apps to front first
-        bringDesktopAppsToFront(task.displayId, wct)
-        addMoveToDesktopChanges(wct, task)
-
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
     }
 
     /**

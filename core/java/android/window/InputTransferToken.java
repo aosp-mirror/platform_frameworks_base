@@ -16,6 +16,7 @@
 
 package android.window;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.os.Binder;
 import android.os.IBinder;
@@ -23,13 +24,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.SurfaceControlViewHost;
 
+import com.android.window.flags.Flags;
+
 import java.util.Objects;
 
 /**
  * A token that can be used to request focus on or to transfer touch gesture to a
  * {@link SurfaceControlViewHost} or {@link android.view.SurfaceControl} that has an input channel.
- * @hide
  */
+@FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
 public final class InputTransferToken implements Parcelable {
     /**
      * @hide

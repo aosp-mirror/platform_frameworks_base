@@ -51,6 +51,8 @@ constructor(
             onStep = { 1f - it }
         )
 
+    val lockscreenAlpha: Flow<Float> = shortcutsAlpha
+
     override val deviceEntryParentViewAlpha: Flow<Float> =
         shadeDependentFlows.transitionFlow(
             flowWhenShadeIsNotExpanded =

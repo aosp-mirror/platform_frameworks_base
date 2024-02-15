@@ -4,6 +4,7 @@
  -->
 <configuration description="Runs Input Tests">
     <option name="test-tag" value="InputTests" />
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
     <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
         <!-- keeps the screen on during tests -->
         <option name="screen-always-on" value="on" />

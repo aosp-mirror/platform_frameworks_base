@@ -1498,6 +1498,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     && (control.getLeash() != null || control.getId() == ID_IME_CAPTION_BAR)) {
                 controls.put(control.getId(), new InsetsSourceControl(control));
                 typesReady |= consumer.getType();
+            } else if (fromIme) {
+                Log.w(TAG, "collectSourceControls can't continue for type: ime,"
+                        + " fromIme: true requires a control with a leash but we have "
+                        + ((control == null)
+                            ? "control: null"
+                            : "control: non-null and control.getLeash(): null"));
+                ImeTracker.forLogging().onFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_COLLECT_SOURCE_CONTROLS);
             }
         }
         return new Pair<>(typesReady, imeReady);

@@ -22,6 +22,9 @@ import static android.app.Notification.FLAG_CAN_COLORIZE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
+import static android.app.Notification.VISIBILITY_PRIVATE;
+import static android.app.Notification.VISIBILITY_PUBLIC;
+import static android.app.Notification.VISIBILITY_SECRET;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 
 import static com.android.server.notification.GroupHelper.BASE_FLAGS;
@@ -81,6 +84,8 @@ public class GroupHelperTest extends UiServiceTestCase {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
+    private final int DEFAULT_VISIBILITY = VISIBILITY_PRIVATE;
+
     private @Mock GroupHelper.Callback mCallback;
     private @Mock PackageManager mPackageManager;
 
@@ -127,7 +132,7 @@ public class GroupHelperTest extends UiServiceTestCase {
     }
 
     private NotificationAttributes getNotificationAttributes(int flags) {
-        return new NotificationAttributes(flags, mSmallIcon, COLOR_DEFAULT);
+        return new NotificationAttributes(flags, mSmallIcon, COLOR_DEFAULT, DEFAULT_VISIBILITY);
     }
 
     @Test
@@ -704,7 +709,8 @@ public class GroupHelperTest extends UiServiceTestCase {
         final Icon icon = mock(Icon.class);
         when(icon.sameAs(icon)).thenReturn(true);
         final int iconColor = Color.BLUE;
-        final NotificationAttributes attr = new NotificationAttributes(BASE_FLAGS, icon, iconColor);
+        final NotificationAttributes attr = new NotificationAttributes(BASE_FLAGS, icon, iconColor,
+                DEFAULT_VISIBILITY);
 
         // Add notifications with same icon and color
         for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
@@ -744,7 +750,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         doReturn(monochromeIcon).when(groupHelper).getMonochromeAppIcon(eq(pkg));
 
         final NotificationAttributes initialAttr = new NotificationAttributes(BASE_FLAGS,
-                initialIcon, initialIconColor);
+                initialIcon, initialIconColor, DEFAULT_VISIBILITY);
 
         // Add notifications with same icon and color
         for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
@@ -769,7 +775,42 @@ public class GroupHelperTest extends UiServiceTestCase {
 
         // Summary should be updated to the default color and the icon to the monochrome icon
         NotificationAttributes newAttr = new NotificationAttributes(BASE_FLAGS, monochromeIcon,
-                COLOR_DEFAULT);
+                COLOR_DEFAULT, DEFAULT_VISIBILITY);
+        verify(mCallback, times(1)).updateAutogroupSummary(anyInt(), anyString(), eq(newAttr));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_AUTOGROUP_SUMMARY_ICON_UPDATE)
+    public void testAddSummary_diffVisibility() {
+        final String pkg = "package";
+        final Icon icon = mock(Icon.class);
+        when(icon.sameAs(icon)).thenReturn(true);
+        final int iconColor = Color.BLUE;
+        final NotificationAttributes attr = new NotificationAttributes(BASE_FLAGS, icon, iconColor,
+                VISIBILITY_PRIVATE);
+
+        // Add notifications with same icon and color and default visibility (private)
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            StatusBarNotification sbn = getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM, null,
+                    icon, iconColor);
+            mGroupHelper.onNotificationPosted(sbn, false);
+        }
+        // Check that the summary has private visibility
+        verify(mCallback, times(1)).addAutoGroupSummary(
+                anyInt(), eq(pkg), anyString(), eq(attr));
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+
+        // After auto-grouping, add new notification with public visibility
+        StatusBarNotification sbn = getSbn(pkg, AUTOGROUP_AT_COUNT,
+                String.valueOf(AUTOGROUP_AT_COUNT), UserHandle.SYSTEM, null, icon, iconColor);
+        sbn.getNotification().visibility = VISIBILITY_PUBLIC;
+        mGroupHelper.onNotificationPosted(sbn, true);
+
+        // Check that the summary visibility was updated
+        NotificationAttributes newAttr = new NotificationAttributes(BASE_FLAGS, icon, iconColor,
+                VISIBILITY_PUBLIC);
         verify(mCallback, times(1)).updateAutogroupSummary(anyInt(), anyString(), eq(newAttr));
     }
 
@@ -781,7 +822,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         when(initialIcon.sameAs(initialIcon)).thenReturn(true);
         final int initialIconColor = Color.BLUE;
         final NotificationAttributes initialAttr = new NotificationAttributes(
-                GroupHelper.FLAG_INVALID, initialIcon, initialIconColor);
+                GroupHelper.FLAG_INVALID, initialIcon, initialIconColor, DEFAULT_VISIBILITY);
 
         // Add AUTOGROUP_AT_COUNT-1 notifications with same icon and color
         ArrayList<StatusBarNotification> notifications = new ArrayList<>();
@@ -817,11 +858,12 @@ public class GroupHelperTest extends UiServiceTestCase {
         // Create notifications with the same icon
         List<NotificationAttributes> childrenAttr = new ArrayList<>();
         for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
-            childrenAttr.add(new NotificationAttributes(0, icon, COLOR_DEFAULT));
+            childrenAttr.add(new NotificationAttributes(0, icon, COLOR_DEFAULT,
+                    DEFAULT_VISIBILITY));
         }
 
         //Check that the generated summary icon is the same as the child notifications'
-        Icon summaryIcon = mGroupHelper.getAutobundledSummaryIconAndColor(pkg, childrenAttr).icon;
+        Icon summaryIcon = mGroupHelper.getAutobundledSummaryAttributes(pkg, childrenAttr).icon;
         assertThat(summaryIcon).isEqualTo(icon);
     }
 
@@ -837,11 +879,12 @@ public class GroupHelperTest extends UiServiceTestCase {
         // Create notifications with different icons
         List<NotificationAttributes> childrenAttr = new ArrayList<>();
         for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
-            childrenAttr.add(new NotificationAttributes(0, mock(Icon.class), COLOR_DEFAULT));
+            childrenAttr.add(new NotificationAttributes(0, mock(Icon.class), COLOR_DEFAULT,
+                    DEFAULT_VISIBILITY));
         }
 
         // Check that the generated summary icon is the monochrome icon
-        Icon summaryIcon = groupHelper.getAutobundledSummaryIconAndColor(pkg, childrenAttr).icon;
+        Icon summaryIcon = groupHelper.getAutobundledSummaryAttributes(pkg, childrenAttr).icon;
         assertThat(summaryIcon).isEqualTo(monochromeIcon);
     }
 
@@ -853,11 +896,12 @@ public class GroupHelperTest extends UiServiceTestCase {
         // Create notifications with the same icon color
         List<NotificationAttributes> childrenAttr = new ArrayList<>();
         for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
-            childrenAttr.add(new NotificationAttributes(0, mock(Icon.class), iconColor));
+            childrenAttr.add(new NotificationAttributes(0, mock(Icon.class), iconColor,
+                    DEFAULT_VISIBILITY));
         }
 
         // Check that the generated summary icon color is the same as the child notifications'
-        int summaryIconColor = mGroupHelper.getAutobundledSummaryIconAndColor(pkg,
+        int summaryIconColor = mGroupHelper.getAutobundledSummaryAttributes(pkg,
                 childrenAttr).iconColor;
         assertThat(summaryIconColor).isEqualTo(iconColor);
     }
@@ -869,13 +913,58 @@ public class GroupHelperTest extends UiServiceTestCase {
         // Create notifications with different icon colors
         List<NotificationAttributes> childrenAttr = new ArrayList<>();
         for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
-            childrenAttr.add(new NotificationAttributes(0, mock(Icon.class), i));
+            childrenAttr.add(new NotificationAttributes(0, mock(Icon.class), i,
+                    DEFAULT_VISIBILITY));
         }
 
         // Check that the generated summary icon color is the default color
-        int summaryIconColor = mGroupHelper.getAutobundledSummaryIconAndColor(pkg,
+        int summaryIconColor = mGroupHelper.getAutobundledSummaryAttributes(pkg,
                 childrenAttr).iconColor;
         assertThat(summaryIconColor).isEqualTo(Notification.COLOR_DEFAULT);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_AUTOGROUP_SUMMARY_ICON_UPDATE)
+    public void testAutobundledSummaryVisibility_hasPublicChildren() {
+        final String pkg = "package";
+        final int iconColor = Color.BLUE;
+        // Create notifications with private and public visibility
+        List<NotificationAttributes> childrenAttr = new ArrayList<>();
+        childrenAttr.add(new NotificationAttributes(0, mock(Icon.class), iconColor,
+                VISIBILITY_PUBLIC));
+        for (int i = 0; i < AUTOGROUP_AT_COUNT - 1; i++) {
+            childrenAttr.add(new NotificationAttributes(0, mock(Icon.class), iconColor,
+                    VISIBILITY_PRIVATE));
+        }
+
+        // Check that the generated summary visibility is public
+        int summaryVisibility = mGroupHelper.getAutobundledSummaryAttributes(pkg,
+                childrenAttr).visibility;
+        assertThat(summaryVisibility).isEqualTo(VISIBILITY_PUBLIC);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_AUTOGROUP_SUMMARY_ICON_UPDATE)
+    public void testAutobundledSummaryVisibility_noPublicChildren() {
+        final String pkg = "package";
+        final int iconColor = Color.BLUE;
+        int visibility = VISIBILITY_PRIVATE;
+        // Create notifications with either private or secret visibility
+        List<NotificationAttributes> childrenAttr = new ArrayList<>();
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            if (i % 2 == 0) {
+                visibility = VISIBILITY_PRIVATE;
+            } else {
+                visibility = VISIBILITY_SECRET;
+            }
+            childrenAttr.add(new NotificationAttributes(0, mock(Icon.class), iconColor,
+                    visibility));
+        }
+
+        // Check that the generated summary visibility is private
+        int summaryVisibility = mGroupHelper.getAutobundledSummaryAttributes(pkg,
+                childrenAttr).visibility;
+        assertThat(summaryVisibility).isEqualTo(VISIBILITY_PRIVATE);
     }
 
     @Test

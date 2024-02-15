@@ -4074,12 +4074,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * </ul>
      * <p>should be interpreted in the effective after raw crop field-of-view coordinate system.
      * In this coordinate system,
-     * {preCorrectionActiveArraySize.left, preCorrectionActiveArraySize.top} corresponds to the
+     * {{@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}.left,
+     *  {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}.top} corresponds to the
      * the top left corner of the cropped RAW frame and
-     * {preCorrectionActiveArraySize.right, preCorrectionActiveArraySize.bottom} corresponds to
+     * {{@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}.right,
+     *  {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}.bottom} corresponds to
      * the bottom right corner. Client applications must use the values of the keys
      * in the CaptureResult metadata if present.</p>
-     * <p>Crop regions (android.scaler.CropRegion), AE/AWB/AF regions and face coordinates still
+     * <p>Crop regions {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, AE/AWB/AF regions and face coordinates still
      * use the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} coordinate system as usual.</p>
      * <p><b>Units</b>: Pixel coordinates relative to
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} or
@@ -4091,6 +4093,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP

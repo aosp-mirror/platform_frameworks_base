@@ -54,6 +54,7 @@ import java.util.Objects;
  * keys in ascending order. In the case of <code>valueAt(int)</code>, the
  * values corresponding to the keys are returned in ascending order.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SparseArray<E> implements Cloneable {
     private static final Object DELETED = new Object();
     private boolean mGarbage = false;
