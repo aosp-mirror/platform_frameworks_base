@@ -25,8 +25,9 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.Barrier
 import com.android.internal.widget.CachingIconView
-import com.android.systemui.res.R
 import com.android.systemui.media.controls.models.GutsViewHolder
+import com.android.systemui.res.R
+import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffectView
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView
 import com.android.systemui.util.animation.TransitionLayout
@@ -42,6 +43,7 @@ class MediaViewHolder constructor(itemView: View) {
     val multiRippleView = itemView.requireViewById<MultiRippleView>(R.id.touch_ripple_view)
     val turbulenceNoiseView =
         itemView.requireViewById<TurbulenceNoiseView>(R.id.turbulence_noise_view)
+    val loadingEffectView = itemView.requireViewById<LoadingEffectView>(R.id.loading_effect_view)
     val appIcon = itemView.requireViewById<ImageView>(R.id.icon)
     val titleText = itemView.requireViewById<TextView>(R.id.header_title)
     val artistText = itemView.requireViewById<TextView>(R.id.header_artist)
@@ -171,6 +173,7 @@ class MediaViewHolder constructor(itemView: View) {
             setOf(
                 R.id.album_art,
                 R.id.turbulence_noise_view,
+                R.id.loading_effect_view,
                 R.id.touch_ripple_view,
             )
     }
