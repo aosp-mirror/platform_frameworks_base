@@ -2,6 +2,7 @@ package com.android.systemui.communal.data.repository
 
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
+import android.os.UserHandle
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +24,7 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
 
     override fun addWidget(
         provider: ComponentName,
+        user: UserHandle,
         priority: Int,
         configurator: WidgetConfigurator?
     ) {

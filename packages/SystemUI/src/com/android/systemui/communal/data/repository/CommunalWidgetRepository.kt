@@ -18,13 +18,14 @@ package com.android.systemui.communal.data.repository
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.os.UserHandle
 import androidx.annotation.WorkerThread
 import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
-import com.android.systemui.communal.shared.CommunalWidgetHost
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
+import com.android.systemui.communal.widgets.CommunalWidgetHost
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -50,6 +51,7 @@ interface CommunalWidgetRepository {
     /** Add a widget at the specified position in the app widget service and the database. */
     fun addWidget(
         provider: ComponentName,
+        user: UserHandle,
         priority: Int,
         configurator: WidgetConfigurator? = null
     ) {}
@@ -99,11 +101,12 @@ constructor(
 
     override fun addWidget(
         provider: ComponentName,
+        user: UserHandle,
         priority: Int,
         configurator: WidgetConfigurator?
     ) {
         bgScope.launch {
-            val id = communalWidgetHost.allocateIdAndBindWidget(provider)
+            val id = communalWidgetHost.allocateIdAndBindWidget(provider, user)
             if (id == null) {
                 logger.e("Failed to allocate widget id to ${provider.flattenToString()}")
                 return@launch
