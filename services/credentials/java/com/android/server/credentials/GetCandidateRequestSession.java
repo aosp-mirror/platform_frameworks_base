@@ -168,6 +168,9 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
         mRequestSessionMetric.collectFrameworkException(exception);
         if (finalResponseReceiver != null) {
             Bundle resultData = new Bundle();
+            resultData.putStringArray(
+                    CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION,
+                    new String[] {exception, message});
             finalResponseReceiver.send(Constants.FAILURE_CREDMAN_SELECTOR, resultData);
         } else {
             respondToClientWithErrorAndFinish(exception, message);
