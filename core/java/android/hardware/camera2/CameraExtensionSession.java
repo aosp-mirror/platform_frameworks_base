@@ -16,10 +16,13 @@
 
 package android.hardware.camera2;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.camera2.utils.HashCodeHelpers;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.util.concurrent.Executor;
 
@@ -128,6 +131,34 @@ public abstract class CameraExtensionSession implements AutoCloseable {
          */
         public void onCaptureFailed(@NonNull CameraExtensionSession session,
                 @NonNull CaptureRequest request) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called instead of
+         * {@link #onCaptureProcessStarted} when the camera device failed
+         * to produce the required input for the device-specific extension. The
+         * cause could be a failed camera capture request, a failed
+         * capture result or dropped camera frame. More information about
+         * the reason is included in the 'failure' argument.
+         *
+         * <p>Other requests are unaffected, and some or all image buffers
+         * from the capture may have been pushed to their respective output
+         * streams.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param session the session received during
+         *                {@link StateCallback#onConfigured(CameraExtensionSession)}
+         * @param request The request that was given to the CameraDevice
+         * @param failure The capture failure reason
+         *
+         * @see #capture
+         * @see #setRepeatingRequest
+         */
+        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+        public void onCaptureFailed(@NonNull CameraExtensionSession session,
+                @NonNull CaptureRequest request, @CaptureFailure.FailureReason int failure) {
             // default empty implementation
         }
 
