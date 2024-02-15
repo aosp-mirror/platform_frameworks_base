@@ -1548,6 +1548,48 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI";
 
     /**
+     * Application or Activity level
+     * {@link android.content.pm.PackageManager.Property PackageManager.Property} to provide any
+     * preferences for showing all or specific Activities on small cover displays of foldable
+     * style devices.
+     *
+     * <p>The only supported value for the property is {@link #COMPAT_SMALL_COVER_SCREEN_OPT_IN}.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN"
+     *     android:value=1 <!-- COMPAT_COVER_SCREEN_OPT_IN -->/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     */
+    @FlaggedApi(Flags.FLAG_COVER_DISPLAY_OPT_IN)
+    String PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN =
+            "android.window.PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN";
+
+    /**
+     * Value applicable for the {@link #PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN} property to
+     * provide a signal to the system that an application or its specific activities explicitly
+     * opt into being displayed on small foldable device cover screens that measure at least 1.5
+     * inches for the shorter dimension and at least 2.4 inches for the longer dimension.
+     */
+    @CompatSmallScreenPolicy
+    @FlaggedApi(Flags.FLAG_COVER_DISPLAY_OPT_IN)
+    int COMPAT_SMALL_COVER_SCREEN_OPT_IN = 1;
+
+    /**
+     * @hide
+     */
+    @IntDef({
+            COMPAT_SMALL_COVER_SCREEN_OPT_IN,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface CompatSmallScreenPolicy {}
+
+
+
+    /**
      * Request for app's keyboard shortcuts to be retrieved asynchronously.
      *
      * @param receiver The callback to be triggered when the result is ready.
