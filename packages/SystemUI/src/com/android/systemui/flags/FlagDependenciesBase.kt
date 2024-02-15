@@ -48,10 +48,14 @@ abstract class FlagDependenciesBase(
     private var unmetDependencies = emptyList<Dependency>()
 
     override fun start() {
+        if (!handler.enableDependencies) {
+            return
+        }
         defineDependencies()
         allDependencies = workingDependencies.toList()
         unmetDependencies = workingDependencies.filter { !it.isMet }
         workingDependencies.clear()
+        handler.onCollected(allDependencies)
         if (unmetDependencies.isNotEmpty()) {
             handler.warnAboutBadFlagConfiguration(all = allDependencies, unmet = unmetDependencies)
         }
@@ -106,14 +110,24 @@ abstract class FlagDependenciesBase(
 
     /** Add a dependency to the working list */
     private fun addDependency(first: FlagToken, second: FlagToken) {
-        if (!Compile.IS_DEBUG) return // `user` builds should omit all this code
+        if (!handler.enableDependencies) return
         workingDependencies.add(
             Dependency(first.name, first.isEnabled, second.name, second.isEnabled)
         )
     }
 
-    /** An interface which handles a warning about a bad flag configuration. */
+    /** An interface which handles dependency collection. */
     interface Handler {
+        /**
+         * Should FlagDependencies do anything?
+         *
+         * @return false for user builds so that we skip this overhead.
+         */
+        val enableDependencies: Boolean
+            get() = Compile.IS_DEBUG
+        /** Handle the complete list of dependencies. */
+        fun onCollected(all: List<Dependency>) {}
+        /** Handle a bad flag configuration. */
         fun warnAboutBadFlagConfiguration(all: List<Dependency>, unmet: List<Dependency>)
     }
 }
@@ -133,7 +147,7 @@ constructor(
         all: List<FlagDependenciesBase.Dependency>,
         unmet: List<FlagDependenciesBase.Dependency>
     ) {
-        val title = "Invalid flag dependencies: ${unmet.size} of ${all.size}"
+        val title = "Invalid flag dependencies: ${unmet.size}"
         val details = unmet.joinToString("\n") { it.shortUnmetString() }
         Log.e("FlagDependencies", "$title:\n$details")
         val channel = NotificationChannel("FLAGS", "Flags", NotificationManager.IMPORTANCE_DEFAULT)
