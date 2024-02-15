@@ -1869,11 +1869,11 @@ public class NotificationManagerService extends SystemService {
                                 true, record.getUserId(), REASON_TIMEOUT, null);
                         // If cancellation will be prevented due to lifetime extension, we send an
                         // update to system UI.
+                        final int packageImportance = getPackageImportanceWithIdentity(
+                                record.getSbn().getPackageName());
                         synchronized (mNotificationLock) {
                             maybeNotifySystemUiListenerLifetimeExtendedLocked(record,
-                                    record.getSbn().getPackageName(),
-                                    mActivityManager.getPackageImportance(
-                                            record.getSbn().getPackageName()));
+                                    record.getSbn().getPackageName(), packageImportance);
                         }
                     } else {
                         cancelNotification(record.getSbn().getUid(),
@@ -3841,7 +3841,7 @@ public class NotificationManagerService extends SystemService {
                 // If cancellation will be prevented due to lifetime extension, we send an update to
                 // system UI.
                 NotificationRecord record = null;
-                final int packageImportance = mActivityManager.getPackageImportance(pkg);
+                final int packageImportance = getPackageImportanceWithIdentity(pkg);
                 synchronized (mNotificationLock) {
                     record = findNotificationLocked(pkg, tag, id, userId);
                     maybeNotifySystemUiListenerLifetimeExtendedLocked(record, pkg,
@@ -3866,10 +3866,9 @@ public class NotificationManagerService extends SystemService {
                         pkg, null, 0, FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB
                                 | FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY,
                         userId, REASON_APP_CANCEL_ALL);
+                final int packageImportance = getPackageImportanceWithIdentity(pkg);
                 // If cancellation will be prevented due to lifetime extension, we send updates
                 // to system UI.
-                // In this case, we need to hold the lock to access these lists.
-                final int packageImportance = mActivityManager.getPackageImportance(pkg);
                 synchronized (mNotificationLock) {
                     notifySystemUiListenerLifetimeExtendedListLocked(mNotificationList,
                             packageImportance);
@@ -4930,7 +4929,7 @@ public class NotificationManagerService extends SystemService {
                     pkg = info.component.getPackageName();
                 }
                 if (lifetimeExtensionRefactor()) {
-                    packageImportance = mActivityManager.getPackageImportance(pkg);
+                    packageImportance = getPackageImportanceWithIdentity(pkg);
                 } else {
                     packageImportance = IMPORTANCE_NONE;
                 }
@@ -5249,7 +5248,7 @@ public class NotificationManagerService extends SystemService {
             final int packageImportance;
             try {
                 if (lifetimeExtensionRefactor()) {
-                    packageImportance = mActivityManager.getPackageImportance(pkg);
+                    packageImportance = getPackageImportanceWithIdentity(pkg);
                 } else {
                     packageImportance = IMPORTANCE_NONE;
                 }
@@ -7509,14 +7508,9 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        // Need escalated privileges to get package importance
-        final long token = Binder.clearCallingIdentity();
-        boolean isAppForeground;
-        try {
-            isAppForeground = mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        // Need escalated privileges to get package importance.
+        final int packageImportance = getPackageImportanceWithIdentity(pkg);
+        boolean isAppForeground = packageImportance == IMPORTANCE_FOREGROUND;
         mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground, tracker));
         return true;
     }
@@ -7844,9 +7838,9 @@ public class NotificationManagerService extends SystemService {
                         NotificationRecord r = mNotificationsByKey.get(key);
                         packageName = r != null ? r.getSbn().getPackageName() : null;
                     }
+                    final int packageImportance = getPackageImportanceWithIdentity(packageName);
                     boolean isAppForeground = packageName != null
-                            && mActivityManager.getPackageImportance(packageName)
-                            == IMPORTANCE_FOREGROUND;
+                            && packageImportance == IMPORTANCE_FOREGROUND;
                     synchronized (mNotificationLock) {
                         NotificationRecord r = mNotificationsByKey.get(key);
                         if (r != null) {
@@ -11753,6 +11747,18 @@ public class NotificationManagerService extends SystemService {
                     record, isAppForeground,
                     mPostNotificationTrackerFactory.newTracker(null)));
         }
+    }
+
+    @FlaggedApi(FLAG_LIFETIME_EXTENSION_REFACTOR)
+    private int getPackageImportanceWithIdentity(String pkg) {
+        final long token = Binder.clearCallingIdentity();
+        final int packageImportance;
+        try {
+            packageImportance = mActivityManager.getPackageImportance(pkg);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return packageImportance;
     }
 
     public class NotificationListeners extends ManagedServices {
