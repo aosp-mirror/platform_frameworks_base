@@ -32,4 +32,14 @@ import java.lang.annotation.Target;
 @Target({METHOD})
 @Retention(RetentionPolicy.CLASS)
 public @interface RavenwoodReplace {
+    /**
+     * One or more classes that aren't yet supported by Ravenwood, which is why this method is
+     * being replaced.
+     */
+    Class<?>[] blockedBy() default {};
+
+    /**
+     * General free-form description of why this method is being replaced.
+     */
+    String reason() default "";
 }

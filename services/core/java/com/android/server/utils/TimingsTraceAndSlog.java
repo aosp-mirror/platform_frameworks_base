@@ -23,6 +23,7 @@ import android.util.TimingsTraceLog;
 /**
  * Helper class for reporting boot and shutdown timing metrics, also logging to {@link Slog}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class TimingsTraceAndSlog extends TimingsTraceLog {
 
     /**
