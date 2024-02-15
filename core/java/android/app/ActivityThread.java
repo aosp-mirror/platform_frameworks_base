@@ -3758,7 +3758,7 @@ public final class ActivityThread extends ClientTransactionHandler
         if (DEBUG_RESULTS) Slog.v(TAG, "sendActivityResult: id=" + id
                 + " req=" + requestCode + " res=" + resultCode + " data=" + data);
         final ArrayList<ResultInfo> list = new ArrayList<>();
-        list.add(new ResultInfo(id, requestCode, resultCode, data));
+        list.add(new ResultInfo(id, requestCode, resultCode, data, activityToken));
         final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread);
         final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
                 activityToken, list);
@@ -5799,8 +5799,14 @@ public final class ActivityThread extends ClientTransactionHandler
                 }
                 if (DEBUG_RESULTS) Slog.v(TAG,
                         "Delivering result to activity " + r + " : " + ri);
-                r.activity.dispatchActivityResult(ri.mResultWho,
-                        ri.mRequestCode, ri.mResultCode, ri.mData, reason);
+                if (android.security.Flags.contentUriPermissionApis()) {
+                    ComponentCaller caller = new ComponentCaller(r.token, ri.mCallerToken);
+                    r.activity.dispatchActivityResult(ri.mResultWho,
+                            ri.mRequestCode, ri.mResultCode, ri.mData, caller, reason);
+                } else {
+                    r.activity.dispatchActivityResult(ri.mResultWho,
+                            ri.mRequestCode, ri.mResultCode, ri.mData, reason);
+                }
             } catch (Exception e) {
                 if (!mInstrumentation.onException(r.activity, e)) {
                     throw new RuntimeException(

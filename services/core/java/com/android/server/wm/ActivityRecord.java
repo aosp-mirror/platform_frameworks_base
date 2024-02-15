@@ -3545,6 +3545,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(resultGrants,
                         resultTo.getUriPermissionsLocked());
             }
+            IBinder callerToken = new Binder();
+            if (android.security.Flags.contentUriPermissionApis()) {
+                try {
+                    resultTo.computeCallerInfo(callerToken, intent, this.getUid(),
+                            mAtmService.getPackageManager().getNameForUid(this.getUid()),
+                            /* isShareIdentityEnabled */ false);
+                    // Result callers cannot share their identity via
+                    // {@link ActivityOptions#setShareIdentityEnabled(boolean)} since
+                    // {@link android.app.Activity#setResult} doesn't have a
+                    // {@link android.os.Bundle}.
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             if (mForceSendResultForMediaProjection || resultTo.isState(RESUMED)) {
                 // Sending the result to the resultTo activity asynchronously to prevent the
                 // resultTo activity getting results before this Activity paused.
@@ -3552,12 +3566,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAtmService.mH.post(() -> {
                     synchronized (mAtmService.mGlobalLock) {
                         resultToActivity.sendResult(this.getUid(), resultWho, requestCode,
-                                resultCode, resultData, resultGrants,
+                                resultCode, resultData, callerToken, resultGrants,
                                 mForceSendResultForMediaProjection);
                     }
                 });
             } else {
-                resultTo.addResultLocked(this, resultWho, requestCode, resultCode, resultData);
+                resultTo.addResultLocked(this, resultWho, requestCode, resultCode, resultData,
+                        callerToken);
             }
             resultTo = null;
         } else if (DEBUG_RESULTS) {
@@ -4841,9 +4856,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void addResultLocked(ActivityRecord from, String resultWho,
             int requestCode, int resultCode,
-            Intent resultData) {
+            Intent resultData, IBinder callerToken) {
         ActivityResult r = new ActivityResult(from, resultWho,
-                requestCode, resultCode, resultData);
+                requestCode, resultCode, resultData, callerToken);
         if (results == null) {
             results = new ArrayList<ResultInfo>();
         }
@@ -4869,13 +4884,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void sendResult(int callingUid, String resultWho, int requestCode, int resultCode,
-            Intent data, NeededUriGrants dataGrants) {
-        sendResult(callingUid, resultWho, requestCode, resultCode, data, dataGrants,
+            Intent data, IBinder callerToken, NeededUriGrants dataGrants) {
+        sendResult(callingUid, resultWho, requestCode, resultCode, data, callerToken, dataGrants,
                 false /* forceSendForMediaProjection */);
     }
 
     void sendResult(int callingUid, String resultWho, int requestCode, int resultCode,
-            Intent data, NeededUriGrants dataGrants, boolean forceSendForMediaProjection) {
+            Intent data, IBinder callerToken, NeededUriGrants dataGrants,
+            boolean forceSendForMediaProjection) {
+        if (android.security.Flags.contentUriPermissionApis()
+                && !mCallerState.hasCaller(callerToken)) {
+            try {
+                computeCallerInfo(callerToken, data, callingUid,
+                        mAtmService.getPackageManager().getNameForUid(callingUid),
+                        false /* isShareIdentityEnabled */);
+                // Result callers cannot share their identity via
+                // {@link ActivityOptions#setShareIdentityEnabled(boolean)} since
+                // {@link android.app.Activity#setResult} doesn't have a {@link android.os.Bundle}.
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
         if (callingUid > 0) {
             mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(dataGrants,
                     getUriPermissionsLocked());
@@ -4891,7 +4920,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (isState(RESUMED) && attachedToProcess()) {
             try {
                 final ArrayList<ResultInfo> list = new ArrayList<>();
-                list.add(new ResultInfo(resultWho, requestCode, resultCode, data));
+                list.add(new ResultInfo(resultWho, requestCode, resultCode, data, callerToken));
                 mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
                         ActivityResultItem.obtain(token, list));
                 return;
@@ -4905,7 +4934,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 STOPPING, STOPPED)) {
             // Build result to be returned immediately.
             final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
-                    token, List.of(new ResultInfo(resultWho, requestCode, resultCode, data)));
+                    token, List.of(new ResultInfo(resultWho, requestCode, resultCode, data,
+                            callerToken)));
             // When the activity result is delivered, the activity will transition to RESUMED.
             // Since the activity is only resumed so the result can be immediately delivered,
             // return it to its original lifecycle state.
@@ -4929,7 +4959,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        addResultLocked(null /* from */, resultWho, requestCode, resultCode, data);
+        addResultLocked(null /* from */, resultWho, requestCode, resultCode, data, callerToken);
     }
 
     /**

@@ -1857,7 +1857,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         startActivityInner(starter, targetRecord, sourceRecord, null /* options */,
                 null /* inTask */, null /* inTaskFragment */);
         verify(sourceRecord).sendResult(anyInt(), any(), anyInt(), eq(RESULT_CANCELED), any(),
-                any());
+                any(), any());
     }
 
     @Test
