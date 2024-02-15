@@ -18,6 +18,7 @@ android_test {
     static_libs: [
         "junit",
         "androidx.test.rules",
+        "flag-junit",
     ],
     platform_apis: true,
 }
