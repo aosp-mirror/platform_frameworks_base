@@ -139,3 +139,10 @@ flag {
   description: "Add Headless DO support."
   bug: "289515470"
 }
+
+flag {
+  name: "is_mte_policy_enforced"
+  namespace: "enterprise"
+  description: "Allow to query whether MTE is enabled or not to check for compliance for enterprise policy"
+  bug: "322777918"
+}

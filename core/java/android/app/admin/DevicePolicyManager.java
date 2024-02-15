@@ -55,6 +55,7 @@ import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
+import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -153,6 +154,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.org.conscrypt.TrustedCertificateStore;
+import com.android.internal.os.Zygote;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -4115,6 +4117,19 @@ public class DevicePolicyManager {
             }
         }
         return MTE_NOT_CONTROLLED_BY_POLICY;
+    }
+
+    /**
+     * Get the current MTE state of the device.
+     *
+     * <a href="https://source.android.com/docs/security/test/memory-safety/arm-mte">
+     * Learn more about MTE</a>
+     *
+     * @return whether MTE is currently enabled on the device.
+     */
+    @FlaggedApi(FLAG_IS_MTE_POLICY_ENFORCED)
+    public static boolean isMtePolicyEnforced() {
+        return Zygote.nativeSupportsMemoryTagging();
     }
 
     /** Indicates that content protection is not controlled by policy, allowing user to choose. */
