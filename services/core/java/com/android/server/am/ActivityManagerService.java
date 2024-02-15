@@ -4755,6 +4755,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         autofillOptions,
                         contentCaptureOptions,
                         app.getDisabledCompatChanges(),
+                        app.getLoggableCompatChanges(),
                         serializedSystemFontMap,
                         app.getStartElapsedTime(),
                         app.getStartUptime());
