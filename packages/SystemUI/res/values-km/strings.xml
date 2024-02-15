@@ -120,24 +120,15 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ចុចដើម្បីមើល"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"មានបញ្ហាក្នុងការរក្សាទុក​ការថតវីដេអូអេក្រង់"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"មានបញ្ហា​ក្នុងការ​ចាប់ផ្ដើម​ថត​អេក្រង់"</string>
-    <!-- no translation found for issuerecord_title (286627115110121849) -->
-    <skip />
-    <!-- no translation found for issuerecord_background_processing_label (1666840264959336876) -->
-    <skip />
-    <!-- no translation found for issuerecord_channel_description (6142326363431474632) -->
-    <skip />
-    <!-- no translation found for issuerecord_ongoing_screen_only (6248206059935015722) -->
-    <skip />
-    <!-- no translation found for issuerecord_share_label (3992657993619876199) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_title (4161043023696751591) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_text (1205985304551521495) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_error (6913040083446722726) -->
-    <skip />
-    <!-- no translation found for issuerecord_start_error (3402782952722871190) -->
-    <skip />
+    <string name="issuerecord_title" msgid="286627115110121849">"កម្មវិធីកត់ត្រាបញ្ហា"</string>
+    <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"កំពុងដំណើរការការកត់ត្រាបញ្ហា"</string>
+    <string name="issuerecord_channel_description" msgid="6142326363431474632">"ការជូនដំណឹងដែលកំពុងបន្តសម្រាប់វគ្គប្រមូលបញ្ហា"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"កំពុងកត់ត្រាបញ្ហា"</string>
+    <string name="issuerecord_share_label" msgid="3992657993619876199">"ចែករំលែក"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"បានរក្សាទុកកំណត់ត្រាបញ្ហា"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"ចុចដើម្បីមើល"</string>
+    <string name="issuerecord_save_error" msgid="6913040083446722726">"មានបញ្ហាក្នុងការរក្សាទុកកំណត់ត្រាបញ្ហា"</string>
+    <string name="issuerecord_start_error" msgid="3402782952722871190">"មានបញ្ហាក្នុងការចាប់ផ្ដើមកត់ត្រាបញ្ហា"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"កំពុងមើលពេញអេក្រង់"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"ដើម្បីចាកចេញ សូមអូសពីលើចុះក្រោម។"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"យល់ហើយ"</string>
@@ -277,6 +268,10 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"បាន​រក្សាទុក"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ផ្ដាច់"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"បើកដំណើរការ"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"ថ្ម <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"សំឡេង"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"កាស"</string>
@@ -546,6 +541,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"បិទ"</string>
     <string name="sound_settings" msgid="8874581353127418308">"សំឡេង និងការញ័រ"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ការកំណត់"</string>
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"អក្សររត់ក្នុងពេលជាក់ស្ដែង"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"បានបន្ថយកម្រិតសំឡេងមកកម្រិតដែលកាន់តែមានសុវត្ថិភាព"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"កម្រិតសំឡេងកាសមានកម្រិតខ្ពស់យូរជាងរយៈពេលដែលបានណែនាំ"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"កម្រិតសំឡេងកាសបានលើសដែនកំណត់សុវត្ថិភាពសម្រាប់សប្ដាហ៍នេះ"</string>
@@ -612,14 +608,10 @@
     <string name="alarm_template" msgid="2234991538018805736">"នៅ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"នៅ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ហតស្ប៉ត"</string>
-    <!-- no translation found for accessibility_status_bar_satellite_no_connection (3001571744269917762) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_poor_connection (5231478574952724160) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_good_connection (308079391708578704) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_available (6514855015496916829) -->
-    <skip />
+    <string name="accessibility_status_bar_satellite_no_connection" msgid="3001571744269917762">"ផ្កាយរណប មិនមានការតភ្ជាប់ទេ"</string>
+    <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"ផ្កាយរណប ការតភ្ជាប់ខ្សោយ"</string>
+    <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ផ្កាយរណប មានការតភ្ជាប់ល្អ"</string>
+    <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ផ្កាយរណប អាចតភ្ជាប់បាន"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"កម្រងព័ត៌មានការងារ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ល្អសម្រាប់អ្នកប្រើមួយចំនួន តែមិនសម្រាប់គ្រប់គ្នាទេ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"កម្មវិធីសម្រួល UI ប្រព័ន្ធផ្តល់ជូនអ្នកនូវមធ្យោបាយបន្ថែមទៀតដើម្បីកែសម្រួល និងប្តូរចំណុចប្រទាក់អ្នកប្រើ Android តាមបំណង។ លក្ខណៈពិសេសសាកល្បងនេះអាចនឹងផ្លាស់ប្តូរ បំបែក ឬបាត់បង់បន្ទាប់ពីការចេញផ្សាយនាពេលអនាគត។ សូមបន្តដោយប្រុងប្រយ័ត្ន។"</string>
@@ -741,7 +733,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"បើកការកំណត់"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"បើក​ជំនួយការ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ចាក់​សោ​អេក្រង់"</string>
-    <string name="group_system_quick_memo" msgid="6257072703041301265">"បើក​កំណត់ចំណាំ"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"កត់​ចំណាំ"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ការដំណើរការបានច្រើននៃប្រព័ន្ធ"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"ចូលក្នុងមុខងារបំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅខាងស្ដាំដៃ"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"ចូលក្នុងមុខងារ​បំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅខាងឆ្វេងដៃ"</string>

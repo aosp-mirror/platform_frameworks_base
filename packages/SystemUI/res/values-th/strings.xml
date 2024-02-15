@@ -120,24 +120,15 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"แตะเพื่อดู"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"เกิดข้อผิดพลาดในการบันทึกหน้าจอ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"เกิดข้อผิดพลาดขณะเริ่มบันทึกหน้าจอ"</string>
-    <!-- no translation found for issuerecord_title (286627115110121849) -->
-    <skip />
-    <!-- no translation found for issuerecord_background_processing_label (1666840264959336876) -->
-    <skip />
-    <!-- no translation found for issuerecord_channel_description (6142326363431474632) -->
-    <skip />
-    <!-- no translation found for issuerecord_ongoing_screen_only (6248206059935015722) -->
-    <skip />
-    <!-- no translation found for issuerecord_share_label (3992657993619876199) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_title (4161043023696751591) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_text (1205985304551521495) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_error (6913040083446722726) -->
-    <skip />
-    <!-- no translation found for issuerecord_start_error (3402782952722871190) -->
-    <skip />
+    <string name="issuerecord_title" msgid="286627115110121849">"โปรแกรมบันทึกปัญหา"</string>
+    <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"กำลังประมวลผลการบันทึกปัญหา"</string>
+    <string name="issuerecord_channel_description" msgid="6142326363431474632">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการรวบรวมปัญหา"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"กำลังบันทึกปัญหา"</string>
+    <string name="issuerecord_share_label" msgid="3992657993619876199">"แชร์"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"บันทึกไฟล์บันทึกปัญหาแล้ว"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"แตะเพื่อดู"</string>
+    <string name="issuerecord_save_error" msgid="6913040083446722726">"เกิดข้อผิดพลาดในการบันทึกไฟล์บันทึกปัญหา"</string>
+    <string name="issuerecord_start_error" msgid="3402782952722871190">"เกิดข้อผิดพลาดในการเริ่มบันทึกปัญหา"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"กำลังดูแบบเต็มหน้าจอ"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"หากต้องการออก ให้ปัดลงจากด้านบน"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"รับทราบ"</string>
@@ -277,6 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"บันทึกแล้ว"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ยกเลิกการเชื่อมต่อ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"เปิดใช้งาน"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"เปิดอีกครั้งโดยอัตโนมัติในวันพรุ่งนี้"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"ฟีเจอร์ต่างๆ เช่น Quick Share, หาอุปกรณ์ของฉัน และตำแหน่งของอุปกรณ์ ใช้บลูทูธ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"เสียง"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ชุดหูฟัง"</string>
@@ -546,6 +539,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ปิดใช้"</string>
     <string name="sound_settings" msgid="8874581353127418308">"เสียงและการสั่น"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"การตั้งค่า"</string>
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"คำบรรยายสด"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"ลดเสียงให้อยู่ในระดับที่ปลอดภัยยิ่งขึ้น"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"เสียงของหูฟังอยู่ในระดับที่ดังเป็นระยะเวลานานกว่าที่แนะนำ"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"เสียงของหูฟังอยู่ในระดับที่ดังเกินขีดจำกัดความปลอดภัยสำหรับสัปดาห์นี้"</string>
@@ -612,14 +606,10 @@
     <string name="alarm_template" msgid="2234991538018805736">"เวลา <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"ในวันที่ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ฮอตสปอต"</string>
-    <!-- no translation found for accessibility_status_bar_satellite_no_connection (3001571744269917762) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_poor_connection (5231478574952724160) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_good_connection (308079391708578704) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_available (6514855015496916829) -->
-    <skip />
+    <string name="accessibility_status_bar_satellite_no_connection" msgid="3001571744269917762">"ดาวเทียม, ไม่มีการเชื่อมต่อ"</string>
+    <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"ดาวเทียม, การเชื่อมต่อไม่ดี"</string>
+    <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ดาวเทียม, การเชื่อมต่อดี"</string>
+    <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ดาวเทียม, การเชื่อมต่อที่พร้อมใช้งาน"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"โปรไฟล์งาน"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"เพลิดเพลินกับบางส่วนแต่ไม่ใช่ทั้งหมด"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"ตัวรับสัญญาณ UI ระบบช่วยให้คุณมีวิธีพิเศษในการปรับแต่งและกำหนดค่าส่วนติดต่อผู้ใช้ Android ฟีเจอร์รุ่นทดลองเหล่านี้อาจมีการเปลี่ยนแปลง ขัดข้อง หรือหายไปในเวอร์ชันอนาคต โปรดดำเนินการด้วยความระมัดระวัง"</string>
@@ -741,7 +731,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"เปิดการตั้งค่า"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"เปิด Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ล็อกหน้าจอ"</string>
-    <string name="group_system_quick_memo" msgid="6257072703041301265">"เปิดโน้ต"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"จดโน้ต"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"การทํางานหลายอย่างพร้อมกันของระบบ"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"เข้าสู่โหมดแยกหน้าจอโดยแอปปัจจุบันอยู่ด้านขวา"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"เข้าสู่โหมดแยกหน้าจอโดยแอปปัจจุบันอยู่ด้านซ้าย"</string>

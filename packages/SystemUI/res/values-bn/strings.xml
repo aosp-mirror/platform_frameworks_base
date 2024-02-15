@@ -120,24 +120,15 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"দেখতে ট্যাপ করুন"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"স্ক্রিন রেকর্ডিং সেভ করার সময় কোনও সমস্যা হয়েছে"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"স্ক্রিন রেকর্ডিং শুরু করার সময় সমস্যা হয়েছে"</string>
-    <!-- no translation found for issuerecord_title (286627115110121849) -->
-    <skip />
-    <!-- no translation found for issuerecord_background_processing_label (1666840264959336876) -->
-    <skip />
-    <!-- no translation found for issuerecord_channel_description (6142326363431474632) -->
-    <skip />
-    <!-- no translation found for issuerecord_ongoing_screen_only (6248206059935015722) -->
-    <skip />
-    <!-- no translation found for issuerecord_share_label (3992657993619876199) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_title (4161043023696751591) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_text (1205985304551521495) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_error (6913040083446722726) -->
-    <skip />
-    <!-- no translation found for issuerecord_start_error (3402782952722871190) -->
-    <skip />
+    <string name="issuerecord_title" msgid="286627115110121849">"Recorder-এ সমস্যা হয়েছে"</string>
+    <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"সমস্যা সংক্রান্ত রেকর্ডিং প্রসেস করা হচ্ছে"</string>
+    <string name="issuerecord_channel_description" msgid="6142326363431474632">"সমস্যা সংগ্রহ সেশনের জন্য অনগোইং নোটিফিকেশন"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"রেকর্ডিং সংক্রান্ত সমস্যা"</string>
+    <string name="issuerecord_share_label" msgid="3992657993619876199">"শেয়ার করুন"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"রেকর্ডিং সেভ করতে সমস্যা হয়েছে"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"দেখার জন্য ট্যাপ করুন"</string>
+    <string name="issuerecord_save_error" msgid="6913040083446722726">"সমস্যা সংক্রান্ত রেকর্ডিং সেভ করার সময় সমস্যা হয়েছে"</string>
+    <string name="issuerecord_start_error" msgid="3402782952722871190">"সমস্যা সংক্রান্ত রেকর্ডিং শুরু করতে সমস্যা হয়েছে"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"ফুল-স্ক্রিনে দেখা হচ্ছে"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"বেরিয়ে যেতে উপর থেকে নিচের দিকে সোয়াইপ করুন।"</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"বুঝেছি"</string>
@@ -277,6 +268,10 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"সেভ করা আছে"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ডিসকানেক্ট করুন"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"চালু করুন"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"চার্জ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"অডিও"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"হেডসেট"</string>
@@ -546,6 +541,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"বন্ধ হবে"</string>
     <string name="sound_settings" msgid="8874581353127418308">"সাউন্ড ও ভাইব্রেশন"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"সেটিংস"</string>
+    <!-- no translation found for volume_panel_captioning_title (5984936949147684357) -->
+    <skip />
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"ভলিউম কমিয়ে আরও নিরাপদ মাত্রায় নামানো হয়েছে"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"সাজেস্ট করা সময়ের চেয়ে অতিরিক্ত সময় ধরে হেডফোনের ভলিউম বেশি করা আছে"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"এই সপ্তাহে হেডফোনের ভলিউম নিরাপদ মাত্রা ছাড়িয়ে গেছে"</string>
@@ -612,14 +609,10 @@
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> -তে"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"হটস্পট"</string>
-    <!-- no translation found for accessibility_status_bar_satellite_no_connection (3001571744269917762) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_poor_connection (5231478574952724160) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_good_connection (308079391708578704) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_available (6514855015496916829) -->
-    <skip />
+    <string name="accessibility_status_bar_satellite_no_connection" msgid="3001571744269917762">"স্যাটেলাইট, কোনও কানেকশন নেই"</string>
+    <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"স্যাটেলাইট, খারাপ কানেকশন"</string>
+    <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"স্যাটেলাইট, ভালো কানেকশন"</string>
+    <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"স্যাটেলাইট, কানেকশন উপলভ্য আছে"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"কাজের প্রোফাইল"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"কিছু ব্যক্তির জন্য মজাদার কিন্তু সকলের জন্য নয়"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"এই পরীক্ষামূলক বৈশিষ্ট্যগুলি ভবিষ্যতের সংস্করণগুলির মধ্যে পরিবর্তিত, বিভাজিত এবং অদৃশ্য হয়ে যেতে পারে৷ সাবধানতার সাথে এগিয়ে যান৷ সিস্টেম UI টিউনার আপনাকে Android ব্যবহারকারী ইন্টারফেসের সূক্ষ্ম সমন্বয় এবং কাস্টমাইজ করার অতিরিক্ত উপায়গুলি প্রদান করে৷"</string>
@@ -741,7 +734,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"সেটিংস খুলুন"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant খুলুন"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"লক স্ক্রিন"</string>
-    <string name="group_system_quick_memo" msgid="6257072703041301265">"নোট খুলুন"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"একটি নোট লিখুন"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"সিস্টেম মাল্টিটাস্কিং"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"ডানদিকে থাকা বর্তমান অ্যাপ ব্যবহার করে \'স্প্লিট স্ক্রিন\' যোগ করুন"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"বাঁদিকে থাকা বর্তমান অ্যাপ ব্যবহার করে \'স্প্লিট স্ক্রিন\' যোগ করুন"</string>

@@ -120,24 +120,15 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Klepnutím nahrávku zobrazíte"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Při ukládání záznamu obrazovky došlo k chybě"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Při spouštění nahrávání obrazovky došlo k chybě"</string>
-    <!-- no translation found for issuerecord_title (286627115110121849) -->
-    <skip />
-    <!-- no translation found for issuerecord_background_processing_label (1666840264959336876) -->
-    <skip />
-    <!-- no translation found for issuerecord_channel_description (6142326363431474632) -->
-    <skip />
-    <!-- no translation found for issuerecord_ongoing_screen_only (6248206059935015722) -->
-    <skip />
-    <!-- no translation found for issuerecord_share_label (3992657993619876199) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_title (4161043023696751591) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_text (1205985304551521495) -->
-    <skip />
-    <!-- no translation found for issuerecord_save_error (6913040083446722726) -->
-    <skip />
-    <!-- no translation found for issuerecord_start_error (3402782952722871190) -->
-    <skip />
+    <string name="issuerecord_title" msgid="286627115110121849">"Rekordér problémů"</string>
+    <string name="issuerecord_background_processing_label" msgid="1666840264959336876">"Zpracování záznamu problému"</string>
+    <string name="issuerecord_channel_description" msgid="6142326363431474632">"Upozornění na probíhající shromažďování dat o problému"</string>
+    <string name="issuerecord_ongoing_screen_only" msgid="6248206059935015722">"Záznam problému"</string>
+    <string name="issuerecord_share_label" msgid="3992657993619876199">"Sdílet"</string>
+    <string name="issuerecord_save_title" msgid="4161043023696751591">"Záznam problému byl uložen"</string>
+    <string name="issuerecord_save_text" msgid="1205985304551521495">"Zobrazíte ho klepnutím"</string>
+    <string name="issuerecord_save_error" msgid="6913040083446722726">"Při ukládání záznamu problému došlo k chybě"</string>
+    <string name="issuerecord_start_error" msgid="3402782952722871190">"Při zahájení záznamu problému došlo k chybě"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Zobrazování přes celou obrazovku"</string>
     <string name="immersive_cling_description" msgid="6913958856085185775">"Režim ukončíte přejetím prstem shora dolů."</string>
     <string name="immersive_cling_positive" msgid="3076681691468978568">"Rozumím"</string>
@@ -277,6 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Uloženo"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"odpojit"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivovat"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Zítra znovu automaticky zapnout"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Funkce jako Quick Share, Najdi moje zařízení a vyhledávání zařízení používají Bluetooth"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvuk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Sluchátka"</string>
@@ -546,6 +539,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktivovat"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Zvuk a vibrace"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Nastavení"</string>
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Živý přepis"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Hlasitost byla snížena na bezpečnou úroveň"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Hlasitost sluchátek byla vysoká déle, než je doporučeno"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Hlasitost sluchátek překročila bezpečný limit pro tento týden"</string>
@@ -612,14 +606,10 @@
     <string name="alarm_template" msgid="2234991538018805736">"v <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Hotspot"</string>
-    <!-- no translation found for accessibility_status_bar_satellite_no_connection (3001571744269917762) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_poor_connection (5231478574952724160) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_good_connection (308079391708578704) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_satellite_available (6514855015496916829) -->
-    <skip />
+    <string name="accessibility_status_bar_satellite_no_connection" msgid="3001571744269917762">"Satelit, bez připojení"</string>
+    <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelit, špatné připojení"</string>
+    <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, dobré připojení"</string>
+    <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, připojení je k dispozici"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Pracovní profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zábava, která není pro každého"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Nástroj na ladění uživatelského rozhraní systému vám nabízí další způsoby, jak si vyladit a přizpůsobit uživatelské rozhraní Android. Tyto experimentální funkce mohou v dalších verzích chybět, nefungovat nebo být změněny. Postupujte proto prosím opatrně."</string>
@@ -741,7 +731,7 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otevřít nastavení"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otevřít Asistenta"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Uzamknout obrazovku"</string>
-    <string name="group_system_quick_memo" msgid="6257072703041301265">"Otevřít poznámky"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"Vytvořit poznámku"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Systémový multitasking"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Přepnout na rozdělenou obrazovku s aktuálními aplikacemi napravo"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Přepnout na rozdělenou obrazovku s aktuálními aplikacemi nalevo"</string>
