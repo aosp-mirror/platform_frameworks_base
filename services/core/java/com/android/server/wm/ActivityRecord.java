@@ -2024,12 +2024,31 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void computeInitialCallerInfo() {
-        computeCallerInfo(initialCallerInfoAccessToken, intent, launchedFromUid);
+    boolean hasCaller(IBinder callerToken) {
+        return mCallerState.hasCaller(callerToken);
     }
 
-    void computeCallerInfo(IBinder callerToken, Intent intent, int callerUid) {
-        mCallerState.computeCallerInfo(callerToken, intent, callerUid);
+    int getCallerUid(IBinder callerToken) {
+        return mCallerState.getUid(callerToken);
+    }
+
+    String getCallerPackage(IBinder callerToken) {
+        return mCallerState.getPackage(callerToken);
+    }
+
+    boolean isCallerShareIdentityEnabled(IBinder callerToken) {
+        return mCallerState.isShareIdentityEnabled(callerToken);
+    }
+
+    void computeInitialCallerInfo() {
+        computeCallerInfo(initialCallerInfoAccessToken, intent, launchedFromUid,
+                launchedFromPackage, mShareIdentity);
+    }
+
+    void computeCallerInfo(IBinder callerToken, Intent intent, int callerUid,
+            String callerPackageName, boolean isCallerShareIdentityEnabled) {
+        mCallerState.computeCallerInfo(callerToken, intent, callerUid, callerPackageName,
+                isCallerShareIdentityEnabled);
     }
 
     boolean checkContentUriPermission(IBinder callerToken, GrantUri grantUri, int modeFlags) {
@@ -4960,11 +4979,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * method will be called at the proper time.
      */
     final void deliverNewIntentLocked(int callingUid, Intent intent, NeededUriGrants intentGrants,
-            String referrer) {
+            String referrer, boolean isShareIdentityEnabled) {
+        IBinder callerToken = new Binder();
+        if (android.security.Flags.contentUriPermissionApis()) {
+            computeCallerInfo(callerToken, intent, callingUid, referrer, isShareIdentityEnabled);
+        }
         // The activity now gets access to the data associated with this Intent.
         mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(intentGrants,
                 getUriPermissionsLocked());
-        final ReferrerIntent rintent = new ReferrerIntent(intent, getFilteredReferrer(referrer));
+        final ReferrerIntent rintent = new ReferrerIntent(intent, getFilteredReferrer(referrer),
+                callerToken);
         boolean unsent = true;
         final boolean isTopActivityWhileSleeping = isTopRunningActivity() && isSleeping();
 
