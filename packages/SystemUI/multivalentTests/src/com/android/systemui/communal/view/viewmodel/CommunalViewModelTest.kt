@@ -17,7 +17,9 @@
 package com.android.systemui.communal.view.viewmodel
 
 import android.app.smartspace.SmartspaceTarget
+import android.appwidget.AppWidgetProviderInfo
 import android.content.pm.UserInfo
+import android.os.UserHandle
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -45,13 +47,13 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -71,6 +73,7 @@ import org.mockito.MockitoAnnotations
 class CommunalViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var user: UserInfo
+    @Mock private lateinit var providerInfo: AppWidgetProviderInfo
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -97,6 +100,12 @@ class CommunalViewModelTest : SysuiTestCase() {
 
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
+
+        kosmos.fakeUserTracker.set(
+            userInfos = listOf(MAIN_USER_INFO),
+            selectedUserIndex = 0,
+        )
+        whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
 
         underTest =
             CommunalViewModel(
@@ -147,12 +156,12 @@ class CommunalViewModelTest : SysuiTestCase() {
                     CommunalWidgetContentModel(
                         appWidgetId = 0,
                         priority = 30,
-                        providerInfo = mock(),
+                        providerInfo = providerInfo,
                     ),
                     CommunalWidgetContentModel(
                         appWidgetId = 1,
                         priority = 20,
-                        providerInfo = mock(),
+                        providerInfo = providerInfo,
                     ),
                 )
             widgetRepository.setCommunalWidgets(widgets)
@@ -224,5 +233,9 @@ class CommunalViewModelTest : SysuiTestCase() {
         whenever(user.isMain).thenReturn(isMainUser)
         userRepository.setUserInfos(listOf(user))
         userRepository.setSelectedUserInfo(user)
+    }
+
+    private companion object {
+        val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
     }
 }
