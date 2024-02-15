@@ -189,6 +189,18 @@ constructor(
                 }
             }
             .launchIn(applicationScope)
+
+        facePropertyRepository.cameraInfo
+            .onEach {
+                if (it != null && isRunning()) {
+                    repository.cancel()
+                    runFaceAuth(
+                        FaceAuthUiEvent.FACE_AUTH_CAMERA_AVAILABLE_CHANGED,
+                        fallbackToDetect = true
+                    )
+                }
+            }
+            .launchIn(applicationScope)
     }
 
     private suspend fun resetLockedOutState(currentUserId: Int) {

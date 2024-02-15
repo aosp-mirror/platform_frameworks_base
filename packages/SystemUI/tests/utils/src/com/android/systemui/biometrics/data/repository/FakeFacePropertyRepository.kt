@@ -33,6 +33,10 @@ class FakeFacePropertyRepository : FacePropertyRepository {
     override val sensorLocation: StateFlow<Point?>
         get() = faceSensorLocation
 
+    private val currentCameraInfo = MutableStateFlow<CameraInfo?>(null)
+    override val cameraInfo: StateFlow<CameraInfo?>
+        get() = currentCameraInfo
+
     fun setLockoutMode(userId: Int, mode: LockoutMode) {
         lockoutModesForUser[userId] = mode
     }
@@ -46,5 +50,9 @@ class FakeFacePropertyRepository : FacePropertyRepository {
 
     fun setSensorLocation(value: Point?) {
         faceSensorLocation.value = value
+    }
+
+    fun setCameraIno(value: CameraInfo?) {
+        currentCameraInfo.value = value
     }
 }
