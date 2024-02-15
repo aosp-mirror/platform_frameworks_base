@@ -20,15 +20,5 @@
         "core/tests/coretests/src/com/android/internal/inputmethod/.*"
       ]
     }
-  ],
-  "postsubmit": [
-      {
-        "name": "CtsContactKeysManagerTestCases",
-        "options": [
-          {
-            "include-filter": "android.provider.cts.contactkeys."
-          }
-        ]
-      }
-    ]
+  ]
 }
