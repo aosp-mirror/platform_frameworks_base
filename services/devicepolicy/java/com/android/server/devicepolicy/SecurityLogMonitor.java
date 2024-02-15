@@ -469,15 +469,16 @@ class SecurityLogMonitor implements Runnable {
         }
 
         if (!securityLogV2Enabled() || mLegacyLogEnabled) {
-            addToLegacyBuffer(dedupedLogs);
+            addToLegacyBufferLocked(dedupedLogs);
         }
 
         if (securityLogV2Enabled() && mAuditLogEnabled) {
-            addAuditLogEvents(dedupedLogs);
+            addAuditLogEventsLocked(dedupedLogs);
         }
     }
 
-    private void addToLegacyBuffer(List<SecurityEvent> dedupedLogs) {
+    @GuardedBy("mLock")
+    private void addToLegacyBufferLocked(List<SecurityEvent> dedupedLogs) {
         // Save the rest of the new batch.
         mPendingLogs.addAll(dedupedLogs);
 
@@ -649,32 +650,28 @@ class SecurityLogMonitor implements Runnable {
         Slogf.i(TAG, "Set audit log callback for UID %d", uid);
     }
 
-    private void addAuditLogEvents(List<SecurityEvent> events) {
-        mLock.lock();
-        try {
-            if (mPaused) {
-                // TODO: maybe we need to stash the logs in some temp buffer wile paused so that
-                // they can be accessed after affiliation is fixed.
-                return;
+    @GuardedBy("mLock")
+    private void addAuditLogEventsLocked(List<SecurityEvent> events) {
+        if (mPaused) {
+            // TODO: maybe we need to stash the logs in some temp buffer wile paused so that
+            // they can be accessed after affiliation is fixed.
+            return;
+        }
+        if (!events.isEmpty()) {
+            for (int i = 0; i < mAuditLogCallbacks.size(); i++) {
+                final int uid = mAuditLogCallbacks.keyAt(i);
+                scheduleSendAuditLogs(uid, mAuditLogCallbacks.valueAt(i), events);
             }
-            if (!events.isEmpty()) {
-                for (int i = 0; i < mAuditLogCallbacks.size(); i++) {
-                    final int uid = mAuditLogCallbacks.keyAt(i);
-                    scheduleSendAuditLogs(uid, mAuditLogCallbacks.valueAt(i), events);
-                }
-            }
-            if (DEBUG) {
-                Slogf.d(TAG, "Adding audit %d events to % already present in the buffer",
-                        events.size(), mAuditLogEventBuffer.size());
-            }
-            mAuditLogEventBuffer.addAll(events);
-            trimAuditLogBufferLocked();
-            if (DEBUG) {
-                Slogf.d(TAG, "Audit event buffer size after trimming: %d",
-                        mAuditLogEventBuffer.size());
-            }
-        } finally {
-            mLock.unlock();
+        }
+        if (DEBUG) {
+            Slogf.d(TAG, "Adding audit %d events to % already present in the buffer",
+                    events.size(), mAuditLogEventBuffer.size());
+        }
+        mAuditLogEventBuffer.addAll(events);
+        trimAuditLogBufferLocked();
+        if (DEBUG) {
+            Slogf.d(TAG, "Audit event buffer size after trimming: %d",
+                    mAuditLogEventBuffer.size());
         }
     }
 
