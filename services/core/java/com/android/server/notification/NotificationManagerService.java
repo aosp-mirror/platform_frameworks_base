@@ -1355,7 +1355,8 @@ public class NotificationManagerService extends SystemService {
                 nv.recycle();
                 reportUserInteraction(r);
                 mAssistants.notifyAssistantActionClicked(r, action, generatedByAssistant);
-                // Notifications that have been interacted with don't need to be lifetime extended.
+                // Notifications that have been interacted with should no longer be lifetime
+                // extended.
                 if (lifetimeExtensionRefactor()) {
                     r.getSbn().getNotification().flags &= ~FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
                 }
@@ -1524,9 +1525,32 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationDirectReplied(String key) {
             exitIdle();
+            String packageName = null;
+            final int packageImportance;
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
+                    packageName = r.getSbn().getPackageName();
+                }
+            }
+            if (lifetimeExtensionRefactor() && packageName != null) {
+                packageImportance = getPackageImportanceWithIdentity(packageName);
+            } else {
+                packageImportance = IMPORTANCE_NONE;
+            }
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    // If the notification is already marked as lifetime extended before we record
+                    // the new direct reply, there must have been a previous lifetime extension
+                    // event, and the app has already cancelled the notification, or does not
+                    // respond to direct replies with updates. So we need to update System UI
+                    // immediately.
+                    if (lifetimeExtensionRefactor()) {
+                        maybeNotifySystemUiListenerLifetimeExtendedLocked(r,
+                                r.getSbn().getPackageName(), packageImportance);
+                    }
+
                     r.recordDirectReplied();
                     mMetricsLogger.write(r.getLogMaker()
                             .setCategory(MetricsEvent.NOTIFICATION_DIRECT_REPLY_ACTION)
@@ -1557,10 +1581,31 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationSmartReplySent(String key, int replyIndex, CharSequence reply,
                 int notificationLocation, boolean modifiedBeforeSending) {
-
+            String packageName = null;
+            final int packageImportance;
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
+                    packageName = r.getSbn().getPackageName();
+                }
+            }
+            if (lifetimeExtensionRefactor() && packageName != null) {
+                packageImportance = getPackageImportanceWithIdentity(packageName);
+            } else {
+                packageImportance = IMPORTANCE_NONE;
+            }
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    // If the notification is already marked as lifetime extended before we record
+                    // the new direct reply, there must have been a previous lifetime extension
+                    // event, and the app has already cancelled the notification, or does not
+                    // respond to direct replies with updates. So we need to update System UI
+                    // immediately.
+                    if (lifetimeExtensionRefactor()) {
+                        maybeNotifySystemUiListenerLifetimeExtendedLocked(r,
+                                r.getSbn().getPackageName(), packageImportance);
+                    }
                     r.recordSmartReplied();
                     LogMaker logMaker = r.getLogMaker()
                             .setCategory(MetricsEvent.SMART_REPLY_ACTION)
@@ -7727,7 +7772,7 @@ public class NotificationManagerService extends SystemService {
 
         notification.flags &= ~FLAG_FSI_REQUESTED_BUT_DENIED;
 
-        // Apps should not create notifications that are lifetime extended.
+        // Apps cannot post notifications that are lifetime extended.
         if (lifetimeExtensionRefactor()) {
             notification.flags &= ~FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
         }
@@ -11997,8 +12042,10 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onServiceAdded(ManagedServiceInfo info) {
             if (lifetimeExtensionRefactor()) {
-                // Only System or System UI can call registerSystemService, so if the caller is not
-                // system, we know it's system UI.
+                // Generally, only System or System UI should have the permissions to call
+                // registerSystemService.
+                // isCallerSystemorPhone tells us whether the caller is System. Then, if it's not
+                // the system, we know it's system UI.
                 info.isSystemUi = !isCallerSystemOrPhone();
             }
             final INotificationListener listener = (INotificationListener) info.service;

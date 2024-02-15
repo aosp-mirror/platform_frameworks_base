@@ -5841,6 +5841,30 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testStats_DirectReplyLifetimeExtendedPostsUpdate() throws Exception {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationDirectReplied(r.getKey());
+        waitForIdle();
+
+        assertThat(mService.getNotificationRecord(r.getKey()).getStats().hasDirectReplied())
+                .isTrue();
+        // Checks that a post update is sent.
+        verify(mWorkerHandler, times(1))
+                .post(any(NotificationManagerService.PostNotificationRunnable.class));
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(captor.capture(), any(),
+                anyBoolean());
+        assertThat(captor.getValue().getNotification().flags
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
+                FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+    }
+
+    @Test
     public void testStats_updatedOnUserExpansion() throws Exception {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
@@ -8506,6 +8530,36 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testStats_SmartReplyAlreadyLifetimeExtendedPostsUpdate() throws Exception {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
+        final int replyIndex = 2;
+        final String reply = "Hello";
+        final boolean modifiedBeforeSending = true;
+        final boolean generatedByAssistant = true;
+
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        r.setSuggestionsGeneratedByAssistant(generatedByAssistant);
+        mService.addNotification(r);
+
+        mService.mNotificationDelegate.onNotificationSmartReplySent(
+                r.getKey(), replyIndex, reply, NOTIFICATION_LOCATION_UNKNOWN,
+                modifiedBeforeSending);
+        waitForIdle();
+
+        // Checks that a post update is sent.
+        verify(mWorkerHandler, times(1))
+                .post(any(NotificationManagerService.PostNotificationRunnable.class));
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(captor.capture(), any(),
+                anyBoolean());
+        assertThat(captor.getValue().getNotification().flags
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
+                FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+    }
+
+    @Test
     public void testOnNotificationActionClick() {
         final int actionIndex = 2;
         final Notification.Action action =
@@ -8536,6 +8590,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final Notification.Action action =
                 new Notification.Action.Builder(null, "text", PendingIntent.getActivity(
                         mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE)).build();
+        final boolean generatedByAssistant = false;
+
         // Creates a notification marked as being lifetime extended.
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         r.getSbn().getNotification().flags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
@@ -8548,6 +8604,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 /*generatedByAssistant=*/false);
         // The flag is removed, so the notification is no longer lifetime extended.
         assertThat(r.getSbn().getNotification().flags
+                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(0);
+
+        // The record is sent out without the flag.
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mAssistants, times(1)).notifyAssistantActionClicked(
+                captor.capture(), eq(action), eq(generatedByAssistant));
+        assertThat(captor.getValue().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(0);
     }
 
