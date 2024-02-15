@@ -241,7 +241,7 @@ constructor(
     }
 
     override fun onStatusBarTouch(event: MotionEvent) {
-        // The only call to this doesn't happen with KeyguardShadeMigrationNssl enabled
+        // The only call to this doesn't happen with migrateClocksToBlueprint() enabled
         throw UnsupportedOperationException()
     }
 }

@@ -18,6 +18,8 @@ package com.android.systemui.shade;
 
 import static androidx.constraintlayout.core.widgets.Optimizer.OPTIMIZATION_GRAPH;
 
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
+
 import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -33,7 +35,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
@@ -189,7 +190,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if (KeyguardShadeMigrationNssl.isEnabled()) {
+        if (migrateClocksToBlueprint()) {
             return super.drawChild(canvas, child, drawingTime);
         }
         int layoutIndex = mLayoutDrawingOrder.indexOf(child);

@@ -102,7 +102,6 @@ constructor(
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = 500.milliseconds,
-            onStart = { 1f },
             onStep = { 1f },
         )
 }
