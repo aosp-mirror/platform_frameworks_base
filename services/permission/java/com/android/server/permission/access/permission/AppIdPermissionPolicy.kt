@@ -586,8 +586,13 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 var areGidsPerUser = false
                 if (!parsedPermission.isTree && packageState.isSystem) {
                     newState.externalState.configPermissions[permissionName]?.let {
-                        gids = it.gids
-                        areGidsPerUser = it.perUser
+                        // PermissionEntry.gids may return null when parsing legacy config trying
+                        // to work around an issue about upgrading from L platfrm. We can just
+                        // ignore such entries now.
+                        if (it.gids != null) {
+                            gids = it.gids
+                            areGidsPerUser = it.perUser
+                        }
                     }
                 }
                 newPermission = Permission(
