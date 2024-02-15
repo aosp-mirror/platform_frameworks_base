@@ -207,6 +207,72 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun onConfigurationChanged_noRelevantChange_doesNotUpdateInsets() {
+        val previousInsets =
+            Insets.of(/* left = */ 40, /* top = */ 30, /* right = */ 20, /* bottom = */ 10)
+        whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
+            .thenReturn(previousInsets)
+        context.orCreateTestableResources.overrideConfiguration(Configuration())
+        view.onAttachedToWindow()
+
+        val newInsets = Insets.NONE
+        whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
+                .thenReturn(newInsets)
+        view.onConfigurationChanged(Configuration())
+
+        assertThat(view.paddingLeft).isEqualTo(previousInsets.left)
+        assertThat(view.paddingTop).isEqualTo(previousInsets.top)
+        assertThat(view.paddingRight).isEqualTo(previousInsets.right)
+        assertThat(view.paddingBottom).isEqualTo(0)
+    }
+
+    @Test
+    fun onConfigurationChanged_densityChanged_updatesInsets() {
+        val previousInsets =
+            Insets.of(/* left = */ 40, /* top = */ 30, /* right = */ 20, /* bottom = */ 10)
+        whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
+            .thenReturn(previousInsets)
+        val configuration = Configuration()
+        configuration.densityDpi = 123
+        context.orCreateTestableResources.overrideConfiguration(configuration)
+        view.onAttachedToWindow()
+
+        val newInsets = Insets.NONE
+        whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
+                .thenReturn(newInsets)
+        configuration.densityDpi = 456
+        view.onConfigurationChanged(configuration)
+
+        assertThat(view.paddingLeft).isEqualTo(newInsets.left)
+        assertThat(view.paddingTop).isEqualTo(newInsets.top)
+        assertThat(view.paddingRight).isEqualTo(newInsets.right)
+        assertThat(view.paddingBottom).isEqualTo(0)
+    }
+
+    @Test
+    fun onConfigurationChanged_fontScaleChanged_updatesInsets() {
+        val previousInsets =
+            Insets.of(/* left = */ 40, /* top = */ 30, /* right = */ 20, /* bottom = */ 10)
+        whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
+            .thenReturn(previousInsets)
+        val configuration = Configuration()
+        configuration.fontScale = 1f
+        context.orCreateTestableResources.overrideConfiguration(configuration)
+        view.onAttachedToWindow()
+
+        val newInsets = Insets.NONE
+        whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
+                .thenReturn(newInsets)
+        configuration.fontScale = 2f
+        view.onConfigurationChanged(configuration)
+
+        assertThat(view.paddingLeft).isEqualTo(newInsets.left)
+        assertThat(view.paddingTop).isEqualTo(newInsets.top)
+        assertThat(view.paddingRight).isEqualTo(newInsets.right)
+        assertThat(view.paddingBottom).isEqualTo(0)
+    }
+
+    @Test
     fun onApplyWindowInsets_updatesLeftTopRightPaddingsBasedOnInsets() {
         val insets = Insets.of(/* left = */ 90, /* top = */ 10, /* right = */ 45, /* bottom = */ 50)
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
