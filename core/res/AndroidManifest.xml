@@ -7696,7 +7696,7 @@
 
     <!-- @SystemApi Allows the holder to launch an Intent Resolver flow with custom presentation
          and/or targets.
-         @FlaggedApi("android.service.chooser.support_nfc_resolver")
+         @FlaggedApi("android.nfc.enable_nfc_mainline")
          @hide -->
     <permission android:name="android.permission.SHOW_CUSTOMIZED_RESOLVER"
                 android:protectionLevel="signature|privileged" />
@@ -8196,8 +8196,8 @@
                 android:multiprocess="true"
                 android:permission="android.permission.SHOW_CUSTOMIZED_RESOLVER"
                 android:exported="true">
-            <intent-filter>
-                <action android:name="android.service.chooser.action.SHOW_CUSTOMIZED_RESOLVER" />
+            <intent-filter android:priority="100" >
+                <action android:name="android.nfc.action.SHOW_NFC_RESOLVER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
