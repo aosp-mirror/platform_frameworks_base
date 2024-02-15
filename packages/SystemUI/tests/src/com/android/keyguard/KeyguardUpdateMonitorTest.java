@@ -1500,7 +1500,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         verify(mHandler).postDelayed(mKeyguardUpdateMonitor.mFpCancelNotReceived,
                 DEFAULT_CANCEL_SIGNAL_TIMEOUT);
-
         mKeyguardUpdateMonitor.onFingerprintAuthenticated(0, true);
         mTestableLooper.processAllMessages();
 
@@ -2013,6 +2012,34 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // THEN fingerprint detect state should immediately update to STOPPED
         assertThat(mKeyguardUpdateMonitor.mFingerprintRunningState)
                 .isEqualTo(BIOMETRIC_STATE_STOPPED);
+    }
+
+    @Test
+    public void authenticateFingerprint_onFaceLockout_detectFingerprint() throws RemoteException {
+        // GIVEN fingerprintAuthenticate
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+        verifyFingerprintAuthenticateCall();
+        verifyFingerprintDetectNeverCalled();
+        clearInvocations(mFingerprintManager);
+
+        // WHEN class 3 face is locked out
+        when(mFaceAuthInteractor.isFaceAuthStrong()).thenReturn(true);
+        when(mFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()).thenReturn(true);
+        setupFingerprintAuth(/* isClass3 */ true);
+        // GIVEN primary auth is not required by StrongAuthTracker
+        primaryAuthNotRequiredByStrongAuthTracker();
+
+        // WHEN face (class 3) is locked out
+        faceAuthLockOut();
+        mTestableLooper.processAllMessages();
+
+        // THEN unlocking with fingerprint is not allowed
+        Assert.assertFalse(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                BiometricSourceType.FINGERPRINT));
+
+        // THEN fingerprint detect gets called
+        verifyFingerprintDetectCall();
     }
 
     @Test
