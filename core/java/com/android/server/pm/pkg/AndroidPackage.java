@@ -1507,4 +1507,11 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isVisibleToInstantApps();
+
+    /**
+     * @see ApplicationInfo#allowCrossUidActivitySwitchFromBelow
+     * @see R.styleable#AndroidManifestApplication_allowCrossUidActivitySwitchFromBelow
+     * @hide
+     */
+    boolean isAllowCrossUidActivitySwitchFromBelow();
 }
