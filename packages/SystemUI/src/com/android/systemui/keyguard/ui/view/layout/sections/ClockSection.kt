@@ -205,7 +205,7 @@ constructor(
         fun getDimen(context: Context, name: String): Int {
             val res = context.packageManager.getResourcesForApplication(context.packageName)
             val id = res.getIdentifier(name, "dimen", context.packageName)
-            return res.getDimensionPixelSize(id)
+            return if (id == 0) 0 else res.getDimensionPixelSize(id)
         }
     }
 }
