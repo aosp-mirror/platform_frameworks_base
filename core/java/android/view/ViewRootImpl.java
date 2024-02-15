@@ -27,6 +27,8 @@ import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
+import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -1029,6 +1031,15 @@ public final class ViewRootImpl implements ViewParent,
     // time for evaluating the interval between current time and
     // the time when frame rate was set previously.
     private static final int FRAME_RATE_SETTING_REEVALUATE_TIME = 100;
+
+    /*
+     * The variables below are used to update frame rate category
+     */
+    private static final int FRAME_RATE_CATEGORY_COUNT = 5;
+    private int mFrameRateCategoryHighCount = 0;
+    private int mFrameRateCategoryHighHintCount = 0;
+    private int mFrameRateCategoryNormalCount = 0;
+    private int mFrameRateCategoryLowCount = 0;
 
     /*
      * the variables below are used to determine whther a dVRR feature should be enabled
@@ -4084,6 +4095,12 @@ public final class ViewRootImpl implements ViewParent,
         // when the values are applicable.
         setPreferredFrameRate(mPreferredFrameRate);
         setPreferredFrameRateCategory(mPreferredFrameRateCategory);
+        mFrameRateCategoryHighCount = mFrameRateCategoryHighCount > 0
+                ? mFrameRateCategoryHighCount - 1 : mFrameRateCategoryHighCount;
+        mFrameRateCategoryNormalCount = mFrameRateCategoryNormalCount > 0
+                ? mFrameRateCategoryNormalCount - 1 : mFrameRateCategoryNormalCount;
+        mFrameRateCategoryLowCount = mFrameRateCategoryLowCount > 0
+                ? mFrameRateCategoryLowCount - 1 : mFrameRateCategoryLowCount;
         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
         mPreferredFrameRate = -1;
     }
@@ -12348,7 +12365,25 @@ public final class ViewRootImpl implements ViewParent,
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     public void votePreferredFrameRateCategory(int frameRateCategory) {
-        mPreferredFrameRateCategory = Math.max(mPreferredFrameRateCategory, frameRateCategory);
+        if (frameRateCategory == FRAME_RATE_CATEGORY_HIGH) {
+            mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
+        } else if (frameRateCategory == FRAME_RATE_CATEGORY_HIGH_HINT) {
+            mFrameRateCategoryHighHintCount = FRAME_RATE_CATEGORY_COUNT;
+        } else if (frameRateCategory == FRAME_RATE_CATEGORY_NORMAL) {
+            mFrameRateCategoryNormalCount = FRAME_RATE_CATEGORY_COUNT;
+        } else if (frameRateCategory == FRAME_RATE_CATEGORY_LOW) {
+            mFrameRateCategoryLowCount = FRAME_RATE_CATEGORY_COUNT;
+        }
+
+        if (mFrameRateCategoryHighCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
+        } else if (mFrameRateCategoryHighHintCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH_HINT;
+        } else if (mFrameRateCategoryNormalCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NORMAL;
+        } else if (mFrameRateCategoryLowCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_LOW;
+        }
         mHasInvalidation = true;
     }
 
