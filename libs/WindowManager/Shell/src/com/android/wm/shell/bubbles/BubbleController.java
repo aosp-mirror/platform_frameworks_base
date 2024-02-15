@@ -481,7 +481,12 @@ public class BubbleController implements ConfigurationChangeListener,
                 });
 
         mOneHandedOptional.ifPresent(this::registerOneHandedState);
-        mDragAndDropController.addListener(this::collapseStack);
+        mDragAndDropController.addListener(new DragAndDropController.DragAndDropListener() {
+            @Override
+            public void onDragStarted() {
+                collapseStack();
+            }
+        });
 
         // Clear out any persisted bubbles on disk that no longer have a valid user.
         List<UserInfo> users = mUserManager.getAliveUsers();
