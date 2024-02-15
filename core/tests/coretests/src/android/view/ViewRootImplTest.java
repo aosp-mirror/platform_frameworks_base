@@ -699,6 +699,8 @@ public class ViewRootImplTest {
             viewRootImpl.votePreferredFrameRate(24);
             assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
             viewRootImpl.votePreferredFrameRate(30);
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 30, 0.1);
+            viewRootImpl.votePreferredFrameRate(60);
             assertEquals(viewRootImpl.getPreferredFrameRate(), 60, 0.1);
             viewRootImpl.votePreferredFrameRate(120);
             assertEquals(viewRootImpl.getPreferredFrameRate(), 120, 0.1);

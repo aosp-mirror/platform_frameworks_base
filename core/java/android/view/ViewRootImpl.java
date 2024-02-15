@@ -4085,6 +4085,7 @@ public final class ViewRootImpl implements ViewParent,
         setPreferredFrameRate(mPreferredFrameRate);
         setPreferredFrameRateCategory(mPreferredFrameRateCategory);
         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+        mPreferredFrameRate = -1;
     }
 
     private void createSyncIfNeeded() {
@@ -12296,7 +12297,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         try {
-            if (mLastPreferredFrameRate != preferredFrameRate) {
+            if (mLastPreferredFrameRate != preferredFrameRate
+                    && preferredFrameRate >= 0) {
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                     Trace.traceBegin(
                             Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRate "
@@ -12368,13 +12370,7 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        if (mPreferredFrameRate == 0) {
-            mPreferredFrameRate = frameRate;
-        } else if (frameRate > 60 || mPreferredFrameRate > 60) {
-            mPreferredFrameRate = Math.max(mPreferredFrameRate, frameRate);
-        } else if (mPreferredFrameRate != frameRate) {
-            mPreferredFrameRate = 60;
-        }
+        mPreferredFrameRate = Math.max(mPreferredFrameRate, frameRate);
 
         mHasInvalidation = true;
         mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
@@ -12403,7 +12399,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     @VisibleForTesting
     public float getPreferredFrameRate() {
-        return mPreferredFrameRate;
+        return mPreferredFrameRate >= 0 ? mPreferredFrameRate : mLastPreferredFrameRate;
     }
 
     /**
