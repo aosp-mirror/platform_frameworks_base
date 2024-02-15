@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"ಮುಚ್ಚಿ"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"ವಿಸ್ತೃತಗೊಳಿಸು"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"ಸ್ಪ್ಲಿಟ್‌-ಸ್ಕ್ರೀನ್‌ಗೆ ಪ್ರವೇಶಿಸಿ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ಮೆನು"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರ ಮೆನು"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವಾಗಿದೆ"</string>

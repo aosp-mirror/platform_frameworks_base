@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Tutup"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Kembangkan"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Tetapan"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Masuk skrin pisah"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menu Gambar dalam Gambar"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> terdapat dalam gambar dalam gambar"</string>

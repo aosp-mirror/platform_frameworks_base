@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Жабу"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Жаю"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Параметрлер"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Бөлінген экранға кіру"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Mәзір"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"\"Сурет ішіндегі сурет\" мәзірі"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> \"суреттегі сурет\" режимінде"</string>
