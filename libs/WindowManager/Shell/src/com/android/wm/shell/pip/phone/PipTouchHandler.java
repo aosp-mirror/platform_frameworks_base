@@ -25,8 +25,10 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_FULL;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_NONE;
 import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_NONE;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
@@ -53,16 +55,17 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDoubleTapHelper;
+import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
-import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 
 /**
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
@@ -83,6 +86,7 @@ public class PipTouchHandler {
     private final PipDismissTargetHandler mPipDismissTargetHandler;
     private final PipTaskOrganizer mPipTaskOrganizer;
     private final ShellExecutor mMainExecutor;
+    @Nullable private final PipPerfHintController mPipPerfHintController;
 
     private PipResizeGestureHandler mPipResizeGestureHandler;
 
@@ -172,9 +176,11 @@ public class PipTouchHandler {
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional) {
         mContext = context;
         mMainExecutor = mainExecutor;
+        mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
@@ -208,7 +214,7 @@ public class PipTouchHandler {
                 new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
                         mMotionHelper, mTouchState, pipTaskOrganizer, mPipDismissTargetHandler,
                         this::updateMovementBounds, pipUiEventLogger,
-                        menuController, mainExecutor);
+                        menuController, mainExecutor, mPipPerfHintController);
         mConnection = new PipAccessibilityInteractionConnection(mContext, pipBoundsState,
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
                 this::onAccessibilityShowMenu, this::updateMovementBounds,
@@ -520,6 +526,7 @@ public class PipTouchHandler {
         }
 
         if (mPipResizeGestureHandler.hasOngoingGesture()) {
+            mGesture.cleanUpHighPerfSessionMaybe();
             mPipDismissTargetHandler.hideDismissTargetMaybe();
             return true;
         }
@@ -542,7 +549,7 @@ public class PipTouchHandler {
 
         // Ignore the motion event When the entry animation is waiting to be started
         if (!mTouchState.isUserInteracting() && mPipTaskOrganizer.isEntryScheduled()) {
-            ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+            ProtoLog.wtf(WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Waiting to start the entry animation, skip the motion event.", TAG);
             return true;
         }
@@ -789,10 +796,29 @@ public class PipTouchHandler {
         private final PointF mDelta = new PointF();
         private boolean mShouldHideMenuAfterFling;
 
+        @Nullable private PipPerfHintController.PipHighPerfSession mPipHighPerfSession;
+
+        private void onHighPerfSessionTimeout(PipPerfHintController.PipHighPerfSession session) {}
+
+        @Override
+        public void cleanUpHighPerfSessionMaybe() {
+            if (mPipHighPerfSession != null) {
+                // Close the high perf session once pointer interactions are over;
+                mPipHighPerfSession.close();
+                mPipHighPerfSession = null;
+            }
+        }
+
         @Override
         public void onDown(PipTouchState touchState) {
             if (!touchState.isUserInteracting()) {
                 return;
+            }
+
+            if (mPipPerfHintController != null) {
+                // Cache the PiP high perf session to close it upon touch up.
+                mPipHighPerfSession = mPipPerfHintController.startSession(
+                        this::onHighPerfSessionTimeout, "DefaultPipTouchGesture#onDown");
             }
 
             Rect bounds = getPossiblyMotionBounds();
@@ -937,6 +963,7 @@ public class PipTouchHandler {
                     mTouchState.scheduleDoubleTapTimeoutCallback();
                 }
             }
+            cleanUpHighPerfSessionMaybe();
             return true;
         }
 
@@ -1028,7 +1055,7 @@ public class PipTouchHandler {
         }
         final Size estimatedMinMenuSize = mMenuController.getEstimatedMinMenuSize();
         if (estimatedMinMenuSize == null) {
-            ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+            ProtoLog.wtf(WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Failed to get estimated menu size", TAG);
             return false;
         }

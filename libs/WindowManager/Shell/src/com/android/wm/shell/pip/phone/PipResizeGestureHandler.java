@@ -17,6 +17,7 @@ package com.android.wm.shell.pip.phone;
 
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_NONE;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -39,6 +40,7 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipPinchResizingAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -98,6 +100,12 @@ public class PipResizeGestureHandler {
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
 
+    @Nullable
+    private final PipPerfHintController mPipPerfHintController;
+
+    @Nullable
+    private PipPerfHintController.PipHighPerfSession mPipHighPerfSession;
+
     private int mCtrlType;
     private int mOhmOffset;
 
@@ -107,10 +115,11 @@ public class PipResizeGestureHandler {
             PipDismissTargetHandler pipDismissTargetHandler,
             Runnable updateMovementBoundsRunnable,
             PipUiEventLogger pipUiEventLogger, PhonePipMenuController menuActivityController,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor, @Nullable PipPerfHintController pipPerfHintController) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = mainExecutor;
+        mPipPerfHintController = pipPerfHintController;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
         mMotionHelper = motionHelper;
@@ -266,6 +275,16 @@ public class PipResizeGestureHandler {
         return mIsSysUiStateValid;
     }
 
+    private void onHighPerfSessionTimeout(PipPerfHintController.PipHighPerfSession session) {}
+
+    private void cleanUpHighPerfSessionMaybe() {
+        if (mPipHighPerfSession != null) {
+            // Close the high perf session once pointer interactions are over;
+            mPipHighPerfSession.close();
+            mPipHighPerfSession = null;
+        }
+    }
+
     @VisibleForTesting
     void onPinchResize(MotionEvent ev) {
         int action = ev.getActionMasked();
@@ -275,6 +294,7 @@ public class PipResizeGestureHandler {
             mSecondIndex = -1;
             mAllowGesture = false;
             finishResize();
+            cleanUpHighPerfSessionMaybe();
         }
 
         if (ev.getPointerCount() != 2) {
@@ -296,6 +316,12 @@ public class PipResizeGestureHandler {
                 mLastPoint.set(mDownPoint);
                 mLastSecondPoint.set(mLastSecondPoint);
                 mLastResizeBounds.set(mDownBounds);
+
+                // start the high perf session as the second pointer gets detected
+                if (mPipPerfHintController != null) {
+                    mPipHighPerfSession = mPipPerfHintController.startSession(
+                            this::onHighPerfSessionTimeout, "onPinchResize");
+                }
             }
         }
 

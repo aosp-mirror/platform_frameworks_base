@@ -305,6 +305,12 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     public void end() {
     }
 
+    /** Starts the {@link android.window.SystemPerformanceHinter.HighPerfSession}. */
+    public void startHighPerfSession() {}
+
+    /** Closes the {@link android.window.SystemPerformanceHinter.HighPerfSession}. */
+    public void closeHighPerfSession() {}
+
     /**
      * Callback interface for PiP transitions (both from and to PiP mode)
      */

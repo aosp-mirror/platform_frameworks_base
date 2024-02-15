@@ -66,6 +66,7 @@ import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.SizeSpecSource;
@@ -392,6 +393,20 @@ public abstract class WMShellBaseModule {
     static SizeSpecSource provideSizeSpecSource(Context context,
             PipDisplayLayoutState pipDisplayLayoutState) {
         return new PhoneSizeSpecSource(context, pipDisplayLayoutState);
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<PipPerfHintController> providePipPerfHintController(
+            PipDisplayLayoutState pipDisplayLayoutState,
+            @ShellMainThread ShellExecutor mainExecutor,
+            Optional<SystemPerformanceHinter> systemPerformanceHinterOptional) {
+        if (systemPerformanceHinterOptional.isPresent()) {
+            return Optional.of(new PipPerfHintController(pipDisplayLayoutState, mainExecutor,
+                    systemPerformanceHinterOptional.get()));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @WMSingleton

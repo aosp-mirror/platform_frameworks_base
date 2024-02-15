@@ -86,6 +86,7 @@ import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMenuController;
+import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
@@ -140,6 +141,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final int mCrossFadeAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Optional<SplitScreenController> mSplitScreenOptional;
+    @Nullable private final PipPerfHintController mPipPerfHintController;
     protected final ShellTaskOrganizer mTaskOrganizer;
     protected final ShellExecutor mMainExecutor;
 
@@ -157,10 +159,30 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
                 private boolean mIsCancelled;
+                @Nullable private PipPerfHintController.PipHighPerfSession mPipHighPerfSession;
+
+                private void onHighPerfSessionTimeout(
+                        PipPerfHintController.PipHighPerfSession session) {}
+
+                private void cleanUpHighPerfSessionMaybe() {
+                    if (mPipHighPerfSession != null) {
+                        // Close the high perf session once pointer interactions are over;
+                        mPipHighPerfSession.close();
+                        mPipHighPerfSession = null;
+                    }
+                }
+
 
                 @Override
                 public void onPipAnimationStart(TaskInfo taskInfo,
                         PipAnimationController.PipTransitionAnimator animator) {
+                    if (mPipPerfHintController != null) {
+                        // Start a high perf session with a timeout callback.
+                        mPipHighPerfSession = mPipPerfHintController.startSession(
+                                this::onHighPerfSessionTimeout,
+                                "PipTaskOrganizer::mPipAnimationCallback");
+                    }
+
                     final int direction = animator.getTransitionDirection();
                     mIsCancelled = false;
                     sendOnPipTransitionStarted(direction);
@@ -169,6 +191,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 @Override
                 public void onPipAnimationEnd(TaskInfo taskInfo, SurfaceControl.Transaction tx,
                         PipAnimationController.PipTransitionAnimator animator) {
+                    // Close the high perf session if needed.
+                    cleanUpHighPerfSessionMaybe();
+
                     final int direction = animator.getTransitionDirection();
                     if (mIsCancelled) {
                         sendOnPipTransitionFinished(direction);
@@ -356,6 +381,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @NonNull PipTransitionController pipTransitionController,
             @NonNull PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<SplitScreenController> splitScreenOptional,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
@@ -381,6 +407,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSurfaceControlTransactionFactory =
                 new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
         mSplitScreenOptional = splitScreenOptional;
+        mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
         mTaskOrganizer = shellTaskOrganizer;
         mMainExecutor = mainExecutor;
 
@@ -1972,6 +1999,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         pw.println(innerPrefix + "mState=" + mPipTransitionState.getTransitionState());
         pw.println(innerPrefix + "mPictureInPictureParams=" + mPictureInPictureParams);
         mPipTransitionController.dump(pw, innerPrefix);
+        if (mPipPerfHintController != null) {
+            mPipPerfHintController.dump(pw, innerPrefix);
+        }
     }
 
     @Override
