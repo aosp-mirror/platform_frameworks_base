@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityOptions
 import android.app.PendingIntent
@@ -35,7 +34,6 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.os.IBinder
 import android.os.SystemProperties
-import android.util.DisplayMetrics.DENSITY_DEFAULT
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
@@ -51,6 +49,7 @@ import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.ExecutorUtils
 import com.android.wm.shell.common.ExternalInterfaceBinder
 import com.android.wm.shell.common.LaunchAdjacentController
@@ -68,7 +67,6 @@ import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksLi
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
-import com.android.wm.shell.recents.RecentTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -85,7 +83,6 @@ import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
-import java.util.function.Function
 
 /** Handles moving tasks in and out of desktop */
 class DesktopTasksController(
@@ -551,11 +548,7 @@ class DesktopTasksController(
         if (taskInfo.configuration.windowConfiguration.bounds == stableBounds) {
             // The desktop task is currently occupying the whole stable bounds, toggle to the
             // default bounds.
-            getDefaultDesktopTaskBounds(
-                density = taskInfo.configuration.densityDpi.toFloat() / DENSITY_DEFAULT,
-                stableBounds = stableBounds,
-                outBounds = destinationBounds
-            )
+            getDefaultDesktopTaskBounds(displayLayout, destinationBounds)
         } else {
             // Toggle to the stable bounds.
             destinationBounds.set(stableBounds)
@@ -610,15 +603,17 @@ class DesktopTasksController(
         }
     }
 
-    private fun getDefaultDesktopTaskBounds(density: Float, stableBounds: Rect, outBounds: Rect) {
-        val width = (DESKTOP_MODE_DEFAULT_WIDTH_DP * density + 0.5f).toInt()
-        val height = (DESKTOP_MODE_DEFAULT_HEIGHT_DP * density + 0.5f).toInt()
-        outBounds.set(0, 0, width, height)
-        // Center the task in stable bounds
+    private fun getDefaultDesktopTaskBounds(displayLayout: DisplayLayout, outBounds: Rect) {
+        // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
+        val screenBounds = Rect(0, 0, displayLayout.width(), displayLayout.height())
+        // Update width and height with default desktop mode values
+        val desiredWidth = screenBounds.width().times(DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
+        val desiredHeight = screenBounds.height().times(DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
+        outBounds.set(0, 0, desiredWidth, desiredHeight)
+        // Center the task in screen bounds
         outBounds.offset(
-            stableBounds.centerX() - outBounds.centerX(),
-            stableBounds.centerY() - outBounds.centerY()
-        )
+                screenBounds.centerX() - outBounds.centerX(),
+                screenBounds.centerY() - outBounds.centerY())
     }
 
     /**
@@ -1233,13 +1228,9 @@ class DesktopTasksController(
             SystemProperties.getInt("persist.wm.debug.desktop_mode_density", 284)
         private val DESKTOP_DENSITY_ALLOWED_RANGE = (100..1000)
 
-        // Override default freeform task width when desktop mode is enabled. In dips.
-        private val DESKTOP_MODE_DEFAULT_WIDTH_DP =
-            SystemProperties.getInt("persist.wm.debug.desktop_mode.default_width", 840)
-
-        // Override default freeform task height when desktop mode is enabled. In dips.
-        private val DESKTOP_MODE_DEFAULT_HEIGHT_DP =
-            SystemProperties.getInt("persist.wm.debug.desktop_mode.default_height", 630)
+        @JvmField
+        val DESKTOP_MODE_INITIAL_BOUNDS_SCALE = SystemProperties
+                .getInt("persist.wm.debug.freeform_initial_bounds_scale", 75) / 100f
 
         /**
          * Check if desktop density override is enabled
