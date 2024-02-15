@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the shade scene. */
@@ -61,6 +62,16 @@ constructor(
                         isUnlocked = deviceEntryInteractor.isUnlocked.value,
                         canSwipeToDismiss = deviceEntryInteractor.canSwipeToEnter.value,
                     ),
+            )
+
+    /** Whether or not the shade container should be clickable. */
+    val isClickable: StateFlow<Boolean> =
+        upDestinationSceneKey
+            .map { it == SceneKey.Lockscreen }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false
             )
 
     /** Notifies that some content in the shade was clicked. */
