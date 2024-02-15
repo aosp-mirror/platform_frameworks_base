@@ -16,7 +16,7 @@
 
 package android.app;
 
-import static android.app.Flags.enableNightModeCache;
+import static android.app.Flags.enableNightModeBinderCache;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -916,7 +916,7 @@ public class UiModeManager {
      *
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_NIGHT_MODE_CACHE)
+    @FlaggedApi(Flags.FLAG_ENABLE_NIGHT_MODE_BINDER_CACHE)
     public static void invalidateNightModeCache() {
         IpcDataCache.invalidateCache(IpcDataCache.MODULE_SYSTEM,
                 NIGHT_MODE_API);
@@ -938,7 +938,7 @@ public class UiModeManager {
      * @see #setNightMode(int)
      */
     public @NightMode int getNightMode() {
-        if (enableNightModeCache()) {
+        if (enableNightModeBinderCache()) {
             return mNightModeCache.query(null);
         } else {
             return getNightModeFromServer();
