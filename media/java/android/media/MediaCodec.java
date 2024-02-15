@@ -3557,6 +3557,36 @@ final public class MediaCodec {
         }
 
         /**
+         * Set a linear block that contain multiple non-encrypted access unit to this
+         * queue request. Exactly one buffer must be set for a queue request before
+         * calling {@link #queue}. Multiple access units if present must be laid out contiguously
+         * and without gaps and in order. An IllegalArgumentException will be thrown
+         * during {@link #queue} if access units are not laid out contiguously.
+         *
+         * @param block The linear block object
+         * @param infos Represents {@link MediaCodec.BufferInfo} objects to mark
+         *              individual access-unit boundaries and the timestamps associated with it.
+         * @return this object
+         * @throws IllegalStateException if a buffer is already set
+         */
+        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+        public @NonNull QueueRequest setMultiFrameLinearBlock(
+                @NonNull LinearBlock block,
+                @NonNull ArrayDeque<BufferInfo> infos) {
+            if (!isAccessible()) {
+                throw new IllegalStateException("The request is stale");
+            }
+            if (mLinearBlock != null || mHardwareBuffer != null) {
+                throw new IllegalStateException("Cannot set block twice");
+            }
+            mLinearBlock = block;
+            mBufferInfos.clear();
+            mBufferInfos.addAll(infos);
+            mCryptoInfos.clear();
+            return this;
+        }
+
+        /**
          * Set an encrypted linear block to this queue request. Exactly one buffer must be
          * set for a queue request before calling {@link #queue}. It is possible
          * to use the same {@link LinearBlock} object for multiple queue
@@ -3685,26 +3715,6 @@ final public class MediaCodec {
                 throw new IllegalStateException("The request is stale");
             }
             mFlags = flags;
-            return this;
-        }
-
-        /**
-         * Sets MediaCodec.BufferInfo objects describing the access units
-         * contained in this queue request. Access units must be laid out
-         * contiguously without gaps and in order.
-         *
-         * @param infos Represents {@link MediaCodec.BufferInfo} objects to mark
-         *              individual access-unit boundaries and the timestamps associated with it.
-         *              The buffer is expected to contain the data in a continuous manner.
-         * @return this object
-         */
-        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
-        public @NonNull QueueRequest setBufferInfos(@NonNull ArrayDeque<BufferInfo> infos) {
-            if (!isAccessible()) {
-                throw new IllegalStateException("The request is stale");
-            }
-            mBufferInfos.clear();
-            mBufferInfos.addAll(infos);
             return this;
         }
 
