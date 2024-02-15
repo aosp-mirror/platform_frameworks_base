@@ -17,8 +17,8 @@
 package com.android.internal.protolog;
 
 import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LEGACY_OUTPUT_FILE_PATH;
-import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.VIEWER_CONFIG_PATH;
 import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LEGACY_VIEWER_CONFIG_PATH;
+import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.VIEWER_CONFIG_PATH;
 
 import android.annotation.Nullable;
 
@@ -100,7 +100,7 @@ public class ProtoLogImpl {
         if (sServiceInstance == null) {
             if (android.tracing.Flags.perfettoProtolog()) {
                 sServiceInstance =
-                        new PerfettoProtoLogImpl(sViewerConfigPath, sLegacyViewerConfigPath);
+                        new PerfettoProtoLogImpl(sViewerConfigPath);
             } else {
                 sServiceInstance =
                         new LegacyProtoLogImpl(sLegacyOutputFilePath, sLegacyViewerConfigPath);
