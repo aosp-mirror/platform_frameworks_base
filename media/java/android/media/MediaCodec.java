@@ -16,6 +16,7 @@
 
 package android.media;
 
+import static android.media.codec.Flags.FLAG_NULL_OUTPUT_SURFACE;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
 
 import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
@@ -2213,6 +2214,18 @@ final public class MediaCodec {
      */
     public static final int CONFIGURE_FLAG_USE_CRYPTO_ASYNC = 4;
 
+    /**
+     * Configure the codec with a detached output surface.
+     * <p>
+     * This flag is only defined for a video decoder. MediaCodec
+     * configured with this flag will be in Surface mode even though
+     * the surface parameter is null.
+     *
+     * @see detachOutputSurface
+     */
+    @FlaggedApi(FLAG_NULL_OUTPUT_SURFACE)
+    public static final int CONFIGURE_FLAG_DETACHED_SURFACE = 8;
+
     /** @hide */
     @IntDef(
         flag = true,
@@ -2393,6 +2406,31 @@ final public class MediaCodec {
     }
 
     private native void native_setSurface(@NonNull Surface surface);
+
+    /**
+     *  Detach the current output surface of a codec.
+     *  <p>
+     *  Detaches the currently associated output Surface from the
+     *  MediaCodec decoder. This allows the SurfaceView or other
+     *  component holding the Surface to be safely destroyed or
+     *  modified without affecting the decoder's operation. After
+     *  calling this method (and after it returns), the decoder will
+     *  enter detached-Surface mode and will no longer render
+     *  output.
+     *
+     *  @throws IllegalStateException if the codec was not
+     *                                configured in surface mode.
+     *  @see CONFIGURE_FLAG_DETACHED_SURFACE
+     */
+    @FlaggedApi(FLAG_NULL_OUTPUT_SURFACE)
+    public void detachOutputSurface() {
+        if (!mHasSurface) {
+            throw new IllegalStateException("codec was not configured for an output surface");
+        }
+        // note: we still have a surface in detached mode, so keep mHasSurface
+        // we also technically allow calling detachOutputSurface multiple times in a row
+        // native_detachSurface();
+    }
 
     /**
      * Create a persistent input surface that can be used with codecs that normally have an input
@@ -3519,6 +3557,36 @@ final public class MediaCodec {
         }
 
         /**
+         * Set a linear block that contain multiple non-encrypted access unit to this
+         * queue request. Exactly one buffer must be set for a queue request before
+         * calling {@link #queue}. Multiple access units if present must be laid out contiguously
+         * and without gaps and in order. An IllegalArgumentException will be thrown
+         * during {@link #queue} if access units are not laid out contiguously.
+         *
+         * @param block The linear block object
+         * @param infos Represents {@link MediaCodec.BufferInfo} objects to mark
+         *              individual access-unit boundaries and the timestamps associated with it.
+         * @return this object
+         * @throws IllegalStateException if a buffer is already set
+         */
+        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+        public @NonNull QueueRequest setMultiFrameLinearBlock(
+                @NonNull LinearBlock block,
+                @NonNull ArrayDeque<BufferInfo> infos) {
+            if (!isAccessible()) {
+                throw new IllegalStateException("The request is stale");
+            }
+            if (mLinearBlock != null || mHardwareBuffer != null) {
+                throw new IllegalStateException("Cannot set block twice");
+            }
+            mLinearBlock = block;
+            mBufferInfos.clear();
+            mBufferInfos.addAll(infos);
+            mCryptoInfos.clear();
+            return this;
+        }
+
+        /**
          * Set an encrypted linear block to this queue request. Exactly one buffer must be
          * set for a queue request before calling {@link #queue}. It is possible
          * to use the same {@link LinearBlock} object for multiple queue
@@ -3647,26 +3715,6 @@ final public class MediaCodec {
                 throw new IllegalStateException("The request is stale");
             }
             mFlags = flags;
-            return this;
-        }
-
-        /**
-         * Sets MediaCodec.BufferInfo objects describing the access units
-         * contained in this queue request. Access units must be laid out
-         * contiguously without gaps and in order.
-         *
-         * @param infos Represents {@link MediaCodec.BufferInfo} objects to mark
-         *              individual access-unit boundaries and the timestamps associated with it.
-         *              The buffer is expected to contain the data in a continuous manner.
-         * @return this object
-         */
-        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
-        public @NonNull QueueRequest setBufferInfos(@NonNull ArrayDeque<BufferInfo> infos) {
-            if (!isAccessible()) {
-                throw new IllegalStateException("The request is stale");
-            }
-            mBufferInfos.clear();
-            mBufferInfos.addAll(infos);
             return this;
         }
 
