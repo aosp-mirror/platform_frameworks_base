@@ -72,6 +72,8 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.PermissionGroupUsage;
+import android.permission.PermissionUsageHelper;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -226,6 +228,7 @@ public class AppOpsManager {
     private static Boolean sFullLog = null;
 
     final Context mContext;
+    private PermissionUsageHelper mUsageHelper;
 
     @UnsupportedAppUsage
     final IAppOpsService mService;
@@ -7765,6 +7768,44 @@ public class AppOpsManager {
     }
 
     /**
+     * Retrieve current operation state for all applications for a device.
+     *
+     * The mode of the ops returned are set for the package but may not reflect their effective
+     * state due to UID policy or because it's controlled by a different global op.
+     *
+     * Use {@link #unsafeCheckOp(String, int, String)}} or
+     * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
+     *
+     * @param ops The set of operations you are interested in, or null if you want all of them.
+     * @param persistentDeviceId The device that the ops are attributed to.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
+    public @NonNull List<AppOpsManager.PackageOps> getPackagesForOps(@Nullable String[] ops,
+            @NonNull String persistentDeviceId) {
+        final int[] opCodes;
+        if (ops != null) {
+            final int opCount = ops.length;
+            opCodes = new int[opCount];
+            for (int i = 0; i < opCount; i++) {
+                opCodes[i] = sOpStrToOp.get(ops[i]);
+            }
+        } else {
+            opCodes = null;
+        }
+        final List<AppOpsManager.PackageOps> result;
+        try {
+            result =  mService.getPackagesForOpsForDevice(opCodes, persistentDeviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return (result != null) ? result : Collections.emptyList();
+    }
+
+    /**
      * Retrieve current operation state for all applications.
      *
      * The mode of the ops returned are set for the package but may not reflect their effective
@@ -7780,7 +7821,8 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops) {
         try {
-            return mService.getPackagesForOps(ops);
+            return mService.getPackagesForOpsForDevice(ops,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -9944,6 +9986,30 @@ public class AppOpsManager {
         }
 
         appOpsNotedForAttribution.set(op);
+    }
+
+    /**
+     * Get recent op usage data for CAMERA, MICROPHONE and LOCATION from all connected devices
+     * to power privacy indicator.
+     *
+     * @param includeMicrophoneUsage whether to retrieve microphone usage
+     * @return A list of permission groups currently or recently used by all apps by all users in
+     * the current profile group.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    @RequiresPermission(Manifest.permission.GET_APP_OPS_STATS)
+    public List<PermissionGroupUsage> getPermissionGroupUsageForPrivacyIndicator(
+            boolean includeMicrophoneUsage) {
+        // Lazily initialize the usage helper
+        if (mUsageHelper == null) {
+            mUsageHelper = new PermissionUsageHelper(mContext);
+        }
+
+        return mUsageHelper.getOpUsageDataForAllDevices(includeMicrophoneUsage);
     }
 
     /** @hide */
