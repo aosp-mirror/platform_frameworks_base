@@ -898,7 +898,7 @@ public final class WindowManagerGlobal {
         return inputTransferToken;
     }
 
-    void unregisterSurfaceControlInputReceiver(SurfaceControl surfaceControl) {
+    void unregisterSurfaceControlInputReceiver(@NonNull SurfaceControl surfaceControl) {
         SurfaceControlInputReceiverInfo surfaceControlInputReceiverInfo;
         synchronized (mSurfaceControlInputReceivers) {
             surfaceControlInputReceiverInfo = mSurfaceControlInputReceivers.removeReturnOld(
@@ -920,7 +920,7 @@ public final class WindowManagerGlobal {
         surfaceControlInputReceiverInfo.mInputEventReceiver.dispose();
     }
 
-    IBinder getSurfaceControlInputClientToken(SurfaceControl surfaceControl) {
+    IBinder getSurfaceControlInputClientToken(@NonNull SurfaceControl surfaceControl) {
         SurfaceControlInputReceiverInfo surfaceControlInputReceiverInfo;
         synchronized (mSurfaceControlInputReceivers) {
             surfaceControlInputReceiverInfo = mSurfaceControlInputReceivers.get(
@@ -934,8 +934,8 @@ public final class WindowManagerGlobal {
         return surfaceControlInputReceiverInfo.mClientToken;
     }
 
-    boolean transferTouchGesture(InputTransferToken transferFromToken,
-            InputTransferToken transferToToken) {
+    boolean transferTouchGesture(@NonNull InputTransferToken transferFromToken,
+            @NonNull InputTransferToken transferToToken) {
         try {
             return getWindowManagerService().transferTouchGesture(transferFromToken,
                     transferToToken);
