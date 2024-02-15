@@ -25,7 +25,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
-import com.android.wm.shell.draganddrop.UnhandledDragController.UnhandledDragAndDropCallback
+import com.android.wm.shell.draganddrop.GlobalDragListener.GlobalDragListenerCallback
 import java.util.function.Consumer
 import junit.framework.Assert.assertEquals
 import org.junit.Before
@@ -51,29 +51,29 @@ class UnhandledDragControllerTest : ShellTestCase() {
     @Mock
     private lateinit var mMainExecutor: ShellExecutor
 
-    private lateinit var mController: UnhandledDragController
+    private lateinit var mController: GlobalDragListener
 
     @Before
     @Throws(RemoteException::class)
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        mController = UnhandledDragController(mIWindowManager, mMainExecutor)
+        mController = GlobalDragListener(mIWindowManager, mMainExecutor)
     }
 
     @Test
     fun setListener_registersUnregistersWithWM() {
-        mController.setListener(object : UnhandledDragAndDropCallback {})
-        mController.setListener(object : UnhandledDragAndDropCallback {})
-        mController.setListener(object : UnhandledDragAndDropCallback {})
+        mController.setListener(object : GlobalDragListenerCallback {})
+        mController.setListener(object : GlobalDragListenerCallback {})
+        mController.setListener(object : GlobalDragListenerCallback {})
         verify(mIWindowManager, Mockito.times(1))
-                .setUnhandledDragListener(ArgumentMatchers.any())
+                .setGlobalDragListener(ArgumentMatchers.any())
 
         reset(mIWindowManager)
         mController.setListener(null)
         mController.setListener(null)
         mController.setListener(null)
         verify(mIWindowManager, Mockito.times(1))
-                .setUnhandledDragListener(ArgumentMatchers.isNull())
+                .setGlobalDragListener(ArgumentMatchers.isNull())
     }
 
     @Test
@@ -92,7 +92,7 @@ class UnhandledDragControllerTest : ShellTestCase() {
         val lastDragEvent = arrayOfNulls<DragEvent>(1)
 
         // Set a listener to listen for unhandled drops
-        mController.setListener(object : UnhandledDragAndDropCallback {
+        mController.setListener(object : GlobalDragListenerCallback {
             override fun onUnhandledDrop(dragEvent: DragEvent,
                 onFinishedCallback: Consumer<Boolean>) {
                 lastDragEvent[0] = dragEvent

@@ -20,10 +20,10 @@ import android.view.DragEvent;
 import android.window.IUnhandledDragCallback;
 
 /**
- * An interface to a handler for global drags that are not consumed (ie. not handled by any window).
+ * An interface to a handler for global drags.
  * {@hide}
  */
-oneway interface IUnhandledDragListener {
+oneway interface IGlobalDragListener {
     /**
      * Called when the user finishes the drag gesture but no windows have reported handling the
      * drop.  The DragEvent is populated with the drag surface for the listener to animate.  The

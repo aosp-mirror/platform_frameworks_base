@@ -19,8 +19,8 @@ import android.os.RemoteException
 import android.util.Log
 import android.view.DragEvent
 import android.view.IWindowManager
+import android.window.IGlobalDragListener
 import android.window.IUnhandledDragCallback
-import android.window.IUnhandledDragListener
 import androidx.annotation.VisibleForTesting
 import com.android.internal.protolog.common.ProtoLog
 import com.android.wm.shell.common.ShellExecutor
@@ -30,25 +30,25 @@ import java.util.function.Consumer
 /**
  * Manages the listener and callbacks for unhandled global drags.
  */
-class UnhandledDragController(
+class GlobalDragListener(
     val wmService: IWindowManager,
     mainExecutor: ShellExecutor
 ) {
-    private var callback: UnhandledDragAndDropCallback? = null
+    private var callback: GlobalDragListenerCallback? = null
 
-    private val unhandledDragListener: IUnhandledDragListener =
-        object : IUnhandledDragListener.Stub() {
+    private val globalDragListener: IGlobalDragListener =
+        object : IGlobalDragListener.Stub() {
             override fun onUnhandledDrop(event: DragEvent, callback: IUnhandledDragCallback) {
                 mainExecutor.execute() {
-                    this@UnhandledDragController.onUnhandledDrop(event, callback)
+                    this@GlobalDragListener.onUnhandledDrop(event, callback)
                 }
             }
         }
 
     /**
-     * Listener called when an unhandled drag is started.
+     * Callbacks for global drag events.
      */
-    interface UnhandledDragAndDropCallback {
+    interface GlobalDragListenerCallback {
         /**
          * Called when a global drag is unhandled (ie. dropped outside of all visible windows, or
          * dropped on a window that does not want to handle it).
@@ -62,7 +62,7 @@ class UnhandledDragController(
     /**
      * Sets a listener for callbacks when an unhandled drag happens.
      */
-    fun setListener(listener: UnhandledDragAndDropCallback?) {
+    fun setListener(listener: GlobalDragListenerCallback?) {
         val updateWm = (callback == null && listener != null)
                 || (callback != null && listener == null)
         callback = listener
@@ -71,8 +71,8 @@ class UnhandledDragController(
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
                     "%s unhandled drag listener",
                     if (callback != null) "Registering" else "Unregistering")
-                wmService.setUnhandledDragListener(
-                    if (callback != null) unhandledDragListener else null)
+                wmService.setGlobalDragListener(
+                    if (callback != null) globalDragListener else null)
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to set unhandled drag listener")
             }
@@ -95,6 +95,6 @@ class UnhandledDragController(
     }
 
     companion object {
-        private val TAG = UnhandledDragController::class.java.simpleName
+        private val TAG = GlobalDragListener::class.java.simpleName
     }
 }
