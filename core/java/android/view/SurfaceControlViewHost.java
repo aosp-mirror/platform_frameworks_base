@@ -293,12 +293,12 @@ public class SurfaceControlViewHost {
         /**
          * Gets an {@link InputTransferToken} which can be used to request focus on the embedded
          * surface or to transfer touch gesture to the embedded surface.
-         * @return the InputTransferToken associated with {@link SurfacePackage}
-         * @see AttachedSurfaceControl#transferHostTouchGestureToEmbedded(SurfacePackage)
-         *
-         * @hide
+         * @return the InputTransferToken associated with {@link SurfacePackage} or {@code null} if
+         * the embedded hasn't set up its view or doesn't have input.
+         * @see WindowManager#transferTouchGesture(InputTransferToken, InputTransferToken)
          */
         @Nullable
+        @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
         public InputTransferToken getInputTransferToken() {
             return mInputTransferToken;
         }
@@ -577,9 +577,9 @@ public class SurfaceControlViewHost {
     }
 
     /**
-     * Transfer the currently in progress touch gesture to the parent
-     * (if any) of this SurfaceControlViewHost. This requires that the
-     * SurfaceControlViewHost was created with an associated hostInputToken.
+     * Transfer the currently in progress touch gesture to the parent (if any) of this
+     * SurfaceControlViewHost. This requires that the SurfaceControlViewHost was created with an
+     * associated host {@link InputTransferToken}.
      *
      * @return Whether the touch stream was transferred.
      */
@@ -587,13 +587,14 @@ public class SurfaceControlViewHost {
         if (mViewRoot == null) {
             return false;
         }
-
-        final IWindowSession realWm = WindowManagerGlobal.getWindowSession();
-        try {
-            return realWm.transferEmbeddedTouchFocusToHost(mViewRoot.mWindow);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+        final WindowManager wm =
+                (WindowManager) mViewRoot.mContext.getSystemService(Context.WINDOW_SERVICE);
+        InputTransferToken embeddedToken = getInputTransferToken();
+        InputTransferToken hostToken = mWm.mHostInputTransferToken;
+        if (embeddedToken == null || hostToken == null) {
+            Log.w(TAG, "Failed to transferTouchGestureToHost. Host or embedded token is null");
+            return false;
         }
-        return false;
+        return wm.transferTouchGesture(getInputTransferToken(), mWm.mHostInputTransferToken);
     }
 }

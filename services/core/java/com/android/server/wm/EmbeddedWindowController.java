@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_EMBEDDED_WINDOWS;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -33,6 +34,9 @@ import android.util.proto.ProtoOutputStream;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.window.InputTransferToken;
+
+import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.input.InputManagerService;
 
 /**
  * Keeps track of embedded windows.
@@ -52,9 +56,13 @@ class EmbeddedWindowController {
     private final Object mGlobalLock;
     private final ActivityTaskManagerService mAtmService;
 
-    EmbeddedWindowController(ActivityTaskManagerService atmService) {
+    private final InputManagerService mInputManagerService;
+
+    EmbeddedWindowController(ActivityTaskManagerService atmService,
+            InputManagerService inputManagerService) {
         mAtmService = atmService;
         mGlobalLock = atmService.getGlobalLock();
+        mInputManagerService = inputManagerService;
     }
 
     /**
@@ -133,6 +141,60 @@ class EmbeddedWindowController {
 
     EmbeddedWindow getByWindowToken(IBinder windowToken) {
         return mWindowsByWindowToken.get(windowToken);
+    }
+
+    private boolean isValidTouchGestureParams(WindowState hostWindowState,
+            EmbeddedWindow embeddedWindow) {
+        if (embeddedWindow == null) {
+            ProtoLog.w(WM_DEBUG_EMBEDDED_WINDOWS,
+                    "Attempt to transfer touch gesture with non-existent embedded window");
+            return false;
+        }
+        final WindowState wsAssociatedWithEmbedded = embeddedWindow.getWindowState();
+        if (wsAssociatedWithEmbedded == null) {
+            ProtoLog.w(WM_DEBUG_EMBEDDED_WINDOWS,
+                    "Attempt to transfer touch gesture using embedded window with no associated "
+                            + "host");
+            return false;
+        }
+        if (wsAssociatedWithEmbedded.mClient.asBinder() != hostWindowState.mClient.asBinder()) {
+            ProtoLog.w(WM_DEBUG_EMBEDDED_WINDOWS,
+                    "Attempt to transfer touch gesture with host window not associated with "
+                            + "embedded window");
+            return false;
+        }
+
+        if (embeddedWindow.getInputChannelToken() == null) {
+            ProtoLog.w(WM_DEBUG_EMBEDDED_WINDOWS,
+                    "Attempt to transfer touch gesture using embedded window that has no input "
+                            + "channel");
+            return false;
+        }
+        if (hostWindowState.mInputChannelToken == null) {
+            ProtoLog.w(WM_DEBUG_EMBEDDED_WINDOWS,
+                    "Attempt to transfer touch gesture using a host window with no input channel");
+            return false;
+        }
+        return true;
+    }
+
+    boolean transferToHost(InputTransferToken embeddedWindowToken,
+            WindowState transferToHostWindowState) {
+        EmbeddedWindow ew = getByInputTransferToken(embeddedWindowToken);
+        if (!isValidTouchGestureParams(transferToHostWindowState, ew)) {
+            return false;
+        }
+        return mInputManagerService.transferTouchFocus(ew.getInputChannelToken(),
+                transferToHostWindowState.mInputChannelToken);
+    }
+
+    boolean transferToEmbedded(WindowState hostWindowState, InputTransferToken transferToToken) {
+        final EmbeddedWindowController.EmbeddedWindow ew = getByInputTransferToken(transferToToken);
+        if (!isValidTouchGestureParams(hostWindowState, ew)) {
+            return false;
+        }
+        return mInputManagerService.transferTouchFocus(hostWindowState.mInputChannelToken,
+                ew.getInputChannelToken());
     }
 
     static class EmbeddedWindow implements InputTarget {

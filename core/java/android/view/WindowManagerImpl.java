@@ -563,6 +563,14 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
+    public boolean transferTouchGesture(@NonNull InputTransferToken transferFromToken,
+            @NonNull InputTransferToken transferToToken) {
+        Objects.requireNonNull(transferFromToken);
+        Objects.requireNonNull(transferToToken);
+        return mGlobal.transferTouchGesture(transferFromToken, transferToToken);
+    }
+
+    @Override
     public @ScreenRecordingState int addScreenRecordingCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<@ScreenRecordingState Integer> callback) {

@@ -31,6 +31,11 @@ import java.util.Objects;
 /**
  * A token that can be used to request focus on or to transfer touch gesture to a
  * {@link SurfaceControlViewHost} or {@link android.view.SurfaceControl} that has an input channel.
+ * <p>
+ * For {@link SurfaceControlViewHost}, the token can be retrieved via
+ * {@link SurfaceControlViewHost.SurfacePackage#getInputTransferToken()}
+ *
+ * @see android.view.WindowManager#transferTouchGesture(InputTransferToken, InputTransferToken)
  */
 @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
 public final class InputTransferToken implements Parcelable {

@@ -6196,6 +6196,54 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
+     * Transfer the currently in progress touch gesture from the transferFromToken to the
+     * transferToToken.
+     * <p><br>
+     * This requires that the fromToken and toToken are associated with each other. The association
+     * can be done by creating a {@link SurfaceControlViewHost} and passing the host's
+     * {@link InputTransferToken} for
+     * {@link SurfaceControlViewHost#SurfaceControlViewHost(Context, Display, InputTransferToken)}.
+     * <p>
+     * The host is likely to be an {@link AttachedSurfaceControl} so the host token can be
+     * retrieved via {@link AttachedSurfaceControl#getInputTransferToken()}.
+     * <p><br>
+     * Only the window currently receiving touch is allowed to transfer the gesture so if the caller
+     * attempts to transfer touch gesture from a token that doesn't have touch, it will fail the
+     * transfer.
+     * <p><br>
+     * When the host wants to transfer touch gesture to the embedded, it can retrieve the embedded
+     * token via {@link SurfaceControlViewHost.SurfacePackage#getInputTransferToken()} and pass its
+     * own token as the transferFromToken.
+     * <p>
+     * When the embedded wants to transfer touch gesture to the host, it can pass in its own token
+     * as the transferFromToken and use the associated host's {@link InputTransferToken} as the
+     * transferToToken
+     * <p><br>
+     * When the touch is transferred, the window currently receiving touch gets an ACTION_CANCEL
+     * and does not receive any further input events for this gesture.
+     * <p>
+     * The transferred-to window receives an ACTION_DOWN event and then the remainder of the input
+     * events for this gesture. It does not receive any of the previous events of this gesture that
+     * the originating window received.
+     * <p>
+     * The transferTouchGesture API only works for the current gesture. When a new gesture arrives,
+     * input dispatcher will do a new round of hit testing. So, if the host window is still the
+     * first thing that's being touched, then it will receive the new gesture again. It will again
+     * be up to the host to transfer this new gesture to the embedded.
+     *
+     * @param transferFromToken the InputTransferToken for the currently active gesture
+     * @param transferToToken   the InputTransferToken to transfer the gesture to.
+     * @return Whether the touch stream was transferred.
+     * @see android.view.SurfaceControlViewHost.SurfacePackage#getInputTransferToken()
+     * @see AttachedSurfaceControl#getInputTransferToken()
+     */
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    default boolean transferTouchGesture(@NonNull InputTransferToken transferFromToken,
+            @NonNull InputTransferToken transferToToken) {
+        throw new UnsupportedOperationException("transferTouchGesture is not implemented");
+    }
+
+    /**
      * @hide
      */
     default @NonNull IBinder getDefaultToken() {

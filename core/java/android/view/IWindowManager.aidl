@@ -1098,4 +1098,7 @@ interface IWindowManager
      * (ie. not handled by any window which can handle the drag).
      */
     void setUnhandledDragListener(IUnhandledDragListener listener);
+
+    boolean transferTouchGesture(in InputTransferToken transferFromToken,
+            in InputTransferToken transferToToken);
 }
