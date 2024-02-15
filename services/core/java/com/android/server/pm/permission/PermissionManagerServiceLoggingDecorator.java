@@ -121,24 +121,22 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permName, String persistentDeviceId,
+    public int getPermissionFlags(String packageName, String permName, String deviceId,
             int userId) {
         Log.i(LOG_TAG, "getPermissionFlags(packageName = " + packageName + ", permName = "
-                + permName + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId
-                + ")");
-        return mService.getPermissionFlags(packageName, permName, persistentDeviceId, userId);
+                + permName + ", deviceId = " + deviceId + ", userId = " + userId + ")");
+        return mService.getPermissionFlags(packageName, permName, deviceId, userId);
     }
 
     @Override
     public void updatePermissionFlags(String packageName, String permName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, String persistentDeviceId,
-            int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, String deviceId, int userId) {
         Log.i(LOG_TAG, "updatePermissionFlags(packageName = " + packageName + ", permName = "
                 + permName + ", flagMask = " + flagMask + ", flagValues = " + flagValues
                 + ", checkAdjustPolicyFlagPermission = " + checkAdjustPolicyFlagPermission
-                + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId + ")");
+                + ", deviceId = " + deviceId + ", userId = " + userId + ")");
         mService.updatePermissionFlags(packageName, permName, flagMask, flagValues,
-                checkAdjustPolicyFlagPermission, persistentDeviceId, userId);
+                checkAdjustPolicyFlagPermission, deviceId, userId);
     }
 
     @Override
@@ -186,21 +184,20 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permName,
-            String persistentDeviceId, int userId) {
+    public void grantRuntimePermission(String packageName, String permName, String deviceId,
+            int userId) {
         Log.i(LOG_TAG, "grantRuntimePermission(packageName = " + packageName + ", permName = "
-                + permName + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId
-                + ")");
-        mService.grantRuntimePermission(packageName, permName, persistentDeviceId, userId);
+                + permName + ", deviceId = " + deviceId + ", userId = " + userId + ")");
+        mService.grantRuntimePermission(packageName, permName, deviceId, userId);
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permName,
-            String persistentDeviceId, int userId, String reason) {
+    public void revokeRuntimePermission(String packageName, String permName, String deviceId,
+            int userId, String reason) {
         Log.i(LOG_TAG, "revokeRuntimePermission(packageName = " + packageName + ", permName = "
-                + permName + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId
-                + ", reason = " + reason + ")");
-        mService.revokeRuntimePermission(packageName, permName, persistentDeviceId, userId, reason);
+                + permName + ", deviceId = " + deviceId + ", userId = " + userId + ", reason = "
+                + reason + ")");
+        mService.revokeRuntimePermission(packageName, permName, deviceId, userId, reason);
     }
 
     @Override
@@ -212,16 +209,16 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
 
     @Override
     public boolean shouldShowRequestPermissionRationale(String packageName, String permName,
-            int deviceId, int userId) {
+            String deviceId, int userId) {
         Log.i(LOG_TAG, "shouldShowRequestPermissionRationale(packageName = " + packageName
-                + ", permName = " + permName + ", deviceId = " + deviceId
-                +  ", userId = " + userId + ")");
+                + ", permName = " + permName + ", deviceId = " + deviceId + ", userId = "
+                + userId + ")");
         return mService.shouldShowRequestPermissionRationale(packageName, permName, deviceId,
                 userId);
     }
 
     @Override
-    public boolean isPermissionRevokedByPolicy(String packageName, String permName, int deviceId,
+    public boolean isPermissionRevokedByPolicy(String packageName, String permName, String deviceId,
             int userId) {
         Log.i(LOG_TAG, "isPermissionRevokedByPolicy(packageName = " + packageName + ", permName = "
                 + permName + ", deviceId = " + deviceId + ", userId = " + userId + ")");
@@ -235,26 +232,27 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
     }
 
     @Override
-    public int checkPermission(String pkgName, String permName, String persistentDeviceId,
+    public int checkPermission(String pkgName, String permName, String deviceId,
             int userId) {
         Log.i(LOG_TAG, "checkPermission(pkgName = " + pkgName + ", permName = " + permName
-                + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId + ")");
-        return mService.checkPermission(pkgName, permName, persistentDeviceId, userId);
+                + ", deviceId = " + deviceId + ", userId = " + userId + ")");
+        return mService.checkPermission(pkgName, permName, deviceId, userId);
     }
 
     @Override
-    public int checkUidPermission(int uid, String permName, int deviceId) {
-        Log.i(LOG_TAG, "checkUidPermission(uid = " + uid + ", permName = "
-                + permName + ", deviceId = " + deviceId + ")");
+    public int checkUidPermission(int uid, String permName, String deviceId) {
+        Log.i(LOG_TAG, "checkUidPermission(uid = " + uid + ", permName = " + permName
+                + ", deviceId = " + deviceId + ")");
         return mService.checkUidPermission(uid, permName, deviceId);
     }
 
     @Override
     public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
-            @NonNull String persistentDeviceId, int userId) {
-        Log.i(LOG_TAG, "getAllPermissionStates(packageName = " + packageName
-                + ", persistentDeviceId = " + persistentDeviceId + ", userId = " + userId + ")");
-        return mService.getAllPermissionStates(packageName, persistentDeviceId, userId);
+            @NonNull String deviceId, int userId) {
+        Log.i(LOG_TAG,
+                "getAllPermissionStates(packageName = " + packageName + ", deviceId = " + deviceId
+                        + ", userId = " + userId + ")");
+        return mService.getAllPermissionStates(packageName, deviceId, userId);
     }
 
     @Override
