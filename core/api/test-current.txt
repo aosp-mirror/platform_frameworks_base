@@ -1620,26 +1620,22 @@ package android.hardware.camera2.params {
 
 package android.hardware.devicestate {
 
-  @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceState {
-    ctor @Deprecated public DeviceState(@IntRange(from=android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER, to=android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER) int, @NonNull String, int);
-    ctor public DeviceState(@IntRange(from=android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER, to=android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER) int, @NonNull String, @NonNull java.util.Set<java.lang.Integer>);
-    field public static final int PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST = 8; // 0x8
-  }
-
-  @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceStateManager {
+  public final class DeviceStateManager {
     method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void cancelBaseStateOverride();
     method @RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true) public void cancelStateRequest();
-    method @Deprecated @NonNull public int[] getSupportedStates();
+    method @NonNull public int[] getSupportedStates();
+    method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
     method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void requestBaseStateOverride(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
     method @RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true) public void requestState(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
-    field public static final int MAXIMUM_DEVICE_STATE_IDENTIFIER = 10000; // 0x2710
-    field public static final int MINIMUM_DEVICE_STATE_IDENTIFIER = 0; // 0x0
+    method public void unregisterCallback(@NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
+    field public static final int MAXIMUM_DEVICE_STATE = 255; // 0xff
+    field public static final int MINIMUM_DEVICE_STATE = 0; // 0x0
   }
 
   public static interface DeviceStateManager.DeviceStateCallback {
-    method @Deprecated public default void onBaseStateChanged(int);
-    method @Deprecated public void onStateChanged(int);
-    method @Deprecated public default void onSupportedStatesChanged(@NonNull int[]);
+    method public default void onBaseStateChanged(int);
+    method public void onStateChanged(int);
+    method public default void onSupportedStatesChanged(@NonNull int[]);
   }
 
   public final class DeviceStateRequest {

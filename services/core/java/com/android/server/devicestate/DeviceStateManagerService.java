@@ -21,8 +21,8 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREG
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
-import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER;
-import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
+import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
 
 import static com.android.server.devicestate.OverrideRequest.OVERRIDE_REQUEST_TYPE_BASE_STATE;
 import static com.android.server.devicestate.OverrideRequest.OVERRIDE_REQUEST_TYPE_EMULATED_STATE;
@@ -1065,8 +1065,7 @@ public final class DeviceStateManagerService extends SystemService {
     }
 
     private final class DeviceStateProviderListener implements DeviceStateProvider.Listener {
-        @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to = MAXIMUM_DEVICE_STATE_IDENTIFIER)
-        int mCurrentBaseState;
+        @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int mCurrentBaseState;
 
         @Override
         public void onSupportedDeviceStatesChanged(DeviceState[] newDeviceStates,
@@ -1079,10 +1078,8 @@ public final class DeviceStateManagerService extends SystemService {
 
         @Override
         public void onStateChanged(
-                @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
-                        MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier) {
-            if (identifier < MINIMUM_DEVICE_STATE_IDENTIFIER
-                    || identifier > MAXIMUM_DEVICE_STATE_IDENTIFIER) {
+                @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier) {
+            if (identifier < MINIMUM_DEVICE_STATE || identifier > MAXIMUM_DEVICE_STATE) {
                 throw new IllegalArgumentException("Invalid identifier: " + identifier);
             }
 

@@ -18,19 +18,15 @@ package android.hardware.devicestate;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 
 import com.android.internal.util.ArrayUtils;
 
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -40,8 +36,7 @@ import java.util.function.Consumer;
  *
  * @hide
  */
-@SystemApi
-@FlaggedApi(android.hardware.devicestate.feature.flags.Flags.FLAG_DEVICE_STATE_PROPERTY_API)
+@TestApi
 @SystemService(Context.DEVICE_STATE_SERVICE)
 public final class DeviceStateManager {
     /**
@@ -51,19 +46,11 @@ public final class DeviceStateManager {
      */
     public static final int INVALID_DEVICE_STATE = -1;
 
-    /**
-     * The minimum allowed device state identifier.
-     * @hide
-     */
-    @TestApi
-    public static final int MINIMUM_DEVICE_STATE_IDENTIFIER = 0;
+    /** The minimum allowed device state identifier. */
+    public static final int MINIMUM_DEVICE_STATE = 0;
 
-    /**
-     * The maximum allowed device state identifier.
-     * @hide
-     */
-    @TestApi
-    public static final int MAXIMUM_DEVICE_STATE_IDENTIFIER = 10000;
+    /** The maximum allowed device state identifier. */
+    public static final int MAXIMUM_DEVICE_STATE = 255;
 
     /**
      * Intent needed to launch the rear display overlay activity from SysUI
@@ -96,24 +83,10 @@ public final class DeviceStateManager {
     /**
      * Returns the list of device states that are supported and can be requested with
      * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
-     * @deprecated use {@link #getSupportedDeviceStates()}
-     * @hide
      */
-    // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-    @TestApi
-    @Deprecated
     @NonNull
     public int[] getSupportedStates() {
         return mGlobal.getSupportedStates();
-    }
-
-    /**
-     * Returns the list of device states that are supported and can be requested with
-     * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
-     */
-    @NonNull
-    public List<DeviceState> getSupportedDeviceStates() {
-        return mGlobal.getSupportedDeviceStates();
     }
 
     /**
@@ -134,10 +107,7 @@ public final class DeviceStateManager {
      * the {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission is held.
      *
      * @see DeviceStateRequest
-     * @hide
      */
-    @SuppressLint("RequiresPermission") // Lint doesn't handle conditional permission checks today
-    @TestApi
     @RequiresPermission(value = android.Manifest.permission.CONTROL_DEVICE_STATE,
             conditional = true)
     public void requestState(@NonNull DeviceStateRequest request,
@@ -154,10 +124,7 @@ public final class DeviceStateManager {
      *
      * @throws SecurityException if the caller is neither the current top-focused activity nor if
      * the {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission is held.
-     * @hide
      */
-    @SuppressLint("RequiresPermission") // Lint doesn't handle conditional permission checks today
-    @TestApi
     @RequiresPermission(value = android.Manifest.permission.CONTROL_DEVICE_STATE,
             conditional = true)
     public void cancelStateRequest() {
@@ -184,11 +151,11 @@ public final class DeviceStateManager {
      * emulated override requests take priority.
      *
      * @throws IllegalArgumentException if the requested state is unsupported.
+     * @throws SecurityException if the caller does not hold the
+     * {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission.
      *
      * @see DeviceStateRequest
-     * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)
     public void requestBaseStateOverride(@NonNull DeviceStateRequest request,
             @Nullable @CallbackExecutor Executor executor,
@@ -202,9 +169,9 @@ public final class DeviceStateManager {
      * <p>
      * This method is noop if there is no base state request currently active.
      *
-     * @hide
+     * @throws SecurityException if the caller does not hold the
+     * {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission.
      */
-    @TestApi
     @RequiresPermission(Manifest.permission.CONTROL_DEVICE_STATE)
     public void cancelBaseStateOverride() {
         mGlobal.cancelBaseStateOverride();
@@ -242,29 +209,8 @@ public final class DeviceStateManager {
          * @param supportedStates the new supported states.
          *
          * @see DeviceStateManager#getSupportedStates()
-         * @deprecated use {@link #onSupportedStatesChanged(List)}
-         * @hide
          */
-        // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-        @TestApi
-        @Deprecated
         default void onSupportedStatesChanged(@NonNull int[] supportedStates) {}
-
-        /**
-         * Called in response to a change in the states supported by the device.
-         * <p>
-         * Guaranteed to be called once on registration of the callback with the initial value and
-         * then on every subsequent change in the supported states.
-         *
-         * The supported device states may change due to certain states becoming unavailable
-         * due to device configuration or device conditions such as if the device is too hot or
-         * external monitors have been connected.
-         *
-         * @param supportedStates the new supported states.
-         *
-         * @see DeviceStateManager#getSupportedDeviceStates()
-         */
-        default void onSupportedStatesChanged(@NonNull List<DeviceState> supportedStates) {}
 
         /**
          * Called in response to a change in the base device state.
@@ -278,13 +224,7 @@ public final class DeviceStateManager {
          * then on every subsequent change in the non-override state.
          *
          * @param state the new base device state.
-         * @deprecated use {@link #onDeviceStateChanged(DeviceState)} and query for physical
-         * properties that are relevant to your needs.
-         * @hide
          */
-        // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-        @TestApi
-        @Deprecated
         default void onBaseStateChanged(int state) {}
 
         /**
@@ -294,24 +234,8 @@ public final class DeviceStateManager {
          * then on every subsequent change in device state.
          *
          * @param state the new device state.
-         * @deprecated use {@link #onDeviceStateChanged(DeviceState)}
-         * @hide
          */
-        // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-        @TestApi
-        @Deprecated
         void onStateChanged(int state);
-
-        /**
-         * Called in response to device state changes.
-         * <p>
-         * Guaranteed to be called once on registration of the callback with the initial value and
-         * then on every subsequent change in device state.
-         *
-         * @param state the new device state.
-         */
-        // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-        default void onDeviceStateChanged(@NonNull DeviceState state) {}
     }
 
     /**
