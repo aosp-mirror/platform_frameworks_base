@@ -52,13 +52,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
-import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssAntennaInfo;
 import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
-import android.location.IGeocodeListener;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssNavigationMessageListener;
@@ -75,8 +73,11 @@ import android.location.LocationManagerInternal.LocationPackageTagsListener;
 import android.location.LocationProvider;
 import android.location.LocationRequest;
 import android.location.LocationTime;
+import android.location.provider.ForwardGeocodeRequest;
+import android.location.provider.IGeocodeCallback;
 import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
+import android.location.provider.ReverseGeocodeRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.Build;
@@ -141,6 +142,7 @@ import com.android.server.location.provider.MockLocationProvider;
 import com.android.server.location.provider.PassiveLocationProvider;
 import com.android.server.location.provider.PassiveLocationProviderManager;
 import com.android.server.location.provider.StationaryThrottlingLocationProvider;
+import com.android.server.location.provider.proxy.ProxyGeocodeProvider;
 import com.android.server.location.provider.proxy.ProxyLocationProvider;
 import com.android.server.location.settings.LocationSettings;
 import com.android.server.location.settings.LocationUserSettings;
@@ -253,7 +255,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
 
     private final GeofenceManager mGeofenceManager;
     private volatile @Nullable GnssManagerService mGnssManagerService = null;
-    private GeocoderProxy mGeocodeProvider;
+    private ProxyGeocodeProvider mGeocodeProvider;
 
     private final Object mDeprecatedGnssBatchingLock = new Object();
     @GuardedBy("mDeprecatedGnssBatchingLock")
@@ -493,7 +495,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
 
         // bind to geocoder provider
-        mGeocodeProvider = GeocoderProxy.createAndRegister(mContext);
+        mGeocodeProvider = ProxyGeocodeProvider.createAndRegister(mContext);
         if (mGeocodeProvider == null) {
             Log.e(TAG, "no geocoder provider found");
         }
@@ -1363,23 +1365,22 @@ public class LocationManagerService extends ILocationManager.Stub implements
     }
 
     @Override
-    public boolean geocoderIsPresent() {
+    public boolean isGeocodeAvailable() {
         return mGeocodeProvider != null;
     }
 
     @Override
-    public void getFromLocation(double latitude, double longitude, int maxResults,
-            GeocoderParams params, IGeocodeListener listener) {
-        // validate identity
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, params.getClientPackage(),
-                params.getClientAttributionTag());
-        Preconditions.checkArgument(identity.getUid() == params.getClientUid());
+    public void reverseGeocode(ReverseGeocodeRequest request, IGeocodeCallback callback) {
+        CallerIdentity identity =
+                CallerIdentity.fromBinder(
+                        mContext, request.getCallingPackage(), request.getCallingAttributionTag());
+        Preconditions.checkArgument(identity.getUid() == request.getCallingUid());
 
         if (mGeocodeProvider != null) {
-            mGeocodeProvider.getFromLocation(latitude, longitude, maxResults, params, listener);
+            mGeocodeProvider.reverseGeocode(request, callback);
         } else {
             try {
-                listener.onResults(null, Collections.emptyList());
+                callback.onError(null);
             } catch (RemoteException e) {
                 // ignore
             }
@@ -1387,22 +1388,17 @@ public class LocationManagerService extends ILocationManager.Stub implements
     }
 
     @Override
-    public void getFromLocationName(String locationName,
-            double lowerLeftLatitude, double lowerLeftLongitude,
-            double upperRightLatitude, double upperRightLongitude, int maxResults,
-            GeocoderParams params, IGeocodeListener listener) {
-        // validate identity
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, params.getClientPackage(),
-                params.getClientAttributionTag());
-        Preconditions.checkArgument(identity.getUid() == params.getClientUid());
+    public void forwardGeocode(ForwardGeocodeRequest request, IGeocodeCallback callback) {
+        CallerIdentity identity =
+                CallerIdentity.fromBinder(
+                        mContext, request.getCallingPackage(), request.getCallingAttributionTag());
+        Preconditions.checkArgument(identity.getUid() == request.getCallingUid());
 
         if (mGeocodeProvider != null) {
-            mGeocodeProvider.getFromLocationName(locationName, lowerLeftLatitude,
-                    lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                    maxResults, params, listener);
+            mGeocodeProvider.forwardGeocode(request, callback);
         } else {
             try {
-                listener.onResults(null, Collections.emptyList());
+                callback.onError(null);
             } catch (RemoteException e) {
                 // ignore
             }
