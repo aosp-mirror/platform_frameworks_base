@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.shared.model
+package com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.common.shared.model.Color
+import com.android.systemui.common.shared.model.Icon
 
-object VolumePanelComponents {
+/** Models Media Session Volume Panel component connected device icon. */
+sealed interface DeviceIconViewModel {
 
-    const val MEDIA_OUTPUT: VolumePanelComponentKey = "media_output"
-    const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
-    const val CAPTIONING: VolumePanelComponentKey = "captioning"
+    val icon: Icon
+    val backgroundColor: Color
+
+    class IsPlaying(
+        override val icon: Icon,
+        override val backgroundColor: Color,
+    ) : DeviceIconViewModel
+
+    class IsNotPlaying(
+        override val icon: Icon,
+        override val backgroundColor: Color,
+    ) : DeviceIconViewModel
 }

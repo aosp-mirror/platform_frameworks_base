@@ -1535,6 +1535,12 @@
 
     <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring (<xliff:g id="volume level" example="56">%1$s</xliff:g>)</string>
 
+    <!-- Title with application label for media output settings. [CHAR LIMIT=20] -->
+    <string name="media_output_label_title">Playing <xliff:g id="label" example="Music Player">%s</xliff:g> on</string>
+
+    <!-- Title for media output settings without media is playing. [CHAR LIMIT=20] -->
+    <string name="media_output_title_without_playing">Audio will play on</string>
+
     <!-- Name of special SystemUI debug settings -->
     <string name="system_ui_tuner">System UI Tuner</string>
 
