@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
@@ -262,6 +263,21 @@ final class PolicyEnforcerCallbacks {
                 updateScreenCaptureDisabled();
             }
         });
+        return true;
+    }
+
+    static boolean setContentProtectionPolicy(
+            @Nullable Integer value,
+            @NonNull Context context,
+            @UserIdInt Integer userId,
+            @NonNull PolicyKey policyKey) {
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    DevicePolicyCache cache = DevicePolicyCache.getInstance();
+                    if (cache instanceof DevicePolicyCacheImpl cacheImpl) {
+                        cacheImpl.setContentProtectionPolicy(userId, value);
+                    }
+                });
         return true;
     }
 
