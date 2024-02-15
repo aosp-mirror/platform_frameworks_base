@@ -2905,5 +2905,8 @@ class PermissionService(private val service: AccessCheckingService) :
             } else {
                 emptySet<String>()
             }
+
+        fun getFullerPermission(permissionName: String): String? =
+            FULLER_PERMISSIONS[permissionName]
     }
 }
