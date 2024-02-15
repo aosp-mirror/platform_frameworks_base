@@ -18,13 +18,20 @@ package com.android.server.accessibility;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.BrailleDisplayController;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.testing.DexmakerShareClassLoaderRule;
+
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.google.common.truth.Expect;
 
@@ -32,8 +39,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -54,6 +63,8 @@ public class BrailleDisplayConnectionTest {
     @Rule
     public final Expect expect = Expect.create();
 
+    private Context mContext;
+
     // To mock package-private class
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
@@ -62,7 +73,34 @@ public class BrailleDisplayConnectionTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mBrailleDisplayConnection = new BrailleDisplayConnection(new Object(), mServiceConnection);
+        mContext = InstrumentationRegistry.getInstrumentation().getContext();
+        when(mServiceConnection.isConnectedLocked()).thenReturn(true);
+        mBrailleDisplayConnection =
+                spy(new BrailleDisplayConnection(new Object(), mServiceConnection));
+    }
+
+    @Test
+    public void defaultNativeScanner_getHidrawNodePaths_returnsHidrawPaths() throws Exception {
+        File testDir = mContext.getFilesDir();
+        Path hidrawNode0 = Path.of(testDir.getPath(), "hidraw0");
+        Path hidrawNode1 = Path.of(testDir.getPath(), "hidraw1");
+        Path otherDevice = Path.of(testDir.getPath(), "otherDevice");
+        Path[] nodePaths = {hidrawNode0, hidrawNode1, otherDevice};
+        try {
+            for (Path node : nodePaths) {
+                assertThat(node.toFile().createNewFile()).isTrue();
+            }
+
+            BrailleDisplayConnection.BrailleDisplayScanner scanner =
+                    mBrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
+
+            assertThat(scanner.getHidrawNodePaths(testDir.toPath()))
+                    .containsExactly(hidrawNode0, hidrawNode1);
+        } finally {
+            for (Path node : nodePaths) {
+                node.toFile().delete();
+            }
+        }
     }
 
     @Test
@@ -123,9 +161,38 @@ public class BrailleDisplayConnectionTest {
                 .isEqualTo(BrailleDisplayConnection.BUS_BLUETOOTH);
     }
 
+    @Test
+    public void write_bypassesServiceSideCheckWithLargeBuffer_disconnects() {
+        Mockito.doNothing().when(mBrailleDisplayConnection).disconnect();
+        mBrailleDisplayConnection.write(
+                new byte[IBinder.getSuggestedMaxIpcSizeBytes() * 2]);
+
+        verify(mBrailleDisplayConnection).disconnect();
+    }
+
+    @Test
+    public void write_notConnected_throwsIllegalStateException() {
+        when(mServiceConnection.isConnectedLocked()).thenReturn(false);
+
+        assertThrows(IllegalStateException.class,
+                () -> mBrailleDisplayConnection.write(new byte[1]));
+    }
+
+    @Test
+    public void write_unableToCreateWriteStream_disconnects() {
+        Mockito.doNothing().when(mBrailleDisplayConnection).disconnect();
+        // mBrailleDisplayConnection#connectLocked was never called so the
+        // connection's mHidrawNode is still null. This will throw an exception
+        // when attempting to create FileOutputStream on the node.
+        mBrailleDisplayConnection.write(new byte[1]);
+
+        verify(mBrailleDisplayConnection).disconnect();
+    }
+
     // BrailleDisplayConnection#setTestData() is used to enable CTS testing with
     // test Braille display data, but its own implementation should also be tested
     // so that issues in this helper don't cause confusing failures in CTS.
+
     @Test
     public void setTestData_scannerReturnsTestData() {
         Bundle bd1 = new Bundle(), bd2 = new Bundle();
@@ -148,12 +215,20 @@ public class BrailleDisplayConnectionTest {
         BrailleDisplayConnection.BrailleDisplayScanner scanner =
                 mBrailleDisplayConnection.setTestData(List.of(bd1, bd2));
 
-        expect.that(scanner.getHidrawNodePaths()).containsExactly(path1, path2);
+        expect.that(scanner.getHidrawNodePaths(Path.of("/dev"))).containsExactly(path1, path2);
         expect.that(scanner.getDeviceReportDescriptor(path1)).isEqualTo(desc1);
         expect.that(scanner.getDeviceReportDescriptor(path2)).isEqualTo(desc2);
         expect.that(scanner.getUniqueId(path1)).isEqualTo(uniq1);
         expect.that(scanner.getUniqueId(path2)).isEqualTo(uniq2);
         expect.that(scanner.getDeviceBusType(path1)).isEqualTo(bus1);
         expect.that(scanner.getDeviceBusType(path2)).isEqualTo(bus2);
+    }
+
+    @Test
+    public void setTestData_emptyTestData_returnsNullNodePaths() {
+        BrailleDisplayConnection.BrailleDisplayScanner scanner =
+                mBrailleDisplayConnection.setTestData(List.of());
+
+        expect.that(scanner.getHidrawNodePaths(Path.of("/dev"))).isNull();
     }
 }
