@@ -20,6 +20,7 @@ import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.content.Context;
+import android.hardware.devicestate.DeviceStateManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -64,6 +65,11 @@ public class WindowExtensionsImpl implements WindowExtensions {
     }
 
     @NonNull
+    private DeviceStateManager getDeviceStateManager() {
+        return Objects.requireNonNull(getApplication().getSystemService(DeviceStateManager.class));
+    }
+
+    @NonNull
     private DeviceStateManagerFoldingFeatureProducer getFoldingFeatureProducer() {
         if (mFoldingFeatureProducer == null) {
             synchronized (mLock) {
@@ -73,7 +79,7 @@ public class WindowExtensionsImpl implements WindowExtensions {
                             new RawFoldingFeatureProducer(context);
                     mFoldingFeatureProducer =
                             new DeviceStateManagerFoldingFeatureProducer(context,
-                                    foldingFeatureProducer);
+                                    foldingFeatureProducer, getDeviceStateManager());
                 }
             }
         }
