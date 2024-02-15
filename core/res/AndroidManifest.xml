@@ -3793,6 +3793,14 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCK"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to manage policy related to theft detection.
+        @FlaggedApi("android.app.admin.flags.device_theft_api_enabled")
+        @hide
+        @SystemApi
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION"
+                android:protectionLevel="internal|role" />
+
     <!-- Allows an application to manage policy related to system apps.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
