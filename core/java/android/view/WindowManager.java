@@ -6157,12 +6157,15 @@ public interface WindowManager extends ViewManager {
      *                               rendering Choreographer.
      * @param receiver               The SurfaceControlInputReceiver that will receive the input
      *                               events
+     * @return Returns the {@link InputTransferToken} that can be used to transfer touch gesture
+     * to or from other windows.
      */
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
-    default void registerBatchedSurfaceControlInputReceiver(int displayId,
+    @NonNull
+    default InputTransferToken registerBatchedSurfaceControlInputReceiver(int displayId,
             @NonNull InputTransferToken hostInputTransferToken,
-            @NonNull SurfaceControl surfaceControl,
-            @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
+            @NonNull SurfaceControl surfaceControl, @NonNull Choreographer choreographer,
+            @NonNull SurfaceControlInputReceiver receiver) {
         throw new UnsupportedOperationException(
                 "registerBatchedSurfaceControlInputReceiver is not implemented");
     }
@@ -6187,9 +6190,12 @@ public interface WindowManager extends ViewManager {
      * @param looper                 The looper to use when invoking callbacks.
      * @param receiver               The SurfaceControlInputReceiver that will receive the input
      *                               events.
+     * @return Returns the {@link InputTransferToken} that can be used to transfer touch gesture
+     * to or from other windows.
      */
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
-    default void registerUnbatchedSurfaceControlInputReceiver(int displayId,
+    @NonNull
+    default InputTransferToken registerUnbatchedSurfaceControlInputReceiver(int displayId,
             @NonNull InputTransferToken hostInputTransferToken,
             @NonNull SurfaceControl surfaceControl, @NonNull Looper looper,
             @NonNull SurfaceControlInputReceiver receiver) {
@@ -6242,9 +6248,21 @@ public interface WindowManager extends ViewManager {
      * transferToToken.
      * <p><br>
      * This requires that the fromToken and toToken are associated with each other. The association
-     * can be done by creating a {@link SurfaceControlViewHost} and passing the host's
+     * can be done different ways, depending on how the embedded window is created.
+     * <ul>
+     * <li>
+     * Creating a {@link SurfaceControlViewHost} and passing the host's
      * {@link InputTransferToken} for
      * {@link SurfaceControlViewHost#SurfaceControlViewHost(Context, Display, InputTransferToken)}.
+     * </li>
+     * <li>
+     * Registering a SurfaceControl for input and passing the host's token to either
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Looper, SurfaceControlInputReceiver)}.
+     * </li>
+     * </ul>
      * <p>
      * The host is likely to be an {@link AttachedSurfaceControl} so the host token can be
      * retrieved via {@link AttachedSurfaceControl#getInputTransferToken()}.
@@ -6254,12 +6272,16 @@ public interface WindowManager extends ViewManager {
      * transfer.
      * <p><br>
      * When the host wants to transfer touch gesture to the embedded, it can retrieve the embedded
-     * token via {@link SurfaceControlViewHost.SurfacePackage#getInputTransferToken()} and pass its
-     * own token as the transferFromToken.
+     * token via {@link SurfaceControlViewHost.SurfacePackage#getInputTransferToken()} or use the
+     * value returned from either
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Looper, SurfaceControlInputReceiver)} and pass its own token as the transferFromToken.
      * <p>
-     * When the embedded wants to transfer touch gesture to the host, it can pass in its own token
-     * as the transferFromToken and use the associated host's {@link InputTransferToken} as the
-     * transferToToken
+     * When the embedded wants to transfer touch gesture to the host, it can pass in its own
+     * token as the transferFromToken and use the associated host's {@link InputTransferToken} as
+     * the transferToToken
      * <p><br>
      * When the touch is transferred, the window currently receiving touch gets an ACTION_CANCEL
      * and does not receive any further input events for this gesture.
@@ -6268,10 +6290,10 @@ public interface WindowManager extends ViewManager {
      * events for this gesture. It does not receive any of the previous events of this gesture that
      * the originating window received.
      * <p>
-     * The transferTouchGesture API only works for the current gesture. When a new gesture arrives,
-     * input dispatcher will do a new round of hit testing. So, if the host window is still the
-     * first thing that's being touched, then it will receive the new gesture again. It will again
-     * be up to the host to transfer this new gesture to the embedded.
+     * The transferTouchGesture API only works for the current gesture. When a new gesture
+     * arrives, input dispatcher will do a new round of hit testing. So, if the host window is
+     * still the first thing that's being touched, then it will receive the new gesture again. It
+     * will again be up to the host to transfer this new gesture to the embedded.
      *
      * @param transferFromToken the InputTransferToken for the currently active gesture
      * @param transferToToken   the InputTransferToken to transfer the gesture to.
