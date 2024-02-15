@@ -5629,7 +5629,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     // The preferred frame rate of the view that is mainly used for
     // touch boosting, view velocity handling, and TextureView.
-    private float mPreferredFrameRate = Float.NaN;
+    private float mPreferredFrameRate = REQUESTED_FRAME_RATE_CATEGORY_DEFAULT;
 
     private int mInfrequentUpdateCount = 0;
     private long mLastUpdateTimeMillis = 0;
