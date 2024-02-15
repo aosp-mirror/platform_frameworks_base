@@ -41,12 +41,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindow;
@@ -452,7 +452,9 @@ public class AccessibilityWindowManagerTest {
                 false, mockHostToken, USER_SYSTEM_ID);
         final int embeddedWindowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
                 false, mockEmbeddedToken, USER_SYSTEM_ID);
+
         mA11yWindowManager.associateEmbeddedHierarchyLocked(mockHostToken, mockEmbeddedToken);
+
         final int resolvedWindowId = mA11yWindowManager.resolveParentWindowIdLocked(
                 embeddedWindowId);
         assertEquals(hostWindowId, resolvedWindowId);
@@ -467,10 +469,13 @@ public class AccessibilityWindowManagerTest {
                 false, mockHostToken, USER_SYSTEM_ID);
         final int embeddedWindowId = addAccessibilityInteractionConnection(Display.DEFAULT_DISPLAY,
                 false, mockEmbeddedToken, USER_SYSTEM_ID);
+
         mA11yWindowManager.associateEmbeddedHierarchyLocked(mockHostToken, mockEmbeddedToken);
         mA11yWindowManager.disassociateEmbeddedHierarchyLocked(mockEmbeddedToken);
+
         final int resolvedWindowId = mA11yWindowManager.resolveParentWindowIdLocked(
                 embeddedWindowId);
+        assertNotEquals(hostWindowId, resolvedWindowId);
         assertEquals(embeddedWindowId, resolvedWindowId);
     }
 
@@ -917,7 +922,7 @@ public class AccessibilityWindowManagerTest {
 
         final AccessibilityWindowInfo a11yWindow = mA11yWindowManager.findA11yWindowInfoByIdLocked(
                 windowId);
-        assertTrue(TextUtils.equals(layoutParams.accessibilityTitle, a11yWindow.getTitle()));
+        assertEquals(toString(layoutParams.accessibilityTitle), toString(a11yWindow.getTitle()));
     }
 
     @Test
@@ -1057,7 +1062,7 @@ public class AccessibilityWindowManagerTest {
         when(mockWindowToken.asBinder()).thenReturn(mockWindowBinder);
         when(mMockA11ySecurityPolicy.isCallerInteractingAcrossUsers(userId))
                 .thenReturn(bGlobal);
-        when(mMockWindowManagerInternal.getDisplayIdForWindow(mockWindowToken.asBinder()))
+        when(mMockWindowManagerInternal.getDisplayIdForWindow(mockWindowBinder))
                 .thenReturn(displayId);
 
         int windowId = mA11yWindowManager.addAccessibilityInteractionConnection(
@@ -1077,7 +1082,7 @@ public class AccessibilityWindowManagerTest {
         when(mockWindowToken.asBinder()).thenReturn(mockWindowBinder);
         when(mMockA11ySecurityPolicy.isCallerInteractingAcrossUsers(userId))
                 .thenReturn(bGlobal);
-        when(mMockWindowManagerInternal.getDisplayIdForWindow(mockWindowToken.asBinder()))
+        when(mMockWindowManagerInternal.getDisplayIdForWindow(mockWindowBinder))
                 .thenReturn(displayId);
 
         int windowId = mA11yWindowManager.addAccessibilityInteractionConnection(
@@ -1146,6 +1151,11 @@ public class AccessibilityWindowManagerTest {
             // Changes the top focused display and window.
             setTopFocusedWindowAndDisplay(changeFocusedDisplayId, newFocusedWindowIndex);
         }
+    }
+
+    @Nullable
+    private static String toString(@Nullable CharSequence cs) {
+        return cs == null ? null : cs.toString();
     }
 
     static class DisplayIdMatcher extends TypeSafeMatcher<AccessibilityEvent> {
