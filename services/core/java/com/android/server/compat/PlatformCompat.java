@@ -120,8 +120,16 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         reportChangeInternal(changeId, uid, ChangeReporter.STATE_LOGGED);
     }
 
+    /**
+     * Report the change, but skip over the sdk target version check. This can be used to force the
+     * debug logs.
+     *
+     * @param changeId        of the change to report
+     * @param uid             of the user
+     * @param state           of the change - enabled/disabled/logged
+     */
     private void reportChangeInternal(long changeId, int uid, int state) {
-        mChangeReporter.reportChange(uid, changeId, state);
+        mChangeReporter.reportChange(uid, changeId, state, true);
     }
 
     @Override
@@ -164,15 +172,25 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     /**
-     * Internal version of {@link #isChangeEnabled(long, ApplicationInfo)}.
+     * Internal version of {@link #isChangeEnabled(long, ApplicationInfo)}. If the provided appInfo
+     * is not null, also reports the change.
+     *
+     * @param changeId of the change to report
+     * @param appInfo  the app to check
      *
      * <p>Does not perform costly permission check.
      */
     public boolean isChangeEnabledInternal(long changeId, ApplicationInfo appInfo) {
-        boolean enabled = isChangeEnabledInternalNoLogging(changeId, appInfo);
+        // Fetch the CompatChange. This is done here instead of in mCompatConfig to avoid multiple
+        // fetches.
+        CompatChange c = mCompatConfig.getCompatChange(changeId);
+
+        boolean enabled = mCompatConfig.isChangeEnabled(c, appInfo);
+        int state = enabled ? ChangeReporter.STATE_ENABLED : ChangeReporter.STATE_DISABLED;
         if (appInfo != null) {
-            reportChangeInternal(changeId, appInfo.uid,
-                    enabled ? ChangeReporter.STATE_ENABLED : ChangeReporter.STATE_DISABLED);
+            boolean isTargetingLatestSdk =
+                    mCompatConfig.isChangeTargetingLatestSdk(c, appInfo.targetSdkVersion);
+            mChangeReporter.reportChange(appInfo.uid, changeId, state, isTargetingLatestSdk);
         }
         return enabled;
     }
@@ -396,6 +414,19 @@ public class PlatformCompat extends IPlatformCompat.Stub {
      */
     public long[] getDisabledChanges(ApplicationInfo appInfo) {
         return mCompatConfig.getDisabledChanges(appInfo);
+    }
+
+    /**
+     * Retrieves the set of changes that should be logged for a given app. Any change ID not in the
+     * returned array is ignored for logging purposes.
+     *
+     * @param appInfo The app in question
+     * @return A sorted long array of change IDs. We use a primitive array to minimize memory
+     * footprint: Every app process will store this array statically so we aim to reduce
+     * overhead as much as possible.
+     */
+    public long[] getLoggableChanges(ApplicationInfo appInfo) {
+        return mCompatConfig.getLoggableChanges(appInfo);
     }
 
     /**
