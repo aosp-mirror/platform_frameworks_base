@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL_IMPLICIT;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_BFSL;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
@@ -67,7 +68,10 @@ import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UNBIND_SERVICE;
 import static android.content.Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL;
+import static android.media.audio.Flags.foregroundAudioControl;
 import static android.os.Process.SCHED_OTHER;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
@@ -2265,6 +2269,15 @@ public class OomAdjuster {
                     capabilityFromFGS |=
                             (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
                                     != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
+
+                    if (foregroundAudioControl()) { // flag check
+                        final int fgsAudioType = FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                                | FOREGROUND_SERVICE_TYPE_CAMERA
+                                | FOREGROUND_SERVICE_TYPE_MICROPHONE
+                                | FOREGROUND_SERVICE_TYPE_PHONE_CALL;
+                        capabilityFromFGS |= (psr.getForegroundServiceTypes() & fgsAudioType) != 0
+                                ? PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL : 0;
+                    }
 
                     final boolean enabled = state.getCachedCompatChange(
                             CACHED_COMPAT_CHANGE_CAMERA_MICROPHONE_CAPABILITY);

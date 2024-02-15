@@ -205,10 +205,10 @@ final class ProcessServiceRecord {
     }
 
     /**
-     * Returns the FGS typps, but it doesn't tell if the types include "NONE" or not, so
-     * do not use it outside of this class.
+     * Returns the FGS types, but it doesn't tell if the types include "NONE" or not, use
+     * {@link #hasForegroundServices()}
      */
-    private int getForegroundServiceTypes() {
+    int getForegroundServiceTypes() {
         return mHasForegroundServices ? mFgServiceTypes : 0;
     }
 
