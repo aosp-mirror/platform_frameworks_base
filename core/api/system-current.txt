@@ -7125,7 +7125,6 @@ package android.media {
   public final class MediaRouter2 {
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getAllRoutes();
     method @Nullable public String getClientPackageName();
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void setRouteVolume(@NonNull android.media.MediaRoute2Info, int);
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void startScan();
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void stopScan();
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void transfer(@NonNull android.media.MediaRouter2.RoutingController, @NonNull android.media.MediaRoute2Info);
