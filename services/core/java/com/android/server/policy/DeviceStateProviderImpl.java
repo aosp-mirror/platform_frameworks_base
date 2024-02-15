@@ -17,7 +17,7 @@
 package com.android.server.policy;
 
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
-import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
+import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -94,7 +94,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final BooleanSupplier FALSE_BOOLEAN_SUPPLIER = () -> false;
 
     @VisibleForTesting
-    static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(MINIMUM_DEVICE_STATE_IDENTIFIER,
+    static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(MINIMUM_DEVICE_STATE,
             "DEFAULT", 0 /* flags */);
 
     private static final String VENDOR_CONFIG_FILE_PATH = "etc/devicestate/";
