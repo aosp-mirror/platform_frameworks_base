@@ -323,7 +323,6 @@ public final class DeviceStateManager {
     public static class FoldStateListener implements DeviceStateCallback {
         private final int[] mFoldedDeviceStates;
         private final Consumer<Boolean> mDelegate;
-        private final android.hardware.devicestate.feature.flags.FeatureFlags mFeatureFlags;
 
         @Nullable
         private Boolean lastResult;
@@ -336,23 +335,11 @@ public final class DeviceStateManager {
             mFoldedDeviceStates = context.getResources().getIntArray(
                     com.android.internal.R.array.config_foldedDeviceStates);
             mDelegate = listener;
-            mFeatureFlags = new android.hardware.devicestate.feature.flags.FeatureFlagsImpl();
         }
 
         @Override
-        public final void onStateChanged(int state) {}
-
-        @Override
-        public final void onDeviceStateChanged(@NonNull DeviceState deviceState) {
-            final boolean folded;
-            if (mFeatureFlags.deviceStatePropertyApi()) {
-                // TODO(b/325124054): Update when system server refactor is completed
-                folded = deviceState.hasProperty(
-                        DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)
-                        || ArrayUtils.contains(mFoldedDeviceStates, deviceState.getIdentifier());
-            } else {
-                folded = ArrayUtils.contains(mFoldedDeviceStates, deviceState.getIdentifier());
-            }
+        public final void onStateChanged(int state) {
+            final boolean folded = ArrayUtils.contains(mFoldedDeviceStates, state);
 
             if (lastResult == null || !lastResult.equals(folded)) {
                 lastResult = folded;
