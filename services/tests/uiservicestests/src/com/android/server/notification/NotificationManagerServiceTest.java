@@ -594,6 +594,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(INVALID_TASK_ID);
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
         when(mUm.getProfileIds(eq(mUserId), eq(false))).thenReturn(new int[] { mUserId });
+        when(mAmi.getCurrentUserId()).thenReturn(mUserId);
 
         when(mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)).thenReturn(true);
 
