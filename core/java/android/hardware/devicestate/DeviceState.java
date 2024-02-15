@@ -202,7 +202,7 @@ public final class DeviceState {
      * primary display area.
      *
      * Note: This does not necessarily mean that the outer display area is the
-     * @link Display#DEFAULT_DISPLAY}.
+     * {@link Display#DEFAULT_DISPLAY}.
      */
     public static final int PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY = 11;
 
