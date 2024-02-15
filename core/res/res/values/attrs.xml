@@ -2514,6 +2514,13 @@
             <!-- The icon is shown unless the launching app specified SPLASH_SCREEN_STYLE_EMPTY -->
             <enum name="icon_preferred" value="1" />
         </attr>
+        <!-- Offer Window the ability to opt out the UI Toolkit discrete variable refresh rate.
+             This feature allows device to adjust refresh rate as needed and
+             can be useful for power saving.
+             Set to false to reduce the frame rate optimizations on devices with
+             variable refresh rate screens.
+             The default is true. -->
+        <attr name="windowIsFrameRatePowerSavingsBalanced" format="boolean"/>
 
         <!-- Flag indicating whether this window would opt-out the edge-to-edge enforcement.
 

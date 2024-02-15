@@ -165,6 +165,8 @@
     <public name="allowCrossUidActivitySwitchFromBelow"/>
     <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
     <public name="shiftDrawingOffsetForStartOverhang" />
+    <!-- @FlaggedApi("android.view.flags.toolkit_set_frame_rate_read_only") -->
+    <public name="windowIsFrameRatePowerSavingsBalanced"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">

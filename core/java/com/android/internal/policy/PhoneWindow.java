@@ -363,6 +363,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private boolean mUseDecorContext = false;
 
+    private boolean mIsFrameRatePowerSavingsBalanced = true;
+
     /** @see ViewRootImpl#mActivityConfigCallback */
     private ActivityConfigCallback mActivityConfigCallback;
 
@@ -2211,6 +2213,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
         viewRoot.getOnBackInvokedDispatcher().updateContext(getContext());
+        viewRoot.setFrameRatePowerSavingsBalanced(mIsFrameRatePowerSavingsBalanced);
         mProxyOnBackInvokedDispatcher.setActualDispatcher(viewRoot.getOnBackInvokedDispatcher());
         applyDecorFitsSystemWindows();
     }
@@ -2558,6 +2561,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         if (a.getBoolean(R.styleable.Window_windowActivityTransitions, false)) {
             requestFeature(FEATURE_ACTIVITY_TRANSITIONS);
+        }
+        if (a.hasValue(R.styleable.Window_windowIsFrameRatePowerSavingsBalanced)) {
+            mIsFrameRatePowerSavingsBalanced =
+                    a.getBoolean(R.styleable.Window_windowIsFrameRatePowerSavingsBalanced, true);
         }
 
         mIsTranslucent = a.getBoolean(R.styleable.Window_windowIsTranslucent, false);
