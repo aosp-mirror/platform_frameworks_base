@@ -5,6 +5,9 @@
     },
     {
       "path": "cts/tests/vibrator"
+    },
+    {
+      "path": "frameworks/hardware/interfaces/vibrator/aidl"
     }
   ]
 }
