@@ -25,7 +25,6 @@
 #include <limits.h>
 
 #include <audio_utils/fixedfft.h>
-#include <cutils/bitops.h>
 #include <utils/Thread.h>
 
 #include <android/content/AttributionSourceState.h>
@@ -59,8 +58,8 @@ status_t Visualizer::set(int32_t priority,
     status_t status = AudioEffect::set(
             SL_IID_VISUALIZATION, nullptr, priority, cbf, user, sessionId, io, device, probe);
     if (status == NO_ERROR || status == ALREADY_EXISTS) {
-        initCaptureSize();
-        initSampleRate();
+        status = initCaptureSize();
+        if (status == NO_ERROR) initSampleRate();
     }
     return status;
 }
@@ -152,9 +151,8 @@ status_t Visualizer::setCaptureCallBack(capture_cbk_t cbk, void* user, uint32_t 
 
 status_t Visualizer::setCaptureSize(uint32_t size)
 {
-    if (size > VISUALIZER_CAPTURE_SIZE_MAX ||
-        size < VISUALIZER_CAPTURE_SIZE_MIN ||
-        popcount(size) != 1) {
+    if (!isCaptureSizeValid(size)) {
+        ALOGE("%s with invalid capture size %u from HAL", __func__, size);
         return BAD_VALUE;
     }
 
@@ -172,7 +170,7 @@ status_t Visualizer::setCaptureSize(uint32_t size)
     *((int32_t *)p->data + 1)= size;
     status_t status = setParameter(p);
 
-    ALOGV("setCaptureSize size %d  status %d p->status %d", size, status, p->status);
+    ALOGV("setCaptureSize size %u status %d p->status %d", size, status, p->status);
 
     if (status == NO_ERROR) {
         status = p->status;
@@ -257,8 +255,8 @@ status_t Visualizer::getIntMeasurements(uint32_t type, uint32_t number, int32_t 
     if ((type != MEASUREMENT_MODE_PEAK_RMS)
             // for peak+RMS measurement, the results are 2 int32_t values
             || (number != 2)) {
-        ALOGE("Cannot retrieve int measurements, MEASUREMENT_MODE_PEAK_RMS returns 2 ints, not %d",
-                        number);
+        ALOGE("Cannot retrieve int measurements, MEASUREMENT_MODE_PEAK_RMS returns 2 ints, not %u",
+              number);
         return BAD_VALUE;
     }
 
@@ -390,7 +388,7 @@ void Visualizer::periodicCapture()
     }
 }
 
-uint32_t Visualizer::initCaptureSize()
+status_t Visualizer::initCaptureSize()
 {
     uint32_t buf32[sizeof(effect_param_t) / sizeof(uint32_t) + 2];
     effect_param_t *p = (effect_param_t *)buf32;
@@ -405,14 +403,20 @@ uint32_t Visualizer::initCaptureSize()
     }
 
     uint32_t size = 0;
-    if (status == NO_ERROR) {
-        size = *((int32_t *)p->data + 1);
+    if (status != NO_ERROR) {
+        ALOGE("%s getParameter failed status %d", __func__, status);
+        return status;
     }
+
+    size = *((int32_t *)p->data + 1);
+    if (!isCaptureSizeValid(size)) {
+        ALOGE("%s with invalid capture size %u from HAL", __func__, size);
+        return BAD_VALUE;
+    }
+
     mCaptureSize = size;
-
-    ALOGV("initCaptureSize size %d status %d", mCaptureSize, status);
-
-    return size;
+    ALOGV("%s size %u status %d", __func__, mCaptureSize, status);
+    return NO_ERROR;
 }
 
 void Visualizer::initSampleRate()
