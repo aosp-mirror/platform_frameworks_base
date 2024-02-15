@@ -33,6 +33,7 @@ import com.android.systemui.plugins.clocks.ClockMessageBuffers;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.shared.clocks.DefaultClockProvider;
+import com.android.systemui.util.ThreadAssert;
 
 import dagger.Module;
 import dagger.Provides;
@@ -74,7 +75,8 @@ public abstract class ClockRegistryModule {
                 clockBuffers,
                 /* keepAllLoaded = */ false,
                 /* subTag = */ "System",
-                /* isTransitClockEnabled = */ featureFlags.isEnabled(Flags.TRANSIT_CLOCK));
+                /* isTransitClockEnabled = */ featureFlags.isEnabled(Flags.TRANSIT_CLOCK),
+                new ThreadAssert());
         registry.registerListeners();
         return registry;
     }

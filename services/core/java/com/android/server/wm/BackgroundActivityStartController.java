@@ -913,8 +913,10 @@ public class BackgroundActivityStartController {
 
         // Normal apps with visible app window will be allowed to start activity if app switching
         // is allowed, or apps like live wallpaper with non app visible window will be allowed.
+        // The home app can start apps even if app switches are usually disallowed.
         final boolean appSwitchAllowedOrFg = state.mAppSwitchState == APP_SWITCH_ALLOW
-                || state.mAppSwitchState == APP_SWITCH_FG_ONLY;
+                || state.mAppSwitchState == APP_SWITCH_FG_ONLY
+                || isHomeApp(state.mRealCallingUid, state.mRealCallingPackage);
         if (balImproveRealCallerVisibilityCheck()) {
             if (appSwitchAllowedOrFg && state.mRealCallingUidHasAnyVisibleWindow) {
                 return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,

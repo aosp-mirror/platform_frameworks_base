@@ -21,14 +21,21 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.alternateBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
+import com.android.systemui.keyguard.ui.viewmodel.aodToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.dozingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.dreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.goneToDozingTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.goneToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToOccludedTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.lockscreenToPrimaryBouncerTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.occludedToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.occludedToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.primaryBouncerToGoneTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.primaryBouncerToLockscreenTransitionViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -43,15 +50,24 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         shadeInteractor = shadeInteractor,
         communalInteractor = communalInteractor,
-        occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
-        lockscreenToGoneTransitionViewModel = lockscreenToGoneTransitionViewModel,
         alternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel,
-        primaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel,
-        lockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel,
+        aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
+        dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
         dreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel,
-        lockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel,
+        goneToDozingTransitionViewModel = goneToDozingTransitionViewModel,
+        goneToDreamingTransitionViewModel = goneToDreamingTransitionViewModel,
         glanceableHubToLockscreenTransitionViewModel = glanceableHubToLockscreenTransitionViewModel,
+        lockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel,
         lockscreenToGlanceableHubTransitionViewModel = lockscreenToGlanceableHubTransitionViewModel,
+        lockscreenToGoneTransitionViewModel = lockscreenToGoneTransitionViewModel,
+        lockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel,
+        lockscreenToPrimaryBouncerTransitionViewModel =
+            lockscreenToPrimaryBouncerTransitionViewModel,
+        occludedToAodTransitionViewModel = occludedToAodTransitionViewModel,
+        occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
+        primaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel,
+        primaryBouncerToLockscreenTransitionViewModel =
+            primaryBouncerToLockscreenTransitionViewModel,
         aodBurnInViewModel = aodBurnInViewModel,
     )
 }

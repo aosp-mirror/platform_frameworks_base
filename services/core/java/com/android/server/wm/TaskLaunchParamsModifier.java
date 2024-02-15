@@ -303,15 +303,9 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         } else {
             if (DEBUG) appendLog("non-freeform-task-display-area");
         }
-        final boolean isUpdatingExistingTaskWindowingMode = task != null
-                && task.getRequestedOverrideWindowingMode() != WINDOWING_MODE_UNDEFINED
-                && launchMode != task.getRequestedOverrideWindowingMode();
-        if (DEBUG && isUpdatingExistingTaskWindowingMode) {
-            appendLog("updating-existing-task-windowing-mode");
-        }
         // If launch mode matches display windowing mode, let it inherit from display.
         outParams.mWindowingMode = launchMode == suggestedDisplayArea.getWindowingMode()
-                && !isUpdatingExistingTaskWindowingMode
+                && !shouldUpdateExistingTaskWindowingMode(task, launchMode)
                 ? WINDOWING_MODE_UNDEFINED : launchMode;
 
         if (phase == PHASE_WINDOWING_MODE) {
@@ -401,6 +395,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                     outParams.mBounds);
         }
         return RESULT_CONTINUE;
+    }
+
+    private boolean shouldUpdateExistingTaskWindowingMode(Task task, int launchMode) {
+        return task != null
+                && task.getRequestedOverrideWindowingMode() != WINDOWING_MODE_UNDEFINED
+                && task.getRequestedOverrideWindowingMode() != WINDOWING_MODE_PINNED
+                && launchMode != task.getRequestedOverrideWindowingMode();
     }
 
     private TaskDisplayArea getPreferredLaunchTaskDisplayArea(@Nullable Task task,

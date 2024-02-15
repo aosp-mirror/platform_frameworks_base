@@ -38,6 +38,7 @@ import java.util.Objects;
  * stored must also be immutable. If mutable objects are stored here, then the range
  * effectively becomes mutable. </p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Range<T extends Comparable<? super T>> {
     /**
      * Create a new immutable range.

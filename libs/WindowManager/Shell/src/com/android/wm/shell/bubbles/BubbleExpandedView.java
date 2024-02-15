@@ -176,7 +176,9 @@ public class BubbleExpandedView extends LinearLayout {
     private float mCornerRadius = 0f;
     private int mBackgroundColorFloating;
     private boolean mUsingMaxHeight;
+    private int mLeftClip = 0;
     private int mTopClip = 0;
+    private int mRightClip = 0;
     private int mBottomClip = 0;
     @Nullable private Bubble mBubble;
     private PendingIntent mPendingIntent;
@@ -353,7 +355,8 @@ public class BubbleExpandedView extends LinearLayout {
         mExpandedViewContainer.setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
-                Rect clip = new Rect(0, mTopClip, view.getWidth(), view.getHeight() - mBottomClip);
+                Rect clip = new Rect(mLeftClip, mTopClip, view.getWidth() - mRightClip,
+                        view.getHeight() - mBottomClip);
                 outline.setRoundRect(clip, mCornerRadius);
             }
         });
@@ -756,8 +759,26 @@ public class BubbleExpandedView extends LinearLayout {
         onContainerClipUpdate();
     }
 
+    /**
+     * Sets the clipping for the view.
+     */
+    public void setTaskViewClip(Rect rect) {
+        mLeftClip = rect.left;
+        mTopClip = rect.top;
+        mRightClip = rect.right;
+        mBottomClip = rect.bottom;
+        onContainerClipUpdate();
+    }
+
+    /**
+     * Returns a rect representing the clipping for the view.
+     */
+    public Rect getTaskViewClip() {
+        return new Rect(mLeftClip, mTopClip, mRightClip, mBottom);
+    }
+
     private void onContainerClipUpdate() {
-        if (mTopClip == 0 && mBottomClip == 0) {
+        if (mTopClip == 0 && mBottomClip == 0 && mRightClip == 0 && mLeftClip == 0) {
             if (mIsClipping) {
                 mIsClipping = false;
                 if (mTaskView != null) {
@@ -775,8 +796,10 @@ public class BubbleExpandedView extends LinearLayout {
             }
             mExpandedViewContainer.invalidateOutline();
             if (mTaskView != null) {
-                mTaskView.setClipBounds(new Rect(0, mTopClip, mTaskView.getWidth(),
-                        mTaskView.getHeight() - mBottomClip));
+                Rect clipBounds = new Rect(mLeftClip, mTopClip,
+                        mTaskView.getWidth() - mRightClip,
+                        mTaskView.getHeight() - mBottomClip);
+                mTaskView.setClipBounds(clipBounds);
             }
         }
     }

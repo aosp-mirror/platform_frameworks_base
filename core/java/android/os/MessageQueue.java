@@ -42,7 +42,7 @@ import java.util.ArrayList;
  */
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 @android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
-        "com.android.hoststubgen.nativesubstitution.MessageQueue_host")
+        "com.android.platform.test.ravenwood.nativesubstitution.MessageQueue_host")
 public final class MessageQueue {
     private static final String TAG = "MessageQueue";
     private static final boolean DEBUG = false;

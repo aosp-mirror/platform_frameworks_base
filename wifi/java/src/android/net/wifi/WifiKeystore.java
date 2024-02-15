@@ -16,6 +16,7 @@
 package android.net.wifi;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.Process;
 import android.os.ServiceManager;
@@ -24,9 +25,11 @@ import android.security.legacykeystore.ILegacyKeystore;
 import android.util.Log;
 
 /**
- * @hide This class allows wifi framework to store and access wifi certificate blobs.
+ * This class allows the storage and retrieval of non-standard Wifi certificate blobs.
+ * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+@SystemApi
+@SuppressLint("UnflaggedApi") // Promoting from @SystemApi(MODULE_LIBRARIES)
 public final class WifiKeystore {
     private static final String TAG = "WifiKeystore";
     private static final String LEGACY_KEYSTORE_SERVICE_NAME = "android.security.legacykeystore";
@@ -48,7 +51,8 @@ public final class WifiKeystore {
      * @return true if the blob was successfully added. False otherwise.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
+    @SuppressLint("UnflaggedApi")
     public static boolean put(@NonNull String alias, @NonNull byte[] blob) {
         try {
             Log.i(TAG, "put blob. alias " + alias);
@@ -68,7 +72,8 @@ public final class WifiKeystore {
      *         Returns null if no blob was found.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
+    @SuppressLint("UnflaggedApi")
     public static @NonNull byte[] get(@NonNull String alias) {
         try {
             Log.i(TAG, "get blob. alias " + alias);
@@ -89,7 +94,8 @@ public final class WifiKeystore {
      * @return True if a blob was removed. False if no such blob was found.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
+    @SuppressLint("UnflaggedApi")
     public static boolean remove(@NonNull String alias) {
         try {
             getService().remove(alias, Process.WIFI_UID);
@@ -110,7 +116,8 @@ public final class WifiKeystore {
      *         The return value may be empty but never null.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
+    @SuppressLint("UnflaggedApi")
     public static @NonNull String[] list(@NonNull String prefix) {
         try {
             final String[] aliases = getService().list(prefix, Process.WIFI_UID);

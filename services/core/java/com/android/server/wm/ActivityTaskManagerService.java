@@ -4153,13 +4153,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void onPictureInPictureStateChanged(PictureInPictureUiState pipState) {
-        enforceTaskPermission("onPictureInPictureStateChanged");
-        final Task rootPinnedTask = mRootWindowContainer.getDefaultTaskDisplayArea()
-                .getRootPinnedTask();
-        if (rootPinnedTask != null && rootPinnedTask.getTopMostActivity() != null) {
-            mWindowManager.mAtmService.mActivityClientController.onPictureInPictureStateChanged(
-                    rootPinnedTask.getTopMostActivity(), pipState);
+    public void onPictureInPictureUiStateChanged(PictureInPictureUiState pipState) {
+        enforceTaskPermission("onPictureInPictureUiStateChanged");
+        // The PictureInPictureUiState is sent to current pip task if there is any
+        // -or- the top standard task (state like entering PiP does not require a pinned task).
+        final Task task;
+        if (mRootWindowContainer.getDefaultTaskDisplayArea().hasPinnedTask()) {
+            task = mRootWindowContainer.getDefaultTaskDisplayArea().getRootPinnedTask();
+        } else {
+            task = mRootWindowContainer.getDefaultTaskDisplayArea().getRootTask(
+                    t -> t.isActivityTypeStandard());
+        }
+        if (task != null && task.getTopMostActivity() != null) {
+            mWindowManager.mAtmService.mActivityClientController.onPictureInPictureUiStateChanged(
+                    task.getTopMostActivity(), pipState);
         }
     }
 

@@ -3927,6 +3927,7 @@ public class Activity extends ContextThemeWrapper
 
         if (keyCode == KeyEvent.KEYCODE_ESCAPE && mWindow.shouldCloseOnTouchOutside()) {
             event.startTracking();
+            finish();
             return true;
         }
 
@@ -4027,10 +4028,7 @@ public class Activity extends ContextThemeWrapper
         }
 
         if (keyCode == KeyEvent.KEYCODE_ESCAPE
-                && mWindow.shouldCloseOnTouchOutside()
-                && event.isTracking()
-                && !event.isCanceled()) {
-            finish();
+                && event.isTracking()) {
             return true;
         }
 

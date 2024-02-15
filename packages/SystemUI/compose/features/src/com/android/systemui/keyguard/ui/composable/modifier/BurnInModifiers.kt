@@ -40,7 +40,6 @@ fun Modifier.burnInAware(
 ): Modifier {
     val translationX by viewModel.translationX(params).collectAsState(initial = 0f)
     val translationY by viewModel.translationY(params).collectAsState(initial = 0f)
-    val alpha by viewModel.alpha.collectAsState(initial = 1f)
     val scaleViewModel by viewModel.scale(params).collectAsState(initial = BurnInScaleViewModel())
 
     return this.graphicsLayer {

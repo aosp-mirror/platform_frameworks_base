@@ -63,6 +63,7 @@ import android.service.voice.SoundTriggerFailure;
 import android.service.voice.VisualQueryDetectionService;
 import android.service.voice.VisualQueryDetectionServiceFailure;
 import android.service.voice.VoiceInteractionManagerInternal.HotwordDetectionServiceIdentity;
+import android.service.voice.VoiceInteractionManagerInternal.WearableHotwordDetectionCallback;
 import android.speech.IRecognitionServiceManager;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -449,6 +450,25 @@ final class HotwordDetectionConnection {
             return;
         }
         session.startListeningFromExternalSourceLocked(audioStream, audioFormat, options, callback);
+    }
+
+    public void startListeningFromWearableLocked(
+            ParcelFileDescriptor audioStream,
+            AudioFormat audioFormat,
+            PersistableBundle options,
+            WearableHotwordDetectionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromWearableLocked");
+        }
+        DetectorSession trustedSession = getDspTrustedHotwordDetectorSessionLocked();
+        if (trustedSession == null) {
+            callback.onError(
+                    "Unable to start listening from wearable because the trusted hotword detection"
+                            + " session is not available.");
+            return;
+        }
+        trustedSession.startListeningFromWearableLocked(
+                audioStream, audioFormat, options, callback);
     }
 
     /**

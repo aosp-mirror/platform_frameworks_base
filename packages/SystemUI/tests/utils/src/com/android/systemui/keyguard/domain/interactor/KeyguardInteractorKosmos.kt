@@ -36,6 +36,7 @@ val Kosmos.keyguardInteractor by
             bouncerRepository = keyguardBouncerRepository,
             configurationInteractor = configurationInteractor,
             shadeRepository = shadeRepository,
+            keyguardTransitionInteractor = keyguardTransitionInteractor,
             sceneInteractorProvider = { sceneInteractor },
         )
     }

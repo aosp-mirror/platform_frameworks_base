@@ -65,7 +65,6 @@ class AodBurnInViewModelTest : SysuiTestCase() {
             clockControllerProvider = { clockController },
         )
     private val burnInFlow = MutableStateFlow(BurnInModel())
-    private val enterFromTopAnimationAlpha = MutableStateFlow(0f)
 
     @Before
     fun setUp() {
@@ -74,8 +73,6 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(burnInInteractor.keyguardBurnIn).thenReturn(burnInFlow)
         kosmos.burnInInteractor = burnInInteractor
-        whenever(goneToAodTransitionViewModel.enterFromTopAnimationAlpha)
-            .thenReturn(enterFromTopAnimationAlpha)
         whenever(goneToAodTransitionViewModel.enterFromTopTranslationY(anyInt()))
             .thenReturn(emptyFlow())
         kosmos.goneToAodTransitionViewModel = goneToAodTransitionViewModel
@@ -277,17 +274,5 @@ class AodBurnInViewModelTest : SysuiTestCase() {
             assertThat(translationX).isEqualTo(0)
             assertThat(translationY).isEqualTo(0)
             assertThat(scale).isEqualTo(BurnInScaleViewModel(scale = 0.5f, scaleClockOnly = false))
-        }
-
-    @Test
-    fun alpha() =
-        testScope.runTest {
-            val alpha by collectLastValue(underTest.alpha)
-
-            enterFromTopAnimationAlpha.value = 0.2f
-            assertThat(alpha).isEqualTo(0.2f)
-
-            enterFromTopAnimationAlpha.value = 1f
-            assertThat(alpha).isEqualTo(1f)
         }
 }

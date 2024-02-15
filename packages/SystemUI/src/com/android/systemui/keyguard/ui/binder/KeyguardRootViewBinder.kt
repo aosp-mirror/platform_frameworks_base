@@ -179,7 +179,7 @@ object KeyguardRootViewBinder {
                         }
 
                         launch {
-                            viewModel.lockscreenStateAlpha.collect { alpha ->
+                            viewModel.lockscreenStateAlpha(viewState).collect { alpha ->
                                 childViews[statusViewId]?.alpha = alpha
                             }
                         }

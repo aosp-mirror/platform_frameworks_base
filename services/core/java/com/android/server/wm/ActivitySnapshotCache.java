@@ -23,18 +23,20 @@ import android.window.TaskSnapshot;
  */
 class ActivitySnapshotCache extends SnapshotCache<ActivityRecord> {
 
-    ActivitySnapshotCache(WindowManagerService service) {
-        super(service, "Activity");
+    ActivitySnapshotCache() {
+        super("Activity");
     }
 
     @Override
     void putSnapshot(ActivityRecord ar, TaskSnapshot snapshot) {
         final int hasCode = System.identityHashCode(ar);
-        final CacheEntry entry = mRunningCache.get(hasCode);
-        if (entry != null) {
-            mAppIdMap.remove(entry.topApp);
+        synchronized (mLock) {
+            final CacheEntry entry = mRunningCache.get(hasCode);
+            if (entry != null) {
+                mAppIdMap.remove(entry.topApp);
+            }
+            mAppIdMap.put(ar, hasCode);
+            mRunningCache.put(hasCode, new CacheEntry(snapshot, ar));
         }
-        mAppIdMap.put(ar, hasCode);
-        mRunningCache.put(hasCode, new CacheEntry(snapshot, ar));
     }
 }

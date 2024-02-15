@@ -14,6 +14,7 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -53,13 +54,17 @@ class WalletContextualLocationsServiceTest : SysuiTestCase() {
         doNothing().whenever(controller).setSuggestionCardIds(anySet())
 
         if (Looper.myLooper() == null) Looper.prepare()
-
+        val testDispatcher = StandardTestDispatcher()
         testScope = TestScope()
         featureFlags.set(Flags.ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS, true)
         listenerRegisteredCount = 0
-
         underTest =
-            WalletContextualLocationsService(controller, featureFlags, testScope.backgroundScope)
+            WalletContextualLocationsService(
+                testDispatcher,
+                controller,
+                featureFlags,
+                testScope.backgroundScope
+            )
     }
 
     @Test

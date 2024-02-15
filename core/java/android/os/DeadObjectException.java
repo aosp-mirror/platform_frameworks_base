@@ -43,6 +43,7 @@ import android.os.RemoteException;
  * this information at runtime. So, you should handle the
  * error, as if the service died.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class DeadObjectException extends RemoteException {
     public DeadObjectException() {
         super();

@@ -42,6 +42,7 @@ import android.view.SurfaceControlViewHost;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.window.InputTransferToken;
 
 public class EmbeddedWindowService extends Service {
     private static final String TAG = "EmbeddedWindowService";
@@ -118,7 +119,7 @@ public class EmbeddedWindowService extends Service {
 
         @Override
         public void attachEmbeddedSurfaceControl(SurfaceControl parentSc, int displayId,
-                IBinder hostToken) {
+                InputTransferToken inputTransferToken) {
             mHandler.post(() -> {
                 Paint paint = new Paint();
                 paint.setTextSize(40);
@@ -134,7 +135,7 @@ public class EmbeddedWindowService extends Service {
                 c.drawText("Remote", 250, 250, paint);
                 surface.unlockCanvasAndPost(c);
                 WindowManager wm = getSystemService(WindowManager.class);
-                wm.registerBatchedSurfaceControlInputReceiver(displayId, hostToken,
+                wm.registerBatchedSurfaceControlInputReceiver(displayId, inputTransferToken,
                         mSurfaceControl,
                         Choreographer.getInstance(), event -> {
                             Log.d(TAG, "onInputEvent-remote " + event);

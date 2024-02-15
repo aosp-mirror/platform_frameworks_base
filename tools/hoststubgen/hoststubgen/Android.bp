@@ -54,6 +54,7 @@ java_library {
 // This library is _not_ specific to Android APIs.
 java_library_host {
     name: "hoststubgen-helper-runtime",
+    defaults: ["ravenwood-internal-only-visibility-java"],
     srcs: [
         "helper-runtime-src/**/*.java",
     ],
@@ -64,11 +65,11 @@ java_library_host {
         "guava",
     ],
     jarjar_rules: "jarjar-rules.txt",
-    visibility: ["//visibility:public"],
 }
 
 java_library {
     name: "hoststubgen-helper-runtime.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-java"],
     srcs: [
         "helper-runtime-src/**/*.java",
     ],
@@ -79,7 +80,6 @@ java_library {
         "guava",
     ],
     jarjar_rules: "jarjar-rules.txt",
-    visibility: ["//visibility:public"],
 }
 
 // Host-side stub generator tool.
@@ -150,36 +150,5 @@ genrule_defaults {
         // Following files are created just as FYI.
         "hoststubgen_keep_all.txt",
         "hoststubgen_dump.txt",
-    ],
-}
-
-java_library_host {
-    name: "hoststubgen-helper-libcore-runtime",
-    srcs: [
-        "helper-framework-runtime-src/libcore-fake/**/*.java",
-    ],
-    visibility: ["//visibility:private"],
-}
-
-java_host_for_device {
-    name: "hoststubgen-helper-libcore-runtime.ravenwood",
-    libs: [
-        "hoststubgen-helper-libcore-runtime",
-    ],
-    visibility: ["//visibility:private"],
-}
-
-java_library {
-    name: "hoststubgen-helper-framework-runtime.ravenwood",
-    defaults: ["ravenwood-internal-only-visibility-java"],
-    srcs: [
-        "helper-framework-runtime-src/framework/**/*.java",
-    ],
-    libs: [
-        "hoststubgen-helper-runtime.ravenwood",
-        "framework-minus-apex.ravenwood",
-    ],
-    static_libs: [
-        "hoststubgen-helper-libcore-runtime.ravenwood",
     ],
 }

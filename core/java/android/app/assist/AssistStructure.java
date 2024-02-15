@@ -1,5 +1,8 @@
 package android.app.assist;
 
+import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -7,6 +10,9 @@ import android.annotation.SystemApi;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.GetCredentialException;
+import android.credentials.GetCredentialRequest;
+import android.credentials.GetCredentialResponse;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -15,6 +21,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.OutcomeReceiver;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PooledStringReader;
@@ -637,6 +644,12 @@ public class AssistStructure implements Parcelable {
         AutofillId mAutofillId;
         @View.AutofillType int mAutofillType = View.AUTOFILL_TYPE_NONE;
         @Nullable String[] mAutofillHints;
+
+        @Nullable GetCredentialRequest mGetCredentialRequest;
+
+        @Nullable OutcomeReceiver<GetCredentialResponse, GetCredentialException>
+                mGetCredentialCallback;
+
         AutofillValue mAutofillValue;
         CharSequence[] mAutofillOptions;
         boolean mSanitized;
@@ -1259,6 +1272,32 @@ public class AssistStructure implements Parcelable {
          */
         public boolean isCredential() {
             return mIsCredential;
+        }
+
+        /**
+         * Returns the request associated with this node
+         * @return
+         *
+         * @hide
+         */
+        @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
+        @Nullable
+        public GetCredentialRequest getCredentialManagerRequest() {
+            return mGetCredentialRequest;
+        }
+
+        /**
+         *
+         * @return
+         *
+         * @hide
+         *
+         */
+        @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
+        @Nullable
+        public OutcomeReceiver<GetCredentialResponse,
+                GetCredentialException> getCredentialManagerCallback() {
+            return mGetCredentialCallback;
         }
 
         /**
@@ -2139,6 +2178,19 @@ public class AssistStructure implements Parcelable {
             }
         }
 
+        @Nullable
+        @Override
+        public GetCredentialRequest getCredentialManagerRequest() {
+            return mNode.mGetCredentialRequest;
+        }
+
+        @Nullable
+        @Override
+        public OutcomeReceiver<
+                GetCredentialResponse, GetCredentialException> getCredentialManagerCallback() {
+            return mNode.mGetCredentialCallback;
+        }
+
         @Override
         public void asyncCommit() {
             synchronized (mAssist) {
@@ -2201,6 +2253,13 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setIsCredential(boolean isCredential) {
             mNode.mIsCredential = isCredential;
+        }
+
+        @Override
+        public void setCredentialManagerRequest(@NonNull GetCredentialRequest request,
+                @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
+            mNode.mGetCredentialRequest = request;
+            mNode.mGetCredentialCallback = callback;
         }
 
         @Override
@@ -2521,6 +2580,14 @@ public class AssistStructure implements Parcelable {
                     + ", important=" + node.getImportantForAutofill()
                     + ", visibility=" + node.getVisibility()
                     + ", isCredential=" + node.isCredential()
+            );
+        }
+        GetCredentialRequest getCredentialRequest = node.getCredentialManagerRequest();
+        if (getCredentialRequest == null) {
+            Log.i(TAG, prefix + " NO Credential Manager Request");
+        } else {
+            Log.i(TAG, prefix + "  GetCredentialRequest: no. of options= "
+                    + getCredentialRequest.getCredentialOptions().size()
             );
         }
 

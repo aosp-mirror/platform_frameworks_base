@@ -27,8 +27,6 @@ import android.os.UserManager;
 /**
  * The LauncherUserInfo object holds information about an Android user that is required to display
  * the Launcher related UI elements specific to the user (like badges).
- *
- * @hide
  */
 @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
 public final class LauncherUserInfo implements Parcelable {
@@ -41,11 +39,9 @@ public final class LauncherUserInfo implements Parcelable {
     /**
      * Returns type of the user as defined in {@link UserManager}. e.g.,
      * {@link UserManager.USER_TYPE_PROFILE_MANAGED} or {@link UserManager.USER_TYPE_PROFILE_ClONE}
-     * TODO(b/303812736): Make the return type public and update javadoc here once the linked bug
-     * is resolved.
+     * or {@link UserManager.USER_TYPE_PROFILE_PRIVATE}
      *
      * @return the userType for the user whose LauncherUserInfo this is
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
     @NonNull
@@ -58,7 +54,6 @@ public final class LauncherUserInfo implements Parcelable {
      * {@link UserManager#getSerialNumberForUser(UserHandle)}
      *
      * @return the serial number associated with the user
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
     public int getUserSerialNumber() {

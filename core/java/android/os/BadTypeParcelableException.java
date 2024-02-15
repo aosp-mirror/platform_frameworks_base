@@ -17,6 +17,7 @@
 package android.os;
 
 /** Used by Parcel to signal that the type on the payload was not expected by the caller. */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 class BadTypeParcelableException extends BadParcelableException {
     BadTypeParcelableException(String msg) {
         super(msg);

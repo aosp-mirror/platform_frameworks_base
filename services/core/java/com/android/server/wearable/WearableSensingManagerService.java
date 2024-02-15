@@ -496,6 +496,42 @@ public class WearableSensingManagerService extends
         }
 
         @Override
+        public void startHotwordRecognition(
+                ComponentName targetVisComponentName, RemoteCallback statusCallback) {
+            Slog.i(TAG, "WearableSensingManagerInternal startHotwordRecognition.");
+            Objects.requireNonNull(statusCallback);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE, TAG);
+            if (!mIsServiceEnabled) {
+                Slog.w(TAG, "Service not available.");
+                WearableSensingManagerPerUserService.notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            callPerUserServiceIfExist(
+                    service ->
+                            service.onStartHotwordRecognition(
+                                    targetVisComponentName, statusCallback),
+                    statusCallback);
+        }
+
+        @Override
+        public void stopHotwordRecognition(RemoteCallback statusCallback) {
+            Slog.i(TAG, "WearableSensingManagerInternal stopHotwordRecognition.");
+            Objects.requireNonNull(statusCallback);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE, TAG);
+            if (!mIsServiceEnabled) {
+                Slog.w(TAG, "Service not available.");
+                WearableSensingManagerPerUserService.notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            callPerUserServiceIfExist(
+                    service -> service.onStopHotwordRecognition(statusCallback), statusCallback);
+        }
+
+        @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
             new WearableSensingShellCommand(WearableSensingManagerService.this).exec(

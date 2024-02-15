@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
@@ -79,6 +80,7 @@ constructor(
     bouncerRepository: KeyguardBouncerRepository,
     configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
     sceneInteractorProvider: Provider<SceneInteractor>,
 ) {
     // TODO(b/296118689): move to a repository
@@ -233,7 +235,32 @@ constructor(
     /** The position of the keyguard clock. */
     val clockPosition: Flow<Position> = repository.clockPosition
 
+    @Deprecated("Use the relevant TransitionViewModel")
     val keyguardAlpha: Flow<Float> = repository.keyguardAlpha
+
+    /**
+     * When the lockscreen can be dismissed, emit an alpha value as the user swipes up. This is
+     * useful just before the code commits to moving to GONE.
+     */
+    val dismissAlpha: Flow<Float?> =
+        combine(
+                shadeRepository.legacyShadeExpansion,
+                statusBarState,
+                keyguardTransitionInteractor.currentKeyguardState,
+                isKeyguardDismissible,
+            ) { legacyShadeExpansion, statusBarState, currentKeyguardState, isKeyguardDismissible ->
+                if (
+                    statusBarState == StatusBarState.KEYGUARD &&
+                        isKeyguardDismissible &&
+                        currentKeyguardState == LOCKSCREEN
+                ) {
+                    MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion)
+                } else {
+                    null
+                }
+            }
+            .onStart { emit(null) }
+            .distinctUntilChanged()
 
     val keyguardTranslationY: Flow<Float> =
         configurationInteractor

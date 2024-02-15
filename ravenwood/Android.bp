@@ -24,6 +24,46 @@ java_library {
     visibility: ["//visibility:public"],
 }
 
+java_library_host {
+    name: "ravenwood-helper-libcore-runtime.host",
+    srcs: [
+        "runtime-helper-src/libcore-fake/**/*.java",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_host_for_device {
+    name: "ravenwood-helper-libcore-runtime",
+    libs: [
+        "ravenwood-helper-libcore-runtime.host",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "ravenwood-helper-framework-runtime",
+    srcs: [
+        "runtime-helper-src/framework/**/*.java",
+    ],
+    libs: [
+        "framework-minus-apex.ravenwood",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+// Combine ravenwood-helper-*-runtime and create a single library, which we include
+// in the ravenwood runtime.
+// We do it this way rather than including the individual jars in the runtime, because
+// for some reason we couldn't include a java_host_for_device module in the ravenwood runtime.
+java_library {
+    name: "ravenwood-helper-runtime",
+    defaults: ["ravenwood-internal-only-visibility-java"],
+    static_libs: [
+        "ravenwood-helper-framework-runtime",
+        "ravenwood-helper-libcore-runtime",
+    ],
+}
+
 java_library {
     name: "ravenwood-junit-impl",
     srcs: [
@@ -56,16 +96,6 @@ java_library {
         "junit",
     ],
     visibility: ["//visibility:public"],
-}
-
-java_library {
-    // Prefixed with "200" to ensure it's sorted early in Tradefed classpath
-    // so that we provide a concrete implementation before Mainline stubs
-    name: "200-kxml2-android",
-    static_libs: [
-        "kxml2-android",
-    ],
-    visibility: ["//frameworks/base"],
 }
 
 java_host_for_device {

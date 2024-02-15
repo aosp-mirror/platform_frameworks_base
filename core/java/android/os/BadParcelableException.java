@@ -25,6 +25,7 @@ import android.util.AndroidRuntimeException;
  * passed to another process that doesn't have the same {@link Parcelable} class
  * in its {@link ClassLoader}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BadParcelableException extends AndroidRuntimeException {
     public BadParcelableException(String msg) {
         super(msg);

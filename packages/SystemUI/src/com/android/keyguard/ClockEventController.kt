@@ -421,9 +421,11 @@ constructor(
         smallTimeListener?.update(shouldTimeListenerRun)
         largeTimeListener?.update(shouldTimeListenerRun)
 
-        // Query ZenMode data
-        zenModeCallback.onZenChanged(zenModeController.zen)
-        zenModeCallback.onNextAlarmChanged()
+        bgExecutor.execute {
+            // Query ZenMode data
+            zenModeCallback.onZenChanged(zenModeController.zen)
+            zenModeCallback.onNextAlarmChanged()
+        }
     }
 
     fun unregisterListeners() {

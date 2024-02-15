@@ -163,19 +163,16 @@ public class UserManager {
      * User type representing a managed profile, which is a profile that is to be managed by a
      * device policy controller (DPC).
      * The intended purpose is for work profiles, which are managed by a corporate entity.
-     * @hide
      */
-    @SystemApi
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
     public static final String USER_TYPE_PROFILE_MANAGED = "android.os.usertype.profile.MANAGED";
 
     /**
      * User type representing a clone profile. Clone profile is a user profile type used to run
      * second instance of an otherwise single user App (eg, messengers). Currently only the
      * {@link android.content.pm.UserInfo#isMain()} user can have a clone profile.
-     *
-     * @hide
      */
-    @SystemApi
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
     public static final String USER_TYPE_PROFILE_CLONE = "android.os.usertype.profile.CLONE";
 
 
@@ -184,10 +181,8 @@ public class UserManager {
      * as an alternative user-space to install and use sensitive apps.
      * UI surfaces can adopt an alternative strategy to show apps belonging to this profile, in line
      * with their sensitive nature.
-     * @hide
      */
     @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
-    @SystemApi
     public static final String USER_TYPE_PROFILE_PRIVATE = "android.os.usertype.profile.PRIVATE";
 
     /**
@@ -1785,7 +1780,11 @@ public class UserManager {
     /**
      * Specifies whether the user is allowed to modify default apps in settings.
      *
-     * <p>This restriction can be set by device or profile owner.
+     * <p>A device owner and a profile owner can set this restriction. When it is set by a
+     * device owner, it applies globally - i.e., modifying of default apps in Settings for all
+     * users is disallowed. When it is set by a profile owner on the primary user or by a profile
+     * owner of an organization-owned managed profile on the parent profile, modifying of
+     * default apps in Settings for the primary user is disallowed.
      *
      * <p>The default value is <code>false</code>.
      *

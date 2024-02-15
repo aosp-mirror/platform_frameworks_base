@@ -29,6 +29,8 @@ import java.util.concurrent.RejectedExecutionException;
  *
  * @hide
  */
+// Exported to Mainline modules; cannot use annotations
+// @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class HandlerExecutor implements Executor {
     private final Handler mHandler;
 

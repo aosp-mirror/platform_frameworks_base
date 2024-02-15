@@ -19,6 +19,9 @@ package com.android.systemui.statusbar.policy;
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 
+import android.Manifest;
+import android.annotation.FlaggedApi;
+import android.annotation.RequiresPermission;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 import android.hardware.SensorPrivacyManager.Sources.Source;
@@ -27,6 +30,8 @@ import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.util.Set;
 
@@ -99,6 +104,13 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
     @Override
     public boolean requiresAuthentication() {
         return mSensorPrivacyManager.requiresAuthentication();
+    }
+
+    @Override
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
+    public boolean isCameraPrivacyEnabled(String packageName) {
+        return mSensorPrivacyManager.isCameraPrivacyEnabled(packageName);
     }
 
     @Override

@@ -232,7 +232,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_UNMUTE_MICROPHONE,
             UserManager.DISALLOW_UNMUTE_DEVICE,
             UserManager.DISALLOW_CAMERA,
-            UserManager.DISALLOW_ASSIST_CONTENT
+            UserManager.DISALLOW_ASSIST_CONTENT,
+            UserManager.DISALLOW_CONFIG_DEFAULT_APPS
     );
 
     /**
@@ -288,7 +289,8 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_SMS,
                     UserManager.DISALLOW_USB_FILE_TRANSFER,
                     UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
-                    UserManager.DISALLOW_UNMUTE_MICROPHONE
+                    UserManager.DISALLOW_UNMUTE_MICROPHONE,
+                    UserManager.DISALLOW_CONFIG_DEFAULT_APPS
     );
 
     /**

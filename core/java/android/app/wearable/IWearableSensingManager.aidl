@@ -17,6 +17,7 @@
 package android.app.wearable;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
@@ -38,4 +39,8 @@ interface IWearableSensingManager {
      void registerDataRequestObserver(int dataType, in PendingIntent dataRequestPendingIntent, in RemoteCallback statusCallback);
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
      void unregisterDataRequestObserver(int dataType, in PendingIntent dataRequestPendingIntent, in RemoteCallback statusCallback);
+     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
+     void startHotwordRecognition(in ComponentName targetVisComponentName, in RemoteCallback statusCallback);
+     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
+     void stopHotwordRecognition(in RemoteCallback statusCallback);
 }

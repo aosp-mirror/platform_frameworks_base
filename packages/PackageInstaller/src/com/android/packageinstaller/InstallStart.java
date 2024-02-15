@@ -81,6 +81,12 @@ public class InstallStart extends Activity {
         String callingPackage = getCallingPackage();
         String callingAttributionTag = null;
 
+        // Uid of the source package, coming from ActivityManager
+        int callingUid = getLaunchedFromUid();
+        if (callingUid == Process.INVALID_UID) {
+            Log.w(TAG, "Could not determine the launching uid.");
+        }
+
         final boolean isSessionInstall =
                 PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(intent.getAction())
                         || PackageInstaller.ACTION_CONFIRM_INSTALL.equals(intent.getAction());
@@ -90,24 +96,24 @@ public class InstallStart extends Activity {
         final int sessionId = (isSessionInstall
                 ? intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
                 : -1);
+        int originatingUidFromSession = callingUid;
         if (callingPackage == null && sessionId != -1) {
             PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
             PackageInstaller.SessionInfo sessionInfo = packageInstaller.getSessionInfo(sessionId);
-            callingPackage = (sessionInfo != null) ? sessionInfo.getInstallerPackageName() : null;
-            callingAttributionTag =
-                    (sessionInfo != null) ? sessionInfo.getInstallerAttributionTag() : null;
+            if (sessionInfo != null) {
+                callingPackage = sessionInfo.getInstallerPackageName();
+                callingAttributionTag = sessionInfo.getInstallerAttributionTag();
+                originatingUidFromSession = sessionInfo.getOriginatingUid();
+            }
         }
 
         final ApplicationInfo sourceInfo = getSourceInfo(callingPackage);
-        // Uid of the source package, coming from ActivityManager
-        int callingUid = getLaunchedFromUid();
-        if (callingUid == Process.INVALID_UID) {
-            Log.e(TAG, "Could not determine the launching uid.");
-        }
+
         // Uid of the source package, with a preference to uid from ApplicationInfo
         final int originatingUid = sourceInfo != null ? sourceInfo.uid : callingUid;
 
         if (callingUid == Process.INVALID_UID && sourceInfo == null) {
+            Log.e(TAG, "Cannot determine caller since UID is invalid and sourceInfo is null");
             mAbortInstall = true;
         }
 
@@ -127,7 +133,7 @@ public class InstallStart extends Activity {
                 && originatingUid != Process.INVALID_UID) {
             final int targetSdkVersion = getMaxTargetSdkVersionForUid(this, originatingUid);
             if (targetSdkVersion < 0) {
-                Log.w(TAG, "Cannot get target sdk version for uid " + originatingUid);
+                Log.e(TAG, "Cannot get target sdk version for uid " + originatingUid);
                 // Invalid originating uid supplied. Abort install.
                 mAbortInstall = true;
             } else if (targetSdkVersion >= Build.VERSION_CODES.O && !isUidRequestingPermission(
@@ -139,6 +145,8 @@ public class InstallStart extends Activity {
         }
 
         if (sessionId != -1 && !isCallerSessionOwner(originatingUid, sessionId)) {
+            Log.e(TAG, "UID " + originatingUid + " is not the owner of session " +
+                sessionId);
             mAbortInstall = true;
         }
 
@@ -178,6 +186,8 @@ public class InstallStart extends Activity {
                 callingAttributionTag);
         nextActivity.putExtra(PackageInstallerActivity.EXTRA_ORIGINAL_SOURCE_INFO, sourceInfo);
         nextActivity.putExtra(Intent.EXTRA_ORIGINATING_UID, originatingUid);
+        nextActivity.putExtra(PackageInstallerActivity.EXTRA_ORIGINATING_UID_FROM_SESSION_INFO,
+            originatingUidFromSession);
 
         if (isSessionInstall) {
             nextActivity.setClass(this, PackageInstallerActivity.class);

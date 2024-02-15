@@ -134,6 +134,13 @@ final class PolicyDefinition<V> {
                         permissionName));
     }
 
+    static PolicyDefinition<Boolean> SECURITY_LOGGING = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.SECURITY_LOGGING_POLICY),
+            TRUE_MORE_RESTRICTIVE,
+            POLICY_FLAG_GLOBAL_ONLY_POLICY,
+            PolicyEnforcerCallbacks::enforceSecurityLogging,
+            new BooleanPolicySerializer());
+
     static PolicyDefinition<LockTaskPolicy> LOCK_TASK = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyIdentifiers.LOCK_TASK_POLICY),
             new TopPriority<>(List.of(
@@ -356,6 +363,8 @@ final class PolicyDefinition<V> {
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY,
                 GENERIC_PERMISSION_GRANT);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.SECURITY_LOGGING_POLICY,
+                SECURITY_LOGGING);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.LOCK_TASK_POLICY, LOCK_TASK);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY,
                 USER_CONTROLLED_DISABLED_PACKAGES);

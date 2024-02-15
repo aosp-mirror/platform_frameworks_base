@@ -59,6 +59,24 @@ class AodToLockscreenTransitionViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun lockscreenAlphaStartsFromViewStateAccessorAlpha() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor(alpha = { 0.5f })
+            val alpha by collectLastValue(underTest.lockscreenAlpha(viewState))
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+
+            repository.sendTransitionStep(step(0f))
+            assertThat(alpha).isEqualTo(0.5f)
+
+            repository.sendTransitionStep(step(0.5f))
+            assertThat(alpha).isEqualTo(0.75f)
+
+            repository.sendTransitionStep(step(1f))
+            assertThat(alpha).isEqualTo(1f)
+        }
+
+    @Test
     fun deviceEntryBackgroundView_udfps_alphaFadeIn() =
         testScope.runTest {
             fingerprintPropertyRepository.supportsUdfps()

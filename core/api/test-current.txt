@@ -463,7 +463,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void togglePanel();
   }
 
-  public static final class StatusBarManager.DisableInfo {
+  public static final class StatusBarManager.DisableInfo implements android.os.Parcelable {
     method public boolean isRotationSuggestionDisabled();
   }
 
@@ -1519,6 +1519,7 @@ package android.hardware {
 
   public final class SensorPrivacyManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
+    method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacyState(int, int, int);
   }
 
   public static class SensorPrivacyManager.Sources {
@@ -1836,6 +1837,14 @@ package android.hardware.soundtrigger {
 
   public static class SoundTrigger.RecognitionEvent {
     ctor public SoundTrigger.RecognitionEvent(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[], long);
+  }
+
+}
+
+package android.hardware.usb {
+
+  public final class UsbPort {
+    method @FlaggedApi("android.hardware.usb.flags.enable_is_mode_change_supported_api") @RequiresPermission(android.Manifest.permission.MANAGE_USB) public boolean isModeChangeSupported();
   }
 
 }
@@ -2269,9 +2278,7 @@ package android.os {
   }
 
   public final class BugreportParams {
-    field @FlaggedApi("android.app.admin.flags.onboarding_bugreport_v2_enabled") public static final int BUGREPORT_FLAG_KEEP_BUGREPORT_ON_RETRIEVAL = 4; // 0x4
     field @FlaggedApi("android.os.bugreport_mode_max_value") public static final int BUGREPORT_MODE_MAX_VALUE = 7; // 0x7
-    field @FlaggedApi("android.app.admin.flags.onboarding_bugreport_v2_enabled") public static final int BUGREPORT_MODE_ONBOARDING = 7; // 0x7
   }
 
   public class Build {
@@ -3164,6 +3171,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setDataFormat(int);
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setHalEventReceivedMillis(long);
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setHotwordDetectedResult(@NonNull android.service.voice.HotwordDetectedResult);
+    method @FlaggedApi("android.app.wearable.enable_hotword_wearable_sensing_api") @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setIsRecognitionStopped(boolean);
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setKeyphraseRecognitionExtras(@NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
 

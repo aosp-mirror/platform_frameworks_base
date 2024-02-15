@@ -104,6 +104,7 @@ import java.io.UnsupportedEncodingException;
  * correctly matched pairs of #start and #end calls, and issue
  * errors if they are not matched.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ProtoOutputStream extends ProtoStream {
     /**
      * @hide

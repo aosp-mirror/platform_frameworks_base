@@ -58,7 +58,7 @@ public class UsbPortStatusTest {
                 isSinkDeviceRoleSupported,
                 isSinkHostRoleSupported,
                 isSourceDeviceRoleSupported,
-                isSinkHostRoleSupported);
+                isSourceHostRoleSupported);
         UsbPortStatus usbPortStatus = new UsbPortStatus(
                 MODE_NONE,
                 POWER_ROLE_NONE,

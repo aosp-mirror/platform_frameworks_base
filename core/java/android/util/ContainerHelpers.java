@@ -16,6 +16,7 @@
 
 package android.util;
 
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 class ContainerHelpers {
 
     // This is Arrays.binarySearch(), but doesn't do any argument validation.

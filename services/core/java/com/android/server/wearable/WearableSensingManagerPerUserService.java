@@ -16,6 +16,8 @@
 
 package com.android.server.wearable;
 
+import static android.service.wearable.WearableSensingService.HOTWORD_AUDIO_STREAM_BUNDLE_KEY;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,18 +30,23 @@ import android.companion.CompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.HotwordAudioStream;
+import android.service.voice.VoiceInteractionManagerInternal;
+import android.service.voice.VoiceInteractionManagerInternal.WearableHotwordDetectionCallback;
 import android.system.OsConstants;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.io.IOException;
@@ -58,6 +65,7 @@ final class WearableSensingManagerPerUserService extends
     @VisibleForTesting
     RemoteWearableSensingService mRemoteService;
 
+    @Nullable private VoiceInteractionManagerInternal mVoiceInteractionManagerInternal;
     private ComponentName mComponentName;
     private final Object mSecureChannelLock = new Object();
 
@@ -97,6 +105,15 @@ final class WearableSensingManagerPerUserService extends
             mRemoteService = new RemoteWearableSensingService(
                     getContext(), mComponentName, getUserId());
         }
+    }
+
+    @GuardedBy("mLock")
+    private boolean ensureVoiceInteractionManagerInternalInitiated() {
+        if (mVoiceInteractionManagerInternal == null) {
+            mVoiceInteractionManagerInternal =
+                    LocalServices.getService(VoiceInteractionManagerInternal.class);
+        }
+        return mVoiceInteractionManagerInternal != null;
     }
 
     /**
@@ -333,5 +350,110 @@ final class WearableSensingManagerPerUserService extends
             mRemoteService.unregisterDataRequestObserver(
                     dataType, dataRequestObserverId, packageName, statusCallback);
         }
+    }
+
+    /** Handles starting hotword listening. */
+    public void onStartHotwordRecognition(
+            ComponentName targetVisComponentName, RemoteCallback statusCallback) {
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            if (!ensureVoiceInteractionManagerInternalInitiated()) {
+                Slog.w(TAG, "Voice interaction manager is not available at this moment.");
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            ensureRemoteServiceInitiated();
+            mRemoteService.startHotwordRecognition(
+                    createWearableHotwordCallback(targetVisComponentName), statusCallback);
+        }
+    }
+
+    /** Handles stopping hotword listening. */
+    public void onStopHotwordRecognition(RemoteCallback statusCallback) {
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            ensureRemoteServiceInitiated();
+            mRemoteService.stopHotwordRecognition(statusCallback);
+        }
+    }
+
+    private void onValidatedByHotwordDetectionService() {
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Wearable sensing service is not available at this moment.");
+                return;
+            }
+            ensureRemoteServiceInitiated();
+            mRemoteService.onValidatedByHotwordDetectionService();
+        }
+    }
+
+    private void stopActiveHotwordAudio() {
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Wearable sensing service is not available at this moment.");
+                return;
+            }
+            ensureRemoteServiceInitiated();
+            mRemoteService.stopActiveHotwordAudio();
+        }
+    }
+
+    private RemoteCallback createWearableHotwordCallback(ComponentName targetVisComponentName) {
+        return new RemoteCallback(
+                result -> {
+                    HotwordAudioStream hotwordAudioStream =
+                            result.getParcelable(
+                                    HOTWORD_AUDIO_STREAM_BUNDLE_KEY, HotwordAudioStream.class);
+                    if (hotwordAudioStream == null) {
+                        Slog.w(TAG, "No hotword audio stream received, unable to process hotword.");
+                        return;
+                    }
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        mVoiceInteractionManagerInternal.startListeningFromWearable(
+                                hotwordAudioStream.getAudioStreamParcelFileDescriptor(),
+                                hotwordAudioStream.getAudioFormat(),
+                                hotwordAudioStream.getMetadata(),
+                                targetVisComponentName,
+                                getUserId(),
+                                createHotwordDetectionCallback());
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                });
+    }
+
+    private WearableHotwordDetectionCallback createHotwordDetectionCallback() {
+        return new WearableHotwordDetectionCallback() {
+            @Override
+            public void onDetected() {
+                Slog.i(TAG, "hotwordDetectionCallback onDetected.");
+                onValidatedByHotwordDetectionService();
+            }
+
+            @Override
+            public void onRejected() {
+                Slog.i(TAG, "hotwordDetectionCallback onRejected.");
+                stopActiveHotwordAudio();
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Slog.i(TAG, "hotwordDetectionCallback onError. ErrorMessage: " + errorMessage);
+                stopActiveHotwordAudio();
+            }
+        };
     }
 }

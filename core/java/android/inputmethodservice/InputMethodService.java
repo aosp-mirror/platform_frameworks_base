@@ -51,6 +51,10 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
+import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_NO_TEXT_RECOGNIZED;
+import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_OTHER;
+import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
+import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -58,6 +62,7 @@ import android.annotation.AnyThread;
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -89,6 +94,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -97,6 +103,7 @@ import android.provider.Settings;
 import android.text.InputType;
 import android.text.Layout;
 import android.text.Spannable;
+import android.text.TextUtils;
 import android.text.method.MovementMethod;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -123,6 +130,7 @@ import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.ConnectionlessHandwritingCallback;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
@@ -151,6 +159,7 @@ import android.window.WindowMetricsHelper;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethod;
@@ -174,6 +183,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalInt;
+import java.util.concurrent.Executor;
 
 /**
  * InputMethodService provides a standard implementation of an InputMethod,
@@ -665,6 +675,12 @@ public class InputMethodService extends AbstractInputMethodService {
     /** Stylus handwriting Ink window. */
     private InkWindow mInkWindow;
 
+    private IConnectionlessHandwritingCallback mConnectionlessHandwritingCallback;
+    private boolean mIsConnectionlessHandwritingForDelegation;
+    // Holds the recognized text from a connectionless handwriting session which can later be
+    // committed by commitHandwritingDelegationTextIfAvailable().
+    private CharSequence mHandwritingDelegationText;
+
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
      * The original app window token is passed from client app window.
@@ -1017,7 +1033,10 @@ public class InputMethodService extends AbstractInputMethodService {
          * @hide
          */
         @Override
-        public void canStartStylusHandwriting(int requestId) {
+        public void canStartStylusHandwriting(int requestId,
+                @Nullable IConnectionlessHandwritingCallback connectionlessCallback,
+                @Nullable CursorAnchorInfo cursorAnchorInfo,
+                boolean isConnectionlessForDelegation) {
             if (DEBUG) Log.v(TAG, "canStartStylusHandwriting()");
             if (mHandwritingRequestId.isPresent()) {
                 Log.d(TAG, "There is an ongoing Handwriting session. ignoring.");
@@ -1034,7 +1053,24 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             // reset flag as it's not relevant after onStartStylusHandwriting().
             mOnPreparedStylusHwCalled = false;
-            if (onStartStylusHandwriting()) {
+            if (connectionlessCallback != null) {
+                if (onStartConnectionlessStylusHandwriting(
+                        InputType.TYPE_CLASS_TEXT, cursorAnchorInfo)) {
+                    mConnectionlessHandwritingCallback = connectionlessCallback;
+                    mIsConnectionlessHandwritingForDelegation = isConnectionlessForDelegation;
+                    cancelStylusWindowIdleTimeout();
+                    mPrivOps.onStylusHandwritingReady(requestId, Process.myPid());
+                } else {
+                    Log.i(TAG, "IME is not ready "
+                            + "or doesn't currently support connectionless handwriting");
+                    try {
+                        connectionlessCallback.onError(
+                                CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Couldn't send connectionless handwriting error result", e);
+                    }
+                }
+            } else if (onStartStylusHandwriting()) {
                 cancelStylusWindowIdleTimeout();
                 mPrivOps.onStylusHandwritingReady(requestId, Process.myPid());
             } else {
@@ -1086,6 +1122,24 @@ public class InputMethodService extends AbstractInputMethodService {
                 }
             };
             scheduleHandwritingSessionTimeout();
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void commitHandwritingDelegationTextIfAvailable() {
+            InputMethodService.this.commitHandwritingDelegationTextIfAvailable();
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void discardHandwritingDelegationText() {
+            InputMethodService.this.discardHandwritingDelegationText();
         }
 
         /**
@@ -2581,6 +2635,32 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
+     * Called when an app requests to start a connectionless stylus handwriting session using one of
+     * {@link InputMethodManager#startConnectionlessStylusHandwriting(View, CursorAnchorInfo,
+     * Executor, ConnectionlessHandwritingCallback)}, {@link
+     * InputMethodManager#startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo,
+     * Executor, ConnectionlessHandwritingCallback)}, or {@link
+     * InputMethodManager#startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo,
+     * String, Executor, ConnectionlessHandwritingCallback)}.
+     *
+     * <p>A connectionless stylus handwriting session differs from a regular session in that an
+     * input connection is not used to communicate with a text editor. Instead, the recognised text
+     * is delivered when the IME finishes the connectionless session using {@link
+     * #finishConnectionlessStylusHandwriting(CharSequence)}.
+     *
+     * <p>If the IME can start the connectionless handwriting session, it should return {@code
+     * true}, ensure its inking views are attached to the {@link #getStylusHandwritingWindow()}, and
+     * handle stylus input received from {@link #onStylusHandwritingMotionEvent(MotionEvent)} on the
+     * {@link #getStylusHandwritingWindow()}.
+     */
+    @FlaggedApi(FLAG_CONNECTIONLESS_HANDWRITING)
+    public boolean onStartConnectionlessStylusHandwriting(
+            int inputType, @Nullable CursorAnchorInfo cursorAnchorInfo) {
+        // Intentionally empty
+        return false;
+    }
+
+    /**
      * Called after {@link #onStartStylusHandwriting()} returns {@code true} for every Stylus
      * {@link MotionEvent}.
      * By default, this method forwards all {@link MotionEvent}s to the
@@ -2647,16 +2727,19 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * Finish the current stylus handwriting session.
      *
-     * This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
+     * <p>This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
      * stylus {@code MotionEvent}s.
      *
-     * Note for IME developers: Call this method at any time to finish current handwriting session.
-     * Generally, this should be invoked after a short timeout, giving the user enough time
+     * <p>Note for IME developers: Call this method at any time to finish the current handwriting
+     * session. Generally, this should be invoked after a short timeout, giving the user enough time
      * to start the next stylus stroke, if any. By default, system will time-out after few seconds.
      * To override default timeout, use {@link #setStylusHandwritingSessionTimeout(Duration)}.
      *
-     * Handwriting session will be finished by framework on next {@link #onFinishInput()}.
+     * <p>Handwriting session will be finished by framework on next {@link #onFinishInput()}.
      */
+    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
+    // <p>Connectionless handwriting sessions should be finished using {@link
+    // #finishConnectionlessStylusHandwriting(CharSequence)}.
     public final void finishStylusHandwriting() {
         if (DEBUG) Log.v(TAG, "finishStylusHandwriting()");
         if (mInkWindow == null) {
@@ -2677,9 +2760,68 @@ public class InputMethodService extends AbstractInputMethodService {
         mHandwritingEventReceiver = null;
         mInkWindow.hide(false /* remove */);
 
+        if (mConnectionlessHandwritingCallback != null) {
+            Log.i(TAG, "Connectionless handwriting session did not complete successfully");
+            try {
+                mConnectionlessHandwritingCallback.onError(CONNECTIONLESS_HANDWRITING_ERROR_OTHER);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Couldn't send connectionless handwriting error result", e);
+            }
+            mConnectionlessHandwritingCallback = null;
+        }
+        mIsConnectionlessHandwritingForDelegation = false;
+
         mPrivOps.resetStylusHandwriting(requestId);
         mOnPreparedStylusHwCalled = false;
         onFinishStylusHandwriting();
+    }
+
+    /**
+     * Finishes the current connectionless stylus handwriting session and delivers the result.
+     *
+     * <p>This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
+     * stylus {@code MotionEvent}s.
+     *
+     * <p>Note for IME developers: Call this method at any time to finish the current handwriting
+     * session. Generally, this should be invoked after a short timeout, giving the user enough time
+     * to start the next stylus stroke, if any. By default, system will time-out after few seconds.
+     * To override default timeout, use {@link #setStylusHandwritingSessionTimeout(Duration)}.
+     */
+    @FlaggedApi(FLAG_CONNECTIONLESS_HANDWRITING)
+    public final void finishConnectionlessStylusHandwriting(@Nullable CharSequence text) {
+        if (DEBUG) Log.v(TAG, "finishConnectionlessStylusHandwriting()");
+        if (mConnectionlessHandwritingCallback != null) {
+            try {
+                if (!TextUtils.isEmpty(text)) {
+                    mConnectionlessHandwritingCallback.onResult(text);
+                    if (mIsConnectionlessHandwritingForDelegation) {
+                        mHandwritingDelegationText = text;
+                    }
+                } else {
+                    mConnectionlessHandwritingCallback.onError(
+                            CONNECTIONLESS_HANDWRITING_ERROR_NO_TEXT_RECOGNIZED);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Couldn't send connectionless handwriting result", e);
+            }
+            mConnectionlessHandwritingCallback = null;
+        }
+        finishStylusHandwriting();
+    }
+
+    private void commitHandwritingDelegationTextIfAvailable() {
+        if (!TextUtils.isEmpty(mHandwritingDelegationText)) {
+            InputConnection ic = getCurrentInputConnection();
+            if (ic != null) {
+                // Place cursor after inserted text.
+                ic.commitText(mHandwritingDelegationText, /* newCursorPosition= */ 1);
+            }
+        }
+        mHandwritingDelegationText = null;
+    }
+
+    private void discardHandwritingDelegationText() {
+        mHandwritingDelegationText = null;
     }
 
     /**
