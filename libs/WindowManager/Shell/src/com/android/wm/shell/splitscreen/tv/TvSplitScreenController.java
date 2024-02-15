@@ -28,6 +28,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.LaunchAdjacentController;
+import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
@@ -79,6 +80,7 @@ public class TvSplitScreenController extends SplitScreenController {
             IconProvider iconProvider,
             Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
+            MultiInstanceHelper multiInstanceHelper,
             ShellExecutor mainExecutor,
             Handler mainHandler,
             SystemWindows systemWindows) {
@@ -86,7 +88,7 @@ public class TvSplitScreenController extends SplitScreenController {
                 syncQueue, rootTDAOrganizer, displayController, displayImeController,
                 displayInsetsController, null, transitions, transactionPool,
                 iconProvider, recentTasks, launchAdjacentController, Optional.empty(),
-                Optional.empty(), mainExecutor);
+                Optional.empty(), null /* stageCoordinator */, multiInstanceHelper, mainExecutor);
 
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
