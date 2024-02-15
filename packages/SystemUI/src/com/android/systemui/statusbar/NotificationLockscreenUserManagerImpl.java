@@ -749,7 +749,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 || isNotifUserRedacted;
 
         boolean notificationRequestsRedaction =
-                ent.getSbn().getNotification().visibility == Notification.VISIBILITY_PRIVATE;
+                ent.isNotificationVisibilityPrivate();
         boolean userForcesRedaction = packageHasVisibilityOverride(ent.getSbn().getKey());
 
         if (keyguardPrivateNotifications()) {
@@ -767,9 +767,7 @@ public class NotificationLockscreenUserManagerImpl implements
         }
         NotificationEntry entry = mCommonNotifCollectionLazy.get().getEntry(key);
         if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
-            return entry != null && entry.getRanking().getChannel() != null
-                    && entry.getRanking().getChannel().getLockscreenVisibility()
-                    == Notification.VISIBILITY_PRIVATE;
+            return entry != null && entry.isChannelVisibilityPrivate();
         } else {
             return entry != null
                     && entry.getRanking().getLockscreenVisibilityOverride()
