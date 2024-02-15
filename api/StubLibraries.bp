@@ -225,6 +225,7 @@ java_defaults {
     java_version: "1.8",
     compile_dex: true,
     visibility: ["//visibility:public"],
+    is_stubs_module: true,
 }
 
 java_defaults {
@@ -233,6 +234,7 @@ java_defaults {
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,
+    is_stubs_module: true,
 }
 
 java_defaults {
@@ -716,6 +718,7 @@ java_library {
         // with its own package-private android.annotation.Nullable.
         "private-stub-annotations-jar",
     ],
+    is_stubs_module: true,
 }
 
 java_genrule {
@@ -770,6 +773,7 @@ java_defaults {
         // annotations found, thus should exist inside android.jar.
         "private-stub-annotations-jar",
     ],
+    is_stubs_module: true,
 }
 
 // Listing of API domains contribution and dependencies per API surfaces
