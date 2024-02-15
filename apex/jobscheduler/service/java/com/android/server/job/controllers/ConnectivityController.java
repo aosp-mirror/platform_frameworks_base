@@ -21,6 +21,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_SATELLITE;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
@@ -139,8 +140,9 @@ public final class ConnectivityController extends RestrictingController implemen
     static final SparseIntArray sNetworkTransportAffinities = new SparseIntArray();
     static {
         sNetworkTransportAffinities.put(TRANSPORT_CELLULAR, TRANSPORT_AFFINITY_AVOID);
-        sNetworkTransportAffinities.put(TRANSPORT_WIFI, TRANSPORT_AFFINITY_PREFER);
         sNetworkTransportAffinities.put(TRANSPORT_ETHERNET, TRANSPORT_AFFINITY_PREFER);
+        sNetworkTransportAffinities.put(TRANSPORT_SATELLITE, TRANSPORT_AFFINITY_AVOID);
+        sNetworkTransportAffinities.put(TRANSPORT_WIFI, TRANSPORT_AFFINITY_PREFER);
     }
 
     private final CcConfig mCcConfig;
