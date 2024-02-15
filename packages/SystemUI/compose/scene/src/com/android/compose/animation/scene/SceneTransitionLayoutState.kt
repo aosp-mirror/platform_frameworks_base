@@ -101,13 +101,30 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
     ): TransitionState.Transition?
 }
 
-/** Return a [MutableSceneTransitionLayoutState] initially idle at [initialScene]. */
+/**
+ * Return a [MutableSceneTransitionLayoutState] initially idle at [initialScene].
+ *
+ * @param initialScene the initial scene to which this state is initialized.
+ * @param transitions the [SceneTransitions] used when this state is transitioning between scenes.
+ * @param canChangeScene whether we can transition to the given scene. This is called when the user
+ *   commits a transition to a new scene because of a [UserAction]. If [canChangeScene] returns
+ *   `true`, then the gesture will be committed and we will animate to the other scene. Otherwise,
+ *   the gesture will be cancelled and we will animate back to the current scene.
+ * @param stateLinks the [StateLink] connecting this [SceneTransitionLayoutState] to other
+ *   [SceneTransitionLayoutState]s.
+ */
 fun MutableSceneTransitionLayoutState(
     initialScene: SceneKey,
     transitions: SceneTransitions = SceneTransitions.Empty,
+    canChangeScene: (SceneKey) -> Boolean = { true },
     stateLinks: List<StateLink> = emptyList(),
 ): MutableSceneTransitionLayoutState {
-    return MutableSceneTransitionLayoutStateImpl(initialScene, transitions, stateLinks)
+    return MutableSceneTransitionLayoutStateImpl(
+        initialScene,
+        transitions,
+        canChangeScene,
+        stateLinks,
+    )
 }
 
 /**
@@ -120,18 +137,32 @@ fun MutableSceneTransitionLayoutState(
  *   This is called when the user commits a transition to a new scene because of a [UserAction], for
  *   instance by triggering back navigation or by swiping to a new scene.
  * @param transitions the definition of the transitions used to animate a change of scene.
+ * @param canChangeScene whether we can transition to the given scene. This is called when the user
+ *   commits a transition to a new scene because of a [UserAction]. If [canChangeScene] returns
+ *   `true`, then [onChangeScene] will be called right afterwards with the same [SceneKey]. If it
+ *   returns `false`, the user action will be cancelled and we will animate back to the current
+ *   scene.
+ * @param stateLinks the [StateLink] connecting this [SceneTransitionLayoutState] to other
+ *   [SceneTransitionLayoutState]s.
  */
 @Composable
 fun updateSceneTransitionLayoutState(
     currentScene: SceneKey,
     onChangeScene: (SceneKey) -> Unit,
     transitions: SceneTransitions = SceneTransitions.Empty,
+    canChangeScene: (SceneKey) -> Boolean = { true },
     stateLinks: List<StateLink> = emptyList(),
 ): SceneTransitionLayoutState {
     return remember {
-            HoistedSceneTransitionLayoutScene(currentScene, transitions, onChangeScene, stateLinks)
+            HoistedSceneTransitionLayoutScene(
+                currentScene,
+                transitions,
+                onChangeScene,
+                canChangeScene,
+                stateLinks,
+            )
         }
-        .apply { update(currentScene, onChangeScene, transitions, stateLinks) }
+        .apply { update(currentScene, onChangeScene, canChangeScene, transitions, stateLinks) }
 }
 
 @Stable
@@ -207,6 +238,9 @@ internal abstract class BaseSceneTransitionLayoutState(
     internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
 
     private val activeTransitionLinks = mutableMapOf<StateLink, LinkedTransition>()
+
+    /** Whether we can transition to the given [scene]. */
+    internal abstract fun canChangeScene(scene: SceneKey): Boolean
 
     /**
      * Called when the [current scene][TransitionState.currentScene] should be changed to [scene].
@@ -334,21 +368,26 @@ internal class HoistedSceneTransitionLayoutScene(
     initialScene: SceneKey,
     override var transitions: SceneTransitions,
     private var changeScene: (SceneKey) -> Unit,
+    private var canChangeScene: (SceneKey) -> Boolean,
     stateLinks: List<StateLink> = emptyList(),
 ) : BaseSceneTransitionLayoutState(initialScene, stateLinks) {
     private val targetSceneChannel = Channel<SceneKey>(Channel.CONFLATED)
 
-    override fun CoroutineScope.onChangeScene(scene: SceneKey) = changeScene(scene)
+    override fun canChangeScene(scene: SceneKey): Boolean = canChangeScene.invoke(scene)
+
+    override fun CoroutineScope.onChangeScene(scene: SceneKey) = changeScene.invoke(scene)
 
     @Composable
     fun update(
         currentScene: SceneKey,
         onChangeScene: (SceneKey) -> Unit,
+        canChangeScene: (SceneKey) -> Boolean,
         transitions: SceneTransitions,
         stateLinks: List<StateLink>,
     ) {
         SideEffect {
             this.changeScene = onChangeScene
+            this.canChangeScene = canChangeScene
             this.transitions = transitions
             this.stateLinks = stateLinks
 
@@ -374,6 +413,7 @@ internal class HoistedSceneTransitionLayoutScene(
 internal class MutableSceneTransitionLayoutStateImpl(
     initialScene: SceneKey,
     override var transitions: SceneTransitions,
+    private val canChangeScene: (SceneKey) -> Boolean = { true },
     stateLinks: List<StateLink> = emptyList(),
 ) : MutableSceneTransitionLayoutState, BaseSceneTransitionLayoutState(initialScene, stateLinks) {
     override fun setTargetScene(
@@ -387,6 +427,8 @@ internal class MutableSceneTransitionLayoutStateImpl(
             transitionKey = transitionKey,
         )
     }
+
+    override fun canChangeScene(scene: SceneKey): Boolean = canChangeScene.invoke(scene)
 
     override fun CoroutineScope.onChangeScene(scene: SceneKey) {
         setTargetScene(scene, coroutineScope = this)
