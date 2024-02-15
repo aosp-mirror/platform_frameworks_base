@@ -273,7 +273,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 outerwidth /* ellipsizedWidth */, null /* ellipsize */, 1 /* maxLines */,
                 BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null /* leftIndents */,
                 null /* rightIndents */, JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE, false,
-                null);
+                false /* shiftDrawingOffsetForStartOverhang */, null);
 
         mEllipsizedWidth = outerwidth;
         mEllipsizedStart = 0;
@@ -346,7 +346,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 ellipsizedWidth, ellipsize, 1 /* maxLines */,
                 BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null /* leftIndents */,
                 null /* rightIndents */, JUSTIFICATION_MODE_NONE,
-                LineBreakConfig.NONE, metrics, false /* useBoundsForWidth */, null);
+                LineBreakConfig.NONE, metrics, false /* useBoundsForWidth */,
+                false /* shiftDrawingOffsetForStartOverhang */, null);
     }
 
     /** @hide */
@@ -363,12 +364,14 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             TextUtils.TruncateAt ellipsize,
             Metrics metrics,
             boolean useBoundsForWidth,
+            boolean shiftDrawingOffsetForStartOverhang,
             @Nullable Paint.FontMetrics minimumFontMetrics) {
         this(text, paint, width, align, TextDirectionHeuristics.LTR,
                 spacingMult, spacingAdd, includePad, fallbackLineSpacing, ellipsizedWidth,
                 ellipsize, 1 /* maxLines */, Layout.BREAK_STRATEGY_SIMPLE,
                 Layout.HYPHENATION_FREQUENCY_NONE, null, null, Layout.JUSTIFICATION_MODE_NONE,
-                LineBreakConfig.NONE, metrics, useBoundsForWidth, minimumFontMetrics);
+                LineBreakConfig.NONE, metrics, useBoundsForWidth,
+                shiftDrawingOffsetForStartOverhang, minimumFontMetrics);
     }
 
     /* package */ BoringLayout(
@@ -392,12 +395,14 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             LineBreakConfig lineBreakConfig,
             Metrics metrics,
             boolean useBoundsForWidth,
+            boolean shiftDrawingOffsetForStartOverhang,
             @Nullable Paint.FontMetrics minimumFontMetrics) {
 
         super(text, paint, width, align, textDir, spacingMult, spacingAdd, includePad,
                 fallbackLineSpacing, ellipsizedWidth, ellipsize, maxLines, breakStrategy,
                 hyphenationFrequency, leftIndents, rightIndents, justificationMode,
-                lineBreakConfig, useBoundsForWidth, minimumFontMetrics);
+                lineBreakConfig, useBoundsForWidth, shiftDrawingOffsetForStartOverhang,
+                minimumFontMetrics);
 
 
         boolean trust;
@@ -712,7 +717,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                      int cursorOffset) {
         if (mDirect != null && highlight == null) {
             float leftShift = 0;
-            if (getUseBoundsForWidth()) {
+            if (getUseBoundsForWidth() && getShiftDrawingOffsetForStartOverhang()) {
                 RectF drawingRect = computeDrawingBoundingBox();
                 if (drawingRect.left < 0) {
                     leftShift = -drawingRect.left;

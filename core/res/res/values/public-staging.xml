@@ -163,6 +163,8 @@
     <public name="defaultToObserveMode"/>
     <!-- @FlaggedApi("android.security.asm_restrictions_enabled") -->
     <public name="allowCrossUidActivitySwitchFromBelow"/>
+    <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+    <public name="shiftDrawingOffsetForStartOverhang" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">
