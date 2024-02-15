@@ -582,6 +582,8 @@ applications that come with the platform
         <permission name="android.permission.READ_BLOCKED_NUMBERS" />
         <!-- Permission required for CTS test - PackageManagerTest -->
         <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
+        <!-- Permission required for CTS test CtsInputTestCases -->
+        <permission name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

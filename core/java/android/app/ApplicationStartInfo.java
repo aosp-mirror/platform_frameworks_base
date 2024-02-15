@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.icu.text.SimpleDateFormat;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -249,7 +250,7 @@ public final class ApplicationStartInfo implements Parcelable {
     private @StartType int mStartType;
 
     /**
-     * @see #getStartIntent
+     * @see #getIntent
      */
     private Intent mStartIntent;
 
@@ -257,6 +258,11 @@ public final class ApplicationStartInfo implements Parcelable {
      * @see #getLaunchMode
      */
     private @LaunchMode int mLaunchMode;
+
+    /**
+     * @see #wasForceStopped()
+     */
+    private boolean mWasForceStopped;
 
     /**
      * @hide *
@@ -427,6 +433,15 @@ public final class ApplicationStartInfo implements Parcelable {
     }
 
     /**
+     * @see #wasForceStopped()
+     * @param wasForceStopped whether the app had been force-stopped in the past
+     * @hide
+     */
+    public void setForceStopped(boolean wasForceStopped) {
+        mWasForceStopped = wasForceStopped;
+    }
+
+    /**
      * Current state of startup.
      *
      * Can be used to determine whether the object will have additional fields added as it may be
@@ -578,6 +593,20 @@ public final class ApplicationStartInfo implements Parcelable {
         return mLaunchMode;
     }
 
+    /**
+     * Informs whether this is the first process launch for an app since it was
+     * {@link ApplicationInfo#FLAG_STOPPED force-stopped} for some reason.
+     * This allows the app to know if it should re-register for any alarms, jobs and other callbacks
+     * that were cleared when the app was force-stopped.
+     *
+     * @return {@code true} if this is the first process launch of the app after having been
+     *      stopped, {@code false} otherwise.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_STAY_STOPPED)
+    public boolean wasForceStopped() {
+        return mWasForceStopped;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -603,6 +632,7 @@ public final class ApplicationStartInfo implements Parcelable {
         dest.writeInt(mStartType);
         dest.writeParcelable(mStartIntent, flags);
         dest.writeInt(mLaunchMode);
+        dest.writeBoolean(mWasForceStopped);
     }
 
     /** @hide */
@@ -622,6 +652,7 @@ public final class ApplicationStartInfo implements Parcelable {
         mStartType = other.mStartType;
         mStartIntent = other.mStartIntent;
         mLaunchMode = other.mLaunchMode;
+        mWasForceStopped = other.mWasForceStopped;
     }
 
     private ApplicationStartInfo(@NonNull Parcel in) {
@@ -643,6 +674,7 @@ public final class ApplicationStartInfo implements Parcelable {
         mStartIntent =
                 in.readParcelable(Intent.class.getClassLoader(), android.content.Intent.class);
         mLaunchMode = in.readInt();
+        mWasForceStopped = in.readBoolean();
     }
 
     private static String intern(@Nullable String source) {
@@ -720,6 +752,7 @@ public final class ApplicationStartInfo implements Parcelable {
             intentOut.close();
         }
         proto.write(ApplicationStartInfoProto.LAUNCH_MODE, mLaunchMode);
+        proto.write(ApplicationStartInfoProto.WAS_FORCE_STOPPED, mWasForceStopped);
         proto.end(token);
     }
 
@@ -799,6 +832,10 @@ public final class ApplicationStartInfo implements Parcelable {
                 case (int) ApplicationStartInfoProto.LAUNCH_MODE:
                     mLaunchMode = proto.readInt(ApplicationStartInfoProto.LAUNCH_MODE);
                     break;
+                case (int) ApplicationStartInfoProto.WAS_FORCE_STOPPED:
+                    mWasForceStopped = proto.readBoolean(
+                            ApplicationStartInfoProto.WAS_FORCE_STOPPED);
+                    break;
             }
         }
         proto.end(token);
@@ -823,6 +860,7 @@ public final class ApplicationStartInfo implements Parcelable {
                 .append(" reason=").append(reasonToString(mReason))
                 .append(" startType=").append(startTypeToString(mStartType))
                 .append(" launchMode=").append(mLaunchMode)
+                .append(" wasForceStopped=").append(mWasForceStopped)
                 .append('\n');
         if (mStartIntent != null) {
             sb.append(" intent=").append(mStartIntent.toString())
@@ -878,7 +916,7 @@ public final class ApplicationStartInfo implements Parcelable {
             && mDefiningUid == o.mDefiningUid && mReason == o.mReason
             && mStartupState == o.mStartupState && mStartType == o.mStartType
             && mLaunchMode == o.mLaunchMode && TextUtils.equals(mProcessName, o.mProcessName)
-            && timestampsEquals(o);
+            && timestampsEquals(o) && mWasForceStopped == o.mWasForceStopped;
     }
 
     @Override

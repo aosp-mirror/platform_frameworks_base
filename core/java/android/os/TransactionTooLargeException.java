@@ -54,6 +54,7 @@ import android.os.RemoteException;
  * later as needed.
  * </p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class TransactionTooLargeException extends RemoteException {
     public TransactionTooLargeException() {
         super();

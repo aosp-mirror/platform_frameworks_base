@@ -42,3 +42,10 @@ flag {
   # Referenced in WM where WM starts before DeviceConfig
   is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_arrow_icon_on_hover_when_clickable"
+    namespace: "toolkit"
+    description: "Enable default arrow icon when hovering on buttons or clickable widgets."
+    bug: "299269803"
+}

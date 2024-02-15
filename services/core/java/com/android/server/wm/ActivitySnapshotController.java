@@ -102,7 +102,7 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
                 Environment::getDataSystemCeDirectory);
         mPersister = new TaskSnapshotPersister(persistQueue, mPersistInfoProvider);
         mSnapshotLoader = new AppSnapshotLoader(mPersistInfoProvider);
-        initialize(new ActivitySnapshotCache(service));
+        initialize(new ActivitySnapshotCache());
 
         final boolean snapshotEnabled =
                 !service.mContext

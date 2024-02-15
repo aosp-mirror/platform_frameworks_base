@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
@@ -66,9 +67,6 @@ constructor(
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     private val keyguardClockViewModel: KeyguardClockViewModel,
 ) {
-    /** Alpha for elements that appear and move during the animation -> AOD */
-    val alpha: Flow<Float> = goneToAodTransitionViewModel.enterFromTopAnimationAlpha
-
     /** Horizontal translation for elements that need to apply anti-burn-in tactics. */
     fun translationX(
         params: BurnInParameters,
@@ -131,6 +129,9 @@ constructor(
         return combine(
             merge(
                     keyguardTransitionInteractor.transition(GONE, AOD).map { it.value },
+                    keyguardTransitionInteractor.transition(AOD, PRIMARY_BOUNCER).map {
+                        1f - it.value
+                    },
                     keyguardTransitionInteractor.transition(ALTERNATE_BOUNCER, AOD).map {
                         it.value
                     },

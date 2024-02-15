@@ -139,7 +139,7 @@ public class SurfaceInputTestActivity extends Activity {
         surface.unlockCanvasAndPost(c);
         WindowManager wm = getSystemService(WindowManager.class);
         wm.registerBatchedSurfaceControlInputReceiver(getDisplayId(),
-                attachedSurfaceControl.getHostToken(), mLocalSurfaceControl,
+                attachedSurfaceControl.getInputTransferToken(), mLocalSurfaceControl,
                 Choreographer.getInstance(), event -> {
                     Log.d(TAG, "onInputEvent-sc " + event);
                     return false;
@@ -160,7 +160,8 @@ public class SurfaceInputTestActivity extends Activity {
 
             WindowManager wm = getSystemService(WindowManager.class);
             wm.registerBatchedSurfaceControlInputReceiver(getDisplayId(),
-                    mLocalSurfaceView.getHostToken(), mLocalSurfaceView.getSurfaceControl(),
+                    mLocalSurfaceView.getRootSurfaceControl().getInputTransferToken(),
+                    mLocalSurfaceView.getSurfaceControl(),
                     Choreographer.getInstance(), event -> {
                         Log.d(TAG, "onInputEvent-local " + event);
                         return false;
@@ -210,7 +211,8 @@ public class SurfaceInputTestActivity extends Activity {
         }
         try {
             mIAttachEmbeddedWindow.attachEmbeddedSurfaceControl(mParentSurfaceControl,
-                    getDisplayId(), mRemoteSurfaceView.getHostToken());
+                    getDisplayId(),
+                    mRemoteSurfaceView.getRootSurfaceControl().getInputTransferToken());
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to load embedded SurfaceControl", e);
         }

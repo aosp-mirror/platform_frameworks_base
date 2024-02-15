@@ -811,18 +811,6 @@ public class CameraDeviceImpl extends CameraDevice
         }
     }
 
-    @Override
-    public CameraCharacteristics getSessionCharacteristics(
-            @NonNull SessionConfiguration sessionConfig) throws CameraAccessException,
-            UnsupportedOperationException, IllegalArgumentException {
-        synchronized (mInterfaceLock) {
-            checkIfCameraClosedOrInError();
-            CameraMetadataNative info = mRemoteDevice.getSessionCharacteristics(sessionConfig);
-
-            return new CameraCharacteristics(info);
-        }
-    }
-
     /**
      * For use by backwards-compatibility code only.
      */

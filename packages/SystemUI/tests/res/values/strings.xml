@@ -17,5 +17,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="test_content">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ultrices condimentum ultricies. Sed elementum at massa id sagittis. Nullam dictum massa lorem, nec ornare nunc pharetra vitae. Duis ultrices, felis eu condimentum congue, erat orci efficitur purus, ac rutrum odio lacus sed sapien. Suspendisse erat augue, eleifend eget auctor sagittis, porta eget nibh. Mauris pulvinar urna non justo condimentum, ut vehicula sapien finibus. Aliquam nibh magna, tincidunt ut viverra sed, placerat et turpis. Nam placerat, dui sed tincidunt consectetur, ante velit posuere mauris, tincidunt finibus velit lectus ac tortor. Cras eget lectus feugiat, porttitor velit nec, malesuada massa.</string>
-
+    <string name="test_a11y_shortcut_target_description">Test a11y shortcut target activity description</string>
+    <string name="test_a11y_shortcut_target_summary">Test a11y shortcut target activity summary</string>
+    <string name="test_a11y_shortcut_target_intro">Test a11y shortcut target activity intro</string>
 </resources>

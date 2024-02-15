@@ -20,10 +20,12 @@ import android.os.IBinder;
 import com.android.test.viewembed.IAttachEmbeddedWindowCallback;
 import android.view.WindowManager.LayoutParams;
 import android.view.SurfaceControl;
+import android.window.InputTransferToken;
 
 interface IAttachEmbeddedWindow {
     void attachEmbedded(IBinder hostToken, int width, int height, in IAttachEmbeddedWindowCallback callback);
     void relayout(in LayoutParams lp);
-    oneway void attachEmbeddedSurfaceControl(in SurfaceControl parentSurfaceControl, int displayId, IBinder hostToken);
+    oneway void attachEmbeddedSurfaceControl(in SurfaceControl parentSurfaceControl, int displayId,
+            in InputTransferToken inputTransferToken);
     oneway void tearDownEmbeddedSurfaceControl();
 }

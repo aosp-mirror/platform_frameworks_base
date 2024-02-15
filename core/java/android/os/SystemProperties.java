@@ -56,7 +56,8 @@ import java.util.function.Predicate;
  */
 @SystemApi
 @RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass("com.android.hoststubgen.nativesubstitution.SystemProperties_host")
+@RavenwoodNativeSubstitutionClass(
+        "com.android.platform.test.ravenwood.nativesubstitution.SystemProperties_host")
 public class SystemProperties {
     private static final String TAG = "SystemProperties";
     private static final boolean TRACK_KEY_ACCESS = false;

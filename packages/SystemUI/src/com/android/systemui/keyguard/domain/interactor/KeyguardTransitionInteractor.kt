@@ -56,7 +56,6 @@ class KeyguardTransitionInteractor
 constructor(
     @Application val scope: CoroutineScope,
     private val repository: KeyguardTransitionRepository,
-    private val keyguardInteractor: dagger.Lazy<KeyguardInteractor>,
     private val fromLockscreenTransitionInteractor: dagger.Lazy<FromLockscreenTransitionInteractor>,
     private val fromPrimaryBouncerTransitionInteractor:
         dagger.Lazy<FromPrimaryBouncerTransitionInteractor>,

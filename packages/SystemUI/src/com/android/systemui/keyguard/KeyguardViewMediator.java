@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard;
 
+import static android.app.StatusBarManager.DISABLE2_NONE;
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.provider.Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT;
 import static android.provider.Settings.System.LOCKSCREEN_SOUNDS_ENABLED;
@@ -689,18 +690,17 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             } else {
                                 resetStateLocked();
                             }
-                        } else {
-                            if (lastSimStateWasLocked && mShowing) {
-                                if (DEBUG_SIM_STATES) {
-                                    Log.d(TAG, "SIM moved to "
-                                            + "NOT_READY/ABSENT/UNKNOWN when the previous state "
-                                            + "was locked. Reset the state.");
-                                }
+                        }
+                        if (simState == TelephonyManager.SIM_STATE_ABSENT) {
+                            // MVNO SIMs can become transiently NOT_READY when switching networks,
+                            // so we should only lock when they are ABSENT.
+                            if (lastSimStateWasLocked) {
+                                if (DEBUG_SIM_STATES) Log.d(TAG, "SIM moved to ABSENT when the "
+                                        + "previous state was locked. Reset the state.");
                                 resetStateLocked();
                             }
+                            mSimWasLocked.append(slotId, false);
                         }
-
-                        mSimWasLocked.append(slotId, false);
                     }
                     break;
                 case TelephonyManager.SIM_STATE_PIN_REQUIRED:
@@ -3403,9 +3403,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             //  unless disable is called to show un-hide it once first
             if (forceClearFlags) {
                 try {
-                    mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
+                    StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo(flags,
+                            DISABLE2_NONE);
+                    mStatusBarService.disableForUser(info, mStatusBarDisableToken,
                             mContext.getPackageName(),
-                            mSelectedUserInteractor.getSelectedUserId(true));
+                            mSelectedUserInteractor.getSelectedUserId(true),
+                            "adjustStatusBarLocked - force clear flags");
                 } catch (RemoteException e) {
                     Log.d(TAG, "Failed to force clear flags", e);
                 }
@@ -3431,9 +3434,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             }
 
             try {
-                mStatusBarService.disableForUser(flags, mStatusBarDisableToken,
-                        mContext.getPackageName(),
-                        mSelectedUserInteractor.getSelectedUserId(true));
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo(flags,
+                        DISABLE2_NONE);
+                mStatusBarService.disableForUser(info, mStatusBarDisableToken,
+                        mContext.getPackageName(), mSelectedUserInteractor.getSelectedUserId(true),
+                        "adjustStatusBarLocked - set disable flags");
             } catch (RemoteException e) {
                 Log.d(TAG, "Failed to set disable flags: " + flags, e);
             }

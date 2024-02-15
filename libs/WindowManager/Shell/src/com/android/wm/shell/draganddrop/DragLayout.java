@@ -16,11 +16,11 @@
 
 package com.android.wm.shell.draganddrop;
 
+import static android.app.StatusBarManager.DISABLE2_NONE;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.content.pm.ActivityInfo.CONFIG_ASSETS_PATHS;
 import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -445,18 +445,20 @@ public class DragLayout extends LinearLayout {
     }
 
     private void animateFullscreenContainer(boolean visible) {
-        mStatusBarManager.disable(visible
-                ? HIDE_STATUS_BAR_FLAGS
-                : DISABLE_NONE);
+        int flags = visible ? HIDE_STATUS_BAR_FLAGS : DISABLE_NONE;
+        StatusBarManager.DisableInfo disableInfo = new StatusBarManager.DisableInfo(flags,
+                DISABLE2_NONE);
+        mStatusBarManager.requestDisabledComponent(disableInfo, "animateFullscreenContainer");
         // We're only using the first drop zone if there is one fullscreen target
         mDropZoneView1.setShowingMargin(visible);
         mDropZoneView1.setShowingHighlight(visible);
     }
 
     private void animateSplitContainers(boolean visible, Runnable animCompleteCallback) {
-        mStatusBarManager.disable(visible
-                ? HIDE_STATUS_BAR_FLAGS
-                : DISABLE_NONE);
+        int flags = visible ? HIDE_STATUS_BAR_FLAGS : DISABLE_NONE;
+        StatusBarManager.DisableInfo disableInfo = new StatusBarManager.DisableInfo(flags,
+                DISABLE2_NONE);
+        mStatusBarManager.requestDisabledComponent(disableInfo, "animateSplitContainers");
         mDropZoneView1.setShowingMargin(visible);
         mDropZoneView2.setShowingMargin(visible);
         Animator animator = mDropZoneView1.getAnimator();

@@ -103,9 +103,8 @@ DrawTextFunctor processFunctor(const std::vector<uint16_t>& text, Paint* paint) 
     // Create minikin::Layout
     std::unique_ptr<Typeface> typeface(makeTypeface());
     minikin::Layout layout = doLayout(text, *paint, typeface.get());
-    minikin::MinikinRect bounds;
 
-    DrawTextFunctor f(layout, &canvas, *paint, 0, 0, layout.getAdvance(), bounds);
+    DrawTextFunctor f(layout, &canvas, *paint, 0, 0, layout.getAdvance());
     MinikinUtils::forFontRun(layout, paint, f);
     return f;
 }

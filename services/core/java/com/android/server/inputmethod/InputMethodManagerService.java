@@ -47,6 +47,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
+import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_OTHER;
+import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
 
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
@@ -1688,8 +1690,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         IntConsumer toolTypeConsumer =
                 Flags.useHandwritingListenerForTooltype()
                         ? toolType -> onUpdateEditorToolType(toolType) : null;
+        Runnable discardDelegationTextRunnable = () -> discardHandwritingDelegationText();
         mHwController = new HandwritingModeController(mContext, thread.getLooper(),
-                new InkWindowInitializer(), toolTypeConsumer);
+                new InkWindowInitializer(), toolTypeConsumer, discardDelegationTextRunnable);
         registerDeviceListenerAndCheckStylusSupport();
     }
 
@@ -1715,6 +1718,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             IInputMethodInvoker curMethod = getCurMethodLocked();
             if (curMethod != null) {
                 curMethod.updateEditorToolType(toolType);
+            }
+        }
+    }
+
+    private void discardHandwritingDelegationText() {
+        synchronized (ImfLock.class) {
+            IInputMethodInvoker curMethod = getCurMethodLocked();
+            if (curMethod != null) {
+                curMethod.discardHandwritingDelegationText();
             }
         }
     }
@@ -3388,58 +3400,106 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     public void startConnectionlessStylusHandwriting(IInputMethodClient client, int userId,
             @Nullable CursorAnchorInfo cursorAnchorInfo, @Nullable String delegatePackageName,
             @Nullable String delegatorPackageName,
-            @NonNull IConnectionlessHandwritingCallback callback) {
-        // TODO(b/300979854)
+            @NonNull IConnectionlessHandwritingCallback callback) throws RemoteException {
+        synchronized (ImfLock.class) {
+            if (!mBindingController.supportsConnectionlessStylusHandwriting()) {
+                Slog.w(TAG, "Connectionless stylus handwriting mode unsupported by IME.");
+                callback.onError(CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED);
+                return;
+            }
+        }
+
+        IConnectionlessHandwritingCallback immsCallback = callback;
+        boolean isForDelegation = delegatePackageName != null && delegatorPackageName != null;
+        if (isForDelegation) {
+            synchronized (ImfLock.class) {
+                if (!mClientController.verifyClientAndPackageMatch(client, delegatorPackageName)) {
+                    Slog.w(TAG, "startConnectionlessStylusHandwriting() fail");
+                    callback.onError(CONNECTIONLESS_HANDWRITING_ERROR_OTHER);
+                    throw new IllegalArgumentException("Delegator doesn't match UID");
+                }
+            }
+            immsCallback = new IConnectionlessHandwritingCallback.Stub() {
+                @Override
+                public void onResult(CharSequence text) throws RemoteException {
+                    synchronized (ImfLock.class) {
+                        mHwController.prepareStylusHandwritingDelegation(
+                                userId, delegatePackageName, delegatorPackageName,
+                                /* connectionless= */ true);
+                    }
+                    callback.onResult(text);
+                }
+
+                @Override
+                public void onError(int errorCode) throws RemoteException {
+                    callback.onError(errorCode);
+                }
+            };
+        }
+
+        if (!startStylusHandwriting(
+                client, false, immsCallback, cursorAnchorInfo, isForDelegation)) {
+            callback.onError(CONNECTIONLESS_HANDWRITING_ERROR_OTHER);
+        }
     }
 
-    private void startStylusHandwriting(IInputMethodClient client, boolean usesDelegation) {
+    private void startStylusHandwriting(IInputMethodClient client, boolean acceptingDelegation) {
+        startStylusHandwriting(client, acceptingDelegation, null, null, false);
+    }
+
+    private boolean startStylusHandwriting(IInputMethodClient client, boolean acceptingDelegation,
+            IConnectionlessHandwritingCallback connectionlessCallback,
+            CursorAnchorInfo cursorAnchorInfo, boolean isConnectionlessForDelegation) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.startStylusHandwriting");
         try {
             ImeTracing.getInstance().triggerManagerServiceDump(
                     "InputMethodManagerService#startStylusHandwriting");
             int uid = Binder.getCallingUid();
             synchronized (ImfLock.class) {
-                if (!usesDelegation) {
+                if (!acceptingDelegation) {
                     mHwController.clearPendingHandwritingDelegation();
                 }
                 if (!canInteractWithImeLocked(uid, client, "startStylusHandwriting",
                         null /* statsToken */)) {
-                    return;
+                    return false;
                 }
                 if (!hasSupportedStylusLocked()) {
                     Slog.w(TAG, "No supported Stylus hardware found on device. Ignoring"
                             + " startStylusHandwriting()");
-                    return;
+                    return false;
                 }
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     if (!mBindingController.supportsStylusHandwriting()) {
                         Slog.w(TAG,
                                 "Stylus HW unsupported by IME. Ignoring startStylusHandwriting()");
-                        return;
+                        return false;
                     }
 
                     final OptionalInt requestId = mHwController.getCurrentRequestId();
                     if (!requestId.isPresent()) {
                         Slog.e(TAG, "Stylus handwriting was not initialized.");
-                        return;
+                        return false;
                     }
                     if (!mHwController.isStylusGestureOngoing()) {
                         Slog.e(TAG,
                                 "There is no ongoing stylus gesture to start stylus handwriting.");
-                        return;
+                        return false;
                     }
                     if (mHwController.hasOngoingStylusHandwritingSession()) {
                         // prevent duplicate calls to startStylusHandwriting().
                         Slog.e(TAG,
                                 "Stylus handwriting session is already ongoing."
                                         + " Ignoring startStylusHandwriting().");
-                        return;
+                        return false;
                     }
                     if (DEBUG) Slog.v(TAG, "Client requesting Stylus Handwriting to be started");
                     final IInputMethodInvoker curMethod = getCurMethodLocked();
                     if (curMethod != null) {
-                        curMethod.canStartStylusHandwriting(requestId.getAsInt());
+                        curMethod.canStartStylusHandwriting(requestId.getAsInt(),
+                                connectionlessCallback, cursorAnchorInfo,
+                                isConnectionlessForDelegation);
+                        return true;
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -3448,6 +3508,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
+        return false;
     }
 
     @Override
@@ -3487,8 +3548,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (!verifyDelegator(client, delegatePackageName, delegatorPackageName, flags)) {
             return false;
         }
-
-        startStylusHandwriting(client, true /* usesDelegation */);
+        synchronized (ImfLock.class) {
+            if (mHwController.isDelegationUsingConnectionlessFlow()) {
+                final IInputMethodInvoker curMethod = getCurMethodLocked();
+                if (curMethod == null) {
+                    return false;
+                }
+                curMethod.commitHandwritingDelegationTextIfAvailable();
+                mHwController.clearPendingHandwritingDelegation();
+            } else {
+                startStylusHandwriting(client, true /* acceptingDelegation */);
+            }
+        }
         return true;
     }
 
@@ -5002,7 +5073,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     int userId = msg.arg1;
                     String delegate = (String) ((Pair) msg.obj).first;
                     String delegator = (String) ((Pair) msg.obj).second;
-                    mHwController.prepareStylusHandwritingDelegation(userId, delegate, delegator);
+                    mHwController.prepareStylusHandwritingDelegation(
+                            userId, delegate, delegator, /* connectionless= */ false);
                 }
                 return true;
             case MSG_START_HANDWRITING:

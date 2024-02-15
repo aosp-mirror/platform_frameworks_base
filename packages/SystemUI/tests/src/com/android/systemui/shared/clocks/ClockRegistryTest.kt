@@ -35,6 +35,7 @@ import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.ThreadAssert
 import java.util.function.BiConsumer
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.fail
@@ -69,6 +70,7 @@ class ClockRegistryTest : SysuiTestCase() {
     @Mock private lateinit var mockDefaultClock: ClockController
     @Mock private lateinit var mockThumbnail: Drawable
     @Mock private lateinit var mockContentResolver: ContentResolver
+    @Mock private lateinit var mockThreadAssert: ThreadAssert
     private lateinit var fakeDefaultProvider: FakeClockPlugin
     private lateinit var pluginListener: PluginListener<ClockProviderPlugin>
     private lateinit var registry: ClockRegistry
@@ -163,14 +165,12 @@ class ClockRegistryTest : SysuiTestCase() {
             defaultClockProvider = fakeDefaultProvider,
             keepAllLoaded = false,
             subTag = "Test",
+            assert = mockThreadAssert,
         ) {
             override fun querySettings() { }
             override fun applySettings(value: ClockSettings?) {
                 settings = value
             }
-            // Unit Test does not validate threading
-            override fun assertMainThread() {}
-            override fun assertNotMainThread() {}
         }
         registry.registerListeners()
 

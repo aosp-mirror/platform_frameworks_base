@@ -123,6 +123,7 @@ import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.window.InputTransferToken;
 import android.window.TaskFpsCallback;
 import android.window.TrustedPresentationThresholds;
 
@@ -6097,25 +6098,28 @@ public interface WindowManager extends ViewManager {
      * receive batched input event. For those events that are batched, the invocation will happen
      * once per {@link Choreographer} frame, and other input events will be delivered immediately.
      * This is different from
-     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Looper,
-     * SurfaceControlInputReceiver)} in that the input events are received batched. The caller must
-     * invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to clean up the
-     * resources when no longer needing to use the {@link SurfaceControlInputReceiver}
+     * { #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Looper, SurfaceControlInputReceiver)} in that the input events are received batched. The
+     * caller must invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to clean up
+     * the resources when no longer needing to use the {@link SurfaceControlInputReceiver}
      *
-     * @param displayId      The display that the SurfaceControl will be placed on. Input will
-     *                       only work
-     *                       if SurfaceControl is on that display and that display was touched.
-     * @param surfaceControl The SurfaceControl to register the InputChannel for
-     * @param hostToken      The host token to link the InputChannel for. This is primarily for ANRs
-     *                       to ensure the host receives the ANR if any issues with touch on the
-     *                       InputChannel
-     * @param choreographer  The Choreographer used for batching. This should match the rendering
-     *                       Choreographer.
-     * @param receiver       The SurfaceControlInputReceiver that will receive the input events
+     * @param displayId              The display that the SurfaceControl will be placed on. Input
+     *                               will only work if SurfaceControl is on that display and that
+     *                               display  was touched.
+     * @param surfaceControl         The SurfaceControl to register the InputChannel for
+     * @param hostInputTransferToken The host token to link the embedded. This is used to handle
+     *                               transferring touch gesture from host to embedded and for ANRs
+     *                               to ensure the host receives the ANR if any issues with
+     *                               touch on the embedded.
+     * @param choreographer          The Choreographer used for batching. This should match the
+     *                               rendering Choreographer.
+     * @param receiver               The SurfaceControlInputReceiver that will receive the input
+     *                               events
      */
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
     default void registerBatchedSurfaceControlInputReceiver(int displayId,
-            @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
+            @NonNull InputTransferToken hostInputTransferToken,
+            @NonNull SurfaceControl surfaceControl,
             @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
         throw new UnsupportedOperationException(
                 "registerBatchedSurfaceControlInputReceiver is not implemented");
@@ -6123,26 +6127,30 @@ public interface WindowManager extends ViewManager {
 
     /**
      * Registers a {@link SurfaceControlInputReceiver} for a {@link SurfaceControl} that will
-     * receive every input event. This is different than calling @link
-     * #registerBatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Choreographer,
-     * SurfaceControlInputReceiver)} in that the input events are received unbatched. The caller
-     * must invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to clean up the
-     * resources when no longer needing to use the {@link SurfaceControlInputReceiver}
+     * receive every input event. This is different than calling
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} in that the input events are received
+     * unbatched.
+     * The caller must invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to
+     * clean up the resources when no longer needing to use the {@link SurfaceControlInputReceiver}
      *
-     * @param displayId      The display that the SurfaceControl will be placed on. Input will only
-     *                       work if SurfaceControl is on that display and that display was
-     *                       touched.
-     * @param hostToken      The host token to link the InputChannel for. This is primarily for ANRs
-     *                       to ensure the host receives the ANR if any issues with touch on the
-     *                       InputChannel
-     * @param surfaceControl The SurfaceControl to register the InputChannel for
-     * @param looper         The looper to use when invoking callbacks.
-     * @param receiver       The SurfaceControlInputReceiver that will receive the input events
-     **/
+     * @param displayId              The display that the SurfaceControl will be placed on. Input
+     *                               will only work if SurfaceControl is on that display and that
+     *                               display  was touched.
+     * @param surfaceControl         The SurfaceControl to register the InputChannel for
+     * @param hostInputTransferToken The host token to link the embedded. This is used to handle
+     *                               transferring touch gesture from host to embedded and for ANRs
+     *                               to ensure the host receives the ANR if any issues with
+     *                               touch on the embedded.
+     * @param looper                 The looper to use when invoking callbacks.
+     * @param receiver               The SurfaceControlInputReceiver that will receive the input
+     *                               events.
+     */
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
     default void registerUnbatchedSurfaceControlInputReceiver(int displayId,
-            @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
-            @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
+            @NonNull InputTransferToken hostInputTransferToken,
+            @NonNull SurfaceControl surfaceControl, @NonNull Looper looper,
+            @NonNull SurfaceControlInputReceiver receiver) {
         throw new UnsupportedOperationException(
                 "registerUnbatchedSurfaceControlInputReceiver is not implemented");
     }
@@ -6152,10 +6160,10 @@ public interface WindowManager extends ViewManager {
      * specified token.
      * <p>
      * Must be called on the same {@link Looper} thread to which was passed to the
-     * {@link #registerBatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl,
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
      * Choreographer,
      * SurfaceControlInputReceiver)} or
-     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Looper,
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl, Looper,
      * SurfaceControlInputReceiver)}
      *
      * @param surfaceControl The SurfaceControl to remove and unregister the input channel for.
@@ -6171,7 +6179,7 @@ public interface WindowManager extends ViewManager {
      * if the SurfaceControl was registered for input via
      * { #registerBatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Choreographer,
      * SurfaceControlInputReceiver)} or
-     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, IBinder, SurfaceControl, Looper,
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl, Looper,
      * SurfaceControlInputReceiver)}.
      * <p>
      * This is helpful for testing to ensure the test waits for the layer to be registered with

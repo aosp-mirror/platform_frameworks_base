@@ -19,6 +19,7 @@ package android.util;
 /**
  * Base class for all checked exceptions thrown by the Android frameworks.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class AndroidException extends Exception {
     public AndroidException() {
     }

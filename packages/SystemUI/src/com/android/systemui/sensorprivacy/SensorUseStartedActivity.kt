@@ -23,6 +23,7 @@ import android.content.DialogInterface.BUTTON_NEGATIVE
 import android.content.DialogInterface.BUTTON_POSITIVE
 import android.content.Intent
 import android.content.Intent.EXTRA_PACKAGE_NAME
+import android.content.pm.PackageManager
 import android.hardware.SensorPrivacyManager
 import android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS
 import android.hardware.SensorPrivacyManager.EXTRA_SENSOR
@@ -31,6 +32,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.window.OnBackInvokedDispatcher
 import androidx.annotation.OpenForTesting
+import com.android.internal.camera.flags.Flags
 import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION
 import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__CANCEL
 import com.android.internal.util.FrameworkStatsLog.PRIVACY_TOGGLE_DIALOG_INTERACTION__ACTION__ENABLE
@@ -90,14 +92,14 @@ open class SensorUseStartedActivity @Inject constructor(
             sensor = ALL_SENSORS
             val callback = IndividualSensorPrivacyController.Callback { _, _ ->
                 if (!sensorPrivacyController.isSensorBlocked(MICROPHONE) &&
-                        !sensorPrivacyController.isSensorBlocked(CAMERA)) {
+                        !isCameraBlocked(sensorUsePackageName)) {
                     finish()
                 }
             }
             sensorPrivacyListener = callback
             sensorPrivacyController.addCallback(callback)
             if (!sensorPrivacyController.isSensorBlocked(MICROPHONE) &&
-                    !sensorPrivacyController.isSensorBlocked(CAMERA)) {
+                    !isCameraBlocked(sensorUsePackageName)) {
                 finish()
                 return
             }
@@ -110,14 +112,22 @@ open class SensorUseStartedActivity @Inject constructor(
             }
             val callback = IndividualSensorPrivacyController.Callback {
                 whichSensor: Int, isBlocked: Boolean ->
-                if (whichSensor == sensor && !isBlocked) {
+                if (whichSensor != sensor) {
+                    // Ignore a callback; we're not interested in.
+                } else if ((whichSensor == CAMERA) && !isCameraBlocked(sensorUsePackageName)) {
+                    finish()
+                } else if ((whichSensor == MICROPHONE) && !isBlocked) {
                     finish()
                 }
             }
             sensorPrivacyListener = callback
             sensorPrivacyController.addCallback(callback)
 
-            if (!sensorPrivacyController.isSensorBlocked(sensor)) {
+            if ((sensor == CAMERA) && !isCameraBlocked(sensorUsePackageName)) {
+                finish()
+                return
+            } else if ((sensor == MICROPHONE) &&
+                    !sensorPrivacyController.isSensorBlocked(MICROPHONE)) {
                 finish()
                 return
             }
@@ -202,6 +212,22 @@ open class SensorUseStartedActivity @Inject constructor(
     override fun onNewIntent(intent: Intent?) {
         setIntent(intent)
         recreate()
+    }
+
+    private fun isAutomotive(): Boolean {
+        return getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+    }
+
+    private fun isCameraBlocked(packageName: String): Boolean {
+        if (Flags.cameraPrivacyAllowlist()) {
+            if (isAutomotive()) {
+                return sensorPrivacyController.isCameraPrivacyEnabled(packageName)
+            } else {
+                return sensorPrivacyController.isSensorBlocked(CAMERA)
+            }
+        } else {
+            return sensorPrivacyController.isSensorBlocked(CAMERA)
+        }
     }
 
     private fun disableSensorPrivacy() {

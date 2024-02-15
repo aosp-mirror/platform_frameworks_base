@@ -22,6 +22,7 @@ import android.os.Build;
 import java.io.Writer;
 
 /** @hide */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LogWriter extends Writer {
     private final int mPriority;
     private final String mTag;

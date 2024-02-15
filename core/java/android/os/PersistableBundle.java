@@ -49,6 +49,7 @@ import java.util.ArrayList;
  *
  * @see Bundle
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class PersistableBundle extends BaseBundle implements Cloneable, Parcelable,
         XmlUtils.WriteMapCallback {
     private static final String TAG = "PersistableBundle";

@@ -257,6 +257,55 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
                                         statusCallback));
     }
 
+    /**
+     * Request the wearable to start hotword recognition.
+     *
+     * @param wearableHotwordCallback The callback to send hotword audio data and format to.
+     * @param statusCallback The callback for service status.
+     */
+    public void startHotwordRecognition(
+            RemoteCallback wearableHotwordCallback, RemoteCallback statusCallback) {
+        if (DEBUG) {
+            Slog.i(TAG, "Starting to listen for hotword.");
+        }
+        var unused =
+                post(
+                        service ->
+                                service.startHotwordRecognition(
+                                        wearableHotwordCallback, statusCallback));
+    }
+
+    /**
+     * Request the wearable to stop hotword recognition.
+     *
+     * @param statusCallback The callback for service status.
+     */
+    public void stopHotwordRecognition(RemoteCallback statusCallback) {
+        if (DEBUG) {
+            Slog.i(TAG, "Stopping hotword recognition.");
+        }
+        var unused = post(service -> service.stopHotwordRecognition(statusCallback));
+    }
+
+    /**
+     * Signals to the {@link WearableSensingService} that hotword audio data is accepted by the
+     * {@link android.service.voice.HotwordDetectionService} as valid hotword.
+     */
+    public void onValidatedByHotwordDetectionService() {
+        if (DEBUG) {
+            Slog.i(TAG, "Requesting hotword audio data egress.");
+        }
+        var unused = post(service -> service.onValidatedByHotwordDetectionService());
+    }
+
+    /** Stops the active hotword audio stream from the wearable. */
+    public void stopActiveHotwordAudio() {
+        if (DEBUG) {
+            Slog.i(TAG, "Stopping hotword audio.");
+        }
+        var unused = post(service -> service.stopActiveHotwordAudio());
+    }
+
     private static class SecureWearableConnectionContext {
         final ParcelFileDescriptor mSecureWearableConnection;
         final RemoteCallback mStatusCallback;

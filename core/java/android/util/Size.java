@@ -21,6 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 /**
  * Immutable class for describing width and height dimensions in pixels.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Size {
     /**
      * Create a new immutable Size instance.

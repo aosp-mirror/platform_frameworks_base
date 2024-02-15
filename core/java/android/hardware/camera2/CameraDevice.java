@@ -1420,35 +1420,7 @@ public abstract class CameraDevice implements AutoCloseable {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }
 
-  /**
-   * <p>Get camera characteristics for a particular session configuration by the camera device.</p>
-   *
-   * <p>The camera characteristics returned here is typically more limited than the characteristics
-   * returned from {@link CameraManager#getCameraCharacteristics}. The keys that have more limited
-   * values are listed in
-   * {@link CameraCharacteristics#getAvailableSessionCharacteristicsKeys}. </p>
-   *
-   * <p>Other than that, the characteristics returned here can be used in the same way as those
-   * returned from {@link CameraManager#getCameraCharacteristics}.</p>
-   *
-   * @param sessionConfig : The session configuration for which characteristics are fetched.
-   * @return CameraCharacteristics specific to a given session configuration.
-   * @throws UnsupportedOperationException if the query operation is not supported by the camera
-   *                                       device
-   * @throws IllegalArgumentException if the session configuration is invalid
-   * @throws CameraAccessException if the camera device is no longer connected or has
-   *                               encountered a fatal error
-   * @throws IllegalStateException if the camera device has been closed
-   * @see android.hardware.camera2.CameraCharacteristics#getAvailableSessionCharacteristicsKeys
-   */
-    @NonNull
-    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
-    public CameraCharacteristics getSessionCharacteristics(
-            @NonNull SessionConfiguration sessionConfig) throws CameraAccessException {
-        throw new UnsupportedOperationException("Subclasses must override this method");
-    }
-
-  /**
+    /**
      * A callback objects for receiving updates about the state of a camera device.
      *
      * <p>A callback instance must be provided to the {@link CameraManager#openCamera} method to
@@ -1732,6 +1704,33 @@ public abstract class CameraDevice implements AutoCloseable {
         @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
         public abstract boolean isSessionConfigurationSupported(
                 @NonNull SessionConfiguration config) throws CameraAccessException;
+
+        /**
+         * <p>Get camera characteristics for a particular session configuration for this camera
+         * device</p>
+         *
+         * <p>The camera characteristics returned by this method are different from those returned
+         * from {@link CameraManager#getCameraCharacteristics}. The characteristics returned here
+         * reflect device capabilities more accurately if the device were to be configured with
+         * {@code sessionConfig}. The keys that may get updated are listed in
+         * {@link CameraCharacteristics#getAvailableSessionCharacteristicsKeys}.</p>
+         *
+         * <p>Other than that, the characteristics returned here can be used in the same way as
+         * those returned from {@link CameraManager#getCameraCharacteristics}.</p>
+         *
+         * @param sessionConfig : The session configuration for which characteristics are fetched.
+         * @return CameraCharacteristics specific to a given session configuration.
+         *
+         * @throws IllegalArgumentException      if the session configuration is invalid
+         * @throws CameraAccessException         if the camera device is no longer connected or has
+         *                                       encountered a fatal error
+         *
+         * @see CameraCharacteristics#getAvailableSessionCharacteristicsKeys
+         */
+        @NonNull
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        public abstract CameraCharacteristics getSessionCharacteristics(
+                @NonNull SessionConfiguration sessionConfig) throws CameraAccessException;
 
         /**
          * Utility function to forward the call to

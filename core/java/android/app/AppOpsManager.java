@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.location.flags.Flags.FLAG_LOCATION_BYPASS;
 import static android.permission.flags.Flags.FLAG_OP_ENABLE_MOBILE_DATA_BY_USER;
 import static android.view.contentprotection.flags.Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED;
 import static android.view.contentprotection.flags.Flags.FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED;
@@ -1571,9 +1572,17 @@ public class AppOpsManager {
     public static final int OP_UNARCHIVAL_CONFIRMATION =
             AppProtoEnums.APP_OP_UNARCHIVAL_CONFIRMATION;
 
+    /**
+     * Allows an app to access location without the traditional location permissions and while the
+     * user location setting is off, but only during pre-defined emergency sessions.
+     *
+     * @hide
+     */
+    public static final int OP_EMERGENCY_LOCATION = AppProtoEnums.APP_OP_EMERGENCY_LOCATION;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 147;
+    public static final int _NUM_OP = 148;
 
     /**
      * All app ops represented as strings.
@@ -1726,6 +1735,7 @@ public class AppOpsManager {
             OPSTR_RUN_BACKUP_JOBS,
             OPSTR_ARCHIVE_ICON_OVERLAY,
             OPSTR_UNARCHIVAL_CONFIRMATION,
+            OPSTR_EMERGENCY_LOCATION,
     })
     public @interface AppOpString {}
 
@@ -2439,6 +2449,16 @@ public class AppOpsManager {
      */
     public static final String OPSTR_RUN_BACKUP_JOBS = "android:run_backup_jobs";
 
+    /**
+     * Allows an app to access location without the traditional location permissions and while the
+     * user location setting is off, but only during pre-defined emergency sessions.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_LOCATION_BYPASS)
+    public static final String OPSTR_EMERGENCY_LOCATION = "android:emergency_location";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -3019,6 +3039,9 @@ public class AppOpsManager {
         new AppOpInfo.Builder(OP_UNARCHIVAL_CONFIRMATION, OPSTR_UNARCHIVAL_CONFIRMATION,
                 "UNARCHIVAL_CONFIRMATION")
                 .setDefaultMode(MODE_ALLOWED).build(),
+        // TODO(b/301150056): STOPSHIP determine how this appop should work with the permission
+        new AppOpInfo.Builder(OP_EMERGENCY_LOCATION, OPSTR_EMERGENCY_LOCATION, "EMERGENCY_LOCATION")
+                .setPermission(Manifest.permission.LOCATION_BYPASS).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops

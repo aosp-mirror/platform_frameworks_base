@@ -1746,6 +1746,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    @Override
+    @RequiresPermission(Manifest.permission.STATUS_BAR_SERVICE)
+    public void notifyQuickSettingsTilesChanged(
+            @UserIdInt int userId, List<ComponentName> tileComponentNames) {
+        mSecurityPolicy.enforceCallingPermission(
+                Manifest.permission.STATUS_BAR_SERVICE,
+                /* function= */ "notifyQuickSettingsTilesChanged");
+
+        Slog.d(LOG_TAG, TextUtils.formatSimple(
+                "notifyQuickSettingsTilesChanged userId: %d, tileComponentNames: %s",
+                        userId, tileComponentNames));
+        // TODO (b/314843909): in the follow up cl
+        // update in-memory copy of QS_TILES in AccessibilityManager
+        // update Settings.Secure.ACCESSIBILITY_QS_TARGETS and its in-memory copy
+        // show full device control warning if needed (b/314850435)
+    }
+
     /**
      * Called when a gesture is detected on a display by the framework.
      *

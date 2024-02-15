@@ -37,6 +37,7 @@ import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
+import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
@@ -2338,7 +2339,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.updateAutobundledSummaryLocked(0, "pkg",
                 new NotificationAttributes(GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT,
-                    mock(Icon.class), 0), false);
+                    mock(Icon.class), 0, VISIBILITY_PRIVATE), false);
         waitForIdle();
 
         assertTrue(summary.getSbn().isOngoing());
@@ -2357,7 +2358,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.updateAutobundledSummaryLocked(0, "pkg",
                 new NotificationAttributes(GroupHelper.BASE_FLAGS,
-                    mock(Icon.class), 0), false);
+                    mock(Icon.class), 0, VISIBILITY_PRIVATE), false);
         waitForIdle();
 
         assertFalse(summary.getSbn().isOngoing());
@@ -3479,7 +3480,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPermissionHelper.isPermissionFixed(PKG, temp.getUserId())).thenReturn(true);
 
         NotificationRecord r = mService.createAutoGroupSummary(temp.getUserId(),
-                temp.getSbn().getPackageName(), temp.getKey(), 0, mock(Icon.class), 0);
+                temp.getSbn().getPackageName(), temp.getKey(), 0, mock(Icon.class), 0,
+                VISIBILITY_PRIVATE);
 
         assertThat(r.isImportanceFixed()).isTrue();
     }
@@ -12215,9 +12217,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // grouphelper is a mock here, so make the calls it would make
 
         // add summary
-        mService.addNotification(mService.createAutoGroupSummary(nr1.getUserId(),
-                nr1.getSbn().getPackageName(), nr1.getKey(),
-                GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT, mock(Icon.class), 0));
+        mService.addNotification(
+                mService.createAutoGroupSummary(nr1.getUserId(), nr1.getSbn().getPackageName(),
+                    nr1.getKey(), GroupHelper.BASE_FLAGS | FLAG_ONGOING_EVENT, mock(Icon.class), 0,
+                    VISIBILITY_PRIVATE));
 
         // cancel both children
         mBinderService.cancelNotificationWithTag(PKG, PKG, nr0.getSbn().getTag(),
@@ -12246,7 +12249,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(nr1);
         mService.addNotification(
                 mService.createAutoGroupSummary(nr1.getUserId(), nr1.getSbn().getPackageName(),
-                nr1.getKey(), GroupHelper.BASE_FLAGS, mock(Icon.class), 0));
+                nr1.getKey(), GroupHelper.BASE_FLAGS, mock(Icon.class), 0, VISIBILITY_PRIVATE));
 
         // add notifications + summary for USER_ALL
         NotificationRecord nr0_all =
@@ -12259,7 +12262,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(
                 mService.createAutoGroupSummary(nr0_all.getUserId(),
                 nr0_all.getSbn().getPackageName(),
-                nr0_all.getKey(), GroupHelper.BASE_FLAGS, mock(Icon.class), 0));
+                nr0_all.getKey(), GroupHelper.BASE_FLAGS, mock(Icon.class), 0, VISIBILITY_PRIVATE));
 
         // cancel both children for USER_ALL
         mBinderService.cancelNotificationWithTag(PKG, PKG, nr0_all.getSbn().getTag(),

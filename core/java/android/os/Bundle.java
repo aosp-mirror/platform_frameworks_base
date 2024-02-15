@@ -42,6 +42,7 @@ import java.util.List;
  *
  * @see PersistableBundle
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @VisibleForTesting
     static final int FLAG_HAS_FDS = 1 << 8;

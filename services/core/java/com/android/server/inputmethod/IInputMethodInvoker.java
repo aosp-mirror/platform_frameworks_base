@@ -27,6 +27,7 @@ import android.os.ResultReceiver;
 import android.util.Slog;
 import android.view.InputChannel;
 import android.view.MotionEvent;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputBinding;
@@ -34,6 +35,7 @@ import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
@@ -242,9 +244,12 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
-    void canStartStylusHandwriting(int requestId) {
+    void canStartStylusHandwriting(int requestId,
+            IConnectionlessHandwritingCallback connectionlessCallback,
+            CursorAnchorInfo cursorAnchorInfo, boolean isConnectionlessForDelegation) {
         try {
-            mTarget.canStartStylusHandwriting(requestId);
+            mTarget.canStartStylusHandwriting(requestId, connectionlessCallback, cursorAnchorInfo,
+                    isConnectionlessForDelegation);
         } catch (RemoteException e) {
             logRemoteException(e);
         }
@@ -259,6 +264,24 @@ final class IInputMethodInvoker {
             return false;
         }
         return true;
+    }
+
+    @AnyThread
+    void commitHandwritingDelegationTextIfAvailable() {
+        try {
+            mTarget.commitHandwritingDelegationTextIfAvailable();
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        }
+    }
+
+    @AnyThread
+    void discardHandwritingDelegationText() {
+        try {
+            mTarget.discardHandwritingDelegationText();
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        }
     }
 
     @AnyThread

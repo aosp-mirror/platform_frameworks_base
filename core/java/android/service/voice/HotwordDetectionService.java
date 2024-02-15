@@ -19,6 +19,7 @@ package android.service.voice;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -77,6 +78,16 @@ public abstract class HotwordDetectionService extends Service
     private static final boolean DBG = false;
 
     private static final long UPDATE_TIMEOUT_MILLIS = 20000;
+
+    /**
+     * The PersistableBundle options key used in {@link #onDetect(ParcelFileDescriptor, AudioFormat,
+     * PersistableBundle, Callback)} to indicate whether the system will close the audio stream
+     * after {@code Callback} is invoked.
+     */
+    @FlaggedApi(android.app.wearable.Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+    public static final String KEY_SYSTEM_WILL_CLOSE_AUDIO_STREAM_AFTER_CALLBACK =
+            "android.service.voice.HotwordDetectionService."
+                    + "KEY_SYSTEM_WILL_CLOSE_AUDIO_STREAM_AFTER_CALLBACK";
 
     /**
      * Feature flag for Attention Service.
@@ -364,6 +375,11 @@ public abstract class HotwordDetectionService extends Service
      * PersistableBundle)}.
      * @param callback The callback to use for responding to the detection request.
      */
+    // TODO(b/324635656): Update Javadoc for 24Q3 release. Change the last paragraph to:
+    // <p>Upon invoking the {@code callback}, the system will send the detection result to
+    // the {@link HotwordDetector}'s callback. If {@code
+    // options.getBoolean(KEY_SYSTEM_WILL_CLOSE_AUDIO_STREAM_AFTER_CALLBACK, true)} returns true,
+    // the system will also close the {@code audioStream} after {@code callback} is invoked.
     public void onDetect(
             @NonNull ParcelFileDescriptor audioStream,
             @NonNull AudioFormat audioFormat,
