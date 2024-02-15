@@ -443,7 +443,10 @@ public class AccessibilityWindowManager {
         public void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
                 IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows) {
             synchronized (mLock) {
-                updateWindowsByWindowAttributesLocked(windows);
+                if (!Flags.computeWindowChangesOnA11y()) {
+                    // If the flag is enabled, it's already done in #createWindowInfoListLocked.
+                    updateWindowsByWindowAttributesLocked(windows);
+                }
                 if (DEBUG) {
                     Slogf.i(LOG_TAG, "mDisplayId=%d, topFocusedDisplayId=%d, currentUserId=%d, "
                                     + "visibleBgUsers=%s", mDisplayId, topFocusedDisplayId,
@@ -500,14 +503,15 @@ public class AccessibilityWindowManager {
         public void onAccessibilityWindowsChanged(boolean forceSend, int topFocusedDisplayId,
                 @NonNull IBinder topFocusedWindowToken, @NonNull Point screenSize,
                 @NonNull List<AccessibilityWindow> windows) {
-            // TODO(b/322444245): Get a screenSize from DisplayManager#getDisplay(int)
-            //  .getRealSize().
-            final List<WindowInfo> windowInfoList = createWindowInfoList(screenSize, windows);
-            onWindowsForAccessibilityChanged(forceSend, topFocusedDisplayId,
-                    topFocusedWindowToken, windowInfoList);
+            synchronized (mLock) {
+                final List<WindowInfo> windowInfoList =
+                        createWindowInfoListLocked(screenSize, windows);
+                onWindowsForAccessibilityChanged(forceSend, topFocusedDisplayId,
+                        topFocusedWindowToken, windowInfoList);
+            }
         }
 
-        private static List<WindowInfo> createWindowInfoList(@NonNull Point screenSize,
+        private List<WindowInfo> createWindowInfoListLocked(@NonNull Point screenSize,
                 @NonNull List<AccessibilityWindow> visibleWindows) {
             final Set<IBinder> addedWindows = new ArraySet<>();
             final List<WindowInfo> windows = new ArrayList<>();
@@ -515,6 +519,8 @@ public class AccessibilityWindowManager {
             // Avoid allocating Region for each window.
             final Region regionInWindow = new Region();
             final Region touchableRegionInScreen = new Region();
+
+            final int userId = mAccessibilityUserManager.getCurrentUserIdLocked();
 
             // Iterate until we figure out what is touchable for the entire screen.
             boolean focusedWindowAdded = false;
@@ -526,9 +532,11 @@ public class AccessibilityWindowManager {
                     if (window.token != null) {
                         // Even if token is null, the window will be used in calculating visible
                         // windows, but is excluded from the accessibility window list.
-                        // TODO(b/322444245): We can call #updateWindowWithWindowAttributes() here.
                         window.regionInScreen.set(regionInWindow);
                         window.layer = addedWindows.size();
+                        final int windowId = findWindowIdLocked(userId, window.token);
+                        updateWindowWithWindowAttributes(window, mWindowAttributes.get(windowId));
+
                         windows.add(window);
                         addedWindows.add(window.token);
                     }
