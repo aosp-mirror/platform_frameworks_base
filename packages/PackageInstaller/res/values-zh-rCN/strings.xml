@@ -113,8 +113,7 @@
     <string name="unarchive_body_text" msgid="8244155079861708964">"系统将开始在后台下载此应用"</string>
     <string name="restore" msgid="8460854736328970444">"恢复"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"您没有联网"</string>
-    <!-- no translation found for unarchive_error_offline_body (2256042209364094099) -->
-    <skip />
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"若要恢复此应用，请检查互联网连接，然后重试"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"出了点问题"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"尝试恢复此应用时出现问题"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"存储空间不足"</string>
