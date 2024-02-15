@@ -5187,7 +5187,10 @@ public final class ViewRootImpl implements ViewParent,
 
         // Force recalculation of transparent regions
         if (accessibilityFocusDirty) {
-            requestLayout();
+            final Rect bounds = mAttachInfo.mTmpInvalRect;
+            if (getAccessibilityFocusedRect(bounds)) {
+                requestLayout();
+            }
         }
 
         mAttachInfo.mDrawingTime =
