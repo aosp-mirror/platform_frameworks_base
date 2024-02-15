@@ -666,18 +666,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म प्रेस करा"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"फिंगरप्रिंट हार्डवेअर उपलब्‍ध नाही."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"फिंगरप्रिंट सेट करता आली नाही"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिंट सेट करण्याची वेळ संपली आहे. पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"फिंगरप्रिंट ऑपरेशन रद्द झाले."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"वापरकर्त्याने फिंगरप्रिंट ऑपरेशन रद्द केले."</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"खूप जास्त प्रयत्न. त्याऐवजी स्क्रीन लॉक वापरा."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"खूप जास्त प्रयत्न. त्याऐवजी स्क्रीन लॉक वापरा."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"फिंगरप्रिंटवर प्रक्रिया करू शकत नाही. पुन्हा प्रयत्न करा."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"कोणत्याही फिंगरप्रिंटची नोंद झाली नाही"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"या डिव्हाइसमध्ये फिंगरप्रिंट सेन्सर नाही."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"सेन्सर तात्पुरता बंद केला आहे."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"फिंगरप्रिंट सेन्सर वापरू शकत नाही. दुरुस्तीच्या सेवा पुरवठादाराला भेट द्या"</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"या डिव्हाइसवर फिंगरप्रिंट सेन्सर नाही"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"पॉवर बटण दाबले"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g> बोट"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"फिंगरप्रिंट वापरा"</string>

@@ -666,18 +666,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Imethibitisha alama ya kidole"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Uso umethibitishwa"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Uso umethibitishwa, tafadhali bonyeza thibitisha"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Maunzi ya alama ya kidole hayapatikani."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Imeshindwa kuweka mipangilio ya alama ya kidole"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Muda wa kuweka alama ya kidole umeisha. Jaribu tena."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Mchakato wa alama ya kidole umeghairiwa."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Mtumiaji ameghairi uthibitishaji wa alama ya kidole."</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Umejaribu mara nyingi mno. Badala yake, tumia mbinu ya kufunga skrini."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Umejaribu mara nyingi mno. Badala yake, tumia mbinu ya kufunga skrini."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Imeshindwa kutambua alama ya kidole. Jaribu tena."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Hakuna alama za vidole zilizojumuishwa."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Kifaa hiki hakina kitambua alama ya kidole."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Kitambuzi kimezimwa kwa muda."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Imeshindwa kutumia kitambua alama ya kidole. Tembelea mtoa huduma za urekebishaji"</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Kifaa hiki hakina kitambua alama ya kidole"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Kitufe cha kuwasha au kuzima kimebonyezwa"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Kidole cha <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Tumia alama ya kidole"</string>

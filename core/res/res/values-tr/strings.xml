@@ -666,18 +666,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Parmak izi kimlik doğrulaması yapıldı"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Yüz kimliği doğrulandı"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Yüz kimliği doğrulandı, lütfen onayla\'ya basın"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Parmak izi donanımı kullanılamıyor."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Parmak izi ayarlanamıyor"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Parmak izi kurulumu zaman aşımına uğradı. Tekrar deneyin."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Parmak izi işlemi iptal edildi."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Parmak izi işlemi kullanıcı tarafından iptal edildi."</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Çok fazla deneme yapıldı. Bunun yerine ekran kilidini kullanın."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Çok fazla deneme yapıldı. Bunun yerine ekran kilidini kullanın."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Parmak izi işlenemiyor. Tekrar deneyin."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Parmak izi kaydedilmedi."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Bu cihazda parmak izi sensörü yok."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensör geçici olarak devre dışı bırakıldı."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Parmak izi sensörü kullanılamıyor. Bir onarım hizmeti sağlayıcıyı ziyaret edin"</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Bu cihazda parmak izi sensörü yok"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Güç düğmesine basıldı"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. parmak"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Parmak izi kullan"</string>
