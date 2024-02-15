@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.Intra
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
+import com.google.android.material.math.MathUtils
 import kotlin.math.abs
 
 internal fun View.setRect(rect: Rect) =
@@ -57,15 +58,6 @@ class ClockSizeTransition(
         override fun captureEndValues(transition: TransitionValues) = captureValues(transition)
         override fun captureStartValues(transition: TransitionValues) = captureValues(transition)
         override fun getTransitionProperties(): Array<String> = TRANSITION_PROPERTIES
-        open fun mutateBounds(
-            view: View,
-            fromVis: Int,
-            toVis: Int,
-            fromBounds: Rect,
-            toBounds: Rect,
-            fromSSBounds: Rect?,
-            toSSBounds: Rect?
-        ) {}
 
         private fun captureValues(transition: TransitionValues) {
             val view = transition.view
@@ -79,6 +71,16 @@ class ClockSizeTransition(
             transition.values[SMARTSPACE_BOUNDS] = Rect(ss.left, ss.top, ss.right, ss.bottom)
         }
 
+        open fun mutateBounds(
+            view: View,
+            fromIsVis: Boolean,
+            toIsVis: Boolean,
+            fromBounds: Rect,
+            toBounds: Rect,
+            fromSSBounds: Rect?,
+            toSSBounds: Rect?
+        ) {}
+
         override fun createAnimator(
             sceenRoot: ViewGroup,
             startValues: TransitionValues?,
@@ -86,7 +88,6 @@ class ClockSizeTransition(
         ): Animator? {
             if (startValues == null || endValues == null) return null
 
-            val fromView = startValues.view
             var fromVis = startValues.values[PROP_VISIBILITY] as Int
             var fromIsVis = fromVis == View.VISIBLE
             var fromAlpha = startValues.values[PROP_ALPHA] as Float
@@ -109,7 +110,7 @@ class ClockSizeTransition(
                 fromVis = View.INVISIBLE
             }
 
-            mutateBounds(toView, fromVis, toVis, fromBounds, toBounds, fromSSBounds, toSSBounds)
+            mutateBounds(toView, fromIsVis, toIsVis, fromBounds, toBounds, fromSSBounds, toSSBounds)
             if (fromIsVis == toIsVis && fromBounds.equals(toBounds)) {
                 if (DEBUG) {
                     Log.w(
@@ -125,7 +126,7 @@ class ClockSizeTransition(
 
             val sendToBack = fromIsVis && !toIsVis
             fun lerp(start: Int, end: Int, fract: Float): Int =
-                (start * (1f - fract) + end * fract).toInt()
+                MathUtils.lerp(start.toFloat(), end.toFloat(), fract).toInt()
             fun computeBounds(fract: Float): Rect =
                 Rect(
                     lerp(fromBounds.left, toBounds.left, fract),
@@ -134,9 +135,14 @@ class ClockSizeTransition(
                     lerp(fromBounds.bottom, toBounds.bottom, fract)
                 )
 
-            fun assignAnimValues(src: String, alpha: Float, fract: Float, vis: Int? = null) {
+            fun assignAnimValues(src: String, fract: Float, vis: Int? = null) {
                 val bounds = computeBounds(fract)
-                if (DEBUG) Log.i(TAG, "$src: $toView; alpha=$alpha; vis=$vis; bounds=$bounds;")
+                val alpha = MathUtils.lerp(fromAlpha, toAlpha, fract)
+                if (DEBUG)
+                    Log.i(
+                        TAG,
+                        "$src: $toView; fract=$fract; alpha=$alpha; vis=$vis; bounds=$bounds;"
+                    )
                 toView.setVisibility(vis ?: View.VISIBLE)
                 toView.setAlpha(alpha)
                 toView.setRect(bounds)
@@ -152,12 +158,12 @@ class ClockSizeTransition(
                 )
             }
 
-            return ValueAnimator.ofFloat(fromAlpha, toAlpha).also { anim ->
+            return ValueAnimator.ofFloat(0f, 1f).also { anim ->
                 // We enforce the animation parameters on the target view every frame using a
                 // predraw listener. This is suboptimal but prevents issues with layout passes
                 // overwriting the animation for individual frames.
                 val predrawCallback = OnPreDrawListener {
-                    assignAnimValues("predraw", anim.animatedValue as Float, anim.animatedFraction)
+                    assignAnimValues("predraw", anim.animatedFraction)
                     return@OnPreDrawListener true
                 }
 
@@ -167,16 +173,18 @@ class ClockSizeTransition(
                 anim.addListener(
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationStart(anim: Animator) {
-                            assignAnimValues("start", fromAlpha, 0f)
+                            assignAnimValues("start", 0f, fromVis)
                         }
 
                         override fun onAnimationEnd(anim: Animator) {
-                            assignAnimValues("end", toAlpha, 1f, toVis)
+                            assignAnimValues("end", 1f, toVis)
                             if (sendToBack) toView.translationZ = 0f
                             toView.viewTreeObserver.removeOnPreDrawListener(predrawCallback)
                         }
                     }
                 )
+
+                assignAnimValues("init", 0f, fromVis)
                 toView.viewTreeObserver.addOnPreDrawListener(predrawCallback)
             }
         }
@@ -213,13 +221,16 @@ class ClockSizeTransition(
 
         override fun mutateBounds(
             view: View,
-            fromVis: Int,
-            toVis: Int,
+            fromIsVis: Boolean,
+            toIsVis: Boolean,
             fromBounds: Rect,
             toBounds: Rect,
             fromSSBounds: Rect?,
             toSSBounds: Rect?
         ) {
+            // Move normally if clock is not changing visibility
+            if (fromIsVis == toIsVis) return
+
             fromBounds.left = toBounds.left
             fromBounds.right = toBounds.right
             if (viewModel.useLargeClock) {
@@ -267,13 +278,16 @@ class ClockSizeTransition(
 
         override fun mutateBounds(
             view: View,
-            fromVis: Int,
-            toVis: Int,
+            fromIsVis: Boolean,
+            toIsVis: Boolean,
             fromBounds: Rect,
             toBounds: Rect,
             fromSSBounds: Rect?,
             toSSBounds: Rect?
         ) {
+            // Move normally if clock is not changing visibility
+            if (fromIsVis == toIsVis) return
+
             toBounds.left = fromBounds.left
             toBounds.right = fromBounds.right
             if (!viewModel.useLargeClock) {

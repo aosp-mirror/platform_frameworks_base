@@ -78,8 +78,8 @@ class DefaultClockSteppingTransition(
     }
 
     companion object {
-        private const val PROP_BOUNDS_LEFT = "splitShadeTransitionAdapter:boundsLeft"
-        private const val PROP_X_IN_WINDOW = "splitShadeTransitionAdapter:xInWindow"
+        private const val PROP_BOUNDS_LEFT = "DefaultClockSteppingTransition:boundsLeft"
+        private const val PROP_X_IN_WINDOW = "DefaultClockSteppingTransition:xInWindow"
         private val TRANSITION_PROPERTIES = arrayOf(PROP_BOUNDS_LEFT, PROP_X_IN_WINDOW)
         private const val KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION_MS = 1000L
     }
