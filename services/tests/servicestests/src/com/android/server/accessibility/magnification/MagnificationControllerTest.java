@@ -150,6 +150,9 @@ public class MagnificationControllerTest {
     @Mock
     private DisplayManagerInternal mDisplayManagerInternal;
 
+    @Mock
+    private Scroller mMockScroller;
+
     // To mock package-private class
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
@@ -208,7 +211,7 @@ public class MagnificationControllerTest {
                                 mScaleProvider,
                                 () -> null,
                                 ConcurrentUtils.DIRECT_EXECUTOR,
-                                () -> new Scroller(mContext),
+                                () -> mMockScroller,
                                 () -> mTimeAnimator));
         mScreenMagnificationController.register(TEST_DISPLAY);
 
