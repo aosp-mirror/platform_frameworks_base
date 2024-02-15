@@ -20,8 +20,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.core.view.WindowCompat
 import com.android.systemui.compose.ComposeFacade
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import javax.inject.Inject
@@ -32,6 +32,7 @@ class VolumePanelActivity
 constructor(
     private val volumePanelViewModelFactory: Provider<VolumePanelViewModel.Factory>,
     private val volumePanelFlag: VolumePanelFlag,
+    private val configurationController: ConfigurationController,
 ) : ComponentActivity() {
 
     private val viewModel: VolumePanelViewModel by
@@ -43,7 +44,11 @@ constructor(
 
         volumePanelFlag.assertNewVolumePanel()
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         ComposeFacade.setVolumePanelActivityContent(this, viewModel) { finish() }
+    }
+
+    override fun onContentChanged() {
+        super.onContentChanged()
+        configurationController.onConfigurationChanged(resources.configuration)
     }
 }

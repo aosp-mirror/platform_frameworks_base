@@ -953,13 +953,13 @@
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
-    <style name="Theme.VolumePanelActivity" parent="@style/Theme.SystemUI">
+    <style name="Theme.VolumePanelActivity"
+        parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-        <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen.  -->
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
     </style>
 
     <style name="Theme.UserSwitcherFullscreenDialog" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">

@@ -608,7 +608,6 @@
     <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
 
     <dimen name="volume_panel_corner_radius">52dp</dimen>
-    <dimen name="volume_panel_content_padding">24dp</dimen>
     <dimen name="volume_panel_bottom_bar_horizontal_padding">24dp</dimen>
     <dimen name="volume_panel_bottom_bar_bottom_padding">20dp</dimen>
 

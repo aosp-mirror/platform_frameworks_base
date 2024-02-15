@@ -69,7 +69,7 @@ object ComposeFacade : BaseComposeFacade {
     override fun setVolumePanelActivityContent(
         activity: ComponentActivity,
         viewModel: VolumePanelViewModel,
-        onDismissAnimationFinished: () -> Unit,
+        onDismiss: () -> Unit,
     ) {
         throwComposeUnavailableError()
     }
