@@ -1329,7 +1329,9 @@ public final class PermissionManager {
     public List<PermissionGroupUsage> getIndicatorAppOpUsageData(boolean micMuted) {
         // Lazily initialize the usage helper
         initializeUsageHelper();
-        return mUsageHelper.getOpUsageData(micMuted);
+        boolean includeMicrophoneUsage = !micMuted;
+        return mUsageHelper.getOpUsageDataByDevice(includeMicrophoneUsage,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
     }
 
     /**

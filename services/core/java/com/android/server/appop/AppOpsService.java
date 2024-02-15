@@ -658,11 +658,11 @@ public class AppOpsService extends IAppOpsService.Stub {
             return attributedOp;
         }
 
-        @NonNull OpEntry createEntryLocked() {
+        @NonNull OpEntry createEntryLocked(String persistentDeviceId) {
             // TODO(b/308201969): Update this method when we introduce disk persistence of events
             // for accesses on external devices.
             final ArrayMap<String, AttributedOp> attributedOps = mDeviceAttributedOps.get(
-                    PERSISTENT_DEVICE_ID_DEFAULT);
+                    persistentDeviceId);
             final ArrayMap<String, AppOpsManager.AttributedOpEntry> attributionEntries =
                     new ArrayMap<>(attributedOps.size());
             for (int i = 0; i < attributedOps.size(); i++) {
@@ -1550,13 +1550,14 @@ public class AppOpsService extends IAppOpsService.Stub {
         mHistoricalRegistry.shutdown();
     }
 
-    private ArrayList<AppOpsManager.OpEntry> collectOps(Ops pkgOps, int[] ops) {
+    private ArrayList<AppOpsManager.OpEntry> collectOps(Ops pkgOps, int[] ops,
+            String persistentDeviceId) {
         ArrayList<AppOpsManager.OpEntry> resOps = null;
         if (ops == null) {
             resOps = new ArrayList<>();
             for (int j=0; j<pkgOps.size(); j++) {
                 Op curOp = pkgOps.valueAt(j);
-                resOps.add(getOpEntryForResult(curOp));
+                resOps.add(getOpEntryForResult(curOp, persistentDeviceId));
             }
         } else {
             for (int j=0; j<ops.length; j++) {
@@ -1565,7 +1566,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (resOps == null) {
                         resOps = new ArrayList<>();
                     }
-                    resOps.add(getOpEntryForResult(curOp));
+                    resOps.add(getOpEntryForResult(curOp, persistentDeviceId));
                 }
             }
         }
@@ -1609,16 +1610,23 @@ public class AppOpsService extends IAppOpsService.Stub {
         return resOps;
     }
 
-    private static @NonNull OpEntry getOpEntryForResult(@NonNull Op op) {
-        return op.createEntryLocked();
+    private static @NonNull OpEntry getOpEntryForResult(@NonNull Op op, String persistentDeviceId) {
+        return op.createEntryLocked(persistentDeviceId);
     }
 
     @Override
     public List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops) {
+        return getPackagesForOpsForDevice(ops, PERSISTENT_DEVICE_ID_DEFAULT);
+    }
+
+    @Override
+    public List<AppOpsManager.PackageOps> getPackagesForOpsForDevice(int[] ops,
+            @NonNull String persistentDeviceId) {
         final int callingUid = Binder.getCallingUid();
         final boolean hasAllPackageAccess = mContext.checkPermission(
                 Manifest.permission.GET_APP_OPS_STATS, Binder.getCallingPid(),
                 Binder.getCallingUid(), null) == PackageManager.PERMISSION_GRANTED;
+
         ArrayList<AppOpsManager.PackageOps> res = null;
         synchronized (this) {
             final int uidStateCount = mUidStates.size();
@@ -1627,21 +1635,24 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (uidState.pkgOps.isEmpty()) {
                     continue;
                 }
+                // Caller can always see their packages and with a permission all.
+                if (!hasAllPackageAccess && callingUid != uidState.uid) {
+                    continue;
+                }
+
                 ArrayMap<String, Ops> packages = uidState.pkgOps;
                 final int packageCount = packages.size();
                 for (int j = 0; j < packageCount; j++) {
                     Ops pkgOps = packages.valueAt(j);
-                    ArrayList<AppOpsManager.OpEntry> resOps = collectOps(pkgOps, ops);
+                    ArrayList<AppOpsManager.OpEntry> resOps = collectOps(pkgOps, ops,
+                            persistentDeviceId);
                     if (resOps != null) {
                         if (res == null) {
                             res = new ArrayList<>();
                         }
                         AppOpsManager.PackageOps resPackage = new AppOpsManager.PackageOps(
                                 pkgOps.packageName, pkgOps.uidState.uid, resOps);
-                        // Caller can always see their packages and with a permission all.
-                        if (hasAllPackageAccess || callingUid == pkgOps.uidState.uid) {
-                            res.add(resPackage);
-                        }
+                        res.add(resPackage);
                     }
                 }
             }
@@ -1663,7 +1674,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (pkgOps == null) {
                 return null;
             }
-            ArrayList<AppOpsManager.OpEntry> resOps = collectOps(pkgOps, ops);
+            ArrayList<AppOpsManager.OpEntry> resOps = collectOps(pkgOps, ops,
+                    PERSISTENT_DEVICE_ID_DEFAULT);
             if (resOps == null || resOps.size() == 0) {
                 return null;
             }
