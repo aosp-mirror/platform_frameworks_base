@@ -16,6 +16,8 @@
 
 package android.media;
 
+import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
+
 import static com.android.media.codec.flags.Flags.FLAG_CODEC_IMPORTANCE;
 import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
 
@@ -1714,6 +1716,58 @@ public final class MediaFormat {
      */
     @FlaggedApi(FLAG_CODEC_IMPORTANCE)
     public static final String KEY_IMPORTANCE = "importance";
+
+    /** @hide */
+    @IntDef(flag = true, prefix = {"FLAG_SECURITY_MODEL_"}, value = {
+        FLAG_SECURITY_MODEL_SANDBOXED,
+        FLAG_SECURITY_MODEL_MEMORY_SAFE,
+        FLAG_SECURITY_MODEL_TRUSTED_CONTENT_ONLY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SecurityModelFlag {}
+
+    /**
+     * Flag for {@link MediaCodecInfo#SECURITY_MODEL_SANDBOXED}.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    public static final int FLAG_SECURITY_MODEL_SANDBOXED =
+            (1 << MediaCodecInfo.SECURITY_MODEL_SANDBOXED);
+    /**
+     * Flag for {@link MediaCodecInfo#SECURITY_MODEL_MEMORY_SAFE}.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    public static final int FLAG_SECURITY_MODEL_MEMORY_SAFE =
+            (1 << MediaCodecInfo.SECURITY_MODEL_MEMORY_SAFE);
+    /**
+     * Flag for {@link MediaCodecInfo#SECURITY_MODEL_TRUSTED_CONTENT_ONLY}.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    public static final int FLAG_SECURITY_MODEL_TRUSTED_CONTENT_ONLY =
+            (1 << MediaCodecInfo.SECURITY_MODEL_TRUSTED_CONTENT_ONLY);
+
+    /**
+     * A key describing the requested security model as flags.
+     * <p>
+     * The associated value is a flag of the following values:
+     * {@link FLAG_SECURITY_MODEL_SANDBOXED},
+     * {@link FLAG_SECURITY_MODEL_MEMORY_SAFE},
+     * {@link FLAG_SECURITY_MODEL_TRUSTED_CONTENT_ONLY}. The default value is
+     * {@link FLAG_SECURITY_MODEL_SANDBOXED}.
+     * <p>
+     * When passed to {@link MediaCodecList#findDecoderForFormat} or
+     * {@link MediaCodecList#findEncoderForFormat}, MediaCodecList filters
+     * the security model of the codecs according to this flag value.
+     * <p>
+     * When passed to {@link MediaCodec#configure}, MediaCodec verifies
+     * the security model matches the flag value passed, and throws
+     * {@link java.lang.IllegalArgumentException} if the model does not match.
+     * <p>
+     * @see MediaCodecInfo#getSecurityModel
+     * @see MediaCodecList#findDecoderForFormat
+     * @see MediaCodecList#findEncoderForFormat
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    public static final String KEY_SECURITY_MODEL = "security-model";
 
     /* package private */ MediaFormat(@NonNull Map<String, Object> map) {
         mMap = map;
