@@ -55,6 +55,7 @@ import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
+import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
@@ -232,7 +233,6 @@ public class DevicePolicyManager {
     private final IDevicePolicyManager mService;
     private final boolean mParentInstance;
     private final DevicePolicyResourcesManager mResourcesManager;
-
 
     /** @hide */
     public DevicePolicyManager(Context context, IDevicePolicyManager service) {
@@ -14055,6 +14055,74 @@ public class DevicePolicyManager {
             return mService.isSecurityLoggingEnabled(admin, mContext.getPackageName());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Controls whether audit logging is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
+    public void setAuditLogEnabled(boolean enabled) {
+        throwIfParentInstance("setAuditLogEnabled");
+        try {
+            mService.setAuditLogEnabled(mContext.getPackageName(), true);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return Whether audit logging is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
+    public boolean isAuditLogEnabled() {
+        throwIfParentInstance("isAuditLogEnabled");
+        try {
+            return mService.isAuditLogEnabled(mContext.getPackageName());
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+            // unreachable
+            return false;
+        }
+    }
+
+    /**
+     * Sets audit log event callback. Only one callback per UID is active at any time, when a new
+     * callback is set, the previous one is forgotten. Should only be called when audit log policy
+     * is enforced by the caller. Disabling the policy clears the callback. Each time a new callback
+     * is set, it will first be invoked with all the audit log events available at the time.
+     *
+     * @param callback callback to invoke when new audit log events become available or {@code null}
+     *                 to clear the callback.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
+    public void setAuditLogEventCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @Nullable Consumer<List<SecurityEvent>> callback) {
+        throwIfParentInstance("setAuditLogEventCallback");
+        final IAuditLogEventsCallback wrappedCallback = callback == null
+                ? null
+                : new IAuditLogEventsCallback.Stub() {
+                    @Override
+                    public void onNewAuditLogEvents(List<SecurityEvent> events) {
+                        executor.execute(() -> callback.accept(events));
+                    }
+                };
+        try {
+            mService.setAuditLogEventsCallback(mContext.getPackageName(), wrappedCallback);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
         }
     }
 

@@ -32,6 +32,7 @@ import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.PackagePolicy;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.FactoryResetProtectionPolicy;
+import android.app.admin.IAuditLogEventsCallback;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.app.admin.ManagedSubscriptionsPolicy;
@@ -440,6 +441,10 @@ interface IDevicePolicyManager {
     ParceledListSlice retrievePreRebootSecurityLogs(in ComponentName admin, String packageName);
     long forceNetworkLogs();
     long forceSecurityLogs();
+
+    void setAuditLogEnabled(String callerPackage, boolean enabled);
+    boolean isAuditLogEnabled(String callerPackage);
+    void setAuditLogEventsCallback(String callerPackage, in IAuditLogEventsCallback callback);
 
     boolean isUninstallInQueue(String packageName);
     void uninstallPackageWithActiveAdmins(String packageName);
