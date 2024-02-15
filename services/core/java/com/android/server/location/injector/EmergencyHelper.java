@@ -16,14 +16,55 @@
 
 package com.android.server.location.injector;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 /**
  * Provides helpers for emergency sessions.
  */
 public abstract class EmergencyHelper {
+
+    private final CopyOnWriteArrayList<EmergencyStateChangedListener> mListeners;
+
+    protected EmergencyHelper() {
+        mListeners = new CopyOnWriteArrayList<>();
+    }
+
+    /**
+     * Listener for emergency state changes.
+     */
+    public interface EmergencyStateChangedListener {
+        /**
+         * Called when state changes.
+         */
+        void onStateChanged();
+    }
 
     /**
      * Returns true if the device is in an emergency session, or if an emergency session ended
      * within the given extension time.
      */
     public abstract boolean isInEmergency(long extensionTimeMs);
+
+    /**
+     * Add a listener for changes to the emergency location state.
+     */
+    public void addOnEmergencyStateChangedListener(EmergencyStateChangedListener listener) {
+        mListeners.add(listener);
+    }
+
+    /**
+     * Remove a listener for changes to the emergency location state.
+     */
+    public void removeOnEmergencyStateChangedListener(EmergencyStateChangedListener listener) {
+        mListeners.remove(listener);
+    }
+
+    /**
+     * Notify listeners for emergency state of state change
+     */
+    protected final void dispatchEmergencyStateChanged() {
+        for (EmergencyStateChangedListener listener : mListeners) {
+            listener.onStateChanged();
+        }
+    }
 }

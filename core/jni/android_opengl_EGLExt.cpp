@@ -17,6 +17,7 @@
 // This source file is automatically generated
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #pragma GCC diagnostic ignored "-Wunused-function"
 
 #include "jni.h"
@@ -54,11 +55,11 @@ nativeClassInit(JNIEnv *_env, jclass glImplClass)
     jclass eglsurfaceClassLocal = _env->FindClass("android/opengl/EGLSurface");
     eglsurfaceClass = (jclass) _env->NewGlobalRef(eglsurfaceClassLocal);
     jclass eglsyncClassLocal = _env->FindClass("android/opengl/EGLSync");
-    eglsyncClass = (jclass)_env->NewGlobalRef(eglsyncClassLocal);
+    eglsyncClass = (jclass) _env->NewGlobalRef(eglsyncClassLocal);
 
     egldisplayGetHandleID = _env->GetMethodID(egldisplayClass, "getNativeHandle", "()J");
     eglsurfaceGetHandleID = _env->GetMethodID(eglsurfaceClass, "getNativeHandle", "()J");
-    eglsyncGetHandleID = _env->GetMethodID(eglsyncClassLocal, "getNativeHandle", "()J");
+    eglsyncGetHandleID = _env->GetMethodID(eglsyncClass, "getNativeHandle", "()J");
 }
 
 static void *
@@ -70,6 +71,14 @@ fromEGLHandle(JNIEnv *_env, jmethodID mid, jobject obj) {
     }
 
     return reinterpret_cast<void*>(_env->CallLongMethod(obj, mid));
+}
+
+// TODO: this should be generated from the .spec file, but needs to be renamed and made private
+static jint android_eglDupNativeFenceFDANDROID(JNIEnv *env, jobject, jobject dpy, jobject sync) {
+    EGLDisplay dpy_native = (EGLDisplay)fromEGLHandle(env, egldisplayGetHandleID, dpy);
+    EGLSync sync_native = (EGLSync)fromEGLHandle(env, eglsyncGetHandleID, sync);
+
+    return eglDupNativeFenceFDANDROID(dpy_native, sync_native);
 }
 
 // --------------------------------------------------------------------------
@@ -89,21 +98,12 @@ android_eglPresentationTimeANDROID
     return (jboolean)_returnValue;
 }
 
-static jint android_eglDupNativeFenceFDANDROID(JNIEnv *env, jobject, jobject dpy, jobject sync) {
-    EGLDisplay dpy_native = (EGLDisplay)fromEGLHandle(env, egldisplayGetHandleID, dpy);
-    EGLSync sync_native = (EGLSync)fromEGLHandle(env, eglsyncGetHandleID, sync);
-
-    return eglDupNativeFenceFDANDROID(dpy_native, sync_native);
-}
-
 static const char *classPathName = "android/opengl/EGLExt";
 
 static const JNINativeMethod methods[] = {
-        {"_nativeClassInit", "()V", (void *)nativeClassInit},
-        {"eglPresentationTimeANDROID", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSurface;J)Z",
-         (void *)android_eglPresentationTimeANDROID},
-        {"eglDupNativeFenceFDANDROIDImpl", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSync;)I",
-         (void *)android_eglDupNativeFenceFDANDROID},
+{"_nativeClassInit", "()V", (void*)nativeClassInit },
+{"eglPresentationTimeANDROID", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSurface;J)Z", (void *) android_eglPresentationTimeANDROID },
+{"eglDupNativeFenceFDANDROIDImpl", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSync;)I", (void *)android_eglDupNativeFenceFDANDROID },
 };
 
 int register_android_opengl_jni_EGLExt(JNIEnv *_env)

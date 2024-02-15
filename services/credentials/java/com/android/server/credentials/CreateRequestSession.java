@@ -27,10 +27,11 @@ import android.credentials.CreateCredentialResponse;
 import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.ICreateCredentialCallback;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.RequestInfo;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.PermissionUtils;
 import android.util.Slog;
@@ -38,6 +39,7 @@ import android.util.Slog;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -49,7 +51,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         ICreateCredentialCallback, CreateCredentialResponse>
         implements ProviderSession.ProviderInternalCallback<CreateCredentialResponse> {
     private static final String TAG = "CreateRequestSession";
-    private final Set<String> mPrimaryProviders;
+    private final Set<ComponentName> mPrimaryProviders;
 
     CreateRequestSession(@NonNull Context context, RequestSession.SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,
@@ -57,12 +59,13 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             ICreateCredentialCallback callback,
             CallingAppInfo callingAppInfo,
             Set<ComponentName> enabledProviders,
-            Set<String> primaryProviders,
+            Set<ComponentName> primaryProviders,
             CancellationSignal cancellationSignal,
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 RequestInfo.TYPE_CREATE,
-                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
+                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp,
+                /*shouldBindClientToDeath=*/ true);
         mRequestSessionMetric.collectCreateFlowInitialMetricInfo(
                 /*origin=*/request.getOrigin() != null, request);
         mPrimaryProviders = primaryProviders;
@@ -96,14 +99,21 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.USER_INTERACTION);
         cancelExistingPendingIntent();
         try {
+            List<String> flattenedPrimaryProviders = new ArrayList<>();
+            for (ComponentName cn : mPrimaryProviders) {
+                flattenedPrimaryProviders.add(cn.flattenToString());
+            }
+
+            final boolean isShowAllOptionsRequested = false;
             mPendingIntent = mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newCreateRequestInfo(
                             mRequestId, mClientRequest,
                             mClientAppInfo.getPackageName(),
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
                                     Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
-                            /*defaultProviderId=*/new ArrayList<String>(mPrimaryProviders)),
-                    providerDataList);
+                            /*defaultProviderId=*/flattenedPrimaryProviders,
+                            isShowAllOptionsRequested),
+                    providerDataList, /*isRequestForAllOptions=*/ isShowAllOptionsRequested);
             mClientCallback.onPendingIntent(mPendingIntent);
         } catch (RemoteException e) {
             mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
@@ -154,7 +164,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     }
 
     @Override
-    public void onUiCancellation(boolean isUserCancellation) {
+    public void onUiCancellation(boolean isUserCancellation, ResultReceiver resultReceiver) {
         String exception = CreateCredentialException.TYPE_USER_CANCELED;
         String message = "User cancelled the selector";
         if (!isUserCancellation) {

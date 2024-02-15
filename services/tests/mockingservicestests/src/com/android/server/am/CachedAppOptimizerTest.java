@@ -39,8 +39,8 @@ import android.text.TextUtils;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.modules.utils.testing.TestableDeviceConfig;
-import com.android.server.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.appop.AppOpsService;
@@ -85,22 +85,17 @@ public final class CachedAppOptimizerTest {
     @Mock
     private PackageManagerInternal mPackageManagerInt;
 
-    private final TestableDeviceConfig mDeviceConfig = new TestableDeviceConfig();
-
     @Rule
     public final ApplicationExitInfoTest.ServiceThreadRule
             mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
 
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
-            .dynamiclyConfigureSessionBuilder(
-                    sessionBuilder -> mDeviceConfig.setUpMockedClasses(sessionBuilder))
-            .build();
+            .addStaticMockFixtures(TestableDeviceConfig::new).build();
 
     @Before
     public void setUp() {
         System.loadLibrary("mockingservicestestjni");
-        mDeviceConfig.setUpMockBehaviors();
         mHandlerThread = new HandlerThread("");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
@@ -131,7 +126,6 @@ public final class CachedAppOptimizerTest {
         mHandlerThread.quit();
         mThread.quit();
         mCountDown = null;
-        mDeviceConfig.tearDown();
     }
 
     private ProcessRecord makeProcessRecord(int pid, int uid, int packageUid, String processName,
@@ -975,7 +969,7 @@ public final class CachedAppOptimizerTest {
 
         mCachedAppOptimizerUnderTest.mLastCompactionStats.clear();
 
-        if (CachedAppOptimizer.ENABLE_FILE_COMPACT) {
+        if (CachedAppOptimizer.ENABLE_SHARED_AND_CODE_COMPACT) {
             // We force a some compaction
             mCachedAppOptimizerUnderTest.compactApp(processRecord,
                     CachedAppOptimizer.CompactProfile.SOME, CachedAppOptimizer.CompactSource.APP,

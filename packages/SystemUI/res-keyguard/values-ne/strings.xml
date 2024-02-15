@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज गरिँदै"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • द्रुत गतिमा चार्ज गरिँदै छ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • मन्द गतिमा चार्ज गरिँदै"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ब्याट्री जोगाउन चार्ज गर्ने प्रक्रिया अप्टिमाइज गरिएको छ"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज गर्ने एक्सेसरीमा कुनै समस्या आयो"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"अनलक गर्न मेनु थिच्नुहोस्।"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ब्याट्रीको सुरक्षा गर्न चार्जिङ होल्ड गरिएको छ"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जिङ एक्सेसरी जाँच्नुहोस्"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लक भएको छ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM कार्ड हालिएको छैन"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM कार्ड हाल्नुहोस्।"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM कार्ड हालिएको छैन वा रिड गर्न मिल्दैन। SIM कार्ड हाल्नुहोस्।"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"यो SIM कार्ड प्रयोग गर्न मिल्दैन।"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"तपाईंको SIM कार्ड सदाका लागि डिएक्टिभेट गरिएको छ।\n आफ्नो वायरलेस सेवा प्रदायकलाई सम्पर्क गरी अर्को SIM कार्ड प्राप्त गर्नुहोस्।"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM कार्ड लक गरिएको छ।"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM कार्ड PUK प्रयोग गरी लक गरिएको छ।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM कार्ड अनलक गरिँदै छ…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"लकडाउन गरेपछि PIN हाल्नु पर्ने हुन्छ"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"लकडाउन गरेपछि पासवर्ड हाल्नु पर्ने हुन्छ"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"लकडाउन गरेपछि प्याटर्न कोर्नु पर्ने हुन्छ"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"डिभाइस प्रयोग नभएका बेला अपडेट इन्स्टल हुने छ"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"डिभाइस नचलाइएका बेला अपडेट इन्स्टल हुने छ"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"थप सुरक्षित बनाउनु पर्ने हुन्छ। केही समयदेखि PIN प्रयोग गरिएको छैन।"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"थप सुरक्षित बनाउनु पर्ने हुन्छ। केही समयदेखि पासवर्ड प्रयोग गरिएको छैन।"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"थप सुरक्षित बनाउनु पर्ने हुन्छ। केही समयदेखि प्याटर्न प्रयोग गरिएको छैन।"</string>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,30 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.screenshot
+package com.android.settingslib.spa.screenshot.widget.preference
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material.icons.outlined.DisabledByDefault
 import androidx.compose.runtime.Composable
-import com.android.settingslib.spa.framework.compose.toState
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.ui.SettingsIcon
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 import platform.test.screenshot.DeviceEmulationSpec
+import platform.test.screenshot.PhoneAndTabletMinimal
 
 /** A screenshot test for ExampleFeature. */
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 class PreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     companion object {
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         @JvmStatic
         fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletMinimal
         private const val TITLE = "Title"
@@ -46,9 +48,8 @@ class PreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test
@@ -61,18 +62,18 @@ class PreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
                 Preference(object : PreferenceModel {
                     override val title = TITLE
-                    override val summary = SUMMARY.toState()
+                    override val summary = { SUMMARY }
                 })
 
                 Preference(object : PreferenceModel {
                     override val title = TITLE
-                    override val summary = LONG_SUMMARY.toState()
+                    override val summary = { LONG_SUMMARY }
                 })
 
                 Preference(object : PreferenceModel {
                     override val title = TITLE
-                    override val summary = SUMMARY.toState()
-                    override val enabled = false.toState()
+                    override val summary = { SUMMARY }
+                    override val enabled = { false }
                     override val icon = @Composable {
                         SettingsIcon(imageVector = Icons.Outlined.DisabledByDefault)
                     }
@@ -80,7 +81,7 @@ class PreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
                 Preference(object : PreferenceModel {
                     override val title = TITLE
-                    override val summary = SUMMARY.toState()
+                    override val summary = { SUMMARY }
                     override val icon = @Composable {
                         SettingsIcon(imageVector = Icons.Outlined.Autorenew)
                     }

@@ -19,12 +19,26 @@ package com.android.systemui.compose
 
 import android.content.Context
 import android.view.View
+import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
-import com.android.systemui.multishade.ui.viewmodel.MultiShadeViewModel
+import com.android.systemui.bouncer.ui.BouncerDialogFactory
+import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.widgets.WidgetConfigurator
+import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
+import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
-import com.android.systemui.util.time.SystemClock
+import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
+import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * A facade to interact with Compose, when it is available.
@@ -53,6 +67,21 @@ interface BaseComposeFacade {
         onResult: (PeopleViewModel.Result) -> Unit,
     )
 
+    /** Bind the content of [activity] to [viewModel]. */
+    fun setCommunalEditWidgetActivityContent(
+        activity: ComponentActivity,
+        viewModel: BaseCommunalViewModel,
+        widgetConfigurator: WidgetConfigurator,
+        onOpenWidgetPicker: () -> Unit,
+        onEditDone: () -> Unit,
+    )
+
+    fun setVolumePanelActivityContent(
+        activity: ComponentActivity,
+        viewModel: VolumePanelViewModel,
+        onDismissAnimationFinished: () -> Unit,
+    )
+
     /** Create a [View] to represent [viewModel] on screen. */
     fun createFooterActionsView(
         context: Context,
@@ -61,9 +90,41 @@ interface BaseComposeFacade {
     ): View
 
     /** Create a [View] to represent [viewModel] on screen. */
-    fun createMultiShadeView(
+    fun createSceneContainerView(
+        scope: CoroutineScope,
         context: Context,
-        viewModel: MultiShadeViewModel,
-        clock: SystemClock,
+        viewModel: SceneContainerViewModel,
+        windowInsets: StateFlow<WindowInsets?>,
+        sceneByKey: Map<SceneKey, Scene>,
+        dataSourceDelegator: SceneDataSourceDelegator,
+    ): View
+
+    /** Creates sticky key indicator content presenting provided [viewModel] */
+    fun createStickyKeysIndicatorContent(
+        context: Context,
+        viewModel: StickyKeysIndicatorViewModel
+    ): View
+
+    /** Create a [View] to represent [viewModel] on screen. */
+    fun createCommunalView(
+        context: Context,
+        viewModel: BaseCommunalViewModel,
+    ): View
+
+    /** Create a [View] to represent the [BouncerViewModel]. */
+    fun createBouncer(
+        context: Context,
+        viewModel: BouncerViewModel,
+        dialogFactory: BouncerDialogFactory,
+    ): View
+
+    /** Creates a container that hosts the communal UI and handles gesture transitions. */
+    fun createCommunalContainer(context: Context, viewModel: CommunalViewModel): View
+
+    /** Creates a [View] that represents the Lockscreen. */
+    fun createLockscreen(
+        context: Context,
+        viewModel: LockscreenContentViewModel,
+        blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
     ): View
 }

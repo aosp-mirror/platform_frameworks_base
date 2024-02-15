@@ -14,7 +14,7 @@ android_test {
         "androidx.test.core",
         "androidx.test.rules",
         "services.core",
-        "truth-prebuilt",
+        "truth",
         "platform-test-annotations",
     ],
     test_suites: ["general-tests"],

@@ -20,7 +20,9 @@ package android.companion.virtual.sensor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.hardware.Sensor;
 import android.hardware.SensorDirectChannel;
 import android.os.Parcel;
@@ -102,6 +104,11 @@ public final class VirtualSensorConfig implements Parcelable {
         parcel.writeInt(mMinDelay);
         parcel.writeInt(mMaxDelay);
         parcel.writeInt(mFlags);
+    }
+
+    @Override
+    public String toString() {
+        return "VirtualSensorConfig{" + "mType=" + mType + ", mName='" + mName + '\'' + '}';
     }
 
     /**
@@ -212,6 +219,8 @@ public final class VirtualSensorConfig implements Parcelable {
      *
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public int getFlags() {
         return mFlags;
     }

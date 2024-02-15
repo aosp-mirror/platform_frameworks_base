@@ -15,11 +15,12 @@
  */
 package com.android.wm.shell.bubbles;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -28,16 +29,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
-import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.taskview.TaskView;
-import com.android.wm.shell.taskview.TaskViewTaskController;
 
 /**
  * Handles creating and updating the {@link TaskView} associated with a {@link Bubble}.
@@ -63,8 +62,7 @@ public class BubbleTaskViewHelper {
     }
 
     private final Context mContext;
-    private final BubbleController mController;
-    private final @ShellMainThread ShellExecutor mMainExecutor;
+    private final BubbleExpandedViewManager mExpandedViewManager;
     private final BubbleTaskViewHelper.Listener mListener;
     private final View mParentView;
 
@@ -72,7 +70,6 @@ public class BubbleTaskViewHelper {
     private Bubble mBubble;
     @Nullable
     private PendingIntent mPendingIntent;
-    private TaskViewTaskController mTaskViewTaskController;
     @Nullable
     private TaskView mTaskView;
     private int mTaskId = INVALID_TASK_ID;
@@ -83,11 +80,8 @@ public class BubbleTaskViewHelper {
 
         @Override
         public void onInitialized() {
-            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                Log.d(TAG, "onInitialized: destroyed=" + mDestroyed
-                        + " initialized=" + mInitialized
-                        + " bubble=" + getBubbleKey());
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES, "onInitialized: destroyed=%b initialized=%b bubble=%s",
+                    mDestroyed, mInitialized, getBubbleKey());
 
             if (mDestroyed || mInitialized) {
                 return;
@@ -103,13 +97,14 @@ public class BubbleTaskViewHelper {
             // TODO: I notice inconsistencies in lifecycle
             // Post to keep the lifecycle normal
             mParentView.post(() -> {
-                if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                    Log.d(TAG, "onInitialized: calling startActivity, bubble="
-                            + getBubbleKey());
-                }
+                ProtoLog.d(WM_SHELL_BUBBLES, "onInitialized: calling startActivity, bubble=%s",
+                        getBubbleKey());
                 try {
                     options.setTaskAlwaysOnTop(true);
                     options.setLaunchedFromBubble(true);
+                    options.setPendingIntentBackgroundActivityStartMode(
+                            MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                    options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
 
                     Intent fillInIntent = new Intent();
                     // Apply flags to make behaviour match documentLaunchMode=always.
@@ -117,11 +112,19 @@ public class BubbleTaskViewHelper {
                     fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
 
                     if (mBubble.isAppBubble()) {
-                        PendingIntent pi = PendingIntent.getActivity(mContext, 0,
-                                mBubble.getAppBubbleIntent(),
-                                PendingIntent.FLAG_MUTABLE,
-                                null);
-                        mTaskView.startActivity(pi, fillInIntent, options, launchBounds);
+                        Context context =
+                                mContext.createContextAsUser(
+                                        mBubble.getUser(), Context.CONTEXT_RESTRICTED);
+                        PendingIntent pi = PendingIntent.getActivity(
+                                context,
+                                /* requestCode= */ 0,
+                                mBubble.getAppBubbleIntent()
+                                        .addFlags(FLAG_ACTIVITY_NEW_DOCUMENT)
+                                        .addFlags(FLAG_ACTIVITY_MULTIPLE_TASK),
+                                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
+                                /* options= */ null);
+                        mTaskView.startActivity(pi, /* fillInIntent= */ null, options,
+                                launchBounds);
                     } else if (mBubble.hasMetadataShortcutId()) {
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
@@ -139,7 +142,8 @@ public class BubbleTaskViewHelper {
                     // the bubble again so we'll just remove it.
                     Log.w(TAG, "Exception while displaying bubble: " + getBubbleKey()
                             + ", " + e.getMessage() + "; removing bubble");
-                    mController.removeBubble(getBubbleKey(), Bubbles.DISMISS_INVALID_INTENT);
+                    mExpandedViewManager.removeBubble(
+                            getBubbleKey(), Bubbles.DISMISS_INVALID_INTENT);
                 }
                 mInitialized = true;
             });
@@ -152,10 +156,8 @@ public class BubbleTaskViewHelper {
 
         @Override
         public void onTaskCreated(int taskId, ComponentName name) {
-            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                Log.d(TAG, "onTaskCreated: taskId=" + taskId
-                        + " bubble=" + getBubbleKey());
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES, "onTaskCreated: taskId=%d bubble=%s",
+                    taskId, getBubbleKey());
             // The taskId is saved to use for removeTask, preventing appearance in recent tasks.
             mTaskId = taskId;
 
@@ -171,37 +173,41 @@ public class BubbleTaskViewHelper {
 
         @Override
         public void onTaskRemovalStarted(int taskId) {
-            if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-                Log.d(TAG, "onTaskRemovalStarted: taskId=" + taskId
-                        + " bubble=" + getBubbleKey());
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES, "onTaskRemovalStarted: taskId=%d bubble=%s",
+                    taskId, getBubbleKey());
             if (mBubble != null) {
-                mController.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+                mExpandedViewManager.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+            }
+            if (mTaskView != null) {
+                mTaskView.release();
+                ((ViewGroup) mParentView).removeView(mTaskView);
+                mTaskView = null;
             }
         }
 
         @Override
         public void onBackPressedOnTaskRoot(int taskId) {
-            if (mTaskId == taskId && mController.isStackExpanded()) {
+            if (mTaskId == taskId && mExpandedViewManager.isStackExpanded()) {
                 mListener.onBackPressed();
             }
         }
     };
 
     public BubbleTaskViewHelper(Context context,
-            BubbleController controller,
+            BubbleExpandedViewManager expandedViewManager,
             BubbleTaskViewHelper.Listener listener,
+            BubbleTaskView bubbleTaskView,
             View parent) {
         mContext = context;
-        mController = controller;
-        mMainExecutor = mController.getMainExecutor();
+        mExpandedViewManager = expandedViewManager;
         mListener = listener;
         mParentView = parent;
-        mTaskViewTaskController = new TaskViewTaskController(mContext,
-                mController.getTaskOrganizer(),
-                mController.getTaskViewTransitions(), mController.getSyncTransactionQueue());
-        mTaskView = new TaskView(mContext, mTaskViewTaskController);
-        mTaskView.setListener(mMainExecutor, mTaskViewListener);
+        mTaskView = bubbleTaskView.getTaskView();
+        bubbleTaskView.setDelegateListener(mTaskViewListener);
+        if (bubbleTaskView.isCreated()) {
+            mTaskId = bubbleTaskView.getTaskId();
+            mListener.onTaskCreated();
+        }
     }
 
     /**
@@ -217,24 +223,6 @@ public class BubbleTaskViewHelper {
             return true;
         }
         return false;
-    }
-
-    /** Cleans up anything related to the task and {@code TaskView}. */
-    public void cleanUpTaskView() {
-        if (DEBUG_BUBBLE_EXPANDED_VIEW) {
-            Log.d(TAG, "cleanUpExpandedState: bubble=" + getBubbleKey() + " task=" + mTaskId);
-        }
-        if (mTaskId != INVALID_TASK_ID) {
-            try {
-                ActivityTaskManager.getService().removeTask(mTaskId);
-            } catch (RemoteException e) {
-                Log.w(TAG, e.getMessage());
-            }
-        }
-        if (mTaskView != null) {
-            mTaskView.release();
-            mTaskView = null;
-        }
     }
 
     /** Returns the bubble key associated with this view. */

@@ -30,9 +30,8 @@ constructor(
     private val localBluetoothManager: LocalBluetoothManager?
 ) {
     /** Creates a [LocalMediaManager] for the given package. */
-    fun create(packageName: String): LocalMediaManager {
-        return InfoMediaManager(context, packageName, null, localBluetoothManager).run {
-            LocalMediaManager(context, localBluetoothManager, this, packageName)
-        }
+    fun create(packageName: String?): LocalMediaManager {
+        return InfoMediaManager.createInstance(context, packageName, null, localBluetoothManager)
+            .run { LocalMediaManager(context, localBluetoothManager, this, packageName) }
     }
 }

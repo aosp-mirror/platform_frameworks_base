@@ -16,11 +16,13 @@
 
 package com.android.server.dreams;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
+import static android.os.PowerManager.USER_ACTIVITY_EVENT_OTHER;
+import static android.os.PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS;
 
 import android.app.ActivityTaskManager;
 import android.app.BroadcastOptions;
+import android.app.IAppTask;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -72,6 +74,7 @@ final class DreamController {
     private final Handler mHandler;
     private final Listener mListener;
     private final ActivityTaskManager mActivityTaskManager;
+    private final PowerManager mPowerManager;
 
     private final Intent mDreamingStartedIntent = new Intent(Intent.ACTION_DREAMING_STARTED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | FLAG_RECEIVER_FOREGROUND);
@@ -83,6 +86,15 @@ final class DreamController {
 
     private final Intent mCloseNotificationShadeIntent;
     private final Bundle mCloseNotificationShadeOptions;
+
+    /**
+     * If this flag is on, we report user activity to {@link PowerManager} so that the screen
+     * doesn't shut off immediately when a dream quits unexpectedly. The device will instead go to
+     * keyguard and time out back to dreaming shortly.
+     *
+     * This allows the dream a second chance to relaunch in case of an app update or other crash.
+     */
+    private final boolean mResetScreenTimeoutOnUnexpectedDreamExit;
 
     private DreamRecord mCurrentDream;
 
@@ -101,6 +113,7 @@ final class DreamController {
         mHandler = handler;
         mListener = listener;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
+        mPowerManager = mContext.getSystemService(PowerManager.class);
         mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mCloseNotificationShadeIntent.putExtra(EXTRA_REASON_KEY, EXTRA_REASON_VALUE);
         mCloseNotificationShadeIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -110,6 +123,8 @@ final class DreamController {
                         EXTRA_REASON_VALUE)
                 .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                 .toBundle();
+        mResetScreenTimeoutOnUnexpectedDreamExit = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_resetScreenTimeoutOnUnexpectedDreamExit);
     }
 
     /**
@@ -214,6 +229,38 @@ final class DreamController {
     }
 
     /**
+     * Provides an appTask for the dream with token {@code dreamToken}, so that the dream controller
+     * can stop the dream task when necessary.
+     */
+    void setDreamAppTask(Binder dreamToken, IAppTask appTask) {
+        if (mCurrentDream == null || mCurrentDream.mToken != dreamToken
+                || mCurrentDream.mAppTask != null) {
+            Slog.e(TAG, "Illegal dream activity start. mCurrentDream.mToken = "
+                    + mCurrentDream.mToken + ", illegal dreamToken = " + dreamToken
+                    + ". Ending this dream activity.");
+            try {
+                appTask.finishAndRemoveTask();
+            } catch (RemoteException | RuntimeException e) {
+                Slog.e(TAG, "Unable to stop illegal dream activity.");
+            }
+            return;
+        }
+
+        mCurrentDream.mAppTask = appTask;
+    }
+
+    /**
+     * Sends a user activity signal to PowerManager to stop the screen from turning off immediately
+     * if there hasn't been any user interaction in a while.
+     */
+    private void resetScreenTimeout() {
+        Slog.i(TAG, "Resetting screen timeout");
+        long time = SystemClock.uptimeMillis();
+        mPowerManager.userActivity(time, USER_ACTIVITY_EVENT_OTHER,
+                USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS);
+    }
+
+    /**
      * Stops dreaming.
      *
      * The current dream, if any, and any unstopped previous dreams are stopped. The device stops
@@ -303,8 +350,14 @@ final class DreamController {
                     mSentStartBroadcast = false;
                 }
 
-                mActivityTaskManager.removeRootTasksWithActivityTypes(
-                        new int[] {ACTIVITY_TYPE_DREAM});
+                if (mCurrentDream != null && mCurrentDream.mAppTask != null) {
+                    // Finish the dream task in case it hasn't finished by itself already.
+                    try {
+                        mCurrentDream.mAppTask.finishAndRemoveTask();
+                    } catch (RemoteException | RuntimeException e) {
+                        Slog.e(TAG, "Unable to stop dream activity.");
+                    }
+                }
 
                 mListener.onDreamStopped(dream.mToken);
             }
@@ -364,6 +417,7 @@ final class DreamController {
         public final boolean mIsPreviewMode;
         public final boolean mCanDoze;
         public final int mUserId;
+        public IAppTask mAppTask;
 
         public PowerManager.WakeLock mWakeLock;
         public boolean mBound;
@@ -420,6 +474,9 @@ final class DreamController {
             mHandler.post(() -> {
                 mService = null;
                 if (mCurrentDream == DreamRecord.this) {
+                    if (mResetScreenTimeoutOnUnexpectedDreamExit) {
+                        resetScreenTimeout();
+                    }
                     stopDream(true /*immediate*/, "binder died");
                 }
             });
@@ -445,6 +502,9 @@ final class DreamController {
             mHandler.post(() -> {
                 mService = null;
                 if (mCurrentDream == DreamRecord.this) {
+                    if (mResetScreenTimeoutOnUnexpectedDreamExit) {
+                        resetScreenTimeout();
+                    }
                     stopDream(true /*immediate*/, "service disconnected");
                 }
             });

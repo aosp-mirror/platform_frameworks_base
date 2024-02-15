@@ -28,6 +28,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ProcessList.INVALID_ADJ;
+import static com.android.server.grammaticalinflection.GrammaticalInflectionUtils.checkSystemGrammaticalGenderPermission;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.DESTROYING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
@@ -42,12 +43,12 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 
 import static java.util.Objects.requireNonNull;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -55,6 +56,7 @@ import android.app.ActivityThread;
 import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.ConfigurationChangeItem;
 import android.content.ComponentName;
 import android.content.Context;
@@ -65,6 +67,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Build;
+import android.os.DeadObjectException;
 import android.os.FactoryTest;
 import android.os.LocaleList;
 import android.os.Message;
@@ -75,7 +78,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.IRemoteAnimationRunner;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -87,6 +89,8 @@ import com.android.server.wm.ActivityTaskManagerService.HotPath;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -185,6 +189,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Set to true when process was launched with a wrapper attached
     private volatile boolean mUsingWrapper;
 
+    /** Non-null if this process may have a window. */
+    @Nullable
+    Session mWindowSession;
+
     // Thread currently set for VR scheduling
     int mVrThreadTid;
 
@@ -249,11 +257,30 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @Nullable
     private ArrayMap<ActivityRecord, int[]> mRemoteActivities;
 
-    /** Whether our process is currently running a {@link RecentsAnimation} */
-    private boolean mRunningRecentsAnimation;
+    /**
+     * It can be set for a running transition player ({@link android.window.ITransitionPlayer}) or
+     * remote animators (running {@link android.window.IRemoteTransition}).
+     */
+    static final int ANIMATING_REASON_REMOTE_ANIMATION = 1;
+    /** It is set for wakefulness transition. */
+    static final int ANIMATING_REASON_WAKEFULNESS_CHANGE = 1 << 1;
+    /** Whether the legacy {@link RecentsAnimation} is running. */
+    static final int ANIMATING_REASON_LEGACY_RECENT_ANIMATION = 1 << 2;
 
-    /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
-    private boolean mRunningRemoteAnimation;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            ANIMATING_REASON_REMOTE_ANIMATION,
+            ANIMATING_REASON_WAKEFULNESS_CHANGE,
+            ANIMATING_REASON_LEGACY_RECENT_ANIMATION,
+    })
+    @interface AnimatingReason {}
+
+    /**
+     * Non-zero if this process is currently running an important animation. This should be never
+     * set for system server.
+     */
+    @AnimatingReason
+    private int mAnimatingReasons;
 
     // The bits used for mActivityStateFlags.
     private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
@@ -271,6 +298,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      * window manager and read by activity manager.
      */
     private volatile int mActivityStateFlags = ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
+
+    private boolean mCanUseSystemGrammaticalGender;
 
     public WindowProcessController(@NonNull ActivityTaskManagerService atm,
             @NonNull ApplicationInfo info, String name, int uid, int userId, Object owner,
@@ -293,6 +322,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             mIsActivityConfigOverrideAllowed = false;
         }
 
+        mCanUseSystemGrammaticalGender = mAtm.mGrammaticalManagerInternal != null
+                && mAtm.mGrammaticalManagerInternal.canGetSystemGrammaticalGender(mUid,
+                mInfo.packageName);
         onConfigurationChanged(atm.getGlobalConfiguration());
         mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
@@ -367,13 +399,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         final IApplicationThread thread = mThread;
         if (prevProcState >= CACHED_CONFIG_PROC_STATE && repProcState < CACHED_CONFIG_PROC_STATE
                 && thread != null && mHasCachedConfiguration) {
-            final Configuration config;
+            final ConfigurationChangeItem configurationChangeItem;
             synchronized (mLastReportedConfiguration) {
-                config = new Configuration(mLastReportedConfiguration);
+                onConfigurationChangePreScheduled(mLastReportedConfiguration);
+                configurationChangeItem = ConfigurationChangeItem.obtain(
+                        mLastReportedConfiguration, mLastTopActivityDeviceId);
             }
             // Schedule immediately to make sure the app component (e.g. receiver, service) can get
             // the latest configuration in their lifecycle callbacks (e.g. onReceive, onCreate).
-            scheduleConfigurationChange(thread, config);
+            try {
+                // No WM lock here.
+                mAtm.getLifecycleManager().scheduleTransactionItemNow(
+                        thread, configurationChangeItem);
+            } catch (Exception e) {
+                Slog.e(TAG_CONFIGURATION, "Failed to schedule ConfigurationChangeItem="
+                        + configurationChangeItem + " owner=" + mOwner, e);
+            }
         }
     }
 
@@ -609,22 +650,23 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     @HotPath(caller = HotPath.START_SERVICE)
     public boolean areBackgroundFgsStartsAllowed() {
-        return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesState(),
-                true /* isCheckingForFgsStart */) != BAL_BLOCK;
+        return areBackgroundActivityStartsAllowed(
+                mAtm.getBalAppSwitchesState(),
+                true /* isCheckingForFgsStart */).allows();
     }
 
-    @BackgroundActivityStartController.BalCode
-    int areBackgroundActivityStartsAllowed(int appSwitchState) {
-        return areBackgroundActivityStartsAllowed(appSwitchState,
+    BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
+            int appSwitchState) {
+        return areBackgroundActivityStartsAllowed(
+                appSwitchState,
                 false /* isCheckingForFgsStart */);
     }
 
-    @BackgroundActivityStartController.BalCode
-    private int areBackgroundActivityStartsAllowed(int appSwitchState,
-            boolean isCheckingForFgsStart) {
-        return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid, mInfo.packageName,
-                appSwitchState, isCheckingForFgsStart, hasActivityInVisibleTask(),
-                mInstrumentingWithBackgroundActivityStartPrivileges,
+    private BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
+            int appSwitchState, boolean isCheckingForFgsStart) {
+        return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid,
+                mInfo.packageName, appSwitchState, isCheckingForFgsStart,
+                hasActivityInVisibleTask(), mInstrumentingWithBackgroundActivityStartPrivileges,
                 mAtm.getLastStopAppSwitchesTime(),
                 mLastActivityLaunchTime, mLastActivityFinishTime);
     }
@@ -884,7 +926,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             int i = mActivities.size();
             while (i > 0) {
                 i--;
-                mActivities.get(i).stopFreezingScreenLocked(true);
+                mActivities.get(i).stopFreezingScreen(true /* unfreezeNow */, true /* force */);
             }
         }
     }
@@ -957,7 +999,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             if (packageName.equals(r.packageName)
                     && r.applyAppSpecificConfig(nightMode, localesOverride, gender)
                     && r.isVisibleRequested()) {
-                r.ensureActivityConfiguration(0 /* globalChanges */, true /* preserveWindow */);
+                r.ensureActivityConfiguration();
             }
         }
     }
@@ -1235,8 +1277,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 & (ACTIVITY_STATE_FLAG_IS_VISIBLE | ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE)) != 0;
         if (!wasAnyVisible && anyVisible) {
             mAtm.mVisibleActivityProcessTracker.onAnyActivityVisible(this);
+            mAtm.mWindowManager.onProcessActivityVisibilityChanged(mUid, true /*visible*/);
         } else if (wasAnyVisible && !anyVisible) {
             mAtm.mVisibleActivityProcessTracker.onAllActivitiesInvisible(this);
+            mAtm.mWindowManager.onProcessActivityVisibilityChanged(mUid, false /*visible*/);
         } else if (wasAnyVisible && !wasResumed && hasResumedActivity()) {
             mAtm.mVisibleActivityProcessTracker.onActivityResumedWhileVisible(this);
         }
@@ -1530,6 +1574,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
+        if (mCanUseSystemGrammaticalGender) {
+            config.setGrammaticalGender(
+                    mAtm.mGrammaticalManagerInternal.getSystemGrammaticalGender(mUserId));
+        }
+
         if (mPauseConfigurationDispatchCount > 0) {
             mHasPendingConfigurationChange = true;
             return;
@@ -1584,9 +1633,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         resolvedConfig.seq = newParentConfig.seq;
     }
 
-    void dispatchConfiguration(Configuration config) {
+    void dispatchConfiguration(@NonNull Configuration config) {
         mHasPendingConfigurationChange = false;
-        if (mThread == null) {
+        final IApplicationThread thread = mThread;
+        if (thread == null) {
             if (Build.IS_DEBUGGABLE && mHasImeService) {
                 // TODO (b/135719017): Temporary log for debugging IME service.
                 Slog.w(TAG_CONFIGURATION, "Unable to send config for IME proc " + mName
@@ -1611,10 +1661,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
 
-        scheduleConfigurationChange(mThread, config);
+        onConfigurationChangePreScheduled(config);
+        scheduleClientTransactionItem(thread, ConfigurationChangeItem.obtain(
+                config, mLastTopActivityDeviceId));
     }
 
-    private void scheduleConfigurationChange(IApplicationThread thread, Configuration config) {
+    private void onConfigurationChangePreScheduled(@NonNull Configuration config) {
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending to proc %s new config %s", mName,
                 config);
         if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1622,11 +1674,37 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             Slog.v(TAG_CONFIGURATION, "Sending to IME proc " + mName + " new config " + config);
         }
         mHasCachedConfiguration = false;
+    }
+
+    @VisibleForTesting
+    void scheduleClientTransactionItem(@NonNull ClientTransactionItem transactionItem) {
+        final IApplicationThread thread = mThread;
+        if (thread == null) {
+            if (Build.IS_DEBUGGABLE) {
+                Slog.w(TAG_CONFIGURATION, "Unable to send transaction to client proc " + mName
+                        + ": no app thread");
+            }
+            return;
+        }
+        scheduleClientTransactionItem(thread, transactionItem);
+    }
+
+    private void scheduleClientTransactionItem(@NonNull IApplicationThread thread,
+            @NonNull ClientTransactionItem transactionItem) {
         try {
-            mAtm.getLifecycleManager().scheduleTransaction(thread,
-                    ConfigurationChangeItem.obtain(config, mLastTopActivityDeviceId));
+            if (mWindowSession != null && mWindowSession.hasWindow()) {
+                mAtm.getLifecycleManager().scheduleTransactionItem(thread, transactionItem);
+            } else {
+                // Non-UI process can handle the change directly.
+                mAtm.getLifecycleManager().scheduleTransactionItemNow(thread, transactionItem);
+            }
+        } catch (DeadObjectException e) {
+            // Expected if the process has been killed.
+            Slog.w(TAG_CONFIGURATION, "Failed for dead process. ClientTransactionItem="
+                    + transactionItem + " owner=" + mOwner);
         } catch (Exception e) {
-            Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change: " + mOwner, e);
+            Slog.e(TAG_CONFIGURATION, "Failed to schedule ClientTransactionItem="
+                    + transactionItem + " owner=" + mOwner, e);
         }
     }
 
@@ -1667,7 +1745,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             overrideConfig.assetsSeq = assetSeq;
             r.onRequestedOverrideConfigurationChanged(overrideConfig);
             if (r.isVisibleRequested()) {
-                r.ensureActivityConfiguration(0, true);
+                r.ensureActivityConfiguration();
             }
         }
     }
@@ -1821,6 +1899,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
+    public boolean isShowingUiWhileDozing() {
+        return this == mAtm.mVisibleDozeUiProcess;
+    }
+
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean isPreviousProcess() {
         return this == mAtm.mPreviousProcess;
     }
@@ -1847,30 +1930,45 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void setRunningRecentsAnimation(boolean running) {
-        if (mRunningRecentsAnimation == running) {
-            return;
+        if (running) {
+            addAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
+        } else {
+            removeAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
         }
-        mRunningRecentsAnimation = running;
-        updateRunningRemoteOrRecentsAnimation();
     }
 
     void setRunningRemoteAnimation(boolean running) {
-        if (mRunningRemoteAnimation == running) {
-            return;
+        if (running) {
+            addAnimatingReason(ANIMATING_REASON_REMOTE_ANIMATION);
+        } else {
+            removeAnimatingReason(ANIMATING_REASON_REMOTE_ANIMATION);
         }
-        mRunningRemoteAnimation = running;
-        updateRunningRemoteOrRecentsAnimation();
     }
 
-    void updateRunningRemoteOrRecentsAnimation() {
+    void addAnimatingReason(@AnimatingReason int reason) {
+        final int prevReasons = mAnimatingReasons;
+        mAnimatingReasons |= reason;
+        if (prevReasons == 0) {
+            setAnimating(true);
+        }
+    }
+
+    void removeAnimatingReason(@AnimatingReason int reason) {
+        final int prevReasons = mAnimatingReasons;
+        mAnimatingReasons &= ~reason;
+        if (prevReasons != 0 && mAnimatingReasons == 0) {
+            setAnimating(false);
+        }
+    }
+
+    /** Applies the animating state to activity manager for updating process priority. */
+    private void setAnimating(boolean animating) {
         // Posting on handler so WM lock isn't held when we call into AM.
-        mAtm.mH.sendMessage(PooledLambda.obtainMessage(
-                WindowProcessListener::setRunningRemoteAnimation, mListener,
-                isRunningRemoteTransition()));
+        mAtm.mH.post(() -> mListener.setRunningRemoteAnimation(animating));
     }
 
     boolean isRunningRemoteTransition() {
-        return mRunningRecentsAnimation || mRunningRemoteAnimation;
+        return (mAnimatingReasons & ANIMATING_REASON_REMOTE_ANIMATION) != 0;
     }
 
     /** Adjusts scheduling group for animation. This method MUST NOT be called inside WM lock. */
@@ -1923,6 +2021,21 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         pw.println(prefix + " OverrideConfiguration=" + getRequestedOverrideConfiguration());
         pw.println(prefix + " mLastReportedConfiguration=" + (mHasCachedConfiguration
                 ? ("(cached) " + mLastReportedConfiguration) : mLastReportedConfiguration));
+
+        final int animatingReasons = mAnimatingReasons;
+        if (animatingReasons != 0) {
+            pw.print(prefix + " mAnimatingReasons=");
+            if ((animatingReasons & ANIMATING_REASON_REMOTE_ANIMATION) != 0) {
+                pw.print("remote-animation|");
+            }
+            if ((animatingReasons & ANIMATING_REASON_WAKEFULNESS_CHANGE) != 0) {
+                pw.print("wakefulness|");
+            }
+            if ((animatingReasons & ANIMATING_REASON_LEGACY_RECENT_ANIMATION) != 0) {
+                pw.print("legacy-recents");
+            }
+            pw.println();
+        }
 
         final int stateFlags = mActivityStateFlags;
         if (stateFlags != ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER) {

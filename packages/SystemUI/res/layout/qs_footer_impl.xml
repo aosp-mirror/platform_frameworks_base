@@ -19,7 +19,7 @@
 <com.android.systemui.qs.QSFooterView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/qs_footer"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/qs_footer_height"
     android:layout_marginStart="@dimen/qs_footer_margin"
     android:layout_marginEnd="@dimen/qs_footer_margin"
     android:layout_marginBottom="@dimen/qs_footers_margin_bottom"
@@ -31,7 +31,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/qs_footer_height"
+            android:layout_height="match_parent"
             android:layout_gravity="center_vertical">
 
             <TextView
@@ -44,6 +44,8 @@
                 android:ellipsize="marquee"
                 android:focusable="true"
                 android:gravity="center_vertical"
+                android:textDirection="locale"
+                android:textAlignment="viewStart"
                 android:singleLine="true"
                 android:textAppearance="@style/TextAppearance.QS.Status.Build"
                 android:visibility="gone" />
@@ -53,6 +55,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
+                android:focusable="true"
+                android:importantForAccessibility="no"
+                android:tint="?attr/shadeActive"
                 android:visibility="gone" />
 
             <FrameLayout
@@ -70,7 +75,7 @@
                     android:focusable="true"
                     android:padding="@dimen/qs_footer_icon_padding"
                     android:src="@*android:drawable/ic_mode_edit"
-                    android:tint="?android:attr/textColorPrimary" />
+                    android:tint="?attr/onSurfaceVariant" />
             </FrameLayout>
 
         </LinearLayout>

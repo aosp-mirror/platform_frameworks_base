@@ -57,11 +57,8 @@ public class ProtectedPackages {
     @GuardedBy("this")
     private final SparseArray<Set<String>> mOwnerProtectedPackages = new SparseArray<>();
 
-    private final Context mContext;
-
     public ProtectedPackages(Context context) {
-        mContext = context;
-        mDeviceProvisioningPackage = mContext.getResources().getString(
+        mDeviceProvisioningPackage = context.getResources().getString(
                 R.string.config_deviceProvisioningPackage);
     }
 

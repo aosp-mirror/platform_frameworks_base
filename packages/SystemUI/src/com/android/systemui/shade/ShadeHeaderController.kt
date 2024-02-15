@@ -23,11 +23,11 @@ import android.app.PendingIntent
 import android.app.StatusBarManager
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Insets
 import android.os.Bundle
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
 import android.provider.AlarmClock
-import android.util.Pair
 import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowInsets
@@ -38,7 +38,7 @@ import androidx.core.view.doOnLayout
 import com.android.app.animation.Interpolators
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.Flags.centralizedStatusBarDimensRefactor
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
@@ -49,18 +49,20 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
+import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeHeaderController.Companion.HEADER_TRANSITION_ID
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
 import com.android.systemui.shade.ShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
-import com.android.systemui.shade.ShadeModule.Companion.SHADE_HEADER
+import com.android.systemui.shade.ShadeViewProviderModule.Companion.SHADE_HEADER
 import com.android.systemui.shade.carrier.ShadeCarrierGroup
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
+import com.android.systemui.statusbar.phone.StatusOverlayHoverListenerFactory
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.NextAlarmController
@@ -99,6 +101,7 @@ constructor(
     private val qsBatteryModeController: QsBatteryModeController,
     private val nextAlarmController: NextAlarmController,
     private val activityStarter: ActivityStarter,
+    private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
 ) : ViewController<View>(header), Dumpable {
 
     companion object {
@@ -122,15 +125,19 @@ constructor(
             }
     }
 
+    var shadeCollapseAction: Runnable? = null
+
     private lateinit var iconManager: StatusBarIconController.TintedIconManager
     private lateinit var carrierIconSlots: List<String>
     private lateinit var mShadeCarrierGroupController: ShadeCarrierGroupController
 
-    private val batteryIcon: BatteryMeterView = header.findViewById(R.id.batteryRemainingIcon)
-    private val clock: Clock = header.findViewById(R.id.clock)
-    private val date: TextView = header.findViewById(R.id.date)
-    private val iconContainer: StatusIconContainer = header.findViewById(R.id.statusIcons)
-    private val mShadeCarrierGroup: ShadeCarrierGroup = header.findViewById(R.id.carrier_group)
+    private val batteryIcon: BatteryMeterView = header.requireViewById(R.id.batteryRemainingIcon)
+    private val clock: Clock = header.requireViewById(R.id.clock)
+    private val date: TextView = header.requireViewById(R.id.date)
+    private val iconContainer: StatusIconContainer = header.requireViewById(R.id.statusIcons)
+    private val mShadeCarrierGroup: ShadeCarrierGroup = header.requireViewById(R.id.carrier_group)
+    private val systemIconsHoverContainer: View =
+        header.requireViewById(R.id.hover_system_icons_container)
 
     private var roundedCorners = 0
     private var cutout: DisplayCutout? = null
@@ -195,7 +202,9 @@ constructor(
         set(value) {
             if (visible && field != value) {
                 field = value
+                iconContainer.setQsExpansionTransitioning(value > 0f && value < 1.0f)
                 updatePosition()
+                updateIgnoredSlots()
             }
         }
 
@@ -215,6 +224,8 @@ constructor(
 
             view.onApplyWindowInsets(insets)
         }
+
+    private var singleCarrier = false
 
     private val demoModeReceiver =
         object : DemoMode {
@@ -250,6 +261,20 @@ constructor(
                     header.paddingRight,
                     header.paddingBottom
                 )
+                systemIconsHoverContainer.setPaddingRelative(
+                    resources.getDimensionPixelSize(
+                        R.dimen.hover_system_icons_container_padding_start
+                    ),
+                    resources.getDimensionPixelSize(
+                        R.dimen.hover_system_icons_container_padding_top
+                    ),
+                    resources.getDimensionPixelSize(
+                        R.dimen.hover_system_icons_container_padding_end
+                    ),
+                    resources.getDimensionPixelSize(
+                        R.dimen.hover_system_icons_container_padding_bottom
+                    )
+                )
             }
 
             override fun onDensityOrFontScaleChanged() {
@@ -262,6 +287,7 @@ constructor(
                 lastInsets?.let { updateConstraintsForInsets(header, it) }
                 updateResources()
                 updateCarrierGroupPadding()
+                clock.onDensityOrFontScaleChanged()
             }
         }
 
@@ -279,7 +305,8 @@ constructor(
 
         iconManager = tintedIconManagerFactory.create(iconContainer, StatusBarLocation.QS)
         iconManager.setTint(
-            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary)
+            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary),
+            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimaryInverse),
         )
 
         carrierIconSlots =
@@ -310,6 +337,9 @@ constructor(
         demoModeController.addCallback(demoModeReceiver)
         statusBarIconController.addIconGroup(iconManager)
         nextAlarmController.addCallback(nextAlarmCallback)
+        systemIconsHoverContainer.setOnHoverListener(
+            statusOverlayHoverListenerFactory.createListener(systemIconsHoverContainer)
+        )
     }
 
     override fun onViewDetached() {
@@ -320,6 +350,7 @@ constructor(
         demoModeController.removeCallback(demoModeReceiver)
         statusBarIconController.removeIconGroup(iconManager)
         nextAlarmController.removeCallback(nextAlarmCallback)
+        systemIconsHoverContainer.setOnHoverListener(null)
     }
 
     fun disable(state1: Int, state2: Int, animate: Boolean) {
@@ -372,9 +403,9 @@ constructor(
     private fun updateConstraintsForInsets(view: MotionLayout, insets: WindowInsets) {
         val cutout = insets.displayCutout.also { this.cutout = it }
 
-        val sbInsets: Pair<Int, Int> = insetsProvider.getStatusBarContentInsetsForCurrentRotation()
-        val cutoutLeft = sbInsets.first
-        val cutoutRight = sbInsets.second
+        val sbInsets: Insets = insetsProvider.getStatusBarContentInsetsForCurrentRotation()
+        val cutoutLeft = sbInsets.left
+        val cutoutRight = sbInsets.right
         val hasCornerCutout: Boolean = insetsProvider.currentRotationHasCornerCutout()
         updateQQSPaddings()
         // Set these guides as the left/right limits for content that lives in the top row, using
@@ -402,6 +433,9 @@ constructor(
             changes += combinedShadeHeadersConstraintManager.emptyCutoutConstraints()
         }
 
+        if (centralizedStatusBarDimensRefactor()) {
+            view.setPadding(view.paddingLeft, sbInsets.top, view.paddingRight, view.paddingBottom)
+        }
         view.updateAllConstraints(changes)
         updateBatteryMode()
     }
@@ -455,9 +489,13 @@ constructor(
         if (largeScreenActive) {
             logInstantEvent("Large screen constraints set")
             header.setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
+            systemIconsHoverContainer.isClickable = true
+            systemIconsHoverContainer.setOnClickListener { shadeCollapseAction?.run() }
         } else {
             logInstantEvent("Small screen constraints set")
             header.setTransition(HEADER_TRANSITION_ID)
+            systemIconsHoverContainer.setOnClickListener(null)
+            systemIconsHoverContainer.isClickable = false
         }
         header.jumpToState(header.startState)
         updatePosition()
@@ -479,17 +517,20 @@ constructor(
     private fun updateListeners() {
         mShadeCarrierGroupController.setListening(visible)
         if (visible) {
-            updateSingleCarrier(mShadeCarrierGroupController.isSingleCarrier)
+            singleCarrier = mShadeCarrierGroupController.isSingleCarrier
+            updateIgnoredSlots()
             mShadeCarrierGroupController.setOnSingleCarrierChangedListener {
-                updateSingleCarrier(it)
+                singleCarrier = it
+                updateIgnoredSlots()
             }
         } else {
             mShadeCarrierGroupController.setOnSingleCarrierChangedListener(null)
         }
     }
 
-    private fun updateSingleCarrier(singleCarrier: Boolean) {
-        if (singleCarrier) {
+    private fun updateIgnoredSlots() {
+        // switching from QQS to QS state halfway through the transition
+        if (singleCarrier || qsExpandedFraction < 0.5) {
             iconContainer.removeIgnoredSlots(carrierIconSlots)
         } else {
             iconContainer.addIgnoredSlots(carrierIconSlots)
@@ -555,7 +596,7 @@ constructor(
     inner class CustomizerAnimationListener(
         private val enteringCustomizing: Boolean,
     ) : AnimatorListenerAdapter() {
-        override fun onAnimationEnd(animation: Animator?) {
+        override fun onAnimationEnd(animation: Animator) {
             super.onAnimationEnd(animation)
             header.animate().setListener(null)
             if (enteringCustomizing) {
@@ -563,7 +604,7 @@ constructor(
             }
         }
 
-        override fun onAnimationStart(animation: Animator?) {
+        override fun onAnimationStart(animation: Animator) {
             super.onAnimationStart(animation)
             if (!enteringCustomizing) {
                 customizing = false

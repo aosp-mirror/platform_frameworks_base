@@ -29,6 +29,7 @@ import android.annotation.ColorRes;
 import android.annotation.DimenRes;
 import android.annotation.Discouraged;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.FontRes;
 import android.annotation.FractionRes;
 import android.annotation.IntegerRes;
@@ -46,6 +47,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.content.pm.ApplicationInfo;
 import android.content.res.loader.ResourcesLoader;
 import android.graphics.Movie;
 import android.graphics.Typeface;
@@ -54,6 +56,7 @@ import android.graphics.drawable.Drawable.ConstantState;
 import android.graphics.drawable.DrawableInflater;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -86,7 +89,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -132,6 +134,11 @@ public class Resources {
 
     private static final Object sSync = new Object();
     private final Object mUpdateLock = new Object();
+
+    /**
+     * Controls whether we should preload resources during zygote init.
+     */
+    private static final boolean PRELOAD_RESOURCES = true;
 
     // Used by BridgeResources in layoutlib
     @UnsupportedAppUsage
@@ -180,7 +187,7 @@ public class Resources {
     private int mBaseApkAssetsSize;
 
     /** @hide */
-    private static Set<Resources> sResourcesHistory = Collections.synchronizedSet(
+    private static final Set<Resources> sResourcesHistory = Collections.synchronizedSet(
             Collections.newSetFromMap(
                     new WeakHashMap<>()));
 
@@ -2204,8 +2211,7 @@ public class Resources {
      *
      * <p>The best practices is to obtain metrics from
      * {@link WindowManager#getCurrentWindowMetrics()} for window bounds. The value obtained from
-     * this API may be wrong if {@link Context#getResources()} is from
-     * non-{@link android.annotation.UiContext}.
+     * this API may be wrong if {@link Context#getResources()} is not from a {@code UiContext}.
      * For example, use the {@link DisplayMetrics} obtained from {@link Application#getResources()}
      * to build {@link android.app.Activity} UI elements especially when the
      * {@link android.app.Activity} is in the multi-window mode or on the secondary {@link Display}.
@@ -2705,11 +2711,108 @@ public class Resources {
         }
     }
 
+    /**
+     * Load in commonly used resources, so they can be shared across processes.
+     *
+     * These tend to be a few Kbytes, but are frequently in the 20-40K range, and occasionally even
+     * larger.
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public static void preloadResources() {
+        try {
+            final Resources sysRes = Resources.getSystem();
+            sysRes.startPreloading();
+            if (PRELOAD_RESOURCES) {
+                Log.i(TAG, "Preloading resources...");
+
+                long startTime = SystemClock.uptimeMillis();
+                TypedArray ar = sysRes.obtainTypedArray(
+                        com.android.internal.R.array.preloaded_drawables);
+                int numberOfEntries = preloadDrawables(sysRes, ar);
+                ar.recycle();
+                Log.i(TAG, "...preloaded " + numberOfEntries + " resources in "
+                        + (SystemClock.uptimeMillis() - startTime) + "ms.");
+
+                startTime = SystemClock.uptimeMillis();
+                ar = sysRes.obtainTypedArray(
+                        com.android.internal.R.array.preloaded_color_state_lists);
+                numberOfEntries = preloadColorStateLists(sysRes, ar);
+                ar.recycle();
+                Log.i(TAG, "...preloaded " + numberOfEntries + " resources in "
+                        + (SystemClock.uptimeMillis() - startTime) + "ms.");
+
+                if (sysRes.getBoolean(
+                        com.android.internal.R.bool.config_freeformWindowManagement)) {
+                    startTime = SystemClock.uptimeMillis();
+                    ar = sysRes.obtainTypedArray(
+                            com.android.internal.R.array.preloaded_freeform_multi_window_drawables);
+                    numberOfEntries = preloadDrawables(sysRes, ar);
+                    ar.recycle();
+                    Log.i(TAG, "...preloaded " + numberOfEntries + " resource in "
+                            + (SystemClock.uptimeMillis() - startTime) + "ms.");
+                }
+            }
+            sysRes.finishPreloading();
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Failure preloading resources", e);
+        }
+    }
+
+    private static int preloadColorStateLists(Resources resources, TypedArray ar) {
+        final int numberOfEntries = ar.length();
+        for (int i = 0; i < numberOfEntries; i++) {
+            int id = ar.getResourceId(i, 0);
+
+            if (id != 0) {
+                if (resources.getColorStateList(id, null) == null) {
+                    throw new IllegalArgumentException(
+                            "Unable to find preloaded color resource #0x"
+                                    + Integer.toHexString(id)
+                                    + " (" + ar.getString(i) + ")");
+                }
+            }
+        }
+        return numberOfEntries;
+    }
+
+    private static int preloadDrawables(Resources resources, TypedArray ar) {
+        final int numberOfEntries = ar.length();
+        for (int i = 0; i < numberOfEntries; i++) {
+            int id = ar.getResourceId(i, 0);
+
+            if (id != 0) {
+                if (resources.getDrawable(id, null) == null) {
+                    throw new IllegalArgumentException(
+                            "Unable to find preloaded drawable resource #0x"
+                                    + Integer.toHexString(id)
+                                    + " (" + ar.getString(i) + ")");
+                }
+            }
+        }
+        return numberOfEntries;
+    }
+
+    /**
+     * Clear the cache when the framework resources packages is changed.
+     * @hide
+     */
+    @VisibleForTesting
+    public static void resetPreloadDrawableStateCache() {
+        ResourcesImpl.resetDrawableStateCache();
+        preloadResources();
+    }
+
     /** @hide */
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "class=" + getClass());
         pw.println(prefix + "resourcesImpl");
-        mResourcesImpl.dump(pw, prefix + "  ");
+        final var impl = mResourcesImpl;
+        if (impl != null) {
+            impl.dump(pw, prefix + "  ");
+        } else {
+            pw.println(prefix + "  " + "null");
+        }
     }
 
     /** @hide */
@@ -2717,15 +2820,40 @@ public class Resources {
         pw.println(prefix + "history");
         // Putting into a map keyed on the apk assets to deduplicate resources that are different
         // objects but ultimately represent the same assets
-        Map<List<ApkAssets>, Resources> history = new ArrayMap<>();
+        ArrayMap<List<ApkAssets>, Resources> history = new ArrayMap<>();
         sResourcesHistory.forEach(
-                r -> history.put(Arrays.asList(r.mResourcesImpl.mAssets.getApkAssets()), r));
+                r -> {
+                    if (r != null) {
+                        final var impl = r.mResourcesImpl;
+                        if (impl != null) {
+                            history.put(Arrays.asList(impl.mAssets.getApkAssets()), r);
+                        } else {
+                            history.put(null, r);
+                        }
+                    }
+                });
         int i = 0;
         for (Resources r : history.values()) {
-            if (r != null) {
-                pw.println(prefix + i++);
-                r.dump(pw, prefix + "  ");
-            }
+            pw.println(prefix + i++);
+            r.dump(pw, prefix + "  ");
         }
+    }
+
+    /**
+     * Register the resources paths of a package (e.g. a shared library). This will collect the
+     * package resources' paths from its ApplicationInfo and add them to all existing and future
+     * contexts while the application is running.
+     * A second call with the same uniqueId is a no-op.
+     * The paths are not persisted during application restarts. The application is responsible for
+     * calling the API again if this happens.
+     *
+     * @param uniqueId The unique id for the ApplicationInfo object, to detect and ignore repeated
+     *                 API calls.
+     * @param appInfo The ApplicationInfo that contains resources paths of the package.
+     */
+    @FlaggedApi(android.content.res.Flags.FLAG_REGISTER_RESOURCE_PATHS)
+    public static void registerResourcePaths(@NonNull String uniqueId,
+            @NonNull ApplicationInfo appInfo) {
+        throw new UnsupportedOperationException("The implementation has not been done yet.");
     }
 }

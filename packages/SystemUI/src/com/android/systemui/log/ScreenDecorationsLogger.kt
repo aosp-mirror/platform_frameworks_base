@@ -21,9 +21,9 @@ import android.graphics.Rect
 import android.graphics.RectF
 import androidx.core.graphics.toRectF
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.INFO
 import com.android.systemui.log.dagger.ScreenDecorationsLog
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
@@ -35,7 +35,7 @@ private const val TAG = "ScreenDecorationsLog"
  *
  * To enable logcat echoing for an entire buffer:
  * ```
- *   adb shell settings put global systemui/buffer/ScreenDecorationsLog <logLevel>
+ *   adb shell cmd statusbar echo -b ScreenDecorationsLog:<logLevel>
  *
  * ```
  */
@@ -134,34 +134,81 @@ constructor(
     }
 
     fun cameraProtectionShownOrHidden(
+        showAnimationNow: Boolean,
         faceDetectionRunning: Boolean,
         biometricPromptShown: Boolean,
-        requestedState: Boolean,
+        faceAuthenticated: Boolean,
+        isCameraActive: Boolean,
         currentlyShowing: Boolean
     ) {
         logBuffer.log(
             TAG,
             DEBUG,
             {
+                str1 = "$showAnimationNow"
                 bool1 = faceDetectionRunning
                 bool2 = biometricPromptShown
-                bool3 = requestedState
+                str2 = "$faceAuthenticated"
+                bool3 = isCameraActive
                 bool4 = currentlyShowing
             },
             {
-                "isFaceDetectionRunning: $bool1, " +
+                "cameraProtectionShownOrHidden showAnimationNow: $str1, " +
+                    "isFaceDetectionRunning: $bool1, " +
                     "isBiometricPromptShowing: $bool2, " +
-                    "requestedState: $bool3, " +
+                    "faceAuthenticated: $str2, " +
+                    "isCameraActive: $bool3, " +
                     "currentState: $bool4"
             }
         )
     }
 
-    fun biometricEvent(@CompileTimeConstant info: String) {
-        logBuffer.log(TAG, DEBUG, info)
-    }
-
     fun cameraProtectionEvent(@CompileTimeConstant cameraProtectionEvent: String) {
         logBuffer.log(TAG, DEBUG, cameraProtectionEvent)
+    }
+
+    fun logRotationChangeDeferred(currentRot: Int, newRot: Int) {
+        logBuffer.log(
+            TAG,
+            INFO,
+            {
+                int1 = currentRot
+                int2 = newRot
+            },
+            { "Rotation changed, deferring $int2, staying at $int2" },
+        )
+    }
+
+    fun logRotationChanged(oldRot: Int, newRot: Int) {
+        logBuffer.log(
+            TAG,
+            INFO,
+            {
+                int1 = oldRot
+                int2 = newRot
+            },
+            { "Rotation changed from $int1 to $int2" }
+        )
+    }
+
+    fun logDisplaySizeChanged(currentSize: Point, newSize: Point) {
+        logBuffer.log(
+            TAG,
+            INFO,
+            {
+                str1 = currentSize.flattenToString()
+                str2 = newSize.flattenToString()
+            },
+            { "Resolution changed, deferring size change to $str2, staying at $str1" },
+        )
+    }
+
+    fun logUserSwitched(newUser: Int) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { int1 = newUser },
+            { "UserSwitched newUserId=$int1. Updating color inversion setting" },
+        )
     }
 }

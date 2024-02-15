@@ -21,6 +21,7 @@ import static android.graphics.Color.alpha;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
 import static android.view.WindowManager.LayoutParams.FLAG_LOCAL_FOCUS_MODE;
@@ -37,7 +38,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
 
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
@@ -94,7 +94,8 @@ public class SnapshotDrawerUtils {
             | FLAG_WATCH_OUTSIDE_TOUCH
             | FLAG_SPLIT_TOUCH
             | FLAG_SCALED
-            | FLAG_SECURE;
+            | FLAG_SECURE
+            | FLAG_DIM_BEHIND;
 
     private static final RectF sTmpSnapshotSize = new RectF();
     private static final RectF sTmpDstFrame = new RectF();
@@ -237,13 +238,14 @@ public class SnapshotDrawerUtils {
                         PixelFormat.RGBA_8888,
                         GraphicBuffer.USAGE_HW_TEXTURE | GraphicBuffer.USAGE_HW_COMPOSER
                                 | GraphicBuffer.USAGE_SW_WRITE_RARELY);
-                if (background == null) {
+                final Canvas c = background != null ? background.lockCanvas() : null;
+                if (c == null) {
                     Log.e(TAG, "Unable to draw snapshot: failed to allocate graphic buffer for "
                             + mTitle);
+                    mTransaction.clear();
+                    childSurfaceControl.release();
                     return;
                 }
-                // TODO: Support this on HardwareBuffer
-                final Canvas c = background.lockCanvas();
                 drawBackgroundAndBars(c, frame);
                 background.unlockCanvasAndPost(c);
                 mTransaction.setBuffer(mRootSurface,
@@ -425,7 +427,7 @@ public class SnapshotDrawerUtils {
         // Setting as trusted overlay to let touches pass through. This is safe because this
         // window is controlled by the system.
         layoutParams.privateFlags = (windowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS)
-                | PRIVATE_FLAG_TRUSTED_OVERLAY | PRIVATE_FLAG_USE_BLAST;
+                | PRIVATE_FLAG_TRUSTED_OVERLAY;
         layoutParams.token = token;
         layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
         layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;

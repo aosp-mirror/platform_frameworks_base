@@ -19,6 +19,7 @@ package com.android.systemui.screenshot;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
@@ -34,19 +35,21 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
 import android.view.ScrollCaptureResponse;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
+import com.android.internal.view.OneShotPreDrawListener;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
+import com.android.systemui.screenshot.CropView.CropBoundary;
 import com.android.systemui.screenshot.ScrollCaptureController.LongScreenshot;
 import com.android.systemui.settings.UserTracker;
 
@@ -215,6 +218,7 @@ public class LongScreenshotActivity extends Activity {
         mPreview.setImageDrawable(drawable);
         mMagnifierView.setDrawable(mLongScreenshot.getDrawable(),
                 mLongScreenshot.getWidth(), mLongScreenshot.getHeight());
+        Log.i(TAG, "Completed: " + longScreenshot);
         // Original boundaries go from the image tile set's y=0 to y=pageSize, so
         // we animate to that as a starting crop position.
         float topFraction = Math.max(0,
@@ -223,31 +227,26 @@ public class LongScreenshotActivity extends Activity {
                 1 - (mLongScreenshot.getBottom() - mLongScreenshot.getPageHeight())
                         / (float) mLongScreenshot.getHeight());
 
+        Log.i(TAG, "topFraction: " + topFraction);
+        Log.i(TAG, "bottomFraction: " + bottomFraction);
+
         mEnterTransitionView.setImageDrawable(drawable);
-        mEnterTransitionView.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        mEnterTransitionView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        updateImageDimensions();
-                        mEnterTransitionView.post(() -> {
-                            Rect dest = new Rect();
-                            mEnterTransitionView.getBoundsOnScreen(dest);
-                            mLongScreenshotHolder.takeTransitionDestinationCallback()
-                                    .setTransitionDestination(dest, () -> {
-                                        mPreview.animate().alpha(1f);
-                                        mCropView.setBoundaryPosition(
-                                                CropView.CropBoundary.TOP, topFraction);
-                                        mCropView.setBoundaryPosition(
-                                                CropView.CropBoundary.BOTTOM, bottomFraction);
-                                        mCropView.animateEntrance();
-                                        mCropView.setVisibility(View.VISIBLE);
-                                        setButtonsEnabled(true);
-                                    });
+        OneShotPreDrawListener.add(mEnterTransitionView, () -> {
+            updateImageDimensions();
+            mEnterTransitionView.post(() -> {
+                Rect dest = new Rect();
+                mEnterTransitionView.getBoundsOnScreen(dest);
+                mLongScreenshotHolder.takeTransitionDestinationCallback()
+                        .setTransitionDestination(dest, () -> {
+                            mPreview.animate().alpha(1f);
+                            mCropView.setBoundaryPosition(CropBoundary.TOP, topFraction);
+                            mCropView.setBoundaryPosition(CropBoundary.BOTTOM, bottomFraction);
+                            mCropView.animateEntrance();
+                            mCropView.setVisibility(View.VISIBLE);
+                            setButtonsEnabled(true);
                         });
-                        return true;
-                    }
-                });
+            });
+        });
 
         // Immediately export to temp image file for saved state
         mCacheSaveFuture = mImageExporter.exportToRawFile(mBackgroundExecutor,
@@ -337,9 +336,9 @@ public class LongScreenshotActivity extends Activity {
         if (mScreenshotUserHandle != Process.myUserHandle()) {
             // TODO: Fix transition for work profile. Omitting it in the meantime.
             mActionExecutor.launchIntentAsync(
-                    ActionIntentCreator.INSTANCE.createEditIntent(uri, this),
+                    ActionIntentCreator.INSTANCE.createEdit(uri, this),
                     null,
-                    mScreenshotUserHandle.getIdentifier(), false);
+                    mScreenshotUserHandle, false);
         } else {
             String editorPackage = getString(R.string.config_screenshotEditor);
             Intent intent = new Intent(Intent.ACTION_EDIT);
@@ -365,9 +364,8 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void doShare(Uri uri) {
-        Intent shareIntent = ActionIntentCreator.INSTANCE.createShareIntent(uri);
-        mActionExecutor.launchIntentAsync(shareIntent, null,
-                mScreenshotUserHandle.getIdentifier(), false);
+        Intent shareIntent = ActionIntentCreator.INSTANCE.createShare(uri);
+        mActionExecutor.launchIntentAsync(shareIntent, null, mScreenshotUserHandle, false);
     }
 
     private void onClicked(View v) {
@@ -407,9 +405,10 @@ public class LongScreenshotActivity extends Activity {
         updateImageDimensions();
 
         mOutputBitmap = renderBitmap(drawable, bounds);
+        // TODO(b/298931528): Add support for long screenshot on external displays.
         ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
                 mBackgroundExecutor, UUID.randomUUID(), mOutputBitmap, ZonedDateTime.now(),
-                mScreenshotUserHandle);
+                mScreenshotUserHandle, Display.DEFAULT_DISPLAY);
         exportFuture.addListener(() -> onExportCompleted(action, exportFuture), mUiExecutor);
     }
 
@@ -423,13 +422,15 @@ public class LongScreenshotActivity extends Activity {
             Log.e(TAG, "failed to export", e);
             return;
         }
+        Uri exported = ContentProvider.getUriWithoutUserId(result.uri);
+        Log.e(TAG, action + " uri=" + exported);
 
         switch (action) {
             case EDIT:
-                doEdit(result.uri);
+                doEdit(exported);
                 break;
             case SHARE:
-                doShare(result.uri);
+                doShare(exported);
                 break;
             case SAVE:
                 // Nothing more to do

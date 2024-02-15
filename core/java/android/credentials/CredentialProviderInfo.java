@@ -16,12 +16,14 @@
 
 package android.credentials;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
+import android.credentials.flags.Flags;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,9 +31,7 @@ import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * {@link ServiceInfo} and meta-data about a credential provider.
@@ -41,9 +41,10 @@ import java.util.Set;
 @TestApi
 public final class CredentialProviderInfo implements Parcelable {
     @NonNull private final ServiceInfo mServiceInfo;
-    @NonNull private final Set<String> mCapabilities = new HashSet<>();
+    @NonNull private final List<String> mCapabilities = new ArrayList<>();
     @Nullable private final CharSequence mOverrideLabel;
     @Nullable private CharSequence mSettingsSubtitle = null;
+    @Nullable private CharSequence mSettingsActivity = null;
     private final boolean mIsSystemProvider;
     private final boolean mIsEnabled;
     private final boolean mIsPrimary;
@@ -61,6 +62,7 @@ public final class CredentialProviderInfo implements Parcelable {
         mIsEnabled = builder.mIsEnabled;
         mIsPrimary = builder.mIsPrimary;
         mOverrideLabel = builder.mOverrideLabel;
+        mSettingsActivity = builder.mSettingsActivity;
     }
 
     /** Returns true if the service supports the given {@code credentialType}, false otherwise. */
@@ -98,11 +100,7 @@ public final class CredentialProviderInfo implements Parcelable {
     /** Returns a list of capabilities this provider service can support. */
     @NonNull
     public List<String> getCapabilities() {
-        List<String> capabilities = new ArrayList<>();
-        for (String capability : mCapabilities) {
-            capabilities.add(capability);
-        }
-        return Collections.unmodifiableList(capabilities);
+        return Collections.unmodifiableList(mCapabilities);
     }
 
     /** Returns whether the provider is enabled by the user. */
@@ -110,11 +108,7 @@ public final class CredentialProviderInfo implements Parcelable {
         return mIsEnabled;
     }
 
-    /**
-     * Returns whether the provider is set as primary by the user.
-     *
-     * @hide
-     */
+    /** Returns whether the provider is set as primary by the user. */
     public boolean isPrimary() {
         return mIsPrimary;
     }
@@ -123,6 +117,23 @@ public final class CredentialProviderInfo implements Parcelable {
     @Nullable
     public CharSequence getSettingsSubtitle() {
         return mSettingsSubtitle;
+    }
+
+    /**
+     * Returns the settings activity.
+     *
+     * @hide
+     */
+    @Nullable
+    @TestApi
+    @FlaggedApi(Flags.FLAG_SETTINGS_ACTIVITY_ENABLED)
+    public CharSequence getSettingsActivity() {
+        // Add a manual check to make sure this returns null if
+        // the flag is not enabled.
+        if (!Flags.settingsActivityEnabled()) {
+            return null;
+        }
+        return mSettingsActivity;
     }
 
     /** Returns the component name for the service. */
@@ -135,13 +146,12 @@ public final class CredentialProviderInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(mServiceInfo, flags);
         dest.writeBoolean(mIsSystemProvider);
+        dest.writeStringList(mCapabilities);
         dest.writeBoolean(mIsEnabled);
         dest.writeBoolean(mIsPrimary);
         TextUtils.writeToParcel(mOverrideLabel, dest, flags);
         TextUtils.writeToParcel(mSettingsSubtitle, dest, flags);
-
-        List<String> capabilities = getCapabilities();
-        dest.writeStringList(capabilities);
+        TextUtils.writeToParcel(mSettingsActivity, dest, flags);
     }
 
     @Override
@@ -170,6 +180,9 @@ public final class CredentialProviderInfo implements Parcelable {
                 + "settingsSubtitle="
                 + mSettingsSubtitle
                 + ", "
+                + "settingsActivity="
+                + mSettingsActivity
+                + ", "
                 + "capabilities="
                 + String.join(",", mCapabilities)
                 + "}";
@@ -178,14 +191,12 @@ public final class CredentialProviderInfo implements Parcelable {
     private CredentialProviderInfo(@NonNull Parcel in) {
         mServiceInfo = in.readTypedObject(ServiceInfo.CREATOR);
         mIsSystemProvider = in.readBoolean();
+        in.readStringList(mCapabilities);
         mIsEnabled = in.readBoolean();
         mIsPrimary = in.readBoolean();
         mOverrideLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mSettingsSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-
-        List<String> capabilities = new ArrayList<>();
-        in.readStringList(capabilities);
-        mCapabilities.addAll(capabilities);
+        mSettingsActivity = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
     }
 
     public static final @NonNull Parcelable.Creator<CredentialProviderInfo> CREATOR =
@@ -205,9 +216,10 @@ public final class CredentialProviderInfo implements Parcelable {
     public static final class Builder {
 
         @NonNull private ServiceInfo mServiceInfo;
-        @NonNull private Set<String> mCapabilities = new HashSet<>();
+        @NonNull private List<String> mCapabilities = new ArrayList<>();
         private boolean mIsSystemProvider = false;
         @Nullable private CharSequence mSettingsSubtitle = null;
+        @Nullable private CharSequence mSettingsActivity = null;
         private boolean mIsEnabled = false;
         private boolean mIsPrimary = false;
         @Nullable private CharSequence mOverrideLabel = null;
@@ -243,18 +255,18 @@ public final class CredentialProviderInfo implements Parcelable {
             return this;
         }
 
-        /** Sets a list of capabilities this provider service can support. */
-        public @NonNull Builder addCapabilities(@NonNull List<String> capabilities) {
-            mCapabilities.addAll(capabilities);
-            return this;
-        }
-
         /**
-         * Sets a list of capabilities this provider service can support.
+         * Sets the settings activity.
          *
          * @hide
          */
-        public @NonNull Builder addCapabilities(@NonNull Set<String> capabilities) {
+        public @NonNull Builder setSettingsActivity(@Nullable CharSequence settingsActivity) {
+            mSettingsActivity = settingsActivity;
+            return this;
+        }
+
+        /** Sets a list of capabilities this provider service can support. */
+        public @NonNull Builder addCapabilities(@NonNull List<String> capabilities) {
             mCapabilities.addAll(capabilities);
             return this;
         }

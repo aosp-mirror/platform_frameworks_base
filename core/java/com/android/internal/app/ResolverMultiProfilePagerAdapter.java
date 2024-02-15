@@ -79,7 +79,7 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     }
 
     @Override
-    ResolverProfileDescriptor getItem(int pageIndex) {
+    public ResolverProfileDescriptor getItem(int pageIndex) {
         return mItems[pageIndex];
     }
 

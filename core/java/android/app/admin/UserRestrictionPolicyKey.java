@@ -17,6 +17,7 @@
 package android.app.admin;
 
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_KEY;
+import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -44,6 +45,9 @@ public final class UserRestrictionPolicyKey extends PolicyKey {
     @TestApi
     public UserRestrictionPolicyKey(@NonNull String identifier, @NonNull String restriction) {
         super(identifier);
+        if (devicePolicySizeTrackingEnabled()) {
+            PolicySizeVerifier.enforceMaxStringLength(restriction, "restriction");
+        }
         mRestriction = Objects.requireNonNull(restriction);
     }
 

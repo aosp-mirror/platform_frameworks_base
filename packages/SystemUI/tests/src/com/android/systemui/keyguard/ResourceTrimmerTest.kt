@@ -5,19 +5,17 @@ import android.graphics.HardwareRenderer
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeCommandQueue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
+import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
 import com.android.systemui.utils.GlobalWindowManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -38,12 +36,14 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class ResourceTrimmerTest : SysuiTestCase() {
+    val kosmos = testKosmos()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private val keyguardRepository = FakeKeyguardRepository()
-    private val featureFlags = FakeFeatureFlags()
-    private val keyguardTransitionRepository = FakeKeyguardTransitionRepository()
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val featureFlags = kosmos.fakeFeatureFlagsClassic
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val powerInteractor = kosmos.powerInteractor
 
     @Mock private lateinit var globalWindowManager: GlobalWindowManager
     private lateinit var resourceTrimmer: ResourceTrimmer
@@ -53,27 +53,20 @@ class ResourceTrimmerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         featureFlags.set(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK, true)
         featureFlags.set(Flags.TRIM_FONT_CACHES_AT_UNLOCK, true)
-        featureFlags.set(Flags.FACE_AUTH_REFACTOR, false)
-        keyguardRepository.setWakefulnessModel(
-            WakefulnessModel(WakefulnessState.AWAKE, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
-        )
         keyguardRepository.setDozeAmount(0f)
         keyguardRepository.setKeyguardGoingAway(false)
 
-        val keyguardInteractor =
-            KeyguardInteractor(
-                keyguardRepository,
-                FakeCommandQueue(),
-                featureFlags,
-                FakeKeyguardBouncerRepository()
+        val withDeps =
+            KeyguardInteractorFactory.create(
+                repository = keyguardRepository,
+                featureFlags = featureFlags,
             )
+        val keyguardInteractor = withDeps.keyguardInteractor
         resourceTrimmer =
             ResourceTrimmer(
                 keyguardInteractor,
-                KeyguardTransitionInteractor(
-                    keyguardTransitionRepository,
-                    testScope.backgroundScope
-                ),
+                powerInteractor,
+                kosmos.keyguardTransitionInteractor,
                 globalWindowManager,
                 testScope.backgroundScope,
                 testDispatcher,
@@ -92,13 +85,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
     @Test
     fun dozeAodDisabled_sleep_trimsMemory() =
         testScope.runTest {
-            keyguardRepository.setWakefulnessModel(
-                WakefulnessModel(
-                    WakefulnessState.ASLEEP,
-                    WakeSleepReason.OTHER,
-                    WakeSleepReason.OTHER
-                )
-            )
+            powerInteractor.setAsleepForTest()
             testScope.runCurrent()
             verify(globalWindowManager, times(1))
                 .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
@@ -110,13 +97,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
         testScope.runTest {
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDozeAmount(1f)
-            keyguardRepository.setWakefulnessModel(
-                WakefulnessModel(
-                    WakefulnessState.ASLEEP,
-                    WakeSleepReason.OTHER,
-                    WakeSleepReason.OTHER
-                )
-            )
+            powerInteractor.setAsleepForTest()
             testScope.runCurrent()
             verify(globalWindowManager, times(1))
                 .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
@@ -128,13 +109,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
         testScope.runTest {
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDozeAmount(0f)
-            keyguardRepository.setWakefulnessModel(
-                WakefulnessModel(
-                    WakefulnessState.ASLEEP,
-                    WakeSleepReason.OTHER,
-                    WakeSleepReason.OTHER
-                )
-            )
+            powerInteractor.setAsleepForTest()
             testScope.runCurrent()
             verifyZeroInteractions(globalWindowManager)
         }
@@ -144,13 +119,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
         testScope.runTest {
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDozeAmount(0f)
-            keyguardRepository.setWakefulnessModel(
-                WakefulnessModel(
-                    WakefulnessState.ASLEEP,
-                    WakeSleepReason.OTHER,
-                    WakeSleepReason.OTHER
-                )
-            )
+            powerInteractor.setAsleepForTest()
 
             testScope.runCurrent()
             verifyZeroInteractions(globalWindowManager)
@@ -176,13 +145,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
         testScope.runTest {
             keyguardRepository.setDreaming(true)
             keyguardRepository.setDozeAmount(0f)
-            keyguardRepository.setWakefulnessModel(
-                WakefulnessModel(
-                    WakefulnessState.ASLEEP,
-                    WakeSleepReason.OTHER,
-                    WakeSleepReason.OTHER
-                )
-            )
+            powerInteractor.setAsleepForTest()
 
             testScope.runCurrent()
             verifyZeroInteractions(globalWindowManager)
@@ -211,8 +174,10 @@ class ResourceTrimmerTest : SysuiTestCase() {
     @Test
     fun keyguardTransitionsToGone_trimsFontCache() =
         testScope.runTest {
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
             )
             verify(globalWindowManager, times(1))
                 .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
@@ -224,9 +189,14 @@ class ResourceTrimmerTest : SysuiTestCase() {
     fun keyguardTransitionsToGone_flagDisabled_doesNotTrimFontCache() =
         testScope.runTest {
             featureFlags.set(Flags.TRIM_FONT_CACHES_AT_UNLOCK, false)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
             )
-            verifyNoMoreInteractions(globalWindowManager)
+            // Memory hidden should still be called.
+            verify(globalWindowManager, times(1))
+                .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+            verify(globalWindowManager, times(0)).trimCaches(any())
         }
 }

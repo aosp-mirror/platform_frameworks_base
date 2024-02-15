@@ -204,8 +204,9 @@ public class LocationManagerService extends ILocationManager.Stub implements
         public void onUserStarting(TargetUser user) {
             mUserInfoHelper.onUserStarted(user.getUserIdentifier());
 
-            // log location enabled state on start to minimize coverage loss
+            // log location enabled state and emergency state on start to minimize coverage loss
             mService.logLocationEnabledState();
+            mService.logEmergencyState();
         }
 
         @Override
@@ -297,6 +298,8 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 refreshAppOpsRestrictions(userId);
             }
         });
+        mInjector.getEmergencyHelper().addOnEmergencyStateChangedListener(
+                this::onEmergencyStateChanged);
 
         // set up passive provider first since it will be required for all other location providers,
         // which are loaded later once the system is ready.
@@ -361,9 +364,13 @@ public class LocationManagerService extends ILocationManager.Stub implements
             if (realProvider != null) {
                 // custom logic wrapping all non-passive providers
                 if (manager != mPassiveManager) {
+                    int defaultStationaryThrottlingSetting =
+                            mContext.getPackageManager().hasSystemFeature(
+                                PackageManager.FEATURE_WATCH) ? 0 : 1;
                     boolean enableStationaryThrottling = Settings.Global.getInt(
                             mContext.getContentResolver(),
-                            Settings.Global.LOCATION_ENABLE_STATIONARY_THROTTLE, 1) != 0;
+                            Settings.Global.LOCATION_ENABLE_STATIONARY_THROTTLE,
+                            defaultStationaryThrottlingSetting) != 0;
                     if (enableStationaryThrottling) {
                         realProvider = new StationaryThrottlingLocationProvider(manager.getName(),
                                 mInjector, realProvider);
@@ -467,13 +474,14 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 // If we have a GNSS provider override, add the hardware provider as a standalone
                 // option for use by apps with the correct permission. Note the GNSS HAL can only
                 // support a single client, so mGnssManagerService.getGnssLocationProvider() can
-                // only be installed with a single provider.
+                // only be installed with a single provider. Locations from this provider won't
+                // be reported through the passive provider.
                 LocationProviderManager gnssHardwareManager =
                         new LocationProviderManager(
                                 mContext,
                                 mInjector,
                                 GPS_HARDWARE_PROVIDER,
-                                mPassiveManager,
+                                /*passiveManager=*/ null,
                                 Collections.singletonList(Manifest.permission.LOCATION_HARDWARE));
                 addLocationProviderManager(
                         gnssHardwareManager, mGnssManagerService.getGnssLocationProvider());
@@ -568,6 +576,15 @@ public class LocationManagerService extends ILocationManager.Stub implements
         refreshAppOpsRestrictions(userId);
     }
 
+    private void onEmergencyStateChanged() {
+        this.logEmergencyState();
+    }
+
+    private void logEmergencyState() {
+        boolean isInEmergency = mInjector.getEmergencyHelper().isInEmergency(Long.MIN_VALUE);
+        mInjector.getLocationUsageLogger().logEmergencyStateChanged(isInEmergency);
+    }
+
     private void logLocationEnabledState() {
         boolean locationEnabled = false;
         // Location setting is considered on if it is enabled for any one user
@@ -598,10 +615,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return mGnssManagerService == null ? 0 : mGnssManagerService.getGnssBatchSize();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public void startGnssBatch(long periodNanos, ILocationListener listener, String packageName,
             @Nullable String attributionTag, String listenerId) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        startGnssBatch_enforcePermission();
 
         if (mGnssManagerService == null) {
             return;
@@ -627,9 +645,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public void flushGnssBatch() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        flushGnssBatch_enforcePermission();
 
         if (mGnssManagerService == null) {
             return;
@@ -642,9 +661,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.LOCATION_HARDWARE)
     @Override
     public void stopGnssBatch() {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        stopGnssBatch_enforcePermission();
 
         if (mGnssManagerService == null) {
             return;
@@ -1110,10 +1130,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     @Override
     @RequiresPermission(INTERACT_ACROSS_USERS)
     public void addProviderRequestListener(IProviderRequestListener listener) {
-        mContext.enforceCallingOrSelfPermission(INTERACT_ACROSS_USERS, null);
+        addProviderRequestListener_enforcePermission();
         for (LocationProviderManager manager : mProviderManagers) {
             if (manager.isVisibleToCaller()) {
                 manager.addProviderRequestListener(listener);
@@ -1194,10 +1215,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return manager.getProperties();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.READ_DEVICE_CONFIG)
     @Override
     public boolean isProviderPackage(@Nullable String provider, String packageName,
             @Nullable String attributionTag) {
-        mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
+        isProviderPackage_enforcePermission();
 
         for (LocationProviderManager manager : mProviderManagers) {
             if (provider != null && !provider.equals(manager.getName())) {
@@ -1216,9 +1238,10 @@ public class LocationManagerService extends ILocationManager.Stub implements
         return false;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.READ_DEVICE_CONFIG)
     @Override
     public List<String> getProviderPackages(String provider) {
-        mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
+        getProviderPackages_enforcePermission();
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         if (manager == null) {
@@ -1549,6 +1572,18 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
         ipw.decreaseIndent();
 
+        ipw.println("Historical Aggregate Gnss Measurement Provider Data:");
+        ipw.increaseIndent();
+        ArrayMap<CallerIdentity, LocationEventLog.GnssMeasurementAggregateStats>
+                gnssAggregateStats = EVENT_LOG.copyGnssMeasurementAggregateStats();
+        for (int i = 0; i < gnssAggregateStats.size(); i++) {
+            ipw.print(gnssAggregateStats.keyAt(i));
+            ipw.print(": ");
+            gnssAggregateStats.valueAt(i).updateTotals();
+            ipw.println(gnssAggregateStats.valueAt(i));
+        }
+        ipw.decreaseIndent();
+
         if (mGnssManagerService != null) {
             ipw.println("GNSS Manager:");
             ipw.increaseIndent();
@@ -1713,13 +1748,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
             }
 
             return false;
-        }
-
-        @Override
-        public void sendNiResponse(int notifId, int userResponse) {
-            if (mGnssManagerService != null) {
-                mGnssManagerService.sendNiResponse(notifId, userResponse);
-            }
         }
 
         @Override

@@ -17,9 +17,12 @@
 package android.companion;
 
 import android.companion.AssociationInfo;
+import android.companion.DevicePresenceEvent;
+import android.os.ParcelUuid;
 
 /** @hide */
 oneway interface ICompanionDeviceService {
     void onDeviceAppeared(in AssociationInfo associationInfo);
     void onDeviceDisappeared(in AssociationInfo associationInfo);
+    void onDevicePresenceEvent(in DevicePresenceEvent event);
 }

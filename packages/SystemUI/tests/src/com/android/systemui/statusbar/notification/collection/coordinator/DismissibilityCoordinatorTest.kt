@@ -21,7 +21,6 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -47,14 +46,11 @@ class DismissibilityCoordinatorTest : SysuiTestCase() {
     private lateinit var onBeforeRenderListListener: OnBeforeRenderListListener
     private val keyguardStateController: KeyguardStateController = mock()
     private val pipeline: NotifPipeline = mock()
-    private val flags: NotifPipelineFlags = mock()
     private val dumpManager: DumpManager = mock()
 
     @Before
     fun setUp() {
-        whenever(flags.allowDismissOngoing()).thenReturn(true)
-
-        dismissibilityProvider = NotificationDismissibilityProviderImpl(flags, dumpManager)
+        dismissibilityProvider = NotificationDismissibilityProviderImpl(dumpManager)
         coordinator = DismissibilityCoordinator(keyguardStateController, dismissibilityProvider)
         coordinator.attach(pipeline)
         onBeforeRenderListListener = withArgCaptor {
@@ -307,59 +303,6 @@ class DismissibilityCoordinatorTest : SysuiTestCase() {
         assertFalse(
             "Summary should be non-dismissible",
             dismissibilityProvider.isDismissable(summary)
-        )
-    }
-
-    @Test
-    fun testFeatureToggleOffNonDismissibleEntry() {
-        whenever(flags.allowDismissOngoing()).thenReturn(false)
-        val entry =
-            NotificationEntryBuilder()
-                .setTag("entry")
-                .setFlag(mContext, Notification.FLAG_NO_DISMISS, true)
-                .build()
-
-        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
-
-        assertTrue(
-            "FLAG_NO_DISMISS should be ignored, if the feature is off",
-            dismissibilityProvider.isDismissable(entry)
-        )
-    }
-
-    @Test
-    fun testFeatureToggleOffOngoingNotifWhenPhoneIsLocked() {
-        whenever(flags.allowDismissOngoing()).thenReturn(false)
-        whenever(keyguardStateController.isUnlocked).thenReturn(false)
-        val entry =
-            NotificationEntryBuilder()
-                .setTag("entry")
-                .setFlag(mContext, Notification.FLAG_ONGOING_EVENT, true)
-                .build()
-
-        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
-
-        assertFalse(
-            "Ongoing Notifs should NOT be dismissible, if the feature is off",
-            dismissibilityProvider.isDismissable(entry)
-        )
-    }
-
-    @Test
-    fun testFeatureToggleOffOngoingNotifWhenPhoneIsUnLocked() {
-        whenever(flags.allowDismissOngoing()).thenReturn(false)
-        whenever(keyguardStateController.isUnlocked).thenReturn(true)
-        val entry =
-            NotificationEntryBuilder()
-                .setTag("entry")
-                .setFlag(mContext, Notification.FLAG_ONGOING_EVENT, true)
-                .build()
-
-        onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
-
-        assertFalse(
-            "Ongoing Notifs should NOT be dismissible, if the feature is off",
-            dismissibilityProvider.isDismissable(entry)
         )
     }
 }

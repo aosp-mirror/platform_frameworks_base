@@ -39,7 +39,7 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.TransitionInfoBuilder;
+import com.android.wm.shell.transition.TransitionInfoBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -187,6 +187,25 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
         verifyNoMoreInteractions(mFinishTransaction);
     }
 
+    @Test
+    public void testShouldAnimate_containsAnimationOptions() {
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CLOSE, 0)
+                .addChange(createEmbeddedChange(EMBEDDED_RIGHT_BOUNDS, TASK_BOUNDS, TASK_BOUNDS))
+                .build();
+
+        info.setAnimationOptions(TransitionInfo.AnimationOptions
+                .makeCustomAnimOptions("packageName", 0 /* enterResId */, 0 /* exitResId */,
+                        0 /* backgroundColor */, false /* overrideTaskTransition */));
+        assertTrue(mController.shouldAnimate(info));
+
+        info.setAnimationOptions(TransitionInfo.AnimationOptions
+                .makeSceneTransitionAnimOptions());
+        assertFalse(mController.shouldAnimate(info));
+
+        info.setAnimationOptions(TransitionInfo.AnimationOptions.makeCrossProfileAnimOptions());
+        assertFalse(mController.shouldAnimate(info));
+    }
+
     @UiThreadTest
     @Test
     public void testMergeAnimation() {
@@ -217,12 +236,10 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
         doReturn(animator).when(mAnimRunner).createAnimator(any(), any(), any(), any(), any());
         mController.startAnimation(mTransition, info, mStartTransaction,
                 mFinishTransaction, mFinishCallback);
-        verify(mFinishCallback, never()).onTransitionFinished(any(), any());
+        verify(mFinishCallback, never()).onTransitionFinished(any());
         mController.mergeAnimation(mTransition, info, new SurfaceControl.Transaction(),
-                mTransition,
-                (wct, cb) -> {
-                });
-        verify(mFinishCallback).onTransitionFinished(any(), any());
+                mTransition, (wct) -> {});
+        verify(mFinishCallback).onTransitionFinished(any());
     }
 
     @Test
@@ -238,9 +255,9 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
         mController.startAnimation(mTransition, info, mStartTransaction,
                 mFinishTransaction, mFinishCallback);
 
-        verify(mFinishCallback, never()).onTransitionFinished(any(), any());
+        verify(mFinishCallback, never()).onTransitionFinished(any());
         mController.onAnimationFinished(mTransition);
-        verify(mFinishCallback).onTransitionFinished(any(), any());
+        verify(mFinishCallback).onTransitionFinished(any());
 
         // Should not call finish when the finish has already been called.
         assertThrows(IllegalStateException.class,

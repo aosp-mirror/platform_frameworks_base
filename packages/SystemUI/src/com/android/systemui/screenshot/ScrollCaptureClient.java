@@ -365,6 +365,9 @@ public class ScrollCaptureClient {
         @Override
         public void onImageAvailable(ImageReader reader) {
             synchronized (mLock) {
+                if (mCapturedImage != null) {
+                    mCapturedImage.close();
+                }
                 mCapturedImage = mReader.acquireLatestImage();
                 if (mCapturedArea != null) {
                     completeCaptureRequest();

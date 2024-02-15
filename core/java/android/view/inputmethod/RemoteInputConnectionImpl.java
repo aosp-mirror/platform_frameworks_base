@@ -28,7 +28,13 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UiThread;
+import android.app.UriGrantsManager;
+import android.content.ContentProvider;
+import android.content.Intent;
 import android.graphics.RectF;
+import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.CancellationSignalBeamer;
@@ -37,13 +43,13 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
@@ -54,6 +60,7 @@ import java.lang.annotation.Retention;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -158,17 +165,14 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
         boolean cancellable();
     }
 
-    @GuardedBy("mLock")
-    @Nullable
-    private InputConnection mInputConnection;
+    @NonNull
+    private final AtomicReference<InputConnection> mInputConnectionRef;
+    @NonNull
+    private final AtomicBoolean mDeactivateRequested = new AtomicBoolean(false);
 
     @NonNull
     private final Looper mLooper;
     private final Handler mH;
-
-    private final Object mLock = new Object();
-    @GuardedBy("mLock")
-    private boolean mFinished = false;
 
     private final InputMethodManager mParentInputMethodManager;
     private final WeakReference<View> mServedView;
@@ -185,7 +189,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
             @NonNull InputMethodManager inputMethodManager, @Nullable View servedView) {
-        mInputConnection = inputConnection;
+        mInputConnectionRef = new AtomicReference<>(inputConnection);
         mLooper = looper;
         mH = new Handler(mLooper);
         mParentInputMethodManager = inputMethodManager;
@@ -197,9 +201,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
      */
     @Nullable
     public InputConnection getInputConnection() {
-        synchronized (mLock) {
-            return mInputConnection;
-        }
+        return mInputConnectionRef.get();
     }
 
     /**
@@ -215,13 +217,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
      * {@link InputConnection#closeConnection()} as a result of {@link #deactivate()}.
      */
     private boolean isFinished() {
-        synchronized (mLock) {
-            return mFinished;
-        }
-    }
-
-    private boolean isActive() {
-        return mParentInputMethodManager.isActive() && !isFinished();
+        return mInputConnectionRef.get() == null;
     }
 
     private View getServedView() {
@@ -358,25 +354,15 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
      */
     @Dispatching(cancellable = false)
     public void deactivate() {
-        if (isFinished()) {
+        if (mDeactivateRequested.getAndSet(true)) {
             // This is a small performance optimization.  Still only the 1st call of
-            // reportFinish() will take effect.
+            // deactivate() will take effect.
             return;
         }
         dispatch(() -> {
-            // Note that we do not need to worry about race condition here, because 1) mFinished is
-            // updated only inside this block, and 2) the code here is running on a Handler hence we
-            // assume multiple closeConnection() tasks will not be handled at the same time.
-            if (isFinished()) {
-                return;
-            }
             Trace.traceBegin(Trace.TRACE_TAG_INPUT, "InputConnection#closeConnection");
             try {
                 InputConnection ic = getInputConnection();
-                // Note we do NOT check isActive() here, because this is safe
-                // for an IME to call at any time, and we need to allow it
-                // through to clean up our state after the IME has switched to
-                // another client.
                 if (ic == null) {
                     return;
                 }
@@ -386,10 +372,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     // TODO(b/199934664): See if we can remove this by providing a default impl.
                 }
             } finally {
-                synchronized (mLock) {
-                    mInputConnection = null;
-                    mFinished = true;
-                }
+                mInputConnectionRef.set(null);
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }
 
@@ -434,15 +417,16 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
         if (mBeamer == null) {
             return;
         }
-        mBeamer.forget(token);
+        dispatch(() -> {
+            mBeamer.forget(token);
+        });
     }
 
     @Override
     public String toString() {
         return "RemoteInputConnectionImpl{"
                 + "connection=" + getInputConnection()
-                + " finished=" + isFinished()
-                + " mParentInputMethodManager.isActive()=" + mParentInputMethodManager.isActive()
+                + " mDeactivateRequested=" + mDeactivateRequested.get()
                 + " mServedView=" + mServedView.get()
                 + "}";
     }
@@ -455,16 +439,14 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
      *                {@link DumpableInputConnection#dumpDebug(ProtoOutputStream, long)}.
      */
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        synchronized (mLock) {
-            // Check that the call is initiated in the target thread of the current InputConnection
-            // {@link InputConnection#getHandler} since the messages to IInputConnectionWrapper are
-            // executed on this thread. Otherwise the messages are dispatched to the correct thread
-            // in IInputConnectionWrapper, but this is not wanted while dumpng, for performance
-            // reasons.
-            if ((mInputConnection instanceof DumpableInputConnection)
-                    && mLooper.isCurrentThread()) {
-                ((DumpableInputConnection) mInputConnection).dumpDebug(proto, fieldId);
-            }
+        final InputConnection ic = mInputConnectionRef.get();
+        // Check that the call is initiated in the target thread of the current InputConnection
+        // {@link InputConnection#getHandler} since the messages to IInputConnectionWrapper are
+        // executed on this thread. Otherwise the messages are dispatched to the correct thread
+        // in IInputConnectionWrapper, but this is not wanted while dumping, for performance
+        // reasons.
+        if ((ic instanceof DumpableInputConnection) && mLooper.isCurrentThread()) {
+            ((DumpableInputConnection) ic).dumpDebug(proto, fieldId);
         }
     }
 
@@ -479,7 +461,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     public void dispatchReportFullscreenMode(boolean enabled) {
         dispatch(() -> {
             final InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 return;
             }
             ic.reportFullscreenMode(enabled);
@@ -495,7 +477,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return null;  // cancelled
             }
             final InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "getTextAfterCursor on inactive InputConnection");
                 return null;
             }
@@ -517,7 +499,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return null;  // cancelled
             }
             final InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "getTextBeforeCursor on inactive InputConnection");
                 return null;
             }
@@ -539,7 +521,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return null;  // cancelled
             }
             final InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "getSelectedText on inactive InputConnection");
                 return null;
             }
@@ -561,7 +543,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return null;  // cancelled
             }
             final InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "getSurroundingText on inactive InputConnection");
                 return null;
             }
@@ -589,7 +571,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return 0;  // cancelled
             }
             final InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "getCursorCapsMode on inactive InputConnection");
                 return 0;
             }
@@ -606,7 +588,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return null;  // cancelled
             }
             final InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "getExtractedText on inactive InputConnection");
                 return null;
             }
@@ -623,7 +605,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "commitText on inactive InputConnection");
                 return;
             }
@@ -640,7 +622,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "commitText on inactive InputConnection");
                 return;
             }
@@ -656,7 +638,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "commitCompletion on inactive InputConnection");
                 return;
             }
@@ -672,7 +654,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "commitCorrection on inactive InputConnection");
                 return;
             }
@@ -692,7 +674,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "setSelection on inactive InputConnection");
                 return;
             }
@@ -708,7 +690,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "performEditorAction on inactive InputConnection");
                 return;
             }
@@ -724,7 +706,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "performContextMenuAction on inactive InputConnection");
                 return;
             }
@@ -740,7 +722,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "setComposingRegion on inactive InputConnection");
                 return;
             }
@@ -761,7 +743,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "setComposingRegion on inactive InputConnection");
                 return;
             }
@@ -778,7 +760,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "setComposingText on inactive InputConnection");
                 return;
             }
@@ -795,7 +777,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "setComposingText on inactive InputConnection");
                 return;
             }
@@ -824,11 +806,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            // Note we do NOT check isActive() here, because this is safe
-            // for an IME to call at any time, and we need to allow it
-            // through to clean up our state after the IME has switched to
-            // another client.
-            if (ic == null) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "finishComposingTextFromImm on inactive InputConnection");
                 return;
             }
@@ -852,11 +830,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            // Note we do NOT check isActive() here, because this is safe
-            // for an IME to call at any time, and we need to allow it
-            // through to clean up our state after the IME has switched to
-            // another client.
-            if (ic == null) {
+            if (ic == null && mDeactivateRequested.get()) {
                 Log.w(TAG, "finishComposingText on inactive InputConnection");
                 return;
             }
@@ -872,7 +846,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "sendKeyEvent on inactive InputConnection");
                 return;
             }
@@ -888,7 +862,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "clearMetaKeyStates on inactive InputConnection");
                 return;
             }
@@ -905,7 +879,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "deleteSurroundingText on inactive InputConnection");
                 return;
             }
@@ -922,7 +896,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "deleteSurroundingTextInCodePoints on inactive InputConnection");
                 return;
             }
@@ -942,7 +916,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "beginBatchEdit on inactive InputConnection");
                 return;
             }
@@ -958,7 +932,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "endBatchEdit on inactive InputConnection");
                 return;
             }
@@ -974,7 +948,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "performSpellCheck on inactive InputConnection");
                 return;
             }
@@ -991,7 +965,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "performPrivateCommand on inactive InputConnection");
                 return;
             }
@@ -1029,7 +1003,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "performHandwritingGesture on inactive InputConnection");
                 if (resultReceiver != null) {
                     resultReceiver.send(
@@ -1069,7 +1043,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "previewHandwritingGesture on inactive InputConnection");
                 return; // cancelled
             }
@@ -1117,13 +1091,12 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             @InputConnection.CursorUpdateMode int cursorUpdateMode,
             @InputConnection.CursorUpdateFilter int cursorUpdateFilter, int imeDisplayId) {
         final InputConnection ic = getInputConnection();
-        if (ic == null || !isActive()) {
-            Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
+        if (ic == null || mDeactivateRequested.get()) {
+            Log.w(TAG, "requestCursorUpdates on inactive InputConnection");
             return false;
         }
         if (mParentInputMethodManager.mRequestCursorUpdateDisplayIdCheck.get()
-                && mParentInputMethodManager.getDisplayId() != imeDisplayId
-                && !mParentInputMethodManager.hasVirtualDisplayToScreenMatrix()) {
+                && mParentInputMethodManager.getDisplayId() != imeDisplayId) {
             // requestCursorUpdates() is not currently supported across displays.
             return false;
         }
@@ -1155,7 +1128,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "requestTextBoundsInfo on inactive InputConnection");
                 resultReceiver.send(TextBoundsInfoResult.CODE_CANCELLED, null);
                 return;
@@ -1179,12 +1152,27 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     public void commitContent(InputConnectionCommandHeader header,
             InputContentInfo inputContentInfo, int flags, Bundle opts,
             AndroidFuture future /* T=Boolean */) {
+        final int imeUid = Binder.getCallingUid();
         dispatchWithTracing("commitContent", future, () -> {
+            // Check if the originator IME has the right permissions
+            try {
+                final int contentUriOwnerUserId = ContentProvider.getUserIdFromUri(
+                        inputContentInfo.getContentUri(), UserHandle.getUserId(imeUid));
+                final Uri contentUriWithoutUserId = ContentProvider.getUriWithoutUserId(
+                        inputContentInfo.getContentUri());
+                UriGrantsManager.getService().checkGrantUriPermission_ignoreNonSystem(imeUid, null,
+                        contentUriWithoutUserId, Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        contentUriOwnerUserId);
+            } catch (Exception e) {
+                Log.w(TAG, "commitContent with invalid Uri permission from IME:", e);
+                return false;
+            }
+
             if (header.mSessionId != mCurrentSessionId.get()) {
                 return false;  // cancelled
             }
             final InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "commitContent on inactive InputConnection");
                 return false;
             }
@@ -1209,7 +1197,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
+            if (ic == null || mDeactivateRequested.get()) {
                 Log.w(TAG, "setImeConsumesInput on inactive InputConnection");
                 return;
             }
@@ -1233,7 +1221,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                         return; // cancelled
                     }
                     InputConnection ic = getInputConnection();
-                    if (ic == null || !isActive()) {
+                    if (ic == null || mDeactivateRequested.get()) {
                         Log.w(TAG, "replaceText on inactive InputConnection");
                         return;
                     }
@@ -1252,7 +1240,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     return;  // cancelled
                 }
                 InputConnection ic = getInputConnection();
-                if (ic == null || !isActive()) {
+                if (ic == null || mDeactivateRequested.get()) {
                     Log.w(TAG, "commitText on inactive InputConnection");
                     return;
                 }
@@ -1272,7 +1260,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     return;  // cancelled
                 }
                 InputConnection ic = getInputConnection();
-                if (ic == null || !isActive()) {
+                if (ic == null || mDeactivateRequested.get()) {
                     Log.w(TAG, "setSelection on inactive InputConnection");
                     return;
                 }
@@ -1289,7 +1277,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     return null;  // cancelled
                 }
                 final InputConnection ic = getInputConnection();
-                if (ic == null || !isActive()) {
+                if (ic == null || mDeactivateRequested.get()) {
                     Log.w(TAG, "getSurroundingText on inactive InputConnection");
                     return null;
                 }
@@ -1317,7 +1305,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     return;  // cancelled
                 }
                 InputConnection ic = getInputConnection();
-                if (ic == null || !isActive()) {
+                if (ic == null || mDeactivateRequested.get()) {
                     Log.w(TAG, "deleteSurroundingText on inactive InputConnection");
                     return;
                 }
@@ -1333,7 +1321,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     return;  // cancelled
                 }
                 InputConnection ic = getInputConnection();
-                if (ic == null || !isActive()) {
+                if (ic == null || mDeactivateRequested.get()) {
                     Log.w(TAG, "sendKeyEvent on inactive InputConnection");
                     return;
                 }
@@ -1349,7 +1337,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     return;  // cancelled
                 }
                 InputConnection ic = getInputConnection();
-                if (ic == null || !isActive()) {
+                if (ic == null || mDeactivateRequested.get()) {
                     Log.w(TAG, "performEditorAction on inactive InputConnection");
                     return;
                 }
@@ -1365,7 +1353,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     return;  // cancelled
                 }
                 InputConnection ic = getInputConnection();
-                if (ic == null || !isActive()) {
+                if (ic == null || mDeactivateRequested.get()) {
                     Log.w(TAG, "performContextMenuAction on inactive InputConnection");
                     return;
                 }
@@ -1382,7 +1370,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     return 0;  // cancelled
                 }
                 final InputConnection ic = getInputConnection();
-                if (ic == null || !isActive()) {
+                if (ic == null || mDeactivateRequested.get()) {
                     Log.w(TAG, "getCursorCapsMode on inactive InputConnection");
                     return 0;
                 }
@@ -1398,7 +1386,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     return;  // cancelled
                 }
                 InputConnection ic = getInputConnection();
-                if (ic == null || !isActive()) {
+                if (ic == null || mDeactivateRequested.get()) {
                     Log.w(TAG, "clearMetaKeyStates on inactive InputConnection");
                     return;
                 }

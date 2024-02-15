@@ -15,13 +15,16 @@
  */
 package com.android.settingslib.media;
 
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
+
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHearingAid;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter2Manager;
+import android.media.RouteListingPreference;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -37,9 +40,19 @@ public class BluetoothMediaDevice extends MediaDevice {
     private CachedBluetoothDevice mCachedDevice;
     private final AudioManager mAudioManager;
 
-    BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
-            MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
-        super(context, routerManager, info, packageName, null);
+    BluetoothMediaDevice(
+            Context context,
+            CachedBluetoothDevice device,
+            MediaRoute2Info info) {
+        this(context, device, info, null);
+    }
+
+    BluetoothMediaDevice(
+            Context context,
+            CachedBluetoothDevice device,
+            MediaRoute2Info info,
+            RouteListingPreference.Item item) {
+        super(context, info, item);
         mCachedDevice = device;
         mAudioManager = context.getSystemService(AudioManager.class);
         initDeviceRecord();
@@ -58,6 +71,19 @@ public class BluetoothMediaDevice extends MediaDevice {
     }
 
     @Override
+    public CharSequence getSummaryForTv(int lowBatteryColorRes) {
+        return isConnected() || mCachedDevice.isBusy()
+                ? mCachedDevice.getTvConnectionSummary(lowBatteryColorRes)
+                : mContext.getString(R.string.bluetooth_saved_device);
+    }
+
+    @Override
+    public int getSelectionBehavior() {
+        // We don't allow apps to override the selection behavior of system routes.
+        return SELECTION_BEHAVIOR_TRANSFER;
+    }
+
+    @Override
     public Drawable getIcon() {
         return BluetoothUtils.isAdvancedUntetheredDevice(mCachedDevice.getDevice())
                 ? mContext.getDrawable(R.drawable.ic_earbuds_advanced)
@@ -73,7 +99,12 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public String getId() {
-        return MediaDeviceUtils.getId(mCachedDevice);
+        if (mCachedDevice.isHearingAidDevice()) {
+            if (mCachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+                return Long.toString(mCachedDevice.getHiSyncId());
+            }
+        }
+        return mCachedDevice.getAddress();
     }
 
     /**

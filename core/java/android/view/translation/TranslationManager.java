@@ -56,7 +56,7 @@ import java.util.function.Consumer;
  * translation framework.
  *
  * <p>The TranslationManager manages {@link Translator}s and help bridge client calls to
- * the server {@link android.service.translation.TranslationService} </p>
+ * the server translation service </p>
  */
 @SystemService(Context.TRANSLATION_MANAGER_SERVICE)
 public final class TranslationManager {

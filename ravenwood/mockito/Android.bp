@@ -1,0 +1,66 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_ravenwood_test {
+    name: "RavenwoodMockitoTest",
+
+    srcs: [
+        "test/**/*.java",
+    ],
+    exclude_srcs: [
+        "test/**/*DeviceOnly*.java",
+    ],
+    static_libs: [
+        "junit",
+        "truth",
+    ],
+    libs: [
+        "android.test.mock",
+        "android.test.base",
+        "android.test.runner",
+    ],
+    auto_gen_config: true,
+}
+
+android_test {
+    name: "RavenwoodMockitoTest_device",
+
+    srcs: [
+        "test/**/*.java",
+    ],
+    exclude_srcs: [
+        "test/**/*RavenwoodOnly*.java",
+    ],
+    static_libs: [
+        "junit",
+        "truth",
+
+        "androidx.test.rules",
+
+        "ravenwood-junit",
+
+        "mockito-target-extended-minus-junit4",
+    ],
+    libs: [
+        "android.test.mock",
+        "android.test.base",
+        "android.test.runner",
+    ],
+    jni_libs: [
+        // Required by mockito
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
+    test_suites: [
+        "device-tests",
+    ],
+    optimize: {
+        enabled: false,
+    },
+}

@@ -46,14 +46,6 @@ public class EGLExt {
         _nativeClassInit();
     }
 
-    // C function EGLBoolean eglPresentationTimeANDROID ( EGLDisplay dpy, EGLSurface sur, EGLnsecsANDROID time )
-
-    public static native boolean eglPresentationTimeANDROID(
-        EGLDisplay dpy,
-        EGLSurface sur,
-        long time
-    );
-
     /**
      * Retrieves the SyncFence for an EGLSync created with EGL_SYNC_NATIVE_FENCE_ANDROID
      *
@@ -83,4 +75,13 @@ public class EGLExt {
     }
 
     private static native int eglDupNativeFenceFDANDROIDImpl(EGLDisplay display, EGLSync sync);
+
+    // C function EGLBoolean eglPresentationTimeANDROID ( EGLDisplay dpy, EGLSurface sur, EGLnsecsANDROID time )
+
+    public static native boolean eglPresentationTimeANDROID(
+        EGLDisplay dpy,
+        EGLSurface sur,
+        long time
+    );
+
 }

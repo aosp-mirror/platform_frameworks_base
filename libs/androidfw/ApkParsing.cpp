@@ -56,6 +56,11 @@ const char* ValidLibraryPathLastSlash(const char* fileName, bool suppress64Bit, 
         return nullptr;
     }
 
+    // Make sure file starts with 'lib/' prefix.
+    if (strncmp(fileName, APK_LIB.data(), APK_LIB_LEN) != 0) {
+        return nullptr;
+    }
+
     // Make sure there aren't subdirectories by checking if the next / after lib/ is the last slash
     if (memchr(fileName + APK_LIB_LEN, '/', fileNameLen - APK_LIB_LEN) != lastSlash) {
         return nullptr;

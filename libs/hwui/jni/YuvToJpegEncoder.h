@@ -2,6 +2,7 @@
 #define _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
 
 #include <android/data_space.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 #include <ultrahdr/jpegr.h>
 
 extern "C" {
@@ -90,11 +91,15 @@ public:
      *  @param width Width of the Yuv data in terms of pixels.
      *  @param height Height of the Yuv data in terms of pixels.
      *  @param jpegQuality Picture quality in [0, 100].
+     *  @param exif Buffer holds EXIF package.
+     *  @param hdrStrides The number of row bytes in each image plane of the HDR input.
+     *  @param sdrStrides The number of row bytes in each image plane of the SDR input.
      *  @return true if successfully compressed the stream.
      */
     bool encode(JNIEnv* env,
             SkWStream* stream, void* hdr, int hdrColorSpace, void* sdr, int sdrColorSpace,
-            int width, int height, int jpegQuality);
+            int width, int height, int jpegQuality, ScopedByteArrayRO* exif,
+            ScopedIntArrayRO* hdrStrides, ScopedIntArrayRO* sdrStrides);
 
     /** Map data space (defined in DataSpace.java and data_space.h) to the color gamut
      *  used in JPEG/R
@@ -103,7 +108,7 @@ public:
      *  @param aDataSpace data space defined in data_space.h.
      *  @return color gamut for JPEG/R.
      */
-    static android::ultrahdr::ultrahdr_color_gamut findColorGamut(JNIEnv* env, int aDataSpace);
+    static ultrahdr::ultrahdr_color_gamut findColorGamut(JNIEnv* env, int aDataSpace);
 
     /** Map data space (defined in DataSpace.java and data_space.h) to the transfer function
      *  used in JPEG/R
@@ -112,8 +117,8 @@ public:
      *  @param aDataSpace data space defined in data_space.h.
      *  @return color gamut for JPEG/R.
      */
-    static android::ultrahdr::ultrahdr_transfer_function findHdrTransferFunction(
-            JNIEnv* env, int aDataSpace);
+    static ultrahdr::ultrahdr_transfer_function findHdrTransferFunction(JNIEnv* env,
+                                                                        int aDataSpace);
 };
 
 #endif  // _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_

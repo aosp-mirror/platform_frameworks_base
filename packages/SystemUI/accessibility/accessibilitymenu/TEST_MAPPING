@@ -1,0 +1,22 @@
+{
+  "presubmit": [
+    {
+      "name": "AccessibilityMenuServiceTests",
+      "options": [
+        {
+          "exclude-annotation": "android.support.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "AccessibilityMenuServiceTests",
+      "options": [
+        {
+          "exclude-annotation": "android.support.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ]
+}

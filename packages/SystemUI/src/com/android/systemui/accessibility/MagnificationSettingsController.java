@@ -34,7 +34,7 @@ import com.android.systemui.util.settings.SecureSettings;
  * A class to control {@link WindowMagnificationSettings} and receive settings panel callbacks by
  * {@link WindowMagnificationSettingsCallback}.
  * The settings panel callbacks will be delegated through
- * {@link MagnificationSettingsController.Callback} to {@link WindowMagnification}.
+ * {@link MagnificationSettingsController.Callback} to {@link Magnification}.
  */
 
 public class MagnificationSettingsController implements ComponentCallbacks {
@@ -73,7 +73,7 @@ public class MagnificationSettingsController implements ComponentCallbacks {
                 context.getDisplay(),
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 null);
-        mContext.setTheme(com.android.systemui.R.style.Theme_SystemUI);
+        mContext.setTheme(com.android.systemui.res.R.style.Theme_SystemUI);
         mDisplayId = mContext.getDisplayId();
         mConfiguration = new Configuration(mContext.getResources().getConfiguration());
         mSettingsControllerCallback = settingsControllerCallback;
@@ -87,14 +87,15 @@ public class MagnificationSettingsController implements ComponentCallbacks {
     }
 
     /**
-     * Shows magnification settings panel {@link WindowMagnificationSettings}.
+     * Toggles the visibility of magnification settings panel {@link WindowMagnificationSettings}.
+     * We show the panel if it is not visible. Otherwise, hide the panel.
      */
-    void showMagnificationSettings() {
+    void toggleSettingsPanelVisibility() {
         if (!mWindowMagnificationSettings.isSettingPanelShowing()) {
             onConfigurationChanged(mContext.getResources().getConfiguration());
             mContext.registerComponentCallbacks(this);
         }
-        mWindowMagnificationSettings.showSettingPanel();
+        mWindowMagnificationSettings.toggleSettingsPanelVisibility();
     }
 
     void closeMagnificationSettings() {
@@ -104,6 +105,10 @@ public class MagnificationSettingsController implements ComponentCallbacks {
 
     boolean isMagnificationSettingsShowing() {
         return mWindowMagnificationSettings.isSettingPanelShowing();
+    }
+
+    void setMagnificationScale(float scale) {
+        mWindowMagnificationSettings.setMagnificationScale(scale);
     }
 
     @Override
@@ -159,8 +164,9 @@ public class MagnificationSettingsController implements ComponentCallbacks {
          *
          * @param displayId The logical display id.
          * @param scale Magnification scale value.
+         * @param updatePersistence whether the new scale should be persisted.
          */
-        void onMagnifierScale(int displayId, float scale);
+        void onMagnifierScale(int displayId, float scale, boolean updatePersistence);
 
         /**
          * Called when magnification mode changed.
@@ -210,9 +216,9 @@ public class MagnificationSettingsController implements ComponentCallbacks {
         }
 
         @Override
-        public void onMagnifierScale(float scale) {
+        public void onMagnifierScale(float scale, boolean updatePersistence) {
             mSettingsControllerCallback.onMagnifierScale(mDisplayId,
-                    A11Y_ACTION_SCALE_RANGE.clamp(scale));
+                    A11Y_ACTION_SCALE_RANGE.clamp(scale), updatePersistence);
         }
     };
 }

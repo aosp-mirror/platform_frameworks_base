@@ -31,7 +31,7 @@ import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,7 +136,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
 
     @Override
     public void binderDied() {
-        Log.w(TAG, "Underlying HAL driver died.");
+        Slog.w(TAG, "Underlying HAL driver died.");
         List<ISoundTriggerCallback> callbacks;
         synchronized (this) {
             callbacks = new ArrayList<>(mActiveSessions.size());
@@ -270,7 +270,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     try {
                         mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
                     } catch (Exception ee) {
-                        Log.e(TAG, "Failed to release session.", ee);
+                        Slog.e(TAG, "Failed to release session.", ee);
                     }
                     throw e;
                 }
@@ -286,7 +286,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     checkValid();
                     Model loadedModel = new Model();
                     int result = loadedModel.load(model, audioSession);
-                    Log.d(TAG, String.format("loadPhraseModel()->%d", result));
+                    Slog.d(TAG, String.format("loadPhraseModel()->%d", result));
                     return result;
                 } catch (Exception e) {
                     // We must do this outside the lock, to avoid possible deadlocks with the remote
@@ -294,7 +294,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     try {
                         mAudioSessionProvider.releaseSession(audioSession.mSessionHandle);
                     } catch (Exception ee) {
-                        Log.e(TAG, "Failed to release session.", ee);
+                        Slog.e(TAG, "Failed to release session.", ee);
                     }
                     throw e;
                 }

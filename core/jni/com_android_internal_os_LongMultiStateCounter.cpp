@@ -100,7 +100,7 @@ static jlong native_getCount(jlong nativePtr, jint state) {
     return asLongMultiStateCounter(nativePtr)->getCount(state);
 }
 
-static jobject native_toString(JNIEnv *env, jobject self, jlong nativePtr) {
+static jobject native_toString(JNIEnv *env, jclass, jlong nativePtr) {
     return env->NewStringUTF(asLongMultiStateCounter(nativePtr)->toString().c_str());
 }
 
@@ -118,7 +118,7 @@ static void throwWriteRE(JNIEnv *env, binder_status_t status) {
         }                                     \
     }
 
-static void native_writeToParcel(JNIEnv *env, jobject self, jlong nativePtr, jobject jParcel,
+static void native_writeToParcel(JNIEnv *env, jclass, jlong nativePtr, jobject jParcel,
                                  jint flags) {
     battery::LongMultiStateCounter *counter = asLongMultiStateCounter(nativePtr);
     ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));
@@ -131,16 +131,17 @@ static void native_writeToParcel(JNIEnv *env, jobject self, jlong nativePtr, job
     }
 }
 
-static void throwReadRE(JNIEnv *env, binder_status_t status) {
+static void throwReadException(JNIEnv *env, binder_status_t status) {
     ALOGE("Could not read LongMultiStateCounter from Parcel, status = %d", status);
-    jniThrowRuntimeException(env, "Could not read LongMultiStateCounter from Parcel");
+    jniThrowException(env, "android.os.BadParcelableException",
+                      "Could not read LongMultiStateCounter from Parcel");
 }
 
 #define THROW_AND_RETURN_ON_READ_ERROR(expr) \
     {                                        \
         binder_status_t status = expr;       \
         if (status != STATUS_OK) {           \
-            throwReadRE(env, status);        \
+            throwReadException(env, status); \
             return 0L;                       \
         }                                    \
     }
@@ -150,6 +151,11 @@ static jlong native_initFromParcel(JNIEnv *env, jclass theClass, jobject jParcel
 
     int32_t stateCount;
     THROW_AND_RETURN_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &stateCount));
+
+    if (stateCount < 0 || stateCount > 0xEFFF) {
+        throwReadException(env, STATUS_INVALID_OPERATION);
+        return 0L;
+    }
 
     auto counter = std::make_unique<battery::LongMultiStateCounter>(stateCount, 0);
 

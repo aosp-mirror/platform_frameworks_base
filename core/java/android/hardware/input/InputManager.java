@@ -16,7 +16,11 @@
 
 package android.hardware.input;
 
+import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
+import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
+
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -24,6 +28,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -31,6 +36,7 @@ import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.hardware.BatteryState;
 import android.os.Build;
 import android.os.Handler;
@@ -288,6 +294,23 @@ public final class InputManager {
     @Nullable
     public InputDevice getInputDevice(int id) {
         return mGlobal.getInputDevice(id);
+    }
+
+    /**
+     * Gets the {@link InputDevice.ViewBehavior} of the input device with a given {@code id}.
+     *
+     * <p>Use this API to query a fresh view behavior instance whenever the input device
+     * changes.
+     *
+     * @param deviceId the id of the input device whose view behavior is being requested.
+     * @return the view behavior of the input device with the provided id, or {@code null} if there
+     *      is not input device with the provided id.
+     */
+    @FlaggedApi(FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API)
+    @Nullable
+    public InputDevice.ViewBehavior getInputDeviceViewBehavior(int deviceId) {
+        InputDevice device = getInputDevice(deviceId);
+        return device == null ? null : device.getViewBehavior();
     }
 
     /**
@@ -835,6 +858,28 @@ public final class InputManager {
     }
 
     /**
+     * Returns the mouse pointer speed.
+     *
+     * <p>The pointer speed is a value between {@link InputSettings#MIN_POINTER_SPEED} and
+     * {@link InputSettings#MAX_POINTER_SPEED}, the default value being
+     * {@link InputSettings#DEFAULT_POINTER_SPEED}.
+     *
+     * <p> Note that while setting the mouse pointer speed, it's possible that the input reader has
+     * only received this value and has not yet completed reconfiguring itself with this value.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // TestApi without associated feature.
+    @TestApi
+    public int getMousePointerSpeed() {
+        try {
+            return mIm.getMousePointerSpeed();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Changes the mouse pointer speed temporarily, but does not save the setting.
      * <p>
      * Requires {@link android.Manifest.permission#SET_POINTER_SPEED}.
@@ -928,6 +973,31 @@ public final class InputManager {
      */
     public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
         return mGlobal.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
+    }
+
+    /**
+     * Provides a Keyboard layout preview of a particular dimension.
+     *
+     * @param keyboardLayout Layout whose preview is requested. If null, will return preview of
+     *                       the default Keyboard layout defined by {@code Generic.kl}.
+     * @param width Expected width of the drawable
+     * @param height Expected height of the drawable
+     *
+     * NOTE: Width and height will auto-adjust to the width and height of the ImageView that
+     * shows the drawable but this allows the caller to provide an intrinsic width and height of
+     * the drawable allowing the ImageView to properly wrap the drawable content.
+     *
+     * @hide
+     */
+    @Nullable
+    public Drawable getKeyboardLayoutPreview(@Nullable KeyboardLayout keyboardLayout, int width,
+            int height) {
+        if (!keyboardLayoutPreviewFlag()) {
+            return null;
+        }
+        PhysicalKeyLayout keyLayout = new PhysicalKeyLayout(
+                mGlobal.getKeyCharacterMap(keyboardLayout), keyboardLayout);
+        return new KeyboardLayoutPreviewDrawable(mContext, keyLayout, width, height);
     }
 
     /**
@@ -1029,6 +1099,12 @@ public final class InputManager {
         mGlobal.setCustomPointerIcon(icon);
     }
 
+    /** @hide */
+    public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
+            IBinder inputToken) {
+        return mGlobal.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
+    }
+
     /**
      * Check if showing a {@link android.view.PointerIcon} for styluses is enabled.
      *
@@ -1064,62 +1140,6 @@ public final class InputManager {
      */
     public InputMonitor monitorGestureInput(String name, int displayId) {
         return mGlobal.monitorGestureInput(name, displayId);
-    }
-
-    /**
-     * Get sensors information as list.
-     *
-     * @hide
-     */
-    public InputSensorInfo[] getSensorList(int deviceId) {
-        return mGlobal.getSensorList(deviceId);
-    }
-
-    /**
-     * Enable input device sensor
-     *
-     * @hide
-     */
-    public boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
-            int maxBatchReportLatencyUs) {
-        return mGlobal.enableSensor(deviceId, sensorType, samplingPeriodUs,
-                maxBatchReportLatencyUs);
-    }
-
-    /**
-     * Enable input device sensor
-     *
-     * @hide
-     */
-    public void disableSensor(int deviceId, int sensorType) {
-        mGlobal.disableSensor(deviceId, sensorType);
-    }
-
-    /**
-     * Flush input device sensor
-     *
-     * @hide
-     */
-    public boolean flushSensor(int deviceId, int sensorType) {
-        return mGlobal.flushSensor(deviceId, sensorType);
-    }
-
-    /**
-     * Register input device sensor listener
-     *
-     * @hide
-     */
-    public boolean registerSensorListener(IInputSensorEventListener listener) {
-        return mGlobal.registerSensorListener(listener);
-    }
-
-    /**
-     * Unregister input device sensor listener
-     *
-     * @hide
-     */
-    public void unregisterSensorListener(IInputSensorEventListener listener) {
-        mGlobal.unregisterSensorListener(listener);
     }
 
     /**
@@ -1319,6 +1339,42 @@ public final class InputManager {
     }
 
     /**
+     * Registers a Sticky modifier state change listener to be notified about {@link
+     * StickyModifierState} changes.
+     *
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link StickyModifierStateListener}
+     * @throws IllegalArgumentException if {@code listener} has already been registered previously.
+     * @throws NullPointerException     if {@code listener} or {@code executor} is null.
+     * @hide
+     * @see #unregisterStickyModifierStateListener(StickyModifierStateListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    public void registerStickyModifierStateListener(@NonNull Executor executor,
+            @NonNull StickyModifierStateListener listener) throws IllegalArgumentException {
+        if (!InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
+            return;
+        }
+        mGlobal.registerStickyModifierStateListener(executor, listener);
+    }
+
+    /**
+     * Unregisters a previously added Sticky modifier state change listener.
+     *
+     * @param listener the {@link StickyModifierStateListener}
+     * @hide
+     * @see #registerStickyModifierStateListener(Executor, StickyModifierStateListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    public void unregisterStickyModifierStateListener(
+            @NonNull StickyModifierStateListener listener) {
+        if (!InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
+            return;
+        }
+        mGlobal.unregisterStickyModifierStateListener(listener);
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.
@@ -1345,7 +1401,7 @@ public final class InputManager {
     public interface InputDeviceListener {
         /**
          * Called whenever an input device has been added to the system.
-         * Use {@link InputManagerGlobal#getInputDevice} to get more information about the device.
+         * Use {@link #getInputDevice(int)} to get more information about the device.
          *
          * @param deviceId The id of the input device that was added.
          */
@@ -1399,5 +1455,24 @@ public final class InputManager {
          */
         void onKeyboardBacklightChanged(
                 int deviceId, @NonNull KeyboardBacklightState state, boolean isTriggeredByKeyPress);
+    }
+
+    /**
+     * A callback used to be notified about sticky modifier state changes when A11y Sticky keys
+     * feature is enabled.
+     *
+     * @see #registerStickyModifierStateListener(Executor, StickyModifierStateListener)
+     * @see #unregisterStickyModifierStateListener(StickyModifierStateListener)
+     * @hide
+     */
+    public interface StickyModifierStateListener {
+        /**
+         * Called when the sticky modifier state changes.
+         * This method will be called once after the listener is successfully registered to provide
+         * the initial modifier state.
+         *
+         * @param state the new sticky modifier state, never null.
+         */
+        void onStickyModifierStateChanged(@NonNull StickyModifierState state);
     }
 }

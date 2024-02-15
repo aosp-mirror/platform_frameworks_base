@@ -61,7 +61,8 @@ interface ITelecomService {
      * @see TelecomServiceImpl#getCallCapablePhoneAccounts
      */
     ParceledListSlice<PhoneAccountHandle> getCallCapablePhoneAccounts(
-            boolean includeDisabledAccounts, String callingPackage, String callingFeatureId);
+            boolean includeDisabledAccounts, String callingPackage,
+            String callingFeatureId, boolean acrossProfiles);
 
     /**
      * @see TelecomServiceImpl#getSelfManagedPhoneAccounts
@@ -358,6 +359,8 @@ interface ITelecomService {
 
     int cleanupOrphanPhoneAccounts();
 
+    boolean isNonUiInCallServiceBound(in String packageName);
+
     void resetCarMode();
 
     void setTestDefaultCallRedirectionApp(String packageName);
@@ -392,7 +395,7 @@ interface ITelecomService {
      * @see TelecomServiceImpl#isInSelfManagedCall
      */
     boolean isInSelfManagedCall(String packageName, in UserHandle userHandle,
-        String callingPackage);
+        String callingPackage, boolean detectForAllUsers);
 
     /**
      * @see TelecomServiceImpl#addCall

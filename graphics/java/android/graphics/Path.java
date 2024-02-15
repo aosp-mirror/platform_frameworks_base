@@ -16,10 +16,13 @@
 
 package android.graphics;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+
+import com.android.graphics.flags.Flags;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -293,9 +296,24 @@ public class Path {
      *
      * @param bounds Returns the computed bounds of the path's control points.
      * @param exact This parameter is no longer used.
+     *
+     * @deprecated use computeBounds(RectF) instead
      */
+    @Deprecated
     @SuppressWarnings({"UnusedDeclaration"})
     public void computeBounds(@NonNull RectF bounds, boolean exact) {
+        computeBounds(bounds);
+    }
+
+    /**
+     * Compute the bounds of the control points of the path, and write the
+     * answer into bounds. If the path contains 0 or 1 points, the bounds is
+     * set to (0,0,0,0)
+     *
+     * @param bounds Returns the computed bounds of the path's control points.
+     */
+    @FlaggedApi(Flags.FLAG_EXACT_COMPUTE_BOUNDS)
+    public void computeBounds(@NonNull RectF bounds) {
         nComputeBounds(mNativePath, bounds);
     }
 

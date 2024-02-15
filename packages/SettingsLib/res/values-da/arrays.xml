@@ -26,7 +26,7 @@
     <item msgid="6050951078202663628">"Opretter forbindelse..."</item>
     <item msgid="8356618438494652335">"Godkender..."</item>
     <item msgid="2837871868181677206">"Henter IP-adresse…"</item>
-    <item msgid="4613015005934755724">"Tilsluttet"</item>
+    <item msgid="4613015005934755724">"Forbundet"</item>
     <item msgid="3763530049995655072">"Sat på pause"</item>
     <item msgid="7852381437933824454">"Afbryder ..."</item>
     <item msgid="5046795712175415059">"Afbrudt"</item>
@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"4K (sikker)"</item>
     <item msgid="7322156123728520872">"4K (opskaleret)"</item>
     <item msgid="7735692090314849188">"4K (opskaleret, sikker)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (dobbelt skærm)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (Dual Screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"Ingen"</item>
@@ -281,5 +281,11 @@
     <item msgid="3825132913289380004">"RNDIS (USB Ethernet)"</item>
     <item msgid="8828567335701536560">"Lydkilde"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
+  </string-array>
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"0"</item>
+    <item msgid="2646486108212979598">"1"</item>
+    <item msgid="3753634915787796632">"2"</item>
+    <item msgid="4779928470672877922">"3"</item>
   </string-array>
 </resources>

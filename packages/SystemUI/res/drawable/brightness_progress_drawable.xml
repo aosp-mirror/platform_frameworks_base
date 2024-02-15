@@ -24,7 +24,7 @@
             <shape>
                 <size android:height="@dimen/rounded_slider_track_width" />
                 <corners android:radius="@dimen/rounded_slider_track_corner_radius" />
-                <solid android:color="?attr/offStateColor" />
+                <solid android:color="@color/brightness_slider_track" />
             </shape>
         </inset>
     </item>

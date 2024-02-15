@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullM
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_EMERGENCY
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_IS_GSM
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_IS_IN_SERVICE
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_IS_NTN
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_OPERATOR
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_PRIMARY_LEVEL
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_ROAMING
@@ -109,6 +110,17 @@ class DemoMobileConnectionRepository(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), _isInService.value)
 
+    private val _isNonTerrestrial = MutableStateFlow(false)
+    override val isNonTerrestrial =
+        _isNonTerrestrial
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = COL_IS_NTN,
+                _isNonTerrestrial.value
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), _isNonTerrestrial.value)
+
     private val _isGsm = MutableStateFlow(false)
     override val isGsm =
         _isGsm
@@ -184,7 +196,16 @@ class DemoMobileConnectionRepository(
 
     override val cdmaRoaming = MutableStateFlow(false)
 
-    override val networkName = MutableStateFlow(NetworkNameModel.IntentDerived("demo network"))
+    override val networkName = MutableStateFlow(NetworkNameModel.IntentDerived(DEMO_CARRIER_NAME))
+
+    override val carrierName =
+        MutableStateFlow(NetworkNameModel.SubscriptionDerived(DEMO_CARRIER_NAME))
+
+    override val isAllowedDuringAirplaneMode = MutableStateFlow(false)
+
+    override val hasPrioritizedNetworkCapabilities = MutableStateFlow(false)
+
+    override suspend fun isInEcmMode(): Boolean = false
 
     /**
      * Process a new demo mobile event. Note that [resolvedNetworkType] must be passed in separately
@@ -198,6 +219,7 @@ class DemoMobileConnectionRepository(
         // This is always true here, because we split out disabled states at the data-source level
         dataEnabled.value = true
         networkName.value = NetworkNameModel.IntentDerived(event.name)
+        carrierName.value = NetworkNameModel.SubscriptionDerived("${event.name} ${event.subId}")
 
         _carrierId.value = event.carrierId ?: INVALID_SUBSCRIPTION_ID
 
@@ -217,12 +239,17 @@ class DemoMobileConnectionRepository(
             (event.activity ?: TelephonyManager.DATA_ACTIVITY_NONE).toMobileDataActivityModel()
         _carrierNetworkChangeActive.value = event.carrierNetworkChange
         _resolvedNetworkType.value = resolvedNetworkType
+        _isNonTerrestrial.value = event.ntn
+
+        isAllowedDuringAirplaneMode.value = false
+        hasPrioritizedNetworkCapabilities.value = event.slice
     }
 
     fun processCarrierMergedEvent(event: FakeWifiEventModel.CarrierMerged) {
         // This is always true here, because we split out disabled states at the data-source level
         dataEnabled.value = true
         networkName.value = NetworkNameModel.IntentDerived(CARRIER_MERGED_NAME)
+        carrierName.value = NetworkNameModel.SubscriptionDerived(CARRIER_MERGED_NAME)
         // TODO(b/276943904): is carrierId a thing with carrier merged networks?
         _carrierId.value = INVALID_SUBSCRIPTION_ID
         numberOfLevels.value = event.numberOfLevels
@@ -240,9 +267,12 @@ class DemoMobileConnectionRepository(
         _isInService.value = true
         _isGsm.value = false
         _carrierNetworkChangeActive.value = false
+        isAllowedDuringAirplaneMode.value = true
+        hasPrioritizedNetworkCapabilities.value = false
     }
 
     companion object {
+        private const val DEMO_CARRIER_NAME = "Demo Carrier"
         private const val CARRIER_MERGED_NAME = "Carrier Merged Network"
     }
 }

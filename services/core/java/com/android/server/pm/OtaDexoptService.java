@@ -159,6 +159,9 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             if (pkgSetting.getPkg().isCoreApp()) {
                 throw new IllegalStateException("Found a core app that's not important");
             }
+            // Use REASON_FIRST_BOOT to query "pm.dexopt.first-boot" for the compiler filter, but
+            // the reason itself won't make it into the actual compiler reason because it will be
+            // overridden in otapreopt.cpp.
             mDexoptCommands.addAll(generatePackageDexopts(pkgSetting.getPkg(), pkgSetting,
                     PackageManagerService.REASON_FIRST_BOOT));
         }

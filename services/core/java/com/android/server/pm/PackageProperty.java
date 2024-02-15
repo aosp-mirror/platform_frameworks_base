@@ -31,8 +31,8 @@ import android.os.Binder;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 
+import com.android.internal.pm.pkg.component.ParsedComponent;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedComponent;
 
 import java.util.ArrayList;
 import java.util.Iterator;

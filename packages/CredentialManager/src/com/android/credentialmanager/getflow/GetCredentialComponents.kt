@@ -48,8 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
-import com.android.credentialmanager.common.BaseEntry
-import com.android.credentialmanager.common.CredentialType
+import com.android.credentialmanager.model.EntryInfo
+import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
 import com.android.credentialmanager.common.ui.ActionButton
@@ -68,6 +69,10 @@ import com.android.credentialmanager.common.ui.HeadlineIcon
 import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.logging.GetCredentialEvent
+import com.android.credentialmanager.model.get.ActionEntryInfo
+import com.android.credentialmanager.model.get.AuthenticationEntryInfo
+import com.android.credentialmanager.model.get.CredentialEntryInfo
+import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.credentialmanager.userAndDisplayNameForPasskey
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 
@@ -175,8 +180,8 @@ fun PrimarySelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
     providerDisplayInfo: ProviderDisplayInfo,
     providerInfoList: List<ProviderInfo>,
-    activeEntry: BaseEntry?,
-    onEntrySelected: (BaseEntry) -> Unit,
+    activeEntry: EntryInfo?,
+    onEntrySelected: (EntryInfo) -> Unit,
     onConfirm: () -> Unit,
     onMoreOptionSelected: () -> Unit,
     onLog: @Composable (UiEventEnum) -> Unit,
@@ -358,7 +363,7 @@ fun PrimarySelectionCard(
 fun AllSignInOptionCard(
     providerInfoList: List<ProviderInfo>,
     providerDisplayInfo: ProviderDisplayInfo,
-    onEntrySelected: (BaseEntry) -> Unit,
+    onEntrySelected: (EntryInfo) -> Unit,
     onBackButtonClicked: () -> Unit,
     onCancel: () -> Unit,
     onLog: @Composable (UiEventEnum) -> Unit,
@@ -436,7 +441,7 @@ fun HeadlineProviderIconAndName(
 @Composable
 fun ActionChips(
     providerInfoList: List<ProviderInfo>,
-    onEntrySelected: (BaseEntry) -> Unit,
+    onEntrySelected: (EntryInfo) -> Unit,
     isFirstSection: Boolean,
 ) {
     val actionChips = providerInfoList.flatMap { it.actionEntryList }
@@ -460,7 +465,7 @@ fun ActionChips(
 @Composable
 fun RemoteEntryCard(
     remoteEntry: RemoteEntryInfo,
-    onEntrySelected: (BaseEntry) -> Unit,
+    onEntrySelected: (EntryInfo) -> Unit,
     isFirstSection: Boolean,
 ) {
     CredentialListSectionHeader(
@@ -486,7 +491,7 @@ fun RemoteEntryCard(
 @Composable
 fun LockedCredentials(
     authenticationEntryList: List<AuthenticationEntryInfo>,
-    onEntrySelected: (BaseEntry) -> Unit,
+    onEntrySelected: (EntryInfo) -> Unit,
     isFirstSection: Boolean,
 ) {
     CredentialListSectionHeader(
@@ -508,7 +513,7 @@ fun LockedCredentials(
 @Composable
 fun PerUserNameCredentials(
     perUserNameCredentialEntryList: PerUserNameCredentialEntryList,
-    onEntrySelected: (BaseEntry) -> Unit,
+    onEntrySelected: (EntryInfo) -> Unit,
     isFirstSection: Boolean,
 ) {
     CredentialListSectionHeader(
@@ -532,7 +537,7 @@ fun PerUserNameCredentials(
 @Composable
 fun CredentialEntryRow(
     credentialEntryInfo: CredentialEntryInfo,
-    onEntrySelected: (BaseEntry) -> Unit,
+    onEntrySelected: (EntryInfo) -> Unit,
     enforceOneLine: Boolean = false,
     onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
@@ -571,7 +576,7 @@ fun CredentialEntryRow(
 @Composable
 fun AuthenticationEntryRow(
     authenticationEntryInfo: AuthenticationEntryInfo,
-    onEntrySelected: (BaseEntry) -> Unit,
+    onEntrySelected: (EntryInfo) -> Unit,
     enforceOneLine: Boolean = false,
 ) {
     Entry(
@@ -596,7 +601,7 @@ fun AuthenticationEntryRow(
 @Composable
 fun ActionEntryRow(
     actionEntryInfo: ActionEntryInfo,
-    onEntrySelected: (BaseEntry) -> Unit,
+    onEntrySelected: (EntryInfo) -> Unit,
 ) {
     ActionEntry(
         iconImageBitmap = actionEntryInfo.icon.toBitmap().asImageBitmap(),

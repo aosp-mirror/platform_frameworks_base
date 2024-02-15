@@ -486,9 +486,12 @@ public class LocaleManagerService extends SystemService {
                 Settings.Secure.DEFAULT_INPUT_METHOD,
                 userId);
         if (!TextUtils.isEmpty(currentInputMethod)) {
-            String inputMethodPkgName = ComponentName
-                    .unflattenFromString(currentInputMethod)
-                    .getPackageName();
+            ComponentName componentName = ComponentName.unflattenFromString(currentInputMethod);
+            if (componentName == null) {
+                Slog.d(TAG, "inValid input method");
+                return false;
+            }
+            String inputMethodPkgName = componentName.getPackageName();
             int inputMethodUid = getPackageUid(inputMethodPkgName, userId);
             return inputMethodUid >= 0 && UserHandle.isSameApp(Binder.getCallingUid(),
                     inputMethodUid);

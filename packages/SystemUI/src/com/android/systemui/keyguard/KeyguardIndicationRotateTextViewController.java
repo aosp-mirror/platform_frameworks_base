@@ -403,6 +403,7 @@ public class KeyguardIndicationRotateTextViewController extends
     public static final int INDICATION_TYPE_REVERSE_CHARGING = 10;
     public static final int INDICATION_TYPE_BIOMETRIC_MESSAGE = 11;
     public static final int INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP = 12;
+    public static final int INDICATION_IS_DISMISSIBLE = 13;
 
     @IntDef({
             INDICATION_TYPE_NONE,
@@ -417,7 +418,8 @@ public class KeyguardIndicationRotateTextViewController extends
             INDICATION_TYPE_USER_LOCKED,
             INDICATION_TYPE_REVERSE_CHARGING,
             INDICATION_TYPE_BIOMETRIC_MESSAGE,
-            INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP
+            INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+            INDICATION_IS_DISMISSIBLE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface IndicationType{}

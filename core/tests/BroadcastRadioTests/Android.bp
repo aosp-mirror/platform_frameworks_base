@@ -18,6 +18,7 @@ package {
     // all of the 'license_kinds' from "frameworks_base_license"
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
+    default_team: "trendy_team_aaos_framework",
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
@@ -38,13 +39,16 @@ android_test {
     static_libs: [
         "services.core",
         "androidx.test.rules",
-        "truth-prebuilt",
+        "truth",
         "testng",
+        "android.hardware.radio.flags-aconfig-java",
+        "flag-junit",
         "mockito-target-extended",
     ],
     libs: ["android.test.base"],
     test_suites: [
         "general-tests",
+        "automotive-general-tests",
     ],
     // mockito-target-inline dependency
     jni_libs: [

@@ -18,11 +18,12 @@ package com.android.systemui.privacy.logging
 
 import android.icu.text.SimpleDateFormat
 import android.permission.PermissionGroupUsage
-import com.android.systemui.log.dagger.PrivacyLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogMessage
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogMessage
+import com.android.systemui.log.dagger.PrivacyLog
 import com.android.systemui.privacy.PrivacyDialog
+import com.android.systemui.privacy.PrivacyDialogV2
 import com.android.systemui.privacy.PrivacyItem
 import java.util.Locale
 import javax.inject.Inject
@@ -126,6 +127,14 @@ class PrivacyLogger @Inject constructor(
         })
     }
 
+    fun logShowDialogV2Contents(contents: List<PrivacyDialogV2.PrivacyElement>) {
+        log(LogLevel.INFO, {
+            str1 = contents.toString()
+        }, {
+            "Privacy dialog shown. Contents: $str1"
+        })
+    }
+
     fun logEmptyDialog() {
         log(LogLevel.WARNING, {}, {
             "Trying to show an empty dialog"
@@ -145,6 +154,23 @@ class PrivacyLogger @Inject constructor(
         }, {
             "Start settings activity from dialog for packageName=$str1, userId=$int1 "
         })
+    }
+
+    fun logCloseAppFromDialog(packageName: String, userId: Int) {
+        log(LogLevel.INFO, {
+            str1 = packageName
+            int1 = userId
+        }, {
+            "Close app from dialog for packageName=$str1, userId=$int1"
+        })
+    }
+
+    fun logStartPrivacyDashboardFromDialog() {
+        log(LogLevel.INFO, {}, { "Start privacy dashboard from dialog" })
+    }
+
+    fun logLabelNotFound(packageName: String) {
+        log(LogLevel.WARNING, { str1 = packageName }, { "Label not found for: $str1" })
     }
 
     private fun listToString(list: List<PrivacyItem>): String {

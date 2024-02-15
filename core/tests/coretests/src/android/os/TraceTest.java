@@ -16,25 +16,80 @@
 
 package android.os;
 
-import android.test.AndroidTestCase;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * This class is used to test the native tracing support.  Run this test
  * while tracing on the emulator and then run traceview to view the trace.
  */
-public class TraceTest extends AndroidTestCase
-{
+@RunWith(AndroidJUnit4.class)
+public class TraceTest {
     private static final String TAG = "TraceTest";
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private int eMethodCalls = 0;
     private int fMethodCalls = 0;
     private int gMethodCalls = 0;
 
+    @Test
+    public void testEnableDisable() {
+        // Currently only verifying that we can invoke without crashing
+        Trace.setTracingEnabled(true, 0);
+        Trace.setTracingEnabled(false, 0);
+
+        Trace.setAppTracingAllowed(true);
+        Trace.setAppTracingAllowed(false);
+    }
+
+    @Test
+    public void testBeginEnd() {
+        // Currently only verifying that we can invoke without crashing
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, TAG);
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, TAG, 42);
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, TAG, 42);
+
+        Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, TAG, TAG, 42);
+        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, TAG, 42);
+
+        Trace.beginSection(TAG);
+        Trace.endSection();
+
+        Trace.beginAsyncSection(TAG, 42);
+        Trace.endAsyncSection(TAG, 42);
+    }
+
+    @Test
+    public void testCounter() {
+        // Currently only verifying that we can invoke without crashing
+        Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER, TAG, 42);
+        Trace.setCounter(TAG, 42);
+    }
+
+    @Test
+    public void testInstant() {
+        // Currently only verifying that we can invoke without crashing
+        Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, TAG);
+        Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, TAG, TAG);
+    }
+
+    @Test
     public void testNullStrings() {
+        // Currently only verifying that we can invoke without crashing
         Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER, null, 42);
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, null);
 
@@ -48,7 +103,9 @@ public class TraceTest extends AndroidTestCase
         Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, null, null);
     }
 
+    @Test
     @SmallTest
+    @IgnoreUnderRavenwood(blockedBy = Debug.class)
     public void testNativeTracingFromJava()
     {
         long start = System.currentTimeMillis();
@@ -69,6 +126,7 @@ public class TraceTest extends AndroidTestCase
     
     // This should not run in the automated suite.
     @Suppress
+    @IgnoreUnderRavenwood(blockedBy = Debug.class)
     public void disableTestNativeTracingFromC()
     {
         long start = System.currentTimeMillis();
@@ -80,9 +138,11 @@ public class TraceTest extends AndroidTestCase
 
     native void nativeMethod();
     native void nativeMethodAndStartTracing();
-    
+
+    @Test
     @LargeTest
     @Suppress  // Failing.
+    @IgnoreUnderRavenwood(blockedBy = Debug.class)
     public void testMethodTracing()
     {
         long start = System.currentTimeMillis();

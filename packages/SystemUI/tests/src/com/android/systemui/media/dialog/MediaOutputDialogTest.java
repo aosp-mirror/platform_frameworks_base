@@ -49,13 +49,13 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 
@@ -67,7 +67,6 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 @MediumTest
@@ -92,7 +91,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private final MediaDevice mMediaDevice = mock(MediaDevice.class);
     private final CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
-    private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
+    private final DialogTransitionAnimator mDialogTransitionAnimator = mock(
+            DialogTransitionAnimator.class);
     private final MediaMetadata mMediaMetadata = mock(MediaMetadata.class);
     private final MediaDescription mMediaDescription = mock(MediaDescription.class);
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
@@ -131,8 +131,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mNotifCollection, mDialogTransitionAnimator,
+                mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputDialog = makeTestDialog(mMediaOutputController);
@@ -257,6 +257,30 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void isBroadcastSupported_noBleDeviceAndEnabledBroadcast_returnsTrue() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(true);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
+        when(mMediaDevice.isBLEDevice()).thenReturn(false);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isTrue();
+    }
+
+    @Test
+    public void isBroadcastSupported_noBleDeviceAndDisabledBroadcast_returnsFalse() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
+        when(mMediaDevice.isBLEDevice()).thenReturn(false);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isFalse();
+    }
+
+    @Test
     public void getBroadcastIconVisibility_isBroadcasting_returnVisible() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
@@ -356,7 +380,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         });
 
         verify(mockMediaOutputController).releaseSession();
-        verify(mDialogLaunchAnimator).disableAllCurrentDialogsExitAnimations();
+        verify(mDialogTransitionAnimator).disableAllCurrentDialogsExitAnimations();
     }
 
     @Test
@@ -371,8 +395,14 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
     @NonNull
     private MediaOutputDialog makeTestDialog(MediaOutputController controller) {
-        return new MediaOutputDialog(mContext, false, mBroadcastSender,
-                controller, mDialogLaunchAnimator, mUiEventLogger);
+        return new MediaOutputDialog(
+                mContext,
+                false,
+                mBroadcastSender,
+                controller,
+                mDialogTransitionAnimator,
+                mUiEventLogger,
+                true);
     }
 
     private void withTestDialog(MediaOutputController controller, Consumer<MediaOutputDialog> c) {

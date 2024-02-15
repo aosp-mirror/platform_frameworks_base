@@ -30,4 +30,6 @@
          lockscreen, setting this to true should come with customized drawables. -->
     <bool name="use_lock_pattern_drawable">false</bool>
     <bool name="resolver_landscape_phone">true</bool>
+    <!-- Whether or not to include horizontal space around the dialog -->
+    <bool name="autofill_dialog_horizontal_space_included">false</bool>
 </resources>

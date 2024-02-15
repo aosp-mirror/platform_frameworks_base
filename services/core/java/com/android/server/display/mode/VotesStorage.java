@@ -30,11 +30,15 @@ class VotesStorage {
     private static final String TAG = "VotesStorage";
     // Special ID used to indicate that given vote is to be applied globally, rather than to a
     // specific display.
-    private static final int GLOBAL_ID = -1;
+    @VisibleForTesting
+    static final int GLOBAL_ID = -1;
 
     private boolean mLoggingEnabled;
 
     private final Listener mListener;
+
+    @Nullable
+    private final VotesStatsReporter mVotesStatsReporter;
 
     private final Object mStorageLock = new Object();
     // A map from the display ID to the collection of votes and their priority. The latter takes
@@ -43,8 +47,9 @@ class VotesStorage {
     @GuardedBy("mStorageLock")
     private final SparseArray<SparseArray<Vote>> mVotesByDisplay = new SparseArray<>();
 
-    VotesStorage(@NonNull Listener listener) {
+    VotesStorage(@NonNull Listener listener, @Nullable VotesStatsReporter votesStatsReporter) {
         mListener = listener;
+        mVotesStatsReporter = votesStatsReporter;
     }
     /** sets logging enabled/disabled for this class */
     void setLoggingEnabled(boolean loggingEnabled) {
@@ -90,6 +95,7 @@ class VotesStorage {
                     + ", vote=" + vote);
             return;
         }
+        boolean changed = false;
         SparseArray<Vote> votes;
         synchronized (mStorageLock) {
             if (mVotesByDisplay.contains(displayId)) {
@@ -98,16 +104,24 @@ class VotesStorage {
                 votes = new SparseArray<>();
                 mVotesByDisplay.put(displayId, votes);
             }
-            if (vote != null) {
+            var currentVote = votes.get(priority);
+            if (vote != null && !vote.equals(currentVote)) {
                 votes.put(priority, vote);
-            } else {
+                changed = true;
+            } else if (vote == null && currentVote != null) {
                 votes.remove(priority);
+                changed = true;
             }
         }
         if (mLoggingEnabled) {
             Slog.i(TAG, "Updated votes for display=" + displayId + " votes=" + votes);
         }
-        mListener.onChanged();
+        if (changed) {
+            if (mVotesStatsReporter != null) {
+                mVotesStatsReporter.reportVoteChanged(displayId, priority, vote);
+            }
+            mListener.onChanged();
+        }
     }
 
     /** dump class values, for debugging */

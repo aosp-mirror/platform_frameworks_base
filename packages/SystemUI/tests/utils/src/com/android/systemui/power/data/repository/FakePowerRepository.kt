@@ -17,18 +17,69 @@
 
 package com.android.systemui.power.data.repository
 
+import android.os.PowerManager
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.power.shared.model.ScreenPowerState
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessModel
+import com.android.systemui.power.shared.model.WakefulnessState
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakePowerRepository(
-    initialInteractive: Boolean = true,
-) : PowerRepository {
-
-    private val _isInteractive = MutableStateFlow(initialInteractive)
+@SysUISingleton
+class FakePowerRepository @Inject constructor() : PowerRepository {
+    private val _isInteractive = MutableStateFlow(true)
     override val isInteractive: Flow<Boolean> = _isInteractive.asStateFlow()
+
+    private val _wakefulness = MutableStateFlow(WakefulnessModel())
+    override val wakefulness = _wakefulness.asStateFlow()
+
+    private val _screenPowerState = MutableStateFlow(ScreenPowerState.SCREEN_OFF)
+    override val screenPowerState = _screenPowerState.asStateFlow()
+
+    var lastWakeWhy: String? = null
+    var lastWakeReason: Int? = null
+
+    var userTouchRegistered = false
 
     fun setInteractive(value: Boolean) {
         _isInteractive.value = value
     }
+
+    override fun wakeUp(why: String, @PowerManager.WakeReason wakeReason: Int) {
+        lastWakeWhy = why
+        lastWakeReason = wakeReason
+    }
+
+    override fun userTouch(noChangeLights: Boolean) {
+        userTouchRegistered = true
+    }
+
+    override fun updateWakefulness(
+        rawState: WakefulnessState,
+        lastWakeReason: WakeSleepReason,
+        lastSleepReason: WakeSleepReason,
+        powerButtonLaunchGestureTriggered: Boolean
+    ) {
+        _wakefulness.value =
+            WakefulnessModel(
+                rawState,
+                lastWakeReason,
+                lastSleepReason,
+                powerButtonLaunchGestureTriggered,
+            )
+    }
+
+    override fun setScreenPowerState(state: ScreenPowerState) {
+        _screenPowerState.value = state
+    }
+}
+
+@Module
+interface FakePowerRepositoryModule {
+    @Binds fun bindFake(fake: FakePowerRepository): PowerRepository
 }

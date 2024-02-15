@@ -16,6 +16,8 @@
 
 package android.content;
 
+import static android.content.flags.Flags.FLAG_ENABLE_BIND_PACKAGE_ISOLATED_PROCESS;
+
 import android.annotation.AttrRes;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
@@ -23,6 +25,7 @@ import android.annotation.ColorInt;
 import android.annotation.ColorRes;
 import android.annotation.DisplayContext;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -71,6 +74,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -294,6 +298,7 @@ public abstract class Context {
             BIND_ALLOW_ACTIVITY_STARTS,
             BIND_INCLUDE_CAPABILITIES,
             BIND_SHARED_ISOLATED_PROCESS,
+            BIND_PACKAGE_ISOLATED_PROCESS,
             BIND_EXTERNAL_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -316,6 +321,7 @@ public abstract class Context {
             BIND_ALLOW_ACTIVITY_STARTS,
             BIND_INCLUDE_CAPABILITIES,
             BIND_SHARED_ISOLATED_PROCESS,
+            BIND_PACKAGE_ISOLATED_PROCESS,
             // Intentionally not include BIND_EXTERNAL_SERVICE, because it'd cause sign-extension.
             // This would allow Android Studio to show a warning, if someone tries to use
             // BIND_EXTERNAL_SERVICE BindServiceFlags.
@@ -323,6 +329,7 @@ public abstract class Context {
             // Make sure no flag uses the sign bit (most significant bit) of the long integer,
             // to avoid future confusion.
             BIND_BYPASS_USER_NETWORK_RESTRICTIONS,
+            BIND_MATCH_QUARANTINED_COMPONENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlagsLongBits {}
@@ -508,6 +515,26 @@ public abstract class Context {
      */
     public static final int BIND_SHARED_ISOLATED_PROCESS = 0x00002000;
 
+    /**
+     * Flag for {@link #bindIsolatedService}: Bind the service into a shared isolated process,
+     * but only with other isolated services from the same package that declare the same process
+     * name.
+     *
+     * <p>Specifying this flag allows multiple isolated services defined in the same package to be
+     * running in a single shared isolated process. This shared isolated process must be specified
+     * since this flag will not work with the default application process.
+     *
+     * <p>This flag is different from {@link #BIND_SHARED_ISOLATED_PROCESS} since it only
+     * allows binding services from the same package in the same shared isolated process. This also
+     * means the shared package isolated process is global, and not scoped to each potential
+     * calling app.
+     *
+     * <p>The shared isolated process instance is identified by the "android:process" attribute
+     * defined by the service. This flag cannot be used without this attribute set.
+     */
+    @FlaggedApi(FLAG_ENABLE_BIND_PACKAGE_ISOLATED_PROCESS)
+    public static final int BIND_PACKAGE_ISOLATED_PROCESS = 1 << 14;
+
     /***********    Public flags above this line ***********/
     /***********    Hidden flags below this line ***********/
 
@@ -592,7 +619,7 @@ public abstract class Context {
     public static final int BIND_IMPORTANT_BACKGROUND = 0x00800000;
 
     /**
-     * @hide Flag for {@link #bindService}: allows application hosting service to manage whitelists
+     * @hide Flag for {@link #bindService}: allows application hosting service to manage allowlists
      * such as temporary allowing a {@code PendingIntent} to bypass Power Save mode.
      */
     public static final int BIND_ALLOW_WHITELIST_MANAGEMENT = 0x01000000;
@@ -683,7 +710,7 @@ public abstract class Context {
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
 
     /**
-     * Works in the same way as {@link #BIND_EXTERNAL_SERVICE}, but it's defined as a (@code long)
+     * Works in the same way as {@link #BIND_EXTERNAL_SERVICE}, but it's defined as a {@code long}
      * value that is compatible to {@link BindServiceFlags}.
      */
     public static final long BIND_EXTERNAL_SERVICE_LONG = 1L << 62;
@@ -696,6 +723,13 @@ public abstract class Context {
      * @hide
      */
     public static final long BIND_BYPASS_USER_NETWORK_RESTRICTIONS = 0x1_0000_0000L;
+
+    /**
+     * Flag for {@link #bindService}.
+     *
+     * @hide
+     */
+    public static final long BIND_MATCH_QUARANTINED_COMPONENTS = 0x2_0000_0000L;
 
 
     /**
@@ -852,12 +886,23 @@ public abstract class Context {
      * <em>must</em> be sure to use {@link #unregisterComponentCallbacks} when
      * appropriate in the future; this will not be removed for you.
      * <p>
-     * After {@link Build.VERSION_CODES#S}, Registering the ComponentCallbacks to Context created
+     * After {@link Build.VERSION_CODES#S}, registering the ComponentCallbacks to Context created
      * via {@link #createWindowContext(int, Bundle)} or
      * {@link #createWindowContext(Display, int, Bundle)} will receive
      * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from Window Context rather
      * than its base application. It is helpful if you want to handle UI components that
      * associated with the Window Context when the Window Context has configuration changes.</p>
+     * <p>
+     * After {@link Build.VERSION_CODES#TIRAMISU}, registering the ComponentCallbacks to
+     * {@link Activity} context will receive
+     * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from
+     * {@link Activity#onConfigurationChanged(Configuration)} rather than its base application.</p>
+     * <p>
+     * After {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, registering the ComponentCallbacks to
+     * {@link android.inputmethodservice.InputMethodService} will receive
+     * {@link ComponentCallbacks#onConfigurationChanged(Configuration)} from InputmethodService
+     * rather than its base application. It is helpful if you want to handle UI components when the
+     * IME has configuration changes.</p>
      *
      * @param callback The interface to call.  This can be either a
      * {@link ComponentCallbacks} or {@link ComponentCallbacks2} interface.
@@ -1413,7 +1458,7 @@ public abstract class Context {
      * </ul>
      * <p>
      * If a shared storage device is emulated (as determined by
-     * {@link Environment#isExternalStorageEmulated(File)}), it's contents are
+     * {@link Environment#isExternalStorageEmulated(File)}), its contents are
      * backed by a private user data partition, which means there is little
      * benefit to storing data here instead of the private directories returned
      * by {@link #getFilesDir()}, etc.
@@ -1501,7 +1546,7 @@ public abstract class Context {
      * </ul>
      * <p>
      * If a shared storage device is emulated (as determined by
-     * {@link Environment#isExternalStorageEmulated(File)}), it's contents are
+     * {@link Environment#isExternalStorageEmulated(File)}), its contents are
      * backed by a private user data partition, which means there is little
      * benefit to storing data here instead of the private directories returned
      * by {@link #getFilesDir()}, etc.
@@ -1812,7 +1857,7 @@ public abstract class Context {
      * </ul>
      * <p>
      * If a shared storage device is emulated (as determined by
-     * {@link Environment#isExternalStorageEmulated(File)}), it's contents are
+     * {@link Environment#isExternalStorageEmulated(File)}), its contents are
      * backed by a private user data partition, which means there is little
      * benefit to storing data here instead of the private directory returned by
      * {@link #getCacheDir()}.
@@ -3526,6 +3571,8 @@ public abstract class Context {
      *
      * @param receiver The BroadcastReceiver to unregister.
      *
+     * @throws IllegalArgumentException if the {@code receiver} was not previously registered or
+     *                                  already unregistered.
      * @see #registerReceiver
      */
     public abstract void unregisterReceiver(BroadcastReceiver receiver);
@@ -3610,8 +3657,8 @@ public abstract class Context {
      * On Android {@link android.os.Build.VERSION_CODES#S} and later,
      * if the application is in a state where the service
      * can not be started (such as not in the foreground in a state when services are allowed),
-     * {@link android.app.BackgroundServiceStartNotAllowedException} is thrown
-     * This excemption extends {@link IllegalStateException}, so apps can
+     * {@link android.app.BackgroundServiceStartNotAllowedException} is thrown.
+     * This exception extends {@link IllegalStateException}, so apps can
      * use {@code catch (IllegalStateException)} to catch both.
      *
      * @see #startForegroundService(Intent)
@@ -4081,6 +4128,7 @@ public abstract class Context {
             VIBRATOR_MANAGER_SERVICE,
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
+            THREAD_NETWORK_SERVICE,
             CONNECTIVITY_SERVICE,
             PAC_PROXY_SERVICE,
             VCN_MANAGEMENT_SERVICE,
@@ -4193,6 +4241,9 @@ public abstract class Context {
             DEVICE_LOCK_SERVICE,
             VIRTUALIZATION_SERVICE,
             GRAMMATICAL_INFLECTION_SERVICE,
+            SECURITY_STATE_SERVICE,
+           //@hide: ECM_ENHANCED_CONFIRMATION_SERVICE,
+            CONTACT_KEYS_SERVICE,
 
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -4348,7 +4399,6 @@ public abstract class Context {
      * @see android.telephony.CarrierConfigManager
      * @see #EUICC_SERVICE
      * @see android.telephony.euicc.EuiccManager
-     * @see android.telephony.MmsManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -4756,6 +4806,21 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.net.thread.ThreadNetworkManager}.
+     *
+     * <p>On devices without {@link PackageManager#FEATURE_THREAD_NETWORK} system feature
+     * the {@link #getSystemService(String)} will return {@code null}.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.thread.ThreadNetworkManager
+     * @hide
+     */
+    @FlaggedApi("com.android.net.thread.flags.thread_enabled")
+    @SystemApi
+    public static final String THREAD_NETWORK_SERVICE = "thread_network";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.net.IpSecManager} for encrypting Sockets or Networks with
      * IPSec.
      *
@@ -5015,6 +5080,8 @@ public abstract class Context {
      * @see #getSystemService
      * @see android.hardware.face.FaceManager
      */
+    @FlaggedApi(android.hardware.biometrics.Flags.FLAG_FACE_BACKGROUND_AUTHENTICATION)
+    @SystemApi
     public static final String FACE_SERVICE = "face";
 
     /**
@@ -5296,6 +5363,13 @@ public abstract class Context {
      */
     @SystemApi
     public static final String APP_PREDICTION_SERVICE = "app_prediction";
+
+    /**
+     * Used for reading system-wide, overridable flags.
+     *
+     * @hide
+     */
+    public static final String FEATURE_FLAGS_SERVICE = "feature_flags";
 
     /**
      * Official published name of the search ui service.
@@ -5773,6 +5847,17 @@ public abstract class Context {
      * @see android.media.tv.TvInputManager
      */
     public static final String TV_INPUT_SERVICE = "tv_input";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.tv.ad.TvAdManager} for interacting with TV client-side advertisement
+     * services on the device.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.tv.ad.TvAdManager
+     */
+    @FlaggedApi(android.media.tv.flags.Flags.FLAG_ENABLE_AD_SERVICE_FW)
+    public static final String TV_AD_SERVICE = "tv_ad";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -6334,6 +6419,17 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.remoteauth.RemoteAuthManager} to discover,
+     * register and authenticate via remote authenticator  devices.
+     *
+     * @see #getSystemService(String)
+     * @see android.remoteauth.RemoteAuthManager
+     * @hide
+     */
+    public static final String REMOTE_AUTH_SERVICE = "remote_auth";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.ambientcontext.AmbientContextManager}.
      *
      * @see #getSystemService(String)
@@ -6423,6 +6519,60 @@ public abstract class Context {
      */
     @SystemApi
     public static final String SHARED_CONNECTIVITY_SERVICE = "shared_connectivity";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.os.SecurityStateManager} for accessing the security state manager service.
+     *
+     * @see #getSystemService(String)
+     * @see android.os.SecurityStateManager
+     */
+    @FlaggedApi(Flags.FLAG_SECURITY_STATE_SERVICE)
+    public static final String SECURITY_STATE_SERVICE = "security_state";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.app.ecm.EnhancedConfirmationManager}.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.ecm.EnhancedConfirmationManager
+     * @hide
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
+    @SystemApi
+    public static final String ECM_ENHANCED_CONFIRMATION_SERVICE = "ecm_enhanced_confirmation";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.provider.ContactKeysManager} to managing contact keys.
+     *
+     * @see #getSystemService(String)
+     * @see android.provider.ContactKeysManager
+     */
+    @FlaggedApi(android.provider.Flags.FLAG_USER_KEYS)
+    public static final String CONTACT_KEYS_SERVICE = "contact_keys";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.ProfilingManager}.
+     *
+     * @see #getSystemService(String)
+     */
+    @FlaggedApi(android.os.Flags.FLAG_TELEMETRY_APIS_FRAMEWORK_INITIALIZATION)
+    public static final String PROFILING_SERVICE = "profiling";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.webkit.WebViewUpdateManager} for accessing the WebView update service.
+     *
+     * @see #getSystemService(String)
+     * @see android.webkit.WebViewUpdateManager
+     * @hide
+     */
+    @FlaggedApi(android.webkit.Flags.FLAG_UPDATE_SERVICE_IPC_WRAPPER)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("ServiceName")
+    public static final String WEBVIEW_UPDATE_SERVICE = "webviewupdate";
 
     /**
      * Determine whether the given permission is allowed for a particular
@@ -6656,7 +6806,7 @@ public abstract class Context {
             @Intent.AccessUriMode int modeFlags);
 
     /**
-     * Determine whether a particular process and user ID has been granted
+     * Determine whether a particular process and uid has been granted
      * permission to access a specific URI.  This only checks for permissions
      * that have been explicitly granted -- if the given process/uid has
      * more general access to the URI's content provider then this check will
@@ -6680,7 +6830,38 @@ public abstract class Context {
             @Intent.AccessUriMode int modeFlags);
 
     /**
-     * Determine whether a particular process and user ID has been granted
+     * Determine whether a particular process and uid has been granted
+     * permission to access a specific content URI.
+     *
+     * <p>Unlike {@link #checkUriPermission(Uri, int, int, int)}, this method
+     * checks for general access to the URI's content provider, as well as
+     * explicitly granted permissions.</p>
+     *
+     * <p>Note, this check will throw an {@link IllegalArgumentException}
+     * for non-content URIs.</p>
+     *
+     * @param uri The content uri that is being checked.
+     * @param pid (Optional) The process ID being checked against. If the
+     * pid is unknown, pass -1.
+     * @param uid The UID being checked against.  A uid of 0 is the root
+     * user, which will pass every permission check.
+     * @param modeFlags The access modes to check.
+     *
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the given
+     * pid/uid is allowed to access that uri, or
+     * {@link PackageManager#PERMISSION_DENIED} if it is not.
+     *
+     * @see #checkUriPermission(Uri, int, int, int)
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @PackageManager.PermissionResult
+    public int checkContentUriPermissionFull(@NonNull Uri uri, int pid, int uid,
+            @Intent.AccessUriMode int modeFlags) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Determine whether a particular process and uid has been granted
      * permission to access a list of URIs.  This only checks for permissions
      * that have been explicitly granted -- if the given process/uid has
      * more general access to the URI's content provider then this check will
@@ -6716,7 +6897,7 @@ public abstract class Context {
             @Intent.AccessUriMode int modeFlags, IBinder callerToken);
 
     /**
-     * Determine whether the calling process and user ID has been
+     * Determine whether the calling process and uid has been
      * granted permission to access a specific URI.  This is basically
      * the same as calling {@link #checkUriPermission(Uri, int, int,
      * int)} with the pid and uid returned by {@link
@@ -6739,7 +6920,7 @@ public abstract class Context {
     public abstract int checkCallingUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags);
 
     /**
-     * Determine whether the calling process and user ID has been
+     * Determine whether the calling process and uid has been
      * granted permission to access a list of URIs.  This is basically
      * the same as calling {@link #checkUriPermissions(List, int, int, int)}
      * with the pid and uid returned by {@link
@@ -6833,7 +7014,7 @@ public abstract class Context {
             @Intent.AccessUriMode int modeFlags);
 
     /**
-     * If a particular process and user ID has not been granted
+     * If a particular process and uid has not been granted
      * permission to access a specific URI, throw {@link
      * SecurityException}.  This only checks for permissions that have
      * been explicitly granted -- if the given process/uid has more
@@ -6853,7 +7034,7 @@ public abstract class Context {
             Uri uri, int pid, int uid, @Intent.AccessUriMode int modeFlags, String message);
 
     /**
-     * If the calling process and user ID has not been granted
+     * If the calling process and uid has not been granted
      * permission to access a specific URI, throw {@link
      * SecurityException}.  This is basically the same as calling
      * {@link #enforceUriPermission(Uri, int, int, int, String)} with
@@ -7507,7 +7688,7 @@ public abstract class Context {
      * @throws UnsupportedOperationException if the method is called on an instance that is not
      *         associated with any display.
      */
-    @Nullable
+    @NonNull
     public Display getDisplay() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -7547,9 +7728,13 @@ public abstract class Context {
     }
 
     /**
+     * Updates the display association of this Context with the display with the given ID.
+     *
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public abstract void updateDisplay(int displayId);
 
     /**

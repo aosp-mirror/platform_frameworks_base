@@ -84,7 +84,7 @@ status_t CursorWindow::maybeInflate() {
     String8 ashmemName("CursorWindow: ");
     ashmemName.append(mName);
 
-    ashmemFd = ashmem_create_region(ashmemName.string(), mInflatedSize);
+    ashmemFd = ashmem_create_region(ashmemName.c_str(), mInflatedSize);
     if (ashmemFd < 0) {
         PLOG(ERROR) << "Failed ashmem_create_region";
         goto fail_silent;

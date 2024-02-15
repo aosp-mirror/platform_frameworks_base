@@ -17,9 +17,7 @@
 package com.android.settingslib.spa.framework.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -39,7 +37,7 @@ fun SettingsTheme(content: @Composable () -> Unit) {
     MaterialTheme(colorScheme = colorScheme, typography = rememberSettingsTypography()) {
         CompositionLocalProvider(
             LocalColorScheme provides settingsColorScheme(isDarkTheme),
-            LocalRippleTheme provides SettingsRippleTheme,
+            LocalContentColor provides MaterialTheme.colorScheme.onSurface,
         ) {
             content()
         }
@@ -52,19 +50,3 @@ object SettingsTheme {
         @ReadOnlyComposable
         get() = LocalColorScheme.current
 }
-
-private object SettingsRippleTheme : RippleTheme {
-    @Composable
-    override fun defaultColor() = MaterialTheme.colorScheme.onSurface
-
-    @Composable
-    override fun rippleAlpha() = RippleAlpha
-}
-
-/** Alpha levels for all content. */
-private val RippleAlpha = RippleAlpha(
-    pressedAlpha = 0.48f,
-    focusedAlpha = 0.48f,
-    draggedAlpha = 0.32f,
-    hoveredAlpha = 0.16f,
-)

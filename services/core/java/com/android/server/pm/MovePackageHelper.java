@@ -35,6 +35,7 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
+import android.content.pm.UserInfo;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
@@ -48,6 +49,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -62,6 +64,7 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -86,6 +89,21 @@ public final class MovePackageHelper {
         if (packageState == null || packageState.getPkg() == null) {
             throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
         }
+        final int[] installedUserIds = PackageStateUtils.queryInstalledUsers(packageState,
+                mPm.mUserManager.getUserIds(), true);
+        final UserHandle userForMove;
+        if (installedUserIds.length > 0) {
+            userForMove = UserHandle.of(installedUserIds[0]);
+        } else {
+            throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST,
+                    "Package is not installed for any user");
+        }
+        for (int userId : installedUserIds) {
+            if (snapshot.shouldFilterApplicationIncludingUninstalled(packageState, callingUid,
+                    userId)) {
+                throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
+            }
+        }
         final AndroidPackage pkg = packageState.getPkg();
         if (packageState.isSystem()) {
             throw new PackageManagerException(MOVE_FAILED_SYSTEM_PACKAGE,
@@ -100,16 +118,13 @@ public final class MovePackageHelper {
                     "3rd party apps are not allowed on internal storage");
         }
 
-
-        final String currentVolumeUuid = packageState.getVolumeUuid();
-
         final File probe = new File(pkg.getPath());
-        final File probeOat = new File(probe, "oat");
-        if (!probe.isDirectory() || !probeOat.isDirectory()) {
+        if (!probe.isDirectory()) {
             throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
                     "Move only supported for modern cluster style installs");
         }
 
+        final String currentVolumeUuid = packageState.getVolumeUuid();
         if (Objects.equals(currentVolumeUuid, volumeUuid)) {
             throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
                     "Package already moved to " + volumeUuid);
@@ -134,8 +149,6 @@ public final class MovePackageHelper {
         final String label = String.valueOf(pm.getApplicationLabel(
                 AndroidPackageUtils.generateAppInfoWithoutState(pkg)));
         final int targetSdkVersion = pkg.getTargetSdkVersion();
-        final int[] installedUserIds = PackageStateUtils.queryInstalledUsers(packageState,
-                mPm.mUserManager.getUserIds(), true);
         final String fromCodePath;
         if (codeFile.getParentFile().getName().startsWith(
                 PackageManagerService.RANDOM_DIR_PREFIX)) {
@@ -147,7 +160,8 @@ public final class MovePackageHelper {
         final PackageFreezer freezer;
         synchronized (mPm.mLock) {
             freezer = mPm.freezePackage(packageName, UserHandle.USER_ALL,
-                    "movePackageInternal", ApplicationExitInfo.REASON_USER_REQUESTED);
+                    "movePackageInternal", ApplicationExitInfo.REASON_USER_REQUESTED,
+                    null /* request */);
         }
 
         final Bundle extras = new Bundle();
@@ -182,7 +196,8 @@ public final class MovePackageHelper {
         // If we're moving app data around, we need all the users unlocked
         if (moveCompleteApp) {
             for (int userId : installedUserIds) {
-                if (StorageManager.isFileEncrypted() && !StorageManager.isUserKeyUnlocked(userId)) {
+                if (StorageManager.isFileEncrypted()
+                        && !StorageManager.isCeStorageUnlocked(userId)) {
                     freezer.close();
                     throw new PackageManagerException(MOVE_FAILED_LOCKED_USER,
                             "User " + userId + " must be unlocked");
@@ -218,6 +233,14 @@ public final class MovePackageHelper {
             freezer.close();
             throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
                     "Not enough free space to move");
+        }
+
+        try {
+            prepareUserStorageForMove(currentVolumeUuid, volumeUuid, installedUserIds);
+        } catch (RuntimeException e) {
+            freezer.close();
+            throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
+                    "Failed to prepare user storage while moving app");
         }
 
         mPm.mMoveCallbacks.notifyStatusChanged(moveId, 10);
@@ -293,7 +316,8 @@ public final class MovePackageHelper {
                 new File(origin.mResolvedPath), /* flags */ 0);
         final PackageLite lite = ret.isSuccess() ? ret.getResult() : null;
         final InstallingSession installingSession = new InstallingSession(origin, move,
-                installObserver, installFlags, installSource, volumeUuid, user, packageAbiOverride,
+                installObserver, installFlags, /* developmentInstallFlags= */ 0, installSource,
+                volumeUuid, userForMove, packageAbiOverride,
                 PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, lite, mPm);
         installingSession.movePackage();
     }
@@ -364,6 +388,22 @@ public final class MovePackageHelper {
         }
 
         return true;
+    }
+
+    private void prepareUserStorageForMove(String fromVolumeUuid, String toVolumeUuid,
+            int[] userIds) {
+        if (DEBUG_INSTALL) {
+            Slog.d(TAG, "Preparing user directories before moving app, from UUID " + fromVolumeUuid
+                    + " to UUID " + toVolumeUuid);
+        }
+        final StorageManagerInternal smInternal =
+                mPm.mInjector.getLocalService(StorageManagerInternal.class);
+        final ArrayList<UserInfo> users = new ArrayList<>();
+        for (int userId : userIds) {
+            final UserInfo user = mPm.mUserManager.getUserInfo(userId);
+            users.add(user);
+        }
+        smInternal.prepareUserStorageForMove(fromVolumeUuid, toVolumeUuid, users);
     }
 
     public static class MoveCallbacks extends Handler {

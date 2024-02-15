@@ -102,7 +102,7 @@ public class SettingsToPropertiesMapperTest {
         ).when(() -> Settings.Global.getString(any(), anyString()));
 
         mTestMapper = new SettingsToPropertiesMapper(
-            mMockContentResolver, TEST_MAPPING, new String[] {});
+            mMockContentResolver, TEST_MAPPING, new String[] {}, new String[] {});
     }
 
     @After

@@ -70,6 +70,15 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
         return false;
     }
 
+    /**
+     * If AVB has been enabled, send <Give Audio Status> and notify AudioService of the response.
+     */
+    void requestAndUpdateAudioStatus() {
+        if (mState == STATE_MONITOR_AUDIO_STATUS) {
+            sendGiveAudioStatus();
+        }
+    }
+
     private boolean handleReportAudioStatus(HdmiCecMessage cmd) {
         if (mTargetAddress != cmd.getSource() || cmd.getParams().length == 0) {
             return false;
@@ -89,10 +98,21 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
             localDevice().getService().enableAbsoluteVolumeBehavior(audioStatus);
             mState = STATE_MONITOR_AUDIO_STATUS;
         } else if (mState == STATE_MONITOR_AUDIO_STATUS) {
-            if (audioStatus.getVolume() != mLastAudioStatus.getVolume()) {
+            // Update volume in AudioService if it has changed since the last <Report Audio Status>
+            boolean updateVolume = audioStatus.getVolume() != mLastAudioStatus.getVolume();
+            if (updateVolume) {
                 localDevice().getService().notifyAvbVolumeChange(audioStatus.getVolume());
             }
-            if (audioStatus.getMute() != mLastAudioStatus.getMute()) {
+
+            // Update mute in AudioService if any of the following conditions are met:
+            // - The mute status changed
+            // - The volume changed - we need to make sure mute is set correctly afterwards, since
+            //   setting volume can affect mute status as well as a side effect.
+            // - We're a TV panel - we want to trigger volume UI on TV panels, so that the user
+            //   always gets visual feedback when they attempt to adjust the AVR's volume/mute.
+            if ((audioStatus.getMute() != mLastAudioStatus.getMute())
+                    || updateVolume
+                    || localDevice().getService().isTvDevice()) {
                 localDevice().getService().notifyAvbMuteChange(audioStatus.getMute());
             }
         }

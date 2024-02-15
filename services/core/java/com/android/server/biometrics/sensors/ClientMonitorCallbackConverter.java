@@ -41,20 +41,40 @@ import android.os.RemoteException;
  * a common interface.
  */
 public class ClientMonitorCallbackConverter {
-    private IBiometricSensorReceiver mSensorReceiver; // BiometricService
-    private IFaceServiceReceiver mFaceServiceReceiver; // FaceManager
-    private IFingerprintServiceReceiver mFingerprintServiceReceiver; // FingerprintManager
+    private final IBiometricSensorReceiver mSensorReceiver; // BiometricService
+    private final IFaceServiceReceiver mFaceServiceReceiver; // FaceManager
+    private final IFingerprintServiceReceiver mFingerprintServiceReceiver; // FingerprintManager
 
     public ClientMonitorCallbackConverter(IBiometricSensorReceiver sensorReceiver) {
         mSensorReceiver = sensorReceiver;
+        mFaceServiceReceiver = null;
+        mFingerprintServiceReceiver = null;
     }
 
     public ClientMonitorCallbackConverter(IFaceServiceReceiver faceServiceReceiver) {
+        mSensorReceiver = null;
         mFaceServiceReceiver = faceServiceReceiver;
+        mFingerprintServiceReceiver = null;
     }
 
     public ClientMonitorCallbackConverter(IFingerprintServiceReceiver fingerprintServiceReceiver) {
+        mSensorReceiver = null;
+        mFaceServiceReceiver = null;
         mFingerprintServiceReceiver = fingerprintServiceReceiver;
+    }
+
+    /**
+     * Returns an int representing the {@link BiometricAuthenticator.Modality} of the active
+     * ServiceReceiver
+     */
+    @BiometricAuthenticator.Modality
+    public int getModality() {
+        if (mFaceServiceReceiver != null) {
+            return BiometricAuthenticator.TYPE_FACE;
+        } else if (mFingerprintServiceReceiver != null) {
+            return BiometricAuthenticator.TYPE_FINGERPRINT;
+        }
+        return BiometricAuthenticator.TYPE_NONE;
     }
 
     // The following apply to all clients
@@ -167,6 +187,12 @@ public class ClientMonitorCallbackConverter {
     public void onUdfpsPointerUp(int sensorId) throws RemoteException {
         if (mFingerprintServiceReceiver != null) {
             mFingerprintServiceReceiver.onUdfpsPointerUp(sensorId);
+        }
+    }
+
+    public void onUdfpsOverlayShown() throws RemoteException {
+        if (mFingerprintServiceReceiver != null) {
+            mFingerprintServiceReceiver.onUdfpsOverlayShown();
         }
     }
 

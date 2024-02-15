@@ -16,10 +16,14 @@
 
 package com.android.server.display;
 
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
 import android.util.Slog;
@@ -132,12 +136,15 @@ abstract class DisplayDevice {
     /**
      * Returns the default size of the surface associated with the display, or null if the surface
      * is not provided for layer mirroring by SurfaceFlinger. For non virtual displays, this will
-     * be the actual display device's size.
+     * be the actual display device's size, reflecting the current rotation.
      */
     @Nullable
     public Point getDisplaySurfaceDefaultSizeLocked() {
         DisplayDeviceInfo displayDeviceInfo = getDisplayDeviceInfoLocked();
-        return new Point(displayDeviceInfo.width, displayDeviceInfo.height);
+        final boolean isRotated = mCurrentOrientation == ROTATION_90
+                || mCurrentOrientation == ROTATION_270;
+        return isRotated ? new Point(displayDeviceInfo.height, displayDeviceInfo.width)
+                : new Point(displayDeviceInfo.width, displayDeviceInfo.height);
     }
 
     /**
@@ -194,11 +201,15 @@ abstract class DisplayDevice {
      * @param state The new display state.
      * @param brightnessState The new display brightnessState.
      * @param sdrBrightnessState The new display brightnessState for SDR layers.
-     * @return A runnable containing work to be deferred until after we have
-     * exited the critical section, or null if none.
+     * @param displayOffloadSession {@link DisplayOffloadSession} associated with current device.
+     * @return A runnable containing work to be deferred until after we have exited the critical
+     *     section, or null if none.
      */
-    public Runnable requestDisplayStateLocked(int state, float brightnessState,
-            float sdrBrightnessState) {
+    public Runnable requestDisplayStateLocked(
+            int state,
+            float brightnessState,
+            float sdrBrightnessState,
+            @Nullable DisplayOffloadSessionImpl displayOffloadSession) {
         return null;
     }
 
@@ -358,7 +369,7 @@ abstract class DisplayDevice {
         }
 
         boolean isRotated = (mCurrentOrientation == Surface.ROTATION_90
-                || mCurrentOrientation == Surface.ROTATION_270);
+                || mCurrentOrientation == ROTATION_270);
         DisplayDeviceInfo info = getDisplayDeviceInfoLocked();
         viewport.deviceWidth = isRotated ? info.height : info.width;
         viewport.deviceHeight = isRotated ? info.width : info.height;
@@ -389,6 +400,7 @@ abstract class DisplayDevice {
     }
 
     private DisplayDeviceConfig loadDisplayDeviceConfig() {
-        return DisplayDeviceConfig.create(mContext, false);
+        return DisplayDeviceConfig.create(mContext, /* useConfigXml= */ false,
+                mDisplayAdapter.getFeatureFlags());
     }
 }

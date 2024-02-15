@@ -37,7 +37,7 @@ import androidx.annotation.Keep
 import com.android.app.animation.Interpolators
 import com.android.internal.graphics.ColorUtils
 import com.android.internal.graphics.ColorUtils.blendARGB
-import com.android.systemui.R
+import com.android.systemui.res.R
 import org.xmlpull.v1.XmlPullParser
 
 private const val BACKGROUND_ANIM_DURATION = 370L
@@ -195,7 +195,7 @@ class IlluminationDrawable : Drawable() {
                 }
                 addListener(
                     object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
+                        override fun onAnimationEnd(animation: Animator) {
                             backgroundAnimation = null
                         }
                     }

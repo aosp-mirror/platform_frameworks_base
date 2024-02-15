@@ -20,41 +20,6 @@
 // The API doc generation is done by the various droiddoc modules each of which
 // is for different format.
 
-/////////////////////////////////////////////////////////////////////
-// stub source files are generated using metalava
-/////////////////////////////////////////////////////////////////////
-
-framework_docs_only_libs = [
-    "voip-common",
-    "android.test.mock",
-    "android-support-annotations",
-    "android-support-compat",
-    "android-support-core-ui",
-    "android-support-core-utils",
-    "android-support-design",
-    "android-support-dynamic-animation",
-    "android-support-exifinterface",
-    "android-support-fragment",
-    "android-support-media-compat",
-    "android-support-percent",
-    "android-support-transition",
-    "android-support-v7-cardview",
-    "android-support-v7-gridlayout",
-    "android-support-v7-mediarouter",
-    "android-support-v7-palette",
-    "android-support-v7-preference",
-    "android-support-v13",
-    "android-support-v14-preference",
-    "android-support-v17-leanback",
-    "android-support-vectordrawable",
-    "android-support-animatedvectordrawable",
-    "android-support-v7-appcompat",
-    "android-support-v7-recyclerview",
-    "android-support-v8-renderscript",
-    "android-support-multidex",
-    "android-support-multidex-instrumentation",
-]
-
 // These defaults enable doc-stub generation, api lint database generation and sdk value generation.
 stubs_defaults {
     name: "android-non-updatable-doc-stubs-defaults",
@@ -65,7 +30,18 @@ stubs_defaults {
         ":android-test-mock-sources",
         ":android-test-runner-sources",
     ],
-    libs: framework_docs_only_libs,
+    flags: [
+        // These errors are suppressed in the doc stubs as it isn't easy to suppress them.
+        // They remain unsuppressed/active in the "main" stubs build (the jar stubs).
+        // These can be removed when either a) all the issues have been fixed or
+        // b) these reporting of these issues is gated behind api lint being enabled in metalava.
+        "--hide BroadcastBehavior",
+        "--hide DeprecationMismatch",
+        "--hide MissingPermission",
+        "--hide RequiresPermission",
+        "--hide SdkConstant",
+        "--hide Todo",
+    ],
     create_doc_stubs: true,
     write_sdk_values: true,
 }
@@ -87,9 +63,11 @@ stubs_defaults {
         ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
         ":framework-nearby-sources",
+        ":framework-nfc-updatable-sources",
         ":framework-ondevicepersonalization-sources",
         ":framework-permission-sources",
         ":framework-permission-s-sources",
+        ":framework-profiling-sources",
         ":framework-scheduling-sources",
         ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
@@ -108,7 +86,6 @@ droidstubs {
         "android-non-updatable-doc-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
-    args: metalava_framework_docs_args,
 }
 
 droidstubs {
@@ -117,8 +94,7 @@ droidstubs {
         "android-non-updatable-doc-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
-    args: metalava_framework_docs_args +
-        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
+    flags: ["--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\)"],
 }
 
 droidstubs {
@@ -127,9 +103,10 @@ droidstubs {
         "android-non-updatable-doc-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
-    args: metalava_framework_docs_args +
-        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) " +
-        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES\\) ",
+    flags: [
+        "--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\)",
+        "--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES\\)",
+    ],
     generate_stubs: false, // We're only using this module for the annotations.zip output, disable doc-stubs.
     write_sdk_values: false,
 }
@@ -140,10 +117,11 @@ droidstubs {
         "android-non-updatable-doc-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
-    args: metalava_framework_docs_args +
-        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) " +
-        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES\\) " +
-        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\) ",
+    flags: [
+        "--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\)",
+        "--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES\\)",
+        "--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)",
+    ],
     generate_stubs: false, // We're only using this module for the annotations.zip output, disable doc-stubs.
     write_sdk_values: false,
 }
@@ -152,7 +130,6 @@ droidstubs {
     name: "framework-doc-stubs",
     defaults: ["android-non-updatable-doc-stubs-defaults"],
     srcs: [":all-modules-public-stubs-source"],
-    args: metalava_framework_docs_args,
     api_levels_module: "api_versions_public",
     aidl: {
         include_dirs: [
@@ -160,21 +137,13 @@ droidstubs {
             "packages/modules/Media/apex/aidl/stable",
         ],
     },
-    extensions_info_file: ":sdk-extensions-info",
 }
 
 droidstubs {
     name: "framework-doc-system-stubs",
     defaults: ["framework-doc-stubs-sources-default"],
-    args: metalava_framework_docs_args +
-        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
-    api_levels_sdk_type: "system",
-    extensions_info_file: ":sdk-extensions-info",
+    flags: ["--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\)"],
+    api_levels_module: "api_versions_system",
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -182,20 +151,11 @@ droidstubs {
 // using droiddoc
 /////////////////////////////////////////////////////////////////////
 
-framework_docs_only_args = " -android -manifest $(location :frameworks-base-core-AndroidManifest.xml) " +
-    "-metalavaApiSince " +
-    "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
-    "-overview $(location :frameworks-base-java-overview) " +
-    // Federate Support Library references against local API file.
-    "-federate SupportLib https://developer.android.com " +
-    "-federationapi SupportLib $(location :current-support-api) " +
-    // Federate Support Library references against local API file.
-    "-federate AndroidX https://developer.android.com " +
-    "-federationapi AndroidX $(location :current-androidx-api) "
-
 doc_defaults {
     name: "framework-docs-default",
-    libs: framework_docs_only_libs + [
+    sdk_version: "none",
+    system_modules: "none",
+    libs: [
         "stub-annotations",
         "unsupportedappusage",
     ],
@@ -209,6 +169,30 @@ doc_defaults {
     custom_template: "droiddoc-templates-sdk",
     resourcesdir: "docs/html/reference/images/",
     resourcesoutdir: "reference/android/images/",
+    lint_baseline: "javadoc-lint-baseline",
+    flags: [
+        "-android",
+        "-manifest $(location :frameworks-base-core-AndroidManifest.xml)",
+        "-metalavaApiSince",
+        "-werror",
+        "-lerror",
+        "-overview $(location :frameworks-base-java-overview)",
+        // Federate Support Library references against local API file.
+        "-federate SupportLib https://developer.android.com",
+        "-federationapi SupportLib $(location :current-support-api)",
+        // Federate Support Library references against local API file.
+        "-federate AndroidX https://developer.android.com",
+        "-federationapi AndroidX $(location :current-androidx-api)",
+        // doclava contains checks for a few issues that are have been migrated to metalava.
+        // disable them in doclava, to avoid mistriggering or double triggering.
+        "-hide 101", // TODO: turn Lint 101 back into an error again
+        "-hide 111", // HIDDEN_SUPERCLASS
+        "-hide 113", // DEPRECATION_MISMATCH
+        "-hide 125", // REQUIRES_PERMISSION
+        "-hide 126", // BROADCAST_BEHAVIOR
+        "-hide 127", // SDK_CONSTANT
+        "-hide 128", // TODO
+    ],
     hdf: [
         "dac true",
         "sdk.codename O",
@@ -233,32 +217,21 @@ doc_defaults {
     },
 }
 
-doc_defaults {
-    name: "framework-dokka-docs-default",
-}
-
-droiddoc {
-    name: "doc-comment-check-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    args: framework_docs_only_args + " -referenceonly -parsecomments",
-    installable: false,
-}
-
 droiddoc {
     name: "offline-sdk-docs",
     defaults: ["framework-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     hdf: [
         "android.whichdoc offline",
     ],
     compat_config: ":global-compat-config",
     proofread_file: "offline-sdk-docs-proofread.txt",
-    args: framework_docs_only_args + " -offlinemode -title \"Android SDK\"",
+    flags: [
+        "-offlinemode",
+        "-title \"Android SDK\"",
+    ],
     static_doc_index_redirect: "docs/docs-preview-index.html",
 }
 
@@ -269,13 +242,17 @@ droiddoc {
     name: "offline-sdk-referenceonly-docs",
     defaults: ["framework-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     hdf: [
         "android.whichdoc offline",
     ],
     proofread_file: "offline-sdk-referenceonly-docs-proofread.txt",
-    args: framework_docs_only_args + " -offlinemode -title \"Android SDK\" -referenceonly",
+    flags: [
+        "-offlinemode",
+        "-title \"Android SDK\"",
+        "-referenceonly",
+    ],
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
     static_doc_properties: "docs/source.properties",
 }
@@ -293,113 +270,63 @@ droiddoc {
         "android.whichdoc offline",
     ],
     proofread_file: "offline-system-sdk-referenceonly-docs-proofread.txt",
-    args: framework_docs_only_args + " -hide 101 -hide 104 -hide 108" +
-    " -offlinemode -title \"Android System SDK\" -referenceonly",
+    flags: [
+        "-hide 101",
+        "-hide 104",
+        "-hide 108",
+        "-offlinemode",
+        "-title \"Android System SDK\"",
+        "-referenceonly",
+    ],
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
     static_doc_properties: "docs/source.properties",
-}
-
-droiddoc {
-    name: "online-sdk-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-        "android.hasSamples true",
-    ],
-    proofread_file: "online-sdk-docs-proofread.txt",
-    args: framework_docs_only_args +
-        " -toroot / -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -samplesdir development/samples/browseable ",
-}
-
-droiddoc {
-    name: "online-system-api-sdk-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-system-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-        "android.hasSamples true",
-    ],
-    proofread_file: "online-system-api-sdk-docs-proofread.txt",
-    args: framework_docs_only_args +
-        " -referenceonly " +
-        " -title \"Android SDK - Including system APIs.\" " +
-        " -hide 101 " +
-        " -hide 104 " +
-        " -hide 108 " +
-        " -toroot / -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -samplesdir development/samples/browseable ",
-    installable: false,
 }
 
 droiddoc {
     name: "ds-docs-java",
     defaults: ["framework-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     hdf: [
         "android.whichdoc online",
         "android.hasSamples true",
     ],
     proofread_file: "ds-docs-proofread.txt",
-    args: framework_docs_only_args +
-        " -toroot / -yamlV2 -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -devsite -samplesdir development/samples/browseable ",
+    flags: [
+        " -toroot /",
+        "-yamlV2",
+        "-samplegroup Admin",
+        "-samplegroup Background",
+        "-samplegroup Connectivity",
+        "-samplegroup Content",
+        "-samplegroup Input",
+        "-samplegroup Media",
+        "-samplegroup Notification",
+        "-samplegroup RenderScript",
+        "-samplegroup Security",
+        "-samplegroup Sensors",
+        "-samplegroup System",
+        "-samplegroup Testing",
+        "-samplegroup UI",
+        "-samplegroup Views",
+        "-samplegroup Wearable",
+        "-devsite",
+        "-samplesdir",
+        "development/samples/browseable",
+    ],
 }
 
 droiddoc {
     name: "ds-docs-kt",
-    defaults: ["framework-dokka-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
-    args: "-noJdkLink -links https://kotlinlang.org/api/latest/jvm/stdlib/^external/dokka/package-list " +
+    flags: [
+        "-noJdkLink",
+        "-links https://kotlinlang.org/api/latest/jvm/stdlib/^external/dokka/package-list",
         "-noStdlibLink",
+    ],
     proofread_file: "ds-dokka-proofread.txt",
     dokka_enabled: true,
 }
@@ -447,70 +374,31 @@ droiddoc {
     name: "ds-static-docs",
     defaults: ["framework-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     hdf: [
         "android.whichdoc online",
     ],
-    args: framework_docs_only_args +
-        " -staticonly " +
-        " -toroot / " +
-        " -devsite " +
-        " -ignoreJdLinks ",
+    flags: [
+        "-staticonly",
+        "-toroot /",
+        "-devsite",
+        "-ignoreJdLinks",
+    ],
 }
 
 droiddoc {
     name: "ds-ref-navtree-docs",
     defaults: ["framework-docs-default"],
     srcs: [
-        ":framework-doc-stubs",
+        ":framework-doc-stubs{.exportable}",
     ],
     hdf: [
         "android.whichdoc online",
     ],
-    args: framework_docs_only_args +
-        " -toroot / " +
-        " -atLinksNavtree " +
-        " -navtreeonly ",
-}
-
-droiddoc {
-    name: "online-sdk-dev-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
+    flags: [
+        "-toroot /",
+        "-atLinksNavtree",
+        "-navtreeonly",
     ],
-    hdf: [
-        "android.whichdoc online",
-        "android.hasSamples true",
-    ],
-    proofread_file: "online-sdk-dev-docs-proofread.txt",
-    args: framework_docs_only_args +
-        " -toroot / -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -samplesdir development/samples/browseable ",
-}
-
-droiddoc {
-    name: "hidden-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    proofread_file: "hidden-docs-proofread.txt",
-    args: framework_docs_only_args +
-        " -referenceonly " +
-        " -title \"Android SDK - Including hidden APIs.\"",
 }

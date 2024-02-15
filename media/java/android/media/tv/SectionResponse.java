@@ -76,7 +76,7 @@ public final class SectionResponse extends BroadcastInfoResponse implements Parc
     /**
      * Gets the Version number of requested session. If it is null, value will be -1.
      * <p>The consistency of version numbers between request and response depends on
-     * {@link BroadcastInfoRequest.RequestOption}. If the request has RequestOption value
+     * {@link BroadcastInfoRequest#getOption()}. If the request has RequestOption value
      * REQUEST_OPTION_AUTO_UPDATE, then the response may be set to the latest version which may be
      * different from the version of the request. Otherwise, response with a different version from
      * its request will be considered invalid.

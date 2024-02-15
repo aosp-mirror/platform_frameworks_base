@@ -34,7 +34,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
@@ -42,6 +41,7 @@ import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
@@ -76,11 +76,11 @@ public class WMShellTest extends SysuiTestCase {
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
     @Mock WakefulnessLifecycle mWakefulnessLifecycle;
-    @Mock ProtoTracer mProtoTracer;
     @Mock UserTracker mUserTracker;
     @Mock ShellExecutor mSysUiMainExecutor;
     @Mock NoteTaskInitializer mNoteTaskInitializer;
     @Mock DesktopMode mDesktopMode;
+    @Mock RecentTasks mRecentTasks;
 
     @Before
     public void setUp() {
@@ -93,13 +93,13 @@ public class WMShellTest extends SysuiTestCase {
                 Optional.of(mSplitScreen),
                 Optional.of(mOneHanded),
                 Optional.of(mDesktopMode),
+                Optional.of(mRecentTasks),
                 mCommandQueue,
                 mConfigurationController,
                 mKeyguardStateController,
                 mKeyguardUpdateMonitor,
                 mScreenLifecycle,
                 mSysUiState,
-                mProtoTracer,
                 mWakefulnessLifecycle,
                 mUserTracker,
                 displayTracker,
@@ -131,5 +131,11 @@ public class WMShellTest extends SysuiTestCase {
         verify(mDesktopMode).addVisibleTasksListener(
                 any(DesktopModeTaskRepository.VisibleTasksListener.class),
                 any(Executor.class));
+    }
+
+    @Test
+    public void initRecentTasks_registersListener() {
+        mWMShell.initRecentTasks(mRecentTasks);
+        verify(mRecentTasks).addAnimationStateListener(any(Executor.class), any());
     }
 }

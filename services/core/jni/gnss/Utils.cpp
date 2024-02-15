@@ -20,12 +20,15 @@
 
 #include <android/hardware/gnss/1.0/IGnss.h>
 #include <android/hardware/gnss/2.0/IGnss.h>
+#include <android_location_flags.h>
 #include <utils/SystemClock.h>
 /*
  * Save a pointer to JavaVm to attach/detach threads executing
  * callback methods that need to make JNI calls.
  */
 JavaVM* android::ScopedJniThreadAttach::sJvm;
+
+namespace location_flags = android::location::flags;
 
 namespace android {
 
@@ -194,7 +197,12 @@ jobject translateGnssLocation(JNIEnv* env, const android::hardware::gnss::GnssLo
 
     flags = static_cast<uint32_t>(location.elapsedRealtime.flags);
     if (flags & android::hardware::gnss::ElapsedRealtime::HAS_TIMESTAMP_NS) {
-        SET(ElapsedRealtimeNanos, location.elapsedRealtime.timestampNs);
+        if (location_flags::replace_future_elapsed_realtime_jni() &&
+            location.elapsedRealtime.timestampNs > android::elapsedRealtimeNano()) {
+            SET(ElapsedRealtimeNanos, android::elapsedRealtimeNano());
+        } else {
+            SET(ElapsedRealtimeNanos, location.elapsedRealtime.timestampNs);
+        }
     } else {
         SET(ElapsedRealtimeNanos, android::elapsedRealtimeNano());
     }

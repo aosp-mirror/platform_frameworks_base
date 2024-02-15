@@ -30,8 +30,11 @@ import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Util class for CDM data stores
@@ -86,6 +89,29 @@ public final class DataStoreUtils {
         } catch (Exception e) {
             Slog.e(TAG, "Error while writing to file " + file, e);
         }
+    }
+
+    /**
+     * Read a file and return the byte array containing the bytes of the file.
+     */
+    @NonNull
+    public static byte[] fileToByteArray(@NonNull AtomicFile file) {
+        if (!file.getBaseFile().exists()) {
+            Slog.d(TAG, "File does not exist");
+            return new byte[0];
+        }
+        try (FileInputStream in = file.openRead()) {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                bytes.write(buffer, 0, read);
+            }
+            return bytes.toByteArray();
+        } catch (IOException e) {
+            Slog.e(TAG, "Error while reading requests file", e);
+        }
+        return new byte[0];
     }
 
     private DataStoreUtils() {

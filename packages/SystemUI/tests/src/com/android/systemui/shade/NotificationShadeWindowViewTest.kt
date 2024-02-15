@@ -24,22 +24,20 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
-import com.android.systemui.R
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.classifier.FalsingCollectorFake
-import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
-import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
-import com.android.systemui.multishade.data.remoteproxy.MultiShadeInputProxy
-import com.android.systemui.multishade.data.repository.MultiShadeRepository
-import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor
-import com.android.systemui.multishade.domain.interactor.MultiShadeMotionEventInteractor
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
+import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.DragDownHelper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -47,13 +45,18 @@ import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.DozeScrimController
+import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
+import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -70,11 +73,12 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@ExperimentalCoroutinesApi
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
@@ -84,11 +88,14 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var shadeController: ShadeController
     @Mock private lateinit var centralSurfaces: CentralSurfaces
+    @Mock private lateinit var dozeServiceHost: DozeServiceHost
+    @Mock private lateinit var dozeScrimController: DozeScrimController
     @Mock private lateinit var dockManager: DockManager
     @Mock private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock private lateinit var notificationStackScrollLayout: NotificationStackScrollLayout
     @Mock private lateinit var notificationShadeDepthController: NotificationShadeDepthController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
+    @Mock private lateinit var quickSettingsController: QuickSettingsController
     @Mock
     private lateinit var notificationStackScrollLayoutController:
         NotificationStackScrollLayoutController
@@ -99,8 +106,11 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var lockIconViewController: LockIconViewController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var ambientState: AmbientState
+    @Mock private lateinit var shadeLogger: ShadeLogger
+    @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
-    @Mock private lateinit var keyguardBouncerViewModel: KeyguardBouncerViewModel
+    @Mock
+    private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
     @Mock private lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock private lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock
@@ -109,10 +119,10 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     private lateinit var unfoldTransitionProgressProvider:
         Optional<UnfoldTransitionProgressProvider>
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
+    @Mock private lateinit var mGlanceableHubContainerController: GlanceableHubContainerController
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
-    @Mock
-    private lateinit var primaryBouncerToGoneTransitionViewModel:
-        PrimaryBouncerToGoneTransitionViewModel
+    @Mock lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
+    @Mock lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     @Captor
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
 
@@ -145,20 +155,11 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         val featureFlags = FakeFeatureFlags()
         featureFlags.set(Flags.TRACKPAD_GESTURE_COMMON, true)
         featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
-        featureFlags.set(Flags.DUAL_SHADE, false)
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
-        val inputProxy = MultiShadeInputProxy()
+        featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         testScope = TestScope()
-        val multiShadeInteractor =
-            MultiShadeInteractor(
-                applicationScope = testScope.backgroundScope,
-                repository =
-                    MultiShadeRepository(
-                        applicationContext = context,
-                        inputProxy = inputProxy,
-                    ),
-                inputProxy = inputProxy,
-            )
         controller =
             NotificationShadeWindowViewController(
                 lockscreenShadeTransitionController,
@@ -174,34 +175,29 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 statusBarWindowStateController,
                 lockIconViewController,
                 centralSurfaces,
+                dozeServiceHost,
+                dozeScrimController,
                 notificationShadeWindowController,
                 unfoldTransitionProgressProvider,
                 keyguardUnlockAnimationController,
                 notificationInsetsController,
                 ambientState,
+                shadeLogger,
+                dumpManager,
                 pulsingGestureListener,
-                keyguardBouncerViewModel,
-                keyguardBouncerComponentFactory,
+                mLockscreenHostedDreamGestureListener,
                 keyguardTransitionInteractor,
-                primaryBouncerToGoneTransitionViewModel,
+                mGlanceableHubContainerController,
+                NotificationLaunchAnimationInteractor(NotificationLaunchAnimationRepository()),
                 featureFlags,
-                { multiShadeInteractor },
                 FakeSystemClock(),
-                {
-                    MultiShadeMotionEventInteractor(
-                        applicationContext = context,
-                        applicationScope = testScope.backgroundScope,
-                        multiShadeInteractor = multiShadeInteractor,
-                        featureFlags = featureFlags,
-                        keyguardTransitionInteractor =
-                            KeyguardTransitionInteractor(
-                                repository = FakeKeyguardTransitionRepository(),
-                                scope = testScope.backgroundScope
-                            ),
-                        falsingManager = FalsingManagerFake(),
-                        shadeController = shadeController,
-                    )
-                },
+                Mockito.mock(SysUIKeyEventHandler::class.java),
+                quickSettingsController,
+                primaryBouncerInteractor,
+                alternateBouncerInteractor,
+                { Mockito.mock(JavaAdapter::class.java) },
+                { Mockito.mock(AlternateBouncerDependencies::class.java) },
+                mock()
             )
 
         controller.setupExpandedStatusBar()
@@ -211,6 +207,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Test
     fun testDragDownHelperCalledWhenDraggingDown() =
         testScope.runTest {
+            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
             whenever(dragDownHelper.isDraggingDown).thenReturn(true)
             val now = SystemClock.elapsedRealtime()
             val ev = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, 0f, 0f, 0 /* meta */)

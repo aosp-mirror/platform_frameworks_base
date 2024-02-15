@@ -280,7 +280,7 @@ final class ProcessStateRecord {
      * The last time the process was in the TOP state or greater.
      */
     @GuardedBy("mService")
-    private long mLastTopTime;
+    private long mLastTopTime = Long.MIN_VALUE;
 
     /**
      * Is this an empty background process?
@@ -454,6 +454,9 @@ final class ProcessStateRecord {
     @GuardedBy("mService")
     private int mCachedSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
 
+    @GuardedBy("mService")
+    private boolean mScheduleLikeTopApp = false;
+
     ProcessStateRecord(ProcessRecord app) {
         mApp = app;
         mService = app.mService;
@@ -476,9 +479,22 @@ final class ProcessStateRecord {
 
     @GuardedBy({"mService", "mProcLock"})
     void setCurRawAdj(int curRawAdj) {
+        setCurRawAdj(curRawAdj, false);
+    }
+
+    /**
+     * @return {@code true} if it's a dry run and it's going to bump the adj score of the process
+     * if it was a real run.
+     */
+    @GuardedBy({"mService", "mProcLock"})
+    boolean setCurRawAdj(int curRawAdj, boolean dryRun) {
+        if (dryRun) {
+            return mCurRawAdj > curRawAdj;
+        }
         mCurRawAdj = curRawAdj;
         mApp.getWindowProcessController().setPerceptible(
                 curRawAdj <= ProcessList.PERCEPTIBLE_APP_ADJ);
+        return false;
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
@@ -591,7 +607,20 @@ final class ProcessStateRecord {
 
     @GuardedBy({"mService", "mProcLock"})
     void setCurRawProcState(int curRawProcState) {
+        setCurRawProcState(curRawProcState, false);
+    }
+
+    /**
+     * @return {@code true} if it's a dry run and it's going to bump the procstate of the process
+     * if it was a real run.
+     */
+    @GuardedBy({"mService", "mProcLock"})
+    boolean setCurRawProcState(int curRawProcState, boolean dryRun) {
+        if (dryRun) {
+            return mCurRawProcState > curRawProcState;
+        }
         mCurRawProcState = curRawProcState;
+        return false;
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
@@ -614,9 +643,11 @@ final class ProcessStateRecord {
     void forceProcessStateUpTo(int newState) {
         if (mRepProcState > newState) {
             synchronized (mProcLock) {
+                final int prevProcState = mRepProcState;
                 setReportedProcState(newState);
                 setCurProcState(newState);
                 setCurRawProcState(newState);
+                mService.mOomAdjuster.onProcessStateChanged(mApp, prevProcState);
             }
         }
     }
@@ -895,7 +926,20 @@ final class ProcessStateRecord {
 
     @GuardedBy("mService")
     void setCached(boolean cached) {
+        setCached(cached, false);
+    }
+
+    /**
+     * @return {@code true} if it's a dry run and it's going to uncache the process
+     * if it was a real run.
+     */
+    @GuardedBy("mService")
+    boolean setCached(boolean cached, boolean dryRun) {
+        if (dryRun) {
+            return mCached && !cached;
+        }
         mCached = cached;
+        return false;
     }
 
     @GuardedBy("mService")
@@ -1134,6 +1178,16 @@ final class ProcessStateRecord {
         return mCachedSchedGroup;
     }
 
+    @GuardedBy("mService")
+    boolean shouldScheduleLikeTopApp() {
+        return mScheduleLikeTopApp;
+    }
+
+    @GuardedBy("mService")
+    void setScheduleLikeTopApp(boolean scheduleLikeTopApp) {
+        mScheduleLikeTopApp = scheduleLikeTopApp;
+    }
+
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     public String makeAdjReason() {
         if (mAdjSource != null || mAdjTarget != null) {
@@ -1335,7 +1389,12 @@ final class ProcessStateRecord {
         }
         if (mNotCachedSinceIdle) {
             pw.print(prefix); pw.print("notCachedSinceIdle="); pw.print(mNotCachedSinceIdle);
-            pw.print(" initialIdlePss="); pw.println(mApp.mProfile.getInitialIdlePss());
+            if (mService.mAppProfiler.isProfilingPss()) {
+                pw.print(" initialIdlePss=");
+            } else {
+                pw.print(" initialIdleRss=");
+            }
+            pw.println(mApp.mProfile.getInitialIdlePssOrRss());
         }
         if (hasTopUi() || hasOverlayUi() || mRunningRemoteAnimation) {
             pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi());

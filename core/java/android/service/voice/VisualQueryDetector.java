@@ -20,11 +20,13 @@ import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.RECORD_AUDIO;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
 import android.os.Binder;
@@ -32,12 +34,16 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.service.voice.flags.Flags;
 import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
+import com.android.internal.infra.AndroidFuture;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -58,17 +64,21 @@ public class VisualQueryDetector {
 
     private final Callback mCallback;
     private final Executor mExecutor;
+    private final Context mContext;
     private final IVoiceInteractionManagerService mManagerService;
     private final VisualQueryDetectorInitializationDelegate mInitializationDelegate;
+    private final String mAttributionTag;
 
     VisualQueryDetector(
             IVoiceInteractionManagerService managerService,
-            @NonNull @CallbackExecutor Executor executor,
-            Callback callback) {
+            @NonNull @CallbackExecutor Executor executor, Callback callback, Context context,
+            @Nullable String attributionTag) {
         mManagerService = managerService;
         mCallback = callback;
         mExecutor = executor;
         mInitializationDelegate = new VisualQueryDetectorInitializationDelegate();
+        mContext = context;
+        mAttributionTag = attributionTag;
     }
 
     /**
@@ -86,7 +96,9 @@ public class VisualQueryDetector {
      */
     public void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
-        mInitializationDelegate.updateState(options, sharedMemory);
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.updateState(options, sharedMemory);
+        }
     }
 
 
@@ -108,18 +120,21 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
-        // check if the detector is active with the initialization delegate
-        mInitializationDelegate.startRecognition();
+        synchronized (mInitializationDelegate.getLock()) {
+            // check if the detector is active with the initialization delegate
+            mInitializationDelegate.startRecognition();
 
-        try {
-            mManagerService.startPerceiving(new BinderCallback(mExecutor, mCallback));
-        } catch (SecurityException e) {
-            Slog.e(TAG, "startRecognition failed: " + e);
-            return false;
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            try {
+                mManagerService.startPerceiving(new BinderCallback(
+                        mExecutor, mCallback, mInitializationDelegate.getLock()));
+            } catch (SecurityException e) {
+                Slog.e(TAG, "startRecognition failed: " + e);
+                return false;
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            return true;
         }
-        return true;
     }
 
     /**
@@ -132,15 +147,17 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
-        // check if the detector is active with the initialization delegate
-        mInitializationDelegate.startRecognition();
+        synchronized (mInitializationDelegate.getLock()) {
+            // check if the detector is active with the initialization delegate
+            mInitializationDelegate.stopRecognition();
 
-        try {
-            mManagerService.stopPerceiving();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            try {
+                mManagerService.stopPerceiving();
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            return true;
         }
-        return true;
     }
 
     /**
@@ -152,12 +169,16 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#destroy");
         }
-        mInitializationDelegate.destroy();
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.destroy();
+        }
     }
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
-        // TODO: implement this
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.dump(prefix, pw);
+        }
     }
 
     /** @hide */
@@ -167,7 +188,9 @@ public class VisualQueryDetector {
 
     /** @hide */
     void registerOnDestroyListener(Consumer<AbstractDetector> onDestroyListener) {
-        mInitializationDelegate.registerOnDestroyListener(onDestroyListener);
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.registerOnDestroyListener(onDestroyListener);
+        }
     }
 
     /**
@@ -183,6 +206,17 @@ public class VisualQueryDetector {
          * @param partialQuery The partial query in a text form being streamed.
          */
         void onQueryDetected(@NonNull String partialQuery);
+
+        /**
+         * Called when the {@link VisualQueryDetectionService} starts to stream partial results
+         * with {@link VisualQueryDetectionService#streamQuery(VisualQueryDetectedResult)}.
+         *
+         * @param partialResult The partial query in a text form being streamed.
+         */
+        @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+        default void onQueryDetected(@NonNull VisualQueryDetectedResult partialResult) {
+            throw new UnsupportedOperationException("This emthod must be implemented for use.");
+        }
 
         /**
          * Called when the {@link VisualQueryDetectionService} decides to abandon the streamed
@@ -245,8 +279,8 @@ public class VisualQueryDetector {
         @Override
         void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
             initAndVerifyDetector(options, sharedMemory,
-                    new InitializationStateListener(mExecutor, mCallback),
-                    DETECTOR_TYPE_VISUAL_QUERY_DETECTOR);
+                    new InitializationStateListener(mExecutor, mCallback, mContext),
+                    DETECTOR_TYPE_VISUAL_QUERY_DETECTOR, mAttributionTag);
         }
 
         @Override
@@ -274,6 +308,15 @@ public class VisualQueryDetector {
         public boolean isUsingSandboxedDetectionService() {
             return true;
         }
+
+        @Override
+        public void dump(String prefix, PrintWriter pw) {
+            // No-op
+        }
+
+        private Object getLock() {
+            return mLock;
+        }
     }
 
     private static class BinderCallback
@@ -281,31 +324,54 @@ public class VisualQueryDetector {
         private final Executor mExecutor;
         private final VisualQueryDetector.Callback mCallback;
 
-        BinderCallback(Executor executor, VisualQueryDetector.Callback callback) {
+        private final Object mLock;
+
+        BinderCallback(Executor executor, VisualQueryDetector.Callback callback, Object lock) {
             this.mExecutor = executor;
             this.mCallback = callback;
+            this.mLock = lock;
+        }
+
+        /** Called when the detected query is valid. */
+        @Override
+        public void onQueryDetected(@NonNull String partialQuery) {
+            Slog.v(TAG, "BinderCallback#onQueryDetected");
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mExecutor.execute(()->mCallback.onQueryDetected(partialQuery));
+                }
+            });
         }
 
         /** Called when the detected result is valid. */
         @Override
-        public void onQueryDetected(@NonNull String partialQuery) {
-            Slog.v(TAG, "BinderCallback#onQueryDetected");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onQueryDetected(partialQuery)));
+        public void onResultDetected(@NonNull VisualQueryDetectedResult partialResult) {
+            Slog.v(TAG, "BinderCallback#onResultDetected");
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mCallback.onQueryDetected(partialResult);
+                }
+            });
         }
 
         @Override
         public void onQueryFinished() {
             Slog.v(TAG, "BinderCallback#onQueryFinished");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onQueryFinished()));
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mExecutor.execute(()->mCallback.onQueryFinished());
+                }
+            });
         }
 
         @Override
         public void onQueryRejected() {
             Slog.v(TAG, "BinderCallback#onQueryRejected");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onQueryRejected()));
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mExecutor.execute(()->mCallback.onQueryRejected());
+                }
+            });
         }
 
         /** Called when the detection fails due to an error. */
@@ -330,9 +396,12 @@ public class VisualQueryDetector {
         private final Executor mExecutor;
         private final Callback mCallback;
 
-        InitializationStateListener(Executor executor, Callback callback) {
+        private final Context mContext;
+
+        InitializationStateListener(Executor executor, Callback callback, Context context) {
             this.mExecutor = executor;
             this.mCallback = callback;
+            this.mContext = context;
         }
 
         @Override
@@ -341,6 +410,13 @@ public class VisualQueryDetector {
                 HotwordDetectedResult result) {
             if (DEBUG) {
                 Slog.i(TAG, "Ignored #onKeyphraseDetected event");
+            }
+        }
+
+        @Override
+        public void onKeyphraseDetectedFromExternalSource(HotwordDetectedResult result) {
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onKeyphraseDetectedFromExternalSource event");
             }
         }
 
@@ -424,6 +500,23 @@ public class VisualQueryDetector {
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
                 mCallback.onUnknownFailure(
                         !TextUtils.isEmpty(errorMessage) ? errorMessage : "Error data is null");
+            }));
+        }
+        @Override
+        public void onOpenFile(String filename, AndroidFuture future) throws RemoteException {
+            Slog.v(TAG, "BinderCallback#onOpenFile " + filename);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                Slog.v(TAG, "onOpenFile: " + filename + "under internal app storage.");
+                File f = new File(mContext.getFilesDir(), filename);
+                ParcelFileDescriptor pfd = null;
+                try {
+                    pfd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
+                    Slog.d(TAG, "Successfully opened a file with ParcelFileDescriptor.");
+                } catch (FileNotFoundException e) {
+                    Slog.e(TAG, "Cannot open file. No ParcelFileDescriptor returned.");
+                } finally {
+                    future.complete(pfd);
+                }
             }));
         }
     }

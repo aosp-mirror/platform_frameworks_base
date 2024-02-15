@@ -120,7 +120,7 @@ void Gnss_class_init_once(JNIEnv* env, jclass& clazz) {
 
 Status GnssCallbackAidl::gnssSetCapabilitiesCb(const int capabilities) {
     ALOGD("%s: %du\n", __func__, capabilities);
-    bool isAdrCapabilityKnown = (getInterfaceVersion() >= 3) ? true : false;
+    bool isAdrCapabilityKnown = (interfaceVersion >= 3) ? true : false;
     JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities,
                         isAdrCapabilityKnown);
@@ -178,7 +178,7 @@ Status GnssCallbackAidl::gnssLocationCb(const hardware::gnss::GnssLocation& loca
 
 Status GnssCallbackAidl::gnssNmeaCb(const int64_t timestamp, const std::string& nmea) {
     // In AIDL v1, if no listener is registered, do not report nmea to the framework.
-    if (getInterfaceVersion() <= 1) {
+    if (interfaceVersion <= 1) {
         if (!isNmeaRegistered) {
             return Status::ok();
         }

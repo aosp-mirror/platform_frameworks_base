@@ -26,8 +26,11 @@ import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.Dumpable
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.dagger.MediaModule.KEYGUARD
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
@@ -35,8 +38,12 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.LargeScreenUtils
+import com.android.systemui.statusbar.policy.SplitShadeStateController
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.println
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.withIncreasedIndent
+import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -55,17 +62,22 @@ constructor(
     private val secureSettings: SecureSettings,
     @Main private val handler: Handler,
     configurationController: ConfigurationController,
-) {
+    private val splitShadeStateController: SplitShadeStateController,
+    private val logger: KeyguardMediaControllerLogger,
+    dumpManager: DumpManager,
+) : Dumpable {
+    private var lastUsedStatusBarState = -1
 
     init {
+        dumpManager.registerDumpable(this)
         statusBarStateController.addCallback(
             object : StatusBarStateController.StateListener {
                 override fun onStateChanged(newState: Int) {
-                    refreshMediaPosition()
+                    refreshMediaPosition(reason = "StatusBarState.onStateChanged")
                 }
 
                 override fun onDozingChanged(isDozing: Boolean) {
-                    refreshMediaPosition()
+                    refreshMediaPosition(reason = "StatusBarState.onDozingChanged")
                 }
             }
         )
@@ -87,7 +99,7 @@ constructor(
                                 true,
                                 UserHandle.USER_CURRENT
                             )
-                        refreshMediaPosition()
+                        refreshMediaPosition(reason = "allowMediaPlayerOnLockScreen changed")
                     }
                 }
             }
@@ -108,7 +120,7 @@ constructor(
     }
 
     private fun updateResources() {
-        useSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+        useSplitShade = splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
     }
 
     @VisibleForTesting
@@ -119,7 +131,7 @@ constructor(
             }
             field = value
             reattachHostView()
-            refreshMediaPosition()
+            refreshMediaPosition(reason = "useSplitShade changed")
         }
 
     /** Is the media player visible? */
@@ -127,6 +139,15 @@ constructor(
         private set
 
     var visibilityChangedListener: ((Boolean) -> Unit)? = null
+
+    /**
+     * Whether the doze wake up animation is delayed and we are currently waiting for it to start.
+     */
+    var isDozeWakeUpAnimationWaiting: Boolean = false
+        set(value) {
+            field = value
+            refreshMediaPosition(reason = "isDozeWakeUpAnimationWaiting changed")
+        }
 
     /** single pane media container placed at the top of the notifications list */
     var singlePaneContainer: MediaContainerView? = null
@@ -159,8 +180,12 @@ constructor(
 
     /** Called whenever the media hosts visibility changes */
     private fun onMediaHostVisibilityChanged(visible: Boolean) {
-        refreshMediaPosition()
+        refreshMediaPosition(reason = "onMediaHostVisibilityChanged")
+
         if (visible) {
+            if (migrateClocksToBlueprint() && useSplitShade) {
+                return
+            }
             mediaHost.hostView.layoutParams.apply {
                 height = ViewGroup.LayoutParams.WRAP_CONTENT
                 width = ViewGroup.LayoutParams.MATCH_PARENT
@@ -172,7 +197,7 @@ constructor(
     fun attachSplitShadeContainer(container: ViewGroup) {
         splitShadeContainer = container
         reattachHostView()
-        refreshMediaPosition()
+        refreshMediaPosition(reason = "attachSplitShadeContainer")
     }
 
     private fun reattachHostView() {
@@ -195,20 +220,41 @@ constructor(
         }
     }
 
-    fun refreshMediaPosition() {
-        val keyguardOrUserSwitcher = (statusBarStateController.state == StatusBarState.KEYGUARD)
+    fun refreshMediaPosition(reason: String) {
+        val currentState = statusBarStateController.state
+
+        val keyguardOrUserSwitcher = (currentState == StatusBarState.KEYGUARD)
         // mediaHost.visible required for proper animations handling
+        val isMediaHostVisible = mediaHost.visible
+        val isBypassNotEnabled = !bypassController.bypassEnabled
+        val currentAllowMediaPlayerOnLockScreen = allowMediaPlayerOnLockScreen
+        val useSplitShade = useSplitShade
+        val shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade()
+
         visible =
-            mediaHost.visible &&
-                !bypassController.bypassEnabled &&
+            isMediaHostVisible &&
+                isBypassNotEnabled &&
                 keyguardOrUserSwitcher &&
-                allowMediaPlayerOnLockScreen &&
-                shouldBeVisibleForSplitShade()
+                currentAllowMediaPlayerOnLockScreen &&
+                shouldBeVisibleForSplitShade
         if (visible) {
             showMediaPlayer()
         } else {
             hideMediaPlayer()
         }
+        logger.logRefreshMediaPosition(
+            reason = reason,
+            visible = visible,
+            useSplitShade = useSplitShade,
+            currentState = currentState,
+            keyguardOrUserSwitcher = keyguardOrUserSwitcher,
+            mediaHostVisible = isMediaHostVisible,
+            bypassNotEnabled = isBypassNotEnabled,
+            currentAllowMediaPlayerOnLockScreen = currentAllowMediaPlayerOnLockScreen,
+            shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade
+        )
+
+        lastUsedStatusBarState = currentState
     }
 
     private fun shouldBeVisibleForSplitShade(): Boolean {
@@ -221,7 +267,13 @@ constructor(
         // by the clock. This is not the case for single-line clock though.
         // For single shade, we don't need to do it, because media is a child of NSSL, which already
         // gets hidden on AOD.
-        return !statusBarStateController.isDozing
+        // Media also has to be hidden when waking up from dozing, and the doze wake up animation is
+        // delayed and waiting to be started.
+        // This is to stay in sync with the delaying of the horizontal alignment of the rest of the
+        // keyguard container, that is also delayed until the "wait" is over.
+        // If we show media during this waiting period, the shade will still be centered, and using
+        // the entire width of the screen, and making media show fully stretched.
+        return !statusBarStateController.isDozing && !isDozeWakeUpAnimationWaiting
     }
 
     private fun showMediaPlayer() {
@@ -245,6 +297,32 @@ constructor(
         view?.visibility = newVisibility
         if (previousVisibility != newVisibility) {
             visibilityChangedListener?.invoke(newVisibility == View.VISIBLE)
+        }
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.asIndenting().run {
+            println("KeyguardMediaController")
+            withIncreasedIndent {
+                println("Self", this@KeyguardMediaController)
+                println("visible", visible)
+                println("useSplitShade", useSplitShade)
+                println("allowMediaPlayerOnLockScreen", allowMediaPlayerOnLockScreen)
+                println("bypassController.bypassEnabled", bypassController.bypassEnabled)
+                println("isDozeWakeUpAnimationWaiting", isDozeWakeUpAnimationWaiting)
+                println("singlePaneContainer", singlePaneContainer)
+                println("splitShadeContainer", splitShadeContainer)
+                if (lastUsedStatusBarState != -1) {
+                    println(
+                        "lastUsedStatusBarState",
+                        StatusBarState.toString(lastUsedStatusBarState)
+                    )
+                }
+                println(
+                    "statusBarStateController.state",
+                    StatusBarState.toString(statusBarStateController.state)
+                )
+            }
         }
     }
 }

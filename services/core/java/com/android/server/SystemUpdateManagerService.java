@@ -86,9 +86,10 @@ public class SystemUpdateManagerService extends ISystemUpdateManager.Stub {
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.RECOVERY)
     @Override
     public void updateSystemUpdateInfo(PersistableBundle infoBundle) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.RECOVERY, TAG);
+        updateSystemUpdateInfo_enforcePermission();
 
         int status = infoBundle.getInt(KEY_STATUS, STATUS_UNKNOWN);
         if (status == STATUS_UNKNOWN) {

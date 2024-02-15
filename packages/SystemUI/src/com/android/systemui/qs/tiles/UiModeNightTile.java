@@ -31,7 +31,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -169,7 +169,6 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         state.icon = ResourceIcon.get(state.state == Tile.STATE_ACTIVE
                 ? R.drawable.qs_light_dark_theme_icon_on
                 : R.drawable.qs_light_dark_theme_icon_off);
-        state.showRippleEffect = false;
         state.expandedAccessibilityClassName = Switch.class.getName();
     }
 

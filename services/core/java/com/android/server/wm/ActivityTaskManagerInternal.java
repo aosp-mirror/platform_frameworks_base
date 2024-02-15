@@ -23,6 +23,7 @@ import android.app.ActivityManager;
 import android.app.AppProtoEnums;
 import android.app.BackgroundStartPrivileges;
 import android.app.IActivityManager;
+import android.app.IAppTask;
 import android.app.IApplicationThread;
 import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
@@ -214,21 +215,39 @@ public abstract class ActivityTaskManagerInternal {
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
-     * @param allowBackgroundActivityStart Whether the background activity start should be allowed
-     *        from originatingPendingIntent
+     * @param forcedBalByPiSender If set to allow, the
+     *        PendingIntent's sender will try to force allow background activity starts.
+     *        This is only possible if the sender of the PendingIntent is a system process.
      */
     public abstract int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
             String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges backgroundStartPrivileges);
+            BackgroundStartPrivileges forcedBalByPiSender);
 
+    /**
+     * Start intent as a package.
+     *
+     * @param uid Make a call as if this UID did.
+     * @param realCallingPid PID of the real caller.
+     * @param realCallingUid UID of the real caller.
+     * @param callingPackage Make a call as if this package did.
+     * @param callingFeatureId Make a call as if this feature in the package did.
+     * @param intent Intent to start.
+     * @param userId Start the intents on this user.
+     * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
+     * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
+     *        null if not originated by PendingIntent
+     * @param forcedBalByPiSender If set to allow, the
+     *        PendingIntent's sender will try to force allow background activity starts.
+     *        This is only possible if the sender of the PendingIntent is a system process.
+     */
     public abstract int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
-            String callingPackage, @Nullable String callingFeaturId, Intent intent,
+            String callingPackage, @Nullable String callingFeatureId, Intent intent,
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges backgroundStartPrivileges);
+            BackgroundStartPrivileges forcedBalByPiSender);
 
     /**
      * Callback to be called on certain activity start scenarios.
@@ -306,6 +325,12 @@ public abstract class ActivityTaskManagerInternal {
      * @param activeDreamComponent The currently active dream. If null, the device is not dreaming.
      */
     public abstract void notifyActiveDreamChanged(@Nullable ComponentName activeDreamComponent);
+
+    /**
+     * Starts a dream activity in the DreamService's process.
+     */
+    public abstract IAppTask startDreamActivity(@NonNull Intent intent, int callingUid,
+            int callingPid);
 
     /**
      * Set a uid that is allowed to bypass stopped app switches, launching an app
@@ -771,4 +796,17 @@ public abstract class ActivityTaskManagerInternal {
      * @param token The activity token.
      */
     public abstract int getDisplayId(IBinder token);
+
+    /**
+     * Register a {@link CompatScaleProvider}.
+     */
+    public abstract void registerCompatScaleProvider(
+            @CompatScaleProvider.CompatScaleModeOrderId int id,
+            @NonNull CompatScaleProvider provider);
+
+    /**
+     * Unregister a {@link CompatScaleProvider}.
+     */
+    public abstract void unregisterCompatScaleProvider(
+            @CompatScaleProvider.CompatScaleModeOrderId int id);
 }

@@ -21,7 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.app.animation.Interpolators
 
 /**
@@ -74,7 +74,7 @@ class ViewGroupFadeHelper {
                     root.setTag(R.id.view_group_fade_helper_previous_value_tag, newAlpha)
                 }
                 addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         endRunnable?.run()
                     }
                 })

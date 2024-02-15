@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.app.ForegroundServiceDelegationOptions;
 import android.media.MediaController2;
 import android.media.Session2CommandGroup;
 import android.media.Session2Token;
@@ -54,8 +55,15 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     @GuardedBy("mLock")
     private boolean mIsClosed;
 
-    public MediaSession2Record(Session2Token sessionToken, MediaSessionService service,
-            Looper handlerLooper, int policies) {
+    private final int mPid;
+    private final ForegroundServiceDelegationOptions mForegroundServiceDelegationOptions;
+
+    public MediaSession2Record(
+            Session2Token sessionToken,
+            MediaSessionService service,
+            Looper handlerLooper,
+            int pid,
+            int policies) {
         // The lock is required to prevent `Controller2Callback` from using partially initialized
         // `MediaSession2Record.this`.
         synchronized (mLock) {
@@ -65,7 +73,27 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             mController = new MediaController2.Builder(service.getContext(), sessionToken)
                     .setControllerCallback(mHandlerExecutor, new Controller2Callback())
                     .build();
+            mPid = pid;
             mPolicies = policies;
+            mForegroundServiceDelegationOptions =
+                    new ForegroundServiceDelegationOptions.Builder()
+                            .setClientPid(mPid)
+                            .setClientUid(getUid())
+                            .setClientPackageName(getPackageName())
+                            .setClientAppThread(null)
+                            .setSticky(false)
+                            .setClientInstanceName(
+                                    "MediaSessionFgsDelegate_"
+                                            + getUid()
+                                            + "_"
+                                            + mPid
+                                            + "_"
+                                            + getPackageName())
+                            .setForegroundServiceTypes(0)
+                            .setDelegationService(
+                                    ForegroundServiceDelegationOptions
+                                            .DELEGATION_SERVICE_MEDIA_PLAYBACK)
+                            .build();
         }
     }
 
@@ -86,6 +114,11 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     @Override
     public int getUserId() {
         return UserHandle.getUserHandleForUid(mSessionToken.getUid()).getIdentifier();
+    }
+
+    @Override
+    public ForegroundServiceDelegationOptions getForegroundServiceDelegationOptions() {
+        return mForegroundServiceDelegationOptions;
     }
 
     @Override
@@ -191,7 +224,12 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
                 mIsConnected = true;
                 service = mService;
             }
-            service.onSessionActiveStateChanged(MediaSession2Record.this);
+
+            // TODO (b/318745416): Add support for FGS in MediaSession2. Passing a
+            // null playback state means the owning process will not be allowed to
+            // run in the foreground.
+            service.onSessionActiveStateChanged(MediaSession2Record.this,
+                    /* playbackState= */ null);
         }
 
         @Override
@@ -217,7 +255,8 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             synchronized (mLock) {
                 service = mService;
             }
-            service.onSessionPlaybackStateChanged(MediaSession2Record.this, playbackActive);
+            service.onSessionPlaybackStateChanged(
+                    MediaSession2Record.this, playbackActive, /* playbackState= */ null);
         }
     }
 }

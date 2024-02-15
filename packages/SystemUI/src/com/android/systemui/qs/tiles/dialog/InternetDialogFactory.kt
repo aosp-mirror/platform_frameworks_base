@@ -22,7 +22,7 @@ import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -43,7 +43,7 @@ class InternetDialogFactory @Inject constructor(
     private val internetDialogController: InternetDialogController,
     private val context: Context,
     private val uiEventLogger: UiEventLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val keyguardStateController: KeyguardStateController
 ) {
     companion object {
@@ -67,11 +67,11 @@ class InternetDialogFactory @Inject constructor(
             internetDialog = InternetDialog(
                 context, this, internetDialogController,
                 canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger,
-                    dialogLaunchAnimator, handler,
+                    dialogTransitionAnimator, handler,
                 executor, keyguardStateController
             )
             if (view != null) {
-                dialogLaunchAnimator.showFromView(
+                dialogTransitionAnimator.showFromView(
                     internetDialog!!, view,
                     animateBackgroundBoundsChange = true,
                     cuj = DialogCuj(

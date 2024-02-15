@@ -204,6 +204,19 @@ public class QSTileImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testLongClick_falsing() {
+        mFalsingManager.setFalseLongTap(true);
+        mTile.longClick(null /* view */);
+        mTestableLooper.processAllMessages();
+        assertThat(mTile.mLongClicked).isFalse();
+
+        mFalsingManager.setFalseLongTap(false);
+        mTile.longClick(null /* view */);
+        mTestableLooper.processAllMessages();
+        assertThat(mTile.mLongClicked).isTrue();
+    }
+
+    @Test
     public void testSecondaryClick_Metrics() {
         mTile.secondaryClick(null /* view */);
         verify(mMetricsLogger).write(argThat(new TileLogMatcher(ACTION_QS_SECONDARY_CLICK)));
@@ -518,6 +531,7 @@ public class QSTileImplTest extends SysuiTestCase {
     }
     private static class TileImpl extends QSTileImpl<QSTile.BooleanState> {
         boolean mClicked;
+        boolean mLongClicked;
         int mRefreshes = 0;
 
         protected TileImpl(
@@ -548,6 +562,11 @@ public class QSTileImplTest extends SysuiTestCase {
         @Override
         protected void handleClick(@Nullable View view) {
             mClicked = true;
+        }
+
+        @Override
+        protected void handleLongClick(@Nullable View view) {
+            mLongClicked = true;
         }
 
         @Override

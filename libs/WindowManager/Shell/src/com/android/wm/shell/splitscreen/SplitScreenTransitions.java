@@ -43,15 +43,14 @@ import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.OneShotRemoteHandler;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 
@@ -109,7 +108,7 @@ class SplitScreenTransitions {
             if (pendingTransition.mCanceled) {
                 // The pending transition was canceled, so skip playing animation.
                 startTransaction.apply();
-                onFinish(null /* wct */, null /* wctCB */);
+                onFinish(null /* wct */);
                 return;
             }
 
@@ -211,7 +210,7 @@ class SplitScreenTransitions {
             }
         }
         t.apply();
-        onFinish(null /* wct */, null /* wctCB */);
+        onFinish(null /* wct */);
     }
 
     /** Play animation for drag divider dismiss transition. */
@@ -238,7 +237,7 @@ class SplitScreenTransitions {
                     mAnimations.remove(va);
                     if (animated) {
                         mTransitions.getMainExecutor().execute(() -> {
-                            onFinish(null /* wct */, null /* wctCB */);
+                            onFinish(null /* wct */);
                         });
                     }
                 });
@@ -250,7 +249,7 @@ class SplitScreenTransitions {
             }
         }
         startTransaction.apply();
-        onFinish(null /* wct */, null /* wctCB */);
+        onFinish(null /* wct */);
     }
 
     /** Play animation for resize transition. */
@@ -283,7 +282,7 @@ class SplitScreenTransitions {
                     mAnimations.remove(va);
                     if (animated) {
                         mTransitions.getMainExecutor().execute(() -> {
-                            onFinish(null /* wct */, null /* wctCB */);
+                            onFinish(null /* wct */);
                         });
                     }
                 });
@@ -291,7 +290,7 @@ class SplitScreenTransitions {
         }
 
         startTransaction.apply();
-        onFinish(null /* wct */, null /* wctCB */);
+        onFinish(null /* wct */);
     }
 
     boolean isPendingTransition(IBinder transition) {
@@ -325,8 +324,10 @@ class SplitScreenTransitions {
 
     void startFullscreenTransition(WindowContainerTransaction wct,
             @Nullable RemoteTransition handler) {
-        mTransitions.startTransition(TRANSIT_OPEN, wct,
-                new OneShotRemoteHandler(mTransitions.getMainExecutor(), handler));
+        OneShotRemoteHandler fullscreenHandler =
+                new OneShotRemoteHandler(mTransitions.getMainExecutor(), handler);
+        fullscreenHandler.setTransition(mTransitions
+                .startTransition(TRANSIT_OPEN, wct, fullscreenHandler));
     }
 
 
@@ -387,21 +388,23 @@ class SplitScreenTransitions {
 
     IBinder startResizeTransition(WindowContainerTransaction wct,
             Transitions.TransitionHandler handler,
+            @Nullable TransitionConsumedCallback consumedCallback,
             @Nullable TransitionFinishedCallback finishCallback) {
         if (mPendingResize != null) {
             mPendingResize.cancel(null);
             mAnimations.clear();
-            onFinish(null /* wct */, null /* wctCB */);
+            onFinish(null /* wct */);
         }
 
         IBinder transition = mTransitions.startTransition(TRANSIT_CHANGE, wct, handler);
-        setResizeTransition(transition, finishCallback);
+        setResizeTransition(transition, consumedCallback, finishCallback);
         return transition;
     }
 
     void setResizeTransition(@NonNull IBinder transition,
+            @Nullable TransitionConsumedCallback consumedCallback,
             @Nullable TransitionFinishedCallback finishCallback) {
-        mPendingResize = new TransitSession(transition, null /* consumedCb */, finishCallback);
+        mPendingResize = new TransitSession(transition, consumedCallback, finishCallback);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                 + " deduced Resize split screen");
     }
@@ -448,9 +451,11 @@ class SplitScreenTransitions {
             mPendingResize.onConsumed(aborted);
             mPendingResize = null;
         }
+
+        // TODO: handle transition consumed for active remote handler
     }
 
-    void onFinish(WindowContainerTransaction wct, WindowContainerTransactionCallback wctCB) {
+    void onFinish(WindowContainerTransaction wct) {
         if (!mAnimations.isEmpty()) return;
 
         if (wct == null) wct = new WindowContainerTransaction();
@@ -470,7 +475,7 @@ class SplitScreenTransitions {
 
         mOnFinish.run();
         if (mFinishCallback != null) {
-            mFinishCallback.onTransitionFinished(wct /* wct */, wctCB /* wctCB */);
+            mFinishCallback.onTransitionFinished(wct /* wct */);
             mFinishCallback = null;
         }
     }
@@ -478,24 +483,26 @@ class SplitScreenTransitions {
     private void startFadeAnimation(@NonNull SurfaceControl leash, boolean show) {
         final float end = show ? 1.f : 0.f;
         final float start = 1.f - end;
-        final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
         final ValueAnimator va = ValueAnimator.ofFloat(start, end);
         va.setDuration(FADE_DURATION);
         va.setInterpolator(show ? ALPHA_IN : ALPHA_OUT);
         va.addUpdateListener(animation -> {
             float fraction = animation.getAnimatedFraction();
+            final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
             transaction.setAlpha(leash, start * (1.f - fraction) + end * fraction);
             transaction.apply();
+            mTransactionPool.release(transaction);
         });
         va.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
                 transaction.setAlpha(leash, end);
                 transaction.apply();
                 mTransactionPool.release(transaction);
                 mTransitions.getMainExecutor().execute(() -> {
                     mAnimations.remove(va);
-                    onFinish(null /* wct */, null /* wctCB */);
+                    onFinish(null /* wct */);
                 });
             }
         });

@@ -26,7 +26,7 @@ import android.service.controls.templates.TemperatureControlTemplate
 import android.util.ArrayMap
 import android.util.SparseArray
 
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 data class RenderInfo(
     val icon: Drawable,
@@ -67,7 +67,8 @@ data class RenderInfo(
                     iconMap.put(resourceId, icon)
                 }
             }
-            return RenderInfo(icon!!.constantState.newDrawable(context.resources), fg, bg)
+            return RenderInfo(
+                checkNotNull(icon?.constantState).newDrawable(context.resources), fg, bg)
         }
 
         fun registerComponentIcon(componentName: ComponentName, icon: Drawable) {

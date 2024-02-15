@@ -247,9 +247,11 @@ public class ImsRcsManager {
      * @param c The {@link RegistrationManager.RegistrationCallback} to be added.
      * @see #unregisterImsRegistrationCallback(RegistrationManager.RegistrationCallback)
      * @throws ImsException if the subscription associated with this callback is valid, but
-     * the {@link ImsService} associated with the subscription is not available. This can happen if
+     * the {@code ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
      * reason.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public void registerImsRegistrationCallback(
@@ -294,6 +296,8 @@ public class ImsRcsManager {
      * @param c The {@link RegistrationManager.RegistrationCallback} to be removed.
      * @see android.telephony.SubscriptionManager.OnSubscriptionsChangedListener
      * @see #registerImsRegistrationCallback(Executor, RegistrationCallback)
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public void unregisterImsRegistrationCallback(
@@ -329,6 +333,8 @@ public class ImsRcsManager {
      * following: {@link RegistrationManager#REGISTRATION_STATE_NOT_REGISTERED},
      * {@link RegistrationManager#REGISTRATION_STATE_REGISTERING}, or
      * {@link RegistrationManager#REGISTRATION_STATE_REGISTERED}.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public void getRegistrationState(@NonNull @CallbackExecutor Executor executor,
@@ -378,6 +384,8 @@ public class ImsRcsManager {
      * {@see AccessNetworkConstants#TRANSPORT_TYPE_WWAN},
      * {@see AccessNetworkConstants#TRANSPORT_TYPE_WLAN}, or
      * {@see AccessNetworkConstants#TRANSPORT_TYPE_INVALID}.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public void getRegistrationTransportType(@NonNull @CallbackExecutor Executor executor,
@@ -435,6 +443,8 @@ public class ImsRcsManager {
      * {@link ImsRcsManager} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -479,6 +489,8 @@ public class ImsRcsManager {
      * @see #addOnAvailabilityChangedListener(Executor, OnAvailabilityChangedListener)
      * @throws ImsException if the IMS service is not available when calling this method.
      * See {@link ImsException#getCode()} for more information on the error codes.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -525,6 +537,8 @@ public class ImsRcsManager {
      * @see android.telephony.CarrierConfigManager.Ims#KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL
      * @throws ImsException if the IMS service is not available when calling this method.
      * See {@link ImsException#getCode()} for more information on the error codes.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -563,6 +577,8 @@ public class ImsRcsManager {
      * @see #isCapable(int, int)
      * @throws ImsException if the IMS service is not available when calling this method.
      * See {@link ImsException#getCode()} for more information on the error codes.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi

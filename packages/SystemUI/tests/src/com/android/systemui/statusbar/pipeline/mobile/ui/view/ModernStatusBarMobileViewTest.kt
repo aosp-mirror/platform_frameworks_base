@@ -22,15 +22,18 @@ import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
@@ -43,6 +46,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,8 +62,8 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
     private lateinit var testableLooper: TestableLooper
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
+    private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
-    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var viewLogger: MobileViewLogger
     @Mock private lateinit var constants: ConnectivityConstants
@@ -84,6 +88,7 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 airplaneModeRepository,
                 FakeConnectivityRepository(),
+                FakeMobileConnectionsRepository(),
             )
 
         interactor = FakeMobileIconInteractor(tableLogBuffer)
@@ -196,7 +201,7 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun isIconVisible_notAirplaneMode_outputsTrue() {
+    fun isIconVisible_notAirplaneMode_outputsTrue() = runTest {
         airplaneModeRepository.setIsAirplaneMode(false)
 
         val view =
@@ -215,7 +220,7 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun isIconVisible_airplaneMode_outputsTrue() {
+    fun isIconVisible_airplaneMode_outputsTrue() = runTest {
         airplaneModeRepository.setIsAirplaneMode(true)
 
         val view =
@@ -235,7 +240,6 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
 
     @Test
     fun onDarkChanged_iconHasNewColor() {
-        whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
         val view =
             ModernStatusBarMobileView.constructAndBind(
                 context,
@@ -247,7 +251,8 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         val color = 0x12345678
-        view.onDarkChanged(arrayListOf(), 1.0f, color)
+        val contrast = 0x12344321
+        view.onDarkChangedWithContrast(arrayListOf(), color, contrast)
         testableLooper.processAllMessages()
 
         assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
@@ -257,7 +262,6 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
 
     @Test
     fun setStaticDrawableColor_iconHasNewColor() {
-        whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
         val view =
             ModernStatusBarMobileView.constructAndBind(
                 context,
@@ -269,10 +273,40 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         val color = 0x23456789
-        view.setStaticDrawableColor(color)
+        val contrast = 0x12344321
+        view.setStaticDrawableColor(color, contrast)
         testableLooper.processAllMessages()
 
         assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
+
+        ViewUtils.detachView(view)
+    }
+
+    @Test
+    fun colorChange_layersUpdateWithContrast() {
+        // Allow the slice, and set it to visible. This cause us to use special color logic
+        flags.set(Flags.NEW_NETWORK_SLICE_UI, true)
+        interactor.showSliceAttribution.value = true
+        createViewModel()
+
+        val view =
+            ModernStatusBarMobileView.constructAndBind(
+                context,
+                viewLogger,
+                SLOT_NAME,
+                viewModel,
+            )
+        ViewUtils.attachView(view)
+        testableLooper.processAllMessages()
+
+        val color = 0x23456789
+        val contrast = 0x12344321
+        view.setStaticDrawableColor(color, contrast)
+
+        testableLooper.processAllMessages()
+
+        assertThat(view.getNetTypeContainer().backgroundTintList).isEqualTo(color.colorState())
+        assertThat(view.getNetTypeView().imageTintList).isEqualTo(contrast.colorState())
 
         ViewUtils.detachView(view)
     }
@@ -285,9 +319,19 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
         return this.requireViewById(R.id.mobile_signal)
     }
 
+    private fun View.getNetTypeContainer(): FrameLayout {
+        return this.requireViewById(R.id.mobile_type_container)
+    }
+
+    private fun View.getNetTypeView(): ImageView {
+        return this.requireViewById(R.id.mobile_type)
+    }
+
     private fun View.getDotView(): View {
         return this.requireViewById(R.id.status_bar_dot)
     }
+
+    private fun Int.colorState() = ColorStateList.valueOf(this)
 
     private fun createViewModel() {
         viewModelCommon =
@@ -296,9 +340,10 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
                 interactor,
                 airplaneModeInteractor,
                 constants,
+                flags,
                 testScope.backgroundScope,
             )
-        viewModel = QsMobileIconViewModel(viewModelCommon, statusBarPipelineFlags)
+        viewModel = QsMobileIconViewModel(viewModelCommon)
     }
 }
 

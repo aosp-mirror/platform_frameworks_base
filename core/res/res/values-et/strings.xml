@@ -153,6 +153,16 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> sekundi pärast"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: pole suunatud"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: pole edastatud"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Mobiilsidevõrgu turvalisus"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Vaadake seaded üle"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Seadme identifikaatorile pääseti juurde"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Ühenduse <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> võrk salvestas teie seadme kordumatu identifikaatori (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> korda ajavahemikus <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> kuni <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Krüpteeritud ühendus võrguga <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Olete nüüd ühendatud turvalisema mobiilsidevõrguga."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Krüpteerimata ühendus võrguga <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Olete ühendatud krüpteerimata mobiilsidevõrguga. Võõrad võivad teie kõnedele, sõnumitele ja andmetele juurde pääseda."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Mobiilside turvaseaded"</string>
+    <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Lisateave"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Funktsioonikood valmis."</string>
     <string name="fcError" msgid="5325116502080221346">"Ühendusprobleem või kehtetu funktsioonikood."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -290,6 +300,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Rakendused kasutavad akutoidet"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Suurendus"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Juurdepääsetavuse kasutus"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Ekraan"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> kasutab akutoidet"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> rakendust kasutab akutoidet"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Aku ja andmekasutuse üksikasjade nägemiseks puudutage"</string>
@@ -369,6 +380,8 @@
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"Võimaldab rakendusel luua ühenduse kärjeteadete mooduliga, et saabunud kärjeteateid edasi saata. Kärjeteateid edastatakse mõnes asukohas eriolukorrast teavitamiseks. Pahatahtlikud rakendused võivad seadme toimivust või tööd eriolukorra kärjeteate vastuvõtmisel segada."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"Käimasolevate kõnede haldamine"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"Võimaldab rakendusel näha teie seadmes käimasolevate kõnede üksikasju ja neid kõnesid hallata."</string>
+    <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"Juurdepääs viimasele teadaolevale kärjetunnusele."</string>
+    <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"Võimaldab rakendusel pääseda juurde viimasele teadaolevale telefoni teel saadud kärjetunnusele."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"mobiilsidesõnumite lugemine"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Võimaldab rakendusel lugeda seadme vastu võetud mobiilsidesõnumeid. Mobiilsidemärguandeid edastatakse mõnes asukohas eriolukorrast teavitamiseks. Pahatahtlikud rakendused võivad segada seadme toimivust või tööd eriolukorra sõnumi vastuvõtmisel."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"loe tellitud kanaleid"</string>
@@ -433,6 +446,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Lubab rakendusel kasutada esiplaanil olevaid teenuseid, mille tüüp on „systemExempted“."</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"sellise esiplaanil oleva teenuse käitamine, mille tüüp on „fileManagement“"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Lubab rakendusel kasutada esiplaanil olevaid teenuseid, mille tüüp on „fileManagement“"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"sellise esiplaanil oleva teenuse käitamine, mille tüüp on „mediaProcessing“"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Lubab rakendusel kasutada esiplaanil olevaid teenuseid, mille tüüp on „mediaProcessing“."</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"sellise esiplaanil oleva teenuse käitamine, mille tüüp on „specialUse“"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Lubab rakendusel kasutada esiplaanil olevaid teenuseid, mille tüüp on „specialUse“."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"Rakenduse mäluruumi mõõtmine"</string>
@@ -501,6 +516,8 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"See privileegidega või süsteemirakendus saab süsteemi kaameraga alati pilte ja videoid jäädvustada. Rakendusel peab olema ka luba android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Lubab rakendusel või teenusel kaameraseadmete avamise või sulgemise kohta tagasikutseid vastu võtta."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"See rakendus saab mis tahes kaameraseadme avamisel (vastava rakendusega) või sulgemisel tagasikutseid vastu võtta."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Lubage rakendusel või teenusel pääseda kaamerale juurde päiseta süsteemikasutajana."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Sellel rakendusel on kaamerale juurdepääs päiseta süsteemikasutajana."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"juhtige vibreerimist"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Võimaldab rakendusel juhtida vibreerimist."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Võimaldab rakendusel juurde pääseda vibreerimise olekule."</string>
@@ -536,6 +553,8 @@
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"Lubab rakendusel kasutada telefoni infrapunasaatjat."</string>
     <string name="permlab_setWallpaper" msgid="6959514622698794511">"määra taustapilt"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"Võimaldab rakendusel määrata süsteemi taustapildi."</string>
+    <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Juurdepääs peidetud profiilidele"</string>
+    <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Võimaldab rakendusel peidetud profiilidele juurde pääseda."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"korrigeerige oma taustapildi suurust"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Võimaldab rakendusel määrata süsteemi taustapildi suuruse vihjeid."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"määra ajavöönd"</string>
@@ -590,6 +609,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Võimaldab rakendusel hankida eelistatud NFC-makseteenuse teavet (nt registreeritud abi ja marsruudi sihtkoht)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lähiväljaside juhtimine"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Võimaldab rakendusel suhelda lähiväljaside (NFC) märgendite, kaartide ja lugeritega."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Turvaelemendiga tehingu sündmus"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Võimaldab rakendusel võtta vastu teavet tehingute kohta, mis toimuvad turvaelemendi abil."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"keelake ekraanilukk"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Võimaldab rakendusel keelata klahviluku ja muu seotud parooli turvalisuse. Näiteks keelab telefon klahviluku sissetuleva kõne vastuvõtmisel ja lubab klahviluku uuesti, kui kõne on lõpetatud."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekraaniluku keerukuse taotlemine"</string>
@@ -620,13 +641,14 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biomeetriline riistvara ei ole saadaval"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentimine tühistati"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Ei tuvastatud"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"Nägu ei tuvastatud"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentimine tühistati"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN-koodi, mustrit ega parooli pole määratud"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Viga autentimisel"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekraaniluku kasutamine"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jätkamiseks sisestage oma ekraanilukk"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Vajutage kindlalt andurile"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Sõrmejälge ei õnnestu tuvastada. Proovige uuesti."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Sõrmejälge ei tuvastatud. Proovige uuesti."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhastage sõrmejäljeandur ja proovige uuesti"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhastage andur ja proovige uuesti"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Vajutage kindlalt andurile"</string>
@@ -640,6 +662,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Sõrmejälge ei tuvastatud"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Sõrmejälge ei tuvastatud"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Nägu ei õnnestu tuvastada. Kasutage sõrmejälge."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Sõrmejälg autenditi"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Nägu on autenditud"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Nägu on autenditud, vajutage käsku Kinnita"</string>
@@ -665,14 +688,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Midagi läks valesti. Proovige uuesti."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Sõrmejälje ikoon"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Seadme avamine"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Proovige avamiseks teist viisi"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Kasutage näoga avamist, kui teie sõrmejälge ei tuvastata, näiteks kui sõrmed on märjad"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Kasutage sõrmejäljega avamist, kui teie nägu ei tuvastata, näiteks kui pole piisavalt valgust"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Näoga avamine"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Probleem funktsiooniga Näoga avamine"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Puudutage näomudeli kustutamiseks, seejärel lisage oma nägu uuesti"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Näoga avamise seadistamine"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Avage telefon seda vaadates"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Näoga avamise kasutamiseks lülitage menüüs Seaded &gt; Privaatsus sisse "<b>"juurdepääs kaamerale"</b>"."</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Seadistage rohkem viise avamiseks"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Puudutage sõrmejälje lisamiseks"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sõrmejäljega avamine"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Sõrmejäljeandurit ei saa kasutada"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Külastage remonditeenuse pakkujat."</string>
@@ -689,7 +712,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Teie nägu ei ole näha. Hoidke telefoni silmade kõrgusel."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Liiga palju liikumist. Hoidke telefoni paigal."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registreerige oma nägu uuesti."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Nägu ei õnnestu tuvastada. Proovige uuesti."</string>
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Nägu ei tuvastatud. Proovige uuesti."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Muutke pisut oma pea asendit"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Vaadake otse telefoni"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Vaadake otse telefoni"</string>
@@ -800,6 +823,8 @@
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Võimaldab rakendusel anduri andmeid diskreetida sagedusel, mis on suurem kui 200 Hz"</string>
     <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"rakenduse värskendamine ilma kasutaja toiminguta"</string>
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Võimaldab hoidjal värskendada varem installitud rakendust ilma kasutaja toiminguta"</string>
+    <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"teiste rakenduste E2EE-kontaktvõtmete kinnitamisolekute värskendamine"</string>
+    <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Võimaldab rakendusel värskendada teiste rakenduste E2EE-kontaktvõtmete kinnitamisolekuid"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Parooli reeglite määramine"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Juhitakse ekraaniluku paroolide ja PIN-koodide pikkusi ning lubatud tähemärkide seadeid."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekraani avamiskatsete jälgimine"</string>
@@ -819,7 +844,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Kustutage tahvelarvuti andmed hoiatamata, lähtestades arvuti tehaseandmetele."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Kustutatakse teie Android TV seadme andmed ilma hoiatamata, lähtestades seadme tehase andmetele."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Teabe ja meelelahutuse süsteemi andmete hoiatamata kustutamine tehase andmetele lähtestamise abil."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Telefoniandmete hoiatuseta kustutamine, lähtestades telefoni tehaseseadetele."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Kustutab telefoniandmed hoiatuseta, lähtestades telefoni tehaseseadetele."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Profiili andmete kustutamine"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Kasutaja andmete kustutamine"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Kustutatakse selle kasutaja andmed sellest tahvelarvutist ilma hoiatamata."</string>
@@ -1393,7 +1418,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"KEELDU"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Valige sisestusmeetod"</string>
     <string name="show_ime" msgid="6406112007347443383">"Hoia seda ekraanil, kui füüsiline klaviatuur on aktiivne"</string>
-    <string name="hardware" msgid="1800597768237606953">"Virtuaalse klaviatuuri kuvam."</string>
+    <string name="hardware" msgid="3611039921284836033">"Kasuta ekraaniklaviatuuri"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Seadistage <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Seadistage füüsilised klaviatuurid"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Puudutage keele ja paigutuse valimiseks"</string>
@@ -1703,6 +1728,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"See saab jälgida teie suhtlust rakenduse või riistvaraanduriga ja teie eest rakendustega suhelda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Luba"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Keela"</string>
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Desinstalli"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Rakendus varjab loataotlust, nii et teie vastust ei saa kinnitada."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Puudutage funktsiooni, et selle kasutamist alustada."</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Valige funktsioonid, mida juurdepääsetavuse nupuga kasutada"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Valige helitugevuse nupu otsetee funktsioonid"</string>
@@ -1863,6 +1890,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2. töö <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. töö <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Rakenduse <xliff:g id="LABEL">%1$s</xliff:g> kloon"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"Privaatne <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Enne vabastamist küsi PIN-koodi"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Enne vabastamist küsi avamismustrit"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Enne vabastamist küsi parooli"</string>
@@ -1896,6 +1924,9 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Nädalavahetus"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Sündmus"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Magamine"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Haldab <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Sees"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Väljas"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vaigistab teatud helid"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Seadmes ilmnes sisemine probleem ja seade võib olla ebastabiilne seni, kuni lähtestate seadme tehase andmetele."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Seadmes ilmnes sisemine probleem. Üksikasjaliku teabe saamiseks võtke ühendust tootjaga."</string>
@@ -1913,6 +1944,8 @@
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Kinnitatud"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Laienda"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Ahenda"</string>
+    <string name="content_description_collapsed" msgid="2827748787566489401">"Ahendatud"</string>
+    <string name="content_description_expanded" msgid="2159348812972413703">"Laiendatud"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"vaheta laiendamist"</string>
     <string name="usb_midi_peripheral_name" msgid="490523464968655741">"Androidi väline USB-port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
@@ -1956,7 +1989,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Rakendus ei ole saadaval"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei ole praegu saadaval."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ei ole saadaval"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Vaja on luba"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Loataotlus peideti"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kaamera pole saadaval"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Jätkake telefonis"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon pole saadaval"</string>
@@ -1967,6 +2000,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Sellele ei pääse praegu teie seadmega (<xliff:g id="DEVICE">%1$s</xliff:g>) juurde. Proovige juurde pääseda oma Android TV seadmega."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Sellele ei pääse praegu teie seadmega (<xliff:g id="DEVICE">%1$s</xliff:g>) juurde. Proovige juurde pääseda oma tahvelarvutiga."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Sellele ei pääse praegu teie seadmega (<xliff:g id="DEVICE">%1$s</xliff:g>) juurde. Proovige juurde pääseda oma telefoniga."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"See rakendus taotleb lisalube, kuid lube ei saa voogesituse seansis anda. Kõigepealt andke luba oma Android TV seadmele."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"See rakendus taotleb lisalube, kuid lube ei saa voogesituse seansis anda. Kõigepealt andke luba oma tahvelarvutile."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"See rakendus taotleb lisalube, kuid lube ei saa voogesituse seansis anda. Kõigepealt andke luba oma telefonile."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"See rakendus nõuab lisaturvalisust. Proovige juurde pääseda oma Android TV seadmes."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"See rakendus nõuab lisaturvalisust. Proovige juurde pääseda oma tahvelarvutis."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"See rakendus nõuab lisaturvalisust. Proovige juurde pääseda oma telefonis."</string>
@@ -2024,7 +2060,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"Kas värskendada üksust teenuses "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Kas värskendada üksust <xliff:g id="TYPE">%1$s</xliff:g> teenuses "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Kas värskendada üksusi <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g> teenuses "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Kas värskendada teenuses "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" neid üksusi: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ja <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"Kas värskendada teenuses "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" neid üksusi: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ja <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Salvesta"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Tänan, ei"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Hiljem"</string>
@@ -2323,13 +2359,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Lubab kaasrakendusel taustal käivitada esiplaanil olevaid teenuseid."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon on saadaval"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon on blokeeritud"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Kahe ekraani režiim"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Kahe ekraani režiim on sisse lülitatud"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Ei saa ekraanile peegeldada"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Kasutage teist kaablit ja proovige uuesti"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Teie seade on liiga kuum ja ei saa ekraanile peegeldada enne, kui see jahtub"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screeni režiim on sisse lülitatud"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> kasutab sisu kuvamiseks mõlemat ekraani"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Seade on liiga kuum"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Kahe ekraani režiim pole saadaval, kuna teie telefon läheb liiga kuumaks"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Kahe ekraani režiim ei ole saadaval"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Kahe ekraani režiim ei ole saadaval, kuna akusäästja on sisse lülitatud. Saate selle seadetes välja lülitada."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screeni režiim pole saadaval, kuna teie telefon läheb liiga kuumaks"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screeni režiim ei ole saadaval"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screeni režiim ei ole saadaval, kuna akusäästja on sisse lülitatud. Saate selle seadetes välja lülitada."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ava seaded"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Lülita välja"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> on seadistatud"</string>
@@ -2339,4 +2378,16 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Klaviatuuripaigutuseks on määratud <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> … puudutage muutmiseks."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Füüsilised klaviatuurid on seadistatud"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Puudutage klaviatuuride vaatamiseks"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privaatne"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Kloon"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Töö"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Töö 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Töö 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Jagatud"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="satellite_notification_title" msgid="4026338973463121526">"Satelliidiga loodi automaatselt ühendus"</string>
+    <string name="satellite_notification_summary" msgid="5207364139430767162">"Teil on võimalik sõnumeid saata ja vastu võtta ilma mobiilside- ja WiFi-võrguta"</string>
+    <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ava rakendus Messages"</string>
+    <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Tööpõhimõtted"</string>
 </resources>

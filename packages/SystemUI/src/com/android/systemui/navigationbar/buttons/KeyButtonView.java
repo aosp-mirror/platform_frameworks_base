@@ -58,8 +58,11 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
+import com.android.systemui.assist.AssistManager;
+import com.android.systemui.navigationbar.NavBarButtonClickLogger;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.res.R;
+import com.android.systemui.shared.navigationbar.KeyButtonRipple;
 import com.android.systemui.shared.system.QuickStepContract;
 
 public class KeyButtonView extends ImageView implements ButtonInterface {
@@ -84,6 +87,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private final Paint mOvalBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private float mDarkIntensity;
     private boolean mHasOvalBg = false;
+    private NavBarButtonClickLogger mNavBarButtonClickLogger;
 
     @VisibleForTesting
     public enum NavBarButtonEvent implements UiEventLogger.UiEventEnum {
@@ -193,6 +197,10 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     public void setOnClickListener(OnClickListener onClickListener) {
         super.setOnClickListener(onClickListener);
         mOnClickListener = onClickListener;
+    }
+
+    public void setNavBarButtonClickLogger(NavBarButtonClickLogger navBarButtonClickLogger) {
+        mNavBarButtonClickLogger = navBarButtonClickLogger;
     }
 
     public void loadAsync(Icon icon) {
@@ -387,11 +395,19 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 uiEvent = longPressSet
                         ? NavBarButtonEvent.NAVBAR_BACK_BUTTON_LONGPRESS
                         : NavBarButtonEvent.NAVBAR_BACK_BUTTON_TAP;
+
+                if (mNavBarButtonClickLogger != null) {
+                    mNavBarButtonClickLogger.logBackButtonClick();
+                }
                 break;
             case KeyEvent.KEYCODE_HOME:
                 uiEvent = longPressSet
                         ? NavBarButtonEvent.NAVBAR_HOME_BUTTON_LONGPRESS
                         : NavBarButtonEvent.NAVBAR_HOME_BUTTON_TAP;
+
+                if (mNavBarButtonClickLogger != null) {
+                    mNavBarButtonClickLogger.logHomeButtonClick();
+                }
                 break;
             case KeyEvent.KEYCODE_APP_SWITCH:
                 uiEvent = longPressSet
@@ -439,9 +455,20 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         if (mCode != KeyEvent.KEYCODE_UNKNOWN) {
             sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
         }
+        // When aborting long-press home and Launcher has requested to override it, fade out the
+        // ripple more quickly.
+        if (mCode == KeyEvent.KEYCODE_HOME && Dependency.get(AssistManager.class)
+                .shouldOverrideAssist(AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS)) {
+            mRipple.speedUpNextFade();
+        }
         setPressed(false);
         mRipple.abortDelayedRipple();
         mGestureAborted = true;
+    }
+
+    /** Run when the ripple for this button is next invisible. Only used once. */
+    public void setOnRippleInvisibleRunnable(Runnable onRippleInvisibleRunnable) {
+        mRipple.setOnInvisibleRunnable(onRippleInvisibleRunnable);
     }
 
     @Override

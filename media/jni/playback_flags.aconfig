@@ -1,0 +1,8 @@
+package: "com.android.media.playback.flags"
+
+flag {
+  name: "mediametadataretriever_default_rgba8888"
+  namespace: "media_solutions"
+  description: "Change MediaMetadataRetriever to use RGBA8888 for bitmap handling by default."
+  bug: "298965955"
+}

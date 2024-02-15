@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Vis"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Appen fungerer muligvis ikke i opdelt skærm"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Appen understøtter ikke opdelt skærm"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Denne app kan kun åbnes i 1 vindue."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Denne app kan kun åbnes i 1 vindue"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Appen fungerer muligvis ikke på sekundære skærme."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Appen kan ikke åbnes på sekundære skærme."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Adskiller til opdelt skærm"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Flyt op til højre"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Flyt ned til venstre"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Flyt ned til højre"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"udvid <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"skjul <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Indstillinger for <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Afvis boble"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Vis ikke samtaler i bobler"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Ingen seneste bobler"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Nye bobler og afviste bobler vises her"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Chat ved hjælp af bobler"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Nye samtaler vises som ikoner nederst på din skærm. Tryk for at udvide dem, eller træk for at lukke dem."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Administrer bobler når som helst"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Tryk her for at administrere, hvilke apps og samtaler der kan vises i bobler"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Boble"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Administrer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Boblen blev lukket."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Tryk for at genstarte denne app, så visningen forbedres."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Tryk for at genstarte denne app, så visningen forbedres"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Skift denne apps billedformat i Indstillinger"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Skift billedformat"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Har du problemer med dit kamera?\nTryk for at gendanne det oprindelige format"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Løste det ikke problemet?\nTryk for at fortryde"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Har du ingen problemer med dit kamera? Tryk for at afvise."</string>

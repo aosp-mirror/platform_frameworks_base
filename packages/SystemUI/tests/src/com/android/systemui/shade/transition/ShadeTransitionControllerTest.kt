@@ -9,6 +9,7 @@ import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,6 +42,7 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
                 context,
                 scrimShadeTransitionController,
                 statusBarStateController,
+                    ResourcesSplitShadeStateController()
             )
     }
 

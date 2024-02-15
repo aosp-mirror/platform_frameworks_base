@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.icon
 
 import android.app.Notification
+import android.app.Notification.MessagingStyle
 import android.app.Person
 import android.content.pm.LauncherApps
 import android.graphics.drawable.Icon
@@ -25,9 +26,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import com.android.app.tracing.traceSection
 import com.android.internal.statusbar.StatusBarIcon
-import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -95,7 +97,7 @@ class IconManager @Inject constructor(
      * @throws InflationException Exception if required icons are not valid or specified
      */
     @Throws(InflationException::class)
-    fun createIcons(entry: NotificationEntry) {
+    fun createIcons(entry: NotificationEntry) = traceSection("IconManager.createIcons") {
         // Construct the status bar icon view.
         val sbIcon = iconBuilder.createIconView(entry)
         sbIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
@@ -110,15 +112,6 @@ class IconManager @Inject constructor(
         aodIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
         aodIcon.setIncreasedSize(true)
 
-        // Construct the centered icon view.
-        val centeredIcon = if (entry.sbn.notification.isMediaNotification) {
-            iconBuilder.createIconView(entry).apply {
-                scaleType = ImageView.ScaleType.CENTER_INSIDE
-            }
-        } else {
-            null
-        }
-
         // Set the icon views' icons
         val (normalIconDescriptor, sensitiveIconDescriptor) = getIconDescriptors(entry)
 
@@ -126,10 +119,7 @@ class IconManager @Inject constructor(
             setIcon(entry, normalIconDescriptor, sbIcon)
             setIcon(entry, sensitiveIconDescriptor, shelfIcon)
             setIcon(entry, sensitiveIconDescriptor, aodIcon)
-            if (centeredIcon != null) {
-                setIcon(entry, normalIconDescriptor, centeredIcon)
-            }
-            entry.icons = IconPack.buildPack(sbIcon, shelfIcon, aodIcon, centeredIcon, entry.icons)
+            entry.icons = IconPack.buildPack(sbIcon, shelfIcon, aodIcon, entry.icons)
         } catch (e: InflationException) {
             entry.icons = IconPack.buildEmptyPack(entry.icons)
             throw e
@@ -143,32 +133,30 @@ class IconManager @Inject constructor(
      * @throws InflationException Exception if required icons are not valid or specified
      */
     @Throws(InflationException::class)
-    fun updateIcons(entry: NotificationEntry) {
+    fun updateIcons(entry: NotificationEntry) = traceSection("IconManager.updateIcons") {
         if (!entry.icons.areIconsAvailable) {
-            return
+            return@traceSection
         }
         entry.icons.smallIconDescriptor = null
         entry.icons.peopleAvatarDescriptor = null
 
         val (normalIconDescriptor, sensitiveIconDescriptor) = getIconDescriptors(entry)
+        val notificationContentDescription = entry.sbn.notification?.let {
+            iconBuilder.getIconContentDescription(it)
+        }
 
         entry.icons.statusBarIcon?.let {
-            it.notification = entry.sbn
+            it.setNotification(entry.sbn, notificationContentDescription)
             setIcon(entry, normalIconDescriptor, it)
         }
 
         entry.icons.shelfIcon?.let {
-            it.notification = entry.sbn
+            it.setNotification(entry.sbn, notificationContentDescription)
             setIcon(entry, normalIconDescriptor, it)
         }
 
         entry.icons.aodIcon?.let {
-            it.notification = entry.sbn
-            setIcon(entry, sensitiveIconDescriptor, it)
-        }
-
-        entry.icons.centeredIcon?.let {
-            it.notification = entry.sbn
+            it.setNotification(entry.sbn, notificationContentDescription)
             setIcon(entry, sensitiveIconDescriptor, it)
         }
     }
@@ -183,12 +171,10 @@ class IconManager @Inject constructor(
     }
 
     @Throws(InflationException::class)
-    private fun getIconDescriptors(
-        entry: NotificationEntry
-    ): Pair<StatusBarIcon, StatusBarIcon> {
-        val iconDescriptor = getIconDescriptor(entry, false /* redact */)
+    private fun getIconDescriptors(entry: NotificationEntry): Pair<StatusBarIcon, StatusBarIcon> {
+        val iconDescriptor = getIconDescriptor(entry, redact = false)
         val sensitiveDescriptor = if (entry.isSensitive) {
-            getIconDescriptor(entry, true /* redact */)
+            getIconDescriptor(entry, redact = true)
         } else {
             iconDescriptor
         }
@@ -196,10 +182,7 @@ class IconManager @Inject constructor(
     }
 
     @Throws(InflationException::class)
-    private fun getIconDescriptor(
-        entry: NotificationEntry,
-        redact: Boolean
-    ): StatusBarIcon {
+    private fun getIconDescriptor(entry: NotificationEntry, redact: Boolean): StatusBarIcon {
         val n = entry.sbn.notification
         val showPeopleAvatar = isImportantConversation(entry) && !redact
 
@@ -227,7 +210,8 @@ class IconManager @Inject constructor(
                 icon,
                 n.iconLevel,
                 n.number,
-                iconBuilder.getIconContentDescription(n))
+                iconBuilder.getIconContentDescription(n)
+            )
 
         // Cache if important conversation.
         if (isImportantConversation(entry)) {
@@ -266,8 +250,10 @@ class IconManager @Inject constructor(
         // Fall back to extract from message
         if (ic == null) {
             val extras: Bundle = entry.sbn.notification.extras
-            val messages = Notification.MessagingStyle.Message.getMessagesFromBundleArray(
-                    extras.getParcelableArray(Notification.EXTRA_MESSAGES))
+            val messages =
+                MessagingStyle.Message.getMessagesFromBundleArray(
+                    extras.getParcelableArray(Notification.EXTRA_MESSAGES)
+                )
             val user = extras.getParcelable<Person>(Notification.EXTRA_MESSAGING_PERSON)
             for (i in messages.indices.reversed()) {
                 val message = messages[i]
@@ -314,8 +300,11 @@ class IconManager @Inject constructor(
     }
 
     private fun isImportantConversation(entry: NotificationEntry): Boolean {
+        // Also verify that the Notification is MessagingStyle, since we're going to access
+        // MessagingStyle-specific data (EXTRA_MESSAGES, EXTRA_MESSAGING_PERSON).
         return entry.ranking.channel != null &&
                 entry.ranking.channel.isImportantConversation &&
+                entry.sbn.notification.isStyle(MessagingStyle::class.java) &&
                 entry.key !in unimportantConversationKeys
     }
 

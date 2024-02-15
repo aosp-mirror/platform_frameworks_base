@@ -73,7 +73,9 @@ public final class XmlBlock implements AutoCloseable {
     private void decOpenCountLocked() {
         mOpenCount--;
         if (mOpenCount == 0) {
+            mStrings.close();
             nativeDestroy(mNative);
+            mNative = 0;
             if (mAssets != null) {
                 mAssets.xmlBlockGone(hashCode());
             }
@@ -95,6 +97,18 @@ public final class XmlBlock implements AutoCloseable {
     }
 
     /**
+     * Returns a XmlResourceParser that validates the xml using the given validator.
+     */
+    public XmlResourceParser newParser(@AnyRes int resId, Validator validator) {
+        synchronized (this) {
+            if (mNative != 0) {
+                return new Parser(nativeCreateParseState(mNative, resId), this, validator);
+            }
+            return null;
+        }
+    }
+
+    /**
      * Reference Error.h UNEXPECTED_NULL
      */
     private static final int ERROR_NULL_DOCUMENT = Integer.MIN_VALUE + 8;
@@ -106,10 +120,17 @@ public final class XmlBlock implements AutoCloseable {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public final class Parser implements XmlResourceParser {
+        Validator mValidator;
+
         Parser(long parseState, XmlBlock block) {
             mParseState = parseState;
             mBlock = block;
             block.mOpenCount++;
+        }
+
+        Parser(long parseState, XmlBlock block, Validator validator) {
+            this(parseState, block);
+            mValidator = validator;
         }
 
         @AnyRes
@@ -298,7 +319,11 @@ public final class XmlBlock implements AutoCloseable {
                         "Namespace=" + getAttributeNamespace(idx)
                         + "Name=" + getAttributeName(idx)
                         + ", Value=" + getAttributeValue(idx));
-                return getAttributeValue(idx);
+                String value = getAttributeValue(idx);
+                if (mValidator != null) {
+                    mValidator.validateStrAttr(this, name, value);
+                }
+                return value;
             }
             return null;
         }
@@ -327,6 +352,9 @@ public final class XmlBlock implements AutoCloseable {
                 break;
             }
             mEventType = ev;
+            if (mValidator != null) {
+                mValidator.validate(this);
+            }
             if (ev == END_DOCUMENT) {
                 // Automatically close the parse when we reach the end of
                 // a document, since the standard XmlPullParser interface
@@ -621,7 +649,7 @@ public final class XmlBlock implements AutoCloseable {
     }
 
     private @Nullable final AssetManager mAssets;
-    private final long mNative;
+    private long mNative;   // final, but gets reset on close
     /*package*/ final StringBlock mStrings;
     private boolean mOpen = true;
     private int mOpenCount = 1;

@@ -18,50 +18,71 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @SysUISingleton
 class FromDozingTransitionInteractor
 @Inject
 constructor(
-    @Application private val scope: CoroutineScope,
+    override val transitionRepository: KeyguardTransitionRepository,
+    transitionInteractor: KeyguardTransitionInteractor,
+    @Background private val scope: CoroutineScope,
+    @Background bgDispatcher: CoroutineDispatcher,
+    @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
-    private val keyguardTransitionRepository: KeyguardTransitionRepository,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor(FromDozingTransitionInteractor::class.simpleName!!) {
+    private val powerInteractor: PowerInteractor,
+    private val communalInteractor: CommunalInteractor,
+) :
+    TransitionInteractor(
+        fromState = KeyguardState.DOZING,
+        transitionInteractor = transitionInteractor,
+        mainDispatcher = mainDispatcher,
+        bgDispatcher = bgDispatcher,
+    ) {
 
     override fun start() {
-        listenForDozingToLockscreen()
+        listenForDozingToLockscreenHubOrOccluded()
         listenForDozingToGone()
+        listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private fun listenForDozingToLockscreen() {
+    private fun listenForDozingToLockscreenHubOrOccluded() {
         scope.launch {
-            keyguardInteractor.wakefulnessModel
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { (wakefulnessModel, lastStartedTransition) ->
-                    if (
-                        wakefulnessModel.isStartingToWakeOrAwake() &&
-                            lastStartedTransition.to == KeyguardState.DOZING
-                    ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.DOZING,
-                                KeyguardState.LOCKSCREEN,
-                                getAnimator(),
-                            )
+            powerInteractor.isAwake
+                .sample(
+                    combine(
+                        startedKeyguardTransitionStep,
+                        keyguardInteractor.isKeyguardOccluded,
+                        communalInteractor.isIdleOnCommunal,
+                        ::Triple
+                    ),
+                    ::toQuad
+                )
+                .collect { (isAwake, lastStartedTransition, occluded, isIdleOnCommunal) ->
+                    if (isAwake && lastStartedTransition.to == KeyguardState.DOZING) {
+                        startTransitionTo(
+                            if (occluded) {
+                                KeyguardState.OCCLUDED
+                            } else if (isIdleOnCommunal) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
                         )
                     }
                 }
@@ -71,33 +92,28 @@ constructor(
     private fun listenForDozingToGone() {
         scope.launch {
             keyguardInteractor.biometricUnlockState
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(startedKeyguardTransitionStep, ::Pair)
                 .collect { (biometricUnlockState, lastStartedTransition) ->
                     if (
                         lastStartedTransition.to == KeyguardState.DOZING &&
                             isWakeAndUnlock(biometricUnlockState)
                     ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.DOZING,
-                                KeyguardState.GONE,
-                                getAnimator(),
-                            )
-                        )
+                        startTransitionTo(KeyguardState.GONE)
                     }
                 }
         }
     }
 
-    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
+    override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
-            setInterpolator(Interpolators.LINEAR)
-            setDuration(duration.inWholeMilliseconds)
+            interpolator = Interpolators.LINEAR
+            duration = DEFAULT_DURATION.inWholeMilliseconds
         }
     }
 
     companion object {
+        const val TAG = "FromDozingTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
+        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
     }
 }

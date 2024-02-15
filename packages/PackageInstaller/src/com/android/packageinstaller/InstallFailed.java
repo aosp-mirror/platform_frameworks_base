@@ -33,16 +33,16 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import java.io.File;
-
 /**
  * Installation failed: Return status code to the caller or display failure UI to user
  */
-public class InstallFailed extends AlertActivity {
+public class InstallFailed extends Activity {
     private static final String LOG_TAG = InstallFailed.class.getSimpleName();
 
     /** Label of the app that failed to install */
     private CharSequence mLabel;
+
+    private AlertDialog mDialog;
 
     /**
      * Unhide the appropriate label for the statusCode.
@@ -55,19 +55,19 @@ public class InstallFailed extends AlertActivity {
         View viewToEnable;
         switch (statusCode) {
             case PackageInstaller.STATUS_FAILURE_BLOCKED:
-                viewToEnable = requireViewById(R.id.install_failed_blocked);
+                viewToEnable = mDialog.requireViewById(R.id.install_failed_blocked);
                 break;
             case PackageInstaller.STATUS_FAILURE_CONFLICT:
-                viewToEnable = requireViewById(R.id.install_failed_conflict);
+                viewToEnable = mDialog.requireViewById(R.id.install_failed_conflict);
                 break;
             case PackageInstaller.STATUS_FAILURE_INCOMPATIBLE:
-                viewToEnable = requireViewById(R.id.install_failed_incompatible);
+                viewToEnable = mDialog.requireViewById(R.id.install_failed_incompatible);
                 break;
             case PackageInstaller.STATUS_FAILURE_INVALID:
-                viewToEnable = requireViewById(R.id.install_failed_invalid_apk);
+                viewToEnable = mDialog.requireViewById(R.id.install_failed_invalid_apk);
                 break;
             default:
-                viewToEnable = requireViewById(R.id.install_failed);
+                viewToEnable = mDialog.requireViewById(R.id.install_failed);
                 break;
         }
 
@@ -101,24 +101,24 @@ public class InstallFailed extends AlertActivity {
             // Set header icon and title
             PackageUtil.AppSnippet as;
             PackageManager pm = getPackageManager();
-
-            if ("package".equals(packageURI.getScheme())) {
-                as = new PackageUtil.AppSnippet(pm.getApplicationLabel(appInfo),
-                        pm.getApplicationIcon(appInfo));
-            } else {
-                final File sourceFile = new File(packageURI.getPath());
-                as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
-            }
+            as = intent.getParcelableExtra(PackageInstallerActivity.EXTRA_APP_SNIPPET,
+                    PackageUtil.AppSnippet.class);
 
             // Store label for dialog
             mLabel = as.label;
 
-            mAlert.setIcon(as.icon);
-            mAlert.setTitle(as.label);
-            mAlert.setView(R.layout.install_content_view);
-            mAlert.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.done),
-                    (ignored, ignored2) -> finish(), null);
-            setupAlert();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            builder.setIcon(as.icon);
+            builder.setTitle(as.label);
+            builder.setView(R.layout.install_content_view);
+            builder.setPositiveButton(getString(R.string.done),
+                    (ignored, ignored2) -> finish());
+            builder.setOnCancelListener(dialog -> {
+                finish();
+            });
+            mDialog = builder.create();
+            mDialog.show();
 
             // Show out of space dialog if needed
             if (statusCode == PackageInstaller.STATUS_FAILURE_STORAGE) {

@@ -68,13 +68,20 @@
       "name": "FrameworksInputMethodSystemServerTests",
       "options": [
         {"include-filter": "com.android.server.inputmethod"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
         {"exclude-annotation": "org.junit.Ignore"}
       ]
     },
     {
-      "name": "ExtServicesUnitTests",
+      "name": "ExtServicesUnitTests-tplus",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "ExtServicesUnitTests-sminus",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -119,6 +126,24 @@
           "exclude-annotation": "org.junit.Ignore"
         }
       ]
+    },
+    {
+      "name": "vts_treble_vintf_framework_test"
+    },
+    {
+      "name": "vts_treble_vintf_vendor_test"
+    },
+    {
+      "name": "CtsStrictJavaPackagesTestCases"
+    }
+  ],
+  "postsubmit-ravenwood": [
+    {
+      "name": "CtsUtilTestCasesRavenwood",
+      "host": true,
+      "file_patterns": [
+        "[Rr]avenwood"
+      ]
     }
   ],
   "postsubmit-managedprofile-stress": [
@@ -142,7 +167,15 @@
      ]
    },
    {
-     "name": "ExtServicesUnitTests",
+     "name": "ExtServicesUnitTests-tplus",
+     "options": [
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       }
+     ]
+   },
+   {
+     "name": "ExtServicesUnitTests-sminus",
      "options": [
        {
          "exclude-annotation": "androidx.test.filters.FlakyTest"

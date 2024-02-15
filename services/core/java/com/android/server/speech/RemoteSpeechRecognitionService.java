@@ -206,22 +206,16 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         synchronized (mLock) {
             ClientState clientState = mClients.get(listener.asBinder());
 
-            if (clientState == null) {
-                if (DEBUG) {
-                    Slog.w(TAG, "#cancel called with no preceding #startListening - ignoring.");
-                }
-                return;
+            if (clientState != null) {
+                clientState.mRecordingInProgress = false;
+                // Temporary reference to allow for resetting mDelegatingListener to null.
+                final IRecognitionListener delegatingListener = clientState.mDelegatingListener;
+                run(service -> service.cancel(delegatingListener, isShutdown));
             }
-            clientState.mRecordingInProgress = false;
-
-            // Temporary reference to allow for resetting the hard link mDelegatingListener to null.
-            final IRecognitionListener delegatingListener = clientState.mDelegatingListener;
-            run(service -> service.cancel(delegatingListener, isShutdown));
 
             // If shutdown, remove the client info from the map. Unbind if that was the last client.
             if (isShutdown) {
                 removeClient(listener);
-
                 if (mClients.isEmpty()) {
                     if (DEBUG) {
                         Slog.d(TAG, "Unbinding from the recognition service.");
@@ -297,7 +291,8 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
                     return;
                 }
 
-                for (ClientState clientState : mClients.values()) {
+
+                for (ClientState clientState : mClients.values().toArray(new ClientState[0])) {
                     tryRespondWithError(
                             clientState.mDelegatingListener.mRemoteListener,
                             SpeechRecognizer.ERROR_SERVER_DISCONNECTED);

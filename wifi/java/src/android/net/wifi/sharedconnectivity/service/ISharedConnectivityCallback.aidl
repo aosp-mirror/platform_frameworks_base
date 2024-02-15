@@ -31,4 +31,5 @@ interface ISharedConnectivityCallback {
     oneway void onKnownNetworksUpdated(in List<KnownNetwork> networks);
     oneway void onKnownNetworkConnectionStatusChanged(in KnownNetworkConnectionStatus status);
     oneway void onSharedConnectivitySettingsChanged(in SharedConnectivitySettingsState state);
+    oneway void onServiceConnected();
 }

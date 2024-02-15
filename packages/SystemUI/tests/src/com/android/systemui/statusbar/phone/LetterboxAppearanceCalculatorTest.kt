@@ -26,7 +26,6 @@ import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -47,15 +46,12 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
         private val TEST_APPEARANCE_REGION_BOUNDS = Rect(0, 0, 20, 100)
         private val TEST_APPEARANCE_REGION =
             AppearanceRegion(TEST_APPEARANCE, TEST_APPEARANCE_REGION_BOUNDS)
-        private val TEST_APPEARANCE_REGIONS = arrayOf(TEST_APPEARANCE_REGION)
+        private val TEST_APPEARANCE_REGIONS = listOf(TEST_APPEARANCE_REGION)
         private val TEST_WINDOW_BOUNDS = Rect(0, 0, 500, 500)
     }
 
     @get:Rule var expect = Expect.create()
 
-    @Mock private lateinit var lightBarController: LightBarController
-    @Mock private lateinit var statusBarBoundsProvider: StatusBarBoundsProvider
-    @Mock private lateinit var statusBarFragmentComponent: StatusBarFragmentComponent
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var letterboxBackgroundProvider: LetterboxBackgroundProvider
 
@@ -64,24 +60,21 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(statusBarFragmentComponent.boundsProvider).thenReturn(statusBarBoundsProvider)
         calculator =
-            LetterboxAppearanceCalculator(
-                lightBarController, dumpManager, letterboxBackgroundProvider)
-        calculator.onStatusBarViewInitialized(statusBarFragmentComponent)
+            LetterboxAppearanceCalculator(context, dumpManager, letterboxBackgroundProvider)
         whenever(letterboxBackgroundProvider.letterboxBackgroundColor).thenReturn(Color.BLACK)
         whenever(letterboxBackgroundProvider.isLetterboxBackgroundMultiColored).thenReturn(false)
     }
 
     @Test
     fun getLetterboxAppearance_overlapStartSide_returnsOriginalWithScrim() {
-        whenever(statusBarBoundsProvider.visibleStartSideBounds).thenReturn(Rect(0, 0, 100, 100))
-        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(Rect(200, 0, 300, 100))
+        val start = Rect(0, 0, 100, 100)
+        val end = Rect(200, 0, 300, 100)
         val letterbox = letterboxWithInnerBounds(Rect(50, 50, 150, 150))
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox), BoundsPair(start, end))
 
         expect
             .that(letterboxAppearance.appearance)
@@ -91,13 +84,13 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
     @Test
     fun getLetterboxAppearance_overlapEndSide_returnsOriginalWithScrim() {
-        whenever(statusBarBoundsProvider.visibleStartSideBounds).thenReturn(Rect(0, 0, 100, 100))
-        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(Rect(200, 0, 300, 100))
+        val start = Rect(0, 0, 100, 100)
+        val end = Rect(200, 0, 300, 100)
         val letterbox = letterboxWithInnerBounds(Rect(150, 50, 250, 150))
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox), BoundsPair(start, end))
 
         expect
             .that(letterboxAppearance.appearance)
@@ -105,16 +98,38 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
         expect.that(letterboxAppearance.appearanceRegions).isEqualTo(TEST_APPEARANCE_REGIONS)
     }
 
+    /** Regression test for b/287508741 */
+    @Test
+    fun getLetterboxAppearance_withOverlap_doesNotMutateOriginalBounds() {
+        val statusBarStartSideBounds = Rect(left = 0, top = 0, right = 100, bottom = 100)
+        val statusBarEndSideBounds = Rect(left = 200, top = 0, right = 300, bottom = 100)
+        val letterBoxInnerBounds = Rect(left = 150, top = 50, right = 250, bottom = 150)
+        val statusBarStartSideBoundsCopy = Rect(statusBarStartSideBounds)
+        val statusBarEndSideBoundsCopy = Rect(statusBarEndSideBounds)
+        val letterBoxInnerBoundsCopy = Rect(letterBoxInnerBounds)
+
+        calculator.getLetterboxAppearance(
+                TEST_APPEARANCE,
+                TEST_APPEARANCE_REGIONS,
+            listOf(letterboxWithInnerBounds(letterBoxInnerBounds)),
+            BoundsPair(statusBarStartSideBounds, statusBarEndSideBounds)
+        )
+
+        expect.that(statusBarStartSideBounds).isEqualTo(statusBarStartSideBoundsCopy)
+        expect.that(statusBarEndSideBounds).isEqualTo(statusBarEndSideBoundsCopy)
+        expect.that(letterBoxInnerBounds).isEqualTo(letterBoxInnerBoundsCopy)
+    }
+
     @Test
     fun getLetterboxAppearance_noOverlap_BackgroundMultiColor_returnsAppearanceWithScrim() {
         whenever(letterboxBackgroundProvider.isLetterboxBackgroundMultiColored).thenReturn(true)
-        whenever(statusBarBoundsProvider.visibleStartSideBounds).thenReturn(Rect(0, 0, 100, 100))
-        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(Rect(200, 0, 300, 100))
+        val start = Rect(0, 0, 100, 100)
+        val end = Rect(200, 0, 300, 100)
         val letterbox = letterboxWithInnerBounds(Rect(101, 0, 199, 100))
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox), BoundsPair(start, end))
 
         expect
                 .that(letterboxAppearance.appearance)
@@ -124,66 +139,66 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
     @Test
     fun getLetterboxAppearance_noOverlap_returnsAppearanceWithoutScrim() {
-        whenever(statusBarBoundsProvider.visibleStartSideBounds).thenReturn(Rect(0, 0, 100, 100))
-        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(Rect(200, 0, 300, 100))
+        val start = Rect(0, 0, 100, 100)
+        val end = Rect(200, 0, 300, 100)
         val letterbox = letterboxWithInnerBounds(Rect(101, 0, 199, 100))
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox), BoundsPair(start, end))
 
         assertThat(letterboxAppearance.appearance).isEqualTo(TEST_APPEARANCE)
     }
 
     @Test
     fun getLetterboxAppearance_letterboxContainsStartSide_returnsAppearanceWithoutScrim() {
-        whenever(statusBarBoundsProvider.visibleStartSideBounds).thenReturn(Rect(0, 0, 100, 100))
-        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(Rect(200, 0, 300, 100))
+        val start = Rect(0, 0, 100, 100)
+        val end = Rect(200, 0, 300, 100)
         val letterbox = letterboxWithInnerBounds(Rect(0, 0, 101, 101))
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox), BoundsPair(start, end))
 
         assertThat(letterboxAppearance.appearance).isEqualTo(TEST_APPEARANCE)
     }
 
     @Test
     fun getLetterboxAppearance_letterboxContainsEndSide_returnsAppearanceWithoutScrim() {
-        whenever(statusBarBoundsProvider.visibleStartSideBounds).thenReturn(Rect(0, 0, 100, 100))
-        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(Rect(200, 0, 300, 100))
+        val start = Rect(0, 0, 100, 100)
+        val end = Rect(200, 0, 300, 100)
         val letterbox = letterboxWithInnerBounds(Rect(199, 0, 301, 101))
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox), BoundsPair(start, end))
 
         assertThat(letterboxAppearance.appearance).isEqualTo(TEST_APPEARANCE)
     }
 
     @Test
     fun getLetterboxAppearance_letterboxContainsEntireStatusBar_returnsAppearanceWithoutScrim() {
-        whenever(statusBarBoundsProvider.visibleStartSideBounds).thenReturn(Rect(0, 0, 100, 100))
-        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(Rect(200, 0, 300, 100))
+        val start = Rect(0, 0, 100, 100)
+        val end = Rect(200, 0, 300, 100)
         val letterbox = letterboxWithInnerBounds(Rect(0, 0, 300, 100))
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, arrayOf(letterbox))
+                TEST_APPEARANCE, TEST_APPEARANCE_REGIONS, listOf(letterbox), BoundsPair(start, end))
 
         assertThat(letterboxAppearance.appearance).isEqualTo(TEST_APPEARANCE)
     }
 
     @Test
     fun getLetterboxAppearance_returnsAdaptedAppearanceRegions_basedOnLetterboxInnerBounds() {
-        whenever(statusBarBoundsProvider.visibleStartSideBounds).thenReturn(Rect(0, 0, 0, 0))
-        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(Rect(0, 0, 0, 0))
+        val start = Rect(0, 0, 0, 0)
+        val end = Rect(0, 0, 0, 0)
         val letterbox = letterboxWithInnerBounds(Rect(150, 0, 300, 800))
         val letterboxRegion = TEST_APPEARANCE_REGION.copy(bounds = letterbox.letterboxFullBounds)
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, arrayOf(letterboxRegion), arrayOf(letterbox))
+                TEST_APPEARANCE, listOf(letterboxRegion), listOf(letterbox), BoundsPair(start, end))
 
         val letterboxAdaptedRegion = letterboxRegion.copy(bounds = letterbox.letterboxInnerBounds)
         assertThat(letterboxAppearance.appearanceRegions.toList()).contains(letterboxAdaptedRegion)
@@ -192,8 +207,8 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
     @Test
     fun getLetterboxAppearance_returnsDefaultAppearanceRegions_basedOnLetterboxOuterBounds() {
-        whenever(statusBarBoundsProvider.visibleStartSideBounds).thenReturn(Rect(0, 0, 0, 0))
-        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(Rect(0, 0, 0, 0))
+        val start = Rect(0, 0, 0, 0)
+        val end = Rect(0, 0, 0, 0)
         val letterbox =
             letterboxWithBounds(
                 innerBounds = Rect(left = 25, top = 0, right = 75, bottom = 100),
@@ -202,16 +217,20 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 
         val letterboxAppearance =
             calculator.getLetterboxAppearance(
-                TEST_APPEARANCE, arrayOf(letterboxRegion), arrayOf(letterbox))
+                TEST_APPEARANCE, listOf(letterboxRegion), listOf(letterbox), BoundsPair(start, end))
 
         val outerRegions =
             listOf(
                 AppearanceRegion(
-                    DEFAULT_APPEARANCE, Rect(left = 0, top = 0, right = 25, bottom = 100)),
+                    DEFAULT_APPEARANCE,
+                    Rect(left = 0, top = 0, right = 25, bottom = 100),
+                ),
                 AppearanceRegion(
-                    DEFAULT_APPEARANCE, Rect(left = 75, top = 0, right = 100, bottom = 100)),
+                    DEFAULT_APPEARANCE,
+                    Rect(left = 75, top = 0, right = 100, bottom = 100),
+                ),
             )
-        assertThat(letterboxAppearance.appearanceRegions.toList())
+        assertThat(letterboxAppearance.appearanceRegions)
             .containsAtLeastElementsIn(outerRegions)
     }
 

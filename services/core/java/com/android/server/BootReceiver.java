@@ -62,6 +62,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -313,6 +314,11 @@ public class BootReceiver extends BroadcastReceiver {
 
     private static final DropboxRateLimiter sDropboxRateLimiter = new DropboxRateLimiter();
 
+    /** Initialize the rate limiter. */
+    public static void initDropboxRateLimiter() {
+        sDropboxRateLimiter.init();
+    }
+
     /**
      * Reset the dropbox rate limiter.
      */
@@ -328,9 +334,11 @@ public class BootReceiver extends BroadcastReceiver {
      * @param tombstone path to the tombstone
      * @param proto whether the tombstone is stored as proto
      * @param processName the name of the process corresponding to the tombstone
+     * @param tmpFileLock the lock for reading/writing tmp files
      */
     public static void addTombstoneToDropBox(
-                Context ctx, File tombstone, boolean proto, String processName) {
+                Context ctx, File tombstone, boolean proto, String processName,
+                ReentrantLock tmpFileLock) {
         final DropBoxManager db = ctx.getSystemService(DropBoxManager.class);
         if (db == null) {
             Slog.e(TAG, "Can't log tombstone: DropBoxManager not available");
@@ -351,39 +359,11 @@ public class BootReceiver extends BroadcastReceiver {
                     // due to rate limiting. Do this by enclosing the proto tombsstone in a
                     // container proto that has the dropped entry count and the proto tombstone as
                     // bytes (to avoid the complexity of reading and writing nested protos).
-
-                    // Read the proto tombstone file as bytes.
-                    final byte[] tombstoneBytes = Files.readAllBytes(tombstone.toPath());
-
-                    final File tombstoneProtoWithHeaders = File.createTempFile(
-                            tombstone.getName(), ".tmp", TOMBSTONE_TMP_DIR);
-                    Files.setPosixFilePermissions(
-                            tombstoneProtoWithHeaders.toPath(),
-                            PosixFilePermissions.fromString("rw-rw----"));
-
-                    // Write the new proto container proto with headers.
-                    ParcelFileDescriptor pfd;
+                    tmpFileLock.lock();
                     try {
-                        pfd = ParcelFileDescriptor.open(tombstoneProtoWithHeaders, MODE_READ_WRITE);
-
-                        ProtoOutputStream protoStream = new ProtoOutputStream(
-                                pfd.getFileDescriptor());
-                        protoStream.write(TombstoneWithHeadersProto.TOMBSTONE, tombstoneBytes);
-                        protoStream.write(
-                                TombstoneWithHeadersProto.DROPPED_COUNT,
-                                rateLimitResult.droppedCountSinceRateLimitActivated());
-                        protoStream.flush();
-
-                        // Add the proto to dropbox.
-                        db.addFile(TAG_TOMBSTONE_PROTO_WITH_HEADERS, tombstoneProtoWithHeaders, 0);
-                    } catch (FileNotFoundException ex) {
-                        Slog.e(TAG, "failed to open for write: " + tombstoneProtoWithHeaders, ex);
-                        throw ex;
+                        addAugmentedProtoToDropbox(tombstone, db, rateLimitResult);
                     } finally {
-                        // Remove the temporary file.
-                        if (tombstoneProtoWithHeaders != null) {
-                            tombstoneProtoWithHeaders.delete();
-                        }
+                        tmpFileLock.unlock();
                     }
                 }
             } else {
@@ -397,6 +377,44 @@ public class BootReceiver extends BroadcastReceiver {
             Slog.e(TAG, "Can't log tombstone", e);
         }
         writeTimestamps(timestamps);
+    }
+
+    private static void addAugmentedProtoToDropbox(
+                File tombstone, DropBoxManager db,
+                DropboxRateLimiter.RateLimitResult rateLimitResult) throws IOException {
+        // Read the proto tombstone file as bytes.
+        final byte[] tombstoneBytes = Files.readAllBytes(tombstone.toPath());
+
+        final File tombstoneProtoWithHeaders = File.createTempFile(
+                tombstone.getName(), ".tmp", TOMBSTONE_TMP_DIR);
+        Files.setPosixFilePermissions(
+                tombstoneProtoWithHeaders.toPath(),
+                PosixFilePermissions.fromString("rw-rw----"));
+
+        // Write the new proto container proto with headers.
+        try (ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                    tombstoneProtoWithHeaders, MODE_READ_WRITE)) {
+            ProtoOutputStream protoStream =
+                    new ProtoOutputStream(pfd.getFileDescriptor());
+            protoStream.write(TombstoneWithHeadersProto.TOMBSTONE, tombstoneBytes);
+            protoStream.write(
+                    TombstoneWithHeadersProto.DROPPED_COUNT,
+                    rateLimitResult.droppedCountSinceRateLimitActivated());
+            protoStream.flush();
+
+            // Add the proto to dropbox.
+            db.addFile(TAG_TOMBSTONE_PROTO_WITH_HEADERS, tombstoneProtoWithHeaders, 0);
+        } catch (FileNotFoundException ex) {
+            Slog.e(TAG, "failed to open for write: " + tombstoneProtoWithHeaders, ex);
+            throw ex;
+        } catch (IOException ex) {
+            Slog.e(TAG, "IO exception during write: " + tombstoneProtoWithHeaders, ex);
+        } finally {
+            // Remove the temporary file and unlock the lock.
+            if (tombstoneProtoWithHeaders != null) {
+                tombstoneProtoWithHeaders.delete();
+            }
+        }
     }
 
     private static void addLastkToDropBox(

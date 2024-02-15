@@ -29,9 +29,13 @@ import static com.android.server.media.MediaKeyDispatcher.isTripleTapOverridden;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.app.ForegroundServiceDelegationOptions;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.usage.UsageStatsManager;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -59,12 +63,14 @@ import android.media.session.ISessionManager;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
+import android.media.session.PlaybackState;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.Process;
@@ -85,12 +91,11 @@ import android.view.ViewConfiguration;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.LocalManagerRegistry;
+import com.android.media.flags.Flags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.Watchdog.Monitor;
-import com.android.server.am.ActivityManagerLocal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -98,7 +103,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * System implementation of MediaSessionManager
@@ -142,7 +149,9 @@ public class MediaSessionService extends SystemService implements Monitor {
     private KeyguardManager mKeyguardManager;
     private AudioManager mAudioManager;
     private boolean mHasFeatureLeanback;
-    private ActivityManagerLocal mActivityManagerLocal;
+    private ActivityManagerInternal mActivityManagerInternal;
+    private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    private final Set<Integer> mUserEngagingSessions = new HashSet<>();
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
@@ -162,12 +171,27 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final MediaCommunicationManager.SessionCallback mSession2TokenCallback =
             new MediaCommunicationManager.SessionCallback() {
                 @Override
+                // TODO (b/324266224): Deprecate this method once other overload is published.
                 public void onSession2TokenCreated(Session2Token token) {
+                    addSession(token, Process.INVALID_PID);
+                }
+
+                @Override
+                public void onSession2TokenCreated(Session2Token token, int pid) {
+                    addSession(token, pid);
+                }
+
+                private void addSession(Session2Token token, int pid) {
                     if (DEBUG) {
                         Log.d(TAG, "Session2 is created " + token);
                     }
-                    MediaSession2Record record = new MediaSession2Record(token,
-                            MediaSessionService.this, mRecordThread.getLooper(), 0);
+                    MediaSession2Record record =
+                            new MediaSession2Record(
+                                    token,
+                                    MediaSessionService.this,
+                                    mRecordThread.getLooper(),
+                                    pid,
+                                    /* policies= */ 0);
                     synchronized (mLock) {
                         FullUserRecord user = getFullUserRecordLocked(record.getUserId());
                         if (user != null) {
@@ -227,7 +251,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 NotificationManager.ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED);
         mContext.registerReceiver(mNotificationListenerEnabledChangedReceiver, filter);
 
-        mActivityManagerLocal = LocalManagerRegistry.getManager(ActivityManagerLocal.class);
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
     }
 
     @Override
@@ -258,7 +283,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         return mGlobalPrioritySession != null && mGlobalPrioritySession.isActive();
     }
 
-    void onSessionActiveStateChanged(MediaSessionRecordImpl record) {
+    void onSessionActiveStateChanged(
+            MediaSessionRecordImpl record, @Nullable PlaybackState playbackState) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(record.getUserId());
             if (user == null) {
@@ -267,7 +293,14 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
             if (record.isSystemPriority()) {
                 if (DEBUG_KEY_EVENT) {
-                    Log.d(TAG, "Global priority session is updated, active=" + record.isActive());
+                    Log.d(
+                            TAG,
+                            "Global priority session updated - user id="
+                                    + record.getUserId()
+                                    + " package="
+                                    + record.getPackageName()
+                                    + " active="
+                                    + record.isActive());
                 }
                 user.pushAddressedPlayerChangedLocked();
             } else {
@@ -277,7 +310,14 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 user.mPriorityStack.onSessionActiveStateChanged(record);
             }
+            boolean allowRunningInForeground = record.isActive()
+                    && (playbackState == null || playbackState.isActive());
 
+            Log.d(TAG, "onSessionActiveStateChanged: "
+                    + "record=" + record
+                    + "playbackState=" + playbackState
+                    + "allowRunningInForeground=" + allowRunningInForeground);
+            setForegroundServiceAllowance(record, allowRunningInForeground);
             mHandler.postSessionsChanged(record);
         }
     }
@@ -363,8 +403,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    void onSessionPlaybackStateChanged(MediaSessionRecordImpl record,
-            boolean shouldUpdatePriority) {
+    void onSessionPlaybackStateChanged(
+            MediaSessionRecordImpl record,
+            boolean shouldUpdatePriority,
+            @Nullable PlaybackState playbackState) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(record.getUserId());
             if (user == null || !user.mPriorityStack.contains(record)) {
@@ -372,6 +414,14 @@ public class MediaSessionService extends SystemService implements Monitor {
                 return;
             }
             user.mPriorityStack.onPlaybackStateChanged(record, shouldUpdatePriority);
+            if (playbackState != null) {
+                boolean allowRunningInForeground = playbackState.isActive() && record.isActive();
+                Log.d(TAG, "onSessionPlaybackStateChanged: "
+                        + "record=" + record
+                        + "playbackState=" + playbackState
+                        + "allowRunningInForeground=" + allowRunningInForeground);
+                setForegroundServiceAllowance(record, allowRunningInForeground);
+            }
         }
     }
 
@@ -535,27 +585,85 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         session.close();
+
+        Log.d(TAG, "destroySessionLocked: record=" + session);
+        setForegroundServiceAllowance(session, /* allowRunningInForeground= */ false);
         mHandler.postSessionsChanged(session);
+    }
+
+    private void setForegroundServiceAllowance(
+            MediaSessionRecordImpl record, boolean allowRunningInForeground) {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
+        ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
+                record.getForegroundServiceDelegationOptions();
+        if (foregroundServiceDelegationOptions == null
+                || foregroundServiceDelegationOptions.mClientPid == Process.INVALID_PID) {
+            // This record doesn't support FGS delegation. In practice, this is MediaSession2.
+            return;
+        }
+        if (allowRunningInForeground) {
+            mActivityManagerInternal.startForegroundServiceDelegate(
+                    foregroundServiceDelegationOptions, /* connection= */ null);
+            reportMediaInteractionEvent(record, /* userEngaged= */ true);
+        } else {
+            mActivityManagerInternal.stopForegroundServiceDelegate(
+                    foregroundServiceDelegationOptions);
+            reportMediaInteractionEvent(record, /* userEngaged= */ false);
+        }
+    }
+
+    private void reportMediaInteractionEvent(MediaSessionRecordImpl record, boolean userEngaged) {
+           if (!android.app.usage.Flags.userInteractionTypeApi()) {
+                return;
+            }
+
+            String packageName = record.getPackageName();
+            int sessionUid = record.getUid();
+            String actionToLog = null;
+            if (userEngaged) {
+                if (!mUserEngagingSessions.contains(sessionUid)) {
+                    actionToLog = "start";
+                }
+                mUserEngagingSessions.add(sessionUid);
+            } else {
+                if (mUserEngagingSessions.contains(sessionUid)) {
+                    actionToLog = "stop";
+                }
+                mUserEngagingSessions.remove(sessionUid);
+            }
+
+            if (actionToLog != null) {
+                PersistableBundle extras = new PersistableBundle();
+                extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, "android.media");
+                extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION, actionToLog);
+                mUsageStatsManagerInternal.reportUserInteractionEvent(
+                        packageName, record.getUserId(), extras);
+            }
     }
 
     void tempAllowlistTargetPkgIfPossible(int targetUid, String targetPackage,
             int callingPid, int callingUid, String callingPackage, String reason) {
         final long token = Binder.clearCallingIdentity();
         try {
-            MediaServerUtils.enforcePackageName(callingPackage, callingUid);
+            MediaServerUtils.enforcePackageName(mContext, callingPackage, callingUid);
             if (targetUid != callingUid) {
-                boolean canAllowWhileInUse = mActivityManagerLocal
-                        .canAllowWhileInUsePermissionInFgs(callingPid, callingUid, callingPackage);
-                boolean canStartFgs = canAllowWhileInUse
-                        || mActivityManagerLocal.canStartForegroundService(callingPid, callingUid,
-                        callingPackage);
+                boolean canAllowWhileInUse =
+                        mActivityManagerInternal.canAllowWhileInUsePermissionInFgs(
+                                callingPid, callingUid, callingPackage);
+                boolean canStartFgs =
+                        canAllowWhileInUse
+                                || mActivityManagerInternal.canStartForegroundService(
+                                        callingPid, callingUid, callingPackage);
                 Log.i(TAG, "tempAllowlistTargetPkgIfPossible callingPackage:"
                         + callingPackage + " targetPackage:" + targetPackage
                         + " reason:" + reason
                         + (canAllowWhileInUse ? " [WIU]" : "")
                         + (canStartFgs ? " [FGS]" : ""));
                 if (canAllowWhileInUse) {
-                    mActivityManagerLocal.tempAllowWhileInUsePermissionInFgs(targetUid,
+                    mActivityManagerInternal.tempAllowWhileInUsePermissionInFgs(
+                            targetUid,
                             MediaSessionDeviceConfig
                                     .getMediaSessionCallbackFgsWhileInUseTempAllowDurationMs());
                 }
@@ -1187,7 +1295,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaServerUtils.enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(mContext, packageName, uid);
                 int resolvedUserId = handleIncomingUser(pid, uid, userId, packageName);
                 if (cb == null) {
                     throw new IllegalArgumentException("Controller callback cannot be null");
@@ -1239,7 +1347,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaServerUtils.enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(mContext, packageName, uid);
                 enforceMediaPermissions(packageName, pid, uid, userId);
 
                 MediaSessionRecordImpl record;
@@ -1270,7 +1378,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaServerUtils.enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(mContext, packageName, uid);
                 enforceMediaPermissions(packageName, pid, uid, userId);
 
                 MediaSessionRecordImpl record;
@@ -1596,7 +1704,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaServerUtils.enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(mContext, packageName, uid);
                 enforceMediaPermissions(packageName, pid, uid, userId);
 
                 synchronized (mLock) {
@@ -1904,6 +2012,15 @@ public class MediaSessionService extends SystemService implements Monitor {
                                 keyEvent, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                         return;
                     }
+                    if (Flags.fallbackToDefaultHandlingWhenMediaSessionHasFixedVolumeHandling()
+                            && !record.canHandleVolumeKey()) {
+                        Log.d(TAG, "Session with packageName=" + record.getPackageName()
+                                + " doesn't support volume adjustment."
+                                + " Fallbacks to the default handling.");
+                        dispatchVolumeKeyEventLocked(packageName, opPackageName, pid, uid, true,
+                                keyEvent, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
+                        return;
+                    }
                     switch (keyEvent.getAction()) {
                         case KeyEvent.ACTION_DOWN: {
                             int direction = 0;
@@ -2110,7 +2227,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // If they gave us a component name verify they own the
                 // package
                 packageName = componentName.getPackageName();
-                MediaServerUtils.enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(mContext, packageName, uid);
             }
             // Check that they can make calls on behalf of the user and get the final user id
             int resolvedUserId = handleIncomingUser(pid, uid, userId, packageName);
@@ -2188,11 +2305,25 @@ public class MediaSessionService extends SystemService implements Monitor {
             MediaSessionRecordImpl session = isGlobalPriorityActiveLocked() ? mGlobalPrioritySession
                     : mCurrentFullUserRecord.mPriorityStack.getDefaultVolumeSession();
 
-            boolean preferSuggestedStream = false;
-            if (isValidLocalStreamType(suggestedStream)
-                    && AudioSystem.isStreamActive(suggestedStream, 0)) {
-                preferSuggestedStream = true;
+            boolean preferSuggestedStream =
+                    isValidLocalStreamType(suggestedStream)
+                            && AudioSystem.isStreamActive(suggestedStream, 0);
+
+            if (session != null && session.getUid() != uid
+                    && mAudioPlayerStateMonitor.hasUidPlayedAudioLast(uid)) {
+                if (Flags.adjustVolumeForForegroundAppPlayingAudioWithoutMediaSession()) {
+                    // The app in the foreground has been the last app to play media locally.
+                    // Therefore, We ignore the chosen session so that volume events affect the
+                    // local music stream instead. See b/275185436 for details.
+                    Log.d(TAG, "Ignoring session=" + session + " and adjusting suggestedStream="
+                            + suggestedStream + " instead");
+                    session = null;
+                } else {
+                    Log.d(TAG, "Session=" + session + " will not be not ignored and will receive"
+                            + " the volume adjustment event");
+                }
             }
+
             if (session == null || preferSuggestedStream) {
                 if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Adjusting suggestedStream=" + suggestedStream + " by " + direction

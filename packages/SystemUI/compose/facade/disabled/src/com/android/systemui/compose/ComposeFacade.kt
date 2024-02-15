@@ -19,12 +19,26 @@ package com.android.systemui.compose
 
 import android.content.Context
 import android.view.View
+import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
-import com.android.systemui.multishade.ui.viewmodel.MultiShadeViewModel
+import com.android.systemui.bouncer.ui.BouncerDialogFactory
+import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.widgets.WidgetConfigurator
+import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
+import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
-import com.android.systemui.util.time.SystemClock
+import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
+import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 /** The Compose facade, when Compose is *not* available. */
 object ComposeFacade : BaseComposeFacade {
@@ -42,6 +56,24 @@ object ComposeFacade : BaseComposeFacade {
         throwComposeUnavailableError()
     }
 
+    override fun setCommunalEditWidgetActivityContent(
+        activity: ComponentActivity,
+        viewModel: BaseCommunalViewModel,
+        widgetConfigurator: WidgetConfigurator,
+        onOpenWidgetPicker: () -> Unit,
+        onEditDone: () -> Unit,
+    ) {
+        throwComposeUnavailableError()
+    }
+
+    override fun setVolumePanelActivityContent(
+        activity: ComponentActivity,
+        viewModel: VolumePanelViewModel,
+        onDismissAnimationFinished: () -> Unit,
+    ) {
+        throwComposeUnavailableError()
+    }
+
     override fun createFooterActionsView(
         context: Context,
         viewModel: FooterActionsViewModel,
@@ -50,13 +82,46 @@ object ComposeFacade : BaseComposeFacade {
         throwComposeUnavailableError()
     }
 
-    override fun createMultiShadeView(
+    override fun createSceneContainerView(
+        scope: CoroutineScope,
         context: Context,
-        viewModel: MultiShadeViewModel,
-        clock: SystemClock,
+        viewModel: SceneContainerViewModel,
+        windowInsets: StateFlow<WindowInsets?>,
+        sceneByKey: Map<SceneKey, Scene>,
+        dataSourceDelegator: SceneDataSourceDelegator,
     ): View {
         throwComposeUnavailableError()
     }
+
+    override fun createStickyKeysIndicatorContent(
+        context: Context,
+        viewModel: StickyKeysIndicatorViewModel
+    ): View {
+        throwComposeUnavailableError()
+    }
+
+    override fun createCommunalView(
+        context: Context,
+        viewModel: BaseCommunalViewModel,
+    ): View {
+        throwComposeUnavailableError()
+    }
+
+    override fun createCommunalContainer(context: Context, viewModel: CommunalViewModel): View {
+        throwComposeUnavailableError()
+    }
+
+    override fun createBouncer(
+        context: Context,
+        viewModel: BouncerViewModel,
+        dialogFactory: BouncerDialogFactory,
+    ): View = throwComposeUnavailableError()
+
+    override fun createLockscreen(
+        context: Context,
+        viewModel: LockscreenContentViewModel,
+        blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
+    ): View = throwComposeUnavailableError()
 
     private fun throwComposeUnavailableError(): Nothing {
         error(

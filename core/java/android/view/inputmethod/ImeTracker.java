@@ -16,8 +16,12 @@
 
 package android.view.inputmethod;
 
+import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
+import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
+
 import static com.android.internal.inputmethod.InputMethodDebug.softInputDisplayReasonToString;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_IME_INSETS_ANIMATION;
+import static com.android.internal.jank.Cuj.CUJ_IME_INSETS_HIDE_ANIMATION;
+import static com.android.internal.jank.Cuj.CUJ_IME_INSETS_SHOW_ANIMATION;
 import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_HIDDEN;
 import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_SHOWN;
 
@@ -33,6 +37,7 @@ import android.os.SystemProperties;
 import android.util.Log;
 import android.view.InsetsController.AnimationType;
 import android.view.SurfaceControl;
+import android.view.View;
 
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
@@ -168,7 +173,6 @@ public interface ImeTracker {
             PHASE_CLIENT_HANDLE_HIDE_INSETS,
             PHASE_CLIENT_APPLY_ANIMATION,
             PHASE_CLIENT_CONTROL_ANIMATION,
-            PHASE_CLIENT_DISABLED_USER_ANIMATION,
             PHASE_CLIENT_COLLECT_SOURCE_CONTROLS,
             PHASE_CLIENT_INSETS_CONSUMER_REQUEST_SHOW,
             PHASE_CLIENT_REQUEST_IME_SHOW,
@@ -176,7 +180,8 @@ public interface ImeTracker {
             PHASE_CLIENT_ANIMATION_RUNNING,
             PHASE_CLIENT_ANIMATION_CANCEL,
             PHASE_CLIENT_ANIMATION_FINISHED_SHOW,
-            PHASE_CLIENT_ANIMATION_FINISHED_HIDE
+            PHASE_CLIENT_ANIMATION_FINISHED_HIDE,
+            PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Phase {}
@@ -235,7 +240,7 @@ public interface ImeTracker {
     /** Applied the IME visibility. */
     int PHASE_SERVER_APPLY_IME_VISIBILITY = ImeProtoEnums.PHASE_SERVER_APPLY_IME_VISIBILITY;
 
-    /** Created the show IME runner. */
+    /** Started the show IME runner. */
     int PHASE_WM_SHOW_IME_RUNNER = ImeProtoEnums.PHASE_WM_SHOW_IME_RUNNER;
 
     /** Ready to show IME. */
@@ -288,9 +293,6 @@ public interface ImeTracker {
     /** Started the IME window insets show animation. */
     int PHASE_CLIENT_CONTROL_ANIMATION = ImeProtoEnums.PHASE_CLIENT_CONTROL_ANIMATION;
 
-    /** Checked that the IME is controllable. */
-    int PHASE_CLIENT_DISABLED_USER_ANIMATION = ImeProtoEnums.PHASE_CLIENT_DISABLED_USER_ANIMATION;
-
     /** Collecting insets source controls. */
     int PHASE_CLIENT_COLLECT_SOURCE_CONTROLS = ImeProtoEnums.PHASE_CLIENT_COLLECT_SOURCE_CONTROLS;
 
@@ -317,6 +319,10 @@ public interface ImeTracker {
     /** Finished the IME window insets hide animation. */
     int PHASE_CLIENT_ANIMATION_FINISHED_HIDE = ImeProtoEnums.PHASE_CLIENT_ANIMATION_FINISHED_HIDE;
 
+    /** Aborted the request to show the IME post layout. */
+    int PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT =
+            ImeProtoEnums.PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT;
+
     /**
      * Creates an IME show request tracking token.
      *
@@ -325,12 +331,22 @@ public interface ImeTracker {
      * @param uid the uid of the client that requested the IME.
      * @param origin the origin of the IME show request.
      * @param reason the reason why the IME show request was created.
+     * @param fromUser whether this request was created directly from user interaction.
      *
      * @return An IME tracking token.
      */
     @NonNull
     Token onRequestShow(@Nullable String component, int uid, @Origin int origin,
-            @SoftInputShowHideReason int reason);
+            @SoftInputShowHideReason int reason, boolean fromUser);
+
+    /**
+     * Alias for {@link #onRequestShow(String, int, int, int, boolean)} with
+     * {@code fromUser} set to {@code false}.
+     */
+    default Token onRequestShow(@Nullable String component, int uid, @Origin int origin,
+            @SoftInputShowHideReason int reason) {
+        return onRequestShow(component, uid, origin, reason, false /* fromUser */);
+    }
 
     /**
      * Creates an IME hide request tracking token.
@@ -340,12 +356,22 @@ public interface ImeTracker {
      * @param uid the uid of the client that requested the IME.
      * @param origin the origin of the IME hide request.
      * @param reason the reason why the IME hide request was created.
+     * @param fromUser whether this request was created directly from user interaction.
      *
      * @return An IME tracking token.
      */
     @NonNull
     Token onRequestHide(@Nullable String component, int uid, @Origin int origin,
-            @SoftInputShowHideReason int reason);
+            @SoftInputShowHideReason int reason, boolean fromUser);
+
+    /**
+     * Alias for {@link #onRequestHide(String, int, int, int, boolean)} with
+     * {@code fromUser} set to {@code false}.
+     */
+    default Token onRequestHide(@Nullable String component, int uid, @Origin int origin,
+            @SoftInputShowHideReason int reason) {
+        return onRequestHide(component, uid, origin, reason, false /* fromUser */);
+    }
 
     /**
      * Called when an IME request progresses to a further phase.
@@ -394,6 +420,28 @@ public interface ImeTracker {
     void onHidden(@Nullable Token token);
 
     /**
+     * Returns whether the current IME request was created due to a user interaction. This can
+     * only be {@code true} when running on the view's UI thread.
+     *
+     * @param view the view for which the IME was requested.
+     * @return {@code true} if this request is coming from a user interaction,
+     * {@code false} otherwise.
+     */
+    static boolean isFromUser(@Nullable View view) {
+        if (view == null) {
+            return false;
+        }
+        final var handler = view.getHandler();
+        // Early return if not on the UI thread, to ensure safe access to getViewRootImpl() below.
+        if (handler == null || handler.getLooper() == null
+                || !handler.getLooper().isCurrentThread()) {
+            return false;
+        }
+        final var viewRootImpl = view.getViewRootImpl();
+        return viewRootImpl != null && viewRootImpl.isHandlingPointerEvent();
+    }
+
+    /**
      * Get the singleton request tracker instance.
      *
      * @return the singleton request tracker instance
@@ -428,26 +476,37 @@ public interface ImeTracker {
     ImeTracker LOGGER = new ImeTracker() {
 
         {
-            // Set logging flag initial value.
-            mLogProgress = SystemProperties.getBoolean("persist.debug.imetracker", false);
-            // Update logging flag dynamically.
-            SystemProperties.addChangeCallback(() ->
-                    mLogProgress = SystemProperties.getBoolean("persist.debug.imetracker", false));
+            // Read initial system properties.
+            reloadSystemProperties();
+            // Update when system properties change.
+            SystemProperties.addChangeCallback(this::reloadSystemProperties);
         }
 
-        /** Whether progress should be logged. */
+        /** Whether {@link #onProgress} calls should be logged. */
         private boolean mLogProgress;
+
+        /** Whether the stack trace at the request call site should be logged. */
+        private boolean mLogStackTrace;
+
+        private void reloadSystemProperties() {
+            mLogProgress = SystemProperties.getBoolean(
+                    "persist.debug.imetracker", false);
+            mLogStackTrace = SystemProperties.getBoolean(
+                    "persist.debug.imerequest.logstacktrace", false);
+        }
 
         @NonNull
         @Override
         public Token onRequestShow(@Nullable String component, int uid, @Origin int origin,
-                @SoftInputShowHideReason int reason) {
+                @SoftInputShowHideReason int reason, boolean fromUser) {
             final var tag = getTag(component);
             final var token = IInputMethodManagerGlobalInvoker.onRequestShow(tag, uid, origin,
-                    reason);
+                    reason, fromUser);
 
             Log.i(TAG, token.mTag + ": onRequestShow at " + Debug.originToString(origin)
-                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason));
+                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason)
+                    + " fromUser " + fromUser,
+                    mLogStackTrace ? new Throwable() : null);
 
             return token;
         }
@@ -455,13 +514,15 @@ public interface ImeTracker {
         @NonNull
         @Override
         public Token onRequestHide(@Nullable String component, int uid, @Origin int origin,
-                @SoftInputShowHideReason int reason) {
+                @SoftInputShowHideReason int reason, boolean fromUser) {
             final var tag = getTag(component);
             final var token = IInputMethodManagerGlobalInvoker.onRequestHide(tag, uid, origin,
-                    reason);
+                    reason, fromUser);
 
             Log.i(TAG, token.mTag + ": onRequestHide at " + Debug.originToString(origin)
-                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason));
+                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason)
+                    + " fromUser " + fromUser,
+                    mLogStackTrace ? new Throwable() : null);
 
             return token;
         }
@@ -696,20 +757,22 @@ public interface ImeTracker {
         /**
          * Called when the animation, which is going to be monitored, starts.
          *
-         * @param jankContext context which is needed by {@link InteractionJankMonitor}
-         * @param animType {@link AnimationType}
+         * @param jankContext context which is needed by {@link InteractionJankMonitor}.
+         * @param animType the animation type.
          * @param useSeparatedThread {@code true} if the animation is handled by the app,
          *                           {@code false} if the animation will be scheduled on the
-         *                           {@link android.view.InsetsAnimationThread}
+         *                           {@link android.view.InsetsAnimationThread}.
          */
         public void onRequestAnimation(@NonNull InputMethodJankContext jankContext,
                 @AnimationType int animType, boolean useSeparatedThread) {
+            final int cujType = getImeInsetsCujFromAnimation(animType);
             if (jankContext.getDisplayContext() == null
-                    || jankContext.getTargetSurfaceControl() == null) {
+                    || jankContext.getTargetSurfaceControl() == null
+                    || cujType == -1) {
                 return;
             }
             final Configuration.Builder builder = Configuration.Builder.withSurface(
-                            CUJ_IME_INSETS_ANIMATION,
+                            cujType,
                             jankContext.getDisplayContext(),
                             jankContext.getTargetSurfaceControl())
                     .setTag(String.format(Locale.US, "%d@%d@%s", animType,
@@ -719,16 +782,44 @@ public interface ImeTracker {
 
         /**
          * Called when the animation, which is going to be monitored, cancels.
+         *
+         * @param animType the animation type.
          */
-        public void onCancelAnimation() {
-            InteractionJankMonitor.getInstance().cancel(CUJ_IME_INSETS_ANIMATION);
+        public void onCancelAnimation(@AnimationType int animType) {
+            final int cujType = getImeInsetsCujFromAnimation(animType);
+            if (cujType != -1) {
+                InteractionJankMonitor.getInstance().cancel(cujType);
+            }
         }
 
         /**
          * Called when the animation, which is going to be monitored, ends.
+         *
+         * @param animType the animation type.
          */
-        public void onFinishAnimation() {
-            InteractionJankMonitor.getInstance().end(CUJ_IME_INSETS_ANIMATION);
+        public void onFinishAnimation(@AnimationType int animType) {
+            final int cujType = getImeInsetsCujFromAnimation(animType);
+            if (cujType != -1) {
+                InteractionJankMonitor.getInstance().end(cujType);
+            }
+        }
+
+        /**
+         * A helper method to translate animation type to CUJ type for IME animations.
+         *
+         * @param animType the animation type.
+         * @return the integer in {@link com.android.internal.jank.Cuj.CujType},
+         * or {@code -1} if the animation type is not supported for tracking yet.
+         */
+        private static int getImeInsetsCujFromAnimation(@AnimationType int animType) {
+            switch (animType) {
+                case ANIMATION_TYPE_SHOW:
+                    return CUJ_IME_INSETS_SHOW_ANIMATION;
+                case ANIMATION_TYPE_HIDE:
+                    return CUJ_IME_INSETS_HIDE_ANIMATION;
+                default:
+                    return -1;
+            }
         }
     }
 
@@ -748,6 +839,7 @@ public interface ImeTracker {
         private boolean shouldMonitorLatency(@SoftInputShowHideReason int reason) {
             return reason == SoftInputShowHideReason.SHOW_SOFT_INPUT
                     || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT
+                    || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW
                     || reason == SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API
                     || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API
                     || reason == SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME

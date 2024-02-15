@@ -1,11 +1,13 @@
 package com.android.systemui.qs.tiles.dialog;
 
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_PHONE;
 import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
 import static android.telephony.SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
 import static android.telephony.SignalStrength.SIGNAL_STRENGTH_GREAT;
 import static android.telephony.SignalStrength.SIGNAL_STRENGTH_POOR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.settingslib.wifi.WifiUtils.getHotspotIconResource;
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_HORIZONTAL_WEIGHT;
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_VERTICAL_WEIGHT;
 import static com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX;
@@ -31,6 +33,7 @@ import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
@@ -59,13 +62,14 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.wifi.WifiUtils;
-import com.android.systemui.R;
+import com.android.settingslib.wifi.dpp.WifiDppIntentHelper;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -75,6 +79,7 @@ import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.wifitrackerlib.HotspotNetworkEntry;
 import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 
@@ -90,6 +95,7 @@ import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @SmallTest
@@ -166,7 +172,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     @Mock
     private LocationController mLocationController;
     @Mock
-    private DialogLaunchAnimator mDialogLaunchAnimator;
+    private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
     private View mDialogLaunchView;
     @Mock
@@ -182,10 +188,13 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private List<WifiEntry> mAccessPoints = new ArrayList<>();
     private List<WifiEntry> mWifiEntries = new ArrayList<>();
 
+    private Configuration mConfig;
+
     @Before
     public void setUp() {
         mStaticMockSession = mockitoSession()
                 .mockStatic(SubscriptionManager.class)
+                .mockStatic(WifiDppIntentHelper.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
         MockitoAnnotations.initMocks(this);
@@ -218,7 +227,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
                 mConnectivityManager, mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
                 mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker,
-                mLocationController, mDialogLaunchAnimator, mWifiStateWorker, mFlags);
+                mLocationController, mDialogTransitionAnimator, mWifiStateWorker, mFlags);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mInternetDialogCallback, true);
@@ -226,11 +235,18 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.mActivityStarter = mActivityStarter;
         mInternetDialogController.mWifiIconInjector = mWifiIconInjector;
         mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, false);
+        mFlags.set(Flags.SHARE_WIFI_QS_BUTTON, false);
+
+        mConfig = new Configuration(mContext.getResources().getConfiguration());
+        Configuration c2 = new Configuration(mConfig);
+        c2.setLocale(Locale.US);
+        mContext.getResources().updateConfiguration(c2, null);
     }
 
     @After
     public void tearDown() {
         mStaticMockSession.finishMocking();
+        mContext.getResources().updateConfiguration(mConfig, null);
     }
 
     @Test
@@ -511,12 +527,20 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getInternetWifiDrawable_withWifiLevelUnreachable_returnNull() {
+    public void getWifiDrawable_withWifiLevelUnreachable_returnNull() {
         when(mConnectedEntry.getLevel()).thenReturn(WIFI_LEVEL_UNREACHABLE);
 
-        Drawable drawable = mInternetDialogController.getInternetWifiDrawable(mConnectedEntry);
+        assertThat(mInternetDialogController.getWifiDrawable(mConnectedEntry)).isNull();
+    }
 
-        assertThat(drawable).isNull();
+    @Test
+    public void getWifiDrawable_withHotspotNetworkEntry_returnHotspotDrawable() {
+        HotspotNetworkEntry entry = mock(HotspotNetworkEntry.class);
+        when(entry.getDeviceType()).thenReturn(DEVICE_TYPE_PHONE);
+        Drawable hotspotDrawable = mock(Drawable.class);
+        mTestableResources.addOverride(getHotspotIconResource(DEVICE_TYPE_PHONE), hotspotDrawable);
+
+        assertThat(mInternetDialogController.getWifiDrawable(entry)).isEqualTo(hotspotDrawable);
     }
 
     @Test
@@ -711,6 +735,44 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mConnectedWifiInternetMonitor.onUpdated();
 
         verify(mAccessPointController).scanForAccessPoints();
+    }
+
+    @Test
+    public void onWifiScan_isWifiEnabledFalse_callbackOnWifiScanFalse() {
+        reset(mInternetDialogCallback);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(false);
+
+        mInternetDialogController.onWifiScan(true);
+
+        verify(mInternetDialogCallback).onWifiScan(false);
+    }
+
+    @Test
+    public void onWifiScan_isDeviceLockedTrue_callbackOnWifiScanFalse() {
+        reset(mInternetDialogCallback);
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+
+        mInternetDialogController.onWifiScan(true);
+
+        verify(mInternetDialogCallback).onWifiScan(false);
+    }
+
+    @Test
+    public void onWifiScan_onWifiScanFalse_callbackOnWifiScanFalse() {
+        reset(mInternetDialogCallback);
+
+        mInternetDialogController.onWifiScan(false);
+
+        verify(mInternetDialogCallback).onWifiScan(false);
+    }
+
+    @Test
+    public void onWifiScan_onWifiScanTrue_callbackOnWifiScanTrue() {
+        reset(mInternetDialogCallback);
+
+        mInternetDialogController.onWifiScan(true);
+
+        verify(mInternetDialogCallback).onWifiScan(true);
     }
 
     @Test
@@ -959,7 +1021,30 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         spyController.mCarrierNetworkChangeMode = true;
         String dds = spyController.getMobileNetworkSummary(SUB_ID);
 
-        assertThat(dds).contains(mContext.getString(R.string.carrier_network_change_mode));
+        assertThat(dds).contains(mContext.getString(com.android.settingslib.R.string.carrier_network_change_mode));
+    }
+
+    @Test
+    public void getConfiguratorQrCodeGeneratorIntentOrNull_wifiNotShareable_returnNull() {
+        mFlags.set(Flags.SHARE_WIFI_QS_BUTTON, true);
+        when(mConnectedEntry.canShare()).thenReturn(false);
+        assertThat(mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(
+                mConnectedEntry)).isNull();
+    }
+    @Test
+    public void getConfiguratorQrCodeGeneratorIntentOrNull_flagOff_returnNull() {
+        mFlags.set(Flags.SHARE_WIFI_QS_BUTTON, false);
+        when(mConnectedEntry.canShare()).thenReturn(true);
+        assertThat(mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(
+                mConnectedEntry)).isNull();
+    }
+
+    @Test
+    public void getConfiguratorQrCodeGeneratorIntentOrNull_wifiShareable() {
+        mFlags.set(Flags.SHARE_WIFI_QS_BUTTON, true);
+        when(mConnectedEntry.canShare()).thenReturn(true);
+        assertThat(mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(
+                mConnectedEntry)).isNotNull();
     }
 
     @Test
@@ -968,6 +1053,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         assertThat(mInternetDialogController.mSubIdTelephonyManagerMap.get(SUB_ID)).isEqualTo(
                 mTelephonyManager);
         assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.get(SUB_ID)).isNotNull();
+        assertThat(mInternetDialogController.mCallback).isNotNull();
 
         mInternetDialogController.onStop();
 
@@ -980,6 +1066,23 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         verify(mAccessPointController).removeAccessPointCallback(mInternetDialogController);
         verify(mConnectivityManager).unregisterNetworkCallback(
                 any(ConnectivityManager.NetworkCallback.class));
+        assertThat(mInternetDialogController.mCallback).isNull();
+    }
+
+    @Test
+    public void hasActiveSubId_activeSubIdListIsEmpty_returnFalse() {
+        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{});
+        mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
+
+        assertThat(mInternetDialogController.hasActiveSubId()).isFalse();
+    }
+
+    @Test
+    public void hasActiveSubId_activeSubIdListNotEmpty_returnTrue() {
+        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(new int[]{SUB_ID});
+        mInternetDialogController.mOnSubscriptionsChangedListener.onSubscriptionsChanged();
+
+        assertThat(mInternetDialogController.hasActiveSubId()).isTrue();
     }
 
     private String getResourcesString(String name) {

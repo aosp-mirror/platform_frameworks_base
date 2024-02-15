@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.graphics.Color.WHITE;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -77,6 +78,13 @@ public class TaskSnapshotWindow {
             @NonNull Runnable clearWindowHandler) {
         final ActivityManager.RunningTaskInfo runningTaskInfo = info.taskInfo;
         final int taskId = runningTaskInfo.taskId;
+
+        // if we're in PIP we don't want to create the snapshot
+        if (runningTaskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                    "did not create taskSnapshot due to being in PIP");
+            return null;
+        }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                 "create taskSnapshot surface for task: %d", taskId);
 
@@ -127,7 +135,6 @@ public class TaskSnapshotWindow {
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();
         }
-        window.setOuter(snapshotSurface);
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
             session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
@@ -153,7 +160,7 @@ public class TaskSnapshotWindow {
             ShellExecutor splashScreenExecutor) {
         mSplashScreenExecutor = splashScreenExecutor;
         mSession = WindowManagerGlobal.getWindowSession();
-        mWindow = new Window();
+        mWindow = new Window(this);
         mWindow.setSession(mSession);
         int backgroundColor = taskDescription.getBackgroundColor();
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
@@ -174,7 +181,7 @@ public class TaskSnapshotWindow {
         try {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                     "Removing taskSnapshot surface, mHasDrawn=%b", mHasDrawn);
-            mSession.remove(mWindow);
+            mSession.remove(mWindow.asBinder());
         } catch (RemoteException e) {
             // nothing
         }
@@ -196,9 +203,9 @@ public class TaskSnapshotWindow {
     }
 
     static class Window extends BaseIWindow {
-        private WeakReference<TaskSnapshotWindow> mOuter;
+        private final WeakReference<TaskSnapshotWindow> mOuter;
 
-        public void setOuter(TaskSnapshotWindow outer) {
+        Window(TaskSnapshotWindow outer) {
             mOuter = new WeakReference<>(outer);
         }
 

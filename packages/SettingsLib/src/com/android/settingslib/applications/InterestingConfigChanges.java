@@ -21,6 +21,8 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 
+import androidx.annotation.NonNull;
+
 /**
  * A class for applying config changes and determing if doing so resulting in any "interesting"
  * changes.
@@ -28,11 +30,11 @@ import android.content.res.Resources;
 public class InterestingConfigChanges {
     private final Configuration mLastConfiguration = new Configuration();
     private final int mFlags;
-    private int mLastDensity;
 
     public InterestingConfigChanges() {
         this(ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_LAYOUT_DIRECTION
-                | ActivityInfo.CONFIG_UI_MODE | ActivityInfo.CONFIG_ASSETS_PATHS);
+                | ActivityInfo.CONFIG_UI_MODE | ActivityInfo.CONFIG_ASSETS_PATHS
+                | ActivityInfo.CONFIG_DENSITY);
     }
 
     public InterestingConfigChanges(int flags) {
@@ -48,13 +50,15 @@ public class InterestingConfigChanges {
      */
     @SuppressLint("NewApi")
     public boolean applyNewConfig(Resources res) {
+        return applyNewConfig(res.getConfiguration());
+    }
+
+    /**
+     * Applies the given config change and returns whether an "interesting" change happened.
+     */
+    public boolean applyNewConfig(@NonNull Configuration configuration) {
         int configChanges = mLastConfiguration.updateFrom(
-                Configuration.generateDelta(mLastConfiguration, res.getConfiguration()));
-        boolean densityChanged = mLastDensity != res.getDisplayMetrics().densityDpi;
-        if (densityChanged || (configChanges & (mFlags)) != 0) {
-            mLastDensity = res.getDisplayMetrics().densityDpi;
-            return true;
-        }
-        return false;
+                Configuration.generateDelta(mLastConfiguration, configuration));
+        return (configChanges & (mFlags)) != 0;
     }
 }

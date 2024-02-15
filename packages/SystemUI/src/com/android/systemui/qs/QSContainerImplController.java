@@ -24,6 +24,7 @@ import android.view.View;
 
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ViewController;
 
@@ -44,6 +45,7 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
             mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
         }
     };
+    private final boolean mSceneContainerEnabled;
 
     private final View.OnTouchListener mContainerTouchHandler = new View.OnTouchListener() {
         @Override
@@ -64,18 +66,24 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
             QSPanelController qsPanelController,
             QuickStatusBarHeaderController quickStatusBarHeaderController,
             ConfigurationController configurationController,
-            FalsingManager falsingManager) {
+            FalsingManager falsingManager,
+            SceneContainerFlags sceneContainerFlags) {
         super(view);
         mQsPanelController = qsPanelController;
         mQuickStatusBarHeaderController = quickStatusBarHeaderController;
         mConfigurationController = configurationController;
         mFalsingManager = falsingManager;
         mQSPanelContainer = mView.getQSPanelContainer();
+        mSceneContainerEnabled = sceneContainerFlags.isEnabled();
     }
 
     @Override
     public void onInit() {
         mQuickStatusBarHeaderController.init();
+        mView.setSceneContainerEnabled(mSceneContainerEnabled);
+        if (mSceneContainerEnabled && mQsPanelController != null) {
+            mQSPanelContainer.setOnTouchListener(null);
+        }
     }
 
     public void setListening(boolean listening) {
@@ -86,13 +94,17 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
     protected void onViewAttached() {
         mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
         mConfigurationController.addCallback(mConfigurationListener);
-        mQSPanelContainer.setOnTouchListener(mContainerTouchHandler);
+        if (!mSceneContainerEnabled && mQSPanelContainer != null) {
+            mQSPanelContainer.setOnTouchListener(mContainerTouchHandler);
+        }
     }
 
     @Override
     protected void onViewDetached() {
         mConfigurationController.removeCallback(mConfigurationListener);
-        mQSPanelContainer.setOnTouchListener(null);
+        if (mQSPanelContainer != null) {
+            mQSPanelContainer.setOnTouchListener(null);
+        }
     }
 
     public QSContainerImpl getView() {

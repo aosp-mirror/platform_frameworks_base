@@ -23,7 +23,6 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/status_bar_header_height_keyguard"
     android:baselineAligned="false"
-    android:gravity="center_vertical"
     >
 
     <LinearLayout
@@ -47,7 +46,10 @@
             android:layout_height="match_parent"
             android:layout_marginEnd="@dimen/status_bar_padding_end"
             android:gravity="center_vertical|end">
-            <include layout="@layout/system_icons" />
+            <include layout="@layout/system_icons"
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
         </FrameLayout>
 
         <ImageView android:id="@+id/multi_user_avatar"

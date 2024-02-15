@@ -33,18 +33,21 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
-import com.android.systemui.qs.AlphaControlledSignalTileView.AlphaControlledSlashImageView;
+import com.android.systemui.res.R;
 
 import java.util.Objects;
 
 public class QSIconViewImpl extends QSIconView {
 
     public static final long QS_ANIM_LENGTH = 350;
+
+    private static final long ICON_APPLIED_TRANSACTION_ID = -1;
 
     protected final View mIcon;
     protected int mIconSizePx;
@@ -53,7 +56,11 @@ public class QSIconViewImpl extends QSIconView {
     private boolean mDisabledByPolicy = false;
     private int mTint;
     @Nullable
-    private QSTile.Icon mLastIcon;
+    @VisibleForTesting
+    QSTile.Icon mLastIcon;
+
+    private long mScheduledIconChangeTransactionId = ICON_APPLIED_TRANSACTION_ID;
+    private long mHighestScheduledIconChangeTransactionId = ICON_APPLIED_TRANSACTION_ID;
 
     private ValueAnimator mColorAnimator = new ValueAnimator();
 
@@ -113,9 +120,9 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     protected void updateIcon(ImageView iv, State state, boolean allowAnimations) {
+        mScheduledIconChangeTransactionId = ICON_APPLIED_TRANSACTION_ID;
         final QSTile.Icon icon = state.iconSupplier != null ? state.iconSupplier.get() : state.icon;
-        if (!Objects.equals(icon, iv.getTag(R.id.qs_icon_tag))
-                || !Objects.equals(state.slash, iv.getTag(R.id.qs_slash_tag))) {
+        if (!Objects.equals(icon, iv.getTag(R.id.qs_icon_tag))) {
             boolean shouldAnimate = allowAnimations && shouldAnimate(iv);
             mLastIcon = icon;
             Drawable d = icon != null
@@ -130,15 +137,14 @@ public class QSIconViewImpl extends QSIconView {
                 d.setLayoutDirection(getLayoutDirection());
             }
 
-            if (iv instanceof SlashImageView) {
-                ((SlashImageView) iv).setAnimationEnabled(shouldAnimate);
-                ((SlashImageView) iv).setState(null, d);
-            } else {
-                iv.setImageDrawable(d);
+            final Drawable lastDrawable = iv.getDrawable();
+            if (lastDrawable instanceof Animatable2) {
+                ((Animatable2) lastDrawable).clearAnimationCallbacks();
             }
 
+            iv.setImageDrawable(d);
+
             iv.setTag(R.id.qs_icon_tag, icon);
-            iv.setTag(R.id.qs_slash_tag, state.slash);
             iv.setPadding(0, padding, 0, padding);
             if (d instanceof Animatable2) {
                 Animatable2 a = (Animatable2) d;
@@ -170,14 +176,15 @@ public class QSIconViewImpl extends QSIconView {
             mState = state.state;
             mDisabledByPolicy = state.disabledByPolicy;
             if (mTint != 0 && allowAnimations && shouldAnimate(iv)) {
-                animateGrayScale(mTint, color, iv, () -> updateIcon(iv, state, allowAnimations));
+                final long iconTransactionId = getNextIconTransactionId();
+                mScheduledIconChangeTransactionId = iconTransactionId;
+                animateGrayScale(mTint, color, iv, () -> {
+                    if (mScheduledIconChangeTransactionId == iconTransactionId) {
+                        updateIcon(iv, state, allowAnimations);
+                    }
+                });
             } else {
-                if (iv instanceof AlphaControlledSlashImageView) {
-                    ((AlphaControlledSlashImageView)iv)
-                            .setFinalImageTintList(ColorStateList.valueOf(color));
-                } else {
-                    setTint(iv, color);
-                }
+                setTint(iv, color);
                 updateIcon(iv, state, allowAnimations);
             }
         } else {
@@ -190,11 +197,7 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     private void animateGrayScale(int fromColor, int toColor, ImageView iv,
-        final Runnable endRunnable) {
-        if (iv instanceof AlphaControlledSlashImageView) {
-            ((AlphaControlledSlashImageView)iv)
-                    .setFinalImageTintList(ColorStateList.valueOf(toColor));
-        }
+            final Runnable endRunnable) {
         mColorAnimator.cancel();
         if (mAnimationEnabled && ValueAnimator.areAnimatorsEnabled()) {
             PropertyValuesHolder values = PropertyValuesHolder.ofInt("color", fromColor, toColor);
@@ -224,7 +227,7 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     protected View createIcon() {
-        final ImageView icon = new SlashImageView(mContext);
+        final ImageView icon = new ImageView(mContext);
         icon.setId(android.R.id.icon);
         icon.setScaleType(ScaleType.FIT_CENTER);
         return icon;
@@ -238,18 +241,21 @@ public class QSIconViewImpl extends QSIconView {
         child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
     }
 
+    private long getNextIconTransactionId() {
+        mHighestScheduledIconChangeTransactionId++;
+        return mHighestScheduledIconChangeTransactionId;
+    }
+
     /**
      * Color to tint the tile icon based on state
      */
     private static int getIconColorForState(Context context, QSTile.State state) {
         if (state.disabledByPolicy || state.state == Tile.STATE_UNAVAILABLE) {
-            return Utils.getColorAttrDefaultColor(
-                    context, com.android.internal.R.attr.textColorTertiary);
+            return Utils.getColorAttrDefaultColor(context, R.attr.outline);
         } else if (state.state == Tile.STATE_INACTIVE) {
-            return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary);
+            return Utils.getColorAttrDefaultColor(context, R.attr.onShadeInactiveVariant);
         } else if (state.state == Tile.STATE_ACTIVE) {
-            return Utils.getColorAttrDefaultColor(context,
-                    com.android.internal.R.attr.textColorOnAccent);
+            return Utils.getColorAttrDefaultColor(context, R.attr.onShadeActive);
         } else {
             Log.e("QSIconView", "Invalid state " + state);
             return 0;

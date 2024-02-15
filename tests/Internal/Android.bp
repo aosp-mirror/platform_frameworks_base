@@ -19,11 +19,24 @@ android_test {
         "junit",
         "androidx.test.rules",
         "mockito-target-minus-junit4",
-        "truth-prebuilt",
+        "truth",
         "platform-test-annotations",
     ],
     java_resource_dirs: ["res"],
     certificate: "platform",
     platform_apis: true,
     test_suites: ["device-tests"],
+}
+
+android_ravenwood_test {
+    name: "InternalTestsRavenwood",
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "platform-test-annotations",
+    ],
+    srcs: [
+        "src/com/android/internal/util/ParcellingTests.java",
+    ],
+    auto_gen_config: true,
 }

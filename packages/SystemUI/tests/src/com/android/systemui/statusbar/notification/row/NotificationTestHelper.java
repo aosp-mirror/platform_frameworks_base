@@ -21,6 +21,7 @@ import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
 import static org.junit.Assert.assertEquals;
@@ -48,15 +49,18 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.TestableDependency;
-import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -76,20 +80,20 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
-import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
-import com.android.systemui.tests.R;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.systemui.wmshell.BubblesTestActivity;
 
 import org.mockito.ArgumentCaptor;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -118,7 +122,7 @@ public class NotificationTestHelper {
     private final GroupMembershipManager mGroupMembershipManager;
     private final GroupExpansionManager mGroupExpansionManager;
     private ExpandableNotificationRow mRow;
-    private final HeadsUpManagerPhone mHeadsUpManager;
+    private final HeadsUpManager mHeadsUpManager;
     private final NotifBindPipeline mBindPipeline;
     private final NotifCollectionListener mBindPipelineEntryListener;
     private final RowContentBindStage mBindStage;
@@ -130,14 +134,24 @@ public class NotificationTestHelper {
     private final NotificationDismissibilityProvider mDismissibilityProvider;
     public final Runnable mFutureDismissalRunnable;
     private @InflationFlag int mDefaultInflationFlags;
-    private FeatureFlags mFeatureFlags;
+    private final FakeFeatureFlags mFeatureFlags;
 
     public NotificationTestHelper(
             Context context,
             TestableDependency dependency,
             TestableLooper testLooper) {
+        this(context, dependency, testLooper, new FakeFeatureFlags());
+    }
+
+    public NotificationTestHelper(
+            Context context,
+            TestableDependency dependency,
+            TestableLooper testLooper,
+            @NonNull FakeFeatureFlags featureFlags) {
         mContext = context;
         mTestLooper = testLooper;
+        mFeatureFlags = Objects.requireNonNull(featureFlags);
+        dependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
         dependency.injectMockDependency(MediaOutputDialogFactory.class);
@@ -146,7 +160,7 @@ public class NotificationTestHelper {
         mKeyguardBypassController = mock(KeyguardBypassController.class);
         mGroupMembershipManager = mock(GroupMembershipManager.class);
         mGroupExpansionManager = mock(GroupExpansionManager.class);
-        mHeadsUpManager = mock(HeadsUpManagerPhone.class);
+        mHeadsUpManager = mock(HeadsUpManager.class);
         mIconManager = new IconManager(
                 mock(CommonNotifCollection.class),
                 mock(LauncherApps.class),
@@ -158,17 +172,19 @@ public class NotificationTestHelper {
                 mock(ConversationNotificationProcessor.class),
                 mock(MediaFeatureFlag.class),
                 mock(Executor.class),
-                new MockSmartReplyInflater());
+                new MockSmartReplyInflater(),
+                mock(NotifLayoutInflaterFactory.Provider.class),
+                mock(NotificationContentInflaterLogger.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
                 mock(NotifInflationErrorManager.class),
-                mock(RowContentBindStageLogger.class));
+                new RowContentBindStageLogger(logcatLogBuffer()));
 
         CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
         mBindPipeline = new NotifBindPipeline(
                 collection,
-                mock(NotifBindPipelineLogger.class),
+                new NotifBindPipelineLogger(logcatLogBuffer()),
                 mTestLooper.getLooper());
         mBindPipeline.setStage(mBindStage);
 
@@ -182,15 +198,10 @@ public class NotificationTestHelper {
         mFutureDismissalRunnable = mock(Runnable.class);
         when(mOnUserInteractionCallback.registerFutureDismissal(any(), anyInt()))
                 .thenReturn(mFutureDismissalRunnable);
-        mFeatureFlags = mock(FeatureFlags.class);
     }
 
     public void setDefaultInflationFlags(@InflationFlag int defaultInflationFlags) {
         mDefaultInflationFlags = defaultInflationFlags;
-    }
-
-    public void setFeatureFlags(FeatureFlags featureFlags) {
-        mFeatureFlags = featureFlags;
     }
 
     public ExpandableNotificationRowLogger getMockLogger() {
@@ -255,6 +266,10 @@ public class NotificationTestHelper {
      */
     public ExpandableNotificationRow createRow(Notification notification) throws Exception {
         return generateRow(notification, PKG, UID, USER_HANDLE, mDefaultInflationFlags);
+    }
+
+    public ExpandableNotificationRow createRow(NotificationEntry entry) throws Exception {
+        return generateRow(entry, mDefaultInflationFlags);
     }
 
     /**
@@ -479,7 +494,7 @@ public class NotificationTestHelper {
         Notification publicVersion = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setCustomContentView(new RemoteViews(mContext.getPackageName(),
-                        R.layout.custom_view_dark))
+                        com.android.systemui.tests.R.layout.custom_view_dark))
                 .build();
         Notification.Builder notificationBuilder = new Notification.Builder(mContext, "channelId")
                 .setSmallIcon(R.drawable.ic_person)
@@ -526,14 +541,6 @@ public class NotificationTestHelper {
             @InflationFlag int extraInflationFlags,
             int importance)
             throws Exception {
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                mContext.LAYOUT_INFLATER_SERVICE);
-        mRow = (ExpandableNotificationRow) inflater.inflate(
-                R.layout.status_bar_notification_row,
-                null /* root */,
-                false /* attachToRoot */);
-        ExpandableNotificationRow row = mRow;
-
         final NotificationChannel channel =
                 new NotificationChannel(
                         notification.getChannelId(),
@@ -552,6 +559,25 @@ public class NotificationTestHelper {
                 .setPostTime(System.currentTimeMillis())
                 .setChannel(channel)
                 .build();
+
+        return generateRow(entry, extraInflationFlags);
+    }
+
+    private ExpandableNotificationRow generateRow(
+            NotificationEntry entry,
+            @InflationFlag int extraInflationFlags)
+            throws Exception {
+
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        if (com.android.systemui.Flags.notificationRowUserContext()) {
+            inflater.setFactory2(new RowInflaterTask.RowAsyncLayoutInflater(entry));
+        }
+        mRow = (ExpandableNotificationRow) inflater.inflate(
+                R.layout.status_bar_notification_row,
+                null /* root */,
+                false /* attachToRoot */);
+        ExpandableNotificationRow row = mRow;
 
         entry.setRow(row);
         mIconManager.createIcons(entry);
@@ -573,7 +599,6 @@ public class NotificationTestHelper {
                 mock(OnExpandClickListener.class),
                 mock(ExpandableNotificationRow.CoordinateOnClickListener.class),
                 new FalsingManagerFake(),
-                new FalsingCollectorFake(),
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mOnUserInteractionCallback,
@@ -581,6 +606,7 @@ public class NotificationTestHelper {
                 mock(NotificationGutsManager.class),
                 mDismissibilityProvider,
                 mock(MetricsLogger.class),
+                new NotificationChildrenContainerLogger(logcatLogBuffer()),
                 mock(SmartReplyConstants.class),
                 mock(SmartReplyController.class),
                 mFeatureFlags,

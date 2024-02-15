@@ -40,6 +40,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.app.Person;
 import android.app.RemoteInput;
+import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.content.pm.ShortcutInfo;
 import android.net.Uri;
@@ -127,6 +128,7 @@ public final class NotificationEntry extends ListEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
+    public List<RemoteInputHistoryItem> remoteInputs = null;
     public String remoteInputMimeType;
     public Uri remoteInputUri;
     public ContentInfo remoteInputAttachment;
@@ -171,7 +173,7 @@ public final class NotificationEntry extends ListEntry {
     private int mBucket = BUCKET_ALERTING;
     @Nullable private Long mPendingAnimationDuration;
     private boolean mIsMarkedForUserTriggeredMovement;
-    private boolean mIsAlerting;
+    private boolean mIsHeadsUpEntry;
 
     public boolean mRemoteEditImeAnimatingAway;
     public boolean mRemoteEditImeVisible;
@@ -748,7 +750,11 @@ public final class NotificationEntry extends ListEntry {
         return row != null && row.getGuts() != null && row.getGuts().isExposed();
     }
 
-    public boolean isChildInGroup() {
+    /**
+     * @return Whether the notification row is a child of a group notification view; false if the
+     * row is null
+     */
+    public boolean rowIsChildInGroup() {
         return row != null && row.isChildInGroup();
     }
 
@@ -789,28 +795,6 @@ public final class NotificationEntry extends ListEntry {
         }
         // don't dismiss ongoing Notifications when the device is locked
         return !mSbn.isOngoing() || !isLocked;
-    }
-
-    /**
-     * @return Can the underlying notification be individually dismissed?
-     * @see #canViewBeDismissed()
-     */
-    // TODO: This logic doesn't belong on NotificationEntry. It should be moved to a controller
-    // that can be added as a dependency to any class that needs to answer this question.
-    public boolean legacyIsDismissableRecursive() {
-        if  (mSbn.isOngoing()) {
-            return false;
-        }
-        List<NotificationEntry> children = getAttachedNotifChildren();
-        if (children != null && children.size() > 0) {
-            for (int i = 0; i < children.size(); i++) {
-                NotificationEntry child =  children.get(i);
-                if (child.getSbn().isOngoing()) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     public boolean canViewBeDismissed() {
@@ -983,12 +967,12 @@ public final class NotificationEntry extends ListEntry {
         mIsMarkedForUserTriggeredMovement = marked;
     }
 
-    public void setIsAlerting(boolean isAlerting) {
-        mIsAlerting = isAlerting;
+    public void setIsHeadsUpEntry(boolean isHeadsUpEntry) {
+        mIsHeadsUpEntry = isHeadsUpEntry;
     }
 
-    public boolean isAlerting() {
-        return mIsAlerting;
+    public boolean isHeadsUpEntry() {
+        return mIsHeadsUpEntry;
     }
 
     /** Set whether this notification is currently used to animate a launch. */
@@ -999,6 +983,19 @@ public final class NotificationEntry extends ListEntry {
     /** Whether this notification is currently used to animate a launch. */
     public boolean isExpandAnimationRunning() {
         return mExpandAnimationRunning;
+    }
+
+    /**
+     * @return NotificationStyle
+     */
+    public String getNotificationStyle() {
+        if (isSummaryWithChildren()) {
+            return "summary";
+        }
+
+        final Class<? extends Notification.Style> style =
+                getSbn().getNotification().getNotificationStyle();
+        return style == null ? "nostyle" : style.getSimpleName();
     }
 
     /** Information about a suggestion that is being edited. */

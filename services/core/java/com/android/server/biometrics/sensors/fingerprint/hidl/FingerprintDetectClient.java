@@ -16,16 +16,18 @@
 
 package com.android.server.biometrics.sensors.fingerprint.hidl;
 
+import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
-import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
-import android.hardware.fingerprint.IUdfpsOverlay;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -66,13 +68,17 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
             @NonNull FingerprintAuthenticateOptions options,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
-            @Nullable IUdfpsOverlay udfpsOverlay, boolean isStrongBiometric) {
+            boolean isStrongBiometric) {
         super(context, lazyDaemon, token, listener, options.getUserId(),
                 options.getOpPackageName(), 0 /* cookie */, options.getSensorId(),
                 true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
-                null /* sideFpsController */, udfpsOverlay);
+        if (sidefpsControllerRefactor()) {
+            mSensorOverlays = new SensorOverlays(udfpsOverlayController);
+        } else {
+            mSensorOverlays = new SensorOverlays(
+                    udfpsOverlayController, null /* sideFpsController */);
+        }
         mIsStrongBiometric = isStrongBiometric;
     }
 
@@ -98,7 +104,7 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD,
+        mSensorOverlays.show(getSensorId(), BiometricRequestConstants.REASON_AUTH_KEYGUARD,
                 this);
 
         try {
@@ -130,7 +136,7 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     }
 
     @Override
-    public void onUiReady() {
+    public void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event) {
         // Unsupported in HIDL.
     }
 
@@ -147,12 +153,10 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
         final PerformanceTracker pm = PerformanceTracker.getInstanceForSensorId(getSensorId());
         pm.incrementAuthForUser(getTargetUserId(), authenticated);
 
-        if (getListener() != null) {
-            try {
-                getListener().onDetected(getSensorId(), getTargetUserId(), mIsStrongBiometric);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception when sending onDetected", e);
-            }
+        try {
+            getListener().onDetected(getSensorId(), getTargetUserId(), mIsStrongBiometric);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when sending onDetected", e);
         }
     }
 

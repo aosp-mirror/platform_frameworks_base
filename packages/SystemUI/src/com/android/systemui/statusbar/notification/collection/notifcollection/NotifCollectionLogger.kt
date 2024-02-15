@@ -22,11 +22,11 @@ import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
 import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogLevel.WARNING
-import com.android.systemui.log.LogLevel.WTF
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.WARNING
+import com.android.systemui.log.core.LogLevel.WTF
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason
 import com.android.systemui.statusbar.notification.collection.NotifCollection.FutureDismissal
@@ -108,27 +108,39 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
-    fun logNotifDismissed(entry: NotificationEntry) {
+    fun logLocallyDismissed(entry: NotificationEntry, index: Int, count: Int) {
         buffer.log(TAG, INFO, {
             str1 = entry.logKey
+            int1 = index
+            int2 = count
         }, {
-            "DISMISSED $str1"
+            "LOCALLY DISMISSED $str1 ($int1/$int2)"
         })
     }
 
-    fun logNonExistentNotifDismissed(entry: NotificationEntry) {
+    fun logDismissNonExistentNotif(entry: NotificationEntry, index: Int, count: Int) {
         buffer.log(TAG, INFO, {
             str1 = entry.logKey
+            int1 = index
+            int2 = count
         }, {
-            "DISMISSED Non Existent $str1"
+            "DISMISS Non Existent $str1 ($int1/$int2)"
         })
     }
 
-    fun logChildDismissed(entry: NotificationEntry) {
+    fun logLocallyDismissedChild(
+            child: NotificationEntry,
+            parent: NotificationEntry,
+            parentIndex: Int,
+            parentCount: Int
+    ) {
         buffer.log(TAG, DEBUG, {
-            str1 = entry.logKey
+            str1 = child.logKey
+            str2 = parent.logKey
+            int1 = parentIndex
+            int2 = parentCount
         }, {
-            "CHILD DISMISSED (inferred): $str1"
+            "LOCALLY DISMISSED CHILD (inferred): $str1 of parent $str2 ($int1/$int2)"
         })
     }
 
@@ -140,27 +152,31 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
-    fun logDismissOnAlreadyCanceledEntry(entry: NotificationEntry) {
+    fun logLocallyDismissedAlreadyCanceledEntry(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
         }, {
-            "Dismiss on $str1, which was already canceled. Trying to remove..."
+            "LOCALLY DISMISSED Already Canceled $str1. Trying to remove."
         })
     }
 
-    fun logNotifDismissedIntercepted(entry: NotificationEntry) {
+    fun logNotifDismissedIntercepted(entry: NotificationEntry, index: Int, count: Int) {
         buffer.log(TAG, INFO, {
             str1 = entry.logKey
+            int1 = index
+            int2 = count
         }, {
-            "DISMISS INTERCEPTED $str1"
+            "DISMISS INTERCEPTED $str1 ($int1/$int2)"
         })
     }
 
-    fun logNotifClearAllDismissalIntercepted(entry: NotificationEntry) {
+    fun logNotifClearAllDismissalIntercepted(entry: NotificationEntry, index: Int, count: Int) {
         buffer.log(TAG, INFO, {
             str1 = entry.logKey
+            int1 = index
+            int2 = count
         }, {
-            "CLEAR ALL DISMISSAL INTERCEPTED $str1"
+            "CLEAR ALL DISMISSAL INTERCEPTED $str1 ($int1/$int2)"
         })
     }
 
@@ -251,12 +267,19 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
-    fun logRemoteExceptionOnNotificationClear(entry: NotificationEntry, e: RemoteException) {
+    fun logRemoteExceptionOnNotificationClear(
+            entry: NotificationEntry,
+            index: Int,
+            count: Int,
+            e: RemoteException
+    ) {
         buffer.log(TAG, WTF, {
             str1 = entry.logKey
+            int1 = index
+            int2 = count
             str2 = e.toString()
         }, {
-            "RemoteException while attempting to clear $str1:\n$str2"
+            "RemoteException while attempting to clear $str1 ($int1/$int2):\n$str2"
         })
     }
 
@@ -385,6 +408,126 @@ class NotifCollectionLogger @Inject constructor(
             str3 = latestEntry.logKey
         }, {
             "Mismatch: current $str2 is $str3 for: $str1"
+        })
+    }
+
+    fun logDismissAlreadyDismissedNotif(entry: NotificationEntry, index: Int, count: Int) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+            int1 = index
+            int2 = count
+        }, {
+            "DISMISS Already Dismissed $str1 ($int1/$int2)"
+        })
+    }
+
+    fun logDismissAlreadyParentDismissedNotif(
+            childEntry: NotificationEntry,
+            childIndex: Int,
+            childCount: Int
+    ) {
+        buffer.log(TAG, DEBUG, {
+            str1 = childEntry.logKey
+            int1 = childIndex
+            int2 = childCount
+            str2 = childEntry.parent?.summary?.logKey ?: "(null)"
+        }, {
+            "DISMISS Already Parent-Dismissed $str1 ($int1/$int2) with summary $str2"
+        })
+    }
+
+    fun logLocallyDismissNonExistentNotif(entry: NotificationEntry, index: Int, count: Int) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            int1 = index
+            int2 = count
+        }, {
+            "LOCALLY DISMISS Non Existent $str1 ($int1/$int2)"
+        })
+    }
+
+    fun logLocallyDismissMismatchedEntry(
+            entry: NotificationEntry,
+            index: Int,
+            count: Int,
+            storedEntry: NotificationEntry
+    ) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            int1 = index
+            int2 = count
+            str2 = Integer.toHexString(entry.hashCode())
+            str3 = Integer.toHexString(storedEntry.hashCode())
+        }, {
+            "LOCALLY DISMISS Mismatch $str1 ($int1/$int2): dismissing @$str2 but stored @$str3"
+        })
+    }
+
+    fun logLocallyDismissAlreadyDismissedNotif(
+            entry: NotificationEntry,
+            index: Int,
+            count: Int
+    ) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            int1 = index
+            int2 = count
+        }, {
+            "LOCALLY DISMISS Already Dismissed $str1 ($int1/$int2)"
+        })
+    }
+
+    fun logLocallyDismissAlreadyParentDismissedNotif(
+            entry: NotificationEntry,
+            index: Int,
+            count: Int
+    ) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            int1 = index
+            int2 = count
+        }, {
+            "LOCALLY DISMISS Already Dismissed $str1 ($int1/$int2)"
+        })
+    }
+
+    fun logLocallyDismissAlreadyDismissedChild(
+            childEntry: NotificationEntry,
+            parentEntry: NotificationEntry,
+            parentIndex: Int,
+            parentCount: Int
+    ) {
+        buffer.log(TAG, INFO, {
+            str1 = childEntry.logKey
+            str2 = parentEntry.logKey
+            int1 = parentIndex
+            int2 = parentCount
+        }, {
+            "LOCALLY DISMISS Already Dismissed Child $str1 of parent $str2 ($int1/$int2)"
+        })
+    }
+
+    fun logLocallyDismissAlreadyParentDismissedChild(
+            childEntry: NotificationEntry,
+            parentEntry: NotificationEntry,
+            parentIndex: Int,
+            parentCount: Int
+    ) {
+        buffer.log(TAG, INFO, {
+            str1 = childEntry.logKey
+            str2 = parentEntry.logKey
+            int1 = parentIndex
+            int2 = parentCount
+        }, {
+            "LOCALLY DISMISS Already Parent-Dismissed Child $str1 of parent $str2 ($int1/$int2)"
+        })
+    }
+
+    fun logCancelLocalDismissalNotDismissedNotif(entry: NotificationEntry) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+        }, {
+            "CANCEL LOCAL DISMISS Not Dismissed $str1"
         })
     }
 }

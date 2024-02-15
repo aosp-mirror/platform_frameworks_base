@@ -21,10 +21,6 @@ gensrcs {
         "soong_zip",
     ],
 
-    tool_files: [
-        ":libprotobuf-internal-protos",
-    ],
-
     cmd: "mkdir -p $(genDir)/$(in) " +
         "&& $(location aprotoc) " +
         "  --plugin=$(location protoc-gen-javastream) " +
@@ -42,6 +38,11 @@ gensrcs {
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
     ],
+
+    data: [
+        ":libprotobuf-internal-protos",
+    ],
+
     output_extension: "srcjar",
 }
 
@@ -51,10 +52,6 @@ gensrcs {
     tools: [
         "aprotoc",
         "protoc-gen-cppstream",
-    ],
-
-    tool_files: [
-        ":libprotobuf-internal-protos",
     ],
 
     cmd: "mkdir -p $(genDir) " +
@@ -73,7 +70,47 @@ gensrcs {
         "libs/incident/**/*.proto",
     ],
 
+    data: [
+        ":libprotobuf-internal-protos",
+    ],
+
     output_extension: "proto.h",
+}
+
+// ====  nfc framework java library  ==============================
+gensrcs {
+    name: "framework-nfc-javastream-protos",
+
+    tools: [
+        "aprotoc",
+        "protoc-gen-javastream",
+        "soong_zip",
+    ],
+
+    cmd: "mkdir -p $(genDir)/$(in) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-javastream) " +
+        "  --javastream_out=$(genDir)/$(in) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in) " +
+        "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
+
+    srcs: [
+        "core/proto/android/app/pendingintent.proto",
+        "core/proto/android/content/component_name.proto",
+        "core/proto/android/content/intent.proto",
+        "core/proto/android/nfc/*.proto",
+        "core/proto/android/os/patternmatcher.proto",
+        "core/proto/android/os/persistablebundle.proto",
+        "core/proto/android/privacy.proto",
+    ],
+
+    data: [
+        ":libprotobuf-internal-protos",
+    ],
+
+    output_extension: "srcjar",
 }
 
 // ====  java proto host library  ==============================

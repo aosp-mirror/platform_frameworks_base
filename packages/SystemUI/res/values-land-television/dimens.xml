@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
+<!-- TODO(b/289498394) move this to the TvSystemUI target -->
 <resources>
   <!-- Height of volume bar -->
   <dimen name="volume_dialog_panel_height">190dp</dimen>

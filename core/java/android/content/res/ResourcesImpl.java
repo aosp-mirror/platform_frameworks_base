@@ -27,6 +27,8 @@ import android.annotation.PluralsRes;
 import android.annotation.RawRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
+import android.app.LocaleConfig;
+import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
@@ -54,6 +56,7 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.view.DisplayAdjustments;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.GrowingArrayUtils;
 
 import libcore.util.NativeAllocationRegistry;
@@ -163,6 +166,23 @@ public class ResourcesImpl {
     }
 
     /**
+     * Clear the cache when the framework resources packages is changed.
+     *
+     * It's only used in the test initial function instead of regular app behaviors. It doesn't
+     * guarantee the thread-safety so mark this with @VisibleForTesting.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    static void resetDrawableStateCache() {
+        synchronized (sSync) {
+            sPreloadedDrawables[0].clear();
+            sPreloadedDrawables[1].clear();
+            sPreloadedColorDrawables.clear();
+            sPreloadedComplexColors.clear();
+            sPreloaded = false;
+        }
+    }
+
+    /**
      * Creates a new ResourcesImpl object with CompatibilityInfo.
      *
      * @param assets Previously created AssetManager.
@@ -253,14 +273,27 @@ public class ResourcesImpl {
         throw new NotFoundException("String resource name " + name);
     }
 
+    private static boolean isIntLike(@NonNull String s) {
+        if (s.isEmpty() || s.length() > 10) return false;
+        for (int i = 0, size = s.length(); i < size; i++) {
+            final char c = s.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     int getIdentifier(String name, String defType, String defPackage) {
         if (name == null) {
             throw new NullPointerException("name is null");
         }
-        try {
-            return Integer.parseInt(name);
-        } catch (Exception e) {
-            // Ignore
+        if (isIntLike(name)) {
+            try {
+                return Integer.parseInt(name);
+            } catch (Exception e) {
+                // Ignore
+            }
         }
         return mAssets.getResourceIdentifier(name, defType, defPackage);
     }
@@ -406,26 +439,60 @@ public class ResourcesImpl {
                     mConfiguration.setLocales(locales);
                 }
 
+                String[] selectedLocales = null;
+                String defaultLocale = null;
+                LocaleConfig lc = ResourcesManager.getInstance().getLocaleConfig();
                 if ((configChanges & ActivityInfo.CONFIG_LOCALE) != 0) {
                     if (locales.size() > 1) {
-                        // The LocaleList has changed. We must query the AssetManager's available
-                        // Locales and figure out the best matching Locale in the new LocaleList.
-                        String[] availableLocales = mAssets.getNonSystemLocales();
-                        if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
-                            // No app defined locales, so grab the system locales.
-                            availableLocales = mAssets.getLocales();
+                        if (Flags.defaultLocale() && (lc.getDefaultLocale() != null)) {
+                            Locale[] intersection =
+                                    locales.getIntersection(lc.getSupportedLocales());
+                            mConfiguration.setLocales(new LocaleList(intersection));
+                            selectedLocales = new String[intersection.length];
+                            for (int i = 0; i < intersection.length; i++) {
+                                selectedLocales[i] =
+                                        adjustLanguageTag(intersection[i].toLanguageTag());
+                            }
+                            defaultLocale =
+                                    adjustLanguageTag(lc.getDefaultLocale().toLanguageTag());
+                        } else {
+                            String[] availableLocales;
+                            // The LocaleList has changed. We must query the AssetManager's
+                            // available Locales and figure out the best matching Locale in the new
+                            // LocaleList.
+                            availableLocales = mAssets.getNonSystemLocales();
                             if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
-                                availableLocales = null;
+                                // No app defined locales, so grab the system locales.
+                                availableLocales = mAssets.getLocales();
+                                if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
+                                    availableLocales = null;
+                                }
                             }
-                        }
 
-                        if (availableLocales != null) {
-                            final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
-                                    availableLocales);
-                            if (bestLocale != null && bestLocale != locales.get(0)) {
-                                mConfiguration.setLocales(new LocaleList(bestLocale, locales));
+                            if (availableLocales != null) {
+                                final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
+                                        availableLocales);
+                                if (bestLocale != null) {
+                                    selectedLocales = new String[]{
+                                            adjustLanguageTag(bestLocale.toLanguageTag())};
+                                    if (!bestLocale.equals(locales.get(0))) {
+                                        mConfiguration.setLocales(
+                                                new LocaleList(bestLocale, locales));
+                                    }
+                                }
                             }
                         }
+                    }
+                }
+                if (selectedLocales == null) {
+                    if (Flags.defaultLocale() && (lc.getDefaultLocale() != null)) {
+                        selectedLocales = new String[locales.size()];
+                        for (int i = 0; i < locales.size(); i++) {
+                            selectedLocales[i] = adjustLanguageTag(locales.get(i).toLanguageTag());
+                        }
+                    } else {
+                        selectedLocales = new String[]{
+                                adjustLanguageTag(locales.get(0).toLanguageTag())};
                     }
                 }
 
@@ -462,7 +529,8 @@ public class ResourcesImpl {
                 }
 
                 mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
-                        adjustLanguageTag(mConfiguration.getLocales().get(0).toLanguageTag()),
+                        defaultLocale,
+                        selectedLocales,
                         mConfiguration.orientation,
                         mConfiguration.touchscreen,
                         mConfiguration.densityDpi, mConfiguration.keyboard,

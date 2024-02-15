@@ -16,6 +16,7 @@
 
 package android.animation;
 
+import android.annotation.Nullable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
@@ -91,13 +92,28 @@ public class AnimationHandler {
     };
 
     public final static ThreadLocal<AnimationHandler> sAnimatorHandler = new ThreadLocal<>();
+    private static AnimationHandler sTestHandler = null;
     private boolean mListDirty = false;
 
     public static AnimationHandler getInstance() {
+        if (sTestHandler != null) {
+            return sTestHandler;
+        }
         if (sAnimatorHandler.get() == null) {
             sAnimatorHandler.set(new AnimationHandler());
         }
         return sAnimatorHandler.get();
+    }
+
+    /**
+     * Sets an instance that will be returned by {@link #getInstance()} on every thread.
+     * @return  the previously active test handler, if any.
+     * @hide
+     */
+    public static @Nullable AnimationHandler setTestHandler(@Nullable AnimationHandler handler) {
+        AnimationHandler oldHandler = sTestHandler;
+        sTestHandler = handler;
+        return oldHandler;
     }
 
     /**
@@ -369,7 +385,10 @@ public class AnimationHandler {
      * Return the number of callbacks that have registered for frame callbacks.
      */
     public static int getAnimationCount() {
-        AnimationHandler handler = sAnimatorHandler.get();
+        AnimationHandler handler = sTestHandler;
+        if (handler == null) {
+            handler = sAnimatorHandler.get();
+        }
         if (handler == null) {
             return 0;
         }

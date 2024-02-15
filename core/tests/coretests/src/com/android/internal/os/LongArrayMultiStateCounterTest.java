@@ -20,17 +20,22 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 
+import android.os.BadParcelableException;
 import android.os.Parcel;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class LongArrayMultiStateCounterTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
     public void setStateAndUpdateValue() {
@@ -47,6 +52,16 @@ public class LongArrayMultiStateCounterTest {
 
         assertThat(counter.toString()).isEqualTo(
                 "[0: {75, 150, 225, 300}, 1: {25, 50, 75, 100}] updated: 9000 currentState: 0");
+    }
+
+    @Test
+    public void setValue() {
+        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
+
+        counter.setValues(0, new long[]{1, 2, 3, 4});
+        counter.setValues(1, new long[]{5, 6, 7, 8});
+        assertCounts(counter, 0, new long[]{1, 2, 3, 4});
+        assertCounts(counter, 1, new long[]{5, 6, 7, 8});
     }
 
     @Test
@@ -160,6 +175,45 @@ public class LongArrayMultiStateCounterTest {
         parcel.setDataPosition(0);
         assertThrows(RuntimeException.class,
                 () -> LongArrayMultiStateCounter.CREATOR.createFromParcel(parcel));
+    }
+
+    @Test
+    public void createFromBadBundle() {
+        Parcel data = Parcel.obtain();
+        int bundleLenPos = data.dataPosition();
+        data.writeInt(0);
+        data.writeInt(0x4C444E42);      // BaseBundle.BUNDLE_MAGIC
+
+        int bundleStart = data.dataPosition();
+
+        data.writeInt(1);
+        data.writeString("key");
+        data.writeInt(4);
+        int lazyValueLenPos = data.dataPosition();
+        data.writeInt(0);
+        int lazyValueStart = data.dataPosition();
+        data.writeString("com.android.internal.os.LongArrayMultiStateCounter");
+
+        // Invalid int16 value
+        data.writeInt(0x10000);     // stateCount
+        data.writeInt(10);          // arrayLength
+        for (int i = 0; i < 0x10000; ++i) {
+            data.writeLong(0);
+        }
+
+        backPatchLength(data, lazyValueLenPos, lazyValueStart);
+        backPatchLength(data, bundleLenPos, bundleStart);
+        data.setDataPosition(0);
+
+        assertThrows(BadParcelableException.class,
+                () -> data.readBundle().getParcelable("key", LongArrayMultiStateCounter.class));
+    }
+
+    private static void backPatchLength(Parcel parcel, int lengthPos, int startPos) {
+        int endPos = parcel.dataPosition();
+        parcel.setDataPosition(lengthPos);
+        parcel.writeInt(endPos - startPos);
+        parcel.setDataPosition(endPos);
     }
 
     @Test

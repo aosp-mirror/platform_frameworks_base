@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -71,6 +72,7 @@ import java.util.function.IntConsumer;
  * another Context.  Can be subclassed to modify behavior without changing
  * the original Context.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ContextWrapper extends Context {
     @UnsupportedAppUsage
     Context mBase;
@@ -1002,6 +1004,12 @@ public class ContextWrapper extends Context {
         return mBase.checkUriPermission(uri, pid, uid, modeFlags);
     }
 
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @Override
+    public int checkContentUriPermissionFull(@NonNull Uri uri, int pid, int uid, int modeFlags) {
+        return mBase.checkContentUriPermissionFull(uri, pid, uid, modeFlags);
+    }
+
     @NonNull
     @Override
     public int[] checkUriPermissions(@NonNull List<Uri> uris, int pid, int uid,
@@ -1430,6 +1438,7 @@ public class ContextWrapper extends Context {
      * @throws IllegalStateException if this method calls before {@link #attachBaseContext(Context)}
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow
     public void registerComponentCallbacks(ComponentCallbacks callback) {
         if (mBase != null) {
             mBase.registerComponentCallbacks(callback);
@@ -1464,6 +1473,7 @@ public class ContextWrapper extends Context {
      * @throws IllegalStateException if this method calls before {@link #attachBaseContext(Context)}
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow
     public void unregisterComponentCallbacks(ComponentCallbacks callback) {
         // It usually means the ComponentCallbacks is registered before this ContextWrapper attaches
         // to a base Context and Application is targeting prior to S-v2. We should unregister the

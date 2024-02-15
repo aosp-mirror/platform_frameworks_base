@@ -16,12 +16,15 @@
 
 package com.android.server.biometrics;
 
+import static android.adaptiveauth.Flags.FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_SUCCESS;
+
+import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -41,18 +44,30 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.hardware.biometrics.AuthenticationStateListener;
+import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.fingerprint.SensorProps;
+import android.hardware.face.FaceSensorConfigurations;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceService;
+import android.hardware.fingerprint.FingerprintSensorConfigurations;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.iris.IIrisService;
 import android.os.Binder;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -83,6 +98,11 @@ public class AuthServiceTest {
 
     @Rule
     public MockitoRule mockitorule = MockitoJUnit.rule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private Context mContext;
@@ -103,11 +123,16 @@ public class AuthServiceTest {
     @Mock
     IFaceService mFaceService;
     @Mock
+
     AppOpsManager mAppOpsManager;
     @Mock
     private VirtualDeviceManagerInternal mVdmInternal;
     @Captor
     private ArgumentCaptor<List<FingerprintSensorPropertiesInternal>> mFingerprintPropsCaptor;
+    @Captor
+    private ArgumentCaptor<FingerprintSensorConfigurations> mFingerprintSensorConfigurationsCaptor;
+    @Captor
+    private ArgumentCaptor<FaceSensorConfigurations> mFaceSensorConfigurationsCaptor;
     @Captor
     private ArgumentCaptor<List<FaceSensorPropertiesInternal>> mFacePropsCaptor;
 
@@ -134,6 +159,9 @@ public class AuthServiceTest {
         when(mContext.getResources()).thenReturn(mResources);
         when(mInjector.getBiometricService()).thenReturn(mBiometricService);
         when(mInjector.getConfiguration(any())).thenReturn(config);
+        when(mInjector.getFaceConfiguration(any())).thenReturn(config);
+        when(mInjector.getFingerprintConfiguration(any())).thenReturn(config);
+        when(mInjector.getIrisConfiguration(any())).thenReturn(config);
         when(mInjector.getFingerprintService()).thenReturn(mFingerprintService);
         when(mInjector.getFaceService()).thenReturn(mFaceService);
         when(mInjector.getIrisService()).thenReturn(mIrisService);
@@ -164,12 +192,13 @@ public class AuthServiceTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(com.android.server.biometrics.Flags.FLAG_DE_HIDL)
     public void testRegisterAuthenticator_registerAuthenticators() throws Exception {
         final int fingerprintId = 0;
         final int fingerprintStrength = 15;
 
         final int faceId = 1;
-        final int faceStrength = 4095;
+        final int faceStrength = 15;
 
         final String[] config = {
                 // ID0:Fingerprint:Strong
@@ -197,6 +226,51 @@ public class AuthServiceTest {
                 Utils.authenticatorStrengthToPropertyStrength(faceStrength));
     }
 
+    @Test
+    @RequiresFlagsEnabled(com.android.server.biometrics.Flags.FLAG_DE_HIDL)
+    public void testRegisterAuthenticator_registerAuthenticatorsLegacy() throws RemoteException {
+        final int fingerprintId = 0;
+        final int fingerprintStrength = 15;
+
+        final int faceId = 1;
+        final int faceStrength = 4095;
+
+        final String[] config = {
+                // ID0:Fingerprint:Strong
+                String.format("%d:2:%d", fingerprintId, fingerprintStrength),
+                // ID2:Face:Convenience
+                String.format("%d:8:%d", faceId, faceStrength)
+        };
+
+        when(mInjector.getFingerprintConfiguration(any())).thenReturn(config);
+        when(mInjector.getFaceConfiguration(any())).thenReturn(config);
+        when(mInjector.getFingerprintAidlInstances()).thenReturn(new String[]{});
+        when(mInjector.getFaceAidlInstances()).thenReturn(new String[]{});
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        verify(mFingerprintService).registerAuthenticatorsLegacy(
+                mFingerprintSensorConfigurationsCaptor.capture());
+
+        final SensorProps[] fingerprintProp = mFingerprintSensorConfigurationsCaptor.getValue()
+                .getSensorPairForInstance("defaultHIDL").second;
+
+        assertEquals(fingerprintProp[0].commonProps.sensorId, fingerprintId);
+        assertEquals(fingerprintProp[0].commonProps.sensorStrength,
+                Utils.authenticatorStrengthToPropertyStrength(fingerprintStrength));
+
+        verify(mFaceService).registerAuthenticatorsLegacy(
+                mFaceSensorConfigurationsCaptor.capture());
+
+        final android.hardware.biometrics.face.SensorProps[] faceProp =
+                mFaceSensorConfigurationsCaptor.getValue()
+                        .getSensorPairForInstance("defaultHIDL").second;
+
+        assertEquals(faceProp[0].commonProps.sensorId, faceId);
+        assertEquals(faceProp[0].commonProps.sensorStrength,
+                Utils.authenticatorStrengthToPropertyStrength(faceStrength));
+    }
 
     // TODO(b/141025588): Check that an exception is thrown when the userId != callingUserId
     @Test
@@ -399,6 +473,39 @@ public class AuthServiceTest {
                 eq(TEST_OP_PACKAGE_NAME));
     }
 
+    @Test
+    public void testRegisterAuthenticationStateListener_callsFingerprintService()
+            throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
+        setInternalAndTestBiometricPermissions(mContext, true /* hasPermission */);
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final AuthenticationStateListener listener = mock(AuthenticationStateListener.class);
+
+        mAuthService.mImpl.registerAuthenticationStateListener(listener);
+
+        waitForIdle();
+        verify(mFingerprintService).registerAuthenticationStateListener(
+                eq(listener));
+    }
+
+    @Test
+    public void testRegisterAuthenticationStateListener_callsFaceService() throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS);
+        setInternalAndTestBiometricPermissions(mContext, true /* hasPermission */);
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final AuthenticationStateListener listener = mock(AuthenticationStateListener.class);
+
+        mAuthService.mImpl.registerAuthenticationStateListener(listener);
+
+        waitForIdle();
+        verify(mFaceService).registerAuthenticationStateListener(eq(listener));
+    }
 
     @Test
     public void testRegisterKeyguardCallback_callsBiometricServiceRegisterKeyguardCallback()
@@ -416,6 +523,37 @@ public class AuthServiceTest {
         waitForIdle();
         verify(mBiometricService).registerEnabledOnKeyguardCallback(
                 eq(callback));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testGetLastAuthenticationTime_flaggedOff_throwsUnsupportedOperationException()
+            throws Exception {
+        mSetFlagsRule.disableFlags(Flags.FLAG_LAST_AUTHENTICATION_TIME);
+        setInternalAndTestBiometricPermissions(mContext, true /* hasPermission */);
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        mAuthService.mImpl.getLastAuthenticationTime(0,
+                BiometricManager.Authenticators.BIOMETRIC_STRONG);
+    }
+
+    @Test
+    public void testGetLastAuthenticationTime_flaggedOn_callsBiometricService()
+            throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_LAST_AUTHENTICATION_TIME);
+        setInternalAndTestBiometricPermissions(mContext, true /* hasPermission */);
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final int userId = 0;
+        final int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG;
+
+        mAuthService.mImpl.getLastAuthenticationTime(userId, authenticators);
+
+        waitForIdle();
+        verify(mBiometricService).getLastAuthenticationTime(eq(userId), eq(authenticators));
     }
 
     private static void setInternalAndTestBiometricPermissions(

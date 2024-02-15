@@ -11,6 +11,9 @@
         },
         {
           "exclude-annotation": "android.platform.test.annotations.AppModeFull"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
         }
       ]
     }

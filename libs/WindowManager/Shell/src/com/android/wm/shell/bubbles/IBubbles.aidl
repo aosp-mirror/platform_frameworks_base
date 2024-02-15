@@ -17,6 +17,7 @@
 package com.android.wm.shell.bubbles;
 
 import android.content.Intent;
+import android.graphics.Rect;
 import com.android.wm.shell.bubbles.IBubblesListener;
 
 /**
@@ -29,12 +30,16 @@ interface IBubbles {
 
     oneway void unregisterBubbleListener(in IBubblesListener listener) = 2;
 
-    oneway void showBubble(in String key, in boolean onLauncherHome) = 3;
+    oneway void showBubble(in String key, in Rect bubbleBarBounds) = 3;
 
-    oneway void removeBubble(in String key, in int reason) = 4;
+    oneway void removeBubble(in String key) = 4;
 
-    oneway void collapseBubbles() = 5;
+    oneway void removeAllBubbles() = 5;
 
-    oneway void onTaskbarStateChanged(in int newState) = 6;
+    oneway void collapseBubbles() = 6;
+
+    oneway void onBubbleDrag(in String key, in boolean isBeingDragged) = 7;
+
+    oneway void showUserEducation(in int positionX, in int positionY) = 8;
 
 }

@@ -34,14 +34,15 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSEditEvent;
-import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -106,7 +107,8 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
     protected QSCustomizerController(QSCustomizer view, TileQueryHelper tileQueryHelper,
             QSHost qsHost, TileAdapter tileAdapter, ScreenLifecycle screenLifecycle,
             KeyguardStateController keyguardStateController, LightBarController lightBarController,
-            ConfigurationController configurationController, UiEventLogger uiEventLogger) {
+            ConfigurationController configurationController, UiEventLogger uiEventLogger,
+            SceneContainerFlags sceneContainerFlags) {
         super(view);
         mTileQueryHelper = tileQueryHelper;
         mQsHost = qsHost;
@@ -116,10 +118,14 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
         mLightBarController = lightBarController;
         mConfigurationController = configurationController;
         mUiEventLogger = uiEventLogger;
+        view.setSceneContainerEnabled(sceneContainerFlags.isEnabled());
 
         mToolbar = mView.findViewById(com.android.internal.R.id.action_bar);
     }
 
+    public void applyBottomNavBarSizeToRecyclerViewPadding(int padding) {
+        mView.applyBottomNavBarToPadding(padding);
+    }
 
     @Override
     protected void onViewAttached() {
@@ -199,7 +205,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
     }
 
     /** */
-    public void setQs(@Nullable QSFragment qsFragment) {
+    public void setQs(@Nullable QS qsFragment) {
         mView.setQs(qsFragment);
     }
 
@@ -244,7 +250,12 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
     /** Hice the customizer. */
     public void hide() {
-        final boolean animate = mScreenLifecycle.getScreenState() != ScreenLifecycle.SCREEN_OFF;
+        hide(true);
+    }
+
+    public void hide(boolean animated) {
+        final boolean animate = animated
+                && mScreenLifecycle.getScreenState() != ScreenLifecycle.SCREEN_OFF;
         if (mView.isShown()) {
             mUiEventLogger.log(QSEditEvent.QS_EDIT_CLOSED);
             mToolbar.dismissPopupMenus();

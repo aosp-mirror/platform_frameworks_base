@@ -30,11 +30,13 @@ java_test_host {
         "compatibility-host-util",
     ],
     static_libs: [
-        "truth-prebuilt",
+        "truth",
     ],
     data: [
         ":BinaryTransparencyTestApp",
         ":EasterEgg",
+        ":FeatureSplitBase",
+        ":FeatureSplit1",
         ":com.android.apex.cts.shim.v2_rebootless_prebuilt",
     ],
     test_suites: [

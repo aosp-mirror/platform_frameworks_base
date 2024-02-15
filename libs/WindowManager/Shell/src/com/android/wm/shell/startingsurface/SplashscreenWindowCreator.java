@@ -358,7 +358,7 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
             }
         }
         if (shouldSaveView) {
-            mStartingWindowRecordManager.removeWindow(taskId, true);
+            mStartingWindowRecordManager.removeWindow(taskId);
             saveSplashScreenRecord(appToken, taskId, view, suggestType);
         }
         return shouldSaveView;

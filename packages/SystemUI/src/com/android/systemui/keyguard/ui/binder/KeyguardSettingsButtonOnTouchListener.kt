@@ -20,12 +20,10 @@ import android.graphics.PointF
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
-import com.android.systemui.animation.view.LaunchableLinearLayout
 import com.android.systemui.common.ui.view.rawDistanceFrom
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
 
 class KeyguardSettingsButtonOnTouchListener(
-    private val view: LaunchableLinearLayout,
     private val viewModel: KeyguardSettingsMenuViewModel,
 ) : View.OnTouchListener {
 
@@ -41,8 +39,10 @@ class KeyguardSettingsButtonOnTouchListener(
             MotionEvent.ACTION_UP -> {
                 view.isPressed = false
                 val distanceMoved =
-                    motionEvent
-                        .rawDistanceFrom(downPositionDisplayCoords.x, downPositionDisplayCoords.y)
+                    motionEvent.rawDistanceFrom(
+                        downPositionDisplayCoords.x,
+                        downPositionDisplayCoords.y
+                    )
                 val isClick = distanceMoved < ViewConfiguration.getTouchSlop()
                 viewModel.onTouchGestureEnded(isClick)
                 if (isClick) {

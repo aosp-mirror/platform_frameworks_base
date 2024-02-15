@@ -88,10 +88,14 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     private Notification.Builder mBuilder;
     private ExpandableNotificationRow mRow;
 
+    private NotificationTestHelper mHelper;
+
     @Mock private NotifRemoteViewCache mCache;
     @Mock private ConversationNotificationProcessor mConversationNotificationProcessor;
     @Mock private InflatedSmartReplyState mInflatedSmartReplyState;
     @Mock private InflatedSmartReplyViewHolder mInflatedSmartReplies;
+    @Mock private NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
+    @Mock private NotifLayoutInflaterFactory mNotifLayoutInflaterFactory;
 
     private final SmartReplyStateInflater mSmartReplyStateInflater =
             new SmartReplyStateInflater() {
@@ -113,16 +117,18 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mBuilder = new Notification.Builder(mContext).setSmallIcon(
-                R.drawable.ic_person)
+                com.android.systemui.res.R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text")
                 .setStyle(new Notification.BigTextStyle().bigText("big text"));
-        NotificationTestHelper helper = new NotificationTestHelper(
+        mHelper = new NotificationTestHelper(
                 mContext,
                 mDependency,
                 TestableLooper.get(this));
-        ExpandableNotificationRow row = helper.createRow(mBuilder.build());
+        ExpandableNotificationRow row = mHelper.createRow(mBuilder.build());
         mRow = spy(row);
+        when(mNotifLayoutInflaterFactoryProvider.provide(any(), any()))
+                .thenReturn(mNotifLayoutInflaterFactory);
 
         mNotificationInflater = new NotificationContentInflater(
                 mCache,
@@ -130,7 +136,9 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mConversationNotificationProcessor,
                 mock(MediaFeatureFlag.class),
                 mock(Executor.class),
-                mSmartReplyStateInflater);
+                mSmartReplyStateInflater,
+                mNotifLayoutInflaterFactoryProvider,
+                mock(NotificationContentInflaterLogger.class));
     }
 
     @Test
@@ -185,7 +193,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     public void testInflationThrowsErrorDoesntCallUpdated() throws Exception {
         mRow.getPrivateLayout().removeAllViews();
         mRow.getEntry().getSbn().getNotification().contentView
-                = new RemoteViews(mContext.getPackageName(), R.layout.status_bar);
+                = new RemoteViews(mContext.getPackageName(), com.android.systemui.res.R.layout.status_bar);
         inflateAndWait(true /* expectingException */, mNotificationInflater, FLAG_CONTENT_VIEW_ALL,
                 mRow);
         assertTrue(mRow.getPrivateLayout().getChildCount() == 0);
@@ -253,7 +261,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                         return new AsyncFailRemoteView(mContext.getPackageName(),
                                 R.layout.custom_view_dark);
                     }
-                });
+                },
+                mock(NotificationContentInflaterLogger.class));
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 

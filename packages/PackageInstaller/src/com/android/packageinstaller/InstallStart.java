@@ -16,6 +16,7 @@
 
 package com.android.packageinstaller;
 
+import static android.content.pm.Flags.usePiaV2;
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
@@ -34,14 +35,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
+import com.android.packageinstaller.v2.ui.InstallLaunch;
 import java.util.Arrays;
 
 /**
@@ -51,25 +50,42 @@ import java.util.Arrays;
 public class InstallStart extends Activity {
     private static final String TAG = InstallStart.class.getSimpleName();
 
-    private static final String DOWNLOADS_AUTHORITY = "downloads";
-
-    private static final int DLG_INSTALL_APPS_RESTRICTED_FOR_USER = 1;
-    private static final int DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER = 2;
     private PackageManager mPackageManager;
     private UserManager mUserManager;
     private boolean mAbortInstall = false;
+    private boolean mShouldFinish = true;
 
     private final boolean mLocalLOGV = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        if (usePiaV2()) {
+            Log.i(TAG, "Using Pia V2");
+
+            Intent piaV2 = new Intent(getIntent());
+            piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_NAME, getCallingPackage());
+            piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_UID, getLaunchedFromUid());
+            piaV2.setClass(this, InstallLaunch.class);
+            piaV2.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+            startActivity(piaV2);
+            finish();
+            return;
+        }
         mPackageManager = getPackageManager();
         mUserManager = getSystemService(UserManager.class);
 
         Intent intent = getIntent();
         String callingPackage = getCallingPackage();
         String callingAttributionTag = null;
+
+        // Uid of the source package, coming from ActivityManager
+        int callingUid = getLaunchedFromUid();
+        if (callingUid == Process.INVALID_UID) {
+            Log.w(TAG, "Could not determine the launching uid.");
+        }
 
         final boolean isSessionInstall =
                 PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(intent.getAction())
@@ -80,29 +96,31 @@ public class InstallStart extends Activity {
         final int sessionId = (isSessionInstall
                 ? intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
                 : -1);
+        int originatingUidFromSession = callingUid;
         if (callingPackage == null && sessionId != -1) {
             PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
             PackageInstaller.SessionInfo sessionInfo = packageInstaller.getSessionInfo(sessionId);
-            callingPackage = (sessionInfo != null) ? sessionInfo.getInstallerPackageName() : null;
-            callingAttributionTag =
-                    (sessionInfo != null) ? sessionInfo.getInstallerAttributionTag() : null;
+            if (sessionInfo != null) {
+                callingPackage = sessionInfo.getInstallerPackageName();
+                callingAttributionTag = sessionInfo.getInstallerAttributionTag();
+                originatingUidFromSession = sessionInfo.getOriginatingUid();
+            }
         }
 
         final ApplicationInfo sourceInfo = getSourceInfo(callingPackage);
-        // Uid of the source package, coming from ActivityManager
-        int callingUid = getLaunchedFromUid();
-        if (callingUid == Process.INVALID_UID) {
-            Log.e(TAG, "Could not determine the launching uid.");
-        }
+
         // Uid of the source package, with a preference to uid from ApplicationInfo
         final int originatingUid = sourceInfo != null ? sourceInfo.uid : callingUid;
 
         if (callingUid == Process.INVALID_UID && sourceInfo == null) {
+            Log.e(TAG, "Cannot determine caller since UID is invalid and sourceInfo is null");
             mAbortInstall = true;
         }
 
         boolean isDocumentsManager = checkPermission(Manifest.permission.MANAGE_DOCUMENTS,
                 -1, callingUid) == PackageManager.PERMISSION_GRANTED;
+        boolean isSystemDownloadsProvider = PackageUtil.getSystemDownloadsProviderInfo(
+                                                mPackageManager, callingUid) != null;
         boolean isTrustedSource = false;
         if (sourceInfo != null && sourceInfo.isPrivilegedApp()) {
             isTrustedSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false) || (
@@ -111,11 +129,11 @@ public class InstallStart extends Activity {
                             == PackageManager.PERMISSION_GRANTED);
         }
 
-        if (!isTrustedSource && !isSystemDownloadsProvider(callingUid) && !isDocumentsManager
+        if (!isTrustedSource && !isSystemDownloadsProvider && !isDocumentsManager
                 && originatingUid != Process.INVALID_UID) {
             final int targetSdkVersion = getMaxTargetSdkVersionForUid(this, originatingUid);
             if (targetSdkVersion < 0) {
-                Log.w(TAG, "Cannot get target sdk version for uid " + originatingUid);
+                Log.e(TAG, "Cannot get target sdk version for uid " + originatingUid);
                 // Invalid originating uid supplied. Abort install.
                 mAbortInstall = true;
             } else if (targetSdkVersion >= Build.VERSION_CODES.O && !isUidRequestingPermission(
@@ -127,10 +145,12 @@ public class InstallStart extends Activity {
         }
 
         if (sessionId != -1 && !isCallerSessionOwner(originatingUid, sessionId)) {
+            Log.e(TAG, "UID " + originatingUid + " is not the owner of session " +
+                sessionId);
             mAbortInstall = true;
         }
 
-        checkDevicePolicyRestriction();
+        checkDevicePolicyRestrictions();
 
         final String installerPackageNameFromIntent = getIntent().getStringExtra(
                 Intent.EXTRA_INSTALLER_PACKAGE_NAME);
@@ -149,7 +169,9 @@ public class InstallStart extends Activity {
 
         if (mAbortInstall) {
             setResult(RESULT_CANCELED);
-            finish();
+            if (mShouldFinish) {
+                finish();
+            }
             return;
         }
 
@@ -164,6 +186,8 @@ public class InstallStart extends Activity {
                 callingAttributionTag);
         nextActivity.putExtra(PackageInstallerActivity.EXTRA_ORIGINAL_SOURCE_INFO, sourceInfo);
         nextActivity.putExtra(Intent.EXTRA_ORIGINATING_UID, originatingUid);
+        nextActivity.putExtra(PackageInstallerActivity.EXTRA_ORIGINATING_UID_FROM_SESSION_INFO,
+            originatingUidFromSession);
 
         if (isSessionInstall) {
             nextActivity.setClass(this, PackageInstallerActivity.class);
@@ -241,17 +265,6 @@ public class InstallStart extends Activity {
         return null;
     }
 
-    private boolean isSystemDownloadsProvider(int uid) {
-        final ProviderInfo downloadProviderPackage = getPackageManager().resolveContentProvider(
-                DOWNLOADS_AUTHORITY, 0);
-        if (downloadProviderPackage == null) {
-            // There seems to be no currently enabled downloads provider on the system.
-            return false;
-        }
-        final ApplicationInfo appInfo = downloadProviderPackage.applicationInfo;
-        return ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
-                && uid == appInfo.uid);
-    }
 
     @NonNull
     private boolean canPackageQuery(int callingUid, Uri packageUri) {
@@ -266,7 +279,7 @@ public class InstallStart extends Activity {
         if (callingPackages == null) {
             return false;
         }
-        for (String callingPackage: callingPackages) {
+        for (String callingPackage : callingPackages) {
             try {
                 if (mPackageManager.canPackageQuery(callingPackage, targetPackage)) {
                     return true;
@@ -279,63 +292,64 @@ public class InstallStart extends Activity {
     }
 
     private boolean isCallerSessionOwner(int originatingUid, int sessionId) {
+        if (originatingUid == Process.ROOT_UID) {
+            return true;
+        }
         PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
-        int installerUid = packageInstaller.getSessionInfo(sessionId).getInstallerUid();
-        return (originatingUid == Process.ROOT_UID) || (originatingUid == installerUid);
+        PackageInstaller.SessionInfo sessionInfo = packageInstaller.getSessionInfo(sessionId);
+        if (sessionInfo == null) {
+            return false;
+        }
+        int installerUid = sessionInfo.getInstallerUid();
+        return originatingUid == installerUid;
     }
 
-    private void checkDevicePolicyRestriction() {
-        // Check for install apps user restriction first.
-        final int installAppsRestrictionSource = mUserManager.getUserRestrictionSource(
-                UserManager.DISALLOW_INSTALL_APPS, Process.myUserHandle());
-        if ((installAppsRestrictionSource & UserManager.RESTRICTION_SOURCE_SYSTEM) != 0) {
-            if (mLocalLOGV) Log.i(TAG, "install not allowed: " + UserManager.DISALLOW_INSTALL_APPS);
-            mAbortInstall = true;
-            showDialogInner(DLG_INSTALL_APPS_RESTRICTED_FOR_USER);
-            return;
-        } else if (installAppsRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
-            if (mLocalLOGV) {
-                Log.i(TAG, "install not allowed by admin; showing "
-                        + Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
-            }
-            mAbortInstall = true;
-            startActivity(new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS));
-            return;
-        }
+    private void checkDevicePolicyRestrictions() {
+        final String[] restrictions = new String[] {
+            UserManager.DISALLOW_INSTALL_APPS,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
+        };
 
-        final int unknownSourcesRestrictionSource = mUserManager.getUserRestrictionSource(
-                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, Process.myUserHandle());
-        final int unknownSourcesGlobalRestrictionSource = mUserManager.getUserRestrictionSource(
-                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY, Process.myUserHandle());
-        final int systemRestriction = UserManager.RESTRICTION_SOURCE_SYSTEM
-                & (unknownSourcesRestrictionSource | unknownSourcesGlobalRestrictionSource);
-        if (systemRestriction != 0) {
-            if (mLocalLOGV) Log.i(TAG, "Showing DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER");
+        final DevicePolicyManager dpm = getSystemService(DevicePolicyManager.class);
+        for (String restriction : restrictions) {
+            if (!mUserManager.hasUserRestrictionForUser(restriction, Process.myUserHandle())) {
+                continue;
+            }
+
             mAbortInstall = true;
-            showDialogInner(DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER);
-        } else if (unknownSourcesRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
-            mAbortInstall = true;
-            startAdminSupportDetailsActivity(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
-        } else if (unknownSourcesGlobalRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
-            mAbortInstall = true;
-            startAdminSupportDetailsActivity(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY);
+
+            // If the given restriction is set by an admin, display information about the
+            // admin enforcing the restriction for the affected user. If not enforced by the admin,
+            // show the system dialog.
+            final Intent showAdminSupportDetailsIntent = dpm.createAdminSupportIntent(restriction);
+            if (showAdminSupportDetailsIntent != null) {
+                if (mLocalLOGV) Log.i(TAG, "starting " + showAdminSupportDetailsIntent);
+                startActivity(showAdminSupportDetailsIntent);
+            } else {
+                if (mLocalLOGV) Log.i(TAG, "Restriction set by system: " + restriction);
+                mShouldFinish = false;
+                showDialogInner(restriction);
+            }
+            break;
         }
     }
 
     /**
-     * Replace any dialog shown by the dialog with the one for the given {@link #createDialog(int)}.
+     * Replace any dialog shown by the dialog with the one for the given
+     * {@link #createDialog(String)}.
      *
-     * @param id The dialog type to add
+     * @param restriction The restriction to create the dialog for
      */
-    private void showDialogInner(int id) {
-        if (mLocalLOGV) Log.i(TAG, "showDialogInner(" + id + ")");
+    private void showDialogInner(String restriction) {
+        if (mLocalLOGV) Log.i(TAG, "showDialogInner(" + restriction + ")");
         DialogFragment currentDialog =
                 (DialogFragment) getFragmentManager().findFragmentByTag("dialog");
         if (currentDialog != null) {
             currentDialog.dismissAllowingStateLoss();
         }
 
-        DialogFragment newDialog = createDialog(id);
+        DialogFragment newDialog = createDialog(restriction);
         if (newDialog != null) {
             getFragmentManager().beginTransaction()
                     .add(newDialog, "dialog").commitAllowingStateLoss();
@@ -345,35 +359,20 @@ public class InstallStart extends Activity {
     /**
      * Create a new dialog.
      *
-     * @param id The id of the dialog (determines dialog type)
-     *
+     * @param restriction The restriction to create the dialog for
      * @return The dialog
      */
-    private DialogFragment createDialog(int id) {
-        if (mLocalLOGV) Log.i(TAG, "createDialog(" + id + ")");
-        switch (id) {
-            case DLG_INSTALL_APPS_RESTRICTED_FOR_USER:
+    private DialogFragment createDialog(String restriction) {
+        if (mLocalLOGV) Log.i(TAG, "createDialog(" + restriction + ")");
+        switch (restriction) {
+            case UserManager.DISALLOW_INSTALL_APPS:
                 return PackageUtil.SimpleErrorDialog.newInstance(
                         R.string.install_apps_user_restriction_dlg_text);
-            case DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER:
+            case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES:
+            case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY:
                 return PackageUtil.SimpleErrorDialog.newInstance(
                         R.string.unknown_apps_user_restriction_dlg_text);
         }
         return null;
-    }
-
-    private void startAdminSupportDetailsActivity(String restriction) {
-        if (mLocalLOGV) Log.i(TAG, "startAdminSupportDetailsActivity(): " + restriction);
-
-        // If the given restriction is set by an admin, display information about the
-        // admin enforcing the restriction for the affected user.
-        final DevicePolicyManager dpm = getSystemService(DevicePolicyManager.class);
-        final Intent showAdminSupportDetailsIntent = dpm.createAdminSupportIntent(restriction);
-        if (showAdminSupportDetailsIntent != null) {
-            if (mLocalLOGV) Log.i(TAG, "starting " + showAdminSupportDetailsIntent);
-            startActivity(showAdminSupportDetailsIntent);
-        } else {
-            if (mLocalLOGV) Log.w(TAG, "not intent for " + restriction);
-        }
     }
 }

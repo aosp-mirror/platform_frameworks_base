@@ -79,9 +79,9 @@ AssertionResult IsStringEqual(const ResTable& table, uint32_t resource_id,
   }
 
   if (String8(expected_str) != *actual_str) {
-    return AssertionFailure() << actual_str->string();
+    return AssertionFailure() << actual_str->c_str();
   }
-  return AssertionSuccess() << actual_str->string();
+  return AssertionSuccess() << actual_str->c_str();
 }
 
 }  // namespace android

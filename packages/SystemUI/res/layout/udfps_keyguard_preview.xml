@@ -24,7 +24,7 @@
     android:background="@drawable/fingerprint_bg">
 
     <!-- LockScreen fingerprint icon from 0 stroke width to full width -->
-    <com.airbnb.lottie.LottieAnimationView
+    <com.android.systemui.keyguard.ui.view.UdfpsLottieViewWrapper
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scaleType="centerCrop"

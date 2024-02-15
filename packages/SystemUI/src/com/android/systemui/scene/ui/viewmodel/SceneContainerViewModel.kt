@@ -16,15 +16,23 @@
 
 package com.android.systemui.scene.ui.viewmodel
 
+import android.view.MotionEvent
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
+import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-/** Models UI state for a single scene container. */
-class SceneContainerViewModel(
-    private val interactor: SceneInteractor,
-    val containerName: String,
+/** Models UI state for the scene container. */
+@SysUISingleton
+class SceneContainerViewModel
+@Inject
+constructor(
+    private val sceneInteractor: SceneInteractor,
+    private val falsingInteractor: FalsingInteractor,
 ) {
     /**
      * Keys of all scenes in the container.
@@ -32,21 +40,44 @@ class SceneContainerViewModel(
      * The scenes will be sorted in z-order such that the last one is the one that should be
      * rendered on top of all previous ones.
      */
-    val allSceneKeys: List<SceneKey> = interactor.allSceneKeys(containerName)
+    val allSceneKeys: List<SceneKey> = sceneInteractor.allSceneKeys()
 
-    /** The current scene. */
-    val currentScene: StateFlow<SceneModel> = interactor.currentScene(containerName)
+    /** The scene that should be rendered. */
+    val currentScene: StateFlow<SceneKey> = sceneInteractor.currentScene
 
     /** Whether the container is visible. */
-    val isVisible: StateFlow<Boolean> = interactor.isVisible(containerName)
+    val isVisible: StateFlow<Boolean> = sceneInteractor.isVisible
 
-    /** Requests a transition to the scene with the given key. */
-    fun setCurrentScene(scene: SceneModel) {
-        interactor.setCurrentScene(containerName, scene)
+    /**
+     * Binds the given flow so the system remembers it.
+     *
+     * Note that you must call is with `null` when the UI is done or risk a memory leak.
+     */
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
+        sceneInteractor.setTransitionState(transitionState)
     }
 
-    /** Notifies of the progress of a scene transition. */
-    fun setSceneTransitionProgress(progress: Float) {
-        interactor.setSceneTransitionProgress(containerName, progress)
+    /**
+     * Notifies that a [MotionEvent] is first seen at the top of the scene container UI.
+     *
+     * Call this before the [MotionEvent] starts to propagate through the UI hierarchy.
+     */
+    fun onMotionEvent(event: MotionEvent) {
+        sceneInteractor.onUserInput()
+        falsingInteractor.onTouchEvent(event)
+    }
+
+    /**
+     * Notifies that a [MotionEvent] that was previously sent to [onMotionEvent] has passed through
+     * the scene container UI.
+     *
+     * Call this after the [MotionEvent] propagates completely through the UI hierarchy.
+     */
+    fun onMotionEventComplete() {
+        falsingInteractor.onMotionEventComplete()
+    }
+
+    companion object {
+        private const val SCENE_TRANSITION_LOGGING_REASON = "user input"
     }
 }

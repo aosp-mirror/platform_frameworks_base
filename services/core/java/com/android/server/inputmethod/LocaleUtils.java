@@ -212,7 +212,8 @@ final class LocaleUtils {
 
     /**
      * Returns the language component of a given locale string.
-     * TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(String)}
+     * TODO(b/321064051): Switch to {@link
+     * com.android.internal.inputmethod.SubtypeLocaleUtils#constructLocaleFromString(String)}
      */
     static String getLanguageFromLocaleString(String locale) {
         final int idx = locale.indexOf('_');

@@ -16,7 +16,11 @@
 
 package android.hardware.biometrics;
 
+import static android.hardware.biometrics.Flags.FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.security.identity.IdentityCredential;
 import android.security.identity.PresentationSession;
 import android.security.keystore2.AndroidKeyStoreProvider;
@@ -24,25 +28,41 @@ import android.security.keystore2.AndroidKeyStoreProvider;
 import java.security.Signature;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 
 /**
  * A wrapper class for the crypto objects supported by BiometricPrompt and FingerprintManager.
  * Currently the framework supports {@link Signature}, {@link Cipher}, {@link Mac},
- * {@link IdentityCredential}, and {@link PresentationSession} objects.
+ * {@link KeyAgreement}, {@link IdentityCredential}, and {@link PresentationSession} objects.
  * @hide
  */
 public class CryptoObject {
     private final Object mCrypto;
 
+    /**
+     * Create from a {@link Signature} object.
+     *
+     * @param signature a {@link Signature} object.
+     */
     public CryptoObject(@NonNull Signature signature) {
         mCrypto = signature;
     }
 
+    /**
+     * Create from a {@link Cipher} object.
+     *
+     * @param cipher a {@link Cipher} object.
+     */
     public CryptoObject(@NonNull Cipher cipher) {
         mCrypto = cipher;
     }
 
+    /**
+     * Create from a {@link Mac} object.
+     *
+     * @param mac a {@link Mac} object.
+     */
     public CryptoObject(@NonNull Mac mac) {
         mCrypto = mac;
     }
@@ -58,15 +78,30 @@ public class CryptoObject {
         mCrypto = credential;
     }
 
+    /**
+     * Create from a {@link PresentationSession} object.
+     *
+     * @param session a {@link PresentationSession} object.
+     */
     public CryptoObject(@NonNull PresentationSession session) {
         mCrypto = session;
+    }
+
+    /**
+     * Create from a {@link KeyAgreement} object.
+     *
+     * @param keyAgreement a {@link KeyAgreement} object.
+     */
+    @FlaggedApi(FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT)
+    public CryptoObject(@NonNull KeyAgreement keyAgreement) {
+        mCrypto = keyAgreement;
     }
 
     /**
      * Get {@link Signature} object.
      * @return {@link Signature} object or null if this doesn't contain one.
      */
-    public Signature getSignature() {
+    public @Nullable Signature getSignature() {
         return mCrypto instanceof Signature ? (Signature) mCrypto : null;
     }
 
@@ -74,7 +109,7 @@ public class CryptoObject {
      * Get {@link Cipher} object.
      * @return {@link Cipher} object or null if this doesn't contain one.
      */
-    public Cipher getCipher() {
+    public @Nullable Cipher getCipher() {
         return mCrypto instanceof Cipher ? (Cipher) mCrypto : null;
     }
 
@@ -82,7 +117,7 @@ public class CryptoObject {
      * Get {@link Mac} object.
      * @return {@link Mac} object or null if this doesn't contain one.
      */
-    public Mac getMac() {
+    public @Nullable Mac getMac() {
         return mCrypto instanceof Mac ? (Mac) mCrypto : null;
     }
 
@@ -92,7 +127,7 @@ public class CryptoObject {
      * @deprecated Use {@link PresentationSession} instead of {@link IdentityCredential}.
      */
     @Deprecated
-    public IdentityCredential getIdentityCredential() {
+    public @Nullable IdentityCredential getIdentityCredential() {
         return mCrypto instanceof IdentityCredential ? (IdentityCredential) mCrypto : null;
     }
 
@@ -100,15 +135,26 @@ public class CryptoObject {
      * Get {@link PresentationSession} object.
      * @return {@link PresentationSession} object or null if this doesn't contain one.
      */
-    public PresentationSession getPresentationSession() {
+    public @Nullable PresentationSession getPresentationSession() {
         return mCrypto instanceof PresentationSession ? (PresentationSession) mCrypto : null;
+    }
+
+    /**
+     * Get {@link KeyAgreement} object. A key-agreement protocol is a protocol whereby
+     * two or more parties can agree on a shared secret using public key cryptography.
+     *
+     * @return {@link KeyAgreement} object or null if this doesn't contain one.
+     */
+    @FlaggedApi(FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT)
+    public @Nullable KeyAgreement getKeyAgreement() {
+        return mCrypto instanceof KeyAgreement ? (KeyAgreement) mCrypto : null;
     }
 
     /**
      * @hide
      * @return the opId associated with this object or 0 if none
      */
-    public final long getOpId() {
+    public long getOpId() {
         if (mCrypto == null) {
             return 0;
         } else if (mCrypto instanceof IdentityCredential) {

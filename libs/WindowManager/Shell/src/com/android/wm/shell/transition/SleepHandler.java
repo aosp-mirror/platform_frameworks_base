@@ -19,12 +19,11 @@ package com.android.wm.shell.transition;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
+import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
-
-import java.util.ArrayList;
 
 /**
  * A Simple handler that tracks SLEEP transitions. We track them specially since we (ab)use these
@@ -34,30 +33,25 @@ import java.util.ArrayList;
  * don't register it like a normal handler.
  */
 class SleepHandler implements Transitions.TransitionHandler {
-    final ArrayList<IBinder> mSleepTransitions = new ArrayList<>();
-
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        mSleepTransitions.remove(transition);
-        startTransaction.apply();
-        finishCallback.onTransitionFinished(null, null);
-        return true;
+        if (info.hasChangesOrSideEffects()) {
+            Slog.e(Transitions.TAG, "Real changes included in a SLEEP transition");
+            return false;
+        } else {
+            startTransaction.apply();
+            finishCallback.onTransitionFinished(null);
+            return true;
+        }
     }
 
     @Override
     @Nullable
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        mSleepTransitions.add(transition);
         return new WindowContainerTransaction();
-    }
-
-    @Override
-    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
-            @Nullable SurfaceControl.Transaction finishTransaction) {
-        mSleepTransitions.remove(transition);
     }
 }

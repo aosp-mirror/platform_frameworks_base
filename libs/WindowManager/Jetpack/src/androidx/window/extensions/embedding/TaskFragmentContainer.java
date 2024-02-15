@@ -24,6 +24,7 @@ import android.app.WindowConfiguration.WindowingMode;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Size;
 import android.window.TaskFragmentAnimationParams;
@@ -102,6 +103,16 @@ class TaskFragmentContainer {
      */
     private final List<IBinder> mActivitiesToFinishOnExit = new ArrayList<>();
 
+    @Nullable
+    private final String mOverlayTag;
+
+    /**
+     * The launch options that was used to create this container. Must not {@link Bundle#isEmpty()}
+     * for {@link #isOverlay()} container.
+     */
+    @NonNull
+    private final Bundle mLaunchOptions = new Bundle();
+
     /** Indicates whether the container was cleaned up after the last activity was removed. */
     private boolean mIsFinished;
 
@@ -157,15 +168,41 @@ class TaskFragmentContainer {
      */
     private boolean mHasCrossProcessActivities;
 
+    /** Whether this TaskFragment enable isolated navigation. */
+    private boolean mIsIsolatedNavigationEnabled;
+
+    /**
+     * Whether to apply dimming on the parent Task that was requested last.
+     */
+    private boolean mLastDimOnTask;
+
+    /**
+     * @see #TaskFragmentContainer(Activity, Intent, TaskContainer, SplitController,
+     * TaskFragmentContainer, String, Bundle)
+     */
+    TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
+                          @Nullable Intent pendingAppearedIntent,
+                          @NonNull TaskContainer taskContainer,
+                          @NonNull SplitController controller,
+                          @Nullable TaskFragmentContainer pairedPrimaryContainer) {
+        this(pendingAppearedActivity, pendingAppearedIntent, taskContainer,
+                controller, pairedPrimaryContainer, null /* overlayTag */,
+                null /* launchOptions */);
+    }
+
     /**
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
      * @param pairedPrimaryContainer    when it is set, the new container will be add right above it
+     * @param overlayTag                Sets to indicate this taskFragment is an overlay container
+     * @param launchOptions             The launch options to create this container. Must not be
+     *                                  {@code null} for an overlay container
      */
     TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
             @Nullable Intent pendingAppearedIntent, @NonNull TaskContainer taskContainer,
             @NonNull SplitController controller,
-            @Nullable TaskFragmentContainer pairedPrimaryContainer) {
+            @Nullable TaskFragmentContainer pairedPrimaryContainer, @Nullable String overlayTag,
+            @Nullable Bundle launchOptions) {
         if ((pendingAppearedActivity == null && pendingAppearedIntent == null)
                 || (pendingAppearedActivity != null && pendingAppearedIntent != null)) {
             throw new IllegalArgumentException(
@@ -174,29 +211,39 @@ class TaskFragmentContainer {
         mController = controller;
         mToken = new Binder("TaskFragmentContainer");
         mTaskContainer = taskContainer;
+        mOverlayTag = overlayTag;
+        if (overlayTag != null) {
+            Objects.requireNonNull(launchOptions);
+        }
+        if (launchOptions != null) {
+            mLaunchOptions.putAll(launchOptions);
+        }
+
         if (pairedPrimaryContainer != null) {
             // The TaskFragment will be positioned right above the paired container.
             if (pairedPrimaryContainer.getTaskContainer() != taskContainer) {
                 throw new IllegalArgumentException(
                         "pairedPrimaryContainer must be in the same Task");
             }
-            final int primaryIndex = taskContainer.mContainers.indexOf(pairedPrimaryContainer);
-            taskContainer.mContainers.add(primaryIndex + 1, this);
+            final int primaryIndex = taskContainer.indexOf(pairedPrimaryContainer);
+            taskContainer.addTaskFragmentContainer(primaryIndex + 1, this);
         } else if (pendingAppearedActivity != null) {
             // The TaskFragment will be positioned right above the pending appeared Activity. If any
             // existing TaskFragment is empty with pending Intent, it is likely that the Activity of
             // the pending Intent hasn't been created yet, so the new Activity should be below the
             // empty TaskFragment.
-            int i = taskContainer.mContainers.size() - 1;
+            final List<TaskFragmentContainer> containers =
+                    taskContainer.getTaskFragmentContainers();
+            int i = containers.size() - 1;
             for (; i >= 0; i--) {
-                final TaskFragmentContainer container = taskContainer.mContainers.get(i);
+                final TaskFragmentContainer container = containers.get(i);
                 if (!container.isEmpty() || container.getPendingAppearedIntent() == null) {
                     break;
                 }
             }
-            taskContainer.mContainers.add(i + 1, this);
+            taskContainer.addTaskFragmentContainer(i + 1, this);
         } else {
-            taskContainer.mContainers.add(this);
+            taskContainer.addTaskFragmentContainer(this);
         }
         if (pendingAppearedActivity != null) {
             addPendingAppearedActivity(pendingAppearedActivity);
@@ -215,6 +262,30 @@ class TaskFragmentContainer {
     /** List of non-finishing activities that belong to this container and live in this process. */
     @NonNull
     List<Activity> collectNonFinishingActivities() {
+        final List<Activity> activities = collectNonFinishingActivities(false /* checkIfStable */);
+        if (activities == null) {
+            throw new IllegalStateException(
+                    "Result activities should never be null when checkIfstable is false.");
+        }
+        return activities;
+    }
+
+    /**
+     * Collects non-finishing activities that belong to this container and live in this process.
+     *
+     * @param checkIfStable if {@code true}, returns {@code null} when the container is in an
+     *                      intermediate state.
+     * @return List of non-finishing activities that belong to this container and live in this
+     * process, {@code null} if checkIfStable is {@code true} and the container is in an
+     * intermediate state.
+     */
+    @Nullable
+    List<Activity> collectNonFinishingActivities(boolean checkIfStable) {
+        if (checkIfStable
+                && (mInfo == null || mInfo.isEmpty() || !mPendingAppearedActivities.isEmpty())) {
+            return null;
+        }
+
         final List<Activity> allActivities = new ArrayList<>();
         if (mInfo != null) {
             // Add activities reported from the server.
@@ -222,6 +293,15 @@ class TaskFragmentContainer {
                 final Activity activity = mController.getActivity(token);
                 if (activity != null && !activity.isFinishing()) {
                     allActivities.add(activity);
+                } else {
+                    if (checkIfStable) {
+                        // Return null except for a special case when the activity is started in
+                        // background.
+                        if (activity == null && !mTaskContainer.isVisible()) {
+                            continue;
+                        }
+                        return null;
+                    }
                 }
             }
         }
@@ -275,9 +355,19 @@ class TaskFragmentContainer {
         return false;
     }
 
-    @NonNull
-    ActivityStack toActivityStack() {
-        return new ActivityStack(collectNonFinishingActivities(), isEmpty(), mToken);
+    /**
+     * Returns the ActivityStack representing this container.
+     *
+     * @return ActivityStack representing this container if it is in a stable state. {@code null} if
+     * in an intermediate state.
+     */
+    @Nullable
+    ActivityStack toActivityStackIfStable() {
+        final List<Activity> activities = collectNonFinishingActivities(true /* checkIfStable */);
+        if (activities == null) {
+            return null;
+        }
+        return new ActivityStack(activities, isEmpty(), mToken, mOverlayTag);
     }
 
     /** Adds the activity that will be reparented to this container. */
@@ -526,6 +616,9 @@ class TaskFragmentContainer {
      * Removes all activities that belong to this process and finishes other containers/activities
      * configured to finish together.
      */
+    // Suppress GuardedBy warning because lint ask to mark this method as
+    // @GuardedBy(container.mController.mLock), which is mLock itself
+    @SuppressWarnings("GuardedBy")
     @GuardedBy("mController.mLock")
     void finish(boolean shouldFinishDependent, @NonNull SplitPresenter presenter,
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
@@ -741,6 +834,26 @@ class TaskFragmentContainer {
         mLastCompanionTaskFragment = fragmentToken;
     }
 
+    /** Returns whether to enable isolated navigation or not. */
+    boolean isIsolatedNavigationEnabled() {
+        return mIsIsolatedNavigationEnabled;
+    }
+
+    /** Sets whether to enable isolated navigation or not. */
+    void setIsolatedNavigationEnabled(boolean isolatedNavigationEnabled) {
+        mIsIsolatedNavigationEnabled = isolatedNavigationEnabled;
+    }
+
+    /** Sets whether to apply dim on the parent Task. */
+    void setLastDimOnTask(boolean lastDimOnTask) {
+        mLastDimOnTask = lastDimOnTask;
+    }
+
+    /** Returns whether to apply dim on the parent Task. */
+    boolean isLastDimOnTask() {
+        return mLastDimOnTask;
+    }
+
     /**
      * Adds the pending appeared activity that has requested to be launched in this task fragment.
      * @see android.app.ActivityClient#isRequestedToLaunchInTaskFragment
@@ -818,6 +931,31 @@ class TaskFragmentContainer {
         return mTaskContainer.indexOf(this) > mTaskContainer.indexOf(other);
     }
 
+    /** Returns whether this taskFragment container is an overlay container. */
+    boolean isOverlay() {
+        return mOverlayTag != null;
+    }
+
+    /**
+     * Returns the tag specified in launch options. {@code null} if this taskFragment container is
+     * not an overlay container.
+     */
+    @Nullable
+    String getOverlayTag() {
+        return mOverlayTag;
+    }
+
+    /**
+     * Returns the options that was used to launch this {@link TaskFragmentContainer}.
+     * {@link Bundle#isEmpty()} means there's no launch option for this container.
+     * <p>
+     * Note that WM Jetpack owns the logic. The WM Extension library must not modify this object.
+     */
+    @NonNull
+    Bundle getLaunchOptions() {
+        return mLaunchOptions;
+    }
+
     @Override
     public String toString() {
         return toString(true /* includeContainersToFinishOnExit */);
@@ -836,6 +974,7 @@ class TaskFragmentContainer {
                 + " topNonFinishingActivity=" + getTopNonFinishingActivity()
                 + " runningActivityCount=" + getRunningActivityCount()
                 + " isFinished=" + mIsFinished
+                + " overlayTag=" + mOverlayTag
                 + " lastRequestedBounds=" + mLastRequestedBounds
                 + " pendingAppearedActivities=" + mPendingAppearedActivities
                 + (includeContainersToFinishOnExit ? " containersToFinishOnExit="

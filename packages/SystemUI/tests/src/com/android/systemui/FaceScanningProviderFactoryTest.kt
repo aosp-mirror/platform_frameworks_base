@@ -25,9 +25,10 @@ import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.decor.FaceScanningProviderFactory
-import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.log.ScreenDecorationsLogger
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -53,7 +54,7 @@ class FaceScanningProviderFactoryTest : SysuiTestCase() {
 
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
-    @Mock private lateinit var display: Display
+    private val facePropertyRepository = FakeFacePropertyRepository()
 
     private val displayId = 2
 
@@ -87,15 +88,16 @@ class FaceScanningProviderFactoryTest : SysuiTestCase() {
                 statusBarStateController,
                 keyguardUpdateMonitor,
                 mock(Executor::class.java),
-                ScreenDecorationsLogger(logcatLogBuffer("FaceScanningProviderFactoryTest"))
+                ScreenDecorationsLogger(logcatLogBuffer("FaceScanningProviderFactoryTest")),
+                facePropertyRepository,
             )
 
-        whenever(authController.faceSensorLocation).thenReturn(Point(10, 10))
+        facePropertyRepository.setSensorLocation(Point(10, 10))
     }
 
     @Test
     fun shouldNotShowFaceScanningAnimationIfFaceIsNotEnrolled() {
-        whenever(keyguardUpdateMonitor.isFaceEnrolled).thenReturn(false)
+        whenever(keyguardUpdateMonitor.isFaceEnabledAndEnrolled).thenReturn(false)
         whenever(authController.isShowing).thenReturn(true)
 
         assertThat(underTest.shouldShowFaceScanningAnim()).isFalse()
@@ -103,7 +105,7 @@ class FaceScanningProviderFactoryTest : SysuiTestCase() {
 
     @Test
     fun shouldShowFaceScanningAnimationIfBiometricPromptIsShowing() {
-        whenever(keyguardUpdateMonitor.isFaceEnrolled).thenReturn(true)
+        whenever(keyguardUpdateMonitor.isFaceEnabledAndEnrolled).thenReturn(true)
         whenever(authController.isShowing).thenReturn(true)
 
         assertThat(underTest.shouldShowFaceScanningAnim()).isTrue()
@@ -111,7 +113,7 @@ class FaceScanningProviderFactoryTest : SysuiTestCase() {
 
     @Test
     fun shouldShowFaceScanningAnimationIfKeyguardFaceDetectionIsShowing() {
-        whenever(keyguardUpdateMonitor.isFaceEnrolled).thenReturn(true)
+        whenever(keyguardUpdateMonitor.isFaceEnabledAndEnrolled).thenReturn(true)
         whenever(keyguardUpdateMonitor.isFaceDetectionRunning).thenReturn(true)
 
         assertThat(underTest.shouldShowFaceScanningAnim()).isTrue()

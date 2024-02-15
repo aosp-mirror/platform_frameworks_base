@@ -42,16 +42,25 @@ public final class SuspendParams {
     private static final String TAG_DIALOG_INFO = "dialog-info";
     private static final String TAG_APP_EXTRAS = "app-extras";
     private static final String TAG_LAUNCHER_EXTRAS = "launcher-extras";
+    private static final String ATTR_QUARANTINED = "quarantined";
 
-    private final SuspendDialogInfo dialogInfo;
-    private final PersistableBundle appExtras;
-    private final PersistableBundle launcherExtras;
+    private final SuspendDialogInfo mDialogInfo;
+    private final PersistableBundle mAppExtras;
+    private final PersistableBundle mLauncherExtras;
+
+    private final boolean mQuarantined;
 
     public SuspendParams(SuspendDialogInfo dialogInfo, PersistableBundle appExtras,
             PersistableBundle launcherExtras) {
-        this.dialogInfo = dialogInfo;
-        this.appExtras = appExtras;
-        this.launcherExtras = launcherExtras;
+        this(dialogInfo, appExtras, launcherExtras, false /* quarantined */);
+    }
+
+    public SuspendParams(SuspendDialogInfo dialogInfo, PersistableBundle appExtras,
+            PersistableBundle launcherExtras, boolean quarantined) {
+        this.mDialogInfo = dialogInfo;
+        this.mAppExtras = appExtras;
+        this.mLauncherExtras = launcherExtras;
+        this.mQuarantined = quarantined;
     }
 
     @Override
@@ -63,13 +72,16 @@ public final class SuspendParams {
             return false;
         }
         final SuspendParams other = (SuspendParams) obj;
-        if (!Objects.equals(dialogInfo, other.dialogInfo)) {
+        if (!Objects.equals(mDialogInfo, other.mDialogInfo)) {
             return false;
         }
-        if (!BaseBundle.kindofEquals(appExtras, other.appExtras)) {
+        if (!BaseBundle.kindofEquals(mAppExtras, other.mAppExtras)) {
             return false;
         }
-        if (!BaseBundle.kindofEquals(launcherExtras, other.launcherExtras)) {
+        if (!BaseBundle.kindofEquals(mLauncherExtras, other.mLauncherExtras)) {
+            return false;
+        }
+        if (mQuarantined != other.mQuarantined) {
             return false;
         }
         return true;
@@ -77,9 +89,10 @@ public final class SuspendParams {
 
     @Override
     public int hashCode() {
-        int hashCode = Objects.hashCode(dialogInfo);
-        hashCode = 31 * hashCode + ((appExtras != null) ? appExtras.size() : 0);
-        hashCode = 31 * hashCode + ((launcherExtras != null) ? launcherExtras.size() : 0);
+        int hashCode = Objects.hashCode(mDialogInfo);
+        hashCode = 31 * hashCode + ((mAppExtras != null) ? mAppExtras.size() : 0);
+        hashCode = 31 * hashCode + ((mLauncherExtras != null) ? mLauncherExtras.size() : 0);
+        hashCode = 31 * hashCode + Boolean.hashCode(mQuarantined);
         return hashCode;
     }
 
@@ -89,25 +102,26 @@ public final class SuspendParams {
      * @param out the {@link XmlSerializer} object
      */
     public void saveToXml(TypedXmlSerializer out) throws IOException {
-        if (dialogInfo != null) {
+        out.attributeBoolean(null, ATTR_QUARANTINED, mQuarantined);
+        if (mDialogInfo != null) {
             out.startTag(null, TAG_DIALOG_INFO);
-            dialogInfo.saveToXml(out);
+            mDialogInfo.saveToXml(out);
             out.endTag(null, TAG_DIALOG_INFO);
         }
-        if (appExtras != null) {
+        if (mAppExtras != null) {
             out.startTag(null, TAG_APP_EXTRAS);
             try {
-                appExtras.saveToXml(out);
+                mAppExtras.saveToXml(out);
             } catch (XmlPullParserException e) {
                 Slog.e(LOG_TAG, "Exception while trying to write appExtras."
                         + " Will be lost on reboot", e);
             }
             out.endTag(null, TAG_APP_EXTRAS);
         }
-        if (launcherExtras != null) {
+        if (mLauncherExtras != null) {
             out.startTag(null, TAG_LAUNCHER_EXTRAS);
             try {
-                launcherExtras.saveToXml(out);
+                mLauncherExtras.saveToXml(out);
             } catch (XmlPullParserException e) {
                 Slog.e(LOG_TAG, "Exception while trying to write launcherExtras."
                         + " Will be lost on reboot", e);
@@ -126,6 +140,8 @@ public final class SuspendParams {
         SuspendDialogInfo readDialogInfo = null;
         PersistableBundle readAppExtras = null;
         PersistableBundle readLauncherExtras = null;
+
+        final boolean quarantined = in.getAttributeBoolean(null, ATTR_QUARANTINED, false);
 
         final int currentDepth = in.getDepth();
         int type;
@@ -157,18 +173,22 @@ public final class SuspendParams {
             Slog.e(LOG_TAG, "Exception while trying to parse SuspendParams,"
                     + " some fields may default", e);
         }
-        return new SuspendParams(readDialogInfo, readAppExtras, readLauncherExtras);
+        return new SuspendParams(readDialogInfo, readAppExtras, readLauncherExtras, quarantined);
     }
 
     public SuspendDialogInfo getDialogInfo() {
-        return dialogInfo;
+        return mDialogInfo;
     }
 
     public PersistableBundle getAppExtras() {
-        return appExtras;
+        return mAppExtras;
     }
 
     public PersistableBundle getLauncherExtras() {
-        return launcherExtras;
+        return mLauncherExtras;
+    }
+
+    public boolean isQuarantined() {
+        return mQuarantined;
     }
 }

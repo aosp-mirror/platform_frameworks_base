@@ -17,6 +17,8 @@
 package android.view.inputmethod;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
+import static android.view.inputmethod.Flags.initiationWithoutInputConnection;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_IMMEDIATE;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_MONITOR;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.DISPLAY_ID;
@@ -36,9 +38,12 @@ import static android.view.inputmethod.InputMethodManagerProto.SERVED_VIEW;
 import static com.android.internal.inputmethod.StartInputReason.BOUND_TO_IMMS;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.DisplayContext;
 import android.annotation.DrawableRes;
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -50,6 +55,7 @@ import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -58,7 +64,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
@@ -99,12 +104,12 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
-import android.widget.Editor;
 import android.window.ImeOnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.DirectBootAwareness;
+import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IInputMethodSession;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
@@ -121,6 +126,8 @@ import com.android.internal.view.IInputMethodManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -129,6 +136,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -350,7 +358,11 @@ public final class InputMethodManager {
      * @hide
      */
     public static void ensureDefaultInstanceForDefaultDisplayIfNecessary() {
-        forContextInternal(Display.DEFAULT_DISPLAY, Looper.getMainLooper());
+        // Skip this call if we are in system_server, as the system code should not use this
+        // deprecated instance.
+        if (!ActivityThread.isSystem()) {
+            forContextInternal(Display.DEFAULT_DISPLAY, Looper.getMainLooper());
+        }
     }
 
     private static final Object sLock = new Object();
@@ -421,6 +433,23 @@ public final class InputMethodManager {
      */
     private static final boolean OPTIMIZE_NONEDITABLE_VIEWS =
             SystemProperties.getBoolean("debug.imm.optimize_noneditable_views", true);
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "HANDWRITING_DELEGATE_FLAG_" }, value = {
+            HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HandwritingDelegateFlags {}
+
+    /**
+     * Flag indicating that views from the default home screen ({@link Intent#CATEGORY_HOME}) may
+     * act as a handwriting delegator for the delegate editor view. If set, views from the home
+     * screen package will be trusted for handwriting delegation, in addition to views in the {@code
+     * delegatorPackageName} passed to {@link #acceptStylusHandwritingDelegation(View, String,
+     * int)}.
+     */
+    @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
+    public static final int HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED = 0x0001;
 
     /**
      * @deprecated Use {@link IInputMethodManagerGlobalInvoker} instead.
@@ -536,6 +565,20 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     Rect mCursorRect = new Rect();
 
+    /** Cached value for {@link #isStylusHandwritingAvailable} for userId. */
+    @GuardedBy("mH")
+    private PropertyInvalidatedCache<Integer, Boolean> mStylusHandwritingAvailableCache;
+
+    /** Cached value for {@link #isConnectionlessStylusHandwritingAvailable} for userId. */
+    @GuardedBy("mH")
+    private PropertyInvalidatedCache<Integer, Boolean>
+            mConnectionlessStylusHandwritingAvailableCache;
+
+    private static final String CACHE_KEY_STYLUS_HANDWRITING_PROPERTY =
+            "cache_key.system_server.stylus_handwriting";
+    private static final String CACHE_KEY_CONNECTIONLESS_STYLUS_HANDWRITING_PROPERTY =
+            "cache_key.system_server.connectionless_stylus_handwriting";
+
     @GuardedBy("mH")
     private int mCursorSelStart;
     @GuardedBy("mH")
@@ -560,18 +603,6 @@ public final class InputMethodManager {
      */
     @GuardedBy("mH")
     private CursorAnchorInfo mCursorAnchorInfo = null;
-
-    /**
-     * A special {@link Matrix} that can be provided by the system when this instance is running
-     * inside a virtual display.
-     *
-     * <p>If this is non-{@code null}, {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}
-     * should be adjusted with this {@link Matrix}.</p>
-     *
-     * <p>{@code null} when not used.</p>
-     */
-    @GuardedBy("mH")
-    private Matrix mVirtualDisplayToScreenMatrix = null;
 
     // -----------------------------------------------------------
 
@@ -659,8 +690,27 @@ public final class InputMethodManager {
     private static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
     private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
     private static final int MSG_SET_INTERACTIVE = 13;
-    private static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
     private static final int MSG_ON_SHOW_REQUESTED = 31;
+
+    /**
+     * Calling this will invalidate Local stylus handwriting availability Cache which
+     * forces the next query in any process to recompute the cache.
+     * @hide
+     */
+    public static void invalidateLocalStylusHandwritingAvailabilityCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_STYLUS_HANDWRITING_PROPERTY);
+    }
+
+    /**
+     * Calling this will invalidate the local connectionless stylus handwriting availability cache,
+     * which forces the next query in any process to recompute the cache.
+     *
+     * @hide
+     */
+    public static void invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches() {
+        PropertyInvalidatedCache.invalidateCache(
+                CACHE_KEY_CONNECTIONLESS_STYLUS_HANDWRITING_PROPERTY);
+    }
 
     private static boolean isAutofillUIShowing(View servedView) {
         AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
@@ -1017,7 +1067,6 @@ public final class InputMethodManager {
                         mCurMethod = res.method; // for @UnsupportedAppUsage
                         mCurBindState = new BindState(res);
                         mCurId = res.id; // for @UnsupportedAppUsage
-                        mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
                     }
                     startInputInner(StartInputReason.BOUND_TO_IMMS, null, 0, 0, 0);
                     return;
@@ -1171,24 +1220,33 @@ public final class InputMethodManager {
                         mActive = interactive;
                         mFullscreenMode = fullscreen;
                         if (interactive) {
+                            // Find the next view focus to start the input connection when the
+                            // device was interactive.
                             final View rootView =
                                     mCurRootView != null ? mCurRootView.getView() : null;
                             if (rootView == null) {
+                                // No window focused or view was removed, ignore request.
                                 return;
                             }
-                            // Find the next view focus to start the input connection when the
-                            // device was interactive.
                             final ViewRootImpl currentViewRootImpl = mCurRootView;
+                            // Post this on UI thread as required for view focus code.
                             rootView.post(() -> {
                                 synchronized (mH) {
                                     if (mCurRootView != currentViewRootImpl) {
+                                        // Focused window changed since posting, ignore request.
                                         return;
                                     }
                                 }
-                                final View focusedView = currentViewRootImpl.getView().findFocus();
+                                final View curRootView = currentViewRootImpl.getView();
+                                if (curRootView == null) {
+                                    // View was removed, ignore request.
+                                    return;
+                                }
+                                final View focusedView = curRootView.findFocus();
                                 onViewFocusChangedInternal(focusedView, focusedView != null);
                             });
                         } else {
+                            // Finish input connection when device becomes non-interactive.
                             finishInputLocked();
                             if (isImeSessionAvailableLocked()) {
                                 mCurBindState.mImeSession.finishInput();
@@ -1222,43 +1280,6 @@ public final class InputMethodManager {
                     }
                     if (ic != null) {
                         ic.dispatchReportFullscreenMode(fullscreen);
-                    }
-                    return;
-                }
-                case MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX: {
-                    final float[] matrixValues = (float[]) msg.obj;
-                    final int bindSequence = msg.arg1;
-                    synchronized (mH) {
-                        if (getBindSequenceLocked() != bindSequence) {
-                            return;
-                        }
-                        if (matrixValues == null || mVirtualDisplayToScreenMatrix == null) {
-                            // Either InputBoundResult#mVirtualDisplayToScreenMatrixValues is null
-                            // OR this app is unbound from the parent VirtualDisplay. In this case,
-                            // calling updateCursorAnchorInfo() isn't safe. Only clear the matrix.
-                            mVirtualDisplayToScreenMatrix = null;
-                            return;
-                        }
-
-                        final float[] currentValues = new float[9];
-                        mVirtualDisplayToScreenMatrix.getValues(currentValues);
-                        if (Arrays.equals(currentValues, matrixValues)) {
-                            return;
-                        }
-                        mVirtualDisplayToScreenMatrix.setValues(matrixValues);
-
-                        if (mCursorAnchorInfo == null || !isImeSessionAvailableLocked()
-                                || mServedInputConnection == null) {
-                            return;
-                        }
-                        if (!mServedInputConnection.isCursorAnchorInfoMonitoring()) {
-                            return;
-                        }
-                        // Since the host VirtualDisplay is moved, we need to issue
-                        // IMS#updateCursorAnchorInfo() again.
-                        mCurBindState.mImeSession.updateCursorAnchorInfo(
-                                CursorAnchorInfo.createForAdditionalParentMatrix(
-                                        mCursorAnchorInfo, mVirtualDisplayToScreenMatrix));
                     }
                     return;
                 }
@@ -1337,12 +1358,6 @@ public final class InputMethodManager {
         public void reportFullscreenMode(boolean fullscreen) {
             mH.obtainMessage(MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, 0)
                     .sendToTarget();
-        }
-
-        @Override
-        public void updateVirtualDisplayToScreenMatrix(int bindSequence, float[] matrixValues) {
-            mH.obtainMessage(MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX, bindSequence, 0,
-                    matrixValues).sendToTarget();
         }
 
         @Override
@@ -1551,10 +1566,11 @@ public final class InputMethodManager {
      * Returns {@code true} if currently selected IME supports Stylus handwriting & is enabled.
      * If the method returns {@code false}, {@link #startStylusHandwriting(View)} shouldn't be
      * called and Stylus touch should continue as normal touch input.
+     *
      * @see #startStylusHandwriting(View)
      */
     public boolean isStylusHandwritingAvailable() {
-        return isStylusHandwritingAvailableAsUser(UserHandle.myUserId());
+        return isStylusHandwritingAvailableAsUser(UserHandle.of(UserHandle.myUserId()));
     }
 
     /**
@@ -1565,20 +1581,61 @@ public final class InputMethodManager {
      * called and Stylus touch should continue as normal touch input.</p>
      *
      * <p>{@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required when and only when
-     * {@code userId} is different from the user id of the current process.</p>
+     * {@code user} is different from the user of the current process.</p>
      *
      * @see #startStylusHandwriting(View)
-     * @param userId user ID to query.
+     * @param user UserHandle to query.
      * @hide
      */
+    @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
-    public boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
+    @TestApi
+    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
+    @SuppressLint("UserHandle")
+    public boolean isStylusHandwritingAvailableAsUser(@NonNull UserHandle user) {
         final Context fallbackContext = ActivityThread.currentApplication();
         if (fallbackContext == null) {
             return false;
         }
+        boolean isAvailable;
+        synchronized (mH) {
+            if (mStylusHandwritingAvailableCache == null) {
+                mStylusHandwritingAvailableCache = new PropertyInvalidatedCache<>(
+                        4 /* maxEntries */, CACHE_KEY_STYLUS_HANDWRITING_PROPERTY) {
+                    @Override
+                    public Boolean recompute(Integer userId) {
+                        return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(
+                                userId, /* connectionless= */ false);
+                    }
+                };
+            }
+            isAvailable = mStylusHandwritingAvailableCache.query(user.getIdentifier());
+        }
+        return isAvailable;
+    }
 
-        return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(userId);
+    /**
+     * Returns {@code true} if the currently selected IME supports connectionless stylus handwriting
+     * sessions and is enabled.
+     */
+    @FlaggedApi(Flags.FLAG_CONNECTIONLESS_HANDWRITING)
+    public boolean isConnectionlessStylusHandwritingAvailable() {
+        if (ActivityThread.currentApplication() == null) {
+            return false;
+        }
+        synchronized (mH) {
+            if (mConnectionlessStylusHandwritingAvailableCache == null) {
+                mConnectionlessStylusHandwritingAvailableCache = new PropertyInvalidatedCache<>(
+                        /* maxEntries= */ 4, CACHE_KEY_CONNECTIONLESS_STYLUS_HANDWRITING_PROPERTY) {
+                    @Override
+                    public Boolean recompute(@NonNull Integer userId) {
+                        return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(
+                                userId, /* connectionless= */ true);
+                    }
+                };
+            }
+            return mConnectionlessStylusHandwritingAvailableCache.query(UserHandle.myUserId());
+        }
     }
 
     /**
@@ -1668,16 +1725,20 @@ public final class InputMethodManager {
      * Returns the list of enabled input methods for the specified user.
      *
      * <p>{@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required when and only when
-     * {@code userId} is different from the user id of the current process.</p>
+     * {@code user} is different from the user of the current process.</p>
      *
-     * @param userId user ID to query
+     * @param user UserHandle to query
      * @return {@link List} of {@link InputMethodInfo}.
-     * @see #getEnabledInputMethodSubtypeListAsUser(String, boolean, int)
+     * @see #getEnabledInputMethodSubtypeListAsUser(String, boolean, UserHandle)
      * @hide
      */
+    @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
-    public List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
-        return IInputMethodManagerGlobalInvoker.getEnabledInputMethodList(userId);
+    @TestApi
+    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
+    @SuppressLint("UserHandle")
+    public List<InputMethodInfo> getEnabledInputMethodListAsUser(@NonNull UserHandle user) {
+        return IInputMethodManagerGlobalInvoker.getEnabledInputMethodList(user.getIdentifier());
     }
 
     /**
@@ -1706,19 +1767,24 @@ public final class InputMethodManager {
      *
      * @param imeId IME ID to be queried about.
      * @param allowsImplicitlyEnabledSubtypes {@code true} to include implicitly enabled subtypes.
-     * @param userId user ID to be queried about.
+     * @param user UserHandle to be queried about.
      *               {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required if this is
      *               different from the calling process user ID.
      * @return {@link List} of {@link InputMethodSubtype}.
-     * @see #getEnabledInputMethodListAsUser(int)
+     * @see #getEnabledInputMethodListAsUser(UserHandle)
      * @hide
      */
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
+    @TestApi
+    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
+    @SuppressLint("UserHandle")
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
-            @NonNull String imeId, boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
+            @NonNull String imeId, boolean allowsImplicitlyEnabledSubtypes,
+            @NonNull UserHandle user) {
         return IInputMethodManagerGlobalInvoker.getEnabledInputMethodSubtypeList(
-                Objects.requireNonNull(imeId), allowsImplicitlyEnabledSubtypes, userId);
+                Objects.requireNonNull(imeId), allowsImplicitlyEnabledSubtypes,
+                user.getIdentifier());
     }
 
     /**
@@ -1925,12 +1991,15 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     @GuardedBy("mH")
     void finishInputLocked() {
-        mVirtualDisplayToScreenMatrix = null;
         View clearedView = null;
         mNextServedView = null;
         if (mServedView != null) {
             clearedView = mServedView;
             mServedView = null;
+            if (initiationWithoutInputConnection() && clearedView.getViewRootImpl() != null) {
+                clearedView.getViewRootImpl().getHandwritingInitiator()
+                        .clearFocusedView(clearedView);
+            }
         }
         if (clearedView != null) {
             if (DEBUG) {
@@ -2004,6 +2073,14 @@ public final class InputMethodManager {
         }
     }
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "SHOW_" }, value = {
+            SHOW_IMPLICIT,
+            SHOW_FORCED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ShowFlags {}
+
     /**
      * Flag for {@link #showSoftInput} to indicate that this is an implicit
      * request to show the input window, not as the result of a direct request
@@ -2018,7 +2095,7 @@ public final class InputMethodManager {
      *
      * @deprecated Use {@link #showSoftInput} without this flag instead. Using this flag can lead
      * to the soft input remaining visible even when the calling application is closed. The
-     * use of this flag can make the soft input remains visible globally. Starting in
+     * use of this flag can make the soft input remain visible globally. Starting in
      * {@link Build.VERSION_CODES#TIRAMISU Android T}, this flag only has an effect while the
      * caller is currently focused.
      */
@@ -2035,10 +2112,8 @@ public final class InputMethodManager {
      *             {@link View#isFocused view focus}, and its containing window has
      *             {@link View#hasWindowFocus window focus}. Otherwise the call fails and
      *             returns {@code false}.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #SHOW_IMPLICIT} bit set.
      */
-    public boolean showSoftInput(View view, int flags) {
+    public boolean showSoftInput(View view, @ShowFlags int flags) {
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
@@ -2101,24 +2176,25 @@ public final class InputMethodManager {
      *             {@link View#isFocused view focus}, and its containing window has
      *             {@link View#hasWindowFocus window focus}. Otherwise the call fails and
      *             returns {@code false}.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #SHOW_IMPLICIT} bit set.
      * @param resultReceiver If non-null, this will be called by the IME when
      * it has processed your request to tell you what it has done.  The result
      * code you receive may be either {@link #RESULT_UNCHANGED_SHOWN},
      * {@link #RESULT_UNCHANGED_HIDDEN}, {@link #RESULT_SHOWN}, or
      * {@link #RESULT_HIDDEN}.
      */
-    public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver) {
+    public boolean showSoftInput(View view, @ShowFlags int flags, ResultReceiver resultReceiver) {
         return showSoftInput(view, null /* statsToken */, flags, resultReceiver,
                 SoftInputShowHideReason.SHOW_SOFT_INPUT);
     }
 
-    private boolean showSoftInput(View view, @Nullable ImeTracker.Token statsToken, int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+    private boolean showSoftInput(View view, @Nullable ImeTracker.Token statsToken,
+            @ShowFlags int flags, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         if (statsToken == null) {
+            // TODO(b/303041796): handle tracking physical keyboard and DPAD as user interactions
             statsToken = ImeTracker.forLogging().onRequestShow(null /* component */,
-                    Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT, reason);
+                    Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT, reason,
+                    ImeTracker.isFromUser(view));
         }
         ImeTracker.forLatency().onRequestShow(statsToken, ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
                 reason, ActivityThread::currentApplication);
@@ -2127,7 +2203,7 @@ public final class InputMethodManager {
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
-            return fallbackImm.showSoftInput(view, flags, resultReceiver);
+            return fallbackImm.showSoftInput(view, statsToken, flags, resultReceiver, reason);
         }
 
         checkFocus();
@@ -2169,7 +2245,7 @@ public final class InputMethodManager {
      */
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768499)
-    public void showSoftInputUnchecked(int flags, ResultReceiver resultReceiver) {
+    public void showSoftInputUnchecked(@ShowFlags int flags, ResultReceiver resultReceiver) {
         synchronized (mH) {
             final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestShow(
                     null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
@@ -2178,7 +2254,8 @@ public final class InputMethodManager {
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be"
                     + " removed soon. If you are using androidx.appcompat.widget.SearchView,"
                     + " please update to version 26.0 or newer version.");
-            if (mCurRootView == null || mCurRootView.getView() == null) {
+            final View rootView = mCurRootView != null ? mCurRootView.getView() : null;
+            if (rootView == null) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
                 return;
@@ -2191,7 +2268,7 @@ public final class InputMethodManager {
             mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
             IInputMethodManagerGlobalInvoker.showSoftInput(
                     mClient,
-                    mCurRootView.getView().getWindowToken(),
+                    rootView.getWindowToken(),
                     statsToken,
                     flags,
                     mCurRootView.getLastClickToolType(),
@@ -2199,6 +2276,14 @@ public final class InputMethodManager {
                     SoftInputShowHideReason.SHOW_SOFT_INPUT);
         }
     }
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "HIDE_" }, value = {
+            HIDE_IMPLICIT_ONLY,
+            HIDE_NOT_ALWAYS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HideFlags {}
 
     /**
      * Flag for {@link #hideSoftInputFromWindow} and {@link InputMethodService#requestHideSelf(int)}
@@ -2221,10 +2306,8 @@ public final class InputMethodManager {
      *
      * @param windowToken The token of the window that is making the request,
      * as returned by {@link View#getWindowToken() View.getWindowToken()}.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY} bit set.
      */
-    public boolean hideSoftInputFromWindow(IBinder windowToken, int flags) {
+    public boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags) {
         return hideSoftInputFromWindow(windowToken, flags, null);
     }
 
@@ -2246,31 +2329,36 @@ public final class InputMethodManager {
      *
      * @param windowToken The token of the window that is making the request,
      * as returned by {@link View#getWindowToken() View.getWindowToken()}.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY} bit set.
      * @param resultReceiver If non-null, this will be called by the IME when
      * it has processed your request to tell you what it has done.  The result
      * code you receive may be either {@link #RESULT_UNCHANGED_SHOWN},
      * {@link #RESULT_UNCHANGED_HIDDEN}, {@link #RESULT_SHOWN}, or
      * {@link #RESULT_HIDDEN}.
      */
-    public boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
+    public boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags,
             ResultReceiver resultReceiver) {
         return hideSoftInputFromWindow(windowToken, flags, resultReceiver,
                 SoftInputShowHideReason.HIDE_SOFT_INPUT);
     }
 
-    private boolean hideSoftInputFromWindow(IBinder windowToken, int flags,
+    private boolean hideSoftInputFromWindow(IBinder windowToken, @HideFlags int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+        // Get served view initially for statsToken creation.
+        final View initialServedView;
+        synchronized (mH) {
+            initialServedView = getServedViewLocked();
+        }
+
         final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
-                null /* component */, Process.myUid(),
-                ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT, reason);
+                null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                reason, ImeTracker.isFromUser(initialServedView));
         ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
                 reason, ActivityThread::currentApplication);
         ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromWindow",
                 this, null /* icProto */);
         checkFocus();
         synchronized (mH) {
+            // Get served view again in case it changed between the synchronized blocks.
             final View servedView = getServedViewLocked();
             if (servedView == null || servedView.getWindowToken() != windowToken) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
@@ -2283,6 +2371,49 @@ public final class InputMethodManager {
 
             return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken, statsToken,
                     flags, resultReceiver, reason);
+        }
+    }
+
+    /**
+     * Synonym for {@link #hideSoftInputFromWindow(IBinder, int)} but takes a {@link View} as a
+     * parameter to be a counterpart of {@link #showSoftInput(View, int)}.
+     *
+     * @param view {@link View} to be used to conditionally issue hide request when and only when
+     *             this {@link View} is serving as an IME target.
+     * @hide
+     */
+    public boolean hideSoftInputFromView(@NonNull View view, @HideFlags int flags) {
+        final boolean isFocusedAndWindowFocused = view.hasWindowFocus() && view.isFocused();
+        synchronized (mH) {
+            if (!isFocusedAndWindowFocused && !hasServedByInputMethodLocked(view)) {
+                // Fail early if the view is not focused and not served
+                // to avoid logging many erroneous calls.
+                return false;
+            }
+        }
+
+        final var reason = SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW;
+        final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
+                null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                reason, ImeTracker.isFromUser(view));
+        ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                reason, ActivityThread::currentApplication);
+        ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromView",
+                this, null /* icProto */);
+        synchronized (mH) {
+            if (!hasServedByInputMethodLocked(view)) {
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLatency().onShowFailed(
+                        statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED,
+                        ActivityThread::currentApplication);
+                Log.w(TAG, "Ignoring hideSoftInputFromView() as view=" + view + " is not served.");
+                return false;
+            }
+
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+
+            return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, view.getWindowToken(),
+                    statsToken, flags, null, reason);
         }
     }
 
@@ -2305,17 +2436,20 @@ public final class InputMethodManager {
      * @see #isStylusHandwritingAvailable()
      */
     public void startStylusHandwriting(@NonNull View view) {
-        startStylusHandwritingInternal(view, null /* delegatorPackageName */);
+        startStylusHandwritingInternal(
+                view, /* delegatorPackageName= */ null, /* handwritingDelegateFlags= */ 0);
     }
 
     private boolean startStylusHandwritingInternal(
-            @NonNull View view, @Nullable String delegatorPackageName) {
+            @NonNull View view, @Nullable String delegatorPackageName,
+            @HandwritingDelegateFlags int handwritingDelegateFlags) {
         Objects.requireNonNull(view);
 
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
-            fallbackImm.startStylusHandwritingInternal(view, delegatorPackageName);
+            fallbackImm.startStylusHandwritingInternal(
+                    view, delegatorPackageName, handwritingDelegateFlags);
         }
 
         boolean useDelegation = !TextUtils.isEmpty(delegatorPackageName);
@@ -2335,7 +2469,7 @@ public final class InputMethodManager {
             if (useDelegation) {
                 return IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegation(
                         mClient, UserHandle.myUserId(), view.getContext().getOpPackageName(),
-                        delegatorPackageName);
+                        delegatorPackageName, handwritingDelegateFlags);
             } else {
                 IInputMethodManagerGlobalInvoker.startStylusHandwriting(mClient);
             }
@@ -2344,19 +2478,140 @@ public final class InputMethodManager {
     }
 
     /**
+     * Starts a connectionless stylus handwriting session. A connectionless session differs from a
+     * regular stylus handwriting session in that the IME does not use an input connection to
+     * communicate with a text editor. Instead, the IME directly returns recognised handwritten text
+     * via a callback.
+     *
+     * <p>The {code cursorAnchorInfo} may be used by the IME to improve the handwriting recognition
+     * accuracy and user experience of the handwriting session. Usually connectionless handwriting
+     * is used for a view which appears like a text editor but does not really support text editing.
+     * For best results, the {code cursorAnchorInfo} should be populated as it would be for a real
+     * text editor (for example, the insertion marker location can be set to where the user would
+     * expect it to be, even if there is no visible cursor).
+     *
+     * @param view the view receiving stylus events
+     * @param cursorAnchorInfo positional information about the view receiving stylus events
+     * @param callbackExecutor the executor to run the callback on
+     * @param callback the callback to receive the result
+     */
+    @FlaggedApi(Flags.FLAG_CONNECTIONLESS_HANDWRITING)
+    public void startConnectionlessStylusHandwriting(@NonNull View view,
+            @Nullable CursorAnchorInfo cursorAnchorInfo,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull ConnectionlessHandwritingCallback callback) {
+        startConnectionlessStylusHandwritingInternal(
+                view, cursorAnchorInfo, null, null, callbackExecutor, callback);
+    }
+
+    /**
+     * Starts a connectionless stylus handwriting session (see {@link
+     * #startConnectionlessStylusHandwriting}) and additionally enables the recognised handwritten
+     * text to be later committed to a text editor using {@link
+     * #acceptStylusHandwritingDelegation(View)}.
+     *
+     * <p>After a connectionless session started using this method completes successfully, a text
+     * editor view, called the delegate view, may call {@link
+     * #acceptStylusHandwritingDelegation(View)} which will request the IME to commit the recognised
+     * handwritten text from the connectionless session to the delegate view.
+     *
+     * <p>The delegate view must belong to the same package as the delegator view for the delegation
+     * to succeed. If the delegate view belongs to a different package, use {@link
+     * #startConnectionlessStylusHandwritingForDelegation(View, CursorAnchorInfo, String, Executor,
+     * ConnectionlessHandwritingCallback)} instead.
+     *
+     * @param delegatorView the view receiving stylus events
+     * @param cursorAnchorInfo positional information about the view receiving stylus events
+     * @param callbackExecutor the executor to run the callback on
+     * @param callback the callback to receive the result
+     */
+    @FlaggedApi(Flags.FLAG_CONNECTIONLESS_HANDWRITING)
+    public void startConnectionlessStylusHandwritingForDelegation(@NonNull View delegatorView,
+            @Nullable CursorAnchorInfo cursorAnchorInfo,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull ConnectionlessHandwritingCallback callback) {
+        String delegatorPackageName = delegatorView.getContext().getOpPackageName();
+        startConnectionlessStylusHandwritingInternal(delegatorView, cursorAnchorInfo,
+                delegatorPackageName, delegatorPackageName, callbackExecutor, callback);
+    }
+
+    /**
+     * Starts a connectionless stylus handwriting session (see {@link
+     * #startConnectionlessStylusHandwriting}) and additionally enables the recognised handwritten
+     * text to be later committed to a text editor using {@link
+     * #acceptStylusHandwritingDelegation(View, String)}.
+     *
+     * <p>After a connectionless session started using this method completes successfully, a text
+     * editor view, called the delegate view, may call {@link
+     * #acceptStylusHandwritingDelegation(View, String)} which will request the IME to commit the
+     * recognised handwritten text from the connectionless session to the delegate view.
+     *
+     * <p>The delegate view must belong to {@code delegatePackageName} for the delegation to
+     * succeed.
+     *
+     * @param delegatorView the view receiving stylus events
+     * @param cursorAnchorInfo positional information about the view receiving stylus events
+     * @param delegatePackageName name of the package containing the delegate view which will accept
+     *     the delegation
+     * @param callbackExecutor the executor to run the callback on
+     * @param callback the callback to receive the result
+     */
+    @FlaggedApi(Flags.FLAG_CONNECTIONLESS_HANDWRITING)
+    public void startConnectionlessStylusHandwritingForDelegation(@NonNull View delegatorView,
+            @Nullable CursorAnchorInfo cursorAnchorInfo,
+            @NonNull String delegatePackageName,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull ConnectionlessHandwritingCallback callback) {
+        Objects.requireNonNull(delegatePackageName);
+        String delegatorPackageName = delegatorView.getContext().getOpPackageName();
+        startConnectionlessStylusHandwritingInternal(delegatorView, cursorAnchorInfo,
+                delegatorPackageName, delegatePackageName, callbackExecutor, callback);
+    }
+
+    private void startConnectionlessStylusHandwritingInternal(@NonNull View view,
+            @Nullable CursorAnchorInfo cursorAnchorInfo,
+            @Nullable String delegatorPackageName,
+            @Nullable String delegatePackageName,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull ConnectionlessHandwritingCallback callback) {
+        Objects.requireNonNull(view);
+        Objects.requireNonNull(callbackExecutor);
+        Objects.requireNonNull(callback);
+        // Re-dispatch if there is a context mismatch.
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            fallbackImm.startConnectionlessStylusHandwritingInternal(view, cursorAnchorInfo,
+                    delegatorPackageName, delegatePackageName, callbackExecutor, callback);
+        }
+
+        checkFocus();
+        synchronized (mH) {
+            if (view.getViewRootImpl() != mCurRootView) {
+                Log.w(TAG, "Ignoring startConnectionlessStylusHandwriting: "
+                        + "View's window does not have focus.");
+                return;
+            }
+            IInputMethodManagerGlobalInvoker.startConnectionlessStylusHandwriting(
+                    mClient, UserHandle.myUserId(), cursorAnchorInfo,
+                    delegatePackageName, delegatorPackageName,
+                    new ConnectionlessHandwritingCallbackProxy(callbackExecutor, callback));
+        }
+    }
+
+    /**
      * Prepares delegation of starting stylus handwriting session to a different editor in same
      * or different window than the view on which initial handwriting stroke was detected.
      *
-     * Delegation can be used to start stylus handwriting session before the {@link Editor} view or
+     * Delegation can be used to start stylus handwriting session before the {@code Editor} view or
      * its {@link InputConnection} is started. Calling this method starts buffering of stylus
      * motion events until {@link #acceptStylusHandwritingDelegation(View)} is called, at which
      * point the handwriting session can be started and the buffered stylus motion events will be
      * delivered to the IME.
      * e.g. Delegation can be used when initial handwriting stroke is
-     * on a pseudo {@link Editor} like widget (with no {@link InputConnection}) but actual
-     * {@link Editor} is on a different window.
+     * on a pseudo {@code Editor} like widget (with no {@link InputConnection}) but actual
+     * {@code Editor} is on a different window.
      *
-     * <p> Note: If an actual {@link Editor} capable of {@link InputConnection} is being scribbled
+     * <p> Note: If an actual {@code Editor} capable of {@link InputConnection} is being scribbled
      * upon using stylus, use {@link #startStylusHandwriting(View)} instead.</p>
      *
      * @param delegatorView the view that receives initial stylus stroke and delegates it to the
@@ -2375,21 +2630,21 @@ public final class InputMethodManager {
      * different window in a different package than the view on which initial handwriting stroke
      * was detected.
      *
-     * Delegation can be used to start stylus handwriting session before the {@link Editor} view or
+     * Delegation can be used to start stylus handwriting session before the {@code Editor} view or
      * its {@link InputConnection} is started. Calling this method starts buffering of stylus
      * motion events until {@link #acceptStylusHandwritingDelegation(View, String)} is called, at
      * which point the handwriting session can be started and the buffered stylus motion events will
      * be delivered to the IME.
      * e.g. Delegation can be used when initial handwriting stroke is
-     * on a pseudo {@link Editor} like widget (with no {@link InputConnection}) but actual
-     * {@link Editor} is on a different window in the given package.
+     * on a pseudo {@code Editor} like widget (with no {@link InputConnection}) but actual
+     * {@code Editor} is on a different window in the given package.
      *
      * <p>Note: If delegator and delegate are in same package use
      * {@link #prepareStylusHandwritingDelegation(View)} instead.</p>
      *
      * @param delegatorView  the view that receives initial stylus stroke and delegates it to the
      * actual editor. Its window must {@link View#hasWindowFocus have focus}.
-     * @param delegatePackageName package name that contains actual {@link Editor} which should
+     * @param delegatePackageName package name that contains actual {@code Editor} which should
      *  start stylus handwriting session by calling {@link #acceptStylusHandwritingDelegation}.
      * @see #prepareStylusHandwritingDelegation(View)
      * @see #acceptStylusHandwritingDelegation(View, String)
@@ -2422,39 +2677,85 @@ public final class InputMethodManager {
      * {@link #acceptStylusHandwritingDelegation(View, String)} instead.</p>
      *
      * @param delegateView delegate view capable of receiving input via {@link InputConnection}
-     *  on which {@link #startStylusHandwriting(View)} will be called.
      * @return {@code true} if view belongs to same application package as used in
-     *  {@link #prepareStylusHandwritingDelegation(View)} and handwriting session can start.
-     * @see #acceptStylusHandwritingDelegation(View, String)
+     *  {@link #prepareStylusHandwritingDelegation(View)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View)
+     * @see #acceptStylusHandwritingDelegation(View, String)
      */
+    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
+    // <p>Otherwise, if the delegator view previously started delegation using {@link
+    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo)},
+    // requests the IME to commit the recognised handwritten text from the connectionless session to
+    // the delegate view.
+    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
+    //     CursorAnchorInfo)
     public boolean acceptStylusHandwritingDelegation(@NonNull View delegateView) {
         return startStylusHandwritingInternal(
-                delegateView, delegateView.getContext().getOpPackageName());
+                delegateView, delegateView.getContext().getOpPackageName(),
+                delegateView.getHandwritingDelegateFlags());
     }
 
     /**
      * Accepts and starts a stylus handwriting session on the delegate view, if handwriting
      * initiation delegation was previously requested using
-     * {@link #prepareStylusHandwritingDelegation(View, String)} from te delegator and the view
+     * {@link #prepareStylusHandwritingDelegation(View, String)} from the delegator and the view
      * belongs to a specified delegate package.
      *
-     * <p>Note: If delegator and delegate are in same application package use
+     * <p>Note: If delegator and delegate are in the same application package, use
      * {@link #acceptStylusHandwritingDelegation(View)} instead.</p>
      *
      * @param delegateView delegate view capable of receiving input via {@link InputConnection}
-     *  on which {@link #startStylusHandwriting(View)} will be called.
      * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
-     * @return {@code true} if view belongs to allowed delegate package declared in
-     *  {@link #prepareStylusHandwritingDelegation(View, String)} and handwriting session can start.
+     * @return {@code true} if view belongs to allowed delegate package declared in {@link
+     *     #prepareStylusHandwritingDelegation(View, String)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
      */
+    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
+    // <p>Otherwise, if the delegator view previously started delegation using {@link
+    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo,
+    // String)}, requests the IME to commit the recognised handwritten text from the connectionless
+    // session to the delegate view.
+    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
+    //     CursorAnchorInfo, String)
     public boolean acceptStylusHandwritingDelegation(
             @NonNull View delegateView, @NonNull String delegatorPackageName) {
         Objects.requireNonNull(delegatorPackageName);
+        return startStylusHandwritingInternal(
+                delegateView, delegatorPackageName, delegateView.getHandwritingDelegateFlags());
+    }
 
-        return startStylusHandwritingInternal(delegateView, delegatorPackageName);
+    /**
+     * Accepts and starts a stylus handwriting session on the delegate view, if handwriting
+     * initiation delegation was previously requested using {@link
+     * #prepareStylusHandwritingDelegation(View, String)} from the delegator and the view belongs to
+     * a specified delegate package.
+     *
+     * <p>Note: If delegator and delegate are in the same application package, use {@link
+     * #acceptStylusHandwritingDelegation(View)} instead.
+     *
+     * @param delegateView delegate view capable of receiving input via {@link InputConnection}
+     * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
+     * @param flags {@link #HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED} or {@code 0}
+     * @return {@code true} if view belongs to allowed delegate package declared in {@link
+     *     #prepareStylusHandwritingDelegation(View, String)} and delegation is accepted
+     * @see #prepareStylusHandwritingDelegation(View, String)
+     * @see #acceptStylusHandwritingDelegation(View)
+     */
+    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
+    // <p>Otherwise, if the delegator view previously started delegation using {@link
+    // #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver, CursorAnchorInfo,
+    // String)}, requests the IME to commit the recognised handwritten text from the connectionless
+    // session to the delegate view.
+    // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
+    //     CursorAnchorInfo, String)
+    @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
+    public boolean acceptStylusHandwritingDelegation(
+            @NonNull View delegateView, @NonNull String delegatorPackageName,
+            @HandwritingDelegateFlags int flags) {
+        Objects.requireNonNull(delegatorPackageName);
+
+        return startStylusHandwritingInternal(delegateView, delegatorPackageName, flags);
     }
 
     /**
@@ -2463,12 +2764,6 @@ public final class InputMethodManager {
      * If not the input window will be displayed.
      * @param windowToken The token of the window that is making the request,
      * as returned by {@link View#getWindowToken() View.getWindowToken()}.
-     * @param showFlags Provides additional operating flags.  May be
-     * 0 or have the {@link #SHOW_IMPLICIT},
-     * {@link #SHOW_FORCED} bit set.
-     * @param hideFlags Provides additional operating flags.  May be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
-     * {@link #HIDE_NOT_ALWAYS} bit set.
      *
      * @deprecated Use {@link #showSoftInput(View, int)} or
      * {@link #hideSoftInputFromWindow(IBinder, int)} explicitly instead.
@@ -2477,7 +2772,8 @@ public final class InputMethodManager {
      * has an effect if the calling app is the current IME focus.
      */
     @Deprecated
-    public void toggleSoftInputFromWindow(IBinder windowToken, int showFlags, int hideFlags) {
+    public void toggleSoftInputFromWindow(IBinder windowToken, @ShowFlags int showFlags,
+            @HideFlags int hideFlags) {
         ImeTracing.getInstance().triggerClientDump(
                 "InputMethodManager#toggleSoftInputFromWindow", InputMethodManager.this,
                 null /* icProto */);
@@ -2495,12 +2791,6 @@ public final class InputMethodManager {
      *
      * If the input window is already displayed, it gets hidden.
      * If not the input window will be displayed.
-     * @param showFlags Provides additional operating flags.  May be
-     * 0 or have the {@link #SHOW_IMPLICIT},
-     * {@link #SHOW_FORCED} bit set.
-     * @param hideFlags Provides additional operating flags.  May be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
-     * {@link #HIDE_NOT_ALWAYS} bit set.
      *
      * @deprecated Use {@link #showSoftInput(View, int)} or
      * {@link #hideSoftInputFromWindow(IBinder, int)} explicitly instead.
@@ -2509,7 +2799,7 @@ public final class InputMethodManager {
      * has an effect if the calling app is the current IME focus.
      */
     @Deprecated
-    public void toggleSoftInput(int showFlags, int hideFlags) {
+    public void toggleSoftInput(@ShowFlags int showFlags, @HideFlags int hideFlags) {
         ImeTracing.getInstance().triggerClientDump(
                 "InputMethodManager#toggleSoftInput", InputMethodManager.this,
                 null /* icProto */);
@@ -2657,17 +2947,6 @@ public final class InputMethodManager {
             }
         }
 
-        if (windowGainingFocus == null) {
-            windowGainingFocus = view.getWindowToken();
-            if (windowGainingFocus == null) {
-                Log.e(TAG, "ABORT input: ServedView must be attached to a Window");
-                return false;
-            }
-            startInputFlags = getStartInputFlags(view, startInputFlags);
-            softInputMode = view.getViewRootImpl().mWindowAttributes.softInputMode;
-            windowFlags = view.getViewRootImpl().mWindowAttributes.flags;
-        }
-
         // Now we need to get an input connection from the served view.
         // This is complicated in a couple ways: we can't be holding our lock
         // when calling out to the view, and we need to make sure we call into
@@ -2688,6 +2967,17 @@ public final class InputMethodManager {
             if (DEBUG) Log.v(TAG, "Starting input: reschedule to view thread");
             vh.post(() -> startInputOnWindowFocusGainInternal(startInputReason, null, 0, 0, 0));
             return false;
+        }
+
+        if (windowGainingFocus == null) {
+            windowGainingFocus = view.getWindowToken();
+            if (windowGainingFocus == null) {
+                Log.e(TAG, "ABORT input: ServedView must be attached to a Window");
+                return false;
+            }
+            startInputFlags = getStartInputFlags(view, startInputFlags);
+            softInputMode = view.getViewRootImpl().mWindowAttributes.softInputMode;
+            windowFlags = view.getViewRootImpl().mWindowAttributes.flags;
         }
 
         // Okay we are now ready to call into the served view and have it
@@ -2808,7 +3098,6 @@ public final class InputMethodManager {
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
                 return false;
             }
-            mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
             if (res.id != null) {
                 updateInputChannelLocked(res.channel);
                 mCurMethod = res.method; // for @UnsupportedAppUsage
@@ -2832,6 +3121,10 @@ public final class InputMethodManager {
             switch (res.result) {
                 case InputBindResult.ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
                     mRestartOnNextWindowFocus = true;
+                    if (initiationWithoutInputConnection()) {
+                        mServedView.getViewRootImpl().getHandwritingInitiator().clearFocusedView(
+                                mServedView);
+                    }
                     mServedView = null;
                     break;
             }
@@ -2994,6 +3287,11 @@ public final class InputMethodManager {
             return false;
         }
         mServedView = mNextServedView;
+        if (initiationWithoutInputConnection() && mServedView.onCheckIsTextEditor()
+                && mServedView.isHandwritingDelegate()) {
+            mServedView.getViewRootImpl().getHandwritingInitiator().onDelegateViewFocused(
+                    mServedView);
+        }
         if (mServedInputConnection != null) {
             mServedInputConnection.finishComposingTextFromImm();
         }
@@ -3038,12 +3336,14 @@ public final class InputMethodManager {
     void closeCurrentInput() {
         final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
                 null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION);
         ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                SoftInputShowHideReason.HIDE_SOFT_INPUT, ActivityThread::currentApplication);
+                SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION,
+                ActivityThread::currentApplication);
 
         synchronized (mH) {
-            if (mCurRootView == null || mCurRootView.getView() == null) {
+            final View rootView = mCurRootView != null ? mCurRootView.getView() : null;
+            if (rootView == null) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 ImeTracker.forLatency().onHideFailed(statsToken,
                         ImeTracker.PHASE_CLIENT_VIEW_SERVED, ActivityThread::currentApplication);
@@ -3055,11 +3355,11 @@ public final class InputMethodManager {
 
             IInputMethodManagerGlobalInvoker.hideSoftInput(
                     mClient,
-                    mCurRootView.getView().getWindowToken(),
+                    rootView.getWindowToken(),
                     statsToken,
                     HIDE_NOT_ALWAYS,
                     null,
-                    SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                    SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION);
         }
     }
 
@@ -3369,13 +3669,7 @@ public final class InputMethodManager {
                 return;
             }
             if (DEBUG) Log.v(TAG, "updateCursorAnchorInfo: " + cursorAnchorInfo);
-            if (mVirtualDisplayToScreenMatrix != null) {
-                mCurBindState.mImeSession.updateCursorAnchorInfo(
-                        CursorAnchorInfo.createForAdditionalParentMatrix(
-                                cursorAnchorInfo, mVirtualDisplayToScreenMatrix));
-            } else {
-                mCurBindState.mImeSession.updateCursorAnchorInfo(cursorAnchorInfo);
-            }
+            mCurBindState.mImeSession.updateCursorAnchorInfo(cursorAnchorInfo);
             mCursorAnchorInfo = cursorAnchorInfo;
         }
     }
@@ -3522,15 +3816,12 @@ public final class InputMethodManager {
      * @param token Supplies the identifying token given to an input method
      * when it was started, which allows it to perform this operation on
      * itself.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
-     * {@link #HIDE_NOT_ALWAYS} bit set.
      * @deprecated Use {@link InputMethodService#requestHideSelf(int)} instead. This method was
      * intended for IME developers who should be accessing APIs through the service. APIs in this
      * class are intended for app developers interacting with the IME.
      */
     @Deprecated
-    public void hideSoftInputFromInputMethod(IBinder token, int flags) {
+    public void hideSoftInputFromInputMethod(IBinder token, @HideFlags int flags) {
         InputMethodPrivilegedOperationsRegistry.get(token).hideMySoftInput(
                 flags, SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION);
     }
@@ -3544,15 +3835,12 @@ public final class InputMethodManager {
      * @param token Supplies the identifying token given to an input method
      * when it was started, which allows it to perform this operation on
      * itself.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link #SHOW_IMPLICIT} or
-     * {@link #SHOW_FORCED} bit set.
      * @deprecated Use {@link InputMethodService#requestShowSelf(int)} instead. This method was
      * intended for IME developers who should be accessing APIs through the service. APIs in this
      * class are intended for app developers interacting with the IME.
      */
     @Deprecated
-    public void showSoftInputFromInputMethod(IBinder token, int flags) {
+    public void showSoftInputFromInputMethod(IBinder token, @ShowFlags int flags) {
         InputMethodPrivilegedOperationsRegistry.get(token).showMySoftInput(flags);
     }
 
@@ -3995,40 +4283,6 @@ public final class InputMethodManager {
     }
 
     /**
-     * An internal API for {@link android.hardware.display.VirtualDisplay} to report where its
-     * embedded virtual display is placed.
-     *
-     * @param childDisplayId Display ID of the embedded virtual display.
-     * @param matrix         {@link Matrix} to convert virtual display screen coordinates to
-     *                       the host screen coordinates. {@code null} to clear the relationship.
-     * @hide
-     */
-    public void reportVirtualDisplayGeometry(int childDisplayId, @Nullable Matrix matrix) {
-        final float[] matrixValues;
-        if (matrix == null) {
-            matrixValues = null;
-        } else {
-            matrixValues = new float[9];
-            matrix.getValues(matrixValues);
-        }
-        IInputMethodManagerGlobalInvoker.reportVirtualDisplayGeometryAsync(mClient, childDisplayId,
-                matrixValues);
-    }
-
-    /**
-     * An internal API that returns if the current display has a transformation matrix to apply.
-     *
-     * @return {@code true} if {@link Matrix} to convert virtual display screen coordinates to
-     * the host screen coordinates is set.
-     * @hide
-     */
-    public boolean hasVirtualDisplayToScreenMatrix() {
-        synchronized (mH) {
-            return mVirtualDisplayToScreenMatrix != null;
-        }
-    }
-
-    /**
      * Force switch to the last used input method and subtype. If the last input method didn't have
      * any subtypes, the framework will simply switch to the last input method with no subtype
      * specified.
@@ -4245,6 +4499,73 @@ public final class InputMethodManager {
         public void onFinishedInputEvent(Object token, boolean handled);
     }
 
+    private static class ConnectionlessHandwritingCallbackProxy
+            extends IConnectionlessHandwritingCallback.Stub {
+        private final Object mLock = new Object();
+
+        @Nullable
+        @GuardedBy("mLock")
+        private Executor mExecutor;
+
+        @Nullable
+        @GuardedBy("mLock")
+        private ConnectionlessHandwritingCallback mCallback;
+
+        ConnectionlessHandwritingCallbackProxy(
+                @NonNull Executor executor, @NonNull ConnectionlessHandwritingCallback callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResult(CharSequence text) {
+            Executor executor;
+            ConnectionlessHandwritingCallback callback;
+            synchronized (mLock) {
+                if (mExecutor == null || mCallback == null) {
+                    return;
+                }
+                executor = mExecutor;
+                callback = mCallback;
+                mExecutor = null;
+                mCallback = null;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (TextUtils.isEmpty(text)) {
+                    executor.execute(() -> callback.onError(
+                            ConnectionlessHandwritingCallback
+                                    .CONNECTIONLESS_HANDWRITING_ERROR_NO_TEXT_RECOGNIZED));
+                } else {
+                    executor.execute(() -> callback.onResult(text));
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void onError(int errorCode) {
+            Executor executor;
+            ConnectionlessHandwritingCallback callback;
+            synchronized (mLock) {
+                if (mExecutor == null || mCallback == null) {
+                    return;
+                }
+                executor = mExecutor;
+                callback = mCallback;
+                mExecutor = null;
+                mCallback = null;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                executor.execute(() -> callback.onError(errorCode));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
     private final class ImeInputEventSender extends InputEventSender {
         public ImeInputEventSender(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper);
@@ -4361,15 +4682,14 @@ public final class InputMethodManager {
      * @param icProto {@link InputConnection} call data in proto format.
      * @hide
      */
-    @GuardedBy("mH")
     public void dumpDebug(ProtoOutputStream proto, @Nullable byte[] icProto) {
-        if (!isImeSessionAvailableLocked()) {
-            return;
-        }
-
-        proto.write(DISPLAY_ID, mDisplayId);
-        final long token = proto.start(INPUT_METHOD_MANAGER);
         synchronized (mH) {
+            if (!isImeSessionAvailableLocked()) {
+                return;
+            }
+
+            proto.write(DISPLAY_ID, mDisplayId);
+            final long token = proto.start(INPUT_METHOD_MANAGER);
             proto.write(CUR_ID, mCurBindState.mImeId);
             proto.write(FULLSCREEN_MODE, mFullscreenMode);
             proto.write(ACTIVE, mActive);

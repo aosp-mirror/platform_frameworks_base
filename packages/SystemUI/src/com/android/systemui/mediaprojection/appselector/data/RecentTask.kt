@@ -22,8 +22,10 @@ import android.content.ComponentName
 
 data class RecentTask(
     val taskId: Int,
+    val displayId: Int,
     @UserIdInt val userId: Int,
     val topActivityComponent: ComponentName?,
     val baseIntentComponent: ComponentName?,
-    @ColorInt val colorBackground: Int?
+    @ColorInt val colorBackground: Int?,
+    val isForegroundTask: Boolean,
 )

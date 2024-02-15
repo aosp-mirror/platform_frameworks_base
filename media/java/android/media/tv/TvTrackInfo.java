@@ -55,6 +55,27 @@ public final class TvTrackInfo implements Parcelable {
      */
     public static final int TYPE_SUBTITLE = 2;
 
+    /**
+     * The component tag identifies a component carried by a MPEG-2 TS.
+     *
+     * This corresponds to the component_tag in the component descriptor in the
+     * Elementary Stream loop of the stream in the Program Map Table
+     * (PMT) [EN 300 468], or undefined if the component is not carried in an
+     * MPEG-2 TS.
+     *
+     * @hide
+     */
+    public static final String EXTRA_BUNDLE_KEY_COMPONENT_TAG = "component_tag";
+
+    /**
+     * The MPEG Program ID (PID) of the component in the MPEG2-TS in
+     * which it is carried, or undefined if the component is not carried in an
+     * MPEG-2 TS.
+     *
+     * @hide
+     */
+    public static final String EXTRA_BUNDLE_KEY_PID = "pid";
+
     private final int mType;
     private final String mId;
     private final String mLanguage;

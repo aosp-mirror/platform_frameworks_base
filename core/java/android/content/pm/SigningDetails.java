@@ -31,6 +31,8 @@ import com.android.internal.util.DataClass;
 
 import libcore.util.HexEncoding;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
@@ -49,6 +51,7 @@ public final class SigningDetails implements Parcelable {
 
     private static final String TAG = "SigningDetails";
 
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef({SignatureSchemeVersion.UNKNOWN,
             SignatureSchemeVersion.JAR,
             SignatureSchemeVersion.SIGNING_BLOCK_V2,
@@ -656,7 +659,7 @@ public final class SigningDetails implements Parcelable {
                 }
             }
         } else {
-            return Signature.areEffectiveMatch(oldDetails.mSignatures, mSignatures);
+            return Signature.areEffectiveMatch(oldDetails, this);
         }
         return false;
     }
@@ -800,7 +803,7 @@ public final class SigningDetails implements Parcelable {
 
     /** Returns true if the signatures in this and other match exactly. */
     public boolean signaturesMatchExactly(@NonNull SigningDetails other) {
-        return Signature.areExactMatch(mSignatures, other.mSignatures);
+        return Signature.areExactMatch(this, other);
     }
 
     @Override
@@ -853,7 +856,7 @@ public final class SigningDetails implements Parcelable {
         final SigningDetails that = (SigningDetails) o;
 
         if (mSignatureSchemeVersion != that.mSignatureSchemeVersion) return false;
-        if (!Signature.areExactMatch(mSignatures, that.mSignatures)) return false;
+        if (!Signature.areExactMatch(this, that)) return false;
         if (mPublicKeys != null) {
             if (!mPublicKeys.equals((that.mPublicKeys))) {
                 return false;
@@ -867,10 +870,12 @@ public final class SigningDetails implements Parcelable {
             return false;
         }
         // The capabilities for the past signing certs must match as well.
-        for (int i = 0; i < mPastSigningCertificates.length; i++) {
-            if (mPastSigningCertificates[i].getFlags()
-                    != that.mPastSigningCertificates[i].getFlags()) {
-                return false;
+        if (mPastSigningCertificates != null) {
+            for (int i = 0; i < mPastSigningCertificates.length; i++) {
+                if (mPastSigningCertificates[i].getFlags()
+                        != that.mPastSigningCertificates[i].getFlags()) {
+                    return false;
+                }
             }
         }
         return true;

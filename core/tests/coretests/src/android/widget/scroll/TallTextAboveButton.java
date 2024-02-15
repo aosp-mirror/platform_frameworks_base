@@ -16,7 +16,7 @@
 
 package android.widget.scroll;
 
-import android.util.ScrollViewScenario;
+import android.widget.ScrollViewScenario;
 
 /**
  * An (unfocusable) text view that takes up more than the height

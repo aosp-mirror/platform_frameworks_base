@@ -1,0 +1,69 @@
+package: "android.app"
+
+flag {
+  name: "modes_api"
+  namespace: "systemui"
+  description: "This flag controls new and updated DND apis"
+  bug: "300477976"
+}
+
+flag {
+  name: "modes_ui"
+  namespace: "systemui"
+  description: "This flag controls new and updated DND UIs; dependent on flag modes_api"
+  bug: "270703654"
+}
+
+flag {
+  name: "api_tvextender"
+  namespace: "systemui"
+  description: "Guards new android.app.Notification.TvExtender api"
+  bug: "308164892"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "lifetime_extension_refactor"
+  namespace: "systemui"
+  description: "Enables moving notification lifetime extension management from SystemUI to "
+      "Notification Manager Service"
+  bug: "299448097"
+}
+
+flag {
+  name: "visit_risky_uris"
+  namespace: "systemui"
+  description: "Guards the security fix that ensures all URIs in intents and Person.java are valid"
+  bug: "281044385"
+}
+
+flag {
+  name: "keyguard_private_notifications"
+  namespace: "systemui"
+  description: "Fixes the behavior of KeyguardManager#setPrivateNotificationsAllowed()"
+  bug: "309920145"
+}
+
+flag {
+  name: "category_voicemail"
+  namespace: "wear_sysui"
+  description: "Adds a new voicemail category for notifications"
+  bug: "322806700"
+}
+
+flag {
+  name: "notification_channel_vibration_effect_api"
+  namespace: "systemui"
+  description: "This flag enables the API to allow setting VibrationEffect for NotificationChannels"
+  bug: "241732519"
+}
+
+flag {
+  name: "evenly_divided_call_style_action_layout"
+  namespace: "systemui"
+  description: "Evenly divides horizontal space for action buttons in CallStyle notifications."
+  bug: "268733030"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

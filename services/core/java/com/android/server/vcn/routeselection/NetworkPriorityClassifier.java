@@ -47,7 +47,6 @@ import com.android.server.vcn.VcnContext;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /** @hide */
@@ -86,7 +85,6 @@ class NetworkPriorityClassifier {
      * <p>VCN MUST never select a non-INTERNET network that are unvalidated or fail to match any
      * template as the underlying network.
      */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final int PRIORITY_INVALID = -1;
 
     /** Gives networks a priority class, based on configured VcnGatewayConnectionConfig */
@@ -96,7 +94,7 @@ class NetworkPriorityClassifier {
             List<VcnUnderlyingNetworkTemplate> underlyingNetworkTemplates,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
-            UnderlyingNetworkRecord currentlySelected,
+            boolean isSelected,
             PersistableBundleWrapper carrierConfig) {
         // mRouteSelectionNetworkRequest requires a network be both VALIDATED and NOT_SUSPENDED
 
@@ -118,7 +116,7 @@ class NetworkPriorityClassifier {
                     networkRecord,
                     subscriptionGroup,
                     snapshot,
-                    currentlySelected,
+                    isSelected,
                     carrierConfig)) {
                 return priorityIndex;
             }
@@ -140,12 +138,9 @@ class NetworkPriorityClassifier {
             UnderlyingNetworkRecord networkRecord,
             ParcelUuid subscriptionGroup,
             TelephonySubscriptionSnapshot snapshot,
-            UnderlyingNetworkRecord currentlySelected,
+            boolean isSelected,
             PersistableBundleWrapper carrierConfig) {
         final NetworkCapabilities caps = networkRecord.networkCapabilities;
-        final boolean isSelectedUnderlyingNetwork =
-                currentlySelected != null
-                        && Objects.equals(currentlySelected.network, networkRecord.network);
 
         final int meteredMatch = networkPriority.getMetered();
         final boolean isMetered = !caps.hasCapability(NET_CAPABILITY_NOT_METERED);
@@ -159,7 +154,7 @@ class NetworkPriorityClassifier {
         if (caps.getLinkUpstreamBandwidthKbps() < networkPriority.getMinExitUpstreamBandwidthKbps()
                 || (caps.getLinkUpstreamBandwidthKbps()
                                 < networkPriority.getMinEntryUpstreamBandwidthKbps()
-                        && !isSelectedUnderlyingNetwork)) {
+                        && !isSelected)) {
             return false;
         }
 
@@ -167,7 +162,7 @@ class NetworkPriorityClassifier {
                         < networkPriority.getMinExitDownstreamBandwidthKbps()
                 || (caps.getLinkDownstreamBandwidthKbps()
                                 < networkPriority.getMinEntryDownstreamBandwidthKbps()
-                        && !isSelectedUnderlyingNetwork)) {
+                        && !isSelected)) {
             return false;
         }
 
@@ -191,7 +186,7 @@ class NetworkPriorityClassifier {
             return checkMatchesWifiPriorityRule(
                     (VcnWifiUnderlyingNetworkTemplate) networkPriority,
                     networkRecord,
-                    currentlySelected,
+                    isSelected,
                     carrierConfig);
         }
 
@@ -214,7 +209,7 @@ class NetworkPriorityClassifier {
     public static boolean checkMatchesWifiPriorityRule(
             VcnWifiUnderlyingNetworkTemplate networkPriority,
             UnderlyingNetworkRecord networkRecord,
-            UnderlyingNetworkRecord currentlySelected,
+            boolean isSelected,
             PersistableBundleWrapper carrierConfig) {
         final NetworkCapabilities caps = networkRecord.networkCapabilities;
 
@@ -223,7 +218,7 @@ class NetworkPriorityClassifier {
         }
 
         // TODO: Move the Network Quality check to the network metric monitor framework.
-        if (!isWifiRssiAcceptable(networkRecord, currentlySelected, carrierConfig)) {
+        if (!isWifiRssiAcceptable(networkRecord, isSelected, carrierConfig)) {
             return false;
         }
 
@@ -237,15 +232,11 @@ class NetworkPriorityClassifier {
 
     private static boolean isWifiRssiAcceptable(
             UnderlyingNetworkRecord networkRecord,
-            UnderlyingNetworkRecord currentlySelected,
+            boolean isSelected,
             PersistableBundleWrapper carrierConfig) {
         final NetworkCapabilities caps = networkRecord.networkCapabilities;
-        final boolean isSelectedNetwork =
-                currentlySelected != null
-                        && networkRecord.network.equals(currentlySelected.network);
 
-        if (isSelectedNetwork
-                && caps.getSignalStrength() >= getWifiExitRssiThreshold(carrierConfig)) {
+        if (isSelected && caps.getSignalStrength() >= getWifiExitRssiThreshold(carrierConfig)) {
             return true;
         }
 

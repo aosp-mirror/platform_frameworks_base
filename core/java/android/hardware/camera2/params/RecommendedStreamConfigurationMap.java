@@ -16,8 +16,6 @@
 
 package android.hardware.camera2.params;
 
-import static com.android.internal.R.string.hardware;
-
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -45,7 +43,7 @@ import java.util.Set;
  * Immutable class to store the recommended stream configurations to set up
  * {@link android.view.Surface Surfaces} for creating a
  * {@link android.hardware.camera2.CameraCaptureSession capture session} with
- * {@link android.hardware.camera2.CameraDevice#createCaptureSession}.
+ * {@link android.hardware.camera2.CameraDevice#createCaptureSession(SessionConfiguration)}.
  *
  * <p>The recommended list does not replace or deprecate the exhaustive complete list found in
  * {@link StreamConfigurationMap}. It is a suggestion about available power and performance
@@ -70,7 +68,7 @@ import java.util.Set;
  * }</code></pre>
  *
  * @see CameraCharacteristics#getRecommendedStreamConfigurationMap
- * @see CameraDevice#createCaptureSession
+ * @see CameraDevice#createCaptureSession(SessionConfiguration)
  */
 public final class RecommendedStreamConfigurationMap {
 
@@ -282,7 +280,7 @@ public final class RecommendedStreamConfigurationMap {
 
     /**
      * Determine whether or not output surfaces with a particular user-defined format can be passed
-     * {@link CameraDevice#createCaptureSession createCaptureSession}.
+     * {@link CameraDevice#createCaptureSession(SessionConfiguration) createCaptureSession}.
      *
      * <p>
      * For further information refer to {@link StreamConfigurationMap#isOutputSupportedFor}.
@@ -292,7 +290,7 @@ public final class RecommendedStreamConfigurationMap {
      * @param format an image format from either {@link ImageFormat} or {@link PixelFormat}
      * @return
      *          {@code true} if using a {@code surface} with this {@code format} will be
-     *          supported with {@link CameraDevice#createCaptureSession}
+     *          supported with {@link CameraDevice#createCaptureSession(SessionConfiguration)}
      *
      * @throws IllegalArgumentException
      *          if the image format was not a defined named constant
@@ -508,8 +506,10 @@ public final class RecommendedStreamConfigurationMap {
     }
 
     /**
-     * Determine whether or not the {@code surface} in its current state is suitable to be included
-     * in a {@link CameraDevice#createCaptureSession capture session} as an output.
+     * Determine whether or not the {@code surface} in its current
+     * state is suitable to be included in a {@link
+     * CameraDevice#createCaptureSession(SessionConfiguration) capture
+     * session} as an output.
      *
      * <p>For more information refer to {@link StreamConfigurationMap#isOutputSupportedFor}.
      * </p>

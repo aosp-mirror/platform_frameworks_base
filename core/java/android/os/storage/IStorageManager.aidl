@@ -134,20 +134,20 @@ interface IStorageManager {
     @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void setDebugFlags(int flags, int mask) = 60;
     @EnforcePermission("STORAGE_INTERNAL")
-    void createUserKey(int userId, int serialNumber, boolean ephemeral) = 61;
+    void createUserStorageKeys(int userId, boolean ephemeral) = 61;
     @EnforcePermission("STORAGE_INTERNAL")
-    void destroyUserKey(int userId) = 62;
+    void destroyUserStorageKeys(int userId) = 62;
     @EnforcePermission("STORAGE_INTERNAL")
-    void unlockUserKey(int userId, int serialNumber, in byte[] secret) = 63;
+    void unlockCeStorage(int userId, in byte[] secret) = 63;
     @EnforcePermission("STORAGE_INTERNAL")
-    void lockUserKey(int userId) = 64;
-    boolean isUserKeyUnlocked(int userId) = 65;
+    void lockCeStorage(int userId) = 64;
+    boolean isCeStorageUnlocked(int userId) = 65;
     @EnforcePermission("STORAGE_INTERNAL")
-    void prepareUserStorage(in String volumeUuid, int userId, int serialNumber, int flags) = 66;
+    void prepareUserStorage(in String volumeUuid, int userId, int flags) = 66;
     @EnforcePermission("STORAGE_INTERNAL")
     void destroyUserStorage(in String volumeUuid, int userId, int flags) = 67;
     @EnforcePermission("STORAGE_INTERNAL")
-    void setUserKeyProtection(int userId, in byte[] secret) = 70;
+    void setCeStorageProtection(int userId, in byte[] secret) = 70;
     @EnforcePermission("MOUNT_FORMAT_FILESYSTEMS")
     void fstrim(int flags, IVoldTaskListener listener) = 72;
     AppFuseMount mountProxyFileDescriptorBridge() = 73;
@@ -174,4 +174,13 @@ interface IStorageManager {
     boolean isAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 95;
     void setCloudMediaProvider(in String authority) = 96;
     String getCloudMediaProvider() = 97;
+    long getInternalStorageBlockDeviceSize() = 98;
+    /**
+     * Returns the remaining lifetime of the internal storage device, as an
+     * integer percentage. For example, 90 indicates that 90% of the storage
+     * device's useful lifetime remains. If no information is available, -1
+     * is returned.
+     */
+    @EnforcePermission("READ_PRIVILEGED_PHONE_STATE")
+    int getInternalStorageRemainingLifetime() = 99;
 }

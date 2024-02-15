@@ -16,10 +16,10 @@
 
 package com.android.wm.shell.pip.phone;
 
-import static com.android.wm.shell.pip.phone.PipDoubleTapHelper.SIZE_SPEC_CUSTOM;
-import static com.android.wm.shell.pip.phone.PipDoubleTapHelper.SIZE_SPEC_DEFAULT;
-import static com.android.wm.shell.pip.phone.PipDoubleTapHelper.SIZE_SPEC_MAX;
-import static com.android.wm.shell.pip.phone.PipDoubleTapHelper.nextSizeSpec;
+import static com.android.wm.shell.common.pip.PipDoubleTapHelper.SIZE_SPEC_CUSTOM;
+import static com.android.wm.shell.common.pip.PipDoubleTapHelper.SIZE_SPEC_DEFAULT;
+import static com.android.wm.shell.common.pip.PipDoubleTapHelper.SIZE_SPEC_MAX;
+import static com.android.wm.shell.common.pip.PipDoubleTapHelper.nextSizeSpec;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -29,7 +29,8 @@ import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDoubleTapHelper;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,7 +39,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
 /**
- * Unit test against {@link PipDoubleTapHelper}.
+ * Unit test against {@link com.android.wm.shell.common.pip.PipDoubleTapHelper}.
  */
 @RunWith(AndroidTestingRunner.class)
 public class PipDoubleTapHelperTest extends ShellTestCase {

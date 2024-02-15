@@ -55,6 +55,12 @@ bool LayerProperties::setImageFilter(SkImageFilter* imageFilter) {
     return true;
 }
 
+bool LayerProperties::setBackdropImageFilter(SkImageFilter* imageFilter) {
+    if (mBackdropImageFilter.get() == imageFilter) return false;
+    mBackdropImageFilter = sk_ref_sp(imageFilter);
+    return true;
+}
+
 bool LayerProperties::setFromPaint(const SkPaint* paint) {
     bool changed = false;
     changed |= setAlpha(static_cast<uint8_t>(PaintUtils::getAlphaDirect(paint)));
@@ -70,6 +76,7 @@ LayerProperties& LayerProperties::operator=(const LayerProperties& other) {
     setXferMode(other.xferMode());
     setColorFilter(other.getColorFilter());
     setImageFilter(other.getImageFilter());
+    setBackdropImageFilter(other.getBackdropImageFilter());
     mStretchEffect = other.mStretchEffect;
     return *this;
 }

@@ -23,10 +23,11 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.Utils
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.util.mockito.any
@@ -50,6 +51,7 @@ private const val NEGATIVE_TEXT = "escape"
 
 private const val USER_ID = 8
 private const val CHALLENGE = 999L
+private const val OP_PACKAGE_NAME = "biometric.testapp"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -61,13 +63,15 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
 
     private val testScope = TestScope()
+    private val fingerprintRepository = FakeFingerprintPropertyRepository()
     private val promptRepository = FakePromptRepository()
 
     private lateinit var interactor: PromptSelectorInteractor
 
     @Before
     fun setup() {
-        interactor = PromptSelectorInteractorImpl(promptRepository, lockPatternUtils)
+        interactor =
+            PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
     }
 
     @Test
@@ -106,16 +110,16 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         val currentPrompt by collectLastValue(interactor.prompt)
         val credentialKind by collectLastValue(interactor.credentialKind)
         val isCredentialAllowed by collectLastValue(interactor.isCredentialAllowed)
-        val isExplicitConfirmationRequired by collectLastValue(interactor.isConfirmationRequested)
+        val isExplicitConfirmationRequired by collectLastValue(interactor.isConfirmationRequired)
 
         assertThat(currentPrompt).isNull()
 
         interactor.useBiometricsForAuthentication(
             info,
-            confirmationRequired,
             USER_ID,
             CHALLENGE,
-            modalities
+            modalities,
+            OP_PACKAGE_NAME
         )
 
         assertThat(currentPrompt).isNotNull()
@@ -123,6 +127,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         assertThat(currentPrompt?.description).isEqualTo(DESCRIPTION)
         assertThat(currentPrompt?.subtitle).isEqualTo(SUBTITLE)
         assertThat(currentPrompt?.negativeButtonText).isEqualTo(NEGATIVE_TEXT)
+        assertThat(currentPrompt?.opPackageName).isEqualTo(OP_PACKAGE_NAME)
 
         if (allowCredentialFallback) {
             assertThat(credentialKind).isSameInstanceAs(PromptKind.Password)
@@ -170,7 +175,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
 
         assertThat(currentPrompt).isNull()
 
-        interactor.useCredentialsForAuthentication(info, kind, USER_ID, CHALLENGE)
+        interactor.useCredentialsForAuthentication(info, kind, USER_ID, CHALLENGE, OP_PACKAGE_NAME)
 
         // not using biometrics, should be null with no fallback option
         assertThat(currentPrompt).isNull()

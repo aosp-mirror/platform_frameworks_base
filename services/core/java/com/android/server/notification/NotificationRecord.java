@@ -24,9 +24,11 @@ import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.app.IActivityManager;
+import android.app.Flags;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.Person;
@@ -46,6 +48,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.provider.Settings;
@@ -96,12 +100,12 @@ public final class NotificationRecord {
     // the period after which a notification is updated where it can make sound
     private static final int MAX_SOUND_DELAY_MS = 2000;
     private final StatusBarNotification sbn;
-    IActivityManager mAm;
-    UriGrantsManagerInternal mUgmInternal;
+    private final UriGrantsManagerInternal mUgmInternal;
     final int mTargetSdkVersion;
     final int mOriginalFlags;
     private final Context mContext;
-
+    private KeyguardManager mKeyguardManager;
+    private final PowerManager mPowerManager;
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
     IBinder permissionOwner;
@@ -164,7 +168,7 @@ public final class NotificationRecord {
     private boolean mPreChannelsNotification = true;
     private Uri mSound;
     private VibrationEffect mVibration;
-    private AudioAttributes mAttributes;
+    private @NonNull AudioAttributes mAttributes;
     private NotificationChannel mChannel;
     private ArrayList<String> mPeopleOverride;
     private ArrayList<SnoozeCriterion> mSnoozeCriteria;
@@ -220,7 +224,6 @@ public final class NotificationRecord {
         this.sbn = sbn;
         mTargetSdkVersion = LocalServices.getService(PackageManagerInternal.class)
                 .getPackageTargetSdkVersion(sbn.getPackageName());
-        mAm = ActivityManager.getService();
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
@@ -228,6 +231,8 @@ public final class NotificationRecord {
         mUpdateTimeMs = mCreationTimeMs;
         mInterruptionTimeMs = mCreationTimeMs;
         mContext = context;
+        mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
+        mPowerManager = mContext.getSystemService(PowerManager.class);
         stats = new NotificationUsageStats.SingleNotificationStats();
         mChannel = channel;
         mPreChannelsNotification = isPreChannelsNotification();
@@ -303,34 +308,46 @@ public final class NotificationRecord {
         return light;
     }
 
+    private VibrationEffect getVibrationForChannel(
+            NotificationChannel channel, VibratorHelper helper, boolean insistent) {
+        if (!channel.shouldVibrate()) {
+            return null;
+        }
+
+        if (Flags.notificationChannelVibrationEffectApi()) {
+            final VibrationEffect vibration = channel.getVibrationEffect();
+            if (vibration != null && helper.areEffectComponentsSupported(vibration)) {
+                // Adjust the vibration's repeat behavior based on the `insistent` property.
+                return vibration.applyRepeatingIndefinitely(insistent, /* loopDelayMs= */ 0);
+            }
+        }
+
+        final long[] vibrationPattern = channel.getVibrationPattern();
+        if (vibrationPattern == null) {
+            return helper.createDefaultVibration(insistent);
+        }
+        return helper.createWaveformVibration(vibrationPattern, insistent);
+    }
+
     private VibrationEffect calculateVibration() {
         VibratorHelper helper = new VibratorHelper(mContext);
         final Notification notification = getSbn().getNotification();
         final boolean insistent = (notification.flags & Notification.FLAG_INSISTENT) != 0;
-        VibrationEffect defaultVibration = helper.createDefaultVibration(insistent);
-        VibrationEffect vibration;
-        if (getChannel().shouldVibrate()) {
-            vibration = getChannel().getVibrationPattern() == null
-                    ? defaultVibration
-                    : helper.createWaveformVibration(getChannel().getVibrationPattern(), insistent);
-        } else {
-            vibration = null;
-        }
+
         if (mPreChannelsNotification
                 && (getChannel().getUserLockedFields()
                 & NotificationChannel.USER_LOCKED_VIBRATION) == 0) {
             final boolean useDefaultVibrate =
                     (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
             if (useDefaultVibrate) {
-                vibration = defaultVibration;
-            } else {
-                vibration = helper.createWaveformVibration(notification.vibrate, insistent);
+                return helper.createDefaultVibration(insistent);
             }
+            return  helper.createWaveformVibration(notification.vibrate, insistent);
         }
-        return vibration;
+        return getVibrationForChannel(getChannel(), helper, insistent);
     }
 
-    private AudioAttributes calculateAttributes() {
+    private @NonNull AudioAttributes calculateAttributes() {
         final Notification n = getSbn().getNotification();
         AudioAttributes attributes = getChannel().getAudioAttributes();
         if (attributes == null) {
@@ -999,7 +1016,7 @@ public final class NotificationRecord {
     }
 
     public boolean isAudioAttributesUsage(int usage) {
-        return mAttributes != null && mAttributes.getUsage() == usage;
+        return mAttributes.getUsage() == usage;
     }
 
     /**
@@ -1168,7 +1185,7 @@ public final class NotificationRecord {
         return mVibration;
     }
 
-    public AudioAttributes getAudioAttributes() {
+    public @NonNull AudioAttributes getAudioAttributes() {
         return mAttributes;
     }
 
@@ -1255,8 +1272,25 @@ public final class NotificationRecord {
         mStats.setExpanded();
     }
 
+    /** Run when the notification is direct replied. */
     public void recordDirectReplied() {
+        if (Flags.lifetimeExtensionRefactor()) {
+            // Mark the NotificationRecord as lifetime extended.
+            Notification notification = getSbn().getNotification();
+            notification.flags |= Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        }
+
         mStats.setDirectReplied();
+    }
+
+
+    /** Run when the notification is smart replied. */
+    @FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void recordSmartReplied() {
+        Notification notification = getSbn().getNotification();
+        notification.flags |= Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+
+        mStats.setSmartReplied();
     }
 
     public void recordDismissalSurface(@NotificationStats.DismissalSurface int surface) {
@@ -1382,18 +1416,27 @@ public final class NotificationRecord {
      * Collect all {@link Uri} that should have permission granted to whoever
      * will be rendering it.
      */
-    protected void calculateGrantableUris() {
-        final Notification notification = getNotification();
-        notification.visitUris((uri) -> {
-            visitGrantableUri(uri, false, false);
-        });
+    private void calculateGrantableUris() {
+        Trace.beginSection("NotificationRecord.calculateGrantableUris");
+        try {
+            // We can't grant URI permissions from system.
+            final int sourceUid = getSbn().getUid();
+            if (sourceUid == android.os.Process.SYSTEM_UID) return;
 
-        if (notification.getChannelId() != null) {
-            NotificationChannel channel = getChannel();
-            if (channel != null) {
-                visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
-                        & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+            final Notification notification = getNotification();
+            notification.visitUris((uri) -> {
+                visitGrantableUri(uri, false, false);
+            });
+
+            if (notification.getChannelId() != null) {
+                NotificationChannel channel = getChannel();
+                if (channel != null) {
+                    visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
+                            & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+                }
             }
+        } finally {
+            Trace.endSection();
         }
     }
 
@@ -1408,13 +1451,14 @@ public final class NotificationRecord {
     private void visitGrantableUri(Uri uri, boolean userOverriddenUri, boolean isSound) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
-        // We can't grant Uri permissions from system
-        final int sourceUid = getSbn().getUid();
-        if (sourceUid == android.os.Process.SYSTEM_UID) return;
+        if (mGrantableUris != null && mGrantableUris.contains(uri)) {
+            return; // already verified this URI
+        }
 
+        final int sourceUid = getSbn().getUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            // This will throw SecurityException if caller can't grant
+            // This will throw a SecurityException if the caller can't grant.
             mUgmInternal.checkGrantUriPermission(sourceUid, null,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
@@ -1617,6 +1661,22 @@ public final class NotificationRecord {
 
     public ArraySet<String> getPhoneNumbers() {
         return mPhoneNumbers;
+    }
+
+    boolean isLocked() {
+        return getKeyguardManager().isKeyguardLocked()
+                || !mPowerManager.isInteractive();  // Unlocked AOD
+    }
+
+    /**
+     * For some early {@link NotificationRecord}, {@link KeyguardManager} can be {@code null} in
+     * the constructor. Retrieve it again if it is null.
+     */
+    private KeyguardManager getKeyguardManager() {
+        if (mKeyguardManager == null) {
+            mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
+        }
+        return mKeyguardManager;
     }
 
     @VisibleForTesting

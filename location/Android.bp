@@ -1,0 +1,46 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "framework-location-sources",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.aidl",
+    ],
+}
+
+java_sdk_library {
+    name: "framework-location",
+    srcs: [
+        ":framework-location-sources",
+    ],
+    defaults: ["framework-non-updatable-unbundled-defaults"],
+    permitted_packages: [
+        "android.location",
+        "com.android.internal.location",
+    ],
+    libs: [
+        "app-compat-annotations",
+        "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
+    ],
+    hidden_api_packages: [
+        "com.android.internal.location",
+    ],
+    aidl: {
+        include_dirs: [
+            "frameworks/base/location/java",
+            "frameworks/base/core/java",
+        ],
+    },
+}
+
+platform_compat_config {
+    name: "framework-location-compat-config",
+    src: ":framework-location",
+}

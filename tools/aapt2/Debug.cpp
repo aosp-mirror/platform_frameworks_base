@@ -265,6 +265,16 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
     ValueHeadlinePrinter headline_printer(package.name, printer);
     ValueBodyPrinter body_printer(package.name, printer);
 
+    auto& dynamicRefTable = table.GetReferencedPackages();
+    if (!dynamicRefTable.empty()) {
+      printer->Println(StringPrintf("DynamicRefTable entryCount=%d", int(dynamicRefTable.size())));
+      printer->Indent();
+      for (auto&& [id, name] : dynamicRefTable) {
+        printer->Println(StringPrintf("0x%02x -> %s", id, name.c_str()));
+      }
+      printer->Undent();
+    }
+
     printer->Print("Package name=");
     printer->Print(package.name);
     if (package.id) {
@@ -447,7 +457,7 @@ void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer*
   const size_t NS = pool->size();
   for (size_t s=0; s<NS; s++) {
     auto str = pool->string8ObjectAt(s);
-    printer->Print(StringPrintf("String #%zd : %s\n", s, str.has_value() ? str->string() : ""));
+    printer->Print(StringPrintf("String #%zd : %s\n", s, str.has_value() ? str->c_str() : ""));
   }
 }
 

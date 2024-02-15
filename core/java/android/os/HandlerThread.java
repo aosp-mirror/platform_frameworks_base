@@ -25,6 +25,7 @@ import android.annotation.Nullable;
  * <p>
  * Note that just like with a regular {@link Thread}, {@link #start()} must still be called.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class HandlerThread extends Thread {
     int mPriority;
     int mTid = -1;
@@ -34,6 +35,7 @@ public class HandlerThread extends Thread {
     public HandlerThread(String name) {
         super(name);
         mPriority = Process.THREAD_PRIORITY_DEFAULT;
+        onCreated();
     }
     
     /**
@@ -45,8 +47,21 @@ public class HandlerThread extends Thread {
     public HandlerThread(String name, int priority) {
         super(name);
         mPriority = priority;
+        onCreated();
     }
-    
+
+    /** @hide */
+    @android.ravenwood.annotation.RavenwoodReplace
+    protected void onCreated() {
+    }
+
+    /** @hide */
+    protected void onCreated$ravenwood() {
+        // Mark ourselves as daemon to enable tests to terminate quickly when finished, despite
+        // any HandlerThread instances that may be lingering around
+        setDaemon(true);
+    }
+
     /**
      * Call back method that can be explicitly overridden if needed to execute some
      * setup before Looper loops.

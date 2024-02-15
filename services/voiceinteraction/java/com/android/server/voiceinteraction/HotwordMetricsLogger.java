@@ -34,6 +34,9 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENT
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__NORMAL_DETECTOR;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__TRUSTED_DETECTOR_SOFTWARE;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_EVENT_EGRESS_SIZE__DETECTOR_TYPE__NORMAL_DETECTOR;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_EVENT_EGRESS_SIZE__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_EVENT_EGRESS_SIZE__DETECTOR_TYPE__TRUSTED_DETECTOR_SOFTWARE;
 import static com.android.internal.util.LatencyTracker.ACTION_SHOW_VOICE_INTERACTION;
 
 import android.content.Context;
@@ -117,6 +120,16 @@ public final class HotwordMetricsLogger {
         int metricsDetectorType = getAudioEgressDetectorType(detectorType);
         FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED,
                 metricsDetectorType, event, uid, streamSizeBytes, bundleSizeBytes, streamCount);
+    }
+
+    /**
+     * Logs hotword event egress size metrics.
+     */
+    public static void writeHotwordDataEgressSize(int eventType, long eventSize, int detectorType,
+            int uid) {
+        int metricsDetectorType = getHotwordEventEgressSizeDetectorType(detectorType);
+        FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_EGRESS_SIZE_ATOM_REPORTED,
+                eventType, eventSize, metricsDetectorType, uid);
     }
 
     /**
@@ -222,6 +235,17 @@ public final class HotwordMetricsLogger {
                 return AUDIO_EGRESS_DSP_DETECTOR;
             default:
                 return AUDIO_EGRESS_NORMAL_DETECTOR;
+        }
+    }
+
+    private static int getHotwordEventEgressSizeDetectorType(int detectorType) {
+        switch (detectorType) {
+            case HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE:
+                return HOTWORD_EVENT_EGRESS_SIZE__DETECTOR_TYPE__TRUSTED_DETECTOR_SOFTWARE;
+            case HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP:
+                return HOTWORD_EVENT_EGRESS_SIZE__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
+            default:
+                return HOTWORD_EVENT_EGRESS_SIZE__DETECTOR_TYPE__NORMAL_DETECTOR;
         }
     }
 }

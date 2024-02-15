@@ -26,14 +26,15 @@ import android.view.ViewOutlineProvider
 import androidx.core.view.GestureDetectorCompat
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
+import com.android.app.tracing.TraceStateLogger
+import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
+import com.android.systemui.res.R
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.wm.shell.animation.PhysicsAnimator
 
@@ -42,6 +43,7 @@ private const val DISMISS_DELAY = 100L
 private const val SCROLL_DELAY = 100L
 private const val RUBBERBAND_FACTOR = 0.2f
 private const val SETTINGS_BUTTON_TRANSLATION_FRACTION = 0.3f
+private const val TAG = "MediaCarouselScrollHandler"
 
 /**
  * Default spring configuration to use for animations where stiffness and/or damping ratio were not
@@ -59,16 +61,20 @@ class MediaCarouselScrollHandler(
     private var translationChangedListener: () -> Unit,
     private var seekBarUpdateListener: (visibleToUser: Boolean) -> Unit,
     private val closeGuts: (immediate: Boolean) -> Unit,
-    private val falsingCollector: FalsingCollector,
     private val falsingManager: FalsingManager,
     private val logSmartspaceImpression: (Boolean) -> Unit,
     private val logger: MediaUiEventLogger
 ) {
+    /** Trace state logger for media carousel visibility */
+    private val visibleStateLogger = TraceStateLogger("$TAG#visibleToUser")
+
     /** Is the view in RTL */
     val isRtl: Boolean
         get() = scrollView.isLayoutRtl
+
     /** Do we need falsing protection? */
     var falsingProtectionNeeded: Boolean = false
+
     /** The width of the carousel */
     private var carouselWidth: Int = 0
 
@@ -80,6 +86,7 @@ class MediaCarouselScrollHandler(
 
     /** The content where the players are added */
     private var mediaContent: ViewGroup
+
     /** The gesture detector to detect touch gestures */
     private val gestureDetector: GestureDetectorCompat
 
@@ -127,28 +134,26 @@ class MediaCarouselScrollHandler(
         object : GestureDetector.SimpleOnGestureListener() {
             override fun onFling(
                 eStart: MotionEvent?,
-                eCurrent: MotionEvent?,
+                eCurrent: MotionEvent,
                 vX: Float,
                 vY: Float
             ) = onFling(vX, vY)
 
             override fun onScroll(
                 down: MotionEvent?,
-                lastMotion: MotionEvent?,
+                lastMotion: MotionEvent,
                 distanceX: Float,
                 distanceY: Float
-            ) = onScroll(down!!, lastMotion!!, distanceX)
+            ) = onScroll(down!!, lastMotion, distanceX)
 
-            override fun onDown(e: MotionEvent?): Boolean {
-                if (falsingProtectionNeeded) {
-                    falsingCollector.onNotificationStartDismissing()
-                }
+            override fun onDown(e: MotionEvent): Boolean {
                 return false
             }
         }
 
     /** The touch listener for the scroll view */
-    private val touchListener =
+    @VisibleForTesting
+    val touchListener =
         object : Gefingerpoken {
             override fun onTouchEvent(motionEvent: MotionEvent?) = onTouch(motionEvent!!)
             override fun onInterceptTouchEvent(ev: MotionEvent?) = onInterceptTouch(ev!!)
@@ -182,6 +187,7 @@ class MediaCarouselScrollHandler(
             if (field != value) {
                 field = value
                 seekBarUpdateListener.invoke(field)
+                visibleStateLogger.log("$visibleToUser")
             }
         }
 
@@ -263,9 +269,6 @@ class MediaCarouselScrollHandler(
 
     private fun onTouch(motionEvent: MotionEvent): Boolean {
         val isUp = motionEvent.action == MotionEvent.ACTION_UP
-        if (isUp && falsingProtectionNeeded) {
-            falsingCollector.onNotificationStopDismissing()
-        }
         if (gestureDetector.onTouchEvent(motionEvent)) {
             if (isUp) {
                 // If this is an up and we're flinging, we don't want to have this touch reach
@@ -284,15 +287,15 @@ class MediaCarouselScrollHandler(
         } else if (isUp || motionEvent.action == MotionEvent.ACTION_CANCEL) {
             // It's an up and the fling didn't take it above
             val relativePos = scrollView.relativeScrollX % playerWidthPlusPadding
-            val scrollXAmount: Int
-            if (relativePos > playerWidthPlusPadding / 2) {
-                scrollXAmount = playerWidthPlusPadding - relativePos
-            } else {
-                scrollXAmount = -1 * relativePos
-            }
+            val scrollXAmount: Int =
+                if (relativePos > playerWidthPlusPadding / 2) {
+                    playerWidthPlusPadding - relativePos
+                } else {
+                    -1 * relativePos
+                }
             if (scrollXAmount != 0) {
                 val dx = if (isRtl) -scrollXAmount else scrollXAmount
-                val newScrollX = scrollView.relativeScrollX + dx
+                val newScrollX = scrollView.scrollX + dx
                 // Delay the scrolling since scrollView calls springback which cancels
                 // the animation again..
                 mainExecutor.execute { scrollView.smoothScrollTo(newScrollX, scrollView.scrollY) }
@@ -482,8 +485,11 @@ class MediaCarouselScrollHandler(
         }
         val relativeLocation =
             visibleMediaIndex.toFloat() +
-                if (playerWidthPlusPadding > 0) scrollInAmount.toFloat() / playerWidthPlusPadding
-                else 0f
+                if (playerWidthPlusPadding > 0) {
+                    scrollInAmount.toFloat() / playerWidthPlusPadding
+                } else {
+                    0f
+                }
         // Fix the location, because PageIndicator does not handle RTL internally
         val location =
             if (isRtl) {
@@ -540,7 +546,8 @@ class MediaCarouselScrollHandler(
         // If the removed media item is "left of" the active one (in an absolute sense), we need to
         // scroll the view to keep that player in view.  This is because scroll position is always
         // calculated from left to right.
-        val leftOfActive = if (isRtl) !beforeActive else beforeActive
+        // For RTL, we need to scroll if the visible media player is the last item.
+        val leftOfActive = if (isRtl && visibleMediaIndex != 0) !beforeActive else beforeActive
         if (leftOfActive) {
             scrollView.scrollX = Math.max(scrollView.scrollX - playerWidthPlusPadding, 0)
         }

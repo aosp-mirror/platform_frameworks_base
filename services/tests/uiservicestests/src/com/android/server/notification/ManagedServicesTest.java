@@ -16,6 +16,7 @@
 package com.android.server.notification;
 
 import static android.content.Context.DEVICE_POLICY_SERVICE;
+import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
@@ -62,6 +63,7 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -1077,6 +1079,26 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testPackageUninstall_componentNoLongerUserSetList() throws Exception {
+        final String pkg = "this.is.a.package.name";
+        final String component = pkg + "/Ba";
+        for (int approvalLevel : new int[] { APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
+            ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                    mIpm, approvalLevel);
+            writeExpectedValuesToSettings(approvalLevel);
+            service.migrateToXml();
+
+            final String verifyValue = (approvalLevel == APPROVAL_BY_COMPONENT) ? component : pkg;
+
+            assertThat(service.isPackageOrComponentAllowed(verifyValue, 0)).isTrue();
+            assertThat(service.isPackageOrComponentUserSet(verifyValue, 0)).isTrue();
+
+            service.onPackagesChanged(true, new String[]{pkg}, new int[]{103});
+            assertThat(service.isPackageOrComponentUserSet(verifyValue, 0)).isFalse();
+        }
+    }
+
+    @Test
     public void testIsPackageAllowed() {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
@@ -1933,6 +1955,52 @@ public class ManagedServicesTest extends UiServiceTestCase {
         }, 20, 30);
     }
 
+    @Test
+    public void isComponentEnabledForCurrentProfiles_profileUserId() {
+        final int profileUserId = 10;
+        when(mUserProfiles.isProfileUser(profileUserId)).thenReturn(true);
+        // Only approve for parent user (0)
+        mService.addApprovedList("pkg1/cmp1:pkg2/cmp2:pkg3/cmp3", 0, true);
+
+        // Test that the component is enabled after calling rebindServices with profile userId (10)
+        mService.rebindServices(false, profileUserId);
+        assertThat(mService.isComponentEnabledForCurrentProfiles(
+                new ComponentName("pkg1", "cmp1"))).isTrue();
+    }
+
+    @Test
+    public void isComponentEnabledForCurrentProfiles_profileUserId_NAS() {
+        final int profileUserId = 10;
+        when(mUserProfiles.isProfileUser(profileUserId)).thenReturn(true);
+        // Do not rebind for parent users (NAS use-case)
+        ManagedServices service = spy(mService);
+        when(service.allowRebindForParentUser()).thenReturn(false);
+
+        // Only approve for parent user (0)
+        service.addApprovedList("pkg1/cmp1:pkg2/cmp2:pkg3/cmp3", 0, true);
+
+        // Test that the component is disabled after calling rebindServices with profile userId (10)
+        service.rebindServices(false, profileUserId);
+        assertThat(service.isComponentEnabledForCurrentProfiles(
+                new ComponentName("pkg1", "cmp1"))).isFalse();
+    }
+
+    @Test
+    @EnableFlags(FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void testManagedServiceInfoIsSystemUi() {
+        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
+                APPROVAL_BY_COMPONENT);
+
+        ManagedServices.ManagedServiceInfo service0 = service.new ManagedServiceInfo(
+                mock(IInterface.class), ComponentName.unflattenFromString("a/a"), 0, false,
+                mock(ServiceConnection.class), 26, 34);
+
+        service0.isSystemUi = true;
+        assertThat(service0.isSystemUi()).isTrue();
+        service0.isSystemUi = false;
+        assertThat(service0.isSystemUi()).isFalse();
+    }
+
     private void mockServiceInfoWithMetaData(List<ComponentName> componentNames,
             ManagedServices service, ArrayMap<ComponentName, Bundle> metaDatas)
             throws RemoteException {
@@ -2275,6 +2343,11 @@ public class ManagedServicesTest extends UiServiceTestCase {
         @Override
         protected String getRequiredPermission() {
             return null;
+        }
+
+        @Override
+        protected boolean allowRebindForParentUser() {
+            return true;
         }
     }
 

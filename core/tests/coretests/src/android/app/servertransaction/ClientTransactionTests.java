@@ -21,7 +21,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ClientTransactionHandler;
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -46,22 +45,41 @@ public class ClientTransactionTests {
 
     @Test
     public void testPreExecute() {
-        ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
-        ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
-        ActivityLifecycleItem stateRequest = mock(ActivityLifecycleItem.class);
-        ClientTransactionHandler clientTransactionHandler = mock(ClientTransactionHandler.class);
-        IBinder token = mock(IBinder.class);
+        final ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
+        final ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
+        final ActivityLifecycleItem stateRequest = mock(ActivityLifecycleItem.class);
+        final ClientTransactionHandler clientTransactionHandler =
+                mock(ClientTransactionHandler.class);
 
-        ClientTransaction transaction = ClientTransaction.obtain(null /* client */,
-                token /* activityToken */);
+        final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
         transaction.addCallback(callback1);
         transaction.addCallback(callback2);
         transaction.setLifecycleStateRequest(stateRequest);
 
         transaction.preExecute(clientTransactionHandler);
 
-        verify(callback1, times(1)).preExecute(clientTransactionHandler, token);
-        verify(callback2, times(1)).preExecute(clientTransactionHandler, token);
-        verify(stateRequest, times(1)).preExecute(clientTransactionHandler, token);
+        verify(callback1, times(1)).preExecute(clientTransactionHandler);
+        verify(callback2, times(1)).preExecute(clientTransactionHandler);
+        verify(stateRequest, times(1)).preExecute(clientTransactionHandler);
+    }
+
+    @Test
+    public void testPreExecuteTransactionItems() {
+        final ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
+        final ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
+        final ActivityLifecycleItem stateRequest = mock(ActivityLifecycleItem.class);
+        final ClientTransactionHandler clientTransactionHandler =
+                mock(ClientTransactionHandler.class);
+
+        final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
+        transaction.addTransactionItem(callback1);
+        transaction.addTransactionItem(callback2);
+        transaction.addTransactionItem(stateRequest);
+
+        transaction.preExecute(clientTransactionHandler);
+
+        verify(callback1, times(1)).preExecute(clientTransactionHandler);
+        verify(callback2, times(1)).preExecute(clientTransactionHandler);
+        verify(stateRequest, times(1)).preExecute(clientTransactionHandler);
     }
 }

@@ -16,24 +16,17 @@
 
 package com.android.server.vcn.routeselection;
 
-import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.vcn.VcnUnderlyingNetworkTemplate;
-import android.os.ParcelUuid;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
-import com.android.server.vcn.VcnContext;
 
-import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,54 +39,17 @@ public class UnderlyingNetworkRecord {
     @NonNull public final NetworkCapabilities networkCapabilities;
     @NonNull public final LinkProperties linkProperties;
     public final boolean isBlocked;
-    public final boolean isSelected;
-    public final int priorityClass;
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public UnderlyingNetworkRecord(
             @NonNull Network network,
             @NonNull NetworkCapabilities networkCapabilities,
             @NonNull LinkProperties linkProperties,
-            boolean isBlocked,
-            VcnContext vcnContext,
-            List<VcnUnderlyingNetworkTemplate> underlyingNetworkTemplates,
-            ParcelUuid subscriptionGroup,
-            TelephonySubscriptionSnapshot snapshot,
-            UnderlyingNetworkRecord currentlySelected,
-            PersistableBundleWrapper carrierConfig) {
+            boolean isBlocked) {
         this.network = network;
         this.networkCapabilities = networkCapabilities;
         this.linkProperties = linkProperties;
         this.isBlocked = isBlocked;
-
-        this.isSelected = isSelected(this.network, currentlySelected);
-
-        priorityClass =
-                NetworkPriorityClassifier.calculatePriorityClass(
-                        vcnContext,
-                        this,
-                        underlyingNetworkTemplates,
-                        subscriptionGroup,
-                        snapshot,
-                        currentlySelected,
-                        carrierConfig);
-    }
-
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    public UnderlyingNetworkRecord(
-            @NonNull Network network,
-            @NonNull NetworkCapabilities networkCapabilities,
-            @NonNull LinkProperties linkProperties,
-            boolean isBlocked,
-            boolean isSelected,
-            int priorityClass) {
-        this.network = network;
-        this.networkCapabilities = networkCapabilities;
-        this.linkProperties = linkProperties;
-        this.isBlocked = isBlocked;
-        this.isSelected = isSelected;
-
-        this.priorityClass = priorityClass;
     }
 
     @Override
@@ -113,64 +69,20 @@ public class UnderlyingNetworkRecord {
         return Objects.hash(network, networkCapabilities, linkProperties, isBlocked);
     }
 
-    /** Returns if two records are equal including their priority classes. */
-    public static boolean isEqualIncludingPriorities(
-            UnderlyingNetworkRecord left, UnderlyingNetworkRecord right) {
-        if (left != null && right != null) {
-            return left.equals(right)
-                    && left.isSelected == right.isSelected
-                    && left.priorityClass == right.priorityClass;
-        }
-
-        return left == right;
-    }
-
-    static Comparator<UnderlyingNetworkRecord> getComparator() {
-        return (left, right) -> {
-            final int leftIndex = left.priorityClass;
-            final int rightIndex = right.priorityClass;
-
-            // In the case of networks in the same priority class, prioritize based on other
-            // criteria (eg. actively selected network, link metrics, etc)
-            if (leftIndex == rightIndex) {
-                // TODO: Improve the strategy of network selection when both UnderlyingNetworkRecord
-                // fall into the same priority class.
-                if (left.isSelected) {
-                    return -1;
-                }
-                if (right.isSelected) {
-                    return 1;
-                }
-            }
-            return Integer.compare(leftIndex, rightIndex);
-        };
-    }
-
-    private static boolean isSelected(
-            Network networkToCheck, UnderlyingNetworkRecord currentlySelected) {
-        if (currentlySelected == null) {
-            return false;
-        }
-        if (currentlySelected.network.equals(networkToCheck)) {
-            return true;
-        }
-        return false;
+    /** Return whether two records represent the same network */
+    public static boolean isSameNetwork(
+            @Nullable UnderlyingNetworkRecord leftRecord,
+            @Nullable UnderlyingNetworkRecord rightRecord) {
+        final Network left = leftRecord == null ? null : leftRecord.network;
+        final Network right = rightRecord == null ? null : rightRecord.network;
+        return Objects.equals(left, right);
     }
 
     /** Dumps the state of this record for logging and debugging purposes. */
-    void dump(
-            VcnContext vcnContext,
-            IndentingPrintWriter pw,
-            List<VcnUnderlyingNetworkTemplate> underlyingNetworkTemplates,
-            ParcelUuid subscriptionGroup,
-            TelephonySubscriptionSnapshot snapshot,
-            UnderlyingNetworkRecord currentlySelected,
-            PersistableBundleWrapper carrierConfig) {
+    void dump(IndentingPrintWriter pw) {
         pw.println("UnderlyingNetworkRecord:");
         pw.increaseIndent();
 
-        pw.println("priorityClass: " + priorityClass);
-        pw.println("isSelected: " + isSelected);
         pw.println("mNetwork: " + network);
         pw.println("mNetworkCapabilities: " + networkCapabilities);
         pw.println("mLinkProperties: " + linkProperties);
@@ -218,29 +130,14 @@ public class UnderlyingNetworkRecord {
             return mNetworkCapabilities != null && mLinkProperties != null && mWasIsBlockedSet;
         }
 
-        UnderlyingNetworkRecord build(
-                VcnContext vcnContext,
-                List<VcnUnderlyingNetworkTemplate> underlyingNetworkTemplates,
-                ParcelUuid subscriptionGroup,
-                TelephonySubscriptionSnapshot snapshot,
-                UnderlyingNetworkRecord currentlySelected,
-                PersistableBundleWrapper carrierConfig) {
+        UnderlyingNetworkRecord build() {
             if (!isValid()) {
                 throw new IllegalArgumentException(
                         "Called build before UnderlyingNetworkRecord was valid");
             }
 
             return new UnderlyingNetworkRecord(
-                    mNetwork,
-                    mNetworkCapabilities,
-                    mLinkProperties,
-                    mIsBlocked,
-                    vcnContext,
-                    underlyingNetworkTemplates,
-                    subscriptionGroup,
-                    snapshot,
-                    currentlySelected,
-                    carrierConfig);
+                    mNetwork, mNetworkCapabilities, mLinkProperties, mIsBlocked);
         }
     }
 }

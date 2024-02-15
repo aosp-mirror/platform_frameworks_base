@@ -23,6 +23,7 @@ import android.accessibilityservice.GestureDescription.MotionEventGenerator;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.ColorInt;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -79,8 +80,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * Accessibility services should only be used to assist users with disabilities in using
@@ -362,12 +365,12 @@ public abstract class AccessibilityService extends Service {
     public static final int GESTURE_SWIPE_UP_AND_RIGHT = 14;
 
     /**
-     * The user has performed an down and left gesture on the touch screen.
+     * The user has performed a down and left gesture on the touch screen.
      */
     public static final int GESTURE_SWIPE_DOWN_AND_LEFT = 15;
 
     /**
-     * The user has performed an down and right gesture on the touch screen.
+     * The user has performed a down and right gesture on the touch screen.
      */
     public static final int GESTURE_SWIPE_DOWN_AND_RIGHT = 16;
 
@@ -564,8 +567,10 @@ public abstract class AccessibilityService extends Service {
     public static final int GLOBAL_ACTION_TAKE_SCREENSHOT = 9;
 
     /**
-     * Action to send the KEYCODE_HEADSETHOOK KeyEvent, which is used to answer/hang up calls and
-     * play/stop media
+     * Action to send the KEYCODE_HEADSETHOOK KeyEvent, which is used to answer and hang up calls
+     * and play and stop media. Calling takes priority. If there is an incoming call,
+     * this action can be used to answer that call, and if there is an ongoing call, to hang up on
+     * that call.
      */
     public static final int GLOBAL_ACTION_KEYCODE_HEADSETHOOK = 10;
 
@@ -785,6 +790,43 @@ public abstract class AccessibilityService extends Service {
     public static final String KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP =
             "screenshot_timestamp";
 
+
+    /**
+     * Annotations for result codes of attaching accessibility overlays.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
+    @IntDef(
+            prefix = {"OVERLAY_RESULT_"},
+            value = {
+                OVERLAY_RESULT_SUCCESS,
+                OVERLAY_RESULT_INTERNAL_ERROR,
+                OVERLAY_RESULT_INVALID,
+            })
+    public @interface AttachOverlayResult {}
+
+    /** Result code indicating the overlay was successfully attached. */
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
+    public static final int OVERLAY_RESULT_SUCCESS = 0;
+
+    /**
+     * Result code indicating the overlay could not be attached due to an internal
+     * error and not
+     * because of problems with the input.
+     */
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
+    public static final int OVERLAY_RESULT_INTERNAL_ERROR = 1;
+
+    /**
+     * Result code indicating the overlay could not be attached because the
+     * specified display or
+     * window id was invalid.
+     */
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
+    public static final int OVERLAY_RESULT_INVALID = 2;
+
     private int mConnectionId = AccessibilityInteractionClient.NO_ID;
 
     @UnsupportedAppUsage
@@ -809,6 +851,8 @@ public abstract class AccessibilityService extends Service {
     private boolean mInputMethodInitialized = false;
     private final SparseArray<AccessibilityButtonController> mAccessibilityButtonControllers =
             new SparseArray<>(0);
+    private BrailleDisplayController mBrailleDisplayController;
+    private BrailleDisplayController mTestBrailleDisplayController;
 
     private int mGestureStatusCallbackSequence;
 
@@ -1204,7 +1248,21 @@ public abstract class AccessibilityService extends Service {
      * property in its meta-data. For more information, see
      * {@link #SERVICE_META_DATA}.
      * </p>
+     * <p>Since many apps do not appropriately support {@link AccessibilityAction#ACTION_CLICK},
+     * if this action fails on an element that should be clickable, a service that is not a screen
+     * reader may send a tap directly to the element as a fallback. The example below
+     * demonstrates this fallback using the gesture dispatch APIs:
      *
+     * <pre class="prettyprint"><code>
+     *     private void tap(PointF point) {
+     *         StrokeDescription tap =  new StrokeDescription(path(point), 0,
+     *         ViewConfiguration.getTapTimeout());
+     *         GestureDescription.Builder builder = new GestureDescription.Builder();
+     *         builder.addStroke(tap);
+     *         dispatchGesture(builder.build(), null, null);
+     *     }
+     *</code>
+     * </pre>
      * @param gesture The gesture to dispatch
      * @param callback The object to call back when the status of the gesture is known. If
      * {@code null}, no status is reported.
@@ -2580,10 +2638,6 @@ public abstract class AccessibilityService extends Service {
         IAccessibilityServiceConnection connection =
                 AccessibilityInteractionClient.getInstance(this).getConnection(mConnectionId);
         if (mInfo != null && connection != null) {
-            if (!mInfo.isWithinParcelableSize()) {
-                throw new IllegalStateException(
-                        "Cannot update service info: size is larger than safe parcelable limits.");
-            }
             try {
                 connection.setServiceInfo(mInfo);
                 mInfo = null;
@@ -3439,75 +3493,200 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * <p>Attaches a {@link android.view.SurfaceControl} containing an accessibility
-     * overlay to the
-     * specified display. This type of overlay should be used for content that does
-     * not need to
-     * track the location and size of Views in the currently active app e.g. service
-     * configuration
-     * or general service UI.</p>
-     * <p>Generally speaking, an accessibility overlay  will be  a {@link android.view.View}.
-     * To embed the View into a {@link android.view.SurfaceControl}, create a
-     * {@link android.view.SurfaceControlViewHost} and attach the View using
-     * {@link android.view.SurfaceControlViewHost#setView}. Then obtain the SurfaceControl by
-     * calling <code> viewHost.getSurfacePackage().getSurfaceControl()</code>.</p>
-     * <p>To remove this overlay and free the associated
-     * resources, use
-     * <code> new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.</p>
-     * <p>If the specified overlay has already been attached to the specified display
-     * this method does nothing.
-     * If the specified overlay has already been attached to a previous display this
-     * function will transfer the overlay to the new display.
-     * Services can attach multiple overlays. Use
-     * <code> new SurfaceControl.Transaction().setLayer(sc, layer).apply();</code>.
-     * to coordinate the order of the overlays on screen.</p>
+     * Attaches a {@link android.view.SurfaceControl} containing an accessibility overlay to the
+     * specified display. This type of overlay should be used for content that does not need to
+     * track the location and size of Views in the currently active app e.g. service configuration
+     * or general service UI.
+     *
+     * <p>Generally speaking, an accessibility overlay will be a {@link android.view.View}. To embed
+     * the View into a {@link android.view.SurfaceControl}, create a {@link
+     * android.view.SurfaceControlViewHost} and attach the View using {@link
+     * android.view.SurfaceControlViewHost#setView}. Then obtain the SurfaceControl by calling
+     * <code> viewHost.getSurfacePackage().getSurfaceControl()</code>.
+     *
+     * <p>To remove this overlay and free the associated resources, use <code>
+     *  new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.
+     *
+     * <p>If the specified overlay has already been attached to the specified display this method
+     * does nothing. If the specified overlay has already been attached to a previous display this
+     * function will transfer the overlay to the new display. Services can attach multiple overlays.
+     * Use <code> new SurfaceControl.Transaction().setLayer(sc, layer).apply();</code>. to
+     * coordinate the order of the overlays on screen.
      *
      * @param displayId the display to which the SurfaceControl should be attached.
-     * @param sc        the SurfaceControl containing the overlay content
+     * @param sc the SurfaceControl containing the overlay content
+     *
      */
     public void attachAccessibilityOverlayToDisplay(int displayId, @NonNull SurfaceControl sc) {
         Preconditions.checkNotNull(sc, "SurfaceControl cannot be null");
-        final IAccessibilityServiceConnection connection =
-                AccessibilityInteractionClient.getConnection(mConnectionId);
-        if (connection == null) {
-            return;
-        }
-        try {
-            connection.attachAccessibilityOverlayToDisplay(displayId, sc);
-        } catch (RemoteException re) {
-            re.rethrowFromSystemServer();
-        }
+        AccessibilityInteractionClient.getInstance(this)
+                .attachAccessibilityOverlayToDisplay(mConnectionId, displayId, sc, null, null);
     }
 
     /**
-     * <p>Attaches an accessibility overlay {@link android.view.SurfaceControl} to the
-     * specified
-     * window. This method should be used when you want the overlay to move and
-     * resize as the parent window moves and resizes.</p>
-     * <p>Generally speaking, an accessibility overlay  will be  a {@link android.view.View}.
-     * To embed the View into a {@link android.view.SurfaceControl}, create a
-     * {@link android.view.SurfaceControlViewHost} and attach the View using
-     * {@link android.view.SurfaceControlViewHost#setView}. Then obtain the SurfaceControl by
-     * calling <code> viewHost.getSurfacePackage().getSurfaceControl()</code>.</p>
-     * <p>To remove this overlay and free the associated resources, use
-     * <code> new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.</p>
-     * <p>If the specified overlay has already been attached to the specified window
-     * this method does nothing.
-     * If the specified overlay has already been attached to a previous window this
-     * function will transfer the overlay to the new window.
-     * Services can attach multiple overlays. Use
-     * <code> new SurfaceControl.Transaction().setLayer(sc, layer).apply();</code>.
-     * to coordinate the order of the overlays on screen.</p>
+     * Attaches a {@link android.view.SurfaceControl} containing an accessibility overlay to the
+     * specified display. This type of overlay should be used for content that does not need to
+     * track the location and size of Views in the currently active app e.g. service configuration
+     * or general service UI.
      *
-     * @param accessibilityWindowId The window id, from
-     *                              {@link AccessibilityWindowInfo#getId()}.
-     * @param sc                    the SurfaceControl containing the overlay
-     *                              content
+     * <p>Generally speaking, an accessibility overlay will be a {@link android.view.View}. To embed
+     * the View into a {@link android.view.SurfaceControl}, create a {@link
+     * android.view.SurfaceControlViewHost} and attach the View using {@link
+     * android.view.SurfaceControlViewHost#setView}. Then obtain the SurfaceControl by calling
+     * <code> viewHost.getSurfacePackage().getSurfaceControl()</code>.
+     *
+     * <p>To remove this overlay and free the associated resources, use <code>
+     *  new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.
+     *
+     * <p>If the specified overlay has already been attached to the specified display this method
+     * does nothing. If the specified overlay has already been attached to a previous display this
+     * function will transfer the overlay to the new display. Services can attach multiple overlays.
+     * Use <code> new SurfaceControl.Transaction().setLayer(sc, layer).apply();</code>. to
+     * coordinate the order of the overlays on screen.
+     *
+     * @param displayId the display to which the SurfaceControl should be attached.
+     * @param sc the SurfaceControl containing the overlay content
+     * @param executor Executor on which to run the callback.
+     * @param callback The callback invoked when attaching the overlay has succeeded or failed. The
+     *     callback is a {@link java.util.function.IntConsumer} of the result status code.
+     * @see #OVERLAY_RESULT_SUCCESS
+     * @see #OVERLAY_RESULT_INVALID
+     * @see #OVERLAY_RESULT_INTERNAL_ERROR
+     */
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
+    public void attachAccessibilityOverlayToDisplay(
+            int displayId,
+            @NonNull SurfaceControl sc,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer callback) {
+        Preconditions.checkNotNull(sc, "SurfaceControl cannot be null");
+        AccessibilityInteractionClient.getInstance(this)
+                .attachAccessibilityOverlayToDisplay(
+                        mConnectionId, displayId, sc, executor, callback);
+    }
+
+    /**
+     * Attaches an accessibility overlay {@link android.view.SurfaceControl} to the specified
+     * window. This method should be used when you want the overlay to move and resize as the parent
+     * window moves and resizes.
+     *
+     * <p>Generally speaking, an accessibility overlay will be a {@link android.view.View}. To embed
+     * the View into a {@link android.view.SurfaceControl}, create a {@link
+     * android.view.SurfaceControlViewHost} and attach the View using {@link
+     * android.view.SurfaceControlViewHost#setView}. Then obtain the SurfaceControl by calling
+     * <code> viewHost.getSurfacePackage().getSurfaceControl()</code>.
+     *
+     * <p>To remove this overlay and free the associated resources, use <code>
+     *  new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.
+     *
+     * <p>If the specified overlay has already been attached to the specified window this method
+     * does nothing. If the specified overlay has already been attached to a previous window this
+     * function will transfer the overlay to the new window. Services can attach multiple overlays.
+     * Use <code> new SurfaceControl.Transaction().setLayer(sc, layer).apply();</code>. to
+     * coordinate the order of the overlays on screen.
+     *
+     * @param accessibilityWindowId The window id, from {@link AccessibilityWindowInfo#getId()}.
+     * @param sc the SurfaceControl containing the overlay content
+     *
      */
     public void attachAccessibilityOverlayToWindow(
             int accessibilityWindowId, @NonNull SurfaceControl sc) {
         Preconditions.checkNotNull(sc, "SurfaceControl cannot be null");
         AccessibilityInteractionClient.getInstance(this)
-                .attachAccessibilityOverlayToWindow(mConnectionId, accessibilityWindowId, sc);
+                .attachAccessibilityOverlayToWindow(
+                        mConnectionId, accessibilityWindowId, sc, null, null);
+    }
+
+    /**
+     * Attaches an accessibility overlay {@link android.view.SurfaceControl} to the specified
+     * window. This method should be used when you want the overlay to move and resize as the parent
+     * window moves and resizes.
+     *
+     * <p>Generally speaking, an accessibility overlay will be a {@link android.view.View}. To embed
+     * the View into a {@link android.view.SurfaceControl}, create a {@link
+     * android.view.SurfaceControlViewHost} and attach the View using {@link
+     * android.view.SurfaceControlViewHost#setView}. Then obtain the SurfaceControl by calling
+     * <code> viewHost.getSurfacePackage().getSurfaceControl()</code>.
+     *
+     * <p>To remove this overlay and free the associated resources, use <code>
+     *  new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.
+     *
+     * <p>If the specified overlay has already been attached to the specified window this method
+     * does nothing. If the specified overlay has already been attached to a previous window this
+     * function will transfer the overlay to the new window. Services can attach multiple overlays.
+     * Use <code> new SurfaceControl.Transaction().setLayer(sc, layer).apply();</code>. to
+     * coordinate the order of the overlays on screen.
+     *
+     * @param accessibilityWindowId The window id, from {@link AccessibilityWindowInfo#getId()}.
+     * @param sc the SurfaceControl containing the overlay content
+     * @param executor Executor on which to run the callback.
+     * @param callback The callback invoked when attaching the overlay has succeeded or failed. The
+     *     callback is a {@link java.util.function.IntConsumer} of the result status code.
+     * @see #OVERLAY_RESULT_SUCCESS
+     * @see #OVERLAY_RESULT_INVALID
+     * @see #OVERLAY_RESULT_INTERNAL_ERROR
+     */
+    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
+    public void attachAccessibilityOverlayToWindow(
+            int accessibilityWindowId,
+            @NonNull SurfaceControl sc,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer callback) {
+        Preconditions.checkNotNull(sc, "SurfaceControl cannot be null");
+        AccessibilityInteractionClient.getInstance(this)
+                .attachAccessibilityOverlayToWindow(
+                        mConnectionId, accessibilityWindowId, sc, executor, callback);
+    }
+
+    /**
+     * Returns the {@link BrailleDisplayController} which may be used to communicate with
+     * refreshable Braille displays that provide USB or Bluetooth Braille display HID support.
+     */
+    @FlaggedApi(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    @NonNull
+    public BrailleDisplayController getBrailleDisplayController() {
+        BrailleDisplayController.checkApiFlagIsEnabled();
+        synchronized (mLock) {
+            if (mTestBrailleDisplayController != null) {
+                return mTestBrailleDisplayController;
+            }
+
+            if (mBrailleDisplayController == null) {
+                mBrailleDisplayController = new BrailleDisplayControllerImpl(this, mLock);
+            }
+            return mBrailleDisplayController;
+        }
+    }
+
+    /**
+     * Set the {@link BrailleDisplayController} implementation that will be returned by
+     * {@link #getBrailleDisplayController}, to allow this accessibility service to test its
+     * interaction with BrailleDisplayController without requiring a real Braille display.
+     *
+     * <p>For full test fidelity, ensure that this test-only implementation follows the same
+     * behavior specified in the documentation for {@link BrailleDisplayController}, including
+     * thrown exceptions.
+     *
+     * @param controller A test-only implementation of {@link BrailleDisplayController}.
+     */
+    @FlaggedApi(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    public void setTestBrailleDisplayController(@NonNull BrailleDisplayController controller) {
+        BrailleDisplayController.checkApiFlagIsEnabled();
+        Objects.requireNonNull(controller);
+        synchronized (mLock) {
+            mTestBrailleDisplayController = controller;
+        }
+    }
+
+    /**
+     * Clears the {@link BrailleDisplayController} previously set by
+     * {@link #setTestBrailleDisplayController}.
+     */
+    @FlaggedApi(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
+    public void clearTestBrailleDisplayController() {
+        BrailleDisplayController.checkApiFlagIsEnabled();
+        synchronized (mLock) {
+            mTestBrailleDisplayController = null;
+        }
     }
 }

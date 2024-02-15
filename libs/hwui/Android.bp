@@ -28,6 +28,20 @@ license {
     ],
 }
 
+aconfig_declarations {
+    name: "hwui_flags",
+    package: "com.android.graphics.hwui.flags",
+    srcs: [
+        "aconfig/hwui_flags.aconfig",
+    ],
+}
+
+cc_aconfig_library {
+    name: "hwui_flags_cc_lib",
+    host_supported: true,
+    aconfig_declarations: "hwui_flags",
+}
+
 cc_defaults {
     name: "hwui_defaults",
     defaults: [
@@ -44,7 +58,7 @@ cc_defaults {
         "-DEGL_EGLEXT_PROTOTYPES",
         "-DGL_GLEXT_PROTOTYPES",
         "-DATRACE_TAG=ATRACE_TAG_VIEW",
-        "-DLOG_TAG=\"OpenGLRenderer\"",
+        "-DLOG_TAG=\"HWUI\"",
         "-Wall",
         "-Wthread-safety",
         "-Wno-unused-parameter",
@@ -65,14 +79,6 @@ cc_defaults {
         "external/skia/include/private",
         "external/skia/src/core",
     ],
-
-    product_variables: {
-        eng: {
-            lto: {
-                never: true,
-            },
-        },
-    },
 
     target: {
         android: {
@@ -104,11 +110,14 @@ cc_defaults {
         "libbase",
         "libharfbuzz_ng",
         "libminikin",
+        "server_configurable_flags",
     ],
 
     static_libs: [
         "libui-types",
     ],
+
+    whole_static_libs: ["hwui_flags_cc_lib"],
 
     target: {
         android: {
@@ -130,6 +139,8 @@ cc_defaults {
                 "libcrypto",
                 "libsync",
                 "libui",
+                "aconfig_text_flags_c_lib",
+                "server_configurable_flags",
             ],
             static_libs: [
                 "libEGL_blobCache",
@@ -216,15 +227,6 @@ filegroup {
         "apex/java/**/*.java",
     ],
     path: "apex/java",
-}
-
-java_api_contribution {
-    name: "framework-graphics-public-stubs",
-    api_surface: "public",
-    api_file: "api/current.txt",
-    visibility: [
-        "//build/orchestrator/apis",
-    ],
 }
 
 // ------------------------
@@ -514,6 +516,7 @@ cc_defaults {
         "canvas/CanvasOpRasterizer.cpp",
         "effects/StretchEffect.cpp",
         "effects/GainmapRenderer.cpp",
+        "pipeline/skia/BackdropFilterDrawable.cpp",
         "pipeline/skia/HolePunch.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
         "pipeline/skia/SkiaRecordingCanvas.cpp",
@@ -536,6 +539,7 @@ cc_defaults {
         "utils/Blur.cpp",
         "utils/Color.cpp",
         "utils/LinearAllocator.cpp",
+        "utils/TypefaceUtils.cpp",
         "utils/VectorDrawableUtils.cpp",
         "AnimationContext.cpp",
         "Animator.cpp",
@@ -625,14 +629,6 @@ cc_defaults {
             // Allow implicit fallthroughs in HardwareBitmapUploader.cpp until they are fixed.
             cflags: ["-Wno-implicit-fallthrough"],
         },
-        host: {
-            srcs: [
-                "utils/HostColorSpace.cpp",
-            ],
-            export_static_lib_headers: [
-                "libarect",
-            ],
-        },
     },
 }
 
@@ -697,6 +693,7 @@ cc_test {
     ],
 
     static_libs: [
+        "libflagtest",
         "libgmock",
         "libhwui_static",
     ],
@@ -717,6 +714,7 @@ cc_test {
         "tests/unit/EglManagerTests.cpp",
         "tests/unit/FatVectorTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
+        "tests/unit/HintSessionWrapperTests.cpp",
         "tests/unit/JankTrackerTests.cpp",
         "tests/unit/FrameMetricsReporterTests.cpp",
         "tests/unit/LayerUpdateQueueTests.cpp",
@@ -740,6 +738,7 @@ cc_test {
         "tests/unit/TestUtilsTests.cpp",
         "tests/unit/ThreadBaseTests.cpp",
         "tests/unit/TypefaceTests.cpp",
+        "tests/unit/UnderlineTest.cpp",
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/WebViewFunctorManagerTests.cpp",
     ],

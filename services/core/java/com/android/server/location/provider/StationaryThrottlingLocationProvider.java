@@ -27,6 +27,7 @@ import static java.lang.Math.max;
 
 import android.annotation.Nullable;
 import android.location.Location;
+import android.location.LocationRequest;
 import android.location.LocationResult;
 import android.location.provider.ProviderRequest;
 import android.os.SystemClock;
@@ -179,6 +180,7 @@ public final class StationaryThrottlingLocationProvider extends DelegateLocation
     private void onThrottlingChangedLocked(boolean deliverImmediate) {
         long throttlingIntervalMs = INTERVAL_DISABLED;
         if (mDeviceStationary && mDeviceIdle && !mIncomingRequest.isLocationSettingsIgnored()
+                && mIncomingRequest.getQuality() != LocationRequest.QUALITY_HIGH_ACCURACY
                 && mLastLocation != null
                 && mLastLocation.getElapsedRealtimeAgeMillis(mDeviceStationaryRealtimeMs)
                 <= MAX_STATIONARY_LOCATION_AGE_MS) {

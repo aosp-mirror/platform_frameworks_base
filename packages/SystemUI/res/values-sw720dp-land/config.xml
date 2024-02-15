@@ -24,9 +24,6 @@
     <!-- The maximum number of tiles in the QuickQSPanel -->
     <integer name="quick_qs_panel_max_tiles">6</integer>
 
-    <!-- Whether to use the split 2-column notification shade -->
-    <bool name="config_use_split_notification_shade">true</bool>
-
     <!-- The number of columns in the QuickSettings -->
     <integer name="quick_settings_num_columns">3</integer>
 

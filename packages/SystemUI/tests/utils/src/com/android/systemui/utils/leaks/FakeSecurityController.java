@@ -109,6 +109,11 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     }
 
     @Override
+    public boolean isVpnValidated() {
+        return false;
+    }
+
+    @Override
     public String getPrimaryVpnName() {
         return null;
     }

@@ -37,14 +37,17 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.annotation.MainThread;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
@@ -54,6 +57,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
+import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationCustomViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
@@ -65,7 +69,6 @@ import com.android.systemui.statusbar.policy.SmartReplyStateInflaterKt;
 import com.android.systemui.statusbar.policy.SmartReplyView;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.Compile;
-import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -84,7 +87,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     public static final int VISIBLE_TYPE_CONTRACTED = 0;
     public static final int VISIBLE_TYPE_EXPANDED = 1;
     public static final int VISIBLE_TYPE_HEADSUP = 2;
-    private static final int VISIBLE_TYPE_SINGLELINE = 3;
+    public static final int VISIBLE_TYPE_SINGLELINE = 3;
     /**
      * Used when there is no content on the view such as when we're a public layout but don't
      * need to show.
@@ -96,6 +99,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     private final Rect mClipBounds = new Rect();
 
     private int mMinContractedHeight;
+    private int mMinSingleLineHeight;
     private View mContractedChild;
     private View mExpandedChild;
     private View mHeadsUpChild;
@@ -117,6 +121,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     private NotificationViewWrapper mContractedWrapper;
     private NotificationViewWrapper mExpandedWrapper;
     private NotificationViewWrapper mHeadsUpWrapper;
+    @Nullable private NotificationViewWrapper mShownWrapper = null;
     private final HybridGroupManager mHybridGroupManager;
     private int mClipTopAmount;
     private int mContentHeight;
@@ -134,6 +139,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     private PeopleNotificationIdentifier mPeopleIdentifier;
     private RemoteInputViewSubcomponent.Factory mRemoteInputSubcomponentFactory;
     private IStatusBarService mStatusBarService;
+    private boolean mBubblesEnabledForUser;
 
     /**
      * List of listeners for when content views become inactive (i.e. not the showing view).
@@ -208,11 +214,33 @@ public class NotificationContentView extends FrameLayout implements Notification
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
         mStatusBarService = statusBarService;
+        // We set root namespace so that we avoid searching children for id. Notification  might
+        // contain custom view and their ids may clash with ids already existing in shade or
+        // notification panel
+        setIsRootNamespace(true);
+    }
+
+    @Override
+    public View focusSearch(View focused, int direction) {
+        // This implementation is copied from ViewGroup but with removed special handling of
+        // setIsRootNamespace. This view is set as tree root using setIsRootNamespace and it
+        // causes focus to be stuck inside of it. We need to be root to avoid id conflicts
+        // but we don't want to behave like root when it comes to focusing.
+        if (mParent != null) {
+            return mParent.focusSearch(focused, direction);
+        }
+        Log.wtf(TAG, "NotificationContentView doesn't have parent");
+        return null;
     }
 
     public void reinflate() {
         mMinContractedHeight = getResources().getDimensionPixelSize(
                 R.dimen.min_notification_layout_height);
+        if (AsyncHybridViewInflation.isEnabled()) {
+            //TODO: set the height with a more reasonable min single-line height
+            mMinSingleLineHeight = getResources().getDimensionPixelSize(
+                    R.dimen.conversation_single_line_face_pile_size);
+        }
     }
 
     public void setHeights(int smallHeight, int headsUpMaxHeight, int maxHeight) {
@@ -398,6 +426,8 @@ public class NotificationContentView extends FrameLayout implements Notification
         mContractedChild = child;
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
+        // The contracted wrapper has changed. If this is the shown wrapper, we need to update it.
+        updateShownWrapper(mVisibleType);
     }
 
     private NotificationViewWrapper getWrapperForView(View child) {
@@ -461,6 +491,8 @@ public class NotificationContentView extends FrameLayout implements Notification
         if (mContainingNotification != null) {
             applySystemActions(mExpandedChild, mContainingNotification.getEntry());
         }
+        // The expanded wrapper has changed. If this is the shown wrapper, we need to update it.
+        updateShownWrapper(mVisibleType);
     }
 
     /**
@@ -511,6 +543,30 @@ public class NotificationContentView extends FrameLayout implements Notification
         if (mContainingNotification != null) {
             applySystemActions(mHeadsUpChild, mContainingNotification.getEntry());
         }
+        // The heads up wrapper has changed. If this is the shown wrapper, we need to update it.
+        updateShownWrapper(mVisibleType);
+    }
+
+    /**
+     * Sets the single-line view. Child may be null to remove the view.
+     * @param child single-line content view to set
+     */
+    public void setSingleLineView(@Nullable HybridNotificationView child) {
+        if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) return;
+        if (mSingleLineView != null) {
+            mOnContentViewInactiveListeners.remove(mSingleLineView);
+            mSingleLineView.animate().cancel();
+            removeView(mSingleLineView);
+        }
+        if (child == null) {
+            mSingleLineView = null;
+            if (mTransformationStartVisibleType == VISIBLE_TYPE_SINGLELINE) {
+                mTransformationStartVisibleType = VISIBLE_TYPE_NONE;
+            }
+            return;
+        }
+        addView(child);
+        mSingleLineView = child;
     }
 
     @Override
@@ -782,7 +838,17 @@ public class NotificationContentView extends FrameLayout implements Notification
             return mContractedChild != null
                     ? getViewHeight(VISIBLE_TYPE_CONTRACTED) : mMinContractedHeight;
         } else {
-            return mSingleLineView.getHeight();
+            if (AsyncHybridViewInflation.isEnabled()) {
+                if (mSingleLineView != null) {
+                    return getViewHeight(VISIBLE_TYPE_SINGLELINE);
+                } else {
+                    Log.wtf(TAG, "getMinHeight: mSingleLineView == null");
+                    return mMinSingleLineHeight;
+                }
+            } else {
+                AsyncHybridViewInflation.assertInLegacyMode();
+                return mSingleLineView.getHeight();
+            }
         }
     }
 
@@ -867,10 +933,12 @@ public class NotificationContentView extends FrameLayout implements Notification
         forceUpdateVisibility(VISIBLE_TYPE_EXPANDED, mExpandedChild, mExpandedWrapper);
         forceUpdateVisibility(VISIBLE_TYPE_HEADSUP, mHeadsUpChild, mHeadsUpWrapper);
         forceUpdateVisibility(VISIBLE_TYPE_SINGLELINE, mSingleLineView, mSingleLineView);
+        updateShownWrapper(mVisibleType);
         fireExpandedVisibleListenerIfVisible();
         // forceUpdateVisibilities cancels outstanding animations without updating the
         // mAnimationStartVisibleType. Do so here instead.
         mAnimationStartVisibleType = VISIBLE_TYPE_NONE;
+        notifySubtreeForAccessibilityContentChange();
     }
 
     private void fireExpandedVisibleListenerIfVisible() {
@@ -948,16 +1016,40 @@ public class NotificationContentView extends FrameLayout implements Notification
                 mHeadsUpChild, mHeadsUpWrapper);
         updateViewVisibility(visibleType, VISIBLE_TYPE_SINGLELINE,
                 mSingleLineView, mSingleLineView);
+        updateShownWrapper(visibleType);
         fireExpandedVisibleListenerIfVisible();
         // updateViewVisibilities cancels outstanding animations without updating the
         // mAnimationStartVisibleType. Do so here instead.
         mAnimationStartVisibleType = VISIBLE_TYPE_NONE;
+        notifySubtreeForAccessibilityContentChange();
     }
 
     private void updateViewVisibility(int visibleType, int type, View view,
             TransformableView wrapper) {
         if (view != null) {
             wrapper.setVisible(visibleType == type);
+        }
+    }
+
+    /**
+     * Called when the currently shown wrapper is potentially affected by a change to the
+     * {mVisibleType} or the user-visibility of this view.
+     *
+     * @see View#isShown()
+     */
+    private void updateShownWrapper(int visibleType) {
+        final NotificationViewWrapper shownWrapper = isShown() ? getVisibleWrapper(visibleType)
+                : null;
+
+        if (mShownWrapper != shownWrapper) {
+            NotificationViewWrapper hiddenWrapper = mShownWrapper;
+            mShownWrapper = shownWrapper;
+            if (hiddenWrapper != null) {
+                hiddenWrapper.onContentShown(false);
+            }
+            if (shownWrapper != null) {
+                shownWrapper.onContentShown(true);
+            }
         }
     }
 
@@ -971,6 +1063,7 @@ public class NotificationContentView extends FrameLayout implements Notification
         mAnimationStartVisibleType = mVisibleType;
         shownView.transformFrom(hiddenView);
         getViewForVisibleType(visibleType).setVisibility(View.VISIBLE);
+        updateShownWrapper(visibleType);
         hiddenView.transformTo(shownView, new Runnable() {
             @Override
             public void run() {
@@ -978,6 +1071,7 @@ public class NotificationContentView extends FrameLayout implements Notification
                     hiddenView.setVisible(false);
                 }
                 mAnimationStartVisibleType = VISIBLE_TYPE_NONE;
+                notifySubtreeForAccessibilityContentChange();
             }
         });
         fireExpandedVisibleListenerIfVisible();
@@ -995,6 +1089,22 @@ public class NotificationContentView extends FrameLayout implements Notification
                 && mHeadsUpRemoteInputController != null
                 && mHeadsUpRemoteInputController.isActive()) {
             mExpandedRemoteInputController.stealFocusFrom(mHeadsUpRemoteInputController);
+        }
+    }
+
+    @Override
+    public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType) {
+        if (isAnimatingVisibleType()) {
+            // Don't send A11y events while animating to reduce Jank.
+            return;
+        }
+        super.notifySubtreeAccessibilityStateChanged(child, source, changeType);
+    }
+
+    private void notifySubtreeForAccessibilityContentChange() {
+        if (mParent != null) {
+            mParent.notifySubtreeAccessibilityStateChanged(this, this,
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
         }
     }
 
@@ -1193,19 +1303,30 @@ public class NotificationContentView extends FrameLayout implements Notification
     }
 
     private void updateSingleLineView() {
-        if (mIsChildInGroup) {
+        try {
             Trace.beginSection("NotifContentView#updateSingleLineView");
-            boolean isNewView = mSingleLineView == null;
-            mSingleLineView = mHybridGroupManager.bindFromNotification(
-                    mSingleLineView, mContractedChild, mNotificationEntry.getSbn(), this);
-            if (isNewView) {
-                updateViewVisibility(mVisibleType, VISIBLE_TYPE_SINGLELINE,
-                        mSingleLineView, mSingleLineView);
+            if (AsyncHybridViewInflation.isEnabled()) {
+                return;
             }
+            AsyncHybridViewInflation.assertInLegacyMode();
+            if (mIsChildInGroup) {
+                boolean isNewView = mSingleLineView == null;
+                mSingleLineView = mHybridGroupManager.bindFromNotification(
+                        /* reusableView = */ mSingleLineView,
+                        /* contentView = */ mContractedChild,
+                        /* notification = */ mNotificationEntry.getSbn(),
+                        /* parent = */ this
+                );
+                if (isNewView && mSingleLineView != null) {
+                    updateViewVisibility(mVisibleType, VISIBLE_TYPE_SINGLELINE,
+                            mSingleLineView, mSingleLineView);
+                }
+            } else if (mSingleLineView != null) {
+                removeView(mSingleLineView);
+                mSingleLineView = null;
+            }
+        } finally {
             Trace.endSection();
-        } else if (mSingleLineView != null) {
-            removeView(mSingleLineView);
-            mSingleLineView = null;
         }
     }
 
@@ -1344,12 +1465,12 @@ public class NotificationContentView extends FrameLayout implements Notification
                         result.mController.setPendingIntent(existingPendingIntent);
                     }
                     if (result.mController.updatePendingIntentFromActions(actions)) {
-                        if (!result.mView.isActive()) {
-                            result.mView.focus();
+                        if (!result.mController.isActive()) {
+                            result.mController.focus();
                         }
                     } else {
-                        if (result.mView.isActive()) {
-                            result.mView.close();
+                        if (result.mController.isActive()) {
+                            result.mController.close();
                         }
                     }
                 }
@@ -1396,8 +1517,8 @@ public class NotificationContentView extends FrameLayout implements Notification
         if (shouldShowBubbleButton(entry)) {
             // explicitly resolve drawable resource using SystemUI's theme
             Drawable d = mContext.getDrawable(entry.isBubble()
-                    ? R.drawable.bubble_ic_stop_bubble
-                    : R.drawable.bubble_ic_create_bubble);
+                    ? com.android.wm.shell.R.drawable.bubble_ic_stop_bubble
+                    : com.android.wm.shell.R.drawable.bubble_ic_create_bubble);
 
             String contentDescription = mContext.getResources().getString(entry.isBubble()
                     ? R.string.notification_conversation_unbubble
@@ -1423,12 +1544,20 @@ public class NotificationContentView extends FrameLayout implements Notification
         }
     }
 
+    @MainThread
+    public void setBubblesEnabledForUser(boolean enabled) {
+        mBubblesEnabledForUser = enabled;
+
+        applyBubbleAction(mExpandedChild, mNotificationEntry);
+        applyBubbleAction(mHeadsUpChild, mNotificationEntry);
+    }
+
     @VisibleForTesting
     boolean shouldShowBubbleButton(NotificationEntry entry) {
         boolean isPersonWithShortcut =
                 mPeopleIdentifier.getPeopleNotificationType(entry)
                         >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
-        return BubblesManager.areBubblesEnabled(mContext, entry.getSbn().getUser())
+        return mBubblesEnabledForUser
                 && isPersonWithShortcut
                 && entry.getBubbleMetadata() != null;
     }
@@ -1810,6 +1939,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     @Override
     public void onVisibilityAggregated(boolean isVisible) {
         super.onVisibilityAggregated(isVisible);
+        updateShownWrapper(mVisibleType);
         if (isVisible) {
             fireExpandedVisibleListenerIfVisible();
         }
@@ -2062,6 +2192,7 @@ public class NotificationContentView extends FrameLayout implements Notification
             pw.print("null");
         }
         pw.println();
+        pw.println("mBubblesEnabledForUser: " + mBubblesEnabledForUser);
 
         pw.print("RemoteInputViews { ");
         pw.print(" visibleType: " + mVisibleType);
@@ -2189,6 +2320,21 @@ public class NotificationContentView extends FrameLayout implements Notification
     }
 
     @VisibleForTesting
+    protected NotificationViewWrapper getContractedWrapper() {
+        return mContractedWrapper;
+    }
+
+    @VisibleForTesting
+    protected NotificationViewWrapper getExpandedWrapper() {
+        return mExpandedWrapper;
+    }
+
+    @VisibleForTesting
+    protected NotificationViewWrapper getHeadsUpWrapper() {
+        return mHeadsUpWrapper;
+    }
+
+    @VisibleForTesting
     protected void setContractedWrapper(NotificationViewWrapper contractedWrapper) {
         mContractedWrapper = contractedWrapper;
     }
@@ -2199,6 +2345,11 @@ public class NotificationContentView extends FrameLayout implements Notification
     @VisibleForTesting
     protected void setHeadsUpWrapper(NotificationViewWrapper headsUpWrapper) {
         mHeadsUpWrapper = headsUpWrapper;
+    }
+
+    @VisibleForTesting
+    protected void setAnimationStartVisibleType(int animationStartVisibleType) {
+        mAnimationStartVisibleType = animationStartVisibleType;
     }
 
     @Override

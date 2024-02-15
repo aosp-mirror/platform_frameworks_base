@@ -30,15 +30,15 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.utils.GlobalWindowManager
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Releases cached resources on allocated by keyguard.
@@ -52,6 +52,7 @@ class ResourceTrimmer
 @Inject
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
+    private val powerInteractor: PowerInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val globalWindowManager: GlobalWindowManager,
     @Application private val applicationScope: CoroutineScope,
@@ -61,28 +62,23 @@ constructor(
 
     override fun start() {
         Log.d(LOG_TAG, "Resource trimmer registered.")
-        if (
-            !(featureFlags.isEnabled(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK) ||
-                featureFlags.isEnabled(Flags.TRIM_FONT_CACHES_AT_UNLOCK))
-        ) {
-            return
-        }
-
-        applicationScope.launch(bgDispatcher) {
-            // We need to wait for the AoD transition (and animation) to complete.
-            // This means we're waiting for isDreaming (== implies isDoze) and dozeAmount == 1f
-            // signal. This is to make sure we don't clear font caches during animation which
-            // would jank and leave stale data in memory.
-            val isDozingFully =
-                keyguardInteractor.dozeAmount.map { it == 1f }.distinctUntilChanged()
-            combine(
-                    keyguardInteractor.wakefulnessModel.map { it.state },
-                    keyguardInteractor.isDreaming,
-                    isDozingFully,
-                    ::Triple
-                )
-                .distinctUntilChanged()
-                .collect { onWakefulnessUpdated(it.first, it.second, it.third) }
+        if (featureFlags.isEnabled(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK)) {
+            applicationScope.launch(bgDispatcher) {
+                // We need to wait for the AoD transition (and animation) to complete.
+                // This means we're waiting for isDreaming (== implies isDoze) and dozeAmount == 1f
+                // signal. This is to make sure we don't clear font caches during animation which
+                // would jank and leave stale data in memory.
+                val isDozingFully =
+                    keyguardInteractor.dozeAmount.map { it == 1f }.distinctUntilChanged()
+                combine(
+                        powerInteractor.isAsleep,
+                        keyguardInteractor.isDreaming,
+                        isDozingFully,
+                        ::Triple
+                    )
+                    .distinctUntilChanged()
+                    .collect { onWakefulnessUpdated(it.first, it.second, it.third) }
+            }
         }
 
         applicationScope.launch(bgDispatcher) {
@@ -97,24 +93,23 @@ constructor(
 
     @WorkerThread
     private fun onKeyguardGone() {
-        if (!featureFlags.isEnabled(Flags.TRIM_FONT_CACHES_AT_UNLOCK)) {
-            return
-        }
-
-        if (DEBUG) {
-            Log.d(LOG_TAG, "Trimming font caches since keyguard went away.")
-        }
         // We want to clear temporary caches we've created while rendering and animating
         // lockscreen elements, especially clocks.
+        Log.d(LOG_TAG, "Sending TRIM_MEMORY_UI_HIDDEN.")
         globalWindowManager.trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
-        globalWindowManager.trimCaches(HardwareRenderer.CACHE_TRIM_FONT)
+        if (featureFlags.isEnabled(Flags.TRIM_FONT_CACHES_AT_UNLOCK)) {
+            if (DEBUG) {
+                Log.d(LOG_TAG, "Trimming font caches since keyguard went away.")
+            }
+            globalWindowManager.trimCaches(HardwareRenderer.CACHE_TRIM_FONT)
+        }
     }
 
     @WorkerThread
     private fun onWakefulnessUpdated(
-        wakefulness: WakefulnessState,
-        isDreaming: Boolean,
-        isDozingFully: Boolean
+            isAsleep: Boolean,
+            isDreaming: Boolean,
+            isDozingFully: Boolean
     ) {
         if (!featureFlags.isEnabled(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK)) {
             return
@@ -123,7 +118,7 @@ constructor(
         if (DEBUG) {
             Log.d(
                 LOG_TAG,
-                "Wakefulness: $wakefulness Dreaming: $isDreaming DozeAmount: $isDozingFully"
+                "isAsleep: $isAsleep Dreaming: $isDreaming DozeAmount: $isDozingFully"
             )
         }
         // There are three scenarios:
@@ -133,9 +128,9 @@ constructor(
         //      to 1f
         // * AoD - where we go to ASLEEP with iDreaming = true and dozeAmount slowly increases
         //      to 1f
-        val dozeDisabledAndScreenOff = wakefulness == WakefulnessState.ASLEEP && !isDreaming
+        val dozeDisabledAndScreenOff = isAsleep && !isDreaming
         val dozeEnabledAndDozeAnimationCompleted =
-            wakefulness == WakefulnessState.ASLEEP && isDreaming && isDozingFully
+                isAsleep && isDreaming && isDozingFully
         if (dozeDisabledAndScreenOff || dozeEnabledAndDozeAnimationCompleted) {
             Trace.beginSection("ResourceTrimmer#trimMemory")
             Log.d(LOG_TAG, "SysUI asleep, trimming memory.")

@@ -628,6 +628,27 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
     }
 
     @Test
+    public void testLaunchWindowingModeUpdatesExistingTask() {
+        final TestDisplayContent freeformDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FREEFORM);
+
+        mCurrent.mPreferredTaskDisplayArea = freeformDisplay.getDefaultTaskDisplayArea();
+        ActivityRecord activity = createSourceActivity(freeformDisplay);
+        final Task task = activity.getTask();
+        task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder()
+                        .setTask(task)
+                        .setOptions(options)
+                        .calculate());
+
+        assertEquals(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode);
+    }
+
+    @Test
     public void testBoundsInOptionsInfersFreeformWithResizeableActivity() {
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchBounds(new Rect(0, 0, 100, 100));
@@ -675,6 +696,39 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
                 new CalculateRequestBuilder().setSource(source).calculate());
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
+                WINDOWING_MODE_FULLSCREEN);
+    }
+
+    @Test
+    public void testInheritsSourceTaskWindowingModeWhenActivityIsInDifferentWindowingMode() {
+        final TestDisplayContent fullscreenDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FULLSCREEN);
+        final ActivityRecord source = createSourceActivity(fullscreenDisplay);
+        source.setWindowingMode(WINDOWING_MODE_PINNED);
+        source.getTask().setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).calculate());
+
+        assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
+                WINDOWING_MODE_FULLSCREEN);
+    }
+
+    @Test
+    public void testDoesNotInheritsSourceTaskWindowingModeWhenActivityIsInFreeformWindowingMode() {
+        // The activity could end up in different windowing mode state after calling finish()
+        // while the task would still hold the WINDOWING_MODE_PINNED state, or in other words
+        // be still in the Picture in Picture mode.
+        final TestDisplayContent fullscreenDisplay = createNewDisplayContent(
+                WINDOWING_MODE_FULLSCREEN);
+        final ActivityRecord source = createSourceActivity(fullscreenDisplay);
+        source.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        source.getTask().setWindowingMode(WINDOWING_MODE_PINNED);
+
+        assertEquals(RESULT_CONTINUE,
+                new CalculateRequestBuilder().setSource(source).calculate());
+
+        assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
     }
 

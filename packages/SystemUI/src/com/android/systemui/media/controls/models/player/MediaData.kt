@@ -21,7 +21,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.session.MediaSession
 import com.android.internal.logging.InstanceId
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /** State of a media view. */
 data class MediaData(
@@ -81,8 +81,11 @@ data class MediaData(
     /** Set from the notification and used as fallback when PlaybackState cannot be determined */
     val isClearable: Boolean = true,
 
-    /** Timestamp when this player was last active. */
+    /** Milliseconds since boot when this player was last active. */
     var lastActive: Long = 0L,
+
+    /** Timestamp in milliseconds when this player was created. */
+    var createdTimestampMillis: Long = 0L,
 
     /** Instance ID for logging purposes */
     val instanceId: InstanceId,

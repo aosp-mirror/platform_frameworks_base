@@ -18,6 +18,7 @@ package android.hardware.radio;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -122,6 +123,7 @@ public class RadioManager {
     /** AM HD radio or DRM band.
      * @see BandDescriptor */
     public static final int BAND_AM_HD = 3;
+    /** @removed mistakenly exposed previously */
     @IntDef(prefix = { "BAND_" }, value = {
         BAND_INVALID,
         BAND_AM,
@@ -159,11 +161,11 @@ public class RadioManager {
     /**
      * Forces the analog playback for the supporting radio technology.
      *
-     * User may disable digital playback for FM HD Radio or hybrid FM/DAB with
-     * this option. This is purely user choice, ie. does not reflect digital-
+     * <p>User may disable digital playback for FM HD Radio or hybrid FM/DAB with
+     * this option. This is purely user choice, i.e. does not reflect digital-
      * analog handover state managed from the HAL implementation side.
      *
-     * Some radio technologies may not support this, ie. DAB.
+     * <p>Some radio technologies may not support this, i.e. DAB.
      */
     public static final int CONFIG_FORCE_ANALOG = 2;
     /**
@@ -199,6 +201,30 @@ public class RadioManager {
     /** Enables DAB-FM soft-linking (related content). */
     public static final int CONFIG_DAB_FM_SOFT_LINKING = 9;
 
+    /**
+     * Forces the FM analog playback for the supporting radio technology.
+     *
+     * <p>User may disable FM digital playback for FM HD Radio or hybrid FM/DAB
+     * with this option. This is purely user choice, i.e. does not reflect
+     * digital-analog handover state managed from the HAL implementation side.
+     *
+     * <p>Some radio technologies may not support this, i.e. DAB.
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int CONFIG_FORCE_ANALOG_FM = 10;
+
+    /**
+     * Forces the AM analog playback for the supporting radio technology.
+     *
+     * <p>User may disable FM digital playback for AM HD Radio or hybrid AM/DAB
+     * with this option. This is purely user choice, i.e. does not reflect
+     * digital-analog handover state managed from the HAL implementation side.
+     *
+     * <p>Some radio technologies may not support this, i.e. DAB.
+     */
+    @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+    public static final int CONFIG_FORCE_ANALOG_AM = 11;
+
     /** @hide */
     @IntDef(prefix = { "CONFIG_" }, value = {
         CONFIG_FORCE_MONO,
@@ -210,6 +236,8 @@ public class RadioManager {
         CONFIG_DAB_FM_LINKING,
         CONFIG_DAB_DAB_SOFT_LINKING,
         CONFIG_DAB_FM_SOFT_LINKING,
+        CONFIG_FORCE_ANALOG_FM,
+        CONFIG_FORCE_ANALOG_AM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ConfigFlag {}
@@ -283,7 +311,7 @@ public class RadioManager {
         }
 
         /** Unique module identifier provided by the native service.
-         * For use with {@link #openTuner(int, BandConfig, boolean, Callback, Handler)}.
+         * For use with {@link #openTuner(int, BandConfig, boolean, RadioTuner.Callback, Handler)}.
          * @return the radio module unique identifier.
          */
         public int getId() {
@@ -1441,6 +1469,9 @@ public class RadioManager {
         private static final int FLAG_TRAFFIC_ANNOUNCEMENT = 1 << 3;
         private static final int FLAG_TUNED = 1 << 4;
         private static final int FLAG_STEREO = 1 << 5;
+        private static final int FLAG_SIGNAL_ACQUIRED = 1 << 6;
+        private static final int FLAG_HD_SIS_ACQUIRED = 1 << 7;
+        private static final int FLAG_HD_AUDIO_ACQUIRED = 1 << 8;
 
         @NonNull private final ProgramSelector mSelector;
         @Nullable private final ProgramSelector.Identifier mLogicallyTunedTo;
@@ -1530,7 +1561,7 @@ public class RadioManager {
         /** Main channel expressed in units according to band type.
          * Currently all defined band types express channels as frequency in kHz
          * @return the program channel
-         * @deprecated Use {@link getSelector()} instead.
+         * @deprecated Use {@link ProgramInfo#getSelector} instead.
          */
         @Deprecated
         public int getChannel() {
@@ -1544,7 +1575,7 @@ public class RadioManager {
 
         /** Sub channel ID. E.g 1 for HD radio HD1
          * @return the program sub channel
-         * @deprecated Use {@link getSelector()} instead.
+         * @deprecated Use {@link ProgramInfo#getSelector} instead.
          */
         @Deprecated
         public int getSubChannel() {
@@ -1573,7 +1604,7 @@ public class RadioManager {
 
         /** {@code true} if the received program is digital (e.g HD radio)
          * @return {@code true} if digital, {@code false} otherwise.
-         * @deprecated Use {@link getLogicallyTunedTo()} instead.
+         * @deprecated Use {@link ProgramInfo#getLogicallyTunedTo()} instead.
          */
         @Deprecated
         public boolean isDigital() {
@@ -1595,7 +1626,7 @@ public class RadioManager {
         }
 
         /**
-         * {@code true} if radio stream is not playing, ie. due to bad reception
+         * {@code true} if radio stream is not playing, i.e. due to bad reception
          * conditions or buffering. In this state volume knob MAY be disabled to
          * prevent user increasing volume too much.
          * It does NOT mean the user has muted audio.
@@ -1618,6 +1649,28 @@ public class RadioManager {
          */
         public boolean isTrafficAnnouncementActive() {
             return (mInfoFlags & FLAG_TRAFFIC_ANNOUNCEMENT) != 0;
+        }
+
+        /**
+         * @return {@code true} if the signal has been acquired.
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+        public boolean isSignalAcquired() {
+            return (mInfoFlags & FLAG_SIGNAL_ACQUIRED) != 0;
+        }
+        /**
+         * @return {@code true} if HD Station Information Service (SIS) information is available.
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+        public boolean isHdSisAvailable() {
+            return (mInfoFlags & FLAG_HD_SIS_ACQUIRED) != 0;
+        }
+        /**
+         * @return {@code true} if HD audio is available.
+         */
+        @FlaggedApi(Flags.FLAG_HD_RADIO_IMPROVED)
+        public boolean isHdAudioAvailable() {
+            return (mInfoFlags & FLAG_HD_AUDIO_ACQUIRED) != 0;
         }
 
         /**
@@ -1860,7 +1913,8 @@ public class RadioManager {
      * Removes previously registered announcement listener.
      *
      * @param listener announcement listener, previously registered with
-     *        {@link addAnnouncementListener}
+     *        {@link #addAnnouncementListener(Executor, Set, Announcement.OnListUpdatedListener)}
+     *        or {@link #addAnnouncementListener(Set, Announcement.OnListUpdatedListener)}
      */
     @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
     public void removeAnnouncementListener(@NonNull Announcement.OnListUpdatedListener listener) {

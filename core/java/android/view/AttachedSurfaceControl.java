@@ -15,13 +15,19 @@
  */
 package android.view;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
+import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
+import android.os.Looper;
+import android.window.InputTransferToken;
 import android.window.SurfaceSyncGroup;
+
+import com.android.window.flags.Flags;
 
 /**
  * Provides an interface to the root-Surface of a View Hierarchy or Window. This
@@ -88,6 +94,12 @@ public interface AttachedSurfaceControl {
      * Note, when using ANativeWindow APIs in conjunction with a NativeActivity Surface or
      * SurfaceView Surface, the buffer producer will already have access to the transform hint and
      * no additional work is needed.
+     *
+     * If the root surface is not available, the API will return {@code BUFFER_TRANSFORM_IDENTITY}.
+     * The caller should register a listener to listen for any changes. @see
+     * {@link #addOnBufferTransformHintChangedListener(OnBufferTransformHintChangedListener)}.
+     * Warning: Calling this API in Android 14 (API Level 34) or earlier will crash if the root
+     * surface is not available.
      *
      * @see HardwareBuffer
      */
@@ -166,5 +178,62 @@ public interface AttachedSurfaceControl {
      * @throws IllegalArgumentException If negative insets are provided.
      */
     default void setChildBoundingInsets(@NonNull Rect insets) {
+    }
+
+    /**
+     * Gets the token used for associating this {@link AttachedSurfaceControl} with an embedded
+     * {@link SurfaceControlViewHost} or {@link SurfaceControl}
+     *
+     * <p>This token should be passed to
+     * {@link SurfaceControlViewHost#SurfaceControlViewHost(Context, Display, InputTransferToken)}
+     * or
+     * {@link WindowManager#registerBatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Choreographer, SurfaceControlInputReceiver)} or
+     * {@link WindowManager#registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Looper, SurfaceControlInputReceiver)}
+     *
+     * @return The SurfaceControlViewHost link token.
+     * @throws IllegalStateException if the {@link AttachedSurfaceControl} was created with no
+     * registered input
+     */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    default InputTransferToken getInputTransferToken() {
+        throw new UnsupportedOperationException("The getInputTransferToken needs to be "
+                + "implemented before making this call.");
+    }
+
+    /**
+     * Transfer the currently in progress touch gesture from the host to the requested
+     * {@link SurfaceControlViewHost.SurfacePackage}. This requires that the
+     * SurfaceControlViewHost was created with the current host's inputToken.
+     * <p>
+     * When the touch is transferred, the window currently receiving touch gets an ACTION_CANCEL
+     * and does not receive any further input events for this gesture.
+     * <p>
+     * The transferred-to window receives an ACTION_DOWN event and then the remainder of the
+     * input events for this gesture. It does not receive any of the previous events of this gesture
+     * that the originating window received.
+     * <p>
+     * The "transferTouch" API only works for the current gesture. When a new gesture arrives,
+     * input dispatcher will do a new round of hit testing. So, if the "host" window is still the
+     * first thing that's being touched, then it will receive the new gesture again. It will
+     * again be up to the host to transfer this new gesture to the embedded.
+     * <p>
+     * Once the transferred-to window receives the gesture, it can choose to give up this gesture
+     * and send it to another window that it's linked to (it can't be an arbitrary window for
+     * security reasons) using the same transferTouch API. Only the window currently receiving
+     * touch is allowed to transfer the gesture.
+     *
+     * @param surfacePackage The SurfacePackage to transfer the gesture to.
+     * @return Whether the touch stream was transferred.
+     * @see SurfaceControlViewHost#transferTouchGestureToHost() for the reverse to transfer touch
+     * gesture from the embedded to the host.
+     */
+    @FlaggedApi(Flags.FLAG_TRANSFER_GESTURE_TO_EMBEDDED)
+    default boolean transferHostTouchGestureToEmbedded(
+            @NonNull SurfaceControlViewHost.SurfacePackage surfacePackage) {
+        throw new UnsupportedOperationException(
+                "transferHostTouchGestureToEmbedded is unimplemented");
     }
 }

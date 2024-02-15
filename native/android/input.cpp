@@ -314,6 +314,23 @@ const AInputEvent* AMotionEvent_fromJava(JNIEnv* env, jobject motionEvent) {
     return event;
 }
 
+jobject AInputEvent_toJava(JNIEnv* env, const AInputEvent* aInputEvent) {
+    LOG_ALWAYS_FATAL_IF(aInputEvent == nullptr, "Expected aInputEvent to be non-null");
+    const int32_t eventType = AInputEvent_getType(aInputEvent);
+    switch (eventType) {
+        case AINPUT_EVENT_TYPE_MOTION:
+            return android::android_view_MotionEvent_obtainAsCopy(env,
+                                                                  static_cast<const MotionEvent&>(
+                                                                          *aInputEvent));
+        case AINPUT_EVENT_TYPE_KEY:
+            return android::android_view_KeyEvent_fromNative(env,
+                                                             static_cast<const KeyEvent&>(
+                                                                     *aInputEvent));
+        default:
+            LOG_ALWAYS_FATAL("Unexpected event type %d in AInputEvent_toJava.", eventType);
+    }
+}
+
 void AInputQueue_attachLooper(AInputQueue* queue, ALooper* looper,
         int ident, ALooper_callbackFunc callback, void* data) {
     InputQueue* iq = static_cast<InputQueue*>(queue);

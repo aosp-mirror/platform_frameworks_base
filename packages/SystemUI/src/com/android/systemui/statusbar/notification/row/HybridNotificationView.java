@@ -28,9 +28,8 @@ import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
 
-import com.android.internal.util.ContrastColorUtil;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
@@ -98,8 +97,8 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
     private void resolveThemeTextColors() {
         try (TypedArray ta = mContext.getTheme().obtainStyledAttributes(
                 android.R.style.Theme_DeviceDefault_DayNight, new int[]{
-                        android.R.attr.textColorPrimary,
-                        android.R.attr.textColorSecondary
+                        com.android.internal.R.attr.materialColorOnSurface,
+                        com.android.internal.R.attr.materialColorOnSurfaceVariant
                 })) {
             if (ta != null) {
                 mPrimaryTextColor = ta.getColor(0, mPrimaryTextColor);

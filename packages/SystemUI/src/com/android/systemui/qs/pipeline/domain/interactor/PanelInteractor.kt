@@ -16,8 +16,7 @@
 package com.android.systemui.qs.pipeline.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.phone.CentralSurfaces
-import java.util.Optional
+import com.android.systemui.shade.ShadeController
 import javax.inject.Inject
 
 /** Encapsulates business logic for interacting with the QS panel. */
@@ -37,17 +36,17 @@ interface PanelInteractor {
 class PanelInteractorImpl
 @Inject
 constructor(
-    private val centralSurfaces: Optional<CentralSurfaces>,
+    private val shadeController: ShadeController,
 ) : PanelInteractor {
     override fun collapsePanels() {
-        centralSurfaces.ifPresent { it.postAnimateCollapsePanels() }
+        shadeController.postAnimateCollapseShade()
     }
 
     override fun forceCollapsePanels() {
-        centralSurfaces.ifPresent { it.postAnimateForceCollapsePanels() }
+        shadeController.postAnimateForceCollapseShade()
     }
 
     override fun openPanels() {
-        centralSurfaces.ifPresent { it.postAnimateOpenPanels() }
+        shadeController.postAnimateExpandQs()
     }
 }

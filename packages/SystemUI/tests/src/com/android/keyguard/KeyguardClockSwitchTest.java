@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
@@ -39,10 +40,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.ClockController;
-import com.android.systemui.plugins.ClockFaceController;
+import com.android.systemui.plugins.clocks.ClockController;
+import com.android.systemui.plugins.clocks.ClockFaceController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Before;
@@ -192,6 +193,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         assertThat(mLargeClockFrame.getAlpha()).isEqualTo(1);
         assertThat(mLargeClockFrame.getVisibility()).isEqualTo(VISIBLE);
         assertThat(mSmallClockFrame.getAlpha()).isEqualTo(0);
+        assertThat(mSmallClockFrame.getVisibility()).isEqualTo(INVISIBLE);
     }
 
     @Test
@@ -201,6 +203,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         assertThat(mLargeClockFrame.getAlpha()).isEqualTo(1);
         assertThat(mLargeClockFrame.getVisibility()).isEqualTo(VISIBLE);
         assertThat(mSmallClockFrame.getAlpha()).isEqualTo(0);
+        assertThat(mSmallClockFrame.getVisibility()).isEqualTo(INVISIBLE);
     }
 
     @Test
@@ -216,6 +219,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         // only big clock is removed at switch
         assertThat(mLargeClockFrame.getParent()).isNull();
         assertThat(mLargeClockFrame.getAlpha()).isEqualTo(0);
+        assertThat(mLargeClockFrame.getVisibility()).isEqualTo(INVISIBLE);
     }
 
     @Test
@@ -227,6 +231,7 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         // only big clock is removed at switch
         assertThat(mLargeClockFrame.getParent()).isNull();
         assertThat(mLargeClockFrame.getAlpha()).isEqualTo(0);
+        assertThat(mLargeClockFrame.getVisibility()).isEqualTo(INVISIBLE);
     }
 
     @Test

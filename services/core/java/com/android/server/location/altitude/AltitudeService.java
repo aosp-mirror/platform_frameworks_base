@@ -19,6 +19,8 @@ package com.android.server.location.altitude;
 import android.content.Context;
 import android.frameworks.location.altitude.AddMslAltitudeToLocationRequest;
 import android.frameworks.location.altitude.AddMslAltitudeToLocationResponse;
+import android.frameworks.location.altitude.GetGeoidHeightRequest;
+import android.frameworks.location.altitude.GetGeoidHeightResponse;
 import android.frameworks.location.altitude.IAltitudeService;
 import android.location.Location;
 import android.location.altitude.AltitudeConverter;
@@ -52,16 +54,30 @@ public class AltitudeService extends IAltitudeService.Stub {
         location.setLongitude(request.longitudeDegrees);
         location.setAltitude(request.altitudeMeters);
         location.setVerticalAccuracyMeters(request.verticalAccuracyMeters);
+
+        AddMslAltitudeToLocationResponse response = new AddMslAltitudeToLocationResponse();
         try {
             mAltitudeConverter.addMslAltitudeToLocation(mContext, location);
         } catch (IOException e) {
-            throw new RemoteException(e);
+            response.success = false;
+            return response;
         }
-
-        AddMslAltitudeToLocationResponse response = new AddMslAltitudeToLocationResponse();
         response.mslAltitudeMeters = location.getMslAltitudeMeters();
         response.mslAltitudeAccuracyMeters = location.getMslAltitudeAccuracyMeters();
+        response.success = true;
         return response;
+    }
+
+    @Override
+    public GetGeoidHeightResponse getGeoidHeight(GetGeoidHeightRequest request)
+            throws RemoteException {
+        try {
+            return mAltitudeConverter.getGeoidHeight(mContext, request);
+        } catch (IOException e) {
+            GetGeoidHeightResponse response = new GetGeoidHeightResponse();
+            response.success = false;
+            return response;
+        }
     }
 
     @Override

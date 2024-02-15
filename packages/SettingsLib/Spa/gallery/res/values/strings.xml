@@ -24,4 +24,11 @@
     <string name="single_line_summary_preference_title" translatable="false">Preference (singleLineSummary = true)</string>
     <!-- Summary for single line summary preference. [DO NOT TRANSLATE] -->
     <string name="single_line_summary_preference_summary" translatable="false">A very long summary to show case a preference which only shows a single line summary.</string>
+    <!-- Footer text with two links. [DO NOT TRANSLATE] -->
+    <string name="footer_with_two_links" translatable="false">Annotated string with <a href="https://www.android.com/">link 1</a> and <a href="https://source.android.com/">link 2</a>.</string>
+
+    <!-- Sample title -->
+    <string name="sample_title" translatable="false">Lorem ipsum</string>
+    <!-- Sample text -->
+    <string name="sample_text" translatable="false">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent a rhoncus tellus. Nulla facilisi. Pellentesque erat ex, maximus viae turpis</string>
 </resources>

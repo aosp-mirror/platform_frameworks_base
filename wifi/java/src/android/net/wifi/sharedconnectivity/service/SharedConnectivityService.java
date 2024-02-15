@@ -70,14 +70,8 @@ public abstract class SharedConnectivityService extends Service {
     private List<HotspotNetwork> mHotspotNetworks = Collections.emptyList();
     private List<KnownNetwork> mKnownNetworks = Collections.emptyList();
     private SharedConnectivitySettingsState mSettingsState = null;
-    private HotspotNetworkConnectionStatus mHotspotNetworkConnectionStatus =
-            new HotspotNetworkConnectionStatus.Builder()
-                    .setStatus(HotspotNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN)
-                    .setExtras(Bundle.EMPTY).build();
-    private KnownNetworkConnectionStatus mKnownNetworkConnectionStatus =
-            new KnownNetworkConnectionStatus.Builder()
-                    .setStatus(KnownNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN)
-                    .setExtras(Bundle.EMPTY).build();
+    private HotspotNetworkConnectionStatus mHotspotNetworkConnectionStatus = null;
+    private KnownNetworkConnectionStatus mKnownNetworkConnectionStatus = null;
     // Used for testing
     private CountDownLatch mCountDownLatch;
 
@@ -276,6 +270,11 @@ public abstract class SharedConnectivityService extends Service {
 
     private void onRegisterCallback(ISharedConnectivityCallback callback) {
         mRemoteCallbackList.register(callback);
+        try {
+            callback.onServiceConnected();
+        } catch (RemoteException e) {
+            if (DEBUG) Log.w(TAG, "Exception in onRegisterCallback", e);
+        }
         if (mCountDownLatch != null) {
             mCountDownLatch.countDown();
         }

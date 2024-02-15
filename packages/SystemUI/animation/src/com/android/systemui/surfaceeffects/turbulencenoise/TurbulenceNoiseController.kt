@@ -69,12 +69,15 @@ class TurbulenceNoiseController(private val turbulenceNoiseView: TurbulenceNoise
      *
      * <p>It plays ease-in, main, and ease-out animations in sequence.
      */
-    fun play(config: TurbulenceNoiseAnimationConfig) {
+    fun play(
+        baseType: TurbulenceNoiseShader.Companion.Type,
+        config: TurbulenceNoiseAnimationConfig
+    ) {
         if (state != AnimationState.NOT_PLAYING) {
             return // Ignore if any of the animation is playing.
         }
 
-        turbulenceNoiseView.applyConfig(config)
+        turbulenceNoiseView.initShader(baseType, config)
         playEaseInAnimation()
     }
 

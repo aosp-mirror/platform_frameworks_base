@@ -26,24 +26,17 @@ sealed class AuthenticationMethodModel(
      */
     open val isSecure: Boolean,
 ) {
-    /** There is no authentication method on the device. We shouldn't even show the lock screen. */
-    object None : AuthenticationMethodModel(isSecure = false)
+    /**
+     * Device doesn't use a secure authentication method. Either there is no lockscreen or the lock
+     * screen can be swiped away when displayed.
+     */
+    data object None : AuthenticationMethodModel(isSecure = false)
 
-    /** The most basic authentication method. The lock screen can be swiped away when displayed. */
-    object Swipe : AuthenticationMethodModel(isSecure = false)
+    data object Pin : AuthenticationMethodModel(isSecure = true)
 
-    data class PIN(val code: Int) : AuthenticationMethodModel(isSecure = true)
+    data object Password : AuthenticationMethodModel(isSecure = true)
 
-    data class Password(val password: String) : AuthenticationMethodModel(isSecure = true)
+    data object Pattern : AuthenticationMethodModel(isSecure = true)
 
-    data class Pattern(
-        val coordinates: List<PatternCoordinate>,
-        val isPatternVisible: Boolean = true,
-    ) : AuthenticationMethodModel(isSecure = true) {
-
-        data class PatternCoordinate(
-            val x: Int,
-            val y: Int,
-        )
-    }
+    data object Sim : AuthenticationMethodModel(isSecure = true)
 }

@@ -38,7 +38,11 @@
     <!-- Message for updating an existing app [CHAR LIMIT=NONE] -->
     <string name="install_confirm_question_update">Do you want to update this app?</string>
     <!-- Message for updating an existing app with update owner reminder [CHAR LIMIT=NONE] -->
-    <string name="install_confirm_question_update_owner_reminder">Update this app from <xliff:g id="new_update_owner">%1$s</xliff:g>?\n\nThis app normally receives updates from <xliff:g id="existing_update_owner">%2$s</xliff:g>. By updating from a different source, you may receive future updates from any source on your phone. App functionality may change.</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet">&lt;p>Update this app from &lt;b><xliff:g id="new_update_owner">%1$s</xliff:g>&lt;/b>\?&lt;/p>&lt;p>This app normally receives updates from &lt;b><xliff:g id="existing_update_owner">%2$s</xliff:g>&lt;/b>. By updating from a different source, you may receive future updates from any source on your tablet. App functionality may change.&lt;/p></string>
+    <!-- Message for updating an existing app with update owner reminder [CHAR LIMIT=NONE] -->
+    <string name="install_confirm_question_update_owner_reminder" product="tv">&lt;p>Update this app from &lt;b><xliff:g id="new_update_owner">%1$s</xliff:g>&lt;/b>\?&lt;/p>&lt;p>This app normally receives updates from &lt;b><xliff:g id="existing_update_owner">%2$s</xliff:g>&lt;/b>. By updating from a different source, you may receive future updates from any source on your TV. App functionality may change.&lt;/p></string>
+    <!-- Message for updating an existing app with update owner reminder [CHAR LIMIT=NONE] -->
+    <string name="install_confirm_question_update_owner_reminder" product="default">&lt;p>Update this app from &lt;b><xliff:g id="new_update_owner">%1$s</xliff:g>&lt;/b>\?&lt;/p>&lt;p>This app normally receives updates from &lt;b><xliff:g id="existing_update_owner">%2$s</xliff:g>&lt;/b>. By updating from a different source, you may receive future updates from any source on your phone. App functionality may change.&lt;/p></string>
     <!-- [CHAR LIMIT=100] -->
     <string name="install_failed">App not installed.</string>
     <!-- Reason displayed when installation fails because the package was blocked
@@ -81,6 +85,8 @@
 
     <!-- [CHAR LIMIT=15] -->
     <string name="ok">OK</string>
+    <!-- Confirmation text label for button to archive an application. Archiving means uninstalling the app without deleting user's personal data and replacing the app with a stub app with minimum size. So, the user can unarchive the app later and not lose any personal data. -->
+    <string name="archive">Archive</string>
     <!-- [CHAR LIMIT=30] -->
     <string name="update_anyway">Update anyway</string>
     <!-- [CHAR LIMIT=15] -->
@@ -111,6 +117,16 @@
     <!--  [CHAR LIMIT=none] -->
     <string name="uninstall_application_text">Do you want to uninstall this app?</string>
     <!--  [CHAR LIMIT=none] -->
+    <string name="archive_application_text">Your personal data will be saved</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="archive_application_text_all_users">Archive this app for all users? Your personal data will be saved</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="archive_application_text_current_user_work_profile">Archive this app on your work profile? Your personal data will be saved</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="archive_application_text_user">Archive this app for <xliff:g id="username">%1$s</xliff:g>? Your personal data will be saved</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="archive_application_text_current_user_private_profile">Do you want to archive this app from your private space? Your personal data will be saved</string>
+    <!--  [CHAR LIMIT=none] -->
     <string name="uninstall_application_text_all_users">Do you want to uninstall this app for <b>all</b>
         users?  The application and its data will be removed from <b>all</b> users on the device.</string>
     <!--  [CHAR LIMIT=none] -->
@@ -127,6 +143,8 @@
     <string name="uninstall_application_text_current_user_clone_profile">Do you want to delete this app?</string>
     <!--  [CHAR LIMIT=none] -->
     <string name="uninstall_application_text_with_clone_instance">Do you want to uninstall this app? <xliff:g id="package_label">%1$s</xliff:g> clone will also be deleted.</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="uninstall_application_text_current_user_private_profile">Do you want to uninstall this app from your private space?</string>
 
     <!-- Label for the notification channel containing notifications for current uninstall operations [CHAR LIMIT=40] -->
     <string name="uninstalling_notification_channel">Running uninstalls</string>
@@ -184,11 +202,6 @@
     <!-- Dialog attributes to indicate parse errors -->
     <string name="Parse_error_dlg_text">There was a problem parsing the package.</string>
 
-    <!-- Title of dialog telling users that Install/Uninstall action is not supported on Android Wear. [CHAR LIMIT=30] -->
-    <string name="wear_not_allowed_dlg_title">Android Wear</string>
-    <!-- Title of dialog telling users that Install/Uninstall action is not supported on Android Wear. [CHAR LIMIT=none] -->
-    <string name="wear_not_allowed_dlg_text">Install/Uninstall actions not supported on Wear.</string>
-
     <!-- Message that the app to be installed is being staged [CHAR LIMIT=50] -->
     <string name="message_staging">Staging app&#8230;</string>
 
@@ -233,6 +246,8 @@
 
     <!-- Label for cloned app in uninstall dialogue [CHAR LIMIT=40] -->
     <string name="cloned_app_label"><xliff:g id="package_label">%1$s</xliff:g> Clone</string>
+    <!-- Label for archiving an app in uninstall dialogue -->
+    <string name="archiving_app_label">Archive <xliff:g id="package_label">%1$s</xliff:g>?</string>
 
     <!-- Label for button to continue install of an app whose source cannot be identified [CHAR LIMIT=40] -->
     <string name="anonymous_source_continue">Continue</string>
@@ -253,4 +268,96 @@
     <!-- Notification shown in status bar when an application is successfully installed.
          [CHAR LIMIT=50] -->
     <string name="notification_installation_success_status">Successfully installed \u201c<xliff:g id="appname" example="Package Installer">%1$s</xliff:g>\u201d</string>
+
+    <!-- The title of a dialog which asks the user to restore (i.e. re-install, re-download) an app
+         after parts of the app have been previously moved into the cloud for temporary storage.
+         "installername" is the app that will facilitate the download of the app. [CHAR LIMIT=50] -->
+    <string name="unarchive_application_title">Restore <xliff:g id="appname" example="Bird Game">%1$s</xliff:g> from <xliff:g id="installername" example="App Store">%2$s</xliff:g>?</string>
+    <!-- After the user confirms the dialog, a download will start. [CHAR LIMIT=none] -->
+    <string name="unarchive_body_text">This app will begin to download in the background</string>
+    <!-- The action to restore (i.e. re-install, re-download) an app after parts of the app have been previously moved
+         into the cloud for temporary storage. [CHAR LIMIT=15] -->
+    <string name="restore">Restore</string>
+
+    <!-- Dialog title shown when the user is trying to restore an app but the associated download
+         cannot happen immediately because the device is offline (has no internet connection.
+         [CHAR LIMIT=50] -->
+    <string name="unarchive_error_offline_title">You\'re offline</string>
+
+    <!-- Dialog body test shown when the user is trying to restore an app but the associated download
+         cannot happen immediately because the device is offline (has no internet connection.
+         [CHAR LIMIT=none] -->
+    <string name="unarchive_error_offline_body">
+        To restore this app, check your internet connection and try again
+    </string>
+
+    <!-- Dialog title shown when the user is trying to restore an app but a generic error happened.
+         [CHAR LIMIT=50] -->
+    <string name="unarchive_error_generic_title">Something went wrong</string>
+
+    <!-- Dialog body shown when the user is trying to restore an app but a generic error happened.
+         [CHAR LIMIT=none] -->
+    <string name="unarchive_error_generic_body">
+        There was a problem trying to restore this app
+    </string>
+
+    <!-- Dialog title shown when the user is trying to restore an app but the device is out of
+         storage. [CHAR LIMIT=50] -->
+    <string name="unarchive_error_storage_title">Not enough storage</string>
+
+    <!-- Dialog body shown when the user is trying to restore an app but the device is out of
+         storage. [CHAR LIMIT=none] -->
+    <string name="unarchive_error_storage_body">
+        To restore this app, you can free up space on this device. Storage
+        required: <xliff:g id="bytes" example="100 MB">%1$s</xliff:g>
+    </string>
+
+    <!-- Dialog title shown when the user is trying to restore an app but the installer needs to
+         perform an additional action. [CHAR LIMIT=50] -->
+    <string name="unarchive_action_required_title">Action required</string>
+
+    <!-- Dialog body shown when the user is trying to restore an app but the installer needs to
+         perform an additional action. [CHAR LIMIT=none] -->
+    <string name="unarchive_action_required_body">
+        Follow the next steps to restore this app
+    </string>
+    <!-- Dialog title shown when the user is trying to restore an app but the installer responsible
+         for the action is in a disabled state. [CHAR LIMIT=50] -->
+    <string name="unarchive_error_installer_disabled_title">
+        <xliff:g id="installername" example="App Store">%1$s</xliff:g> is disabled
+    </string>
+
+    <!-- Dialog body shown when the user is trying to restore an app but the installer responsible
+         for the action is in a disabled state. [CHAR LIMIT=none] -->
+    <string name="unarchive_error_installer_disabled_body">
+        To restore this app, enable
+        <xliff:g id="installername" example="App Store">%1$s</xliff:g> in Settings
+    </string>
+
+    <!-- Dialog title shown when the user is trying to restore an app but the installer responsible
+     for the action is uninstalled. [CHAR LIMIT=50] -->
+    <string name="unarchive_error_installer_uninstalled_title">
+        <xliff:g id="installername" example="App Store">%1$s</xliff:g> is uninstalled
+    </string>
+
+    <!-- Dialog body shown when the user is trying to restore an app but the installer responsible
+         for the action is uninstalled. [CHAR LIMIT=none] -->
+    <string name="unarchive_error_installer_uninstalled_body">
+        To restore this app, you\'ll need to install
+        <xliff:g id="installername" example="App Store">%1$s</xliff:g>
+    </string>
+
+    <!-- Dialog action to continue with the next action. [CHAR LIMIT=30] -->
+    <string name="unarchive_action_required_continue">Continue</string>
+
+    <!-- Dialog action to clear device storage, as in deleting some apps or photos to free up bytes
+         [CHAR LIMIT=30] -->
+    <string name="unarchive_clear_storage_button">Clear storage</string>
+
+    <!-- Dialog action to open the Settings app. [CHAR LIMIT=30] -->
+    <string name="unarchive_settings_button">Settings</string>
+
+    <!-- Dialog action to close a dialog. [CHAR LIMIT=30] -->
+    <string name="close">Close</string>
+
 </resources>

@@ -1,0 +1,8 @@
+package: "com.android.server.os"
+
+flag {
+    name: "proto_tombstone"
+    namespace: "proto_tombstone_ns"
+    description: "Use proto tombstones as source of truth for adding to dropbox"
+    bug: "323857385"
+}

@@ -18,13 +18,15 @@ package com.android.server.job.controllers;
 
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
-import android.content.Context;
+import android.annotation.NonNull;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 import com.android.server.job.controllers.idle.CarIdlenessTracker;
@@ -53,7 +55,7 @@ public final class IdleController extends RestrictingController implements Idlen
     public IdleController(JobSchedulerService service,
             FlexibilityController flexibilityController) {
         super(service);
-        initIdleStateTracking(mContext);
+        initIdleStateTracker();
         mFlexibilityController = flexibilityController;
     }
 
@@ -89,6 +91,19 @@ public final class IdleController extends RestrictingController implements Idlen
         }
     }
 
+    @Override
+    public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
+            @NonNull String key) {
+        mIdleTracker.processConstant(properties, key);
+    }
+
+    @Override
+    @GuardedBy("mLock")
+    public void onBatteryStateChangedLocked() {
+        mIdleTracker.onBatteryStateChanged(
+                mService.isBatteryCharging(), mService.isBatteryNotLow());
+    }
+
     /**
      * State-change notifications from the idleness tracker
      */
@@ -111,7 +126,7 @@ public final class IdleController extends RestrictingController implements Idlen
      * Idle state tracking, and messaging with the task manager when
      * significant state changes occur
      */
-    private void initIdleStateTracking(Context ctx) {
+    private void initIdleStateTracker() {
         final boolean isCar = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_AUTOMOTIVE);
         if (isCar) {
@@ -119,7 +134,20 @@ public final class IdleController extends RestrictingController implements Idlen
         } else {
             mIdleTracker = new DeviceIdlenessTracker();
         }
-        mIdleTracker.startTracking(ctx, this);
+    }
+
+    @Override
+    public void startTrackingLocked() {
+        mIdleTracker.startTracking(mContext, mService, this);
+    }
+
+    @Override
+    public void dumpConstants(IndentingPrintWriter pw) {
+        pw.println();
+        pw.println("IdleController:");
+        pw.increaseIndent();
+        mIdleTracker.dumpConstants(pw);
+        pw.decreaseIndent();
     }
 
     @Override

@@ -17,19 +17,28 @@
 package com.android.internal.util;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import junit.framework.TestCase;
-
 /**
  * Tests for {@link ArrayUtils}
  */
-public class ArrayUtilsTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class ArrayUtilsTest {
+    @Test
     public void testContains() throws Exception {
         final Object A = new Object();
         final Object B = new Object();
@@ -46,6 +55,7 @@ public class ArrayUtilsTest extends TestCase {
         assertFalse(ArrayUtils.contains(new Object[] { null }, A));
     }
 
+    @Test
     public void testIndexOf() throws Exception {
         final Object A = new Object();
         final Object B = new Object();
@@ -66,6 +76,7 @@ public class ArrayUtilsTest extends TestCase {
         assertEquals(2, ArrayUtils.indexOf(new Object[] { A, null, B }, B));
     }
 
+    @Test
     public void testContainsAll() throws Exception {
         final Object A = new Object();
         final Object B = new Object();
@@ -86,6 +97,7 @@ public class ArrayUtilsTest extends TestCase {
         assertFalse(ArrayUtils.containsAll(new Object[] { A }, new Object[] { null }));
     }
 
+    @Test
     public void testContainsInt() throws Exception {
         assertTrue(ArrayUtils.contains(new int[] { 1, 2, 3 }, 1));
         assertTrue(ArrayUtils.contains(new int[] { 1, 2, 3 }, 2));
@@ -96,6 +108,7 @@ public class ArrayUtilsTest extends TestCase {
         assertFalse(ArrayUtils.contains(new int[] { }, 2));
     }
 
+    @Test
     public void testAppendInt() throws Exception {
         assertArrayEquals(new int[] { 1 },
                 ArrayUtils.appendInt(null, 1));
@@ -107,6 +120,7 @@ public class ArrayUtilsTest extends TestCase {
                 ArrayUtils.appendInt(new int[] { 1, 2 }, 1));
     }
 
+    @Test
     public void testRemoveInt() throws Exception {
         assertNull(ArrayUtils.removeInt(null, 1));
         assertArrayEquals(new int[] { },
@@ -123,6 +137,7 @@ public class ArrayUtilsTest extends TestCase {
                 ArrayUtils.removeInt(new int[] { 1, 2, 3, 1 }, 1));
     }
 
+    @Test
     public void testContainsLong() throws Exception {
         assertTrue(ArrayUtils.contains(new long[] { 1, 2, 3 }, 1));
         assertTrue(ArrayUtils.contains(new long[] { 1, 2, 3 }, 2));
@@ -133,6 +148,7 @@ public class ArrayUtilsTest extends TestCase {
         assertFalse(ArrayUtils.contains(new long[] { }, 2));
     }
 
+    @Test
     public void testAppendLong() throws Exception {
         assertArrayEquals(new long[] { 1 },
                 ArrayUtils.appendLong(null, 1));
@@ -144,6 +160,19 @@ public class ArrayUtilsTest extends TestCase {
                 ArrayUtils.appendLong(new long[] { 1, 2 }, 1));
     }
 
+    @Test
+    public void testAppendBoolean() throws Exception {
+        assertArrayEquals(new boolean[] { true },
+                ArrayUtils.appendBoolean(null, true));
+        assertArrayEquals(new boolean[] { true },
+                ArrayUtils.appendBoolean(new boolean[] { }, true));
+        assertArrayEquals(new boolean[] { true, false },
+                ArrayUtils.appendBoolean(new boolean[] { true }, false));
+        assertArrayEquals(new boolean[] { true, true },
+                ArrayUtils.appendBoolean(new boolean[] { true }, true));
+    }
+
+    @Test
     public void testRemoveLong() throws Exception {
         assertNull(ArrayUtils.removeLong(null, 1));
         assertArrayEquals(new long[] { },
@@ -160,6 +189,7 @@ public class ArrayUtilsTest extends TestCase {
                 ArrayUtils.removeLong(new long[] { 1, 2, 3, 1 }, 1));
     }
 
+    @Test
     public void testConcat_zeroObjectArrays() {
         // empty varargs array
         assertArrayEquals(new String[] {}, ArrayUtils.concat(String.class));
@@ -167,16 +197,19 @@ public class ArrayUtilsTest extends TestCase {
         assertArrayEquals(new String[] {}, ArrayUtils.concat(String.class, (String[][]) null));
     }
 
+    @Test
     public void testConcat_oneObjectArray() {
         assertArrayEquals(new String[] { "1", "2" },
                 ArrayUtils.concat(String.class, new String[] { "1", "2" }));
     }
 
+    @Test
     public void testConcat_oneEmptyObjectArray() {
         assertArrayEquals(new String[] {}, ArrayUtils.concat(String.class, (String[]) null));
         assertArrayEquals(new String[] {}, ArrayUtils.concat(String.class, new String[] {}));
     }
 
+    @Test
     public void testConcat_twoObjectArrays() {
         assertArrayEquals(new Long[] { 1L },
                 ArrayUtils.concat(Long.class, new Long[] { 1L }, new Long[] {}));
@@ -188,6 +221,7 @@ public class ArrayUtilsTest extends TestCase {
                 ArrayUtils.concat(Long.class, new Long[] { 1L, 2L }, new Long[] { 3L, 4L }));
     }
 
+    @Test
     public void testConcat_twoEmptyObjectArrays() {
         assertArrayEquals(new Long[] {}, ArrayUtils.concat(Long.class, null, null));
         assertArrayEquals(new Long[] {}, ArrayUtils.concat(Long.class, new Long[] {}, null));
@@ -196,6 +230,7 @@ public class ArrayUtilsTest extends TestCase {
                 ArrayUtils.concat(Long.class, new Long[] {}, new Long[] {}));
     }
 
+    @Test
     public void testConcat_threeObjectArrays() {
         String[] array1 = { "1", "2" };
         String[] array2 = { "3", "4" };
@@ -205,6 +240,7 @@ public class ArrayUtilsTest extends TestCase {
         assertArrayEquals(expectation, ArrayUtils.concat(String.class, array1, array2, array3));
     }
 
+    @Test
     public void testConcat_threeObjectArraysWithNull() {
         String[] array1 = { "1", "2" };
         String[] array2 = null;
@@ -214,6 +250,7 @@ public class ArrayUtilsTest extends TestCase {
         assertArrayEquals(expectation, ArrayUtils.concat(String.class, array1, array2, array3));
     }
 
+    @Test
     public void testConcat_zeroByteArrays() {
         // empty varargs array
         assertArrayEquals(new byte[] {}, ArrayUtils.concat());
@@ -221,15 +258,18 @@ public class ArrayUtilsTest extends TestCase {
         assertArrayEquals(new byte[] {}, ArrayUtils.concat((byte[][]) null));
     }
 
+    @Test
     public void testConcat_oneByteArray() {
         assertArrayEquals(new byte[] { 1, 2 }, ArrayUtils.concat(new byte[] { 1, 2 }));
     }
 
+    @Test
     public void testConcat_oneEmptyByteArray() {
         assertArrayEquals(new byte[] {}, ArrayUtils.concat((byte[]) null));
         assertArrayEquals(new byte[] {}, ArrayUtils.concat(new byte[] {}));
     }
 
+    @Test
     public void testConcat_twoByteArrays() {
         assertArrayEquals(new byte[] { 1 }, ArrayUtils.concat(new byte[] { 1 }, new byte[] {}));
         assertArrayEquals(new byte[] { 1 }, ArrayUtils.concat(new byte[] {}, new byte[] { 1 }));
@@ -239,6 +279,7 @@ public class ArrayUtilsTest extends TestCase {
                 ArrayUtils.concat(new byte[] { 1, 2 }, new byte[] { 3, 4 }));
     }
 
+    @Test
     public void testConcat_twoEmptyByteArrays() {
         assertArrayEquals(new byte[] {}, ArrayUtils.concat((byte[]) null, null));
         assertArrayEquals(new byte[] {}, ArrayUtils.concat(new byte[] {}, null));
@@ -246,6 +287,7 @@ public class ArrayUtilsTest extends TestCase {
         assertArrayEquals(new byte[] {}, ArrayUtils.concat(new byte[] {}, new byte[] {}));
     }
 
+    @Test
     public void testConcat_threeByteArrays() {
         byte[] array1 = { 1, 2 };
         byte[] array2 = { 3, 4 };
@@ -255,6 +297,7 @@ public class ArrayUtilsTest extends TestCase {
         assertArrayEquals(expectation, ArrayUtils.concat(array1, array2, array3));
     }
 
+    @Test
     public void testConcat_threeByteArraysWithNull() {
         byte[] array1 = { 1, 2 };
         byte[] array2 = null;
@@ -264,6 +307,7 @@ public class ArrayUtilsTest extends TestCase {
         assertArrayEquals(expectation, ArrayUtils.concat(array1, array2, array3));
     }
 
+    @Test
     @SmallTest
     public void testUnstableRemoveIf() throws Exception {
         java.util.function.Predicate<Object> isNull = new java.util.function.Predicate<Object>() {
@@ -357,31 +401,37 @@ public class ArrayUtilsTest extends TestCase {
         assertEquals(0, collection.size());
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_passesWhenRangeInsideArray() {
         ArrayUtils.throwsIfOutOfBounds(10, 2, 6);
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_passesWhenRangeIsWholeArray() {
         ArrayUtils.throwsIfOutOfBounds(10, 0, 10);
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_passesWhenEmptyRangeAtStart() {
         ArrayUtils.throwsIfOutOfBounds(10, 0, 0);
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_passesWhenEmptyRangeAtEnd() {
         ArrayUtils.throwsIfOutOfBounds(10, 10, 0);
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_passesWhenEmptyArray() {
         ArrayUtils.throwsIfOutOfBounds(0, 0, 0);
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_failsWhenRangeStartNegative() {
         try {
@@ -392,6 +442,7 @@ public class ArrayUtilsTest extends TestCase {
         }
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_failsWhenCountNegative() {
         try {
@@ -402,6 +453,7 @@ public class ArrayUtilsTest extends TestCase {
         }
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_failsWhenRangeStartTooHigh() {
         try {
@@ -412,6 +464,7 @@ public class ArrayUtilsTest extends TestCase {
         }
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_failsWhenRangeEndTooHigh() {
         try {
@@ -422,6 +475,7 @@ public class ArrayUtilsTest extends TestCase {
         }
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_failsWhenLengthNegative() {
         try {
@@ -432,6 +486,7 @@ public class ArrayUtilsTest extends TestCase {
         }
     }
 
+    @Test
     @SmallTest
     public void testThrowsIfOutOfBounds_failsWhenOverflowRangeEndTooHigh() {
         try {

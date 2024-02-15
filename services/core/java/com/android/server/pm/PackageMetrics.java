@@ -34,11 +34,13 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Stream;
 
 /**
  * Metrics class for reporting stats to logging infrastructures like statsd
@@ -49,13 +51,15 @@ final class PackageMetrics {
     public static final int STEP_RECONCILE = 3;
     public static final int STEP_COMMIT = 4;
     public static final int STEP_DEXOPT = 5;
+    public static final int STEP_FREEZE_INSTALL = 6;
 
     @IntDef(prefix = {"STEP_"}, value = {
             STEP_PREPARE,
             STEP_SCAN,
             STEP_RECONCILE,
             STEP_COMMIT,
-            STEP_DEXOPT
+            STEP_DEXOPT,
+            STEP_FREEZE_INSTALL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StepInt {
@@ -107,10 +111,17 @@ final class PackageMetrics {
 
         long versionCode = 0, apksSize = 0;
         if (success) {
-            final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
-            if (ps != null) {
-                versionCode = ps.getVersionCode();
-                apksSize = getApksSize(ps.getPath());
+            // TODO: Remove temp try-catch to avoid IllegalStateException. The reason is because
+            //  the scan result is null for installExistingPackageAsUser(). Because it's installing
+            //  a package that's already existing, there's no scanning or parsing involved
+            try {
+                final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
+                if (ps != null) {
+                    versionCode = ps.getVersionCode();
+                    apksSize = getApksSize(ps.getPath());
+                }
+            } catch (IllegalStateException | NullPointerException e) {
+                // no-op
             }
         }
 
@@ -155,10 +166,27 @@ final class PackageMetrics {
     private long getApksSize(File apkDir) {
         // TODO(b/249294752): also count apk sizes for failed installs
         final AtomicLong apksSize = new AtomicLong();
-        try (Stream<Path> walkStream = Files.walk(apkDir.toPath())) {
-            walkStream.filter(p -> p.toFile().isFile()
-                    && ApkLiteParseUtils.isApkFile(p.toFile())).forEach(
-                            f -> apksSize.addAndGet(f.toFile().length()));
+        try {
+            Files.walkFileTree(apkDir.toPath(), new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                        throws IOException {
+                    if (dir.equals(apkDir.toPath())) {
+                        return FileVisitResult.CONTINUE;
+                    } else {
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                        throws IOException {
+                    if (file.toFile().isFile() && ApkLiteParseUtils.isApkFile(file.toFile())) {
+                        apksSize.addAndGet(file.toFile().length());
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
         } catch (IOException e) {
             // ignore
         }
@@ -282,18 +310,25 @@ final class PackageMetrics {
         if (!SecurityLog.isLoggingEnabled()) {
             return;
         }
-        final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
-        if (ps == null) {
-            return;
-        }
-        final String packageName = ps.getPackageName();
-        final long versionCode = ps.getVersionCode();
-        if (!mInstallRequest.isInstallReplace()) {
-            SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_INSTALLED, packageName, versionCode,
-                    userId);
-        } else {
-            SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_UPDATED, packageName, versionCode,
-                    userId);
+        // TODO: Remove temp try-catch to avoid IllegalStateException. The reason is because
+        //  the scan result is null for installExistingPackageAsUser(). Because it's installing
+        //  a package that's already existing, there's no scanning or parsing involved
+        try {
+            final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
+            if (ps == null) {
+                return;
+            }
+            final String packageName = ps.getPackageName();
+            final long versionCode = ps.getVersionCode();
+            if (!mInstallRequest.isInstallReplace()) {
+                SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_INSTALLED, packageName, versionCode,
+                        userId);
+            } else {
+                SecurityLog.writeEvent(SecurityLog.TAG_PACKAGE_UPDATED, packageName, versionCode,
+                        userId);
+            }
+        } catch (IllegalStateException | NullPointerException e) {
+            // no-op
         }
     }
 

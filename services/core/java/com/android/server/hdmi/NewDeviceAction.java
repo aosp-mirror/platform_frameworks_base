@@ -53,6 +53,7 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
     private int mVendorId;
     private String mDisplayName;
     private int mTimeoutRetry;
+    private HdmiDeviceInfo mOldDeviceInfo;
 
     /**
      * Constructor.
@@ -73,6 +74,38 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
 
     @Override
     public boolean start() {
+        mOldDeviceInfo =
+            localDevice().mService.getHdmiCecNetwork().getCecDeviceInfo(mDeviceLogicalAddress);
+        // If there's deviceInfo with same (logical address, physical address) set
+        // Then addCecDevice should be delayed until system information process is finished
+        if (mOldDeviceInfo != null
+                && mOldDeviceInfo.getPhysicalAddress() == mDevicePhysicalAddress) {
+            Slog.d(TAG, "Start NewDeviceAction with old deviceInfo:["
+                    + mOldDeviceInfo.toString() + "]");
+        } else {
+            // Add the device ahead with default information to handle <Active Source>
+            // promptly, rather than waiting till the new device action is finished.
+            Slog.d(TAG, "Start NewDeviceAction with default deviceInfo");
+            HdmiDeviceInfo deviceInfo = HdmiDeviceInfo.cecDeviceBuilder()
+                    .setLogicalAddress(mDeviceLogicalAddress)
+                    .setPhysicalAddress(mDevicePhysicalAddress)
+                    .setPortId(tv().getPortId(mDevicePhysicalAddress))
+                    .setDeviceType(mDeviceType)
+                    .setVendorId(Constants.VENDOR_ID_UNKNOWN)
+                    .build();
+            // If a deviceInfo with same logical address but different physical address exists
+            // We should remove the old deviceInfo first
+            // This will happen if the interval between unplugging and plugging device is too short
+            // and HotplugDetection Action fails to remove the old deviceInfo, or when the newly
+            // plugged device violates HDMI Spec and uses an occupied logical address
+            if (mOldDeviceInfo != null) {
+                Slog.d(TAG, "Remove device by NewDeviceAction, logical address conflicts: "
+                        + mDevicePhysicalAddress);
+                localDevice().mService.getHdmiCecNetwork().removeCecDevice(
+                        localDevice(), mDeviceLogicalAddress);
+            }
+            localDevice().mService.getHdmiCecNetwork().addCecDevice(deviceInfo);
+        }
         requestOsdName(true);
         return true;
     }
@@ -182,14 +215,30 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
                 .setVendorId(mVendorId)
                 .setDisplayName(mDisplayName)
                 .build();
-        localDevice().mService.getHdmiCecNetwork().addCecDevice(deviceInfo);
 
-        // Consume CEC messages we already got for this newly found device.
-        tv().processDelayedMessages(mDeviceLogicalAddress);
+        // Check if oldDevice is same as newDevice
+        // If so, don't add newDevice info, preventing ARC or HDMI source re-connection
+        if (mOldDeviceInfo != null
+                && mOldDeviceInfo.getLogicalAddress() == mDeviceLogicalAddress
+                && mOldDeviceInfo.getPhysicalAddress() == mDevicePhysicalAddress
+                && mOldDeviceInfo.getDeviceType() == mDeviceType
+                && mOldDeviceInfo.getVendorId() == mVendorId
+                && mOldDeviceInfo.getDisplayName().equals(mDisplayName)) {
+            // Consume CEC messages we already got for this newly found device.
+            tv().processDelayedMessages(mDeviceLogicalAddress);
+            Slog.d(TAG, "Ignore NewDevice, deviceInfo is same as current device");
+            Slog.d(TAG, "Old:[" + mOldDeviceInfo.toString()
+                    + "]; New:[" + deviceInfo.toString() + "]");
+        } else {
+            Slog.d(TAG, "Add NewDevice:[" + deviceInfo.toString() + "]");
+            localDevice().mService.getHdmiCecNetwork().addCecDevice(deviceInfo);
 
-        if (HdmiUtils.isEligibleAddressForDevice(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM,
-                mDeviceLogicalAddress)) {
-            tv().onNewAvrAdded(deviceInfo);
+            // Consume CEC messages we already got for this newly found device.
+            tv().processDelayedMessages(mDeviceLogicalAddress);
+            if (HdmiUtils.isEligibleAddressForDevice(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM,
+                        mDeviceLogicalAddress)) {
+                tv().onNewAvrAdded(deviceInfo);
+            }
         }
     }
 

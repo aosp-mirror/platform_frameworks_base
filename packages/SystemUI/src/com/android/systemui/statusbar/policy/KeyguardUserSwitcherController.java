@@ -38,10 +38,10 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
 import com.android.settingslib.drawable.CircleFramedDrawable;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -174,7 +174,8 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                 mUserSwitcherController, this);
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters,
-                screenOffAnimationController, /* animateYPos= */ false, /* logBuffer= */ null);
+                screenOffAnimationController, /* animateYPos= */ false,
+                /* logBuffer= */ null);
         mBackground = new KeyguardUserSwitcherScrim(context);
     }
 
@@ -534,7 +535,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
             }
             drawable.setTint(mResources.getColor(iconColorRes, mContext.getTheme()));
 
-            Drawable bg = mContext.getDrawable(R.drawable.user_avatar_bg);
+            Drawable bg = mContext.getDrawable(com.android.settingslib.R.drawable.user_avatar_bg);
             drawable = new LayerDrawable(new Drawable[]{bg, drawable});
             return drawable;
         }

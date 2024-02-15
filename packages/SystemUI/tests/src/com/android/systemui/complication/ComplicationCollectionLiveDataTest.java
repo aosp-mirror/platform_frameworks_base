@@ -31,7 +31,9 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.log.core.FakeLogBuffer;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.reference.FakeWeakReferenceFactory;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -66,7 +68,9 @@ public class ComplicationCollectionLiveDataTest extends SysuiTestCase {
         mStateController = new DreamOverlayStateController(
                 mExecutor,
                 /* overlayEnabled= */ true,
-                mFeatureFlags);
+                mFeatureFlags,
+                FakeLogBuffer.Factory.Companion.create(),
+                new FakeWeakReferenceFactory());
         mLiveData = new ComplicationCollectionLiveData(mStateController);
     }
 

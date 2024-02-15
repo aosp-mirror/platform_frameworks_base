@@ -18,8 +18,19 @@ package com.android.systemui.classifier;
 
 import android.view.MotionEvent;
 
+import javax.inject.Inject;
+
 /** */
 public class FalsingCollectorFake implements FalsingCollector {
+
+    @Override
+    public void init() {
+    }
+
+    @Inject
+    public FalsingCollectorFake() {
+    }
+
     @Override
     public void onSuccessfulUnlock() {
     }
@@ -29,56 +40,8 @@ public class FalsingCollectorFake implements FalsingCollector {
     }
 
     @Override
-    public void onNotificationStartDraggingDown() {
-    }
-
-    @Override
-    public void onNotificationStopDraggingDown() {
-    }
-
-    @Override
-    public void setNotificationExpanded() {
-    }
-
-    @Override
-    public void onQsDown() {
-    }
-
-    @Override
     public boolean shouldEnforceBouncer() {
         return false;
-    }
-
-    @Override
-    public void onTrackingStarted(boolean secure) {
-    }
-
-    @Override
-    public void onTrackingStopped() {
-    }
-
-    @Override
-    public void onLeftAffordanceOn() {
-    }
-
-    @Override
-    public void onCameraOn() {
-    }
-
-    @Override
-    public void onAffordanceSwipingStarted(boolean rightCorner) {
-    }
-
-    @Override
-    public void onAffordanceSwipingAborted() {
-    }
-
-    @Override
-    public void onStartExpandingFromPulse() {
-    }
-
-    @Override
-    public void onExpansionFromPulseStopped() {
     }
 
     @Override
@@ -91,39 +54,11 @@ public class FalsingCollectorFake implements FalsingCollector {
     }
 
     @Override
-    public void onUnlockHintStarted() {
-    }
-
-    @Override
-    public void onCameraHintStarted() {
-    }
-
-    @Override
-    public void onLeftAffordanceHintStarted() {
-    }
-
-    @Override
     public void onScreenTurningOn() {
     }
 
     @Override
     public void onScreenOff() {
-    }
-
-    @Override
-    public void onNotificationStopDismissing() {
-    }
-
-    @Override
-    public void onNotificationDismissed() {
-    }
-
-    @Override
-    public void onNotificationStartDismissing() {
-    }
-
-    @Override
-    public void onNotificationDoubleTap(boolean accepted, float dx, float dy) {
     }
 
     @Override

@@ -42,7 +42,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.NotificationExpandButton;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationGroupingUtil;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
@@ -132,6 +132,8 @@ public class NotificationChildrenContainer extends ViewGroup
     private boolean mContainingNotificationIsFaded = false;
     private RoundableState mRoundableState;
 
+    private NotificationChildrenContainerLogger mLogger;
+
     public NotificationChildrenContainer(Context context) {
         this(context, null);
     }
@@ -187,6 +189,11 @@ public class NotificationChildrenContainer extends ViewGroup
     @Override
     public RoundableState getRoundableState() {
         return mRoundableState;
+    }
+
+    @Override
+    public int getClipHeight() {
+        return Math.max(mActualHeight - mClipBottomAmount, 0);
     }
 
     @Override
@@ -862,8 +869,7 @@ public class NotificationChildrenContainer extends ViewGroup
         Path clipPath = mChildClipPath;
         if (clipPath != null) {
             final float translation;
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow notificationRow = (ExpandableNotificationRow) child;
+            if (child instanceof ExpandableNotificationRow notificationRow) {
                 translation = notificationRow.getTranslation();
             } else {
                 translation = child.getTranslationX();
@@ -1289,8 +1295,8 @@ public class NotificationChildrenContainer extends ViewGroup
             if (singleLineView != null) {
                 minExpandHeight += singleLineView.getHeight();
             } else {
-                Log.e(TAG, "getMinHeight: child " + child + " single line view is null",
-                        new Exception());
+                Log.e(TAG, "getMinHeight: child " + child.getEntry().getKey()
+                                + " single line view is null", new Exception());
             }
             visibleChildren++;
         }
@@ -1355,7 +1361,7 @@ public class NotificationChildrenContainer extends ViewGroup
         Resources.Theme theme = new ContextThemeWrapper(mContext,
                 com.android.internal.R.style.Theme_DeviceDefault_DayNight).getTheme();
         try (TypedArray ta = theme.obtainStyledAttributes(
-                new int[]{com.android.internal.R.attr.colorAccent})) {
+                new int[]{com.android.internal.R.attr.materialColorPrimary})) {
             color = ta.getColor(0, color);
         }
         mHybridGroupManager.setOverflowNumberColor(mOverflowNumber, color);
@@ -1505,6 +1511,33 @@ public class NotificationChildrenContainer extends ViewGroup
 
     public NotificationHeaderViewWrapper getNotificationHeaderWrapper() {
         return mNotificationHeaderWrapper;
+    }
+
+    public void setLogger(NotificationChildrenContainerLogger logger) {
+        mLogger = logger;
+    }
+
+    @Override
+    public void addTransientView(View view, int index) {
+        if (mLogger != null && view instanceof ExpandableNotificationRow) {
+            mLogger.addTransientRow(
+                    ((ExpandableNotificationRow) view).getEntry(),
+                    getContainingNotification().getEntry(),
+                    index
+            );
+        }
+        super.addTransientView(view, index);
+    }
+
+    @Override
+    public void removeTransientView(View view) {
+        if (mLogger != null && view instanceof ExpandableNotificationRow) {
+            mLogger.removeTransientRow(
+                    ((ExpandableNotificationRow) view).getEntry(),
+                    getContainingNotification().getEntry()
+            );
+        }
+        super.removeTransientView(view);
     }
 
     public String debugString() {

@@ -10,8 +10,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Guideline
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
@@ -39,7 +37,6 @@ class MessageContainerControllerTest : SysuiTestCase() {
     lateinit var detectionNoticeView: ViewGroup
     lateinit var container: FrameLayout
 
-    var featureFlags = FakeFeatureFlags()
     lateinit var screenshotView: ViewGroup
 
     val userHandle = UserHandle.of(5)
@@ -55,25 +52,24 @@ class MessageContainerControllerTest : SysuiTestCase() {
             MessageContainerController(
                 workProfileMessageController,
                 screenshotDetectionController,
-                featureFlags
             )
         screenshotView = ConstraintLayout(mContext)
         workProfileData = WorkProfileMessageController.WorkProfileFirstRunData(appName, icon)
 
         val guideline = Guideline(mContext)
-        guideline.id = com.android.systemui.R.id.guideline
+        guideline.id = com.android.systemui.res.R.id.guideline
         screenshotView.addView(guideline)
 
         container = FrameLayout(mContext)
-        container.id = com.android.systemui.R.id.screenshot_message_container
+        container.id = com.android.systemui.res.R.id.screenshot_message_container
         screenshotView.addView(container)
 
         workProfileFirstRunView = FrameLayout(mContext)
-        workProfileFirstRunView.id = com.android.systemui.R.id.work_profile_first_run
+        workProfileFirstRunView.id = com.android.systemui.res.R.id.work_profile_first_run
         container.addView(workProfileFirstRunView)
 
         detectionNoticeView = FrameLayout(mContext)
-        detectionNoticeView.id = com.android.systemui.R.id.screenshot_detection_notice
+        detectionNoticeView.id = com.android.systemui.res.R.id.screenshot_detection_notice
         container.addView(detectionNoticeView)
 
         messageContainer.setView(screenshotView)
@@ -105,8 +101,6 @@ class MessageContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testOnScreenshotTakenScreenshotData_nothingToShow() {
-        featureFlags.set(Flags.SCREENSHOT_DETECTION, true)
-
         messageContainer.onScreenshotTaken(screenshotData)
 
         verify(workProfileMessageController, never()).populateView(any(), any(), any())

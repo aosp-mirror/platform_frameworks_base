@@ -238,10 +238,15 @@ message UsbPortProto {
         MODE_DEBUG_ACCESSORY = 8;
     }
 
+    enum AltMode {
+        ALT_MODE_DISPLAYPORT = 1;
+    }
+
     // ID of the port. A device (eg: Chromebooks) might have multiple ports.
     optional string id = 1;
     repeated Mode supported_modes = 2;
     optional bool supports_compliance_warnings = 3;
+    repeated AltMode supported_alt_modes = 4;
 }
 
 message UsbPortStatusProto {
@@ -271,6 +276,7 @@ message UsbPortStatusProto {
     optional bool is_power_transfer_limited = 8;
     optional string usb_power_brick_status = 9;
     optional string compliance_warnings_string = 10;
+    optional string displayport_alt_mode_status = 11;
 }
 
 message UsbPortStatusRoleCombinationProto {

@@ -41,7 +41,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;

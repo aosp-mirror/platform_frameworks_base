@@ -76,6 +76,8 @@ constructor(
         val carrierNetworkChange = getString("carriernetworkchange") == "show"
         val roaming = getString("roam") == "show"
         val name = getString("networkname") ?: "demo mode"
+        val slice = getString("slice").toBoolean()
+        val ntn = getString("ntn").toBoolean()
 
         return Mobile(
             level = level,
@@ -87,6 +89,8 @@ constructor(
             carrierNetworkChange = carrierNetworkChange,
             roaming = roaming,
             name = name,
+            slice = slice,
+            ntn = ntn,
         )
     }
 }

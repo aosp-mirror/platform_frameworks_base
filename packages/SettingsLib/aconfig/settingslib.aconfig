@@ -1,0 +1,25 @@
+package: "com.android.settingslib.flags"
+
+flag {
+    name: "new_status_bar_icons"
+    namespace: "systemui"
+    description: "Enable new status bar system icons"
+    bug: "314812750"
+}
+
+flag {
+    name: "enable_cached_bluetooth_device_dedup"
+    namespace: "bluetooth"
+    description: "Enable dedup in CachedBluetoothDevice"
+    bug: "319197962"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+   name: "bluetooth_qs_tile_dialog_auto_on_toggle"
+   namespace: "bluetooth"
+   description: "Displays the auto on toggle in the bluetooth QS tile dialog"
+   bug: "316985153"
+}

@@ -23,7 +23,7 @@
     android:outlineProvider="none" >
 
     <LinearLayout
-        android:id="@+id/keyguard_indication_area"
+        android:id="@id/keyguard_indication_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/keyguard_indication_margin_bottom"
@@ -31,7 +31,7 @@
         android:orientation="vertical">
 
         <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
-            android:id="@+id/keyguard_indication_text"
+            android:id="@id/keyguard_indication_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -41,13 +41,12 @@
             android:accessibilityLiveRegion="polite"/>
 
         <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
-            android:id="@+id/keyguard_indication_text_bottom"
+            android:id="@id/keyguard_indication_text_bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:minHeight="48dp"
+            android:minHeight="@dimen/keyguard_indication_text_min_height"
             android:layout_gravity="center_horizontal"
-            android:layout_centerHorizontal="true"
             android:paddingStart="@dimen/keyguard_indication_text_padding"
             android:paddingEnd="@dimen/keyguard_indication_text_padding"
             android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
@@ -107,5 +106,14 @@
     </FrameLayout>
 
     <include layout="@layout/ambient_indication"
-             android:id="@+id/ambient_indication_container" />
+             android:id="@id/ambient_indication_container" />
+
+    <FrameLayout
+        android:id="@+id/smartspace_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="@dimen/ambient_indication_margin_bottom"
+        android:visibility="gone">
+    </FrameLayout>
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>

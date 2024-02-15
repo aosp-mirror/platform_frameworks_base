@@ -31,7 +31,7 @@ android_test {
         "mockito-target-inline-minus-junit4",
         "platform-test-annotations",
         "services.midi",
-        "truth-prebuilt",
+        "truth",
     ],
     jni_libs: ["libdexmakerjvmtiagent"],
     certificate: "platform",

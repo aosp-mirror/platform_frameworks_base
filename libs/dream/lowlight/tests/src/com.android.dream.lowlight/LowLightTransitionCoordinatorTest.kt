@@ -158,26 +158,6 @@ class LowLightTransitionCoordinatorTest {
         assertThat(job.isCancelled).isTrue()
     }
 
-    @Test
-    fun shouldCancelAnimatorWhenJobCancelled() = testScope.runTest {
-        whenever(mEnterListener.onBeforeEnterLowLight()).thenReturn(mAnimator)
-        val coordinator = LowLightTransitionCoordinator()
-        coordinator.setLowLightEnterListener(mEnterListener)
-        val job = launch {
-            coordinator.waitForLowLightTransitionAnimation(timeout = TIMEOUT, entering = true)
-        }
-        runCurrent()
-        // Animator listener is added and the runnable is not run yet.
-        verify(mAnimator).addListener(mAnimatorListenerCaptor.capture())
-        verify(mAnimator, never()).cancel()
-        assertThat(job.isCompleted).isFalse()
-
-        job.cancel()
-        // We should have removed the listener and cancelled the animator
-        verify(mAnimator).removeListener(mAnimatorListenerCaptor.value)
-        verify(mAnimator).cancel()
-    }
-
     companion object {
         private val TIMEOUT = 1.toDuration(DurationUnit.SECONDS)
     }

@@ -56,7 +56,7 @@
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Овој управник со лозинки за <xliff:g id="USERNAME">%1$s</xliff:g> ќе ги складира вашите лозинки и криптографски клучеви за да ви помогне лесно да се најавите"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Постави како стандардна опција"</string>
     <string name="settings" msgid="6536394145760913145">"Поставки"</string>
-    <string name="use_once" msgid="9027366575315399714">"Употребете еднаш"</string>
+    <string name="use_once" msgid="9027366575315399714">"Употреби го еднаш"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Лозинки: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Криптографски клучеви: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> лозинки"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Криптографски клучеви: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Од друг уред"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Употребете друг уред"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Барањето е откажано од <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Опции за најавување"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Повеќе"</string>
 </resources>

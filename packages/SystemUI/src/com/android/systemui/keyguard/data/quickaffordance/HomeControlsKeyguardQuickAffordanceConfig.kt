@@ -21,7 +21,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.DrawableRes
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -78,6 +78,7 @@ constructor(
             component.getControlsListingController().getOrNull()?.getCurrentServices()
         val hasFavorites =
             component.getControlsController().getOrNull()?.getFavorites()?.isNotEmpty() == true
+        val hasPanels = currentServices?.any { it.panelActivity != null } == true
         val componentPackageName = component.getPackageName()
         when {
             currentServices.isNullOrEmpty() && !componentPackageName.isNullOrEmpty() -> {
@@ -100,8 +101,8 @@ constructor(
                         ),
                 )
             }
-            !hasFavorites -> {
-                // Home app installed but no favorites selected.
+            !hasFavorites && !hasPanels -> {
+                // Home app installed but no favorites selected or panel activities available.
                 val activityClass = component.getControlsUiController().get().resolveActivity()
                 return disabledPickerState(
                     explanation =

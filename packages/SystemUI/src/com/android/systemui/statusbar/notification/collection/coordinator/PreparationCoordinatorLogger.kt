@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey

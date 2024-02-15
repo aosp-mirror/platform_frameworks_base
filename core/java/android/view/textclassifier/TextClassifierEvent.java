@@ -551,8 +551,8 @@ public abstract class TextClassifierEvent implements Parcelable {
          * Sets the entity types. e.g. {@link TextClassifier#TYPE_ADDRESS}.
          * <p>
          * Supported types:
-         * <p>See {@link TextClassifier.EntityType}
-         * <p>See {@link ConversationAction.ActionType}
+         * <p>See {@link TextClassifier} types
+         * <p>See {@link ConversationAction} types
          * <p>See {@link ULocale#toLanguageTag()}
          */
         @NonNull

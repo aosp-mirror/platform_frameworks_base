@@ -46,7 +46,7 @@ import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.LargeScreenUtils
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.WallpaperController
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -67,6 +67,7 @@ class NotificationShadeDepthController @Inject constructor(
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val dozeParameters: DozeParameters,
     private val context: Context,
+    private val splitShadeStateController: SplitShadeStateController,
     dumpManager: DumpManager,
     configurationController: ConfigurationController
 ) : ShadeExpansionListener, Dumpable {
@@ -272,7 +273,7 @@ class NotificationShadeDepthController @Inject constructor(
                             blurUtils.blurRadiusOfRatio(animation.animatedValue as Float)
                 }
                 addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         keyguardAnimator = null
                         wakeAndUnlockBlurRadius = 0f
                     }
@@ -329,7 +330,7 @@ class NotificationShadeDepthController @Inject constructor(
     }
 
     private fun updateResources() {
-        inSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+        inSplitShade = splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
     }
 
     fun addListener(listener: DepthListener) {
@@ -553,7 +554,6 @@ class NotificationShadeDepthController @Inject constructor(
          */
         fun onWallpaperZoomOutChanged(zoomOut: Float)
 
-        @JvmDefault
         fun onBlurRadiusChanged(blurRadius: Int) {}
     }
 }

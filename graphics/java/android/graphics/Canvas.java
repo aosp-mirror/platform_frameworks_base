@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -29,6 +30,8 @@ import android.graphics.text.MeasuredText;
 import android.graphics.text.TextRunShaper;
 import android.os.Build;
 import android.text.TextShaper;
+
+import com.android.graphics.hwui.flags.Flags;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -114,6 +117,7 @@ public class Canvas extends BaseCanvas {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
         throwIfCannotDraw(bitmap);
+        bitmap.setGainmap(null);
         mNativeCanvasWrapper = nInitRaster(bitmap.getNativeInstance());
         mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                 this, mNativeCanvasWrapper);
@@ -178,7 +182,7 @@ public class Canvas extends BaseCanvas {
                 throw new IllegalStateException();
             }
             throwIfCannotDraw(bitmap);
-
+            bitmap.setGainmap(null);
             nSetBitmap(mNativeCanvasWrapper, bitmap.getNativeInstance());
             mDensity = bitmap.mDensity;
         }
@@ -762,6 +766,21 @@ public class Canvas extends BaseCanvas {
      */
     public void concat(@Nullable Matrix matrix) {
         if (matrix != null) nConcat(mNativeCanvasWrapper, matrix.ni());
+    }
+
+    /**
+     * Preconcat the current matrix with the specified matrix. If the specified
+     * matrix is null, this method does nothing. If the canvas's matrix is changed in the z-axis
+     * through this function, the deprecated {@link #getMatrix()} method will return a 3x3 with
+     * z-axis info stripped away.
+     *
+     * @param m The 4x4 matrix to preconcatenate with the current matrix
+     */
+    @FlaggedApi(Flags.FLAG_MATRIX_44)
+    public void concat44(@Nullable Matrix44 m) {
+        if (m != null) {
+            nConcat(mNativeCanvasWrapper, m.mBackingArray);
+        }
     }
 
     /**
@@ -1443,6 +1462,8 @@ public class Canvas extends BaseCanvas {
     private static native void nSkew(long canvasHandle, float sx, float sy);
     @CriticalNative
     private static native void nConcat(long nativeCanvas, long nativeMatrix);
+    @FastNative
+    private static native void nConcat(long nativeCanvas, float[] mat);
     @CriticalNative
     private static native void nSetMatrix(long nativeCanvas, long nativeMatrix);
     @CriticalNative

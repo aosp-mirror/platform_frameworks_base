@@ -2,4 +2,6 @@ michaelwr@google.com
 santoscordon@google.com
 philipjunker@google.com
 
-per-file ThermalManagerService.java=wvw@google.com
+per-file ThermalManagerService.java=file:/THERMAL_OWNERS
+per-file LowPowerStandbyController.java=qingxun@google.com
+per-file LowPowerStandbyControllerInternal.java=qingxun@google.com

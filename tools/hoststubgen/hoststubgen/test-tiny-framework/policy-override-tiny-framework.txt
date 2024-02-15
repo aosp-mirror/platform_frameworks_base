@@ -1,0 +1,20 @@
+class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	stub
+  field stub	stub
+  field keep	keep
+  # field remove	remove # Implicitly remove
+  method <init>	()V	            stub
+  method addOne	(I)I	        stub
+  method addOneInner	(I)I	keep
+  method toBeRemoved	(Ljava/lang/String;)V	remove
+  method addTwo	(I)I	        @addTwo_host
+  # method addTwo_host	(I)I	# used as a substitute
+  method nativeAddThree	(I)I	@addThree_host
+  # method addThree_host	(I)I	# used as a substitute
+  method unsupportedMethod	()Ljava/lang/String;	throw
+  method visibleButUsesUnsupportedMethod	()Ljava/lang/String;	stub
+
+# Class load hook
+class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	~com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded
+
+# Heuristics rule: Stub all the AIDL classes.
+class :aidl stubclass

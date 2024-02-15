@@ -86,9 +86,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST =
             "settings_need_connected_ble_device_for_broadcast";
 
-    /** @hide */
-    public static final String SETTINGS_AUTO_TEXT_WRAPPING = "settings_auto_text_wrapping";
-
     /**
      * Enable new language and keyboard settings UI
      * @hide
@@ -152,11 +149,19 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_BIOMETRICS2_ENROLLMENT = "settings_biometrics2_enrollment";
 
-    /** Flag to enable/disable entire page in Accessibility -> Hearing aids
-     *  @hide
+    /**
+     * Flag to enable/disable FingerprintSettings v2
+     * @hide
      */
-    public static final String SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE =
-            "settings_accessibility_hearing_aid_page";
+    public static final String SETTINGS_BIOMETRICS2_FINGERPRINT_SETTINGS =
+            "settings_biometrics2_fingerprint";
+
+    /**
+     * Flag to enable/disable remote auth enrollment and settings
+     * @hide
+     */
+    public static final String SETTINGS_REMOTEAUTH_ENROLLMENT_SETTINGS =
+            "settings_remoteauth_enrollment";
 
     /**
      * Flag to enable/disable preferring the AccessibilityMenu service in the system.
@@ -176,14 +181,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_FLASH_NOTIFICATIONS = "settings_flash_notifications";
 
     /**
-     * Flag to disable/enable showing udfps enroll view in settings. If it's disabled, udfps enroll
-     * view is shown in system ui.
-     * @hide
-     */
-    public static final String SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS =
-            "settings_show_udfps_enroll_in_settings";
-
-    /**
      * Flag to enable lock screen credentials transfer API in Android U.
      * @hide
      */
@@ -197,6 +194,12 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION =
             "settings_remote_device_credential_validation";
 
+    /**
+     * Flag to enable/disable to start treating any calls to "suspend" an app as "quarantine".
+     * @hide
+     */
+    public static final String SETTINGS_TREAT_PAUSE_AS_QUARANTINE =
+            "settings_treat_pause_as_quarantine";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -225,7 +228,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, "true");
-        DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "true");
@@ -236,13 +238,15 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
         DEFAULT_FLAGS.put(SETTINGS_SHOW_STYLUS_PREFERENCES, "true");
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
-        DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE, "true");
         DEFAULT_FLAGS.put(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM, "false");
         DEFAULT_FLAGS.put(SETTINGS_AUDIO_ROUTING, "false");
         DEFAULT_FLAGS.put(SETTINGS_FLASH_NOTIFICATIONS, "true");
-        DEFAULT_FLAGS.put(SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API, "true");
         DEFAULT_FLAGS.put(SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, "true");
+        DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_FINGERPRINT_SETTINGS, "false");
+        // TODO: b/298454866 Replace with Trunk Stable Feature Flag
+        DEFAULT_FLAGS.put(SETTINGS_REMOTEAUTH_ENROLLMENT_SETTINGS, "false");
+        DEFAULT_FLAGS.put(SETTINGS_TREAT_PAUSE_AS_QUARANTINE, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
@@ -253,7 +257,6 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
         PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
-        PERSISTENT_FLAGS.add(SETTINGS_AUTO_TEXT_WRAPPING);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_UI);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD);
@@ -261,6 +264,7 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA_PHASE2);
         PERSISTENT_FLAGS.add(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM);
+        PERSISTENT_FLAGS.add(SETTINGS_TREAT_PAUSE_AS_QUARANTINE);
     }
 
     /**

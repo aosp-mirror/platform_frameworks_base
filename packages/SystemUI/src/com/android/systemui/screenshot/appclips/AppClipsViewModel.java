@@ -27,6 +27,7 @@ import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.UserHandle;
+import android.view.Display;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -116,8 +117,8 @@ final class AppClipsViewModel extends ViewModel {
             Bitmap screenshotBitmap = renderBitmap(screenshotDrawable, bounds);
 
             // Export and save the screenshot in background.
-            ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
-                    mBgExecutor, UUID.randomUUID(), screenshotBitmap, user);
+            ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(mBgExecutor,
+                    UUID.randomUUID(), screenshotBitmap, user, Display.DEFAULT_DISPLAY);
 
             // Get the result and update state on main thread.
             exportFuture.addListener(() -> {

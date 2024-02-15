@@ -28,11 +28,19 @@ constructor(
     private val keyguardRepository: KeyguardRepository,
 ) {
 
+    fun setAodAvailable(value: Boolean) {
+        keyguardRepository.setAodAvailable(value)
+    }
+
     fun setIsDozing(isDozing: Boolean) {
         keyguardRepository.setIsDozing(isDozing)
     }
 
     fun setLastTapToWakePosition(position: Point) {
         keyguardRepository.setLastDozeTapToWakePosition(position)
+    }
+
+    fun dozeTimeTick() {
+        keyguardRepository.dozeTimeTick()
     }
 }

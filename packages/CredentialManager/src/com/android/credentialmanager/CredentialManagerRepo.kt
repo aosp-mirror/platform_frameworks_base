@@ -18,20 +18,21 @@ package com.android.credentialmanager
 
 import android.content.Context
 import android.content.Intent
-import android.credentials.ui.CancelUiRequest
-import android.credentials.ui.Constants
-import android.credentials.ui.CreateCredentialProviderData
-import android.credentials.ui.GetCredentialProviderData
-import android.credentials.ui.DisabledProviderData
-import android.credentials.ui.ProviderData
-import android.credentials.ui.RequestInfo
-import android.credentials.ui.BaseDialogResult
-import android.credentials.ui.ProviderPendingIntentResponse
-import android.credentials.ui.UserSelectionDialogResult
+import android.credentials.selection.CancelSelectionRequest
+import android.credentials.selection.Constants
+import android.credentials.selection.CreateCredentialProviderData
+import android.credentials.selection.GetCredentialProviderData
+import android.credentials.selection.DisabledProviderData
+import android.credentials.selection.ProviderData
+import android.credentials.selection.RequestInfo
+import android.credentials.selection.BaseDialogResult
+import android.credentials.selection.ProviderPendingIntentResponse
+import android.credentials.selection.UserSelectionDialogResult
 import android.os.IBinder
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.util.Log
+import android.view.autofill.AutofillManager
 import com.android.credentialmanager.createflow.DisabledProviderInfo
 import com.android.credentialmanager.createflow.EnabledProviderInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
@@ -53,9 +54,11 @@ class CredentialManagerRepo(
     isNewActivity: Boolean,
 ) {
     val requestInfo: RequestInfo?
+    var isReqForAllOptions: Boolean = false
     private val providerEnabledList: List<ProviderData>
     private val providerDisabledList: List<DisabledProviderData>?
     val resultReceiver: ResultReceiver?
+    val finalResponseReceiver: ResultReceiver?
 
     var initialUiState: UiState
 
@@ -79,9 +82,10 @@ class CredentialManagerRepo(
                     CreateCredentialProviderData::class.java
                 ) ?: emptyList()
             RequestInfo.TYPE_GET ->
-                intent.extras?.getParcelableArrayList(
-                    ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
-                    GetCredentialProviderData::class.java
+                getEnabledProviderDataList(
+                    intent
+                ) ?: getEnabledProviderDataListFromAuthExtras(
+                    intent
                 ) ?: emptyList()
             else -> {
                 Log.d(
@@ -102,9 +106,20 @@ class CredentialManagerRepo(
             ResultReceiver::class.java
         )
 
+        finalResponseReceiver = intent.getParcelableExtra(
+                Constants.EXTRA_FINAL_RESPONSE_RECEIVER,
+                ResultReceiver::class.java
+        )
+
+        isReqForAllOptions = intent.getBooleanExtra(
+                Constants.EXTRA_REQ_FOR_ALL_OPTIONS,
+                /*defaultValue=*/ false
+        ) || (requestInfo?.isShowAllOptionsRequested ?: false) // TODO(b/323552850) - Remove
+        // usage on Constants.EXTRA_REQ_FOR_ALL_OPTIONS once it is deprecated.
+
         val cancellationRequest = getCancelUiRequest(intent)
         val cancelUiRequestState = cancellationRequest?.let {
-            CancelUiRequestState(getAppLabel(context.getPackageManager(), it.appPackageName))
+            CancelUiRequestState(getAppLabel(context.getPackageManager(), it.packageName))
         }
 
         initialUiState = when (requestInfo?.type) {
@@ -141,7 +156,8 @@ class CredentialManagerRepo(
                 )
             }
             RequestInfo.TYPE_GET -> {
-                val getCredentialInitialUiState = getCredentialInitialUiState(originName)!!
+                val getCredentialInitialUiState = getCredentialInitialUiState(originName,
+                        isReqForAllOptions)!!
                 val autoSelectEntry =
                     findAutoSelectEntry(getCredentialInitialUiState.providerDisplayInfo)
                 UiState(
@@ -190,7 +206,7 @@ class CredentialManagerRepo(
     }
 
     fun onCancel(cancelCode: Int) {
-        sendCancellationCode(cancelCode, requestInfo?.token, resultReceiver)
+        sendCancellationCode(cancelCode, requestInfo?.token, resultReceiver, finalResponseReceiver)
     }
 
     fun onOptionSelected(
@@ -209,6 +225,10 @@ class CredentialManagerRepo(
         )
         val resultDataBundle = Bundle()
         UserSelectionDialogResult.addToBundle(userSelectionDialogResult, resultDataBundle)
+
+        resultDataBundle.putParcelable(Constants.EXTRA_FINAL_RESPONSE_RECEIVER,
+                finalResponseReceiver)
+
         resultReceiver?.send(
             BaseDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION,
             resultDataBundle
@@ -216,14 +236,36 @@ class CredentialManagerRepo(
     }
 
     // IMPORTANT: new invocation should be mindful that this method can throw.
-    private fun getCredentialInitialUiState(originName: String?): GetCredentialUiState? {
+    private fun getCredentialInitialUiState(
+            originName: String?,
+            isReqForAllOptions: Boolean
+    ): GetCredentialUiState? {
         val providerEnabledList = GetFlowUtils.toProviderList(
             providerEnabledList as List<GetCredentialProviderData>, context
         )
         val requestDisplayInfo = GetFlowUtils.toRequestDisplayInfo(requestInfo, context, originName)
         return GetCredentialUiState(
-            providerEnabledList,
-            requestDisplayInfo ?: return null,
+                isReqForAllOptions,
+                providerEnabledList,
+                requestDisplayInfo ?: return null
+        )
+    }
+
+    private fun getEnabledProviderDataList(intent: Intent): List<GetCredentialProviderData>? {
+        return intent.extras?.getParcelableArrayList(
+            ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
+            GetCredentialProviderData::class.java
+        )
+    }
+
+    private fun getEnabledProviderDataListFromAuthExtras(
+        intent: Intent
+    ): List<GetCredentialProviderData>? {
+        return intent.getBundleExtra(
+            AutofillManager.EXTRA_AUTH_STATE
+        ) ?.getParcelableArrayList(
+            ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
+            GetCredentialProviderData::class.java
         )
     }
 
@@ -254,20 +296,24 @@ class CredentialManagerRepo(
         fun sendCancellationCode(
             cancelCode: Int,
             requestToken: IBinder?,
-            resultReceiver: ResultReceiver?
+            resultReceiver: ResultReceiver?,
+            finalResponseReceiver: ResultReceiver?
         ) {
             if (requestToken != null && resultReceiver != null) {
                 val resultData = Bundle()
+                resultData.putParcelable(Constants.EXTRA_FINAL_RESPONSE_RECEIVER,
+                        finalResponseReceiver)
+
                 BaseDialogResult.addToBundle(BaseDialogResult(requestToken), resultData)
                 resultReceiver.send(cancelCode, resultData)
             }
         }
 
         /** Return the cancellation request if present. */
-        fun getCancelUiRequest(intent: Intent): CancelUiRequest? {
+        fun getCancelUiRequest(intent: Intent): CancelSelectionRequest? {
             return intent.extras?.getParcelable(
-                CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
-                CancelUiRequest::class.java
+                CancelSelectionRequest.EXTRA_CANCEL_UI_REQUEST,
+                CancelSelectionRequest::class.java
             )
         }
 

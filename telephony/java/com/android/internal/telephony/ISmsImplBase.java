@@ -227,4 +227,10 @@ public class ISmsImplBase extends ISms.Stub {
     public boolean resetAllCellBroadcastRanges(int subId) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public long getWapMessageSize(String locationUrl) {
+        throw new UnsupportedOperationException();
+    }
+
 }

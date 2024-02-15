@@ -16,8 +16,6 @@ package com.android.server.statusbar;
 
 import static android.app.StatusBarManager.DEFAULT_SETUP_DISABLE2_FLAGS;
 import static android.app.StatusBarManager.DEFAULT_SETUP_DISABLE_FLAGS;
-import static android.app.StatusBarManager.DISABLE2_NONE;
-import static android.app.StatusBarManager.DISABLE_NONE;
 
 import android.app.StatusBarManager.DisableInfo;
 import android.content.ComponentName;
@@ -27,7 +25,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.service.quicksettings.TileService;
-import android.util.Pair;
 
 import java.io.PrintWriter;
 
@@ -61,6 +58,8 @@ public class StatusBarShellCommand extends ShellCommand {
                     return runAddTile();
                 case "remove-tile":
                     return runRemoveTile();
+                case "set-tiles":
+                    return runSetTiles();
                 case "click-tile":
                     return runClickTile();
                 case "check-support":
@@ -105,6 +104,11 @@ public class StatusBarShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetTiles() throws RemoteException {
+        mInterface.setTiles(getNextArgRequired());
+        return 0;
+    }
+
     private int runClickTile() throws RemoteException {
         mInterface.clickTile(ComponentName.unflattenFromString(getNextArgRequired()));
         return 0;
@@ -137,25 +141,17 @@ public class StatusBarShellCommand extends ShellCommand {
         String arg = getNextArgRequired();
         String pkg = mContext.getPackageName();
         boolean disable = Boolean.parseBoolean(arg);
-
-        if (disable) {
-            mInterface.disable(DEFAULT_SETUP_DISABLE_FLAGS, sToken, pkg);
-            mInterface.disable2(DEFAULT_SETUP_DISABLE2_FLAGS, sToken, pkg);
-        } else {
-            mInterface.disable(DISABLE_NONE, sToken, pkg);
-            mInterface.disable2(DISABLE2_NONE, sToken, pkg);
-        }
-
+        int userId = Binder.getCallingUserHandle().getIdentifier();
+        DisableInfo info = disable ? new DisableInfo(DEFAULT_SETUP_DISABLE_FLAGS,
+                DEFAULT_SETUP_DISABLE2_FLAGS) : new DisableInfo();
+        mInterface.disableForUser(info, sToken, pkg, userId, "runDisableForSetup");
         return 0;
     }
 
     private int runSendDisableFlag() {
         String pkg = mContext.getPackageName();
-        int disable1 = DISABLE_NONE;
-        int disable2 = DISABLE2_NONE;
-
+        int userId = Binder.getCallingUserHandle().getIdentifier();
         DisableInfo info = new DisableInfo();
-
         String arg = getNextArg();
         while (arg != null) {
             switch (arg) {
@@ -163,7 +159,7 @@ public class StatusBarShellCommand extends ShellCommand {
                     info.setSearchDisabled(true);
                     break;
                 case "home":
-                    info.setNagivationHomeDisabled(true);
+                    info.setNavigationHomeDisabled(true);
                     break;
                 case "recents":
                     info.setRecentsDisabled(true);
@@ -190,10 +186,7 @@ public class StatusBarShellCommand extends ShellCommand {
             arg = getNextArg();
         }
 
-        Pair<Integer, Integer> flagPair = info.toFlags();
-
-        mInterface.disable(flagPair.first, sToken, pkg);
-        mInterface.disable2(flagPair.second, sToken, pkg);
+        mInterface.disableForUser(info, sToken, pkg, userId, "Shell Commands");
 
         return 0;
     }
@@ -241,6 +234,9 @@ public class StatusBarShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  remove-tile COMPONENT");
         pw.println("    Remove a TileService of the specified component");
+        pw.println("");
+        pw.println("  set-tiles LIST-OF-TILES");
+        pw.println("    Sets the list of tiles as the current Quick Settings tiles");
         pw.println("");
         pw.println("  click-tile COMPONENT");
         pw.println("    Click on a TileService of the specified component");

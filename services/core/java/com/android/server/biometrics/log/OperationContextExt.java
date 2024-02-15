@@ -20,11 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.hardware.biometrics.AuthenticateOptions;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.common.AuthenticateReason;
 import android.hardware.biometrics.common.DisplayState;
+import android.hardware.biometrics.common.FoldState;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
+import android.hardware.biometrics.common.OperationState;
 import android.hardware.biometrics.common.WakeReason;
 import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
@@ -50,13 +53,26 @@ public class OperationContextExt {
 
     /** Create a context. */
     public OperationContextExt(boolean isBP) {
-        this(new OperationContext(), isBP);
+        this(new OperationContext(), isBP, BiometricAuthenticator.TYPE_NONE);
+    }
+
+    public OperationContextExt(boolean isBP, @BiometricAuthenticator.Modality int modality) {
+        this(new OperationContext(), isBP, modality);
     }
 
     /** Create a wrapped context. */
-    public OperationContextExt(@NonNull OperationContext context, boolean isBP) {
+    public OperationContextExt(@NonNull OperationContext context, boolean isBP,
+            @BiometricAuthenticator.Modality int modality) {
         mAidlContext = context;
         mIsBP = isBP;
+
+        if (modality == BiometricAuthenticator.TYPE_FINGERPRINT) {
+            mAidlContext.operationState = OperationState.fingerprintOperationState(
+                    new OperationState.FingerprintOperationState());
+        } else if (modality == BiometricAuthenticator.TYPE_FACE) {
+            mAidlContext.operationState = OperationState.faceOperationState(
+                    new OperationState.FaceOperationState());
+        }
     }
 
     /**
@@ -86,6 +102,24 @@ public class OperationContextExt {
      * @return the underlying AIDL context
      */
     @NonNull
+    public OperationContext toAidlContext(@NonNull AuthenticateOptions options) {
+        if (options instanceof FaceAuthenticateOptions) {
+            return toAidlContext((FaceAuthenticateOptions) options);
+        }
+        if (options instanceof FingerprintAuthenticateOptions) {
+            return toAidlContext((FingerprintAuthenticateOptions) options);
+        }
+        throw new IllegalStateException("Authenticate options are invalid.");
+    }
+
+    /**
+     * Gets the subset of the context that can be shared with the HAL and updates
+     * it with the given options.
+     *
+     * @param options authenticate options
+     * @return the underlying AIDL context
+     */
+    @NonNull
     public OperationContext toAidlContext(@NonNull FaceAuthenticateOptions options) {
         mAidlContext.authenticateReason = AuthenticateReason
                 .faceAuthenticateReason(getAuthReason(options));
@@ -103,8 +137,14 @@ public class OperationContextExt {
      */
     @NonNull
     public OperationContext toAidlContext(@NonNull FingerprintAuthenticateOptions options) {
-        mAidlContext.authenticateReason = AuthenticateReason
-                .fingerprintAuthenticateReason(getAuthReason(options));
+        if (options.getVendorReason() != null) {
+            mAidlContext.authenticateReason = AuthenticateReason
+                    .vendorAuthenticateReason(options.getVendorReason());
+
+        } else {
+            mAidlContext.authenticateReason = AuthenticateReason
+                    .fingerprintAuthenticateReason(getAuthReason(options));
+        }
         mAidlContext.wakeReason = getWakeReason(options);
 
         return mAidlContext;
@@ -240,11 +280,23 @@ public class OperationContextExt {
         return mOrientation;
     }
 
+    /** The current operation state  */
+    public OperationState getOperationState() {
+        return mAidlContext.operationState;
+    }
+
     /** Update this object with the latest values from the given context. */
     OperationContextExt update(@NonNull BiometricContext biometricContext, boolean isCrypto) {
         mAidlContext.isAod = biometricContext.isAod();
         mAidlContext.displayState = toAidlDisplayState(biometricContext.getDisplayState());
+        mAidlContext.foldState = toAidlFoldState(biometricContext.getFoldState());
         mAidlContext.isCrypto = isCrypto;
+
+        if (mAidlContext.operationState != null && mAidlContext.operationState.getTag()
+                == OperationState.fingerprintOperationState) {
+            mAidlContext.operationState.getFingerprintOperationState().isHardwareIgnoringTouches =
+                    biometricContext.isHardwareIgnoringTouches();
+        }
         setFirstSessionId(biometricContext);
 
         mIsDisplayOn = biometricContext.isDisplayOn();
@@ -268,6 +320,19 @@ public class OperationContextExt {
                 return DisplayState.SCREENSAVER;
         }
         return DisplayState.UNKNOWN;
+    }
+
+    @FoldState
+    private static int toAidlFoldState(@IBiometricContextListener.FoldState int state) {
+        switch (state) {
+            case IBiometricContextListener.FoldState.FULLY_CLOSED:
+                return FoldState.FULLY_CLOSED;
+            case IBiometricContextListener.FoldState.FULLY_OPENED:
+                return FoldState.FULLY_OPENED;
+            case IBiometricContextListener.FoldState.HALF_OPENED:
+                return FoldState.HALF_OPENED;
+        }
+        return FoldState.UNKNOWN;
     }
 
     private void setFirstSessionId(@NonNull BiometricContext biometricContext) {

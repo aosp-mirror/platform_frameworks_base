@@ -26,7 +26,6 @@ import android.util.Range;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.ChooserActivity;
 import com.android.server.people.data.AppUsageStatsData;
 import com.android.server.people.data.DataManager;
 import com.android.server.people.data.Event;
@@ -55,8 +54,6 @@ class SharesheetModelScorer {
     private static final float FREQUENTLY_USED_APP_SCORE_INITIAL_DECAY = 0.3F;
     @VisibleForTesting
     static final float FOREGROUND_APP_WEIGHT = 0F;
-    @VisibleForTesting
-    static final String CHOOSER_ACTIVITY = ChooserActivity.class.getSimpleName();
 
     // Keep constructor private to avoid class being instantiated.
     private SharesheetModelScorer() {
@@ -169,13 +166,14 @@ class SharesheetModelScorer {
      */
     static void computeScoreForAppShare(List<ShareTargetPredictor.ShareTarget> shareTargets,
             int shareEventType, int targetsLimit, long now, @NonNull DataManager dataManager,
-            @UserIdInt int callingUserId) {
+            @UserIdInt int callingUserId, @Nullable String chooserActivity) {
         computeScore(shareTargets, shareEventType, now);
-        postProcess(shareTargets, targetsLimit, dataManager, callingUserId);
+        postProcess(shareTargets, targetsLimit, dataManager, callingUserId, chooserActivity);
     }
 
     private static void postProcess(List<ShareTargetPredictor.ShareTarget> shareTargets,
-            int targetsLimit, @NonNull DataManager dataManager, @UserIdInt int callingUserId) {
+            int targetsLimit, @NonNull DataManager dataManager, @UserIdInt int callingUserId,
+            @Nullable String chooserActivity) {
         // Populates a map which key is package name and value is list of shareTargets descended
         // on total score.
         Map<String, List<ShareTargetPredictor.ShareTarget>> shareTargetMap = new ArrayMap<>();
@@ -192,7 +190,7 @@ class SharesheetModelScorer {
             }
             targetsList.add(index, shareTarget);
         }
-        promoteForegroundApp(shareTargetMap, dataManager, callingUserId);
+        promoteForegroundApp(shareTargetMap, dataManager, callingUserId, chooserActivity);
         promoteMostChosenAndFrequentlyUsedApps(shareTargetMap, targetsLimit, dataManager,
                 callingUserId);
     }
@@ -272,9 +270,10 @@ class SharesheetModelScorer {
      */
     private static void promoteForegroundApp(
             Map<String, List<ShareTargetPredictor.ShareTarget>> shareTargetMap,
-            @NonNull DataManager dataManager, @UserIdInt int callingUserId) {
+            @NonNull DataManager dataManager, @UserIdInt int callingUserId,
+            @Nullable String chooserActivity) {
         String sharingForegroundApp = findSharingForegroundApp(shareTargetMap, dataManager,
-                callingUserId);
+                callingUserId, chooserActivity);
         if (sharingForegroundApp != null) {
             ShareTargetPredictor.ShareTarget target = shareTargetMap.get(sharingForegroundApp).get(
                     0);
@@ -297,7 +296,8 @@ class SharesheetModelScorer {
     @Nullable
     private static String findSharingForegroundApp(
             Map<String, List<ShareTargetPredictor.ShareTarget>> shareTargetMap,
-            @NonNull DataManager dataManager, @UserIdInt int callingUserId) {
+            @NonNull DataManager dataManager, @UserIdInt int callingUserId,
+            @Nullable String chooserActivity) {
         String sharingForegroundApp = null;
         long now = System.currentTimeMillis();
         List<UsageEvents.Event> events = dataManager.queryAppMovingToForegroundEvents(
@@ -306,8 +306,8 @@ class SharesheetModelScorer {
         for (int i = events.size() - 1; i >= 0; i--) {
             String className = events.get(i).getClassName();
             String packageName = events.get(i).getPackageName();
-            if (packageName == null || (className != null && className.contains(CHOOSER_ACTIVITY))
-                    || packageName.contains(CHOOSER_ACTIVITY)) {
+            if (packageName == null || (className != null && chooserActivity != null
+                    && className.contains(chooserActivity))) {
                 continue;
             }
             if (sourceApp == null) {

@@ -31,10 +31,10 @@ import androidx.lifecycle.Lifecycle.State.CREATED
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
 import com.android.systemui.people.PeopleSpaceTileView
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+import com.android.systemui.res.R
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -101,20 +101,12 @@ object PeopleViewBinder {
                                 view,
                                 priorityTiles,
                                 recentTiles,
-                                viewModel::onTileClicked,
+                                viewModel.onTileClicked,
                             )
                         } else {
-                            setNoConversationsContent(view, viewModel::onUserJourneyCancelled)
+                            setNoConversationsContent(view, viewModel.onUserJourneyCancelled)
                         }
                     }
-            }
-        }
-
-        // Make sure to refresh the tiles/conversations when the Activity is resumed, so that it
-        // updates them when going back to the Activity after leaving it.
-        lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.onTileRefreshRequested()
             }
         }
     }
@@ -140,13 +132,13 @@ object PeopleViewBinder {
             LayoutInflater.from(context)
                 .inflate(R.layout.people_space_activity_no_conversations, /* root= */ view)
 
-        noConversationsView.findViewById<View>(R.id.got_it_button).setOnClickListener {
+        noConversationsView.requireViewById<View>(R.id.got_it_button).setOnClickListener {
             onGotItClicked()
         }
 
         // The Tile preview has colorBackground as its background. Change it so it's different than
         // the activity's background.
-        val item = noConversationsView.findViewById<LinearLayout>(android.R.id.background)
+        val item = noConversationsView.requireViewById<LinearLayout>(android.R.id.background)
         val shape = item.background as GradientDrawable
         val ta =
             context.theme.obtainStyledAttributes(

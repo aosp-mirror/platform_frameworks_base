@@ -33,14 +33,22 @@ import static com.android.server.uri.UriPermission.STRENGTH_PERSISTABLE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.os.SystemClock;
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class UriPermissionTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     @Mock
     private UriGrantsManagerInternal mService;
 
@@ -148,10 +156,12 @@ public class UriPermissionTest {
             assertEquals(FLAG_WRITE, perm.persistableModeFlags);
             assertEquals(FLAG_WRITE, perm.persistedModeFlags);
 
-            // Attempting to take a second time should be a no-op
+            // Attempting to take a second time should "touch" timestamp, per public API
+            // docs on ContentResolver.takePersistableUriPermission()
             final long createTime = perm.persistedCreateTime;
+            SystemClock.sleep(10);
             assertFalse(perm.takePersistableModes(FLAG_WRITE));
-            assertEquals(createTime, perm.persistedCreateTime);
+            assertNotEquals(createTime, perm.persistedCreateTime);
 
             assertTrue(perm.releasePersistableModes(FLAG_WRITE));
             assertEquals(FLAG_WRITE, perm.persistableModeFlags);

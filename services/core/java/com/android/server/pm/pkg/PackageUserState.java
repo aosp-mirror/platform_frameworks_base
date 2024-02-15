@@ -86,6 +86,13 @@ public interface PackageUserState {
     long getCeDataInode();
 
     /**
+     * Device encrypted /data partition inode.
+     *
+     * @hide
+     */
+    long getDeDataInode();
+
+    /**
      * Fully qualified class names of components explicitly disabled.
      *
      * @hide
@@ -209,6 +216,13 @@ public interface PackageUserState {
     boolean isVirtualPreload();
 
     /**
+     * @return whether the package is quarantined in order to minimize ad-spam and pop ups
+     * when-not-in-use.
+     * @hide
+     */
+    boolean isQuarantined();
+
+    /**
      * The "package:type/entry" form of the theme resource ID previously set as the splash screen.
      *
      * @hide
@@ -217,4 +231,29 @@ public interface PackageUserState {
      */
     @Nullable
     String getSplashScreenTheme();
+
+    /**
+     * @return the min aspect ratio setting of the package which by default is unset
+     * unless it has been set by the user
+     * @hide
+     */
+    @PackageManager.UserMinAspectRatio
+    int getMinAspectRatio();
+
+    /**
+     * Information about the archived state of an app. Set only if an app is archived.
+     *
+     * @hide
+     */
+    @Immutable.Ignore
+    @Nullable
+    ArchiveState getArchiveState();
+
+    /**
+     * @return whether the data dir exists. True when the app is installed for the user, or when the
+     * app is uninstalled for the user with {@link PackageManager#DELETE_KEEP_DATA}.
+     *
+     * @hide
+     */
+    boolean dataExists();
 }

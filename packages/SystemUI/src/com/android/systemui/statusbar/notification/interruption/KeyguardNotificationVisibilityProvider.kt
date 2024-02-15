@@ -1,6 +1,5 @@
 package com.android.systemui.statusbar.notification.interruption
 
-import android.app.Notification
 import android.app.Notification.VISIBILITY_SECRET
 import android.content.Context
 import android.database.ContentObserver
@@ -14,6 +13,8 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -25,6 +26,7 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.ListenerSet
 import com.android.systemui.util.asIndenting
+import com.android.systemui.util.println
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.withIncreasedIndent
@@ -57,7 +59,7 @@ interface KeyguardNotificationVisibilityProvider {
 object KeyguardNotificationVisibilityProviderModule
 
 @Module
-private interface KeyguardNotificationVisibilityProviderImplModule {
+interface KeyguardNotificationVisibilityProviderImplModule {
     @Binds
     fun bindImpl(impl: KeyguardNotificationVisibilityProviderImpl):
             KeyguardNotificationVisibilityProvider
@@ -69,7 +71,7 @@ private interface KeyguardNotificationVisibilityProviderImplModule {
 }
 
 @SysUISingleton
-private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
+class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
     @Main private val handler: Handler,
     private val keyguardStateController: KeyguardStateController,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
@@ -78,7 +80,8 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val userTracker: UserTracker,
     private val secureSettings: SecureSettings,
-    private val globalSettings: GlobalSettings
+    private val globalSettings: GlobalSettings,
+    private val featureFlags: FeatureFlagsClassic
 ) : CoreStartable, KeyguardNotificationVisibilityProvider {
     private val showSilentNotifsUri =
             secureSettings.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS)
@@ -87,6 +90,7 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
 
     private val userTrackerCallback = object : UserTracker.Callback {
         override fun onUserChanged(newUser: Int, userContext: Context) {
+            readShowSilentNotificationSetting()
             if (isLockedOrLocking) {
                 // maybe public mode changed
                 notifyStateChanged("onUserSwitched")
@@ -200,7 +204,7 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
             // device isn't public, no need to check public-related settings, so allow
             !lockscreenUserManager.isLockscreenPublicMode(user) -> false
             // entry is meant to be secret on the lockscreen, disallow
-            entry.ranking.lockscreenVisibilityOverride == Notification.VISIBILITY_SECRET -> true
+            isRankingVisibilitySecret(entry) -> true
             // disallow if user disallows notifications in public
             else -> !lockscreenUserManager.userAllowsNotificationsInPublic(user)
         }
@@ -214,14 +218,26 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
         }
     }
 
-    override fun dump(pw: PrintWriter, args: Array<out String>) = pw.asIndenting().run {
-        println("isLockedOrLocking=$isLockedOrLocking")
-        withIncreasedIndent {
-            println("keyguardStateController.isShowing=${keyguardStateController.isShowing}")
-            println("statusBarStateController.currentOrUpcomingState=" +
-                    "${statusBarStateController.currentOrUpcomingState}")
+    private fun isRankingVisibilitySecret(entry: NotificationEntry): Boolean {
+        return if (featureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
+            // ranking.lockscreenVisibilityOverride contains possibly out of date DPC and Setting
+            // info, and NotificationLockscreenUserManagerImpl is already listening for updates
+            // to those
+            entry.ranking.channel != null && entry.ranking.channel.lockscreenVisibility ==
+                    VISIBILITY_SECRET
+        } else {
+            entry.ranking.lockscreenVisibilityOverride == VISIBILITY_SECRET
         }
-        println("hideSilentNotificationsOnLockscreen=$hideSilentNotificationsOnLockscreen")
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) = pw.asIndenting().run {
+        println("isLockedOrLocking", isLockedOrLocking)
+        withIncreasedIndent {
+            println("keyguardStateController.isShowing", keyguardStateController.isShowing)
+            println("statusBarStateController.currentOrUpcomingState",
+                statusBarStateController.currentOrUpcomingState)
+        }
+        println("hideSilentNotificationsOnLockscreen", hideSilentNotificationsOnLockscreen)
     }
 
     private val isLockedOrLocking get() =

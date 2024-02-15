@@ -39,10 +39,10 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.logging.CarrierTextManagerLogger;
 import com.android.settingslib.WirelessUtils;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository;
 import com.android.systemui.telephony.TelephonyListenerManager;
 
@@ -610,36 +610,6 @@ public class CarrierTextManager {
             list.add(string);
         }
         return list;
-    }
-
-    private CharSequence getCarrierHelpTextForSimState(int simState,
-            String plmn, String spn) {
-        int carrierHelpTextId = 0;
-        CarrierTextManager.StatusMode status = getStatusForIccState(simState);
-        switch (status) {
-            case NetworkLocked:
-                carrierHelpTextId = R.string.keyguard_instructions_when_pattern_disabled;
-                break;
-
-            case SimMissing:
-                carrierHelpTextId = R.string.keyguard_missing_sim_instructions_long;
-                break;
-
-            case SimPermDisabled:
-                carrierHelpTextId = R.string.keyguard_permanent_disabled_sim_instructions;
-                break;
-
-            case SimMissingLocked:
-                carrierHelpTextId = R.string.keyguard_missing_sim_instructions;
-                break;
-
-            case Normal:
-            case SimLocked:
-            case SimPukLocked:
-                break;
-        }
-
-        return mContext.getText(carrierHelpTextId);
     }
 
     /** Injectable Buildeer for {@#link CarrierTextManager}. */

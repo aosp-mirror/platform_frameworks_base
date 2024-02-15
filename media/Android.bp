@@ -23,6 +23,10 @@ aidl_interface {
     name: "soundtrigger_middleware-aidl",
     unstable: true,
     local_include_dir: "aidl",
+    defaults: [
+        "latest_android_media_audio_common_types_import_interface",
+        "latest_android_media_soundtrigger_types_import_interface",
+    ],
     backend: {
         java: {
             sdk_version: "module_current",
@@ -32,8 +36,6 @@ aidl_interface {
         "aidl/android/media/soundtrigger_middleware/*.aidl",
     ],
     imports: [
-        "android.media.audio.common.types-V2",
-        "android.media.soundtrigger.types-V1",
         "media_permission-aidl",
     ],
 }

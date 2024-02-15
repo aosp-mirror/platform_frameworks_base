@@ -22,13 +22,13 @@ import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.text.TextUtils
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.qs.QSIconView
 import com.android.systemui.plugins.qs.QSTile
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -43,8 +43,6 @@ import org.mockito.MockitoAnnotations
 class QSTileViewImplTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var iconView: QSIconView
-    @Mock
     private lateinit var customDrawable: Drawable
 
     private lateinit var tileView: FakeTileView
@@ -56,7 +54,7 @@ class QSTileViewImplTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         context.ensureTestableResources()
 
-        tileView = FakeTileView(context, iconView, false)
+        tileView = FakeTileView(context, false)
         customDrawableView = tileView.requireViewById(R.id.customDrawable)
         chevronView = tileView.requireViewById(R.id.chevron)
     }
@@ -384,9 +382,11 @@ class QSTileViewImplTest : SysuiTestCase() {
 
     class FakeTileView(
         context: Context,
-        icon: QSIconView,
         collapsed: Boolean
-    ) : QSTileViewImpl(context, icon, collapsed) {
+    ) : QSTileViewImpl(
+            ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings),
+            collapsed
+    ) {
         fun changeState(state: QSTile.State) {
             handleStateChanged(state)
         }

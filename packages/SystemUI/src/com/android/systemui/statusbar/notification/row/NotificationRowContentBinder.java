@@ -54,8 +54,9 @@ public interface NotificationRowContentBinder {
      *
      * @param entry notification
      * @param row notification row to cancel bind on
+     * @return true if an on-going bind operation was cancelled
      */
-    void cancelBind(
+    boolean cancelBind(
             @NonNull NotificationEntry entry,
             @NonNull ExpandableNotificationRow row);
 
@@ -79,6 +80,7 @@ public interface NotificationRowContentBinder {
                     FLAG_CONTENT_VIEW_EXPANDED,
                     FLAG_CONTENT_VIEW_HEADS_UP,
                     FLAG_CONTENT_VIEW_PUBLIC,
+                    FLAG_CONTENT_VIEW_SINGLE_LINE,
                     FLAG_CONTENT_VIEW_ALL})
     @interface InflationFlag {}
     /**
@@ -101,7 +103,12 @@ public interface NotificationRowContentBinder {
      */
     int FLAG_CONTENT_VIEW_PUBLIC = 1 << 3;
 
-    int FLAG_CONTENT_VIEW_ALL = (1 << 4) - 1;
+    /**
+     * The single line notification view. Show when the notification is shown as a child in group.
+     */
+    int FLAG_CONTENT_VIEW_SINGLE_LINE = 1 << 4;
+
+    int FLAG_CONTENT_VIEW_ALL = (1 << 5) - 1;
 
     /**
      * Parameters for content view binding

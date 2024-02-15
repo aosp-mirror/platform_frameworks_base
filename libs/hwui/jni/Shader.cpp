@@ -1,6 +1,3 @@
-#undef LOG_TAG
-#define LOG_TAG "ShaderJNI"
-
 #include <vector>
 
 #include "Gainmap.h"
@@ -68,21 +65,41 @@ static jlong Shader_getNativeFinalizer(JNIEnv*, jobject) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&Shader_safeUnref));
 }
 
-static jlong createBitmapShaderHelper(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
-                                      jint tileModeX, jint tileModeY, bool isDirectSampled,
-                                      const SkSamplingOptions& sampling) {
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+static SkGainmapInfo sNoOpGainmap = {
+        .fGainmapRatioMin = {1.f, 1.f, 1.f, 1.0},
+        .fGainmapRatioMax = {1.f, 1.f, 1.f, 1.0},
+        .fGainmapGamma = {1.f, 1.f, 1.f, 1.f},
+        .fEpsilonSdr = {0.f, 0.f, 0.f, 1.0},
+        .fEpsilonHdr = {0.f, 0.f, 0.f, 1.0},
+        .fDisplayRatioSdr = 1.f,
+        .fDisplayRatioHdr = 1.f,
+};
+
+static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
+                                      jint tileModeX, jint tileModeY, jint maxAniso, bool filter,
+                                      bool isDirectSampled, jlong overrideGainmapPtr) {
+    SkSamplingOptions sampling = maxAniso > 0 ? SkSamplingOptions::Aniso(static_cast<int>(maxAniso))
+                                              : SkSamplingOptions(filter ? SkFilterMode::kLinear
+                                                                         : SkFilterMode::kNearest,
+                                                                  SkMipmapMode::kNone);
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
+    const Gainmap* gainmap = reinterpret_cast<Gainmap*>(overrideGainmapPtr);
     sk_sp<SkImage> image;
     if (bitmapHandle) {
         // Only pass a valid SkBitmap object to the constructor if the Bitmap exists. Otherwise,
         // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
         auto& bitmap = android::bitmap::toBitmap(bitmapHandle);
         image = bitmap.makeImage();
+        if (!gainmap && bitmap.hasGainmap()) {
+            gainmap = bitmap.gainmap().get();
+        }
 
-        if (!isDirectSampled && bitmap.hasGainmap()) {
-            sk_sp<SkShader> gainmapShader = MakeGainmapShader(
-                    image, bitmap.gainmap()->bitmap->makeImage(), bitmap.gainmap()->info,
-                    (SkTileMode)tileModeX, (SkTileMode)tileModeY, sampling);
+        if (!isDirectSampled && gainmap && gainmap->info != sNoOpGainmap) {
+            sk_sp<SkShader> gainmapShader =
+                    MakeGainmapShader(image, gainmap->bitmap->makeImage(), gainmap->info,
+                                      (SkTileMode)tileModeX, (SkTileMode)tileModeY, sampling);
             if (gainmapShader) {
                 if (matrix) {
                     gainmapShader = gainmapShader->makeWithLocalMatrix(*matrix);
@@ -110,26 +127,6 @@ static jlong createBitmapShaderHelper(JNIEnv* env, jobject o, jlong matrixPtr, j
     }
 
     return reinterpret_cast<jlong>(shader.release());
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
-                                      jint tileModeX, jint tileModeY, bool filter,
-                                      bool isDirectSampled) {
-    SkSamplingOptions sampling(filter ? SkFilterMode::kLinear : SkFilterMode::kNearest,
-                               SkMipmapMode::kNone);
-    return createBitmapShaderHelper(env, o, matrixPtr, bitmapHandle, tileModeX, tileModeY,
-                                    isDirectSampled, sampling);
-}
-
-static jlong BitmapShader_constructorWithMaxAniso(JNIEnv* env, jobject o, jlong matrixPtr,
-                                                  jlong bitmapHandle, jint tileModeX,
-                                                  jint tileModeY, jint maxAniso,
-                                                  bool isDirectSampled) {
-    auto sampling = SkSamplingOptions::Aniso(static_cast<int>(maxAniso));
-    return createBitmapShaderHelper(env, o, matrixPtr, bitmapHandle, tileModeX, tileModeY,
-                                    isDirectSampled, sampling);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -422,8 +419,7 @@ static const JNINativeMethod gShaderMethods[] = {
 };
 
 static const JNINativeMethod gBitmapShaderMethods[] = {
-        {"nativeCreate", "(JJIIZZ)J", (void*)BitmapShader_constructor},
-        {"nativeCreateWithMaxAniso", "(JJIIIZ)J", (void*)BitmapShader_constructorWithMaxAniso},
+        {"nativeCreate", "(JJIIIZZJ)J", (void*)BitmapShader_constructor},
 
 };
 

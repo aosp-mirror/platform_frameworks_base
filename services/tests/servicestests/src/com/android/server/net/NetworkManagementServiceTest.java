@@ -16,6 +16,7 @@
 
 package com.android.server.net;
 
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_BACKGROUND;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
@@ -57,6 +58,7 @@ import android.util.ArrayMap;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.modules.utils.build.SdkLevel;
 
 import org.junit.After;
 import org.junit.Before;
@@ -263,7 +265,11 @@ public class NetworkManagementServiceTest {
         verify(mCm).addUidToMeteredNetworkDenyList(TEST_UID);
 
         mNMService.setDataSaverModeEnabled(true);
-        verify(mNetdService).bandwidthEnableDataSaver(true);
+        if (SdkLevel.isAtLeastV()) {
+            verify(mCm).setDataSaverEnabled(true);
+        } else {
+            verify(mNetdService).bandwidthEnableDataSaver(true);
+        }
 
         mNMService.setUidOnMeteredNetworkDenylist(TEST_UID, false);
         assertTrue("Should be true since data saver is on and the uid is not allowlisted",
@@ -279,7 +285,11 @@ public class NetworkManagementServiceTest {
         mNMService.setUidOnMeteredNetworkAllowlist(TEST_UID, false);
         verify(mCm).removeUidFromMeteredNetworkAllowList(TEST_UID);
         mNMService.setDataSaverModeEnabled(false);
-        verify(mNetdService).bandwidthEnableDataSaver(false);
+        if (SdkLevel.isAtLeastV()) {
+            verify(mCm).setDataSaverEnabled(false);
+        } else {
+            verify(mNetdService).bandwidthEnableDataSaver(false);
+        }
         assertFalse("Network should not be restricted when data saver is off",
                 mNMService.isNetworkRestricted(TEST_UID));
     }
@@ -318,12 +328,20 @@ public class NetworkManagementServiceTest {
         isRestrictedForLowPowerStandby.put(INetd.FIREWALL_RULE_DENY, true);
         expected.put(FIREWALL_CHAIN_LOW_POWER_STANDBY, isRestrictedForLowPowerStandby);
 
+        // Background chain
+        final ArrayMap<Integer, Boolean> isRestrictedInBackground = new ArrayMap<>();
+        isRestrictedInBackground.put(NetworkPolicyManager.FIREWALL_RULE_DEFAULT, true);
+        isRestrictedInBackground.put(INetd.FIREWALL_RULE_ALLOW, false);
+        isRestrictedInBackground.put(INetd.FIREWALL_RULE_DENY, true);
+        expected.put(FIREWALL_CHAIN_BACKGROUND, isRestrictedInBackground);
+
         final int[] chains = {
                 FIREWALL_CHAIN_STANDBY,
                 FIREWALL_CHAIN_POWERSAVE,
                 FIREWALL_CHAIN_DOZABLE,
                 FIREWALL_CHAIN_RESTRICTED,
-                FIREWALL_CHAIN_LOW_POWER_STANDBY
+                FIREWALL_CHAIN_LOW_POWER_STANDBY,
+                FIREWALL_CHAIN_BACKGROUND
         };
         final int[] states = {
                 INetd.FIREWALL_RULE_ALLOW,

@@ -1,11 +1,11 @@
 # Bug component: 36824
 
-cbrubaker@google.com
-vishwath@google.com
+brambonne@google.com
+eranm@google.com
+jeffv@google.com
 
-per-file NetworkSecurityPolicy.java = cbrubaker@google.com
-per-file NetworkSecurityPolicy.java = klyubin@google.com
-per-file FrameworkNetworkSecurityPolicy.java = cbrubaker@google.com
-per-file FrameworkNetworkSecurityPolicy.java = klyubin@google.com
-per-file Confirmation*.java = jdanis@google.com
-per-file Confirmation*.java = swillden@google.com
+per-file *NetworkSecurityPolicy.java = file:net/OWNERS
+per-file Confirmation*.java = file:/keystore/OWNERS
+per-file FileIntegrityManager.java = file:platform/system/security:/fsverity/OWNERS
+per-file IFileIntegrityService.aidl = file:platform/system/security:/fsverity/OWNERS
+per-file *.aconfig = victorhsieh@google.com,eranm@google.com

@@ -208,8 +208,7 @@ public class ClientTransactionalServiceWrapper {
                 if (resultCode == TELECOM_TRANSACTION_SUCCESS) {
 
                     // create the interface object that the client will interact with
-                    CallControl control = new CallControl(callId, callControl, mRepository,
-                            mPhoneAccountHandle);
+                    CallControl control = new CallControl(callId, callControl);
                     // give the client the object via the OR that was passed into addCall
                     pendingControl.onResult(control);
 

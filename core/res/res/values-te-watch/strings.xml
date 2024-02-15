@@ -21,4 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="permgrouplab_sensors" msgid="2439544173324807471">"సెన్సార్‌లు"</string>
+    <string name="global_action_emergency" msgid="2097576936362874627">"ఎమర్జెన్సీ సహాయం"</string>
+    <string name="reboot_to_update_prepare" msgid="4129802024411268230">"అప్‌డేట్ చేయడానికి సిద్ధమవుతోంది"</string>
+    <string name="reboot_to_update_title" msgid="8043761242418682803">"Wear OS సిస్టమ్ అప్‌డేట్"</string>
+    <string name="select_input_method" msgid="1285150113084396451">"ఇన్‌పుట్‌ను ఎంచుకోండి"</string>
 </resources>

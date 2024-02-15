@@ -16,8 +16,11 @@
 
 package com.android.packageinstaller;
 
+import static com.android.packageinstaller.PackageInstallerActivity.EXTRA_APP_SNIPPET;
 import static com.android.packageinstaller.PackageInstallerActivity.EXTRA_STAGED_SESSION_ID;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,9 +33,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-
 import androidx.annotation.Nullable;
-
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.InstallEventReceiver;
 import java.io.File;
 import java.io.IOException;
 
@@ -42,7 +45,7 @@ import java.io.IOException;
  * <p>This has two phases: First send the data to the package manager, then wait until the package
  * manager processed the result.</p>
  */
-public class InstallInstalling extends AlertActivity {
+public class InstallInstalling extends Activity {
     private static final String LOG_TAG = InstallInstalling.class.getSimpleName();
 
     private static final String SESSION_ID = "com.android.packageinstaller.SESSION_ID";
@@ -66,6 +69,8 @@ public class InstallInstalling extends AlertActivity {
     /** The button that can cancel this dialog */
     private Button mCancelButton;
 
+    private AlertDialog mDialog;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,12 +91,15 @@ public class InstallInstalling extends AlertActivity {
             // ContentResolver.SCHEME_FILE
             // STAGED_SESSION_ID extra contains an ID of a previously staged install session.
             final File sourceFile = new File(mPackageURI.getPath());
-            PackageUtil.AppSnippet as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
+            PackageUtil.AppSnippet as = getIntent()
+                    .getParcelableExtra(EXTRA_APP_SNIPPET, PackageUtil.AppSnippet.class);
 
-            mAlert.setIcon(as.icon);
-            mAlert.setTitle(as.label);
-            mAlert.setView(R.layout.install_content_view);
-            mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            builder.setIcon(as.icon);
+            builder.setTitle(as.label);
+            builder.setView(R.layout.install_content_view);
+            builder.setNegativeButton(getString(R.string.cancel),
                     (ignored, ignored2) -> {
                         if (mInstallingTask != null) {
                             mInstallingTask.cancel(true);
@@ -104,9 +112,11 @@ public class InstallInstalling extends AlertActivity {
 
                         setResult(RESULT_CANCELED);
                         finish();
-                    }, null);
-            setupAlert();
-            requireViewById(R.id.installing).setVisibility(View.VISIBLE);
+                    });
+            builder.setCancelable(false);
+            mDialog = builder.create();
+            mDialog.show();
+            mDialog.requireViewById(R.id.installing).setVisibility(View.VISIBLE);
 
             if (savedInstanceState != null) {
                 mSessionId = savedInstanceState.getInt(SESSION_ID);
@@ -143,7 +153,7 @@ public class InstallInstalling extends AlertActivity {
                 }
             }
 
-            mCancelButton = mAlert.getButton(DialogInterface.BUTTON_NEGATIVE);
+            mCancelButton = mDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
         }
     }
 
@@ -288,7 +298,14 @@ public class InstallInstalling extends AlertActivity {
                         broadcastIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
 
-                session.commit(pendingIntent.getIntentSender());
+                try {
+                    session.commit(pendingIntent.getIntentSender());
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, "Cannot install package: ", e);
+                    launchFailure(PackageInstaller.STATUS_FAILURE,
+                        PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
+                    return;
+                }
                 mCancelButton.setEnabled(false);
                 setFinishOnTouchOutside(false);
             } else {

@@ -30,10 +30,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
-import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.IVpnManager;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkStack;
 import android.net.UnderlyingNetworkInfo;
@@ -90,8 +88,6 @@ public class VpnManagerService extends IVpnManager.Stub {
     private final Context mUserAllContext;
 
     private final Dependencies mDeps;
-
-    private final ConnectivityManager mCm;
     private final VpnProfileStore mVpnProfileStore;
     private final INetworkManagementService mNMS;
     private final INetd mNetd;
@@ -165,7 +161,6 @@ public class VpnManagerService extends IVpnManager.Stub {
         mHandler = mHandlerThread.getThreadHandler();
         mVpnProfileStore = mDeps.getVpnProfileStore();
         mUserAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
-        mCm = mContext.getSystemService(ConnectivityManager.class);
         mNMS = mDeps.getINetworkManagementService();
         mNetd = mDeps.getNetd();
         mUserManager = mContext.getSystemService(UserManager.class);
@@ -437,16 +432,9 @@ public class VpnManagerService extends IVpnManager.Stub {
             throw new UnsupportedOperationException("Legacy VPN is deprecated");
         }
         int user = UserHandle.getUserId(mDeps.getCallingUid());
-        // Note that if the caller is not system (uid >= Process.FIRST_APPLICATION_UID),
-        // the code might not work well since getActiveNetwork might return null if the uid is
-        // blocked by NetworkPolicyManagerService.
-        final LinkProperties egress = mCm.getLinkProperties(mCm.getActiveNetwork());
-        if (egress == null) {
-            throw new IllegalStateException("Missing active network connection");
-        }
         synchronized (mVpns) {
             throwIfLockdownEnabled();
-            mVpns.get(user).startLegacyVpn(profile, null /* underlying */, egress);
+            mVpns.get(user).startLegacyVpn(profile);
         }
     }
 

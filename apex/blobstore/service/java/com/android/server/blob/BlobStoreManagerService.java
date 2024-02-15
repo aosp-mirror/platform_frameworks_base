@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.os.UserHandle.USER_CURRENT;
 import static android.os.UserHandle.USER_NULL;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.blob.BlobStoreConfig.INVALID_BLOB_ID;
 import static com.android.server.blob.BlobStoreConfig.INVALID_BLOB_SIZE;
 import static com.android.server.blob.BlobStoreConfig.LOGV;
@@ -1915,7 +1916,7 @@ public class BlobStoreManagerService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 FrameworkStatsLog.BLOB_INFO,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }

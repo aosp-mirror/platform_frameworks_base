@@ -46,4 +46,5 @@ oneway interface IInputMethodPrivilegedOperations {
             in @nullable ImeTracker.Token statsToken);
     void onStylusHandwritingReady(int requestId, int pid);
     void resetStylusHandwriting(int requestId);
+    void switchKeyboardLayoutAsync(int direction);
 }

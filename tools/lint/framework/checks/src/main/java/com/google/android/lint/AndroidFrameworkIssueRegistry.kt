@@ -20,6 +20,7 @@ import com.android.tools.lint.client.api.IssueRegistry
 import com.android.tools.lint.client.api.Vendor
 import com.android.tools.lint.detector.api.CURRENT_API
 import com.google.android.lint.parcel.SaferParcelChecker
+import com.google.android.lint.aidl.PermissionAnnotationDetector
 import com.google.auto.service.AutoService
 
 @AutoService(IssueRegistry::class)
@@ -37,6 +38,7 @@ class AndroidFrameworkIssueRegistry : IssueRegistry() {
         SaferParcelChecker.ISSUE_UNSAFE_API_USAGE,
         // TODO: Currently crashes due to OOM issue
         // PackageVisibilityDetector.ISSUE_PACKAGE_NAME_NO_PACKAGE_VISIBILITY_FILTERS,
+        PermissionAnnotationDetector.ISSUE_MISSING_PERMISSION_ANNOTATION,
         PermissionMethodDetector.ISSUE_PERMISSION_METHOD_USAGE,
         PermissionMethodDetector.ISSUE_CAN_BE_PERMISSION_METHOD,
     )

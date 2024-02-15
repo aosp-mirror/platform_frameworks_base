@@ -75,6 +75,7 @@ import java.util.StringJoiner;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * Maintains the master list of jobs that the job scheduler is tracking. These jobs are compared by
@@ -99,6 +100,8 @@ public final class JobStore {
     private static final long SCHEDULED_JOB_HIGH_WATER_MARK_PERIOD_MS = 30 * 60_000L;
     @VisibleForTesting
     static final String JOB_FILE_SPLIT_PREFIX = "jobs_";
+    private static final Pattern SPLIT_FILE_PATTERN =
+            Pattern.compile("^" + JOB_FILE_SPLIT_PREFIX + "\\d+.xml$");
     private static final int ALL_UIDS = -1;
     @VisibleForTesting
     static final int INVALID_UID = -2;
@@ -507,6 +510,8 @@ public final class JobStore {
     private static final String XML_TAG_ONEOFF = "one-off";
     private static final String XML_TAG_EXTRAS = "extras";
     private static final String XML_TAG_JOB_WORK_ITEM = "job-work-item";
+    private static final String XML_TAG_DEBUG_INFO = "debug-info";
+    private static final String XML_TAG_DEBUG_TAG = "debug-tag";
 
     private void migrateJobFilesAsync() {
         synchronized (mLock) {
@@ -802,6 +807,7 @@ public final class JobStore {
                     writeExecutionCriteriaToXml(out, jobStatus);
                     writeBundleToXml(jobStatus.getJob().getExtras(), out);
                     writeJobWorkItemsToXml(out, jobStatus);
+                    writeDebugInfoToXml(out, jobStatus);
                     out.endTag(null, XML_TAG_JOB);
 
                     numJobs++;
@@ -935,15 +941,6 @@ public final class JobStore {
             if (job.isRequireStorageNotLow()) {
                 out.attribute(null, "storage-not-low", Boolean.toString(true));
             }
-            if (job.isPreferBatteryNotLow()) {
-                out.attributeBoolean(null, "prefer-battery-not-low", true);
-            }
-            if (job.isPreferCharging()) {
-                out.attributeBoolean(null, "prefer-charging", true);
-            }
-            if (job.isPreferDeviceIdle()) {
-                out.attributeBoolean(null, "prefer-idle", true);
-            }
             out.endTag(null, XML_TAG_PARAMS_CONSTRAINTS);
         }
 
@@ -995,6 +992,26 @@ public final class JobStore {
             } else {
                 out.endTag(null, XML_TAG_ONEOFF);
             }
+        }
+
+        private void writeDebugInfoToXml(@NonNull TypedXmlSerializer out,
+                @NonNull JobStatus jobStatus) throws IOException, XmlPullParserException {
+            final ArraySet<String> debugTags = jobStatus.getJob().getDebugTagsArraySet();
+            final int numTags = debugTags.size();
+            final String traceTag = jobStatus.getJob().getTraceTag();
+            if (traceTag == null && numTags == 0) {
+                return;
+            }
+            out.startTag(null, XML_TAG_DEBUG_INFO);
+            if (traceTag != null) {
+                out.attribute(null, "trace-tag", traceTag);
+            }
+            for (int i = 0; i < numTags; ++i) {
+                out.startTag(null, XML_TAG_DEBUG_TAG);
+                out.attribute(null, "tag", debugTags.valueAt(i));
+                out.endTag(null, XML_TAG_DEBUG_TAG);
+            }
+            out.endTag(null, XML_TAG_DEBUG_INFO);
         }
 
         private void writeJobWorkItemsToXml(@NonNull TypedXmlSerializer out,
@@ -1118,14 +1135,30 @@ public final class JobStore {
             }
             boolean needFileMigration = false;
             long nowElapsed = sElapsedRealtimeClock.millis();
+            int numDuplicates = 0;
             synchronized (mLock) {
                 for (File file : files) {
+                    if (!file.getName().equals("jobs.xml")
+                            && !SPLIT_FILE_PATTERN.matcher(file.getName()).matches()) {
+                        // Skip temporary or other files.
+                        continue;
+                    }
                     final AtomicFile aFile = createJobFile(file);
                     try (FileInputStream fis = aFile.openRead()) {
                         jobs = readJobMapImpl(fis, rtcGood, nowElapsed);
                         if (jobs != null) {
                             for (int i = 0; i < jobs.size(); i++) {
                                 JobStatus js = jobs.get(i);
+                                final JobStatus existingJob = this.jobSet.get(
+                                        js.getUid(), js.getNamespace(), js.getJobId());
+                                if (existingJob != null) {
+                                    numDuplicates++;
+                                    // Jobs are meant to have unique uid-namespace-jobId
+                                    // combinations, but we've somehow read multiple jobs with the
+                                    // combination. Drop the latter one since keeping both will
+                                    // result in other issues.
+                                    continue;
+                                }
                                 js.prepareLocked();
                                 js.enqueueTime = nowElapsed;
                                 this.jobSet.add(js);
@@ -1174,6 +1207,10 @@ public final class JobStore {
                 migrateJobFilesAsync();
             }
 
+            if (numDuplicates > 0) {
+                Slog.wtf(TAG, "Encountered " + numDuplicates + " duplicate persisted jobs");
+            }
+
             // Log the count immediately after loading from boot.
             mCurrentJobSetSize = numJobs;
             mScheduledJob30MinHighWaterMark = mCurrentJobSetSize;
@@ -1182,6 +1219,12 @@ public final class JobStore {
             if (mCompletionLatch != null) {
                 mCompletionLatch.countDown();
             }
+        }
+
+        /** Returns the {@link String#intern() interned} String if it's not null. */
+        @Nullable
+        private static String intern(@Nullable String val) {
+            return val == null ? null : val.intern();
         }
 
         private List<JobStatus> readJobMapImpl(InputStream fis, boolean rtcIsGood, long nowElapsed)
@@ -1298,8 +1341,8 @@ public final class JobStore {
             }
 
             String sourcePackageName = parser.getAttributeValue(null, "sourcePackageName");
-            final String namespace = parser.getAttributeValue(null, "namespace");
-            final String sourceTag = parser.getAttributeValue(null, "sourceTag");
+            final String namespace = intern(parser.getAttributeValue(null, "namespace"));
+            final String sourceTag = intern(parser.getAttributeValue(null, "sourceTag"));
 
             int eventType;
             // Read out constraints tag.
@@ -1429,6 +1472,18 @@ public final class JobStore {
                 jobWorkItems = readJobWorkItemsFromXml(parser);
             }
 
+            if (eventType == XmlPullParser.START_TAG
+                    && XML_TAG_DEBUG_INFO.equals(parser.getName())) {
+                try {
+                    jobBuilder.setTraceTag(parser.getAttributeValue(null, "trace-tag"));
+                } catch (Exception e) {
+                    Slog.wtf(TAG, "Invalid trace tag persisted to disk", e);
+                }
+                parser.next();
+                jobBuilder.addDebugTags(readDebugTagsFromXml(parser));
+                eventType = parser.nextTag(); // Consume </debug-info>
+            }
+
             final JobInfo builtJob;
             try {
                 // Don't perform prefetch-deadline check here. Apps targeting S- shouldn't have
@@ -1440,7 +1495,7 @@ public final class JobStore {
                 // return value), the deadline is dropped. Periodic jobs require all constraints
                 // to be met, so there's no issue with their deadlines.
                 // The same logic applies for other target SDK-based validation checks.
-                builtJob = jobBuilder.build(false, false);
+                builtJob = jobBuilder.build(false, false, false, false);
             } catch (Exception e) {
                 Slog.w(TAG, "Unable to build job from XML, ignoring: " + jobBuilder.summarize(), e);
                 return null;
@@ -1461,7 +1516,7 @@ public final class JobStore {
             final int appBucket = JobSchedulerService.standbyBucketForPackage(sourcePackageName,
                     sourceUserId, nowElapsed);
             JobStatus js = new JobStatus(
-                    builtJob, uid, sourcePackageName, sourceUserId,
+                    builtJob, uid, intern(sourcePackageName), sourceUserId,
                     appBucket, namespace, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTime,
@@ -1478,8 +1533,8 @@ public final class JobStore {
                 throws XmlPullParserException {
             // Pull out required fields from <job> attributes.
             int jobId = parser.getAttributeInt(null, "jobid");
-            String packageName = parser.getAttributeValue(null, "package");
-            String className = parser.getAttributeValue(null, "class");
+            String packageName = intern(parser.getAttributeValue(null, "package"));
+            String className = intern(parser.getAttributeValue(null, "class"));
             ComponentName cname = new ComponentName(packageName, className);
 
             return new JobInfo.Builder(jobId, cname);
@@ -1609,13 +1664,6 @@ public final class JobStore {
             if (val != null) {
                 jobBuilder.setRequiresStorageNotLow(true);
             }
-
-            jobBuilder.setPrefersBatteryNotLow(
-                    parser.getAttributeBoolean(null, "prefer-battery-not-low", false));
-            jobBuilder.setPrefersCharging(
-                    parser.getAttributeBoolean(null, "prefer-charging", false));
-            jobBuilder.setPrefersDeviceIdle(
-                    parser.getAttributeBoolean(null, "prefer-idle", false));
         }
 
         /**
@@ -1707,6 +1755,33 @@ public final class JobStore {
                 Slog.e(TAG, "Invalid JobWorkItem", e);
                 return null;
             }
+        }
+
+        @NonNull
+        private Set<String> readDebugTagsFromXml(TypedXmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            Set<String> debugTags = new ArraySet<>();
+
+            for (int eventType = parser.getEventType(); eventType != XmlPullParser.END_DOCUMENT;
+                    eventType = parser.next()) {
+                final String tagName = parser.getName();
+                if (!XML_TAG_DEBUG_TAG.equals(tagName)) {
+                    // We're no longer operating with debug tags.
+                    break;
+                }
+                if (debugTags.size() < JobInfo.MAX_NUM_DEBUG_TAGS) {
+                    final String debugTag;
+                    try {
+                        debugTag = JobInfo.validateDebugTag(parser.getAttributeValue(null, "tag"));
+                    } catch (Exception e) {
+                        Slog.wtf(TAG, "Invalid debug tag persisted to disk", e);
+                        continue;
+                    }
+                    debugTags.add(debugTag);
+                }
+            }
+
+            return debugTags;
         }
     }
 

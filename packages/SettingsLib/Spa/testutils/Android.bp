@@ -22,15 +22,16 @@ android_library {
     name: "SpaLibTestUtils",
 
     srcs: ["src/**/*.kt"],
-
+    use_resource_processor: true,
     static_libs: [
         "SpaLib",
         "androidx.arch.core_core-testing",
         "androidx.compose.runtime_runtime",
         "androidx.compose.ui_ui-test-junit4",
         "androidx.compose.ui_ui-test-manifest",
-        "mockito",
-        "truth-prebuilt",
+        "androidx.lifecycle_lifecycle-runtime-testing",
+        "mockito-kotlin2",
+        "truth",
     ],
     kotlincflags: [
         "-Xjvm-default=all",

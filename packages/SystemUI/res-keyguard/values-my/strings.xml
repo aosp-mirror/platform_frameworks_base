@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အမြန်အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • နှေးကွေးစွာ အားသွင်းနေသည်"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ဘက်ထရီကာကွယ်ရန် အားသွင်းခြင်းကို အကောင်းဆုံးပြင်ဆင်ထားသည်"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းပစ္စည်းတွင် ပြဿနာရှိသည်"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"မီနူးကို နှိပ်၍ လော့ခ်ဖွင့်ပါ။"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ဘက်ထရီကို ကာကွယ်ရန် အားသွင်းခြင်းကို ခဏရပ်ထားသည်"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းပစ္စည်းကို စစ်ပါ"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ကွန်ရက်ကို လော့ခ်ချထားသည်"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ဆင်းမ်ကတ် မရှိပါ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"ဆင်းမ်ကတ်ထည့်ပါ။"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"ဆင်းမ်မရှိပါ (သို့) သုံး၍မရပါ။ ဆင်းမ်ကတ်ထည့်ပါ။"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ဆင်းမ်ကတ်ကို သုံး၍မရပါ။"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"သင်၏ဆင်းမ်ကတ်ကို အပြီးပိတ်လိုက်သည်။\n ဆင်းမ်ကတ်နောက်တစ်ခု ရယူရန် သင်၏ ကြိုးမဲ့ဝန်ဆောင်မှုပေးသူထံ ဆက်သွယ်ပါ။"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"ဆင်းမ်ကတ်ကို လော့ခ်ချထားသည်။"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"ဆင်းမ်ကတ်၏ ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ်ကို လော့ခ်ချထားသည်။"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"ဆင်းမ်ကတ် ဖွင့်နေသည်…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"လော့ခ်ဒေါင်းလုပ်ပြီးနောက် ပင်နံပါတ်လိုအပ်သည်"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"လော့ခ်ဒေါင်းလုပ်ပြီးနောက် စကားဝှက်လိုအပ်သည်"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"လော့ခ်ဒေါင်းလုပ်ပြီးနောက် ပုံဖော်ခြင်းလိုအပ်သည်"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"မသုံးသည့်အချိန်အတွင်း အပ်ဒိတ်ထည့်သွင်းမည်"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"စက်သုံးနေခြင်း မရှိချိန်တွင် အပ်ဒိတ် ထည့်သွင်းပါမည်"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ထပ်ဆောင်းလုံခြုံရေး လိုအပ်သည်။ ပင်နံပါတ်မသုံးသည်မှာ အနည်းငယ်ကြာပြီ။"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ထပ်ဆောင်းလုံခြုံရေး လိုအပ်သည်။ စကားဝှက်မသုံးသည်မှာ အနည်းငယ်ကြာပြီ။"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ထပ်ဆောင်းလုံခြုံရေး လိုအပ်သည်။ ပုံဖော်ခြင်းမသုံးသည်မှာ အနည်းငယ်ကြာပြီ။"</string>
@@ -128,7 +124,7 @@
     <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"နောက်ပိုင်းတွင် အပ်ဒိတ်ထည့်သွင်းရန် ပင်နံပါတ်ထည့်ပါ"</string>
     <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"နောက်ပိုင်းတွင် အပ်ဒိတ်ထည့်သွင်းရန် စကားဝှက်ထည့်ပါ"</string>
     <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"နောက်ပိုင်းတွင် အပ်ဒိတ်ထည့်သွင်းရန် ပုံဖော်ရေးဆွဲပါ"</string>
-    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"စက်ပစ္စည်း အပ်ဒိတ်လုပ်ထားသည်။ ရှေ့ဆက်ရန် ပင်နံပါတ်ထည့်ပါ။"</string>
-    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"စက်ပစ္စည်း အပ်ဒိတ်လုပ်ထားသည်။ ရှေ့ဆက်ရန် စကားဝှက်ထည့်ပါ။"</string>
-    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"စက်ပစ္စည်း အပ်ဒိတ်လုပ်ထားသည်။ ရှေ့ဆက်ရန် ပုံဖော်ရေးဆွဲပါ။"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"အပ်ဒိတ်လုပ်ထားသည်။ ရှေ့ဆက်ရန် ပင်နံပါတ်ထည့်ပါ။"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"အပ်ဒိတ်လုပ်ထားသည်။ ရှေ့ဆက်ရန် စကားဝှက်ထည့်ပါ။"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"အပ်ဒိတ်လုပ်ထားသည်။ ရှေ့ဆက်ရန် ပုံဖော်ရေးဆွဲပါ။"</string>
 </resources>

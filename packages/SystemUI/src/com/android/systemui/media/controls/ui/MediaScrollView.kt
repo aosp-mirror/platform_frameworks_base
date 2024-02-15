@@ -74,6 +74,14 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
             scrollX = transformScrollX(value)
         }
 
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        if (!isLaidOut && isLayoutRtl) {
+            // Reset scroll because onLayout method overrides RTL scroll if view was not laid out.
+            mScrollX = relativeScrollX
+        }
+        super.onLayout(changed, l, t, r, b)
+    }
+
     /** Allow all scrolls to go through, use base implementation */
     override fun scrollTo(x: Int, y: Int) {
         if (mScrollX != x || mScrollY != y) {

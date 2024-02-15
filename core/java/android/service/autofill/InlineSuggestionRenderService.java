@@ -39,6 +39,7 @@ import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.window.InputTransferToken;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -166,7 +167,7 @@ public abstract class InlineSuggestionRenderService extends Service {
                     PixelFormat.TRANSPARENT);
 
             final SurfaceControlViewHost host = new SurfaceControlViewHost(this, getDisplay(),
-                    hostInputToken, "InlineSuggestionRenderService");
+                    new InputTransferToken(hostInputToken), "InlineSuggestionRenderService");
             host.setView(suggestionRoot, lp);
 
             // Set the suggestion view to be non-focusable so that if its background is set to a

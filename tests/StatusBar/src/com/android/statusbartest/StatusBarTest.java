@@ -176,19 +176,25 @@ public class StatusBarTest extends TestActivity
         },
         new Test("Disable Alerts") {
             public void run() {
-                mStatusBarManager.disable(StatusBarManager.DISABLE_NOTIFICATION_ALERTS);
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                info.setNotificationPeekingDisabled(true);
+                mStatusBarManager.requestDisabledComponent(info, "test");
             }
         },
         new Test("Disable Ticker") {
             public void run() {
-                mStatusBarManager.disable(StatusBarManager.DISABLE_NOTIFICATION_TICKER);
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                info.setNotificationTickerDisabled(true);
+                mStatusBarManager.requestDisabledComponent(info, "test");
             }
         },
         new Test("Disable Expand in 3 sec.") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
-                            mStatusBarManager.disable(StatusBarManager.DISABLE_EXPAND);
+                            StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                            info.setStatusBarExpansionDisabled(true);
+                            mStatusBarManager.requestDisabledComponent(info, "test");
                         }
                     }, 3000);
             }
@@ -197,7 +203,9 @@ public class StatusBarTest extends TestActivity
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
-                            mStatusBarManager.disable(StatusBarManager.DISABLE_NOTIFICATION_ICONS);
+                            StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                            info.setNotificationIconsDisabled(true);
+                            mStatusBarManager.requestDisabledComponent(info, "test");
                         }
                     }, 3000);
             }
@@ -206,56 +214,73 @@ public class StatusBarTest extends TestActivity
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
-                            mStatusBarManager.disable(StatusBarManager.DISABLE_EXPAND
-                                    | StatusBarManager.DISABLE_NOTIFICATION_ICONS);
+                            StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                            info.setStatusBarExpansionDisabled(true);
+                            info.setNotificationIconsDisabled(true);
+                            mStatusBarManager.requestDisabledComponent(info, "test");
                         }
                     }, 3000);
             }
         },
         new Test("Disable Home (StatusBarManager)") {
             public void run() {
-                mStatusBarManager.disable(StatusBarManager.DISABLE_HOME);
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                info.setNavigationHomeDisabled(true);
+                mStatusBarManager.requestDisabledComponent(info, "test");
             }
         },
         new Test("Disable Back (StatusBarManager)") {
             public void run() {
-                mStatusBarManager.disable(StatusBarManager.DISABLE_BACK);
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                info.setBackDisabled(true);
+                mStatusBarManager.requestDisabledComponent(info, "test");
             }
         },
         new Test("Disable Recent (StatusBarManager)") {
             public void run() {
-                mStatusBarManager.disable(StatusBarManager.DISABLE_RECENT);
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                info.setRecentsDisabled(true);
+                mStatusBarManager.requestDisabledComponent(info, "test");
             }
         },
         new Test("Disable Clock") {
             public void run() {
-                mStatusBarManager.disable(StatusBarManager.DISABLE_CLOCK);
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                info.setClockDisabled(true);
+                mStatusBarManager.requestDisabledComponent(info, "test");
             }
         },
         new Test("Disable System Info") {
             public void run() {
-                mStatusBarManager.disable(StatusBarManager.DISABLE_SYSTEM_INFO);
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                info.setSystemIconsDisabled(true);
+                mStatusBarManager.requestDisabledComponent(info, "test");
             }
         },
         new Test("Disable everything in 3 sec") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
-                            mStatusBarManager.disable(~StatusBarManager.DISABLE_NONE);
+                            StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                            info.setDisableAll();
+                            mStatusBarManager.requestDisabledComponent(info, "test");
                         }
                     }, 3000);
             }
         },
         new Test("Enable everything") {
             public void run() {
-                mStatusBarManager.disable(StatusBarManager.DISABLE_NONE);
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                mStatusBarManager.requestDisabledComponent(info, "test");
             }
         },
         new Test("Enable everything in 3 sec.") {
             public void run() {
                 mHandler.postDelayed(new Runnable() {
                         public void run() {
-                            mStatusBarManager.disable(0);
+                            StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                            info.setEnableAll();
+                            mStatusBarManager.requestDisabledComponent(info, "test");
                         }
                     }, 3000);
             }

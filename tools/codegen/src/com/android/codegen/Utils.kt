@@ -137,14 +137,4 @@ private fun parseFailed(source: String, cause: Throwable? = null, desc: String =
             cause)
 }
 
-var <T> MutableList<T>.last
-    get() = last()
-    set(value) {
-        if (isEmpty()) {
-            add(value)
-        } else {
-            this[size - 1] = value
-        }
-    }
-
 inline fun <T> buildList(init: MutableList<T>.() -> Unit) = mutableListOf<T>().apply(init)

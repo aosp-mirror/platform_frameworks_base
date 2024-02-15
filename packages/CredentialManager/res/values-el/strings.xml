@@ -33,7 +33,7 @@
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Τα κλειδιά πρόσβασης σάς επιτρέπουν να συνδέεστε χωρίς να εξαρτάστε από κωδικούς πρόσβασης. Χρειάζεται μόνο να χρησιμοποιήσετε το δακτυλικό αποτύπωμά σας, την αναγνώριση προσώπου, ένα PIN ή ένα μοτίβο σάρωσης για να επαληθεύσετε την ταυτότητά σας και να δημιουργήσετε ένα κλειδί πρόσβασης."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Κρυπτογραφία δημόσιου κλειδιού"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Βάσει του FIDO Alliance (συμμετ. οι Google, Apple, Microsoft κ.ά.) και προτύπων W3C, τα κλειδιά πρόσβ. χρησιμ. συζεύξεις κλειδιών κρυπτογρ. Σε αντίθεση με το όνομα χρήστη και τη συμβολοσειρά χαρακτ. για κωδ. πρόσβ., δημιουργείται μια σύζευξη ιδιωτικού-δημόσιου κλειδ. για εφαρμ./ιστοτόπους. Το ιδιωτ. κλειδί αποθηκεύεται με ασφάλεια στη συσκευή ή στον διαχειρ. κωδ. πρόσβ. και επιβεβαιώνει την ταυτότητά σας. Το δημόσιο κλειδί κοινοπ. στον διακομιστή εφαρμ./ιστοτόπου. Τα αντίστοιχα κλειδιά επιτρέπουν άμεση εγγραφή και σύνδεση."</string>
-    <string name="improved_account_security_title" msgid="1069841917893513424">"Βελτιωμένη ασφάλεια λογαριασμού"</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Βελτιωμένη προστασία λογαριασμού"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Κάθε κλειδί συνδέεται αποκλειστικά με την εφαρμογή ή τον ιστότοπο για τον οποίο δημιουργήθηκε ώστε να μην συνδέεστε ποτέ κατά λάθος σε μη νόμιμες εφαρμογές ή ιστοτόπους. Επιπλέον, οι παραβιάσεις είναι πολύ πιο δύσκολες, επειδή οι διακομιστές διατηρούν μόνο δημόσια κλειδιά."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Απρόσκοπτη μετάβαση"</string>
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Καθώς κινούμαστε προς ένα μέλλον χωρίς κωδικούς πρόσβασης, οι κωδικοί πρόσβασης θα εξακολουθούν να είναι διαθέσιμοι μαζί με τα κλειδιά πρόσβασης."</string>
@@ -53,7 +53,7 @@
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Θέλετε να αποθηκεύσετε τον κωδικό πρόσβασης σε κάποια άλλη συσκευή;"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Θέλετε να αποθηκεύσετε τα στοιχεία σύνδεσης σε κάποια άλλη συσκευή;"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Να χρησιμοποιηθεί το <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> για όλες τις συνδέσεις σας;"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Αυτός ο διαχειριστής κωδικών πρόσβασης για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g> θα αποθηκεύει τους κωδικούς πρόσβασης και τα κλειδιά πρόσβασης, για πιο εύκολη πρόσβαση"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Αυτός ο διαχειριστής κωδικών πρόσβασης για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g> θα αποθηκεύει τους κωδικούς και τα κλειδιά πρόσβασης, για πιο εύκολη σύνδεση"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Ορισμός ως προεπιλογής"</string>
     <string name="settings" msgid="6536394145760913145">"Ρυθμίσεις"</string>
     <string name="use_once" msgid="9027366575315399714">"Χρήση μία φορά"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Από άλλη συσκευή"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Χρήση διαφορετικής συσκευής"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"Το αίτημα ακυρώθηκε από την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Επιλογές σύνδεσης"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Περισσότερα"</string>
 </resources>

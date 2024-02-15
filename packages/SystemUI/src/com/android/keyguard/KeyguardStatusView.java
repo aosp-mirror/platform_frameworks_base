@@ -23,12 +23,14 @@ import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Trace;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.widget.GridLayout;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
+import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.statusbar.CrossFadeHelper;
 
 import java.io.PrintWriter;
@@ -110,9 +112,15 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch(TAG, ev, super.dispatchTouchEvent(ev));
+    }
+
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusView:");
         pw.println("  mDarkAmount: " + mDarkAmount);
+        pw.println("  visibility: " + getVisibility());
         if (mClockView != null) {
             mClockView.dump(pw, args);
         }

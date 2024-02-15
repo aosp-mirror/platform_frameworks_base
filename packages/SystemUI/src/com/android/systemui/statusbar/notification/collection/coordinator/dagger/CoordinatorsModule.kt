@@ -50,7 +50,7 @@ interface CoordinatorsSubcomponent {
 @Module(includes = [
     SensitiveContentCoordinatorModule::class,
 ])
-private abstract class InternalCoordinatorsModule {
+abstract class InternalCoordinatorsModule {
     @Binds
     @Internal
     abstract fun bindNotifCoordinators(impl: NotifCoordinatorsImpl): NotifCoordinators

@@ -28,7 +28,8 @@ import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
-import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -48,7 +49,7 @@ public class PreferredComponent {
     public final int mMatch;
     public final ComponentName mComponent;
     // Whether this is to be the one that's always chosen. If false, it's the most recently chosen.
-    public boolean mAlways;
+    public final boolean mAlways;
 
     final String[] mSetPackages;
     final String[] mSetClasses;
@@ -218,11 +219,15 @@ public class PreferredComponent {
                 continue;
             }
 
-            // Avoid showing the disambiguation dialog if the package which is installed with
-            // reason INSTALL_REASON_DEVICE_SETUP.
-            final PackageUserState pkgUserState =
-                    pmi.getPackageStateInternal(ai.packageName).getUserStates().get(userId);
-            if (pkgUserState != null && pkgUserState.getInstallReason()
+            // Avoid showing the disambiguation dialog if the package is not installed or
+            // installed with reason INSTALL_REASON_DEVICE_SETUP.
+            final PackageStateInternal ps = pmi.getPackageStateInternal(ai.packageName);
+            if (ps == null) {
+                continue;
+            }
+            final PackageUserStateInternal pkgUserState = ps.getUserStates().get(userId);
+            if (pkgUserState == null
+                    || pkgUserState.getInstallReason()
                     == PackageManager.INSTALL_REASON_DEVICE_SETUP) {
                 continue;
             }

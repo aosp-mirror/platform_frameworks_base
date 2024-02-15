@@ -32,6 +32,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class DumpableContainerImpl implements DumpableContainer {
 
     private static final String TAG = DumpableContainerImpl.class.getSimpleName();

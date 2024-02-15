@@ -33,6 +33,7 @@ import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.FocusFinder;
+import android.view.HapticScrollFeedbackProvider;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -46,6 +47,7 @@ import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
+import android.view.flags.Flags;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
@@ -203,6 +205,10 @@ public class ScrollView extends FrameLayout {
     private StrictMode.Span mScrollStrictSpan = null;  // aka "drag"
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private StrictMode.Span mFlingStrictSpan = null;
+
+    private DifferentialMotionFlingHelper mDifferentialMotionFlingHelper;
+
+    private HapticScrollFeedbackProvider mHapticScrollFeedbackProvider;
 
     /**
      * Sentinel value for no current active pointer.
@@ -594,6 +600,20 @@ public class ScrollView extends FrameLayout {
         }
     }
 
+    private void initDifferentialFlingHelperIfNotExists() {
+        if (mDifferentialMotionFlingHelper == null) {
+            mDifferentialMotionFlingHelper =
+                    new DifferentialMotionFlingHelper(
+                            mContext, new DifferentialFlingTarget());
+        }
+    }
+
+    private void initHapticScrollFeedbackProviderIfNotExists() {
+        if (mHapticScrollFeedbackProvider == null) {
+            mHapticScrollFeedbackProvider = new HapticScrollFeedbackProvider(this);
+        }
+    }
+
     private void recycleVelocityTracker() {
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();
@@ -942,17 +962,22 @@ public class ScrollView extends FrameLayout {
     public boolean onGenericMotionEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_SCROLL:
-                final float axisValue;
+                final int axis;
                 if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
-                    axisValue = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                    axis = MotionEvent.AXIS_VSCROLL;
                 } else if (event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
-                    axisValue = event.getAxisValue(MotionEvent.AXIS_SCROLL);
+                    axis = MotionEvent.AXIS_SCROLL;
                 } else {
-                    axisValue = 0;
+                    axis = -1;
                 }
 
+                final float axisValue = (axis == -1) ? 0 : event.getAxisValue(axis);
                 final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
+                    // Tracks whether or not we should attempt fling for this event.
+                    // Fling should not be attempted if the view is already at the limit of scroll,
+                    // since it conflicts with EdgeEffect.
+                    boolean hitLimit = false;
                     final int range = getScrollRange();
                     int oldScrollY = mScrollY;
                     int newScrollY = oldScrollY - delta;
@@ -971,6 +996,7 @@ public class ScrollView extends FrameLayout {
                             absorbed = true;
                         }
                         newScrollY = 0;
+                        hitLimit = true;
                     } else if (newScrollY > range) {
                         if (canOverscroll) {
                             mEdgeGlowBottom.onPullDistance(
@@ -980,9 +1006,26 @@ public class ScrollView extends FrameLayout {
                             absorbed = true;
                         }
                         newScrollY = range;
+                        hitLimit = true;
                     }
                     if (newScrollY != oldScrollY) {
                         super.scrollTo(mScrollX, newScrollY);
+                        if (hitLimit) {
+                            if (Flags.scrollFeedbackApi()) {
+                                initHapticScrollFeedbackProviderIfNotExists();
+                                mHapticScrollFeedbackProvider.onScrollLimit(
+                                        event.getDeviceId(), event.getSource(), axis,
+                                        /* isStart= */ newScrollY == 0);
+                            }
+                        } else {
+                            if (Flags.scrollFeedbackApi()) {
+                                initHapticScrollFeedbackProviderIfNotExists();
+                                mHapticScrollFeedbackProvider.onScrollProgress(
+                                        event.getDeviceId(), event.getSource(), axis, delta);
+                            }
+                            initDifferentialFlingHelperIfNotExists();
+                            mDifferentialMotionFlingHelper.onMotionEvent(event, axis);
+                        }
                         return true;
                     }
                     if (absorbed) {
@@ -1545,11 +1588,17 @@ public class ScrollView extends FrameLayout {
      * @return The unconsumed delta after the EdgeEffects have had an opportunity to consume.
      */
     private int consumeFlingInStretch(int unconsumed) {
+        int scrollY = getScrollY();
+        if (scrollY < 0 || scrollY > getScrollRange()) {
+            // We've overscrolled, so don't stretch
+            return unconsumed;
+        }
         if (unconsumed > 0 && mEdgeGlowTop != null && mEdgeGlowTop.getDistance() != 0f) {
             int size = getHeight();
             float deltaDistance = -unconsumed * FLING_DESTRETCH_FACTOR / size;
             int consumed = Math.round(-size / FLING_DESTRETCH_FACTOR
                     * mEdgeGlowTop.onPullDistance(deltaDistance, 0.5f));
+            mEdgeGlowTop.onRelease();
             if (consumed != unconsumed) {
                 mEdgeGlowTop.finish();
             }
@@ -1560,6 +1609,7 @@ public class ScrollView extends FrameLayout {
             float deltaDistance = unconsumed * FLING_DESTRETCH_FACTOR / size;
             int consumed = Math.round(size / FLING_DESTRETCH_FACTOR
                     * mEdgeGlowBottom.onPullDistance(deltaDistance, 0.5f));
+            mEdgeGlowBottom.onRelease();
             if (consumed != unconsumed) {
                 mEdgeGlowBottom.finish();
             }
@@ -2124,4 +2174,23 @@ public class ScrollView extends FrameLayout {
         };
     }
 
+    private class DifferentialFlingTarget
+            implements DifferentialMotionFlingHelper.DifferentialMotionFlingTarget {
+        @Override
+        public boolean startDifferentialMotionFling(float velocity) {
+            stopDifferentialMotionFling();
+            fling((int) velocity);
+            return true;
+        }
+
+        @Override
+        public void stopDifferentialMotionFling() {
+            mScroller.abortAnimation();
+        }
+
+        @Override
+        public float getScaledScrollFactor() {
+            return -mVerticalScrollFactor;
+        }
+    }
 }

@@ -19,9 +19,9 @@ package com.android.server.pm.parsing.library;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.SystemConfig;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 /**
  * Updates packages to add or remove dependencies on shared libraries as per attributes

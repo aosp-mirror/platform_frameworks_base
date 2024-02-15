@@ -159,24 +159,6 @@ int AlarmImpl::waitForAlarm()
     return result;
 }
 
-static jint android_server_alarm_AlarmManagerService_setKernelTimezone(JNIEnv*, jobject, jlong, jint minswest)
-{
-    struct timezone tz;
-
-    tz.tz_minuteswest = minswest;
-    tz.tz_dsttime = 0;
-
-    int result = settimeofday(NULL, &tz);
-    if (result < 0) {
-        ALOGE("Unable to set kernel timezone to %d: %s\n", minswest, strerror(errno));
-        return -1;
-    } else {
-        ALOGD("Kernel timezone updated to %d minutes west of GMT\n", minswest);
-    }
-
-    return 0;
-}
-
 static void log_timerfd_create_error(clockid_t id)
 {
     if (errno == EINVAL) {
@@ -319,7 +301,6 @@ static const JNINativeMethod sMethods[] = {
     {"close", "(J)V", (void*)android_server_alarm_AlarmManagerService_close},
     {"set", "(JIJJ)I", (void*)android_server_alarm_AlarmManagerService_set},
     {"waitForAlarm", "(J)I", (void*)android_server_alarm_AlarmManagerService_waitForAlarm},
-    {"setKernelTimezone", "(JI)I", (void*)android_server_alarm_AlarmManagerService_setKernelTimezone},
     {"getNextAlarm", "(JI)J", (void*)android_server_alarm_AlarmManagerService_getNextAlarm},
 };
 

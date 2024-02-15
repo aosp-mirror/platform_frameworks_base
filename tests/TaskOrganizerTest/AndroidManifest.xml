@@ -16,9 +16,11 @@
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION"/>
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_TASKS"/>
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
+    <!-- Allow the test to connect to perfetto trace processor -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Enable / Disable tracing !-->
     <uses-permission android:name="android.permission.DUMP" />
-    <application>
+    <application android:networkSecurityConfig="@xml/network_security_config">
       <activity android:name="TaskOrganizerMultiWindowTest"
            android:label="TaskOrganizer MW Test"
            android:exported="true"

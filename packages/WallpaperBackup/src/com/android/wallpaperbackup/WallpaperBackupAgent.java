@@ -18,11 +18,13 @@ package com.android.wallpaperbackup;
 
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
+import static android.app.WallpaperManager.ORIENTATION_UNKNOWN;
 
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_INELIGIBLE;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_METADATA;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_WALLPAPER;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_QUOTA_EXCEEDED;
+import static com.android.window.flags.Flags.multiCrop;
 
 import android.app.AppGlobals;
 import android.app.WallpaperManager;
@@ -43,7 +45,9 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -55,6 +59,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Backs up and restores wallpaper and metadata related to it.
@@ -359,11 +364,7 @@ public class WallpaperBackupAgent extends BackupAgent {
         final File infoStage = new File(filesDir, WALLPAPER_INFO_STAGE);
         final File imageStage = new File(filesDir, SYSTEM_WALLPAPER_STAGE);
         final File lockImageStage = new File(filesDir, LOCK_WALLPAPER_STAGE);
-
-        // If we restored separate lock imagery, the system wallpaper should be
-        // applied as system-only; but if there's no separate lock image, make
-        // sure to apply the restored system wallpaper as both.
-        final int sysWhich = FLAG_SYSTEM | (lockImageStage.exists() ? 0 : FLAG_LOCK);
+        boolean lockImageStageExists = lockImageStage.exists();
 
         try {
             // First parse the live component name so that we know for logging if we care about
@@ -371,14 +372,26 @@ public class WallpaperBackupAgent extends BackupAgent {
             ComponentName wpService = parseWallpaperComponent(infoStage, "wp");
             mSystemHasLiveComponent = wpService != null;
 
+            ComponentName kwpService = parseWallpaperComponent(infoStage, "kwp");
+            mLockHasLiveComponent = kwpService != null;
+            boolean separateLockWallpaper = mLockHasLiveComponent || lockImageStage.exists();
+
+            // if there's no separate lock wallpaper, apply the system wallpaper to both screens.
+            final int sysWhich = separateLockWallpaper ? FLAG_SYSTEM : FLAG_SYSTEM | FLAG_LOCK;
+
             // It is valid for the imagery to be absent; it means that we were not permitted
             // to back up the original image on the source device, or there was no user-supplied
             // wallpaper image present.
+            if (lockImageStageExists) {
+                restoreFromStage(lockImageStage, infoStage, "kwp", FLAG_LOCK);
+            }
             restoreFromStage(imageStage, infoStage, "wp", sysWhich);
-            restoreFromStage(lockImageStage, infoStage, "kwp", FLAG_LOCK);
 
             // And reset to the wallpaper service we should be using
-            updateWallpaperComponent(wpService, !lockImageStage.exists());
+            if (mLockHasLiveComponent) {
+                updateWallpaperComponent(kwpService, FLAG_LOCK);
+            }
+            updateWallpaperComponent(wpService, sysWhich);
         } catch (Exception e) {
             Slog.e(TAG, "Unable to restore wallpaper: " + e.getMessage());
             mEventLogger.onRestoreException(e);
@@ -397,24 +410,24 @@ public class WallpaperBackupAgent extends BackupAgent {
     }
 
     @VisibleForTesting
-    void updateWallpaperComponent(ComponentName wpService, boolean applyToLock) throws IOException {
+    void updateWallpaperComponent(ComponentName wpService, int which)
+            throws IOException {
         if (servicePackageExists(wpService)) {
             Slog.i(TAG, "Using wallpaper service " + wpService);
-            mWallpaperManager.setWallpaperComponent(wpService);
-            if (applyToLock) {
-                // We have a live wallpaper and no static lock image,
-                // allow live wallpaper to show "through" on lock screen.
-                mWallpaperManager.clear(FLAG_LOCK);
+            mWallpaperManager.setWallpaperComponentWithFlags(wpService, which);
+            if ((which & FLAG_LOCK) != 0) {
                 mEventLogger.onLockLiveWallpaperRestored(wpService);
             }
-            mEventLogger.onSystemLiveWallpaperRestored(wpService);
+            if ((which & FLAG_SYSTEM) != 0) {
+                mEventLogger.onSystemLiveWallpaperRestored(wpService);
+            }
         } else {
             // If we've restored a live wallpaper, but the component doesn't exist,
             // we should log it as an error so we can easily identify the problem
             // in reports from users
             if (wpService != null) {
                 // TODO(b/268471749): Handle delayed case
-                applyComponentAtInstall(wpService, applyToLock);
+                applyComponentAtInstall(wpService, which);
                 Slog.w(TAG, "Wallpaper service " + wpService + " isn't available. "
                         + " Will try to apply later");
             }
@@ -424,6 +437,27 @@ public class WallpaperBackupAgent extends BackupAgent {
     private void restoreFromStage(File stage, File info, String hintTag, int which)
             throws IOException {
         if (stage.exists()) {
+            if (multiCrop()) {
+                SparseArray<Rect> cropHints = parseCropHints(info, hintTag);
+                if (cropHints != null) {
+                    Slog.i(TAG, "Got restored wallpaper; applying which=" + which
+                            + "; cropHints = " + cropHints);
+                    try (FileInputStream in = new FileInputStream(stage)) {
+                        mWallpaperManager.setStreamWithCrops(in, cropHints, true, which);
+                    }
+                    // And log the success
+                    if ((which & FLAG_SYSTEM) > 0) {
+                        mEventLogger.onSystemImageWallpaperRestored();
+                    }
+                    if ((which & FLAG_LOCK) > 0) {
+                        mEventLogger.onLockImageWallpaperRestored();
+                    }
+                } else {
+                    logRestoreError(which, ERROR_NO_METADATA);
+                }
+                return;
+            }
+
             // Parse the restored info file to find the crop hint.  Note that this currently
             // relies on a priori knowledge of the wallpaper info file schema.
             Rect cropHint = parseCropHint(info, hintTag);
@@ -437,7 +471,8 @@ public class WallpaperBackupAgent extends BackupAgent {
                     // And log the success
                     if ((which & FLAG_SYSTEM) > 0) {
                         mEventLogger.onSystemImageWallpaperRestored();
-                    } else {
+                    }
+                    if ((which & FLAG_LOCK) > 0) {
                         mEventLogger.onLockImageWallpaperRestored();
                     }
                 }
@@ -460,7 +495,8 @@ public class WallpaperBackupAgent extends BackupAgent {
     private void logRestoreError(int which, String error) {
         if ((which & FLAG_SYSTEM) == FLAG_SYSTEM) {
             mEventLogger.onSystemImageWallpaperRestoreFailed(error);
-        } else if ((which & FLAG_LOCK) == FLAG_LOCK) {
+        }
+        if ((which & FLAG_LOCK) == FLAG_LOCK) {
             mEventLogger.onLockImageWallpaperRestoreFailed(error);
         }
     }
@@ -489,6 +525,47 @@ public class WallpaperBackupAgent extends BackupAgent {
         }
 
         return cropHint;
+    }
+
+    private SparseArray<Rect> parseCropHints(File wallpaperInfo, String sectionTag) {
+        SparseArray<Rect> cropHints = new SparseArray<>();
+        try (FileInputStream stream = new FileInputStream(wallpaperInfo)) {
+            XmlPullParser parser = Xml.resolvePullParser(stream);
+            int type;
+            do {
+                type = parser.next();
+                if (type != XmlPullParser.START_TAG) continue;
+                String tag = parser.getName();
+                if (!sectionTag.equals(tag)) continue;
+                for (Pair<Integer, String> pair: List.of(
+                        new Pair<>(WallpaperManager.PORTRAIT, "Portrait"),
+                        new Pair<>(WallpaperManager.LANDSCAPE, "Landscape"),
+                        new Pair<>(WallpaperManager.SQUARE_PORTRAIT, "SquarePortrait"),
+                        new Pair<>(WallpaperManager.SQUARE_LANDSCAPE, "SquareLandscape"))) {
+                    Rect cropHint = new Rect(
+                            getAttributeInt(parser, "cropLeft" + pair.second, 0),
+                            getAttributeInt(parser, "cropTop" + pair.second, 0),
+                            getAttributeInt(parser, "cropRight" + pair.second, 0),
+                            getAttributeInt(parser, "cropBottom" + pair.second, 0));
+                    if (!cropHint.isEmpty()) cropHints.put(pair.first, cropHint);
+                }
+                if (cropHints.size() == 0) {
+                    // migration case: the crops per screen orientation are not specified.
+                    // use the old attributes to restore the crop for one screen orientation.
+                    Rect cropHint = new Rect(
+                            getAttributeInt(parser, "cropLeft", 0),
+                            getAttributeInt(parser, "cropTop", 0),
+                            getAttributeInt(parser, "cropRight", 0),
+                            getAttributeInt(parser, "cropBottom", 0));
+                    if (!cropHint.isEmpty()) cropHints.put(ORIENTATION_UNKNOWN, cropHint);
+                }
+            } while (type != XmlPullParser.END_DOCUMENT);
+        } catch (Exception e) {
+            // Whoops; can't process the info file at all.  Report failure.
+            Slog.w(TAG, "Failed to parse restored crops: " + e.getMessage());
+            return null;
+        }
+        return cropHints;
     }
 
     private ComponentName parseWallpaperComponent(File wallpaperInfo, String sectionTag) {
@@ -552,13 +629,14 @@ public class WallpaperBackupAgent extends BackupAgent {
         // Intentionally blank
     }
 
-    private void applyComponentAtInstall(ComponentName componentName, boolean applyToLock) {
-        PackageMonitor packageMonitor = getWallpaperPackageMonitor(componentName, applyToLock);
+    private void applyComponentAtInstall(ComponentName componentName, int which) {
+        PackageMonitor packageMonitor = getWallpaperPackageMonitor(
+                componentName, which);
         packageMonitor.register(getBaseContext(), null, UserHandle.ALL, true);
     }
 
     @VisibleForTesting
-    PackageMonitor getWallpaperPackageMonitor(ComponentName componentName, boolean applyToLock) {
+    PackageMonitor getWallpaperPackageMonitor(ComponentName componentName, int which) {
         return new PackageMonitor() {
             @Override
             public void onPackageAdded(String packageName, int uid) {
@@ -569,9 +647,11 @@ public class WallpaperBackupAgent extends BackupAgent {
                     // We have finished restore and not succeeded, so let's log that as an error.
                     WallpaperEventLogger logger = new WallpaperEventLogger(
                             mBackupManager.getDelayedRestoreLogger());
-                    logger.onSystemLiveWallpaperRestoreFailed(
-                            WallpaperEventLogger.ERROR_LIVE_PACKAGE_NOT_INSTALLED);
-                    if (applyToLock) {
+                    if ((which & FLAG_SYSTEM) != 0) {
+                        logger.onSystemLiveWallpaperRestoreFailed(
+                                WallpaperEventLogger.ERROR_LIVE_PACKAGE_NOT_INSTALLED);
+                    }
+                    if ((which & FLAG_LOCK) != 0) {
                         logger.onLockLiveWallpaperRestoreFailed(
                                 WallpaperEventLogger.ERROR_LIVE_PACKAGE_NOT_INSTALLED);
                     }
@@ -582,22 +662,25 @@ public class WallpaperBackupAgent extends BackupAgent {
 
                 if (componentName.getPackageName().equals(packageName)) {
                     Slog.d(TAG, "Applying component " + componentName);
-                    boolean sysResult = mWallpaperManager.setWallpaperComponent(componentName);
+                    boolean success = mWallpaperManager.setWallpaperComponentWithFlags(
+                            componentName, which);
                     WallpaperEventLogger logger = new WallpaperEventLogger(
                             mBackupManager.getDelayedRestoreLogger());
-                    if (sysResult) {
-                        logger.onSystemLiveWallpaperRestored(componentName);
-                    } else {
-                        logger.onSystemLiveWallpaperRestoreFailed(
-                                WallpaperEventLogger.ERROR_SET_COMPONENT_EXCEPTION);
-                    }
-                    if (applyToLock) {
-                        try {
-                            mWallpaperManager.clear(FLAG_LOCK);
+                    if (success) {
+                        if ((which & FLAG_SYSTEM) != 0) {
+                            logger.onSystemLiveWallpaperRestored(componentName);
+                        }
+                        if ((which & FLAG_LOCK) != 0) {
                             logger.onLockLiveWallpaperRestored(componentName);
-                        } catch (IOException e) {
-                            Slog.w(TAG, "Failed to apply live wallpaper to lock screen: " + e);
-                            logger.onLockLiveWallpaperRestoreFailed(e.getClass().getName());
+                        }
+                    } else {
+                        if ((which & FLAG_SYSTEM) != 0) {
+                            logger.onSystemLiveWallpaperRestoreFailed(
+                                    WallpaperEventLogger.ERROR_SET_COMPONENT_EXCEPTION);
+                        }
+                        if ((which & FLAG_LOCK) != 0) {
+                            logger.onLockLiveWallpaperRestoreFailed(
+                                    WallpaperEventLogger.ERROR_SET_COMPONENT_EXCEPTION);
                         }
                     }
                     // We're only expecting to restore the wallpaper component once.

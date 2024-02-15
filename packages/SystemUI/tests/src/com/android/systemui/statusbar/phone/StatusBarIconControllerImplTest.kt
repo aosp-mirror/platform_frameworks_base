@@ -23,6 +23,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.phone.StatusBarIconController.TAG_PRIMARY
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl.EXTERNAL_SLOT_SUFFIX
+import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistry
+import com.android.systemui.statusbar.pipeline.icons.shared.model.BindableIcon
+import com.android.systemui.statusbar.pipeline.icons.shared.model.ModernStatusBarViewCreator
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -49,14 +52,15 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
         iconList = StatusBarIconList(arrayOf())
         underTest =
             StatusBarIconControllerImpl(
-                context,
-                commandQueue,
-                mock(),
-                mock(),
-                mock(),
-                mock(),
-                iconList,
-                mock(),
+                /* context = */ context,
+                /* commandQueue = */ commandQueue,
+                /* demoModeController = */ mock(),
+                /* configurationController = */ mock(),
+                /* tunerService = */ mock(),
+                /* dumpManager = */ mock(),
+                /* statusBarIconList = */ iconList,
+                /* statusBarPipelineFlags = */ mock(),
+                /* modernIconsRegistry = */ mock(),
             )
         underTest.addIconGroup(iconGroup)
         val commandQueueCallbacksCaptor = kotlinArgumentCaptor<CommandQueue.Callbacks>()
@@ -220,30 +224,6 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
 
     /** Regression test for b/255428281. */
     @Test
-    fun internalAndExternalIconWithSameName_internalRemoved_viaRemoveAll_externalStays() {
-        val slotName = "mute"
-
-        // Internal
-        underTest.setIcon(slotName, /* resourceId= */ 10, "contentDescription")
-
-        // External
-        underTest.setIconFromTile(slotName, createExternalIcon())
-
-        // WHEN the internal icon is removed via #removeAllIconsForSlot
-        underTest.removeAllIconsForSlot(slotName)
-
-        // THEN the internal icon is removed but the external icon remains
-        assertThat(iconList.slots).hasSize(2)
-        assertThat(iconList.slots[0].name).isEqualTo(slotName + EXTERNAL_SLOT_SUFFIX)
-        assertThat(iconList.slots[1].name).isEqualTo(slotName)
-        assertThat(iconList.slots[0].hasIconsInSlot()).isTrue()
-        assertThat(iconList.slots[1].hasIconsInSlot()).isFalse() // Indicates removal
-
-        verify(iconGroup).onRemoveIcon(1)
-    }
-
-    /** Regression test for b/255428281. */
-    @Test
     fun internalAndExternalIconWithSameName_internalUpdatedIndependently() {
         val slotName = "mute"
 
@@ -390,6 +370,31 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
         assertThat(iconList.slots[0].name).isEqualTo("myslot$EXTERNAL_SLOT_SUFFIX")
     }
 
+    @Test
+    fun bindableIcons_addedOnInit() {
+        val fakeIcon = FakeBindableIcon("test_slot")
+
+        iconList = StatusBarIconList(arrayOf())
+
+        // WHEN there are registered icons
+        underTest =
+            StatusBarIconControllerImpl(
+                /* context = */ context,
+                /* commandQueue = */ commandQueue,
+                /* demoModeController = */ mock(),
+                /* configurationController = */ mock(),
+                /* tunerService = */ mock(),
+                /* dumpManager = */ mock(),
+                /* statusBarIconList = */ iconList,
+                /* statusBarPipelineFlags = */ mock(),
+                /* modernIconsRegistry = */ FakeBindableIconsRegistry(listOf(fakeIcon)),
+            )
+
+        // THEN they are properly added to the list on init
+        assertThat(iconList.getIconHolder("test_slot", 0))
+            .isInstanceOf(StatusBarIconHolder.BindableIconHolder::class.java)
+    }
+
     private fun createExternalIcon(): StatusBarIcon {
         return StatusBarIcon(
             "external.package",
@@ -399,5 +404,22 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
             /* number= */ 0,
             "contentDescription",
         )
+    }
+}
+
+class FakeBindableIconsRegistry(
+    override val bindableIcons: List<BindableIcon>,
+) : BindableIconsRegistry
+
+class FakeBindableIcon(
+    override val slot: String,
+    override val shouldBindIcon: Boolean = true,
+) : BindableIcon {
+    // Track initialized so we can know that our icon was properly bound
+    var hasInitialized = false
+
+    override val initializer = ModernStatusBarViewCreator { _ ->
+        hasInitialized = true
+        mock()
     }
 }

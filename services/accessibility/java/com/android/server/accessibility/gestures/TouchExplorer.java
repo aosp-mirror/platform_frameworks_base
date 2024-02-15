@@ -58,6 +58,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.BaseEventStreamTransformation;
 import com.android.server.accessibility.EventStreamTransformation;
+import com.android.server.accessibility.Flags;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
@@ -352,16 +353,34 @@ public class TouchExplorer extends BaseEventStreamTransformation
         }
         // The event for gesture end should be strictly after the
         // last hover exit event.
-        if (mSendTouchExplorationEndDelayed.isPending()) {
-            mSendTouchExplorationEndDelayed.cancel();
-            mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
-        }
+        if (Flags.sendA11yEventsBasedOnState()) {
+            if (mSendTouchExplorationEndDelayed.isPending()) {
+                mSendTouchExplorationEndDelayed.cancel();
+            }
+            if (mState.isTouchExploring()) {
+                mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
+            }
 
-        // The event for touch interaction end should be strictly after the
-        // last hover exit and the touch exploration gesture end events.
-        if (mSendTouchInteractionEndDelayed.isPending()) {
-            mSendTouchInteractionEndDelayed.cancel();
-            mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_INTERACTION_END);
+            // The event for touch interaction end should be strictly after the
+            // last hover exit and the touch exploration gesture end events.
+            if (mSendTouchInteractionEndDelayed.isPending()) {
+                mSendTouchInteractionEndDelayed.cancel();
+            }
+            if (mState.isTouchInteracting()) {
+                mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_INTERACTION_END);
+            }
+        } else {
+            if (mSendTouchExplorationEndDelayed.isPending()) {
+                mSendTouchExplorationEndDelayed.cancel();
+                mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
+            }
+
+            // The event for touch interaction end should be strictly after the
+            // last hover exit and the touch exploration gesture end events.
+            if (mSendTouchInteractionEndDelayed.isPending()) {
+                mSendTouchInteractionEndDelayed.cancel();
+                mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_INTERACTION_END);
+            }
         }
     }
 
@@ -637,7 +656,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
             MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         switch (event.getActionMasked()) {
             case ACTION_DOWN:
-                // We should have already received ACTION_DOWN. Ignore.
+                handleActionDownStateTouchExploring(event, rawEvent, policyFlags);
                 break;
             case ACTION_POINTER_DOWN:
                 handleActionPointerDown(event, rawEvent, policyFlags);
@@ -841,6 +860,15 @@ public class TouchExplorer extends BaseEventStreamTransformation
         if (!mSendTouchInteractionEndDelayed.isPending()) {
             mSendTouchInteractionEndDelayed.post();
         }
+    }
+
+    private void handleActionDownStateTouchExploring(
+            MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        // This is an interrupted and continued touch exploration. Maintain the consistency of the
+        // event stream.
+        mSendTouchExplorationEndDelayed.cancel();
+        mSendTouchInteractionEndDelayed.cancel();
+        sendTouchExplorationGestureStartAndHoverEnterIfNeeded(policyFlags);
     }
 
     /**
@@ -1100,12 +1128,15 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     /**
-     * Sends the enter events if needed. Such events are hover enter and touch explore
-     * gesture start.
+     * Sends the enter events if needed. Such events are hover enter and touch explore gesture
+     * start.
      *
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendTouchExplorationGestureStartAndHoverEnterIfNeeded(int policyFlags) {
+        if (!mState.isTouchExploring()) {
+            mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_START);
+        }
         MotionEvent event = mState.getLastInjectedHoverEvent();
         if (event != null && event.getActionMasked() == ACTION_HOVER_EXIT) {
             final int pointerIdBits = event.getPointerIdBits();
@@ -1117,7 +1148,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     policyFlags);
         }
     }
-
 
     /**
      * Determines whether a two pointer gesture is a dragging one.
@@ -1344,6 +1374,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 Slog.e(LOG_TAG, "Unable to find a valid pointer for touch exploration.");
                 return;
             }
+            // Send hover exit if we haven't closed a previous touch exploration event stream.
+            sendHoverExitAndTouchExplorationGestureEndIfNeeded(pointerId);
             final int pointerIdBits = (1 << pointerId);
             final int policyFlags = mState.getLastReceivedPolicyFlags();
             mSendHoverEnterAndMoveDelayed.setPointerIdBits(pointerIdBits);
@@ -1434,8 +1466,11 @@ public class TouchExplorer extends BaseEventStreamTransformation
             int policyFlags = mState.getLastReceivedPolicyFlags();
             if (mState.isDragging()) {
                 // Send an event to the end of the drag gesture.
-                mDispatcher.sendMotionEvent(
-                        event, ACTION_UP, rawEvent, ALL_POINTER_ID_BITS, policyFlags);
+                int pointerIdBits = ALL_POINTER_ID_BITS;
+                if (Flags.fixDragPointerWhenEndingDrag()) {
+                    pointerIdBits = 1 << mDraggingPointerId;
+                }
+                mDispatcher.sendMotionEvent(event, ACTION_UP, rawEvent, pointerIdBits, policyFlags);
             }
             mState.startDelegating();
             // Deliver all pointers to the view hierarchy.

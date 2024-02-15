@@ -33,6 +33,11 @@ import javax.inject.Inject;
 /**
  * A helper service that runs in SysUI process and helps {@link AppClipsActivity} which runs in its
  * own separate process take a screenshot.
+ *
+ * <p>Note: This service always runs in the SysUI process running on the system user irrespective of
+ * which user started the service. This is required so that the correct instance of {@link Bubbles}
+ * instance is injected. This is set via attribute {@code android:singleUser=”true”} in
+ * AndroidManifest.
  */
 public class AppClipsScreenshotHelperService extends Service {
 

@@ -18,6 +18,7 @@ package com.android.settingslib.spa.widget.scaffold
 
 import androidx.activity.compose.BackHandler
 import androidx.appcompat.R
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -36,8 +37,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,7 +70,7 @@ import com.android.settingslib.spa.widget.preference.PreferenceModel
 fun SearchScaffold(
     title: String,
     actions: @Composable RowScope.() -> Unit = {},
-    content: @Composable (bottomPadding: Dp, searchQuery: State<String>) -> Unit,
+    content: @Composable (bottomPadding: Dp, searchQuery: () -> String) -> Unit,
 ) {
     ActivityTitle(title)
     var isSearchMode by rememberSaveable { mutableStateOf(false) }
@@ -96,14 +95,12 @@ fun SearchScaffold(
             Modifier
                 .padding(paddingValues.horizontalValues())
                 .padding(top = paddingValues.calculateTopPadding())
-                .fillMaxSize(),
+                .focusable()
+                .fillMaxSize()
         ) {
-            content(
-                bottomPadding = paddingValues.calculateBottomPadding(),
-                searchQuery = remember {
-                    derivedStateOf { if (isSearchMode) viewModel.searchQuery.text else "" }
-                },
-            )
+            content(paddingValues.calculateBottomPadding()) {
+                if (isSearchMode) viewModel.searchQuery.text else ""
+            }
         }
     }
 }
@@ -163,7 +160,6 @@ private fun SearchTopAppBar(
     BackHandler { onClose() }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchBox(query: TextFieldValue, onQueryChange: (TextFieldValue) -> Unit) {
     val focusRequester = remember { FocusRequester() }
@@ -186,8 +182,9 @@ private fun SearchBox(query: TextFieldValue, onQueryChange: (TextFieldValue) -> 
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { hideKeyboardAction() }),
         singleLine = true,
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.Transparent,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
         ),

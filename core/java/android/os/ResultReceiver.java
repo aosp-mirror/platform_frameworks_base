@@ -31,6 +31,7 @@ import com.android.internal.os.IResultReceiver;
  * the system that your process needs to continue running), the connection will
  * break if your process goes away for any reason, etc.</p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ResultReceiver implements Parcelable {
     final boolean mLocal;
     final Handler mHandler;

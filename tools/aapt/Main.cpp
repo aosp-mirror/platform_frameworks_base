@@ -187,7 +187,7 @@ void usage(void)
         "       be loaded alongside the base APK at runtime.\n"
         "   --feature-of\n"
         "       Builds a split APK that is a feature of the apk specified here. Resources\n"
-        "       in the base APK can be referenced from the the feature APK.\n"
+        "       in the base APK can be referenced from the feature APK.\n"
         "   --feature-after\n"
         "       An app can have multiple Feature Split APKs which must be totally ordered.\n"
         "       If --feature-of is specified, this flag specifies which Feature Split APK\n"

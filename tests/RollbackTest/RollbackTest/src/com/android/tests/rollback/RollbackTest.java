@@ -30,6 +30,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.UserManager;
@@ -146,7 +147,8 @@ public class RollbackTest {
             assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
 
             // Upgrade from v1 to v2, with rollbacks enabled.
-            Install.single(TestApp.A2).setEnableRollback().commit();
+            Install.single(TestApp.A2).setEnableRollback().setRollbackImpactLevel(
+                    PackageManager.ROLLBACK_USER_IMPACT_HIGH).commit();
             assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
 
             // The app should now be available for rollback.
@@ -154,6 +156,8 @@ public class RollbackTest {
             assertThat(available).isNotStaged();
             assertThat(available).packagesContainsExactly(
                     Rollback.from(TestApp.A2).to(TestApp.A1));
+            assertThat(available.getRollbackImpactLevel()).isEqualTo(
+                    PackageManager.ROLLBACK_USER_IMPACT_HIGH);
 
             // We should not have received any rollback requests yet.
             // TODO: Possibly flaky if, by chance, some other app on device
@@ -264,6 +268,8 @@ public class RollbackTest {
             RollbackInfo rollbackB = waitForAvailableRollback(TestApp.B);
             assertThat(rollbackB).packagesContainsExactly(
                     Rollback.from(TestApp.B2).to(TestApp.B1));
+            assertThat(rollbackB.getRollbackImpactLevel()).isEqualTo(
+                    PackageManager.ROLLBACK_USER_IMPACT_LOW);
 
             // Register rollback committed receiver
             RollbackBroadcastReceiver rollbackReceiver = new RollbackBroadcastReceiver();

@@ -630,7 +630,6 @@ void FilterClientCallbackImpl::getMediaEvent(const jobjectArray& arr, const int 
 
     const DemuxFilterMediaEvent &mediaEvent = event.get<DemuxFilterEvent::Tag::media>();
     ScopedLocalRef<jobject> audioDescriptor(env);
-    gAudioPresentationFields.init(env);
     ScopedLocalRef presentationsJObj(env, JAudioPresentationInfo::asJobject(
         env, gAudioPresentationFields));
     switch (mediaEvent.extraMetaData.getTag()) {
@@ -694,6 +693,8 @@ void FilterClientCallbackImpl::getMediaEvent(const jobjectArray& arr, const int 
                                            mpuSequenceNumber, isPesPrivateData, sc,
                                            audioDescriptor.get(), presentationsJObj.get()));
 
+    // Protect mFilterClient from being set to null.
+    android::Mutex::Autolock autoLock(mLock);
     uint64_t avSharedMemSize = mFilterClient->getAvSharedHandleInfo().size;
     if (mediaEvent.avMemory.fds.size() > 0 || mediaEvent.avDataId != 0 ||
         (dataLength > 0 && (dataLength + offset) < avSharedMemSize)) {
@@ -940,38 +941,52 @@ void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &eve
             }
         }
     }
-    ScopedLocalRef filter(env, env->NewLocalRef(mFilterObj));
-    if (!env->IsSameObject(filter.get(), nullptr)) {
-        jmethodID methodID = gFields.onFilterEventID;
-        if (mSharedFilter) {
-            methodID = gFields.onSharedFilterEventID;
+
+    ScopedLocalRef<jobject> filter(env);
+    {
+        android::Mutex::Autolock autoLock(mLock);
+        if (env->IsSameObject(mFilterObj, nullptr)) {
+            ALOGE("FilterClientCallbackImpl::onFilterEvent:"
+                  "Filter object has been freed. Ignoring callback.");
+            return;
+        } else {
+            filter.reset(env->NewLocalRef(mFilterObj));
         }
-        env->CallVoidMethod(filter.get(), methodID, array.get());
-    } else {
-        ALOGE("FilterClientCallbackImpl::onFilterEvent:"
-              "Filter object has been freed. Ignoring callback.");
     }
+
+    jmethodID methodID = gFields.onFilterEventID;
+    if (mSharedFilter) {
+        methodID = gFields.onSharedFilterEventID;
+    }
+    env->CallVoidMethod(filter.get(), methodID, array.get());
 }
 
 void FilterClientCallbackImpl::onFilterStatus(const DemuxFilterStatus status) {
     ALOGV("FilterClientCallbackImpl::onFilterStatus");
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    ScopedLocalRef filter(env, env->NewLocalRef(mFilterObj));
-    if (!env->IsSameObject(filter.get(), nullptr)) {
-        jmethodID methodID = gFields.onFilterStatusID;
-        if (mSharedFilter) {
-            methodID = gFields.onSharedFilterStatusID;
+    ScopedLocalRef<jobject> filter(env);
+    {
+        android::Mutex::Autolock autoLock(mLock);
+        if (env->IsSameObject(mFilterObj, nullptr)) {
+            ALOGE("FilterClientCallbackImpl::onFilterStatus:"
+                  "Filter object has been freed. Ignoring callback.");
+            return;
+        } else {
+            filter.reset(env->NewLocalRef(mFilterObj));
         }
-        env->CallVoidMethod(filter.get(), methodID, (jint)static_cast<uint8_t>(status));
-    } else {
-        ALOGE("FilterClientCallbackImpl::onFilterStatus:"
-              "Filter object has been freed. Ignoring callback.");
     }
+
+    jmethodID methodID = gFields.onFilterStatusID;
+    if (mSharedFilter) {
+        methodID = gFields.onSharedFilterStatusID;
+    }
+    env->CallVoidMethod(filter.get(), methodID, (jint)static_cast<uint8_t>(status));
 }
 
 void FilterClientCallbackImpl::setFilter(jweak filterObj, sp<FilterClient> filterClient) {
     ALOGV("FilterClientCallbackImpl::setFilter");
     // Java Object
+    android::Mutex::Autolock autoLock(mLock);
     mFilterObj = filterObj;
     mFilterClient = filterClient;
     mSharedFilter = false;
@@ -980,6 +995,7 @@ void FilterClientCallbackImpl::setFilter(jweak filterObj, sp<FilterClient> filte
 void FilterClientCallbackImpl::setSharedFilter(jweak filterObj, sp<FilterClient> filterClient) {
     ALOGV("FilterClientCallbackImpl::setFilter");
     // Java Object
+    android::Mutex::Autolock autoLock(mLock);
     mFilterObj = filterObj;
     mFilterClient = filterClient;
     mSharedFilter = true;
@@ -1048,11 +1064,14 @@ FilterClientCallbackImpl::FilterClientCallbackImpl() {
 
 FilterClientCallbackImpl::~FilterClientCallbackImpl() {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (mFilterObj != nullptr) {
-        env->DeleteWeakGlobalRef(mFilterObj);
-        mFilterObj = nullptr;
+    {
+        android::Mutex::Autolock autoLock(mLock);
+        if (mFilterObj != nullptr) {
+            env->DeleteWeakGlobalRef(mFilterObj);
+            mFilterObj = nullptr;
+        }
+        mFilterClient = nullptr;
     }
-    mFilterClient = nullptr;
     env->DeleteGlobalRef(mEventClass);
     env->DeleteGlobalRef(mSectionEventClass);
     env->DeleteGlobalRef(mMediaEventClass);
@@ -1466,6 +1485,10 @@ int JTuner::shareFrontend(int feId) {
         ALOGE("Cannot share frontend:%d because this session is already holding %d",
               feId, mFeClient->getId());
         return (int)Result::INVALID_STATE;
+    }
+
+    if (mDemuxClient != NULL) {
+        mDemuxClient->setFrontendDataSourceById(feId);
     }
 
     mSharedFeId = feId;
@@ -3693,7 +3716,7 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
                     "([Landroid/media/tv/tuner/filter/FilterEvent;)V");
 
     jclass sharedFilterClazz = env->FindClass("android/media/tv/tuner/filter/SharedFilter");
-    gFields.sharedFilterContext = env->GetFieldID(filterClazz, "mNativeContext", "J");
+    gFields.sharedFilterContext = env->GetFieldID(sharedFilterClazz, "mNativeContext", "J");
     gFields.sharedFilterInitID = env->GetMethodID(sharedFilterClazz, "<init>", "()V");
     gFields.onSharedFilterStatusID = env->GetMethodID(sharedFilterClazz, "onFilterStatus", "(I)V");
     gFields.onSharedFilterEventID =
@@ -3727,6 +3750,7 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
     gFields.linearBlockInitID = env->GetMethodID(linearBlockClazz, "<init>", "()V");
     gFields.linearBlockSetInternalStateID =
             env->GetMethodID(linearBlockClazz, "setInternalStateLocked", "(JZ)V");
+    gAudioPresentationFields.init(env);
 }
 
 static void android_media_tv_Tuner_native_setup(JNIEnv *env, jobject thiz) {

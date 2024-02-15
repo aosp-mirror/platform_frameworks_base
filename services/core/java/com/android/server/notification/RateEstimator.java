@@ -22,9 +22,10 @@ package com.android.server.notification;
  *
  * {@hide}
  */
-public class RateEstimator {
-    private static final double RATE_ALPHA = 0.8;
+class RateEstimator {
+    private static final double RATE_ALPHA = 0.7;
     private static final double MINIMUM_DT = 0.0005;
+
     private Long mLastEventTime;
     private double mInterarrivalTime;
 
@@ -34,18 +35,12 @@ public class RateEstimator {
     }
 
     /** Update the estimate to account for an event that just happened. */
-    public float update(long now) {
-        float rate;
-        if (mLastEventTime == null) {
-            // No last event time, rate is zero.
-            rate = 0f;
-        } else {
+    public void update(long now) {
+        if (mLastEventTime != null) {
             // Calculate the new inter-arrival time based on last event time.
             mInterarrivalTime = getInterarrivalEstimate(now);
-            rate = (float) (1.0 / mInterarrivalTime);
         }
         mLastEventTime = now;
-        return rate;
     }
 
     /** @return the estimated rate if there were a new event right now. */

@@ -33,6 +33,7 @@ import java.io.PrintWriter;
  *
  * {@hide}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class AggregateBatteryConsumer extends BatteryConsumer {
     static final int CONSUMER_TYPE_AGGREGATE = 0;
 
@@ -116,8 +117,9 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
      * Builder for DeviceBatteryConsumer.
      */
     public static final class Builder extends BaseBuilder<AggregateBatteryConsumer.Builder> {
-        public Builder(BatteryConsumer.BatteryConsumerData data, int scope) {
-            super(data, CONSUMER_TYPE_AGGREGATE);
+        public Builder(BatteryConsumer.BatteryConsumerData data, int scope,
+                double minConsumedPowerThreshold) {
+            super(data, CONSUMER_TYPE_AGGREGATE, minConsumedPowerThreshold);
             data.putInt(COLUMN_INDEX_SCOPE, scope);
         }
 

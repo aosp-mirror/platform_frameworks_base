@@ -286,6 +286,9 @@ final class CompatConfig {
             return new CompatChange(changeId);
         });
         c.addPackageOverride(packageName, overrides, allowedState, versionCode);
+        Slog.d(TAG, (overrides.isEnabled() ? "Enabled" : "Disabled")
+                + " change " + changeId + (c.getName() != null ? " [" + c.getName() + "]" : "")
+                + " for " + packageName);
         invalidateCache();
         return alreadyKnown.get();
     }
@@ -372,7 +375,14 @@ final class CompatConfig {
         long changeId = change.getId();
         OverrideAllowedState allowedState =
                 mOverrideValidator.getOverrideAllowedState(changeId, packageName);
-        return change.removePackageOverride(packageName, allowedState, versionCode);
+        boolean overrideExists = change.removePackageOverride(packageName, allowedState,
+                versionCode);
+        if (overrideExists) {
+            Slog.d(TAG, "Reset change " + changeId
+                    + (change.getName() != null ? " [" + change.getName() + "]" : "")
+                    + " for " + packageName + " to default value.");
+        }
+        return overrideExists;
     }
 
     /**

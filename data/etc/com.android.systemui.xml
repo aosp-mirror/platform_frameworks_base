@@ -56,6 +56,7 @@
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.REQUEST_NETWORK_SCORES"/>
         <permission name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE"/>
+        <permission name="android.permission.SATELLITE_COMMUNICATION"/>
         <permission name="android.permission.SET_WALLPAPER_DIM_AMOUNT"/>
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
         <permission name="android.permission.START_ACTIVITY_AS_CALLER"/>

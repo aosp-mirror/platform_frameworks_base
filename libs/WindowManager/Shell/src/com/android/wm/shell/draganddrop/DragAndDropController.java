@@ -16,9 +16,6 @@
 
 package com.android.wm.shell.draganddrop;
 
-import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
-import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
-import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_ENDED;
 import static android.view.DragEvent.ACTION_DRAG_ENTERED;
@@ -38,6 +35,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_DRAG_AND_DROP;
 
+import android.app.ActivityTaskManager;
 import android.content.ClipDescription;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -96,6 +94,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
     private ShellExecutor mMainExecutor;
     private ArrayList<DragAndDropListener> mListeners = new ArrayList<>();
 
+    // Map of displayId -> per-display info
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
 
     /**
@@ -106,25 +105,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         void onDragStarted();
     }
 
-    /**
-     * Creates {@link DragAndDropController}. Returns {@code null} if the feature is disabled.
-     */
-    public static DragAndDropController create(Context context,
-            ShellInit shellInit,
-            ShellController shellController,
-            ShellCommandHandler shellCommandHandler,
-            DisplayController displayController,
-            UiEventLogger uiEventLogger,
-            IconProvider iconProvider,
-            ShellExecutor mainExecutor) {
-        if (!context.getResources().getBoolean(R.bool.config_enableShellDragDrop)) {
-            return null;
-        }
-        return new DragAndDropController(context, shellInit, shellController, shellCommandHandler,
-                displayController, uiEventLogger, iconProvider, mainExecutor);
-    }
-
-    DragAndDropController(Context context,
+    public DragAndDropController(Context context,
             ShellInit shellInit,
             ShellController shellController,
             ShellCommandHandler shellCommandHandler,
@@ -205,8 +186,6 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         final Context context = mDisplayController.getDisplayContext(displayId)
                 .createWindowContext(TYPE_APPLICATION_OVERLAY, null);
         final WindowManager wm = context.getSystemService(WindowManager.class);
-
-        // TODO(b/169894807): Figure out the right layer for this, needs to be below the task bar
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
                 TYPE_APPLICATION_OVERLAY,
@@ -279,15 +258,11 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         }
 
         if (event.getAction() == ACTION_DRAG_STARTED) {
-            final boolean hasValidClipData = event.getClipData().getItemCount() > 0
-                    && (description.hasMimeType(MIMETYPE_APPLICATION_ACTIVITY)
-                            || description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT)
-                            || description.hasMimeType(MIMETYPE_APPLICATION_TASK));
-            pd.isHandlingDrag = hasValidClipData;
+            pd.isHandlingDrag = DragUtils.canHandleDrag(event);
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
                     "Clip description: handlingDrag=%b itemCount=%d mimeTypes=%s",
                     pd.isHandlingDrag, event.getClipData().getItemCount(),
-                    getMimeTypes(description));
+                    DragUtils.getMimeTypesConcatenated(description));
         }
 
         if (!pd.isHandlingDrag) {
@@ -300,10 +275,13 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                     Slog.w(TAG, "Unexpected drag start during an active drag");
                     return false;
                 }
+                // TODO(b/290391688): Also update the session data with task stack changes
                 InstanceId loggerSessionId = mLogger.logStart(event);
                 pd.activeDragCount++;
-                pd.dragLayout.prepare(mDisplayController.getDisplayLayout(displayId),
-                        event.getClipData(), loggerSessionId);
+                pd.dragSession = new DragSession(mContext, ActivityTaskManager.getInstance(),
+                        mDisplayController.getDisplayLayout(displayId), event.getClipData());
+                pd.dragSession.update();
+                pd.dragLayout.prepare(pd.dragSession, loggerSessionId);
                 setDropTargetWindowVisibility(pd, View.VISIBLE);
                 notifyDragStarted();
                 break;
@@ -324,7 +302,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                 break;
             }
             case ACTION_DRAG_ENDED:
-                // TODO(b/169894807): Ensure sure it's not possible to get ENDED without DROP
+                // TODO(b/290391688): Ensure sure it's not possible to get ENDED without DROP
                 // or EXITED
                 if (pd.dragLayout.hasDropped()) {
                     mLogger.logDrop();
@@ -362,23 +340,12 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         pd.setWindowVisibility(visibility);
     }
 
-    private String getMimeTypes(ClipDescription description) {
-        String mimeTypes = "";
-        for (int i = 0; i < description.getMimeTypeCount(); i++) {
-            if (i > 0) {
-                mimeTypes += ", ";
-            }
-            mimeTypes += description.getMimeType(i);
-        }
-        return mimeTypes;
-    }
-
     /**
      * Returns if any displays are currently ready to handle a drag/drop.
      */
     private boolean isReadyToHandleDrag() {
         for (int i = 0; i < mDisplayDropTargets.size(); i++) {
-            if (mDisplayDropTargets.valueAt(i).mHasDrawn) {
+            if (mDisplayDropTargets.valueAt(i).hasDrawn) {
                 return true;
             }
         }
@@ -414,8 +381,13 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
      * Dumps information about this controller.
      */
     public void dump(@NonNull PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(prefix + " listeners=" + mListeners.size());
+        pw.println(innerPrefix + "listeners=" + mListeners.size());
+        pw.println(innerPrefix + "Per display:");
+        for (int i = 0; i < mDisplayDropTargets.size(); i++) {
+            mDisplayDropTargets.valueAt(i).dump(pw, innerPrefix);
+        }
     }
     
     /**
@@ -456,12 +428,14 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         final FrameLayout rootView;
         final DragLayout dragLayout;
         // Tracks whether the window has fully drawn since it was last made visible
-        boolean mHasDrawn;
+        boolean hasDrawn;
 
         boolean isHandlingDrag;
         // A count of the number of active drags in progress to ensure that we only hide the window
         // when all the drag animations have completed
         int activeDragCount;
+        // The active drag session
+        DragSession dragSession;
 
         PerDisplay(int dispId, Context c, WindowManager w, FrameLayout rv, DragLayout dl) {
             displayId = dispId;
@@ -478,17 +452,29 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
             rootView.setVisibility(visibility);
             if (visibility == View.VISIBLE) {
                 rootView.requestApplyInsets();
-                if (!mHasDrawn && rootView.getViewRootImpl() != null) {
+                if (!hasDrawn && rootView.getViewRootImpl() != null) {
                     rootView.getViewRootImpl().registerRtFrameCallback(this);
                 }
             } else {
-                mHasDrawn = false;
+                hasDrawn = false;
             }
         }
 
         @Override
         public void onFrameDraw(long frame) {
-            mHasDrawn = true;
+            hasDrawn = true;
+        }
+
+        /**
+         * Dumps information about this display's shell drop target.
+         */
+        public void dump(@NonNull PrintWriter pw, String prefix) {
+            final String innerPrefix = prefix + "  ";
+            pw.println(innerPrefix + "displayId=" + displayId);
+            pw.println(innerPrefix + "hasDrawn=" + hasDrawn);
+            pw.println(innerPrefix + "isHandlingDrag=" + isHandlingDrag);
+            pw.println(innerPrefix + "activeDragCount=" + activeDragCount);
+            dragLayout.dump(pw, innerPrefix);
         }
     }
 }

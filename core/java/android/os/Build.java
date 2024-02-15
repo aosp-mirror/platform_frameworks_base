@@ -17,6 +17,7 @@
 package android.os;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -27,6 +28,7 @@ import android.app.ActivityThread;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
@@ -46,6 +48,7 @@ import java.util.stream.Collectors;
 /**
  * Information about the current build, extracted from system properties.
  */
+@RavenwoodKeepWholeClass
 public class Build {
     private static final String TAG = "Build";
 
@@ -306,7 +309,7 @@ public class Build {
          * compatibility.
          */
         final String[] abiList;
-        if (VMRuntime.getRuntime().is64Bit()) {
+        if (android.os.Process.is64Bit()) {
             abiList = SUPPORTED_64_BIT_ABIS;
         } else {
             abiList = SUPPORTED_32_BIT_ABIS;
@@ -1223,6 +1226,12 @@ public class Build {
          * Upside Down Cake.
          */
         public static final int UPSIDE_DOWN_CAKE = 34;
+
+        /**
+         * Vanilla Ice Cream.
+         */
+        @FlaggedApi(Flags.FLAG_ANDROID_OS_BUILD_VANILLA_ICE_CREAM)
+        public static final int VANILLA_ICE_CREAM = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -1308,9 +1317,7 @@ public class Build {
         if (IS_ENG) return true;
 
         if (IS_TREBLE_ENABLED) {
-            // If we can run this code, the device should already pass AVB.
-            // So, we don't need to check AVB here.
-            int result = VintfObject.verifyWithoutAvb();
+            int result = VintfObject.verifyBuildAtBoot();
 
             if (result != 0) {
                 Slog.e(TAG, "Vendor interface is incompatible, error="
@@ -1555,7 +1562,7 @@ public class Build {
         String attestProp = getString(
                 TextUtils.formatSimple("ro.product.%s_for_attestation", property));
         return attestProp.equals(UNKNOWN)
-                ? getString(TextUtils.formatSimple("ro.product.vendor.%s", property)) : UNKNOWN;
+                ? getString(TextUtils.formatSimple("ro.product.vendor.%s", property)) : attestProp;
     }
 
     private static String[] getStringList(String property, String separator) {

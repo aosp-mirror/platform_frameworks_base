@@ -19,7 +19,7 @@ package com.android.systemui.complication.dagger;
 import android.content.res.Resources;
 import android.view.ViewGroup;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.complication.ComplicationLayoutParams;
 import com.android.systemui.dagger.SystemUIBinder;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -35,10 +35,9 @@ import javax.inject.Named;
  * Module for all components with corresponding dream layer complications registered in
  * {@link SystemUIBinder}.
  */
-@Module(includes = {
-                DreamClockTimeComplicationModule.class,
-        },
+@Module(
         subcomponents = {
+                DreamClockTimeComplicationComponent.class,
                 DreamHomeControlsComplicationComponent.class,
                 DreamMediaEntryComplicationComponent.class
         })

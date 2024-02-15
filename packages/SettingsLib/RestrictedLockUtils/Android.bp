@@ -15,6 +15,10 @@ filegroup {
 
 android_library {
     name: "SettingsLibRestrictedLockUtils",
+    use_resource_processor: true,
+    defaults: [
+        "SettingsLintDefaults",
+    ],
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
@@ -29,4 +33,7 @@ android_library {
         "//apex_available:platform",
         "com.android.permission",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

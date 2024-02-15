@@ -70,7 +70,7 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Elvetés"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Szeretné a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazáshoz mentett azonosítókulcsot használni?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Szeretné az elmentett jelszavát használni a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazáshoz?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Szeretné használni a következőhöz tartozó bejelentkezési adatait: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Szeretné használni bejelentkezési adatait a következőhöz: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Feloldja a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> bejelentkezési lehetőségeit?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Mentett azonosítókulcs kiválasztása a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazáshoz"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Mentett jelszó kiválasztása a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazáshoz"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Másik eszközről"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Másik eszköz használata"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"A kérelmet törölte a(z) <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"Bejelentkezési beállítások"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"Több"</string>
 </resources>

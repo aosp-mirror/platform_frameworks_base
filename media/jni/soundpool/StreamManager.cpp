@@ -35,10 +35,9 @@ static constexpr int32_t kMaxStreams = 32;
 // In R, we change this to true, as it is the correct way per SoundPool documentation.
 static constexpr bool kStealActiveStream_OldestFirst = true;
 
-// kPlayOnCallingThread = true prior to R.
 // Changing to false means calls to play() are almost instantaneous instead of taking around
 // ~10ms to launch the AudioTrack. It is perhaps 100x faster.
-static constexpr bool kPlayOnCallingThread = true;
+static constexpr bool kPlayOnCallingThread = false;
 
 // Amount of time for a StreamManager thread to wait before closing.
 static constexpr int64_t kWaitTimeBeforeCloseNs = 9 * NANOS_PER_SECOND;
@@ -127,7 +126,8 @@ StreamManager::StreamManager(
     mThreadPool = std::make_unique<ThreadPool>(
             std::min((size_t)streams,  // do not make more threads than streams to play
                     std::min(threads, (size_t)std::thread::hardware_concurrency())),
-            "SoundPool_");
+            "SoundPool_",
+            ANDROID_PRIORITY_AUDIO);
 }
 
 #pragma clang diagnostic pop

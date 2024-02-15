@@ -41,8 +41,10 @@ import android.util.Log;
 import com.android.internal.R;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.IoThread;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.art.ArtManagerLocal;
 import com.android.server.wm.ActivityMetricsLaunchObserver;
 import com.android.server.wm.ActivityMetricsLaunchObserverRegistry;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -59,7 +61,7 @@ public final class ProfcollectForwardingService extends SystemService {
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
     private static final String INTENT_UPLOAD_PROFILES =
             "com.android.server.profcollect.UPLOAD_PROFILES";
-    private static final long BG_PROCESS_PERIOD = TimeUnit.HOURS.toMillis(4); // every 4 hours.
+    private static final long BG_PROCESS_INTERVAL = TimeUnit.HOURS.toMillis(4); // every 4 hours.
 
     private IProfCollectd mIProfcollect;
     private static ProfcollectForwardingService sSelfService;
@@ -223,7 +225,7 @@ public final class ProfcollectForwardingService extends SystemService {
             js.schedule(new JobInfo.Builder(JOB_IDLE_PROCESS, JOB_SERVICE_NAME)
                     .setRequiresDeviceIdle(true)
                     .setRequiresCharging(true)
-                    .setPeriodic(BG_PROCESS_PERIOD)
+                    .setPeriodic(BG_PROCESS_INTERVAL)
                     .setPriority(JobInfo.PRIORITY_MIN)
                     .build());
         }
@@ -261,6 +263,7 @@ public final class ProfcollectForwardingService extends SystemService {
         BackgroundThread.get().getThreadHandler().post(
                 () -> {
                     registerAppLaunchObserver();
+                    registerDex2oatObserver();
                     registerOTAObserver();
                 });
     }
@@ -301,6 +304,44 @@ public final class ProfcollectForwardingService extends SystemService {
         @Override
         public void onIntentStarted(Intent intent, long timestampNanos) {
             traceOnAppStart(intent.getPackage());
+        }
+    }
+
+    private void registerDex2oatObserver() {
+        ArtManagerLocal aml = LocalManagerRegistry.getManager(ArtManagerLocal.class);
+        if (aml == null) {
+            Log.w(LOG_TAG, "Couldn't get ArtManagerLocal");
+            return;
+        }
+        aml.setBatchDexoptStartCallback(Runnable::run,
+                (snapshot, reason, defaultPackages, builder, passedSignal) -> {
+                    traceOnDex2oatStart();
+                });
+    }
+
+    private void traceOnDex2oatStart() {
+        if (mIProfcollect == null) {
+            return;
+        }
+        // Sample for a fraction of dex2oat runs.
+        final int traceFrequency =
+            DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
+                "dex2oat_trace_freq", 25);
+        int randomNum = ThreadLocalRandom.current().nextInt(100);
+        if (randomNum < traceFrequency) {
+            if (DEBUG) {
+                Log.d(LOG_TAG, "Tracing on dex2oat event");
+            }
+            BackgroundThread.get().getThreadHandler().post(() -> {
+                try {
+                    // Dex2oat could take a while before it starts. Add a short delay before start
+                    // tracing.
+                    Thread.sleep(1000);
+                    mIProfcollect.trace_once("dex2oat");
+                } catch (RemoteException | InterruptedException e) {
+                    Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
+                }
+            });
         }
     }
 

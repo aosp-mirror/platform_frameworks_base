@@ -22,11 +22,14 @@ import android.app.Notification
 import android.app.Notification.EXTRA_SUBSTITUTE_APP_NAME
 import android.app.PendingIntent
 import android.app.StatusBarManager
+import android.app.UriGrantsManager
+import android.app.smartspace.SmartspaceAction
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
 import android.app.smartspace.SmartspaceTarget
 import android.content.BroadcastReceiver
+import android.content.ContentProvider
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
@@ -53,11 +56,11 @@ import android.text.TextUtils
 import android.util.Log
 import android.util.Pair as APair
 import androidx.media.utils.MediaConstants
+import com.android.app.tracing.traceSection
 import com.android.internal.annotations.Keep
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Dumpable
-import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -80,6 +83,7 @@ import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationMediaManager.isConnectingState
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
@@ -87,8 +91,8 @@ import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.concurrency.ThreadFactory
 import com.android.systemui.util.time.SystemClock
-import com.android.systemui.util.traceSection
 import java.io.IOException
 import java.io.PrintWriter
 import java.util.concurrent.Executor
@@ -184,7 +188,7 @@ class MediaDataManager(
     private val tunerService: TunerService,
     private val mediaFlags: MediaFlags,
     private val logger: MediaUiEventLogger,
-    private val smartspaceManager: SmartspaceManager,
+    private val smartspaceManager: SmartspaceManager?,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
@@ -242,7 +246,7 @@ class MediaDataManager(
     @Inject
     constructor(
         context: Context,
-        @Background backgroundExecutor: Executor,
+        threadFactory: ThreadFactory,
         @Main uiExecutor: Executor,
         @Main foregroundExecutor: DelayableExecutor,
         mediaControllerFactory: MediaControllerFactory,
@@ -260,11 +264,13 @@ class MediaDataManager(
         tunerService: TunerService,
         mediaFlags: MediaFlags,
         logger: MediaUiEventLogger,
-        smartspaceManager: SmartspaceManager,
+        smartspaceManager: SmartspaceManager?,
         keyguardUpdateMonitor: KeyguardUpdateMonitor,
     ) : this(
         context,
-        backgroundExecutor,
+        // Loading bitmap for UMO background can take longer time, so it cannot run on the default
+        // background thread. Use a custom thread for media.
+        threadFactory.buildExecutorOnNewThread(TAG),
         uiExecutor,
         foregroundExecutor,
         mediaControllerFactory,
@@ -347,7 +353,7 @@ class MediaDataManager(
         // Register for Smartspace data updates.
         smartspaceMediaDataProvider.registerListener(this)
         smartspaceSession =
-            smartspaceManager.createSmartspaceSession(
+            smartspaceManager?.createSmartspaceSession(
                 SmartspaceConfig.Builder(context, SMARTSPACE_UI_SURFACE_LABEL).build()
             )
         smartspaceSession?.let {
@@ -394,7 +400,12 @@ class MediaDataManager(
             val oldKey = findExistingEntry(key, sbn.packageName)
             if (oldKey == null) {
                 val instanceId = logger.getNewInstanceId()
-                val temp = LOADING.copy(packageName = sbn.packageName, instanceId = instanceId)
+                val temp =
+                    LOADING.copy(
+                        packageName = sbn.packageName,
+                        instanceId = instanceId,
+                        createdTimestampMillis = systemClock.currentTimeMillis(),
+                    )
                 mediaEntries.put(key, temp)
                 isNewlyActiveEntry = true
             } else if (oldKey != key) {
@@ -448,7 +459,8 @@ class MediaDataManager(
                     resumeAction = action,
                     hasCheckedForResume = true,
                     instanceId = instanceId,
-                    appUid = appUid
+                    appUid = appUid,
+                    createdTimestampMillis = systemClock.currentTimeMillis(),
                 )
             mediaEntries.put(packageName, resumeData)
             logSingleVsMultipleMediaAdded(appUid, packageName, instanceId)
@@ -699,10 +711,13 @@ class MediaDataManager(
             Log.d(TAG, "adding track for $userId from browser: $desc")
         }
 
+        val currentEntry = mediaEntries.get(packageName)
+        val appUid = currentEntry?.appUid ?: Process.INVALID_UID
+
         // Album art
         var artworkBitmap = desc.iconBitmap
         if (artworkBitmap == null && desc.iconUri != null) {
-            artworkBitmap = loadBitmapFromUri(desc.iconUri!!)
+            artworkBitmap = loadBitmapFromUriForUser(desc.iconUri!!, userId, appUid, packageName)
         }
         val artworkIcon =
             if (artworkBitmap != null) {
@@ -711,13 +726,10 @@ class MediaDataManager(
                 null
             }
 
-        val currentEntry = mediaEntries.get(packageName)
         val instanceId = currentEntry?.instanceId ?: logger.getNewInstanceId()
-        val appUid = currentEntry?.appUid ?: Process.INVALID_UID
         val isExplicit =
             desc.extras?.getLong(MediaConstants.METADATA_KEY_IS_EXPLICIT) ==
-                MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT &&
-                mediaFlags.isExplicitIndicatorEnabled()
+                MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
 
         val progress =
             if (mediaFlags.isResumeProgressEnabled()) {
@@ -726,6 +738,7 @@ class MediaDataManager(
 
         val mediaAction = getResumeMediaAction(resumeAction)
         val lastActive = systemClock.elapsedRealtime()
+        val createdTimestampMillis = currentEntry?.createdTimestampMillis ?: 0L
         foregroundExecutor.execute {
             onMediaDataLoaded(
                 packageName,
@@ -751,6 +764,7 @@ class MediaDataManager(
                     notificationKey = packageName,
                     hasCheckedForResume = true,
                     lastActive = lastActive,
+                    createdTimestampMillis = createdTimestampMillis,
                     instanceId = instanceId,
                     appUid = appUid,
                     isExplicit = isExplicit,
@@ -826,12 +840,10 @@ class MediaDataManager(
 
         // Explicit Indicator
         var isExplicit = false
-        if (mediaFlags.isExplicitIndicatorEnabled()) {
-            val mediaMetadataCompat = MediaMetadataCompat.fromMediaMetadata(metadata)
-            isExplicit =
-                mediaMetadataCompat?.getLong(MediaConstants.METADATA_KEY_IS_EXPLICIT) ==
-                    MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
-        }
+        val mediaMetadataCompat = MediaMetadataCompat.fromMediaMetadata(metadata)
+        isExplicit =
+            mediaMetadataCompat?.getLong(MediaConstants.METADATA_KEY_IS_EXPLICIT) ==
+                MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
 
         // Artist name
         var artist: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)
@@ -903,6 +915,7 @@ class MediaDataManager(
         }
 
         val lastActive = systemClock.elapsedRealtime()
+        val createdTimestampMillis = currentEntry?.createdTimestampMillis ?: 0L
         foregroundExecutor.execute {
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
@@ -933,6 +946,7 @@ class MediaDataManager(
                     isPlaying = isPlaying,
                     isClearable = !sbn.isOngoing,
                     lastActive = lastActive,
+                    createdTimestampMillis = createdTimestampMillis,
                     instanceId = instanceId,
                     appUid = appUid,
                     isExplicit = isExplicit,
@@ -1253,6 +1267,9 @@ class MediaDataManager(
         return try {
             val options = BroadcastOptions.makeBasic()
             options.setInteractive(true)
+            options.setPendingIntentBackgroundActivityStartMode(
+                BroadcastOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+            )
             intent.send(options.toBundle())
             true
         } catch (e: PendingIntent.CanceledException) {
@@ -1260,6 +1277,30 @@ class MediaDataManager(
             false
         }
     }
+
+    /** Returns a bitmap if the user can access the given URI, else null */
+    private fun loadBitmapFromUriForUser(
+        uri: Uri,
+        userId: Int,
+        appUid: Int,
+        packageName: String,
+    ): Bitmap? {
+        try {
+            val ugm = UriGrantsManager.getService()
+            ugm.checkGrantUriPermission_ignoreNonSystem(
+                appUid,
+                packageName,
+                ContentProvider.getUriWithoutUserId(uri),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                ContentProvider.getUserIdFromUri(uri, userId)
+            )
+            return loadBitmapFromUri(uri)
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Failed to get URI permission: $e")
+        }
+        return null
+    }
+
     /**
      * Load a bitmap from a URI
      *
@@ -1401,8 +1442,6 @@ class MediaDataManager(
     }
 
     private fun onSessionDestroyed(key: String) {
-        if (!mediaFlags.isRetainingPlayersEnabled()) return
-
         if (DEBUG) Log.d(TAG, "session destroyed for $key")
         val entry = mediaEntries.remove(key) ?: return
         // Clear token since the session is no longer valid
@@ -1446,7 +1485,7 @@ class MediaDataManager(
             if (DEBUG) Log.d(TAG, "Removing still-active player $key")
             notifyMediaDataRemoved(key)
             logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
-        } else {
+        } else if (mediaFlags.isRetainingPlayersEnabled() || isAbleToResume(removed)) {
             // Convert to resume
             if (DEBUG) {
                 Log.d(
@@ -1456,6 +1495,11 @@ class MediaDataManager(
                 )
             }
             convertToResumePlayer(key, removed)
+        } else {
+            // Retaining players flag is off and app doesn't support resume: remove player.
+            if (DEBUG) Log.d(TAG, "Removing player $key")
+            notifyMediaDataRemoved(key)
+            logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
         }
     }
 
@@ -1623,20 +1667,18 @@ class MediaDataManager(
      *   SmartspaceTarget's data is invalid.
      */
     private fun toSmartspaceMediaData(target: SmartspaceTarget): SmartspaceMediaData {
-        var dismissIntent: Intent? = null
-        if (target.baseAction != null && target.baseAction.extras != null) {
-            dismissIntent =
-                target.baseAction.extras.getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY)
-                    as Intent?
-        }
+        val baseAction: SmartspaceAction? = target.baseAction
+        val dismissIntent =
+            baseAction?.extras?.getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY) as Intent?
 
         val isActive =
             when {
                 !mediaFlags.isPersistentSsCardEnabled() -> true
-                target.baseAction == null -> true
-                else ->
-                    target.baseAction.extras.getString(EXTRA_KEY_TRIGGER_SOURCE) !=
-                        EXTRA_VALUE_TRIGGER_PERIODIC
+                baseAction == null -> true
+                else -> {
+                    val triggerSource = baseAction.extras?.getString(EXTRA_KEY_TRIGGER_SOURCE)
+                    triggerSource != EXTRA_VALUE_TRIGGER_PERIODIC
+                }
             }
 
         packageName(target)?.let {

@@ -80,6 +80,19 @@ SkColor transformColorInverse(ColorTransform transform, SkColor color) {
 static void applyColorTransform(ColorTransform transform, SkPaint& paint) {
     if (transform == ColorTransform::None) return;
 
+    if (transform == ColorTransform::Invert) {
+        auto filter = SkHighContrastFilter::Make(
+                {/* grayscale= */ false, SkHighContrastConfig::InvertStyle::kInvertLightness,
+                 /* contrast= */ 0.0f});
+
+        if (paint.getColorFilter()) {
+            paint.setColorFilter(SkColorFilters::Compose(filter, paint.refColorFilter()));
+        } else {
+            paint.setColorFilter(filter);
+        }
+        return;
+    }
+
     SkColor newColor = transformColor(transform, paint.getColor());
     paint.setColor(newColor);
 

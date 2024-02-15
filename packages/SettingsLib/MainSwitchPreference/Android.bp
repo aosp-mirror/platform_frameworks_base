@@ -9,6 +9,10 @@ package {
 
 android_library {
     name: "SettingsLibMainSwitchPreference",
+    use_resource_processor: true,
+    defaults: [
+        "SettingsLintDefaults",
+    ],
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
@@ -16,7 +20,6 @@ android_library {
     static_libs: [
         "androidx.preference_preference",
         "SettingsLibSettingsTheme",
-        "SettingsLibUtils",
     ],
 
     sdk_version: "system_current",

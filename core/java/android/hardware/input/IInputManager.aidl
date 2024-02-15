@@ -25,6 +25,7 @@ import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IKeyboardBacklightState;
+import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.TouchCalibration;
 import android.os.CombinedVibration;
@@ -41,6 +42,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
 import android.view.PointerIcon;
+import android.view.KeyCharacterMap;
 import android.view.VerifiedInputEvent;
 
 /** @hide */
@@ -62,6 +64,11 @@ interface IInputManager {
     // Returns the keyCode produced when pressing the key at the specified location, given the
     // active keyboard layout.
     int getKeyCodeForKeyLocation(int deviceId, in int locationKeyCode);
+
+    KeyCharacterMap getKeyCharacterMap(String layoutDescriptor);
+
+    // Returns the mouse pointer speed.
+    int getMousePointerSpeed();
 
     // Temporarily changes the pointer speed.
     void tryPointerSpeed(int speed);
@@ -166,6 +173,8 @@ interface IInputManager {
 
     void setPointerIconType(int typeId);
     void setCustomPointerIcon(in PointerIcon icon);
+    boolean setPointerIcon(in PointerIcon icon, int displayId, int deviceId, int pointerId,
+            in IBinder inputToken);
 
     oneway void requestPointerCapture(IBinder inputChannelToken, boolean enabled);
 
@@ -236,4 +245,14 @@ interface IInputManager {
     void unregisterKeyboardBacklightListener(IKeyboardBacklightListener listener);
 
     HostUsiVersion getHostUsiVersionFromDisplayConfig(int displayId);
+
+    @EnforcePermission("MONITOR_STICKY_MODIFIER_STATE")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)")
+    void registerStickyModifierStateListener(IStickyModifierStateListener listener);
+
+    @EnforcePermission("MONITOR_STICKY_MODIFIER_STATE")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)")
+    void unregisterStickyModifierStateListener(IStickyModifierStateListener listener);
 }

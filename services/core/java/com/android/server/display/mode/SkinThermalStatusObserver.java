@@ -46,7 +46,7 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
     private final Object mThermalObserverLock = new Object();
     @GuardedBy("mThermalObserverLock")
     @Temperature.ThrottlingStatus
-    private int mStatus = -1;
+    private int mStatus = Temperature.THROTTLING_NONE;
     @GuardedBy("mThermalObserverLock")
     private final SparseArray<SparseArray<SurfaceControl.RefreshRateRange>>
             mThermalThrottlingByDisplay = new SparseArray<>();
@@ -62,6 +62,20 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         mInjector = injector;
         mVotesStorage = votesStorage;
         mHandler = handler;
+    }
+
+    @Nullable
+    public static SurfaceControl.RefreshRateRange findBestMatchingRefreshRateRange(
+            @Temperature.ThrottlingStatus int currentStatus,
+            SparseArray<SurfaceControl.RefreshRateRange> throttlingMap) {
+        SurfaceControl.RefreshRateRange foundRange = null;
+        for (int status = currentStatus; status >= 0; status--) {
+            foundRange = throttlingMap.get(status);
+            if (foundRange != null) {
+                break;
+            }
+        }
+        return foundRange;
     }
 
     void observe() {
@@ -226,20 +240,6 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         if (mLoggingEnabled) {
             Slog.d(TAG, "Voted: vote=" + vote + ", display =" + displayId);
         }
-    }
-
-    @Nullable
-    private SurfaceControl.RefreshRateRange findBestMatchingRefreshRateRange(
-            @Temperature.ThrottlingStatus int currentStatus,
-            SparseArray<SurfaceControl.RefreshRateRange> throttlingMap) {
-        SurfaceControl.RefreshRateRange foundRange = null;
-        for (int status = currentStatus; status >= 0; status--) {
-            foundRange = throttlingMap.get(status);
-            if (foundRange != null) {
-                break;
-            }
-        }
-        return foundRange;
     }
 
     private void fallbackReportThrottlingIfNeeded(int displayId,

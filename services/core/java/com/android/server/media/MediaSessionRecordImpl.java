@@ -16,7 +16,9 @@
 
 package com.android.server.media;
 
+import android.app.ForegroundServiceDelegationOptions;
 import android.media.AudioManager;
+import android.media.session.PlaybackState;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
 
@@ -49,6 +51,15 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
      * @return The user id for this session.
      */
     int getUserId();
+
+    /**
+     * Get the {@link ForegroundServiceDelegationOptions} needed for notifying activity manager
+     * service with changes in the {@link PlaybackState} for this session.
+     *
+     * @return the {@link ForegroundServiceDelegationOptions} needed for notifying the activity
+     *     manager service with changes in the {@link PlaybackState} for this session.
+     */
+    ForegroundServiceDelegationOptions getForegroundServiceDelegationOptions();
 
     /**
      * Check if this session has system priority and should receive media buttons before any other

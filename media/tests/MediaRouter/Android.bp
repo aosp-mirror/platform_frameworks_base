@@ -24,7 +24,7 @@ android_test {
         "compatibility-device-util-axt",
         "mockito-target-minus-junit4",
         "testng",
-        "truth-prebuilt",
+        "truth",
     ],
     test_suites: ["general-tests"],
     platform_apis: true,

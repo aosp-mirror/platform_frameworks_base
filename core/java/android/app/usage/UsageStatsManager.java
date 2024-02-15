@@ -18,6 +18,7 @@ package android.app.usage;
 
 import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -27,6 +28,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserHandleAware;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
@@ -34,6 +36,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Build;
+import android.os.PersistableBundle;
 import android.os.PowerWhitelistManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -391,6 +394,23 @@ public final class UsageStatsManager {
     @SystemApi
     public static final String EXTRA_TIME_USED = "android.app.usage.extra.TIME_USED";
 
+    /**
+     * A String extra, when used with {@link UsageEvents.Event#getExtras}, that indicates
+     * the category of the user interaction associated with the event. The category cannot
+     * be more than 127 characters, longer value will be truncated to 127 characters.
+     */
+    @FlaggedApi(Flags.FLAG_USER_INTERACTION_TYPE_API)
+    public static final String EXTRA_EVENT_CATEGORY =
+            "android.app.usage.extra.EVENT_CATEGORY";
+
+    /**
+     * A String extra, when used with {@link UsageEvents.Event#getExtras}, that indicates
+     * the action of the user interaction associated with the event. The action cannot be
+     * more than 127 characters, longer value will be truncated to 127 characters.
+     */
+    @FlaggedApi(Flags.FLAG_USER_INTERACTION_TYPE_API)
+    public static final String EXTRA_EVENT_ACTION =
+            "android.app.usage.extra.EVENT_ACTION";
 
     /**
      * App usage observers will consider the task root package the source of usage.
@@ -561,10 +581,10 @@ public final class UsageStatsManager {
      * then {@code null} will be returned.</em>
      *
      * @param beginTime The inclusive beginning of the range of events to include in the results.
-     *                 Defined in terms of "Unix time", see
-     *                 {@link java.lang.System#currentTimeMillis}.
+     *                  Defined in terms of "Unix time", see
+     *                  {@link java.lang.System#currentTimeMillis}.
      * @param endTime The exclusive end of the range of events to include in the results. Defined
-     *               in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
+     *                in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
      * @return A {@link UsageEvents}.
      */
     public UsageEvents queryEvents(long beginTime, long endTime) {
@@ -581,16 +601,40 @@ public final class UsageStatsManager {
     }
 
     /**
+     * Query for events with specific UsageEventsQuery object.
+     *
+     * <em>Note: if the user's device is not in an unlocked state (as defined by
+     * {@link UserManager#isUserUnlocked()}), then {@code null} will be returned.</em>
+     *
+     * @param query The query object used to specify the query parameters.
+     * @return A {@link UsageEvents} which contains the events matching the query parameters.
+     */
+    @FlaggedApi(Flags.FLAG_FILTER_BASED_EVENT_QUERY_API)
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    public UsageEvents queryEvents(@NonNull UsageEventsQuery query) {
+        try {
+            UsageEvents iter = mService.queryEventsWithFilter(query, mContext.getOpPackageName());
+            if (iter != null) {
+                return iter;
+            }
+        } catch (RemoteException e) {
+            // fallthrough and return empty result.
+        }
+        return sEmptyResults;
+    }
+
+    /**
      * Like {@link #queryEvents(long, long)}, but only returns events for the calling package.
      * <em>Note: Starting from {@link android.os.Build.VERSION_CODES#R Android R}, if the user's
      * device is not in an unlocked state (as defined by {@link UserManager#isUserUnlocked()}),
      * then {@code null} will be returned.</em>
      *
      * @param beginTime The inclusive beginning of the range of events to include in the results.
-     *                 Defined in terms of "Unix time", see
-     *                 {@link java.lang.System#currentTimeMillis}.
+     *                  Defined in terms of "Unix time", see
+     *                  {@link java.lang.System#currentTimeMillis}.
      * @param endTime The exclusive end of the range of events to include in the results. Defined
-     *               in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
+     *                in terms of "Unix time", see {@link java.lang.System#currentTimeMillis}.
      * @return A {@link UsageEvents} object.
      *
      * @see #queryEvents(long, long)
@@ -1104,11 +1148,45 @@ public final class UsageStatsManager {
      * Reports user interaction with a given package in the given user.
      *
      * <p><em>This method is only for use by the system</em>
+     *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.REPORT_USAGE_STATS)
     public void reportUserInteraction(@NonNull String packageName, int userId) {
         try {
             mService.reportUserInteraction(packageName, userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports user interaction with given package and a particular {@code extras}
+     * in the given user.
+     *
+     * <p>
+     * Note: The structure of {@code extras} is a {@link PersistableBundle} with the
+     * category {@link #EXTRA_EVENT_CATEGORY} and the action {@link #EXTRA_EVENT_ACTION}.
+     * Category provides additional detail about the user interaction, the value
+     * is defined in namespace based. Example: android.app.notification could be used to
+     * indicate that the reported user interaction is related to notification. Action
+     * indicates the general action that performed.
+     * </p>
+     *
+     * @param packageName The package name of the app
+     * @param userId The user id who triggers the user interaction
+     * @param extras The {@link PersistableBundle} that will be used to specify the
+     *               extra details for the user interaction event. The {@link PersistableBundle}
+     *               must contain the extras {@link #EXTRA_EVENT_CATEGORY},
+     *               {@link #EXTRA_EVENT_ACTION}. Cannot be empty.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_USER_INTERACTION_TYPE_API)
+    @RequiresPermission(android.Manifest.permission.REPORT_USAGE_STATS)
+    public void reportUserInteraction(@NonNull String packageName, @UserIdInt int userId,
+            @NonNull PersistableBundle extras) {
+        try {
+            mService.reportUserInteractionWithBundle(packageName, userId, extras);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1396,6 +1474,7 @@ public final class UsageStatsManager {
      * {@link UsageEvents}
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.REPORT_USAGE_STATS)
     public void reportChooserSelection(String packageName, int userId, String contentType,
                                        String[] annotations, String action) {
         try {
@@ -1523,6 +1602,22 @@ public final class UsageStatsManager {
     public void clearBroadcastEvents() {
         try {
             mService.clearBroadcastEvents(mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks whether the given {@code packageName} is exempted from broadcast response tracking.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    @UserHandleAware
+    public boolean isPackageExemptedFromBroadcastResponseStats(@NonNull String packageName) {
+        try {
+            return mService.isPackageExemptedFromBroadcastResponseStats(packageName,
+                    mContext.getUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

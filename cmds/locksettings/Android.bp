@@ -21,8 +21,7 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-java_binary {
+sh_binary {
     name: "locksettings",
-    wrapper: "locksettings.sh",
-    srcs: ["**/*.java"],
+    src: "locksettings.sh",
 }

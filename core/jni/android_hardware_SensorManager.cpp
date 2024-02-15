@@ -150,7 +150,7 @@ static jstring getJavaInternedString(JNIEnv *env, const String8 &string) {
         return gStringOffsets.emptyString;
     }
 
-    ScopedLocalRef<jstring> javaString(env, env->NewStringUTF(string.string()));
+    ScopedLocalRef<jstring> javaString(env, env->NewStringUTF(string.c_str()));
     jstring internedString = (jstring)
             env->CallObjectMethod(javaString.get(), gStringOffsets.intern);
     return internedString;
@@ -225,6 +225,19 @@ nativeGetSensorAtIndex(JNIEnv *env, jclass clazz, jlong sensorManager, jobject s
     return translateNativeSensorToJavaSensor(env, sensor, *sensorList[index]) != NULL;
 }
 
+static jboolean nativeGetDefaultDeviceSensorAtIndex(JNIEnv *env, jclass clazz, jlong sensorManager,
+                                                    jobject sensor, jint index) {
+    SensorManager *mgr = reinterpret_cast<SensorManager *>(sensorManager);
+
+    Vector<Sensor> sensorList;
+    ssize_t count = mgr->getDefaultDeviceSensorList(sensorList);
+    if (ssize_t(index) >= count) {
+        return false;
+    }
+
+    return translateNativeSensorToJavaSensor(env, sensor, sensorList[index]) != NULL;
+}
+
 static void
 nativeGetDynamicSensors(JNIEnv *env, jclass clazz, jlong sensorManager, jobject sensorList) {
 
@@ -263,6 +276,18 @@ static void nativeGetRuntimeSensors(JNIEnv *env, jclass clazz, jlong sensorManag
 static jboolean nativeIsDataInjectionEnabled(JNIEnv *_env, jclass _this, jlong sensorManager) {
     SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
     return mgr->isDataInjectionEnabled();
+}
+
+static jboolean nativeIsReplayDataInjectionEnabled(JNIEnv *_env, jclass _this,
+                                                   jlong sensorManager) {
+    SensorManager *mgr = reinterpret_cast<SensorManager *>(sensorManager);
+    return mgr->isReplayDataInjectionEnabled();
+}
+
+static jboolean nativeIsHalBypassReplayDataInjectionEnabled(JNIEnv *_env, jclass _this,
+                                                            jlong sensorManager) {
+    SensorManager *mgr = reinterpret_cast<SensorManager *>(sensorManager);
+    return mgr->isHalBypassReplayDataInjectionEnabled();
 }
 
 static jint nativeCreateDirectChannel(JNIEnv *_env, jclass _this, jlong sensorManager,
@@ -527,11 +552,19 @@ static const JNINativeMethod gSystemSensorManagerMethods[] = {
         {"nativeGetSensorAtIndex", "(JLandroid/hardware/Sensor;I)Z",
          (void *)nativeGetSensorAtIndex},
 
+        {"nativeGetDefaultDeviceSensorAtIndex", "(JLandroid/hardware/Sensor;I)Z",
+         (void *)nativeGetDefaultDeviceSensorAtIndex},
+
         {"nativeGetDynamicSensors", "(JLjava/util/List;)V", (void *)nativeGetDynamicSensors},
 
         {"nativeGetRuntimeSensors", "(JILjava/util/List;)V", (void *)nativeGetRuntimeSensors},
 
         {"nativeIsDataInjectionEnabled", "(J)Z", (void *)nativeIsDataInjectionEnabled},
+
+        {"nativeIsReplayDataInjectionEnabled", "(J)Z", (void *)nativeIsReplayDataInjectionEnabled},
+
+        {"nativeIsHalBypassReplayDataInjectionEnabled", "(J)Z",
+         (void *)nativeIsHalBypassReplayDataInjectionEnabled},
 
         {"nativeCreateDirectChannel", "(JIJIILandroid/hardware/HardwareBuffer;)I",
          (void *)nativeCreateDirectChannel},

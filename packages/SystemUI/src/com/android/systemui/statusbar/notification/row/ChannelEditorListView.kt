@@ -20,6 +20,7 @@ import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.app.NotificationChannel
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
+import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.NotificationManager.IMPORTANCE_UNSPECIFIED
 import android.content.Context
@@ -37,7 +38,7 @@ import android.widget.Switch
 import android.widget.TextView
 import com.android.settingslib.Utils
 
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.util.Assert
 
 /**
@@ -55,12 +56,14 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
 
     // The first row is for the entire app
     private lateinit var appControlRow: AppControlView
+    private lateinit var channelListView: LinearLayout
     private val channelRows = mutableListOf<ChannelRow>()
 
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        appControlRow = findViewById(R.id.app_control)
+        appControlRow = requireViewById(R.id.app_control)
+        channelListView = requireViewById(R.id.scrollView)
     }
 
     /**
@@ -102,7 +105,7 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
 
         // Remove any rows
         for (row in channelRows) {
-            removeView(row)
+            channelListView.removeView(row)
         }
         channelRows.clear()
 
@@ -122,7 +125,7 @@ class ChannelEditorListView(c: Context, attrs: AttributeSet) : LinearLayout(c, a
         row.channel = channel
 
         channelRows.add(row)
-        addView(row)
+        channelListView.addView(row)
     }
 
     private fun updateAppControlRow(enabled: Boolean) {
@@ -143,9 +146,9 @@ class AppControlView(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
     lateinit var switch: Switch
 
     override fun onFinishInflate() {
-        iconView = findViewById(R.id.icon)
-        channelName = findViewById(R.id.app_name)
-        switch = findViewById(R.id.toggle)
+        iconView = requireViewById(R.id.icon)
+        channelName = requireViewById(R.id.app_name)
+        switch = requireViewById(R.id.toggle)
 
         setOnClickListener { switch.toggle() }
     }
@@ -174,12 +177,14 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        channelName = findViewById(R.id.channel_name)
-        channelDescription = findViewById(R.id.channel_description)
-        switch = findViewById(R.id.toggle)
+        channelName = requireViewById(R.id.channel_name)
+        channelDescription = requireViewById(R.id.channel_description)
+        switch = requireViewById(R.id.toggle)
         switch.setOnCheckedChangeListener { _, b ->
             channel?.let {
-                controller.proposeEditForChannel(it, if (b) it.importance else IMPORTANCE_NONE)
+                controller.proposeEditForChannel(it,
+                        if (b) it.originalImportance.coerceAtLeast(IMPORTANCE_LOW)
+                        else IMPORTANCE_NONE)
             }
         }
         setOnClickListener { switch.toggle() }

@@ -18,8 +18,8 @@ package com.android.systemui.log.table
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.table.TableChange.Companion.IS_INITIAL_PREFIX
 import com.android.systemui.log.table.TableChange.Companion.MAX_STRING_LENGTH
 import com.android.systemui.util.mockito.any
@@ -66,7 +66,6 @@ class TableLogBufferTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 localLogcat = localLogcat,
             )
-        underTest.init()
     }
 
     @Test(expected = IllegalArgumentException::class)

@@ -34,6 +34,7 @@ import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
@@ -51,6 +52,8 @@ import android.view.WindowManagerImpl;
 @TestApi
 @UiContext
 public abstract class WindowProviderService extends Service implements WindowProvider {
+
+    private static final String TAG = WindowProviderService.class.getSimpleName();
 
     private final Bundle mOptions;
     private final WindowTokenClient mWindowToken = new WindowTokenClient();
@@ -126,7 +129,6 @@ public abstract class WindowProviderService extends Service implements WindowPro
     @SuppressLint({"OnNameExpected", "ExecutorRegistration"})
     // Suppress lint because this is a legacy named function and doesn't have an optional param
     // for executor.
-    // TODO(b/259347943): Update documentation for U.
     /**
      * Here we override to prevent WindowProviderService from invoking
      * {@link Application.registerComponentCallback}, which will result in callback registered
@@ -152,7 +154,7 @@ public abstract class WindowProviderService extends Service implements WindowPro
     }
 
     /**
-     * Override {@link Service}'s empty implementation and listen to {@link ActivityThread} for
+     * Override {@link Service}'s empty implementation and listen to {@code ActivityThread} for
      * low memory and trim memory events.
      */
     @Override
@@ -194,8 +196,16 @@ public abstract class WindowProviderService extends Service implements WindowPro
     public final Context createServiceBaseContext(ActivityThread mainThread,
             LoadedApk packageInfo) {
         final Context context = super.createServiceBaseContext(mainThread, packageInfo);
-        final Display display = context.getSystemService(DisplayManager.class)
-                .getDisplay(getInitialDisplayId());
+        final DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+        final int initialDisplayId = getInitialDisplayId();
+        Display display = displayManager.getDisplay(initialDisplayId);
+        // Fallback to use the default display if the initial display to start WindowProviderService
+        // is detached.
+        if (display == null) {
+            Log.e(TAG, "Display with id " + initialDisplayId + " not found, falling back to "
+                    + "DEFAULT_DISPLAY");
+            display = displayManager.getDisplay(DEFAULT_DISPLAY);
+        }
         return context.createTokenContext(mWindowToken, display);
     }
 

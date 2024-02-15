@@ -164,7 +164,6 @@
             />
         <ImageView
             android:id="@+id/media_output_item_end_click_icon"
-            android:src="@drawable/media_output_status_edit_session"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:focusable="false"

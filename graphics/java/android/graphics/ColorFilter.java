@@ -41,19 +41,9 @@ public class ColorFilter {
      * Current native SkColorFilter instance.
      */
     private long mNativeInstance;
-    // Runnable to do immediate destruction
-    private Runnable mCleaner;
 
     long createNativeInstance() {
         return 0;
-    }
-
-    synchronized final void discardNativeInstance() {
-        if (mNativeInstance != 0) {
-            mCleaner.run();
-            mCleaner = null;
-            mNativeInstance = 0;
-        }
     }
 
     /** @hide */
@@ -65,8 +55,7 @@ public class ColorFilter {
                 // Note: we must check for null here, since it's possible for createNativeInstance()
                 // to return nullptr if the native SkColorFilter would be a no-op at draw time.
                 // See native implementations of subclass create methods for more info.
-                mCleaner = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
-                        this, mNativeInstance);
+                NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeInstance);
             }
         }
         return mNativeInstance;

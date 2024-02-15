@@ -49,7 +49,6 @@ import org.mockito.Mockito;
 public class QSIconViewImplTest extends SysuiTestCase {
 
     private QSIconViewImpl mIconView;
-    private static int RES_ID = 1;
 
     @Before
     public void setup() {
@@ -79,7 +78,7 @@ public class QSIconViewImplTest extends SysuiTestCase {
 
     @Test
     public void testMutateIconDrawable() {
-        SlashImageView iv = mock(SlashImageView.class);
+        ImageView iv = mock(ImageView.class);
         Drawable originalDrawable = mock(Drawable.class);
         Drawable otherDrawable = mock(Drawable.class);
         State s = new State();
@@ -92,7 +91,7 @@ public class QSIconViewImplTest extends SysuiTestCase {
 
         mIconView.updateIcon(iv, s, /* allowAnimations= */true);
 
-        verify(iv).setState(any(), eq(otherDrawable));
+        verify(iv).setImageDrawable(eq(otherDrawable));
     }
 
     @Test
@@ -153,6 +152,28 @@ public class QSIconViewImplTest extends SysuiTestCase {
         InOrder inOrder = Mockito.inOrder(d);
         inOrder.verify(d).start();
         inOrder.verify(d).stop();
+    }
+
+    @Test
+    public void testAnimatorCallbackRemovedOnOldDrawable() {
+        ImageView iv = new ImageView(mContext);
+        AnimatedVectorDrawable d1 = mock(AnimatedVectorDrawable.class);
+        when(d1.getConstantState()).thenReturn(fakeConstantState(d1));
+        AnimatedVectorDrawable d2 = mock(AnimatedVectorDrawable.class);
+        when(d2.getConstantState()).thenReturn(fakeConstantState(d2));
+        State s = new State();
+        s.isTransient = true;
+
+        // When set Animatable2 d1
+        s.icon = new QSTileImpl.DrawableIcon(d1);
+        mIconView.updateIcon(iv, s, true);
+
+        // And then set Animatable2 d2
+        s.icon = new QSTileImpl.DrawableIcon(d2);
+        mIconView.updateIcon(iv, s, true);
+
+        // Then d1 has its callback cleared
+        verify(d1).clearAnimationCallbacks();
     }
 
     private static Drawable.ConstantState fakeConstantState(Drawable otherDrawable) {

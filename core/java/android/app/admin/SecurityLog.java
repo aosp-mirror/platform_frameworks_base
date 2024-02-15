@@ -17,12 +17,14 @@
 package android.app.admin;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.admin.flags.Flags;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Build;
@@ -99,6 +101,7 @@ public class SecurityLog {
             TAG_PACKAGE_INSTALLED,
             TAG_PACKAGE_UPDATED,
             TAG_PACKAGE_UNINSTALLED,
+            TAG_BACKUP_SERVICE_TOGGLED,
     })
     public @interface SecurityLogTag {}
 
@@ -598,6 +601,18 @@ public class SecurityLog {
      */
     public static final int TAG_PACKAGE_UNINSTALLED = SecurityLogTags.SECURITY_PACKAGE_UNINSTALLED;
 
+    /**
+     * Indicates that an admin has enabled or disabled backup service. The log entry contains the
+     * following information about the event encapsulated in an {@link Object} array, accessible
+     * via {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] backup service state ({@code Integer}, 1 for enabled, 0 for disabled)
+     * @see DevicePolicyManager#setBackupServiceEnabled(ComponentName, boolean)
+     */
+    @FlaggedApi(Flags.FLAG_BACKUP_SERVICE_SECURITY_LOG_EVENT_ENABLED)
+    public static final int TAG_BACKUP_SERVICE_TOGGLED =
+            SecurityLogTags.SECURITY_BACKUP_SERVICE_TOGGLED;
     /**
      * Event severity level indicating that the event corresponds to normal workflow.
      */

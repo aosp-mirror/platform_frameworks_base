@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.draganddrop;
 
+import static android.app.StatusBarManager.DISABLE2_NONE;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.content.pm.ActivityInfo.CONFIG_ASSETS_PATHS;
@@ -35,7 +36,6 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -48,19 +48,22 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
-import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
- * Coordinates the visible drop targets for the current drag.
+ * Coordinates the visible drop targets for the current drag within a single display.
  */
 public class DragLayout extends LinearLayout {
 
@@ -76,6 +79,11 @@ public class DragLayout extends LinearLayout {
     private final StatusBarManager mStatusBarManager;
     private final Configuration mLastConfiguration = new Configuration();
 
+    // Whether this device supports left/right split in portrait
+    private final boolean mAllowLeftRightSplitInPortrait;
+    // Whether the device is currently in left/right split mode
+    private boolean mIsLeftRightSplit;
+
     private DragAndDropPolicy.Target mCurrentTarget = null;
     private DropZoneView mDropZoneView1;
     private DropZoneView mDropZoneView2;
@@ -86,6 +94,7 @@ public class DragLayout extends LinearLayout {
 
     private boolean mIsShowing;
     private boolean mHasDropped;
+    private DragSession mSession;
 
     @SuppressLint("WrongConstant")
     public DragLayout(Context context, SplitScreenController splitScreenController,
@@ -107,17 +116,18 @@ public class DragLayout extends LinearLayout {
         setLayoutDirection(LAYOUT_DIRECTION_LTR);
         mDropZoneView1 = new DropZoneView(context);
         mDropZoneView2 = new DropZoneView(context);
-        addView(mDropZoneView1, new LinearLayout.LayoutParams(MATCH_PARENT,
-                MATCH_PARENT));
-        addView(mDropZoneView2, new LinearLayout.LayoutParams(MATCH_PARENT,
-                MATCH_PARENT));
+        addView(mDropZoneView1, new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        addView(mDropZoneView2, new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         ((LayoutParams) mDropZoneView1.getLayoutParams()).weight = 1;
         ((LayoutParams) mDropZoneView2.getLayoutParams()).weight = 1;
-        int orientation = getResources().getConfiguration().orientation;
-        setOrientation(orientation == Configuration.ORIENTATION_LANDSCAPE
-                ? LinearLayout.HORIZONTAL
-                : LinearLayout.VERTICAL);
-        updateContainerMargins(getResources().getConfiguration().orientation);
+        // We don't use the configuration orientation here to determine landscape because
+        // near-square devices may report the same orietation with insets taken into account
+        mAllowLeftRightSplitInPortrait = SplitScreenUtils.allowLeftRightSplitInPortrait(
+                context.getResources());
+        mIsLeftRightSplit = SplitScreenUtils.isLeftRightSplit(mAllowLeftRightSplitInPortrait,
+                getResources().getConfiguration());
+        setOrientation(mIsLeftRightSplit ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
+        updateContainerMargins(mIsLeftRightSplit);
     }
 
     @Override
@@ -125,11 +135,12 @@ public class DragLayout extends LinearLayout {
         mInsets = insets.getInsets(Type.tappableElement() | Type.displayCutout());
         recomputeDropTargets();
 
-        final int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        boolean isLeftRightSplit = mSplitScreenController != null
+                && mSplitScreenController.isLeftRightSplit();
+        if (isLeftRightSplit) {
             mDropZoneView1.setBottomInset(mInsets.bottom);
             mDropZoneView2.setBottomInset(mInsets.bottom);
-        } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+        } else {
             mDropZoneView1.setBottomInset(0);
             mDropZoneView2.setBottomInset(mInsets.bottom);
         }
@@ -137,14 +148,12 @@ public class DragLayout extends LinearLayout {
     }
 
     public void onConfigChanged(Configuration newConfig) {
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
-                && getOrientation() != HORIZONTAL) {
-            setOrientation(LinearLayout.HORIZONTAL);
-            updateContainerMargins(newConfig.orientation);
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT
-                && getOrientation() != VERTICAL) {
-            setOrientation(LinearLayout.VERTICAL);
-            updateContainerMargins(newConfig.orientation);
+        boolean isLeftRightSplit = SplitScreenUtils.isLeftRightSplit(mAllowLeftRightSplitInPortrait,
+                newConfig);
+        if (isLeftRightSplit != mIsLeftRightSplit) {
+            mIsLeftRightSplit = isLeftRightSplit;
+            setOrientation(mIsLeftRightSplit ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
+            updateContainerMargins(mIsLeftRightSplit);
         }
 
         final int diff = newConfig.diff(mLastConfiguration);
@@ -163,14 +172,14 @@ public class DragLayout extends LinearLayout {
         mDropZoneView2.setContainerMargin(0, 0, 0, 0);
     }
 
-    private void updateContainerMargins(int orientation) {
+    private void updateContainerMargins(boolean isLeftRightSplit) {
         final float halfMargin = mDisplayMargin / 2f;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (isLeftRightSplit) {
             mDropZoneView1.setContainerMargin(
                     mDisplayMargin, mDisplayMargin, halfMargin, mDisplayMargin);
             mDropZoneView2.setContainerMargin(
                     halfMargin, mDisplayMargin, mDisplayMargin, mDisplayMargin);
-        } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+        } else {
             mDropZoneView1.setContainerMargin(
                     mDisplayMargin, mDisplayMargin, mDisplayMargin, halfMargin);
             mDropZoneView2.setContainerMargin(
@@ -182,16 +191,19 @@ public class DragLayout extends LinearLayout {
         return mHasDropped;
     }
 
-    public void prepare(DisplayLayout displayLayout, ClipData initialData,
-            InstanceId loggerSessionId) {
-        mPolicy.start(displayLayout, initialData, loggerSessionId);
+    /**
+     * Called when a new drag is started.
+     */
+    public void prepare(DragSession session, InstanceId loggerSessionId) {
+        mPolicy.start(session, loggerSessionId);
+        mSession = session;
         mHasDropped = false;
         mCurrentTarget = null;
 
         boolean alreadyInSplit = mSplitScreenController != null
                 && mSplitScreenController.isSplitScreenVisible();
         if (!alreadyInSplit) {
-            ActivityManager.RunningTaskInfo taskInfo1 = mPolicy.getLatestRunningTask();
+            ActivityManager.RunningTaskInfo taskInfo1 = mSession.runningTaskInfo;
             if (taskInfo1 != null) {
                 final int activityType = taskInfo1.getActivityType();
                 if (activityType == ACTIVITY_TYPE_STANDARD) {
@@ -255,23 +267,21 @@ public class DragLayout extends LinearLayout {
      * @param bounds2 bounds to apply to the second dropzone view, null if split in half.
      */
     private void updateDropZoneSizes(Rect bounds1, Rect bounds2) {
-        final int orientation = getResources().getConfiguration().orientation;
-        final boolean isPortrait = orientation == Configuration.ORIENTATION_PORTRAIT;
         final int halfDivider = mDividerSize / 2;
         final LinearLayout.LayoutParams dropZoneView1 =
                 (LayoutParams) mDropZoneView1.getLayoutParams();
         final LinearLayout.LayoutParams dropZoneView2 =
                 (LayoutParams) mDropZoneView2.getLayoutParams();
-        if (isPortrait) {
-            dropZoneView1.width = MATCH_PARENT;
-            dropZoneView2.width = MATCH_PARENT;
-            dropZoneView1.height = bounds1 != null ? bounds1.height() + halfDivider : MATCH_PARENT;
-            dropZoneView2.height = bounds2 != null ? bounds2.height() + halfDivider : MATCH_PARENT;
-        } else {
+        if (mIsLeftRightSplit) {
             dropZoneView1.width = bounds1 != null ? bounds1.width() + halfDivider : MATCH_PARENT;
             dropZoneView2.width = bounds2 != null ? bounds2.width() + halfDivider : MATCH_PARENT;
             dropZoneView1.height = MATCH_PARENT;
             dropZoneView2.height = MATCH_PARENT;
+        } else {
+            dropZoneView1.width = MATCH_PARENT;
+            dropZoneView2.width = MATCH_PARENT;
+            dropZoneView1.height = bounds1 != null ? bounds1.height() + halfDivider : MATCH_PARENT;
+            dropZoneView2.height = bounds2 != null ? bounds2.height() + halfDivider : MATCH_PARENT;
         }
         dropZoneView1.weight = bounds1 != null ? 0 : 1;
         dropZoneView2.weight = bounds2 != null ? 0 : 1;
@@ -356,11 +366,20 @@ public class DragLayout extends LinearLayout {
      */
     public void hide(DragEvent event, Runnable hideCompleteCallback) {
         mIsShowing = false;
-        animateSplitContainers(false, hideCompleteCallback);
+        animateSplitContainers(false, () -> {
+            if (hideCompleteCallback != null) {
+                hideCompleteCallback.run();
+            }
+            switch (event.getAction()) {
+                case DragEvent.ACTION_DROP:
+                case DragEvent.ACTION_DRAG_ENDED:
+                    mSession = null;
+            }
+        });
         // Reset the state if we previously force-ignore the bottom margin
         mDropZoneView1.setForceIgnoreBottomMargin(false);
         mDropZoneView2.setForceIgnoreBottomMargin(false);
-        updateContainerMargins(getResources().getConfiguration().orientation);
+        updateContainerMargins(mIsLeftRightSplit);
         mCurrentTarget = null;
     }
 
@@ -426,18 +445,20 @@ public class DragLayout extends LinearLayout {
     }
 
     private void animateFullscreenContainer(boolean visible) {
-        mStatusBarManager.disable(visible
-                ? HIDE_STATUS_BAR_FLAGS
-                : DISABLE_NONE);
+        int flags = visible ? HIDE_STATUS_BAR_FLAGS : DISABLE_NONE;
+        StatusBarManager.DisableInfo disableInfo = new StatusBarManager.DisableInfo(flags,
+                DISABLE2_NONE);
+        mStatusBarManager.requestDisabledComponent(disableInfo, "animateFullscreenContainer");
         // We're only using the first drop zone if there is one fullscreen target
         mDropZoneView1.setShowingMargin(visible);
         mDropZoneView1.setShowingHighlight(visible);
     }
 
     private void animateSplitContainers(boolean visible, Runnable animCompleteCallback) {
-        mStatusBarManager.disable(visible
-                ? HIDE_STATUS_BAR_FLAGS
-                : DISABLE_NONE);
+        int flags = visible ? HIDE_STATUS_BAR_FLAGS : DISABLE_NONE;
+        StatusBarManager.DisableInfo disableInfo = new StatusBarManager.DisableInfo(flags,
+                DISABLE2_NONE);
+        mStatusBarManager.requestDisabledComponent(disableInfo, "animateSplitContainers");
         mDropZoneView1.setShowingMargin(visible);
         mDropZoneView2.setShowingMargin(visible);
         Animator animator = mDropZoneView1.getAnimator();
@@ -469,5 +490,20 @@ public class DragLayout extends LinearLayout {
     private static int getResizingBackgroundColor(ActivityManager.RunningTaskInfo taskInfo) {
         final int taskBgColor = taskInfo.taskDescription.getBackgroundColor();
         return Color.valueOf(taskBgColor == -1 ? Color.WHITE : taskBgColor).toArgb();
+    }
+
+    /**
+     * Dumps information about this drag layout.
+     */
+    public void dump(@NonNull PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + "DragLayout:");
+        pw.println(innerPrefix + "mIsLeftRightSplitInPortrait=" + mAllowLeftRightSplitInPortrait);
+        pw.println(innerPrefix + "mIsLeftRightSplit=" + mIsLeftRightSplit);
+        pw.println(innerPrefix + "mDisplayMargin=" + mDisplayMargin);
+        pw.println(innerPrefix + "mDividerSize=" + mDividerSize);
+        pw.println(innerPrefix + "mIsShowing=" + mIsShowing);
+        pw.println(innerPrefix + "mHasDropped=" + mHasDropped);
+        pw.println(innerPrefix + "mCurrentTarget=" + mCurrentTarget);
     }
 }

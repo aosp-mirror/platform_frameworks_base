@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "libprotoutil_test"
+    }
+  ],
+  "hwasan-postsubmit": [
+    {
+      "name": "libprotoutil_test"
+    }
+  ]
+}

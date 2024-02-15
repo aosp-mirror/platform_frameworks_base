@@ -50,6 +50,7 @@ import android.util.SparseArray;
 import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
@@ -3086,14 +3087,22 @@ public class WebView extends AbsoluteLayout
             return webviewPackage;
         }
 
-        IWebViewUpdateService service = WebViewFactory.getUpdateService();
-        if (service == null) {
-            return null;
-        }
-        try {
-            return service.getCurrentWebViewPackage();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (Flags.updateServiceIpcWrapper()) {
+            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
+            if (manager == null) {
+                return null;
+            }
+            return manager.getCurrentWebViewPackage();
+        } else {
+            IWebViewUpdateService service = WebViewFactory.getUpdateService();
+            if (service == null) {
+                return null;
+            }
+            try {
+                return service.getCurrentWebViewPackage();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -3138,5 +3147,16 @@ public class WebView extends AbsoluteLayout
         WindowInsets result = mProvider.getViewDelegate().onApplyWindowInsets(insets);
         if (result == null) return super.onApplyWindowInsets(insets);
         return result;
+    }
+
+    @Override
+    @Nullable
+    public PointerIcon onResolvePointerIcon(@NonNull MotionEvent event, int pointerIndex) {
+        PointerIcon icon =
+                mProvider.getViewDelegate().onResolvePointerIcon(event, pointerIndex);
+        if (icon != null) {
+            return icon;
+        }
+        return super.onResolvePointerIcon(event, pointerIndex);
     }
 }

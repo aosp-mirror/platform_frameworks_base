@@ -40,6 +40,7 @@ import android.os.RemoteCallback;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.AttachedSurfaceControl;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.SurfaceControlViewHost;
@@ -47,6 +48,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -331,13 +333,22 @@ public final class SplashScreenView extends FrameLayout {
                                     + Thread.currentThread().getId());
                 }
 
+                AttachedSurfaceControl attachedSurfaceControl = surfaceView.getRootSurfaceControl();
                 SurfaceControlViewHost viewHost = new SurfaceControlViewHost(viewContext,
                         viewContext.getDisplay(),
-                        surfaceView.getHostToken(),
+                        attachedSurfaceControl == null ? null
+                                : attachedSurfaceControl.getInputTransferToken(),
                         "SplashScreenView");
                 ImageView imageView = new ImageView(viewContext);
                 imageView.setBackground(mIconDrawable);
-                viewHost.setView(imageView, mIconSize, mIconSize);
+                final int windowFlag = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+                final WindowManager.LayoutParams lp =
+                        new WindowManager.LayoutParams(mIconSize, mIconSize,
+                                WindowManager.LayoutParams.TYPE_APPLICATION, windowFlag,
+                                PixelFormat.TRANSPARENT);
+                viewHost.setView(imageView, lp);
                 SurfaceControlViewHost.SurfacePackage surfacePackage = viewHost.getSurfacePackage();
                 surfaceView.setChildSurfacePackage(surfacePackage);
                 view.mSurfacePackage = surfacePackage;

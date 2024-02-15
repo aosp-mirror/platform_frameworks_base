@@ -48,6 +48,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Handler;
 import android.os.SystemProperties;
 import android.util.Slog;
 import android.view.InflateException;
@@ -1303,7 +1304,7 @@ public class TransitionAnimation {
             ScreenCapture.ScreenshotHardwareBuffer buffer) {
         t.setBuffer(layer, buffer.getHardwareBuffer());
         t.setDataSpace(layer, buffer.getColorSpace().getDataSpace());
-        // Avoid showing dimming effect for HDR content when running animation.
+        // Avoid showing dimming effect for HDR content when running animations.
         if (buffer.containsHdrLayers()) {
             t.setDimmingEnabled(layer, false);
         }
@@ -1399,4 +1400,14 @@ public class TransitionAnimation {
         // Approximation of WCAG 2.0 relative luminance.
         return ((r * 8) + (g * 22) + (b * 2)) >> 5;
     }
+
+    /**
+     * For non-system server process, it must call this method to initialize the AttributeCache and
+     * start monitor package change, so the resources can be loaded correctly.
+     */
+    public static void initAttributeCache(Context context, Handler handler) {
+        AttributeCache.init(context);
+        AttributeCache.instance().monitorPackageRemove(handler);
+    }
+
 }

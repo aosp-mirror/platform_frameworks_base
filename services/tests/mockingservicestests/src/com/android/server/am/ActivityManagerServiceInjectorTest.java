@@ -31,7 +31,7 @@ import android.os.UserManager;
 import android.util.Log;
 import android.view.Display;
 
-import com.android.server.ExtendedMockitoRule;
+import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.am.ActivityManagerService.Injector;
 
 import org.junit.Before;

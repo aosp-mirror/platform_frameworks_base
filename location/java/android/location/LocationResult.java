@@ -19,8 +19,11 @@ package android.location;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.location.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -37,6 +40,23 @@ import java.util.function.Predicate;
  * @hide
  */
 public final class LocationResult implements Parcelable {
+    private static final String TAG = "LocationResult";
+
+    // maximum reasonable accuracy, somewhat arbitrarily chosen. this is a very high upper limit, it
+    // could likely be lower, but we only want to throw out really absurd values.
+    private static final float MAX_ACCURACY_M = 1000000;
+
+    // maximum reasonable speed we expect a device to travel at is currently mach 1 (top speed of
+    // current fastest private jet). Higher speed than the value is considered as a malfunction
+    // than a correct reading.
+    private static final float MAX_SPEED_MPS = 343;
+
+    /** Exception representing an invalid location within a {@link LocationResult}. */
+    public static class BadLocationException extends Exception {
+        public BadLocationException(String message) {
+            super(message);
+        }
+    }
 
     /**
      * Creates a new LocationResult from the given locations, making a copy of each location.
@@ -101,18 +121,60 @@ public final class LocationResult implements Parcelable {
      *
      * @hide
      */
-    public @NonNull LocationResult validate() {
+    public @NonNull LocationResult validate() throws BadLocationException {
         long prevElapsedRealtimeNs = 0;
         final int size = mLocations.size();
         for (int i = 0; i < size; ++i) {
             Location location = mLocations.get(i);
-            if (!location.isComplete()) {
-                throw new IllegalArgumentException(
-                        "incomplete location at index " + i + ": " + mLocations);
-            }
-            if (location.getElapsedRealtimeNanos() < prevElapsedRealtimeNs) {
-                throw new IllegalArgumentException(
-                        "incorrectly ordered location at index " + i + ": " + mLocations);
+            if (Flags.locationValidation()) {
+                if (location.getLatitude() < -90.0
+                        || location.getLatitude() > 90.0
+                        || location.getLongitude() < -180.0
+                        || location.getLongitude() > 180.0
+                        || Double.isNaN(location.getLatitude())
+                        || Double.isNaN(location.getLongitude())) {
+                    throw new BadLocationException("location must have valid lat/lng");
+                }
+                if (!location.hasAccuracy()) {
+                    throw new BadLocationException("location must have accuracy");
+                }
+                if (location.getAccuracy() < 0 || location.getAccuracy() > MAX_ACCURACY_M) {
+                    throw new BadLocationException("location must have reasonable accuracy");
+                }
+                if (location.getTime() < 0) {
+                    throw new BadLocationException("location must have valid time");
+                }
+                if (prevElapsedRealtimeNs > location.getElapsedRealtimeNanos()) {
+                    throw new BadLocationException(
+                            "location must have valid monotonically increasing realtime");
+                }
+                if (location.getElapsedRealtimeNanos()
+                        > SystemClock.elapsedRealtimeNanos()) {
+                    throw new BadLocationException("location must not have realtime in the future");
+                }
+                if (!location.isMock()) {
+                    if (location.getProvider() == null) {
+                        throw new BadLocationException("location must have valid provider");
+                    }
+                    if (location.getLatitude() == 0 && location.getLongitude() == 0) {
+                        throw new BadLocationException("location must not be at 0,0");
+                    }
+                }
+
+                if (location.hasSpeed() && (location.getSpeed() < 0
+                        || location.getSpeed() > MAX_SPEED_MPS)) {
+                    Log.w(TAG, "removed bad location speed: " + location.getSpeed());
+                    location.removeSpeed();
+                }
+            } else {
+                if (!location.isComplete()) {
+                    throw new IllegalArgumentException(
+                            "incomplete location at index " + i + ": " + mLocations);
+                }
+                if (location.getElapsedRealtimeNanos() < prevElapsedRealtimeNs) {
+                    throw new IllegalArgumentException(
+                            "incorrectly ordered location at index " + i + ": " + mLocations);
+                }
             }
             prevElapsedRealtimeNs = location.getElapsedRealtimeNanos();
         }

@@ -23,6 +23,7 @@ import static com.android.systemui.media.controls.models.recommendation.Smartspa
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
+import android.app.ActivityOptions;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.app.WallpaperColors;
@@ -80,15 +81,12 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.widget.CachingIconView;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.ActivityIntentHelper;
-import com.android.systemui.R;
-import com.android.systemui.animation.ActivityLaunchAnimator;
-import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
+import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.animation.GhostedViewTransitionAnimatorController;
 import com.android.systemui.bluetooth.BroadcastDialogController;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.models.GutsViewHolder;
 import com.android.systemui.media.controls.models.player.MediaAction;
 import com.android.systemui.media.controls.models.player.MediaButton;
@@ -101,6 +99,7 @@ import com.android.systemui.media.controls.models.recommendation.RecommendationV
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.util.MediaDataUtils;
+import com.android.systemui.media.controls.util.MediaFlags;
 import com.android.systemui.media.controls.util.MediaUiEventLogger;
 import com.android.systemui.media.controls.util.SmallHash;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
@@ -108,6 +107,7 @@ import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.monet.Style;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -118,6 +118,8 @@ import com.android.systemui.surfaceeffects.ripple.RippleAnimationConfig;
 import com.android.systemui.surfaceeffects.ripple.RippleShader;
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimationConfig;
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseController;
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader.Companion.Type;
+import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView;
 import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -132,6 +134,7 @@ import kotlin.Unit;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -189,6 +192,7 @@ public class MediaControlPanel {
     @VisibleForTesting static final long TURBULENCE_NOISE_PLAY_DURATION = 7500L;
 
     private final SeekBarViewModel mSeekBarViewModel;
+    private final MediaFlags mMediaFlags;
     private SeekBarObserver mSeekBarObserver;
     protected final Executor mBackgroundExecutor;
     private final DelayableExecutor mMainExecutor;
@@ -244,12 +248,13 @@ public class MediaControlPanel {
     private String mCurrentBroadcastApp;
     private MultiRippleController mMultiRippleController;
     private TurbulenceNoiseController mTurbulenceNoiseController;
-    private final FeatureFlags mFeatureFlags;
     private final GlobalSettings mGlobalSettings;
 
     private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig;
     private boolean mWasPlaying = false;
     private boolean mButtonClicked = false;
+
+    private final Random mRandom = new Random();
 
     /**
      * Initialize a new control panel
@@ -278,8 +283,8 @@ public class MediaControlPanel {
             ActivityIntentHelper activityIntentHelper,
             NotificationLockscreenUserManager lockscreenUserManager,
             BroadcastDialogController broadcastDialogController,
-            FeatureFlags featureFlags,
-            GlobalSettings globalSettings
+            GlobalSettings globalSettings,
+            MediaFlags mediaFlags
     ) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
@@ -298,6 +303,7 @@ public class MediaControlPanel {
         mActivityIntentHelper = activityIntentHelper;
         mLockscreenUserManager = lockscreenUserManager;
         mBroadcastDialogController = broadcastDialogController;
+        mMediaFlags = mediaFlags;
 
         mSeekBarViewModel.setLogSeek(() -> {
             if (mPackageName != null && mInstanceId != null) {
@@ -306,8 +312,6 @@ public class MediaControlPanel {
             logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
             return Unit.INSTANCE;
         });
-
-        mFeatureFlags = featureFlags;
 
         mGlobalSettings = globalSettings;
         updateAnimatorDurationScale();
@@ -449,7 +453,10 @@ public class MediaControlPanel {
 
         MultiRippleView multiRippleView = vh.getMultiRippleView();
         mMultiRippleController = new MultiRippleController(multiRippleView);
-        mTurbulenceNoiseController = new TurbulenceNoiseController(vh.getTurbulenceNoiseView());
+
+        TurbulenceNoiseView turbulenceNoiseView = vh.getTurbulenceNoiseView();
+        turbulenceNoiseView.setBlendMode(BlendMode.SCREEN);
+        mTurbulenceNoiseController = new TurbulenceNoiseController(turbulenceNoiseView);
 
         mColorSchemeTransition = new ColorSchemeTransition(
                 mContext, mMediaViewHolder, mMultiRippleController, mTurbulenceNoiseController);
@@ -535,7 +542,10 @@ public class MediaControlPanel {
                         mLockscreenUserManager.getCurrentUserId());
                 if (showOverLockscreen) {
                     try {
-                        clickIntent.send();
+                        ActivityOptions opts = ActivityOptions.makeBasic();
+                        opts.setPendingIntentBackgroundActivityStartMode(
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                        clickIntent.send(opts.toBundle());
                     } catch (PendingIntent.CanceledException e) {
                         Log.e(TAG, "Pending intent for " + key + " was cancelled");
                     }
@@ -571,7 +581,10 @@ public class MediaControlPanel {
         // to something which might impact the measurement
         // State refresh interferes with the translation animation, only run it if it's not running.
         if (!mMetadataAnimationHandler.isRunning()) {
-            mMediaViewController.refreshState();
+            // Don't refresh in scene framework, because it will calculate with invalid layout sizes
+            if (!mMediaFlags.isSceneContainerEnabled()) {
+                mMediaViewController.refreshState();
+            }
         }
 
         // Turbulence noise
@@ -582,6 +595,7 @@ public class MediaControlPanel {
             }
             // Color will be correctly updated in ColorSchemeTransition.
             mTurbulenceNoiseController.play(
+                    Type.SIMPLEX_NOISE,
                     mTurbulenceNoiseAnimationConfig
             );
             mMainExecutor.executeDelayed(
@@ -665,7 +679,7 @@ public class MediaControlPanel {
                             mLogger.logOpenBroadcastDialog(mUid, mPackageName, mInstanceId);
                             mCurrentBroadcastApp = device.getName().toString();
                             mBroadcastDialogController.createBroadcastDialog(mCurrentBroadcastApp,
-                                    mPackageName, true, mMediaViewHolder.getSeamlessButton());
+                                    mPackageName, mMediaViewHolder.getSeamlessButton());
                         } else {
                             mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
                             mMediaOutputDialogFactory.create(mPackageName, true,
@@ -684,6 +698,8 @@ public class MediaControlPanel {
                                 try {
                                     BroadcastOptions options = BroadcastOptions.makeBasic();
                                     options.setInteractive(true);
+                                    options.setPendingIntentBackgroundActivityStartMode(
+                                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
                                     deviceIntent.send(options.toBundle());
                                 } catch (PendingIntent.CanceledException e) {
                                     Log.e(TAG, "Device pending intent was canceled");
@@ -778,14 +794,7 @@ public class MediaControlPanel {
             contentDescription =
                     mRecommendationViewHolder.getGutsViewHolder().getGutsText().getText();
         } else if (data != null) {
-            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-                contentDescription = mContext.getString(
-                        R.string.controls_media_smartspace_rec_header);
-            } else {
-                contentDescription = mContext.getString(
-                        R.string.controls_media_smartspace_rec_description,
-                        data.getAppName(mContext));
-            }
+            contentDescription = mContext.getString(R.string.controls_media_smartspace_rec_header);
         } else {
             contentDescription = null;
         }
@@ -806,7 +815,14 @@ public class MediaControlPanel {
         // Capture width & height from views in foreground for artwork scaling in background
         int width = mMediaViewHolder.getAlbumView().getMeasuredWidth();
         int height = mMediaViewHolder.getAlbumView().getMeasuredHeight();
+        if (mMediaFlags.isSceneContainerEnabled() && (width <= 0 || height <= 0)) {
+            // TODO(b/312714128): ensure we have a valid size before setting background
+            width = mMediaViewController.getWidthInSceneContainerPx();
+            height = mMediaViewController.getHeightInSceneContainerPx();
+        }
 
+        final int finalWidth = width;
+        final int finalHeight = height;
         mBackgroundExecutor.execute(() -> {
             // Album art
             ColorScheme mutableColorScheme = null;
@@ -816,7 +832,8 @@ public class MediaControlPanel {
             WallpaperColors wallpaperColors = getWallpaperColor(artworkIcon);
             if (wallpaperColors != null) {
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
-                artwork = addGradientToPlayerAlbum(artworkIcon, mutableColorScheme, width, height);
+                artwork = addGradientToPlayerAlbum(artworkIcon, mutableColorScheme, finalWidth,
+                        finalHeight);
                 isArtworkBound = true;
             } else {
                 // If there's no artwork, use colors from the app icon
@@ -858,8 +875,10 @@ public class MediaControlPanel {
                         TransitionDrawable transitionDrawable = new TransitionDrawable(
                                 new Drawable[]{mPrevArtwork, artwork});
 
-                        scaleTransitionDrawableLayer(transitionDrawable, 0, width, height);
-                        scaleTransitionDrawableLayer(transitionDrawable, 1, width, height);
+                        scaleTransitionDrawableLayer(transitionDrawable, 0, finalWidth,
+                                finalHeight);
+                        scaleTransitionDrawableLayer(transitionDrawable, 1, finalWidth,
+                                finalHeight);
                         transitionDrawable.setLayerGravity(0, Gravity.CENTER);
                         transitionDrawable.setLayerGravity(1, Gravity.CENTER);
                         transitionDrawable.setCrossFadeEnabled(true);
@@ -1171,9 +1190,7 @@ public class MediaControlPanel {
 
                         action.run();
 
-                        if (mFeatureFlags.isEnabled(Flags.UMO_SURFACE_RIPPLE)) {
-                            mMultiRippleController.play(createTouchRippleAnimation(button));
-                        }
+                        mMultiRippleController.play(createTouchRippleAnimation(button));
 
                         if (icon instanceof Animatable) {
                             ((Animatable) icon).start();
@@ -1212,30 +1229,30 @@ public class MediaControlPanel {
     }
 
     private boolean shouldPlayTurbulenceNoise() {
-        return mFeatureFlags.isEnabled(Flags.UMO_TURBULENCE_NOISE) && mButtonClicked && !mWasPlaying
-                && isPlaying();
+        return mButtonClicked && !mWasPlaying && isPlaying();
     }
 
     private TurbulenceNoiseAnimationConfig createTurbulenceNoiseAnimation() {
         return new TurbulenceNoiseAnimationConfig(
                 /* gridCount= */ 2.14f,
                 TurbulenceNoiseAnimationConfig.DEFAULT_LUMINOSITY_MULTIPLIER,
+                /* noiseOffsetX= */ mRandom.nextFloat(),
+                /* noiseOffsetY= */ mRandom.nextFloat(),
+                /* noiseOffsetZ= */ mRandom.nextFloat(),
                 /* noiseMoveSpeedX= */ 0.42f,
                 /* noiseMoveSpeedY= */ 0f,
                 TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_SPEED_Z,
                 /* color= */ mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
                 /* backgroundColor= */ Color.BLACK,
-                /* opacity= */ 51,
                 /* width= */ mMediaViewHolder.getTurbulenceNoiseView().getWidth(),
                 /* height= */ mMediaViewHolder.getTurbulenceNoiseView().getHeight(),
                 TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,
                 /* easeInDuration= */ 1350f,
                 /* easeOutDuration= */ 1350f,
                 getContext().getResources().getDisplayMetrics().density,
-                BlendMode.SCREEN,
-                /* onAnimationEnd= */ null,
                 /* lumaMatteBlendFactor= */ 0.26f,
-                /* lumaMatteOverallBrightness= */ 0.09f
+                /* lumaMatteOverallBrightness= */ 0.09f,
+                /* shouldInverseNoiseLuminosity= */ false
         );
     }
     private void clearButton(final ImageButton button) {
@@ -1302,7 +1319,7 @@ public class MediaControlPanel {
     }
 
     @Nullable
-    private ActivityLaunchAnimator.Controller buildLaunchAnimatorController(
+    private ActivityTransitionAnimator.Controller buildLaunchAnimatorController(
             TransitionLayout player) {
         if (!(player.getParent() instanceof ViewGroup)) {
             // TODO(b/192194319): Throw instead of just logging.
@@ -1313,7 +1330,7 @@ public class MediaControlPanel {
 
         // TODO(b/174236650): Make sure that the carousel indicator also fades out.
         // TODO(b/174236650): Instrument the animation to measure jank.
-        return new GhostedViewLaunchAnimatorController(player,
+        return new GhostedViewTransitionAnimatorController(player,
                 InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER) {
             @Override
             protected float getCurrentTopCornerRadius() {
@@ -1371,10 +1388,6 @@ public class MediaControlPanel {
         PackageManager packageManager = mContext.getPackageManager();
         // Set up media source app's logo.
         Drawable icon = packageManager.getApplicationIcon(applicationInfo);
-        if (!mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-            ImageView headerLogoImageView = mRecommendationViewHolder.getCardIcon();
-            headerLogoImageView.setImageDrawable(icon);
-        }
         fetchAndUpdateRecommendationColors(icon);
 
         // Set up media rec card's tap action if applicable.
@@ -1395,16 +1408,7 @@ public class MediaControlPanel {
 
             // Set up media item cover.
             ImageView mediaCoverImageView = mediaCoverItems.get(itemIndex);
-            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-                bindRecommendationArtwork(
-                        recommendation,
-                        data.getPackageName(),
-                        itemIndex
-                );
-            } else {
-                mediaCoverImageView.post(
-                        () -> mediaCoverImageView.setImageIcon(recommendation.getIcon()));
-            }
+            bindRecommendationArtwork(recommendation, data.getPackageName(), itemIndex);
 
             // Set up the media item's click listener if applicable.
             ViewGroup mediaCoverContainer = mediaCoverContainers.get(itemIndex);
@@ -1449,21 +1453,18 @@ public class MediaControlPanel {
             subtitleView.setText(subtitle);
 
             // Set up progress bar
-            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-                SeekBar mediaProgressBar =
-                        mRecommendationViewHolder.getMediaProgressBars().get(itemIndex);
-                TextView mediaSubtitle =
-                        mRecommendationViewHolder.getMediaSubtitles().get(itemIndex);
-                // show progress bar if the recommended album is played.
-                Double progress = MediaDataUtils.getDescriptionProgress(recommendation.getExtras());
-                if (progress == null || progress <= 0.0) {
-                    mediaProgressBar.setVisibility(View.GONE);
-                    mediaSubtitle.setVisibility(View.VISIBLE);
-                } else {
-                    mediaProgressBar.setProgress((int) (progress * 100));
-                    mediaProgressBar.setVisibility(View.VISIBLE);
-                    mediaSubtitle.setVisibility(View.GONE);
-                }
+            SeekBar mediaProgressBar =
+                    mRecommendationViewHolder.getMediaProgressBars().get(itemIndex);
+            TextView mediaSubtitle = mRecommendationViewHolder.getMediaSubtitles().get(itemIndex);
+            // show progress bar if the recommended album is played.
+            Double progress = MediaDataUtils.getDescriptionProgress(recommendation.getExtras());
+            if (progress == null || progress <= 0.0) {
+                mediaProgressBar.setVisibility(View.GONE);
+                mediaSubtitle.setVisibility(View.VISIBLE);
+            } else {
+                mediaProgressBar.setProgress((int) (progress * 100));
+                mediaProgressBar.setVisibility(View.VISIBLE);
+                mediaSubtitle.setVisibility(View.GONE);
             }
         }
         mSmartspaceMediaItemsCount = NUM_REQUIRED_RECOMMENDATIONS;
@@ -1582,9 +1583,7 @@ public class MediaControlPanel {
         int textPrimaryColor = MediaColorSchemesKt.textPrimaryFromScheme(colorScheme);
         int textSecondaryColor = MediaColorSchemesKt.textSecondaryFromScheme(colorScheme);
 
-        if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-            mRecommendationViewHolder.getCardTitle().setTextColor(textPrimaryColor);
-        }
+        mRecommendationViewHolder.getCardTitle().setTextColor(textPrimaryColor);
 
         mRecommendationViewHolder.getRecommendations()
                 .setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
@@ -1592,12 +1591,9 @@ public class MediaControlPanel {
                 (title) -> title.setTextColor(textPrimaryColor));
         mRecommendationViewHolder.getMediaSubtitles().forEach(
                 (subtitle) -> subtitle.setTextColor(textSecondaryColor));
-        if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
-            mRecommendationViewHolder.getMediaProgressBars().forEach(
-                    (progressBar) -> progressBar.setProgressTintList(
-                            ColorStateList.valueOf(textPrimaryColor))
-            );
-        }
+        mRecommendationViewHolder.getMediaProgressBars().forEach(
+                (progressBar) -> progressBar.setProgressTintList(
+                        ColorStateList.valueOf(textPrimaryColor)));
 
         mRecommendationViewHolder.getGutsViewHolder().setColors(colorScheme);
     }

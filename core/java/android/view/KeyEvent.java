@@ -19,6 +19,7 @@ package android.view;
 import static android.os.IInputConstants.INPUT_EVENT_FLAG_IS_ACCESSIBILITY_EVENT;
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -30,6 +31,8 @@ import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.KeyCharacterMap.KeyData;
+
+import com.android.hardware.input.Flags;
 
 import java.util.concurrent.TimeUnit;
 
@@ -384,7 +387,13 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_META_RIGHT      = 118;
     /** Key code constant: Function modifier key. */
     public static final int KEYCODE_FUNCTION        = 119;
-    /** Key code constant: System Request / Print Screen key. */
+    /**
+     * Key code constant: System Request / Print Screen key.
+     *
+     * This key is sent to the app first and only if the app doesn't handle it, the framework
+     * handles it (to take a screenshot), unlike {@code KEYCODE_TAKE_SCREENSHOT} which is
+     * fully handled by the framework.
+     */
     public static final int KEYCODE_SYSRQ           = 120;
     /** Key code constant: Break / Pause key. */
     public static final int KEYCODE_BREAK           = 121;
@@ -921,14 +930,25 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * User customizable key #4.
      */
     public static final int KEYCODE_MACRO_4 = 316;
-
+    /** Key code constant: To open emoji picker */
+    @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
+    public static final int KEYCODE_EMOJI_PICKER = 317;
+    /**
+     * Key code constant: To take a screenshot
+     *
+     * This key is fully handled by the framework and will not be sent to the foreground app,
+     * unlike {@code KEYCODE_SYSRQ} which is sent to the app first and only if the app
+     * doesn't handle it, the framework handles it (to take a screenshot).
+     */
+    @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
+    public static final int KEYCODE_SCREENSHOT = 318;
 
    /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
     @TestApi
-    public static final int LAST_KEYCODE = KEYCODE_MACRO_4;
+    public static final int LAST_KEYCODE = KEYCODE_SCREENSHOT;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -1990,8 +2010,23 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Returns whether this key will be sent to the
-     * {@link android.media.session.MediaSession.Callback} if not handled.
+     * Returns whether this key will be sent to the {@link
+     * android.media.session.MediaSession.Callback} if not handled.
+     *
+     * <p>The following key codes are considered {@link android.media.session.MediaSession} keys:
+     *
+     * <ul>
+     *   <li>{@link #KEYCODE_MEDIA_PLAY}
+     *   <li>{@link #KEYCODE_MEDIA_PAUSE}
+     *   <li>{@link #KEYCODE_MEDIA_PLAY_PAUSE}
+     *   <li>{@link #KEYCODE_HEADSETHOOK}
+     *   <li>{@link #KEYCODE_MEDIA_STOP}
+     *   <li>{@link #KEYCODE_MEDIA_NEXT}
+     *   <li>{@link #KEYCODE_MEDIA_PREVIOUS}
+     *   <li>{@link #KEYCODE_MEDIA_REWIND}
+     *   <li>{@link #KEYCODE_MEDIA_RECORD}
+     *   <li>{@link #KEYCODE_MEDIA_FAST_FORWARD}
+     * </ul>
      */
     public static final boolean isMediaSessionKey(int keyCode) {
         switch (keyCode) {
@@ -2050,6 +2085,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN:
             case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT:
             case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT:
+            case KeyEvent.KEYCODE_STEM_PRIMARY:
                 return true;
         }
 
@@ -2066,6 +2102,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_STEM_2:
             case KeyEvent.KEYCODE_STEM_3:
             case KeyEvent.KEYCODE_WAKEUP:
+            case KeyEvent.KEYCODE_STEM_PRIMARY:
                 return true;
         }
         return false;

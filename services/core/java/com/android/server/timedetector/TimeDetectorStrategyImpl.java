@@ -30,6 +30,7 @@ import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
 import android.app.time.TimeCapabilities;
 import android.app.time.TimeCapabilitiesAndConfig;
+import android.app.time.TimeConfiguration;
 import android.app.time.TimeState;
 import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
@@ -48,10 +49,10 @@ import com.android.server.timezonedetector.ArrayMapWithHistory;
 import com.android.server.timezonedetector.ReferenceWithHistory;
 import com.android.server.timezonedetector.StateChangeListener;
 
-import java.io.PrintWriter;
-import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -93,6 +94,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     @NonNull
     private final Environment mEnvironment;
+
+    @NonNull
+    private final ServiceConfigAccessor mServiceConfigAccessor;
+
+    @GuardedBy("this")
+    @NonNull private final List<StateChangeListener> mStateChangeListeners = new ArrayList<>();
 
     @GuardedBy("this")
     @NonNull
@@ -139,16 +146,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
      */
     public interface Environment {
 
-        /**
-         * Sets a {@link StateChangeListener} that will be invoked when there are any changes that
-         * could affect the content of {@link ConfigurationInternal}.
-         * This is invoked during system server setup.
-         */
-        void setConfigurationInternalChangeListener(@NonNull StateChangeListener listener);
-
-        /** Returns the {@link ConfigurationInternal} for the current user. */
-        @NonNull ConfigurationInternal getCurrentUserConfigurationInternal();
-
         /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
         void acquireWakeLock();
 
@@ -174,16 +171,15 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         /** Release the wake lock acquired by a call to {@link #acquireWakeLock()}. */
         void releaseWakeLock();
 
-
         /**
          * Adds a standalone entry to the time debug log.
          */
         void addDebugLogEntry(@NonNull String logMsg);
 
         /**
-         * Dumps the time debug log to the supplied {@link PrintWriter}.
+         * Dumps the time debug log to the supplied {@link IndentingPrintWriter}.
          */
-        void dumpDebugLog(PrintWriter printWriter);
+        void dumpDebugLog(IndentingPrintWriter ipw);
 
         /**
          * Requests that the supplied runnable is invoked asynchronously.
@@ -195,19 +191,23 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             @NonNull Context context, @NonNull Handler handler,
             @NonNull ServiceConfigAccessor serviceConfigAccessor) {
 
-        TimeDetectorStrategyImpl.Environment environment =
-                new EnvironmentImpl(context, handler, serviceConfigAccessor);
-        return new TimeDetectorStrategyImpl(environment);
+        TimeDetectorStrategyImpl.Environment environment = new EnvironmentImpl(context, handler);
+        return new TimeDetectorStrategyImpl(environment, serviceConfigAccessor);
     }
 
     @VisibleForTesting
-    TimeDetectorStrategyImpl(@NonNull Environment environment) {
+    TimeDetectorStrategyImpl(@NonNull Environment environment,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor) {
         mEnvironment = Objects.requireNonNull(environment);
+        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
 
         synchronized (this) {
-            mEnvironment.setConfigurationInternalChangeListener(
-                    this::handleConfigurationInternalChanged);
-            mCurrentConfigurationInternal = mEnvironment.getCurrentUserConfigurationInternal();
+            // Listen for config and user changes and get an initial snapshot of configuration.
+            StateChangeListener stateChangeListener = this::handleConfigurationInternalMaybeChanged;
+            mServiceConfigAccessor.addConfigurationInternalChangeListener(stateChangeListener);
+
+            // Initialize mCurrentConfigurationInternal with a starting value.
+            updateCurrentConfigurationInternalIfRequired("TimeDetectorStrategyImpl:");
         }
     }
 
@@ -378,7 +378,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             @Origin int origin = ORIGIN_MANUAL;
             UnixEpochTime unixEpochTime = timeState.getUnixEpochTime();
             setSystemClockAndConfidenceUnderWakeLock(
-                    origin, unixEpochTime, confidence, "setTimeZoneState()");
+                    origin, unixEpochTime, confidence, "setTimeState()");
         } finally {
             mEnvironment.releaseWakeLock();
         }
@@ -421,6 +421,57 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
     }
 
+    @GuardedBy("this")
+    private void notifyStateChangeListenersAsynchronously() {
+        for (StateChangeListener listener : mStateChangeListeners) {
+            // This is queuing asynchronous notification, so no need to surrender the "this" lock.
+            mEnvironment.runAsync(listener::onChange);
+        }
+    }
+
+    @Override
+    public synchronized void addChangeListener(@NonNull StateChangeListener listener) {
+        mStateChangeListeners.add(listener);
+    }
+
+    @Override
+    public synchronized TimeCapabilitiesAndConfig getCapabilitiesAndConfig(@UserIdInt int userId,
+            boolean bypassUserPolicyChecks) {
+        ConfigurationInternal configurationInternal;
+        if (mCurrentConfigurationInternal.getUserId() == userId) {
+            // Use the cached snapshot we have.
+            configurationInternal = mCurrentConfigurationInternal;
+        } else {
+            // This is not a common case: It would be unusual to want the configuration for a user
+            // other than the "current" user, but it is supported because it is trivial to do so.
+            // Unlike the current user config, there's no cached copy to worry about so read it
+            // directly from mServiceConfigAccessor.
+            configurationInternal = mServiceConfigAccessor.getConfigurationInternal(userId);
+        }
+        return configurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks);
+    }
+
+    @Override
+    public synchronized boolean updateConfiguration(@UserIdInt int userId,
+            @NonNull TimeConfiguration configuration, boolean bypassUserPolicyChecks) {
+        // Write-through
+        boolean updateSuccessful = mServiceConfigAccessor.updateConfiguration(
+                userId, configuration, bypassUserPolicyChecks);
+
+        // The update above will trigger config update listeners asynchronously if they are needed,
+        // but that could mean an immediate call to getCapabilitiesAndConfig() for the current user
+        // wouldn't see the update. So, handle the cache update and notifications here. When the
+        // async update listener triggers it will find everything already up to date and do nothing.
+        if (updateSuccessful) {
+            String logMsg = "updateConfiguration:"
+                    + " userId=" + userId
+                    + ", configuration=" + configuration
+                    + ", bypassUserPolicyChecks=" + bypassUserPolicyChecks;
+            updateCurrentConfigurationInternalIfRequired(logMsg);
+        }
+        return updateSuccessful;
+    }
+
     @Override
     public synchronized void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion suggestion) {
         // Empty time suggestion means that telephony network connectivity has been lost.
@@ -448,26 +499,49 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         doAutoTimeDetection(reason);
     }
 
-    private synchronized void handleConfigurationInternalChanged() {
-        ConfigurationInternal currentUserConfig =
-                mEnvironment.getCurrentUserConfigurationInternal();
-        String logMsg = "handleConfigurationInternalChanged:"
-                + " oldConfiguration=" + mCurrentConfigurationInternal
-                + ", newConfiguration=" + currentUserConfig;
-        addDebugLogEntry(logMsg);
-        mCurrentConfigurationInternal = currentUserConfig;
+    /**
+     * Handles a configuration change notification.
+     */
+    private synchronized void handleConfigurationInternalMaybeChanged() {
+        String logMsg = "handleConfigurationInternalMaybeChanged:";
+        updateCurrentConfigurationInternalIfRequired(logMsg);
+    }
 
-        boolean autoDetectionEnabled =
-                mCurrentConfigurationInternal.getAutoDetectionEnabledBehavior();
-        // When automatic time detection is enabled we update the system clock instantly if we can.
-        // Conversely, when automatic time detection is disabled we leave the clock as it is.
-        if (autoDetectionEnabled) {
-            String reason = "Auto time zone detection config changed.";
-            doAutoTimeDetection(reason);
-        } else {
-            // CLOCK_PARANOIA: We are losing "control" of the system clock so we cannot predict what
-            // it should be in future.
-            mLastAutoSystemClockTimeSet = null;
+    @GuardedBy("this")
+    private void updateCurrentConfigurationInternalIfRequired(@NonNull String logMsg) {
+        ConfigurationInternal newCurrentConfigurationInternal =
+                mServiceConfigAccessor.getCurrentUserConfigurationInternal();
+        // mCurrentConfigurationInternal is null the first time this method is called.
+        ConfigurationInternal oldCurrentConfigurationInternal = mCurrentConfigurationInternal;
+
+        // If the configuration actually changed, update the cached copy synchronously and do
+        // other necessary house-keeping / (async) listener notifications.
+        if (!newCurrentConfigurationInternal.equals(oldCurrentConfigurationInternal)) {
+            mCurrentConfigurationInternal = newCurrentConfigurationInternal;
+
+            logMsg = new StringBuilder(logMsg)
+                    .append(" [oldConfiguration=").append(oldCurrentConfigurationInternal)
+                    .append(", newConfiguration=").append(newCurrentConfigurationInternal)
+                    .append("]")
+                    .toString();
+            addDebugLogEntry(logMsg);
+
+            // The configuration and maybe the status changed so notify listeners.
+            notifyStateChangeListenersAsynchronously();
+
+            boolean autoDetectionEnabled =
+                    mCurrentConfigurationInternal.getAutoDetectionEnabledBehavior();
+            // When automatic time detection is enabled we update the system clock instantly if we
+            // can. Conversely, when automatic time detection is disabled we leave the clock as it
+            // is.
+            if (autoDetectionEnabled) {
+                String reason = "Auto time detection config changed.";
+                doAutoTimeDetection(reason);
+            } else {
+                // CLOCK_PARANOIA: We are losing "control" of the system clock so we cannot predict
+                // what it should be in future.
+                mLastAutoSystemClockTimeSet = null;
+            }
         }
     }
 
@@ -489,13 +563,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         ipw.println("[Capabilities="
                 + mCurrentConfigurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks)
                 + "]");
-        long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
-        ipw.printf("mEnvironment.elapsedRealtimeMillis()=%s (%s)\n",
-                Duration.ofMillis(elapsedRealtimeMillis), elapsedRealtimeMillis);
-        long systemClockMillis = mEnvironment.systemClockMillis();
-        ipw.printf("mEnvironment.systemClockMillis()=%s (%s)\n",
-                Instant.ofEpochMilli(systemClockMillis), systemClockMillis);
-        ipw.println("mEnvironment.systemClockConfidence()=" + mEnvironment.systemClockConfidence());
+
+        ipw.println("mEnvironment:");
+        ipw.increaseIndent();
+        mEnvironment.dumpDebugLog(ipw);
+        ipw.decreaseIndent();
 
         ipw.println("Time change log:");
         ipw.increaseIndent(); // level 2
@@ -523,6 +595,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         ipw.decreaseIndent(); // level 2
 
         ipw.decreaseIndent(); // level 1
+    }
+
+    @VisibleForTesting
+    public synchronized ConfigurationInternal getCachedCapabilitiesAndConfigForTests() {
+        return mCurrentConfigurationInternal;
     }
 
     @GuardedBy("this")

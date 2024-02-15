@@ -73,6 +73,9 @@ public class AutomaticBrightnessStrategy {
     // the user has enabled the auto-brightness from the settings, it is disabled because the
     // display is off
     private boolean mIsAutoBrightnessEnabled = false;
+    // Indicates if auto-brightness is disabled due to the display being off. Needed for metric
+    // purposes.
+    private boolean mAutoBrightnessDisabledDueToDisplayOff;
     // If the auto-brightness model for the last manual changes done by the user.
     private boolean mIsShortTermModelActive = false;
 
@@ -96,24 +99,22 @@ public class AutomaticBrightnessStrategy {
      * AutomaticBrightnessController accounting for any manual changes made by the user.
      */
     public void setAutoBrightnessState(int targetDisplayState,
-            boolean allowAutoBrightnessWhileDozingConfig,
-            float brightnessState, int brightnessReason, int policy,
+            boolean allowAutoBrightnessWhileDozingConfig, int brightnessReason, int policy,
             float lastUserSetScreenBrightness, boolean userSetBrightnessChanged) {
         final boolean autoBrightnessEnabledInDoze =
                 allowAutoBrightnessWhileDozingConfig
                         && Display.isDozeState(targetDisplayState);
         mIsAutoBrightnessEnabled = shouldUseAutoBrightness()
                 && (targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze)
-                && (Float.isNaN(brightnessState)
-                || brightnessReason == BrightnessReason.REASON_TEMPORARY
-                || brightnessReason == BrightnessReason.REASON_BOOST)
-                && mAutomaticBrightnessController != null
-                && brightnessReason != BrightnessReason.REASON_FOLLOWER;
-        final boolean autoBrightnessDisabledDueToDisplayOff = shouldUseAutoBrightness()
+                && brightnessReason != BrightnessReason.REASON_OVERRIDE
+                && brightnessReason != BrightnessReason.REASON_OFFLOAD
+                && mAutomaticBrightnessController != null;
+        mAutoBrightnessDisabledDueToDisplayOff = shouldUseAutoBrightness()
                 && !(targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze);
         final int autoBrightnessState = mIsAutoBrightnessEnabled
+                    && brightnessReason != BrightnessReason.REASON_FOLLOWER
                 ? AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED
-                : autoBrightnessDisabledDueToDisplayOff
+                : mAutoBrightnessDisabledDueToDisplayOff
                         ? AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE
                         : AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED;
 
@@ -123,6 +124,10 @@ public class AutomaticBrightnessStrategy {
 
     public boolean isAutoBrightnessEnabled() {
         return mIsAutoBrightnessEnabled;
+    }
+
+    public boolean isAutoBrightnessDisabledDueToDisplayOff() {
+        return mAutoBrightnessDisabledDueToDisplayOff;
     }
 
     /**
@@ -198,14 +203,11 @@ public class AutomaticBrightnessStrategy {
      * Sets the pending auto-brightness adjustments in the system settings. Executed
      * when there is a change in the brightness system setting, or when there is a user switch.
      */
-    public void updatePendingAutoBrightnessAdjustments(boolean userSwitch) {
+    public void updatePendingAutoBrightnessAdjustments() {
         final float adj = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f, UserHandle.USER_CURRENT);
         mPendingAutoBrightnessAdjustment = Float.isNaN(adj) ? Float.NaN
                 : BrightnessUtils.clampBrightnessAdjustment(adj);
-        if (userSwitch) {
-            processPendingAutoBrightnessAdjustments();
-        }
     }
 
     /**
@@ -287,8 +289,6 @@ public class AutomaticBrightnessStrategy {
         mAutoBrightnessAdjustmentReasonsFlags = isTemporaryAutoBrightnessAdjustmentApplied()
                 ? BrightnessReason.ADJUSTMENT_AUTO_TEMP
                 : BrightnessReason.ADJUSTMENT_AUTO;
-        mAppliedAutoBrightness = BrightnessUtils.isValidBrightnessValue(brightnessState)
-                || brightnessState == PowerManager.BRIGHTNESS_OFF_FLOAT;
         float newAutoBrightnessAdjustment =
                 (mAutomaticBrightnessController != null)
                         ? mAutomaticBrightnessController.getAutomaticScreenBrightnessAdjustment()
@@ -345,8 +345,7 @@ public class AutomaticBrightnessStrategy {
     /**
      * Sets if the auto-brightness is applied on the latest brightness change.
      */
-    @VisibleForTesting
-    void setAutoBrightnessApplied(boolean autoBrightnessApplied) {
+    public void setAutoBrightnessApplied(boolean autoBrightnessApplied) {
         mAppliedAutoBrightness = autoBrightnessApplied;
     }
 

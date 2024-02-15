@@ -33,15 +33,11 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 충전 중"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 고속 충전 중"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 저속 충전 중"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 배터리 보호를 위해 충전 최적화됨"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 충전 액세서리 문제"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"잠금 해제하려면 메뉴를 누르세요."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="5369697538556777542">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 배터리 보호를 위해 충전 일시중지"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="6384203333154532125">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 충전 액세서리 확인"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"네트워크 잠김"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM 없음"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM을 추가하세요."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM이 없거나 SIM을 읽을 수 없습니다. SIM을 추가하세요."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM을 사용할 수 없습니다."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM이 영구적으로 비활성화되었습니다.\n 다른 SIM을 사용하려면 무선 서비스 제공업체에 문의하시기 바랍니다."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM이 잠김 상태입니다."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM이 PUK 잠김 상태입니다."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM 잠금 해제 중…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"기기가 잠겨 PIN을 입력해야 합니다."</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"기기가 잠겨 비밀번호를 입력해야 합니다."</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"기기가 잠겨 패턴을 입력해야 합니다."</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"미사용 시간에 업데이트가 설치됩니다."</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"기기를 사용하지 않을 때 업데이트가 설치됩니다."</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"보안을 강화해야 합니다. 한동안 PIN이 사용되지 않았습니다."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"보안을 강화해야 합니다. 한동안 비밀번호가 사용되지 않았습니다."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"보안을 강화해야 합니다. 한동안 패턴이 사용되지 않았습니다."</string>
@@ -129,6 +125,6 @@
     <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"나중에 업데이트를 설치하려면 비밀번호를 입력하세요."</string>
     <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"나중에 업데이트를 설치하려면 패턴을 그리세요."</string>
     <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"기기가 업데이트되었습니다. 계속하려면 PIN을 입력하세요."</string>
-    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"기기가 업데이트되었습니다. 계속 진행하려면 비밀번호를 입력하세요."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"기기가 업데이트되었습니다. 계속하려면 비밀번호를 입력하세요."</string>
     <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"기기가 업데이트되었습니다. 계속하려면 패턴을 그리세요."</string>
 </resources>

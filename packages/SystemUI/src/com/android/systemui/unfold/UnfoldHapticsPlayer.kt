@@ -79,15 +79,15 @@ constructor(
 
     private val hapticsScale: Float
         get() {
-            val intensityString = SystemProperties.get("persist.unfold.haptics_scale", "0.1")
-            return intensityString.toFloatOrNull() ?: 0.1f
+            val intensityString = SystemProperties.get("persist.unfold.haptics_scale", "0.5")
+            return intensityString.toFloatOrNull() ?: 0.5f
         }
 
     private val hapticsScaleTick: Float
         get() {
             val intensityString =
-                SystemProperties.get("persist.unfold.haptics_scale_end_tick", "0.6")
-            return intensityString.toFloatOrNull() ?: 0.6f
+                SystemProperties.get("persist.unfold.haptics_scale_end_tick", "1.0")
+            return intensityString.toFloatOrNull() ?: 1.0f
         }
 
     private val primitivesCount: Int

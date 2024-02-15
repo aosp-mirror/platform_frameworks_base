@@ -111,6 +111,7 @@ public class BubblesManager {
     // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
     private final List<NotifCallback> mCallbacks = new ArrayList<>();
     private final StatusBarWindowCallback mStatusBarWindowCallback;
+    private boolean mPanelExpanded;
 
     /**
      * Creates {@link BubblesManager}, returns {@code null} if Optional {@link Bubbles} not present
@@ -242,8 +243,12 @@ public class BubblesManager {
         // Store callback in a field so it won't get GC'd
         mStatusBarWindowCallback =
                 (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, isDozing,
-                        panelExpanded, isDreaming) ->
+                        panelExpanded, isDreaming) -> {
+                    if (panelExpanded != mPanelExpanded) {
+                        mPanelExpanded = panelExpanded;
                         mBubbles.onNotificationPanelExpandedChanged(panelExpanded);
+                    }
+                };
         notificationShadeWindowController.registerCallback(mStatusBarWindowCallback);
 
         mSysuiProxy = new Bubbles.SysuiProxy() {
@@ -621,13 +626,9 @@ public class BubblesManager {
     }
 
     private boolean isDismissableFromBubbles(NotificationEntry e) {
-        if (mNotifPipelineFlags.allowDismissOngoing()) {
-            // Bubbles are only accessible from the unlocked state,
-            // so we can calculate this from the Notification flags only.
-            return e.isDismissableForState(/*isLocked=*/ false);
-        } else {
-            return e.legacyIsDismissableRecursive();
-        }
+        // Bubbles are only accessible from the unlocked state,
+        // so we can calculate this from the Notification flags only.
+        return e.isDismissableForState(/*isLocked=*/ false);
     }
 
     private boolean shouldBubbleUp(NotificationEntry e) {

@@ -16,12 +16,15 @@
 
 package android.widget;
 
+import static android.appwidget.flags.Flags.drawDataParcel;
+
 import static com.android.internal.R.id.pending_intent_tag;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
@@ -39,11 +42,15 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Looper;
 import android.os.Parcel;
+import android.util.AttributeSet;
 import android.util.SizeF;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -58,6 +65,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -407,6 +415,25 @@ public class RemoteViewsTest {
         View view = parent.apply(mContext, mContainer);
         assertNull(view.findViewById(R.id.text));
         assertNotNull(view.findViewById(R.id.light_background_text));
+    }
+
+    @Test
+    public void remoteCanvasCanAccessDrawInstructions() {
+        if (!drawDataParcel()) {
+            return;
+        }
+        final byte[] bytes = new byte[] {'h', 'e', 'l', 'l', 'o'};
+        final RemoteViews.DrawInstructions drawInstructions =
+                new RemoteViews.DrawInstructions.Builder(Collections.singletonList(bytes)).build();
+        final RemoteViews rv = new RemoteViews(drawInstructions);
+        final PendingIntent pi = PendingIntent.getActivity(mContext, 0,
+                new Intent(Intent.ACTION_VIEW), PendingIntent.FLAG_IMMUTABLE);
+        final Intent i = new Intent().putExtra("TEST", "Success");
+        final int viewId = 1;
+        rv.setPendingIntentTemplate(viewId, pi);
+        rv.setOnClickFillInIntent(viewId, i);
+        final View view = rv.apply(mContext, mContainer);
+        assertEquals(drawInstructions, view.getTag());
     }
 
     private RemoteViews createViewChained(int depth, String... texts) {
@@ -826,5 +853,99 @@ public class RemoteViewsTest {
         verify(visitor, times(1)).accept(eq(icon2S.getUri()));
         verify(visitor, times(1)).accept(eq(icon3S.getUri()));
         verify(visitor, times(1)).accept(eq(icon4S.getUri()));
+    }
+
+    @Test
+    public void visitUris_intents() {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+
+        Uri fillIntentUri = Uri.parse("content://intent/fill");
+        views.setOnCheckedChangeResponse(
+                R.id.layout,
+                RemoteViews.RemoteResponse.fromFillInIntent(new Intent("action", fillIntentUri)));
+
+        Uri pendingIntentUri = Uri.parse("content://intent/pending");
+        PendingIntent pendingIntent = getPendingIntentWithUri(pendingIntentUri);
+        views.setOnClickResponse(
+                R.id.layout,
+                RemoteViews.RemoteResponse.fromPendingIntent(pendingIntent));
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        views.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(fillIntentUri));
+        verify(visitor, times(1)).accept(eq(pendingIntentUri));
+    }
+
+    private PendingIntent getPendingIntentWithUri(Uri uri) {
+        return PendingIntent.getActivity(mContext, 0,
+                new Intent("action", uri),
+                PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    @Test
+    public void layoutInflaterFactory_nothingSet_returnsNull() {
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        assertNull(rv.getLayoutInflaterFactory());
+    }
+
+    @Test
+    public void layoutInflaterFactory_replacesImageView_viewReplaced() {
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        final View replacement = new FrameLayout(mContext);
+        replacement.setId(1337);
+
+        LayoutInflater.Factory2 factory = createLayoutInflaterFactory("ImageView", replacement);
+        rv.setLayoutInflaterFactory(factory);
+
+        // Now inflate the views.
+        View inflated = rv.apply(mContext, mContainer);
+
+        assertEquals(factory, rv.getLayoutInflaterFactory());
+        View replacedFrameLayout = inflated.findViewById(1337);
+        assertNotNull(replacedFrameLayout);
+        assertEquals(replacement, replacedFrameLayout);
+        // ImageView should be fully replaced.
+        assertNull(inflated.findViewById(R.id.image));
+    }
+
+    @Test
+    public void layoutInflaterFactory_replacesImageView_settersStillFunctional() {
+        final RemoteViews rv = new RemoteViews(mPackage, R.layout.remote_views_test);
+        final TextView replacement = new TextView(mContext);
+        replacement.setId(R.id.text);
+        final String testText = "testText";
+        rv.setLayoutInflaterFactory(createLayoutInflaterFactory("TextView", replacement));
+        rv.setTextViewText(R.id.text, testText);
+
+
+        // Now inflate the views.
+        View inflated = rv.apply(mContext, mContainer);
+
+        TextView replacedTextView = inflated.findViewById(R.id.text);
+        assertSame(replacement, replacedTextView);
+        assertEquals(testText, replacedTextView.getText());
+    }
+
+    private static LayoutInflater.Factory2 createLayoutInflaterFactory(String viewTypeToReplace,
+            View replacementView) {
+        return new LayoutInflater.Factory2() {
+            @Nullable
+            @Override
+            public View onCreateView(@Nullable View parent, @NonNull String name,
+                                     @NonNull Context context, @NonNull AttributeSet attrs) {
+                if (viewTypeToReplace.equals(name)) {
+                    return replacementView;
+                }
+
+                return null;
+            }
+
+            @Nullable
+            @Override
+            public View onCreateView(@NonNull String name, @NonNull Context context,
+                                     @NonNull AttributeSet attrs) {
+                return null;
+            }
+        };
     }
 }

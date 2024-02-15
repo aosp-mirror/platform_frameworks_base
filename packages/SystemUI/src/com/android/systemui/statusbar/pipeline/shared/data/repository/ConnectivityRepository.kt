@@ -31,7 +31,7 @@ import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.annotation.ArrayRes
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application

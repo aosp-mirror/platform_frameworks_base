@@ -25,7 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode.ACTION_DEMO
 import com.android.systemui.demomode.DemoMode.COMMAND_STATUS
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.FakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -48,7 +48,7 @@ class DemoModeControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var dumpManager: DumpManager
 
-    private val globalSettings = FakeSettings()
+    private val globalSettings = FakeGlobalSettings()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -94,7 +94,7 @@ class DemoModeControllerTest : SysuiTestCase() {
         intent.putExtra("command", command)
         args.forEach { arg -> intent.putExtra(arg.key, arg.value) }
 
-        fakeBroadcastDispatcher.registeredReceivers.forEach { it.onReceive(context, intent) }
+        fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(context, intent)
     }
 
     companion object {

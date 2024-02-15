@@ -190,7 +190,7 @@ class ControlsControllerImpl @Inject constructor (
                     PREFS_CONTROLS_SEEDING_COMPLETED, mutableSetOf<String>())
                 val servicePackageSet = serviceInfoSet.map { it.packageName }
                 prefs.edit().putStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
-                    completedSeedingPackageSet.intersect(servicePackageSet)).apply()
+                    completedSeedingPackageSet?.intersect(servicePackageSet) ?: emptySet()).apply()
 
                 var changed = false
                 favoriteComponentSet.subtract(serviceInfoSet).forEach {
@@ -227,7 +227,7 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     init {
-        dumpManager.registerDumpable(javaClass.name, this)
+        dumpManager.registerDumpable(this)
         resetFavorites()
         userChanging = false
         context.registerReceiver(

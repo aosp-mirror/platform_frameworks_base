@@ -36,13 +36,15 @@ import androidx.annotation.NonNull;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.pip.PipBoundsAlgorithm;
-import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipKeepClearAlgorithmInterface;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -62,9 +64,10 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
     public TvPipBoundsAlgorithm(Context context,
             @NonNull TvPipBoundsState tvPipBoundsState,
             @NonNull PipSnapAlgorithm pipSnapAlgorithm,
-            @NonNull PipSizeSpecHandler pipSizeSpecHandler) {
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState,
+            @NonNull SizeSpecSource sizeSpecSource) {
         super(context, tvPipBoundsState, pipSnapAlgorithm,
-                new PipKeepClearAlgorithmInterface() {}, pipSizeSpecHandler);
+                new PipKeepClearAlgorithmInterface() {}, pipDisplayLayoutState, sizeSpecSource);
         this.mTvPipBoundsState = tvPipBoundsState;
         this.mKeepClearAlgorithm = new TvPipKeepClearAlgorithm();
         reloadResources(context);
@@ -99,10 +102,27 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
                 && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0
                 && !mTvPipBoundsState.isTvPipManuallyCollapsed();
         if (isPipExpanded) {
-            updateGravityOnExpansionToggled(/* expanding= */ true);
+            updateGravityOnExpansionToggled(/* expanding= */ isPipExpanded);
         }
         mTvPipBoundsState.setTvPipExpanded(isPipExpanded);
         return adjustBoundsForTemporaryDecor(getTvPipPlacement().getBounds());
+    }
+
+    @Override
+    public Rect getEntryDestinationBoundsIgnoringKeepClearAreas() {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: getEntryDestinationBoundsIgnoringKeepClearAreas()", TAG);
+
+        updateExpandedPipSize();
+        final boolean isPipExpanded = mTvPipBoundsState.isTvExpandedPipSupported()
+                && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0
+                && !mTvPipBoundsState.isTvPipManuallyCollapsed();
+        if (isPipExpanded) {
+            updateGravityOnExpansionToggled(/* expanding= */ isPipExpanded);
+        }
+        mTvPipBoundsState.setTvPipExpanded(isPipExpanded);
+        return adjustBoundsForTemporaryDecor(getTvPipPlacement(Collections.emptySet(),
+                Collections.emptySet()).getUnstashedBounds());
     }
 
     /** Returns the current bounds adjusted to the new aspect ratio, if valid. */
@@ -131,15 +151,24 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
      */
     @NonNull
     public Placement getTvPipPlacement() {
+        final Set<Rect> restrictedKeepClearAreas = mTvPipBoundsState.getRestrictedKeepClearAreas();
+        final Set<Rect> unrestrictedKeepClearAreas =
+                mTvPipBoundsState.getUnrestrictedKeepClearAreas();
+
+        return getTvPipPlacement(restrictedKeepClearAreas, unrestrictedKeepClearAreas);
+    }
+
+    /**
+     * Calculates the PiP bounds.
+     */
+    @NonNull
+    private Placement getTvPipPlacement(Set<Rect> restrictedKeepClearAreas,
+            Set<Rect> unrestrictedKeepClearAreas) {
         final Size pipSize = getPipSize();
         final Rect displayBounds = mTvPipBoundsState.getDisplayBounds();
         final Size screenSize = new Size(displayBounds.width(), displayBounds.height());
         final Rect insetBounds = new Rect();
         getInsetBounds(insetBounds);
-
-        final Set<Rect> restrictedKeepClearAreas = mTvPipBoundsState.getRestrictedKeepClearAreas();
-        final Set<Rect> unrestrictedKeepClearAreas =
-                mTvPipBoundsState.getUnrestrictedKeepClearAreas();
 
         mKeepClearAlgorithm.setGravity(mTvPipBoundsState.getTvPipGravity());
         mKeepClearAlgorithm.setScreenSize(screenSize);
@@ -187,8 +216,11 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
 
         int updatedGravity;
         if (expanding) {
-            // Save collapsed gravity.
-            mTvPipBoundsState.setTvPipPreviousCollapsedGravity(mTvPipBoundsState.getTvPipGravity());
+            if (!mTvPipBoundsState.isTvPipExpanded()) {
+                // Save collapsed gravity.
+                mTvPipBoundsState.setTvPipPreviousCollapsedGravity(
+                        mTvPipBoundsState.getTvPipGravity());
+            }
 
             if (mTvPipBoundsState.getTvFixedPipOrientation() == ORIENTATION_HORIZONTAL) {
                 updatedGravity = Gravity.CENTER_HORIZONTAL | currentY;
@@ -291,7 +323,7 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
                 expandedSize = mTvPipBoundsState.getTvExpandedSize();
             } else {
                 int maxHeight = displayLayout.height()
-                        - (2 * mPipSizeSpecHandler.getScreenEdgeInsets().y)
+                        - (2 * mPipDisplayLayoutState.getScreenEdgeInsets().y)
                         - pipDecorations.top - pipDecorations.bottom;
                 float aspectRatioHeight = mFixedExpandedWidthInPx / expandedRatio;
 
@@ -311,7 +343,7 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
                 expandedSize = mTvPipBoundsState.getTvExpandedSize();
             } else {
                 int maxWidth = displayLayout.width()
-                        - (2 * mPipSizeSpecHandler.getScreenEdgeInsets().x)
+                        - (2 * mPipDisplayLayoutState.getScreenEdgeInsets().x)
                         - pipDecorations.left - pipDecorations.right;
                 float aspectRatioWidth = mFixedExpandedHeightInPx * expandedRatio;
                 if (maxWidth > aspectRatioWidth) {

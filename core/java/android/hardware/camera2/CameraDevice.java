@@ -16,9 +16,12 @@
 
 package android.hardware.camera2;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.InputConfiguration;
@@ -28,10 +31,13 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Handler;
 import android.view.Surface;
 
+import com.android.internal.camera.flags.Flags;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * <p>The CameraDevice class is a representation of a single camera connected to an
@@ -283,7 +289,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see StreamConfigurationMap#getInputFormats
      * @see StreamConfigurationMap#getInputSizes
      * @see StreamConfigurationMap#getValidOutputFormatsForInput
-     * @see StreamConfigurationMap#getOutputSizes
+     * @see StreamConfigurationMap#getOutputSizes(int)
+     * @see StreamConfigurationMap#getOutputSizes(Class)
      * @see android.media.ImageWriter
      * @see android.media.ImageReader
      * @deprecated Please use {@link
@@ -540,14 +547,6 @@ public abstract class CameraDevice implements AutoCloseable {
      *   or configuring it to use one of the supported
      *   {@link android.media.CamcorderProfile CamcorderProfiles}.</li>
      *
-     * <li>For efficient YUV processing with {@link android.renderscript}:
-     *   Create a RenderScript
-     *   {@link android.renderscript.Allocation Allocation} with a supported YUV
-     *   type, the IO_INPUT flag, and one of the sizes returned by
-     *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(Allocation.class)},
-     *   Then obtain the Surface with
-     *   {@link android.renderscript.Allocation#getSurface}.</li>
-     *
      * <li>For access to RAW, uncompressed YUV, or compressed JPEG data in the application: Create an
      *   {@link android.media.ImageReader} object with one of the supported output formats given by
      *   {@link StreamConfigurationMap#getOutputFormats()}, setting its size to one of the
@@ -632,11 +631,12 @@ public abstract class CameraDevice implements AutoCloseable {
      * <style scoped>
      *  #rb { border-right-width: thick; }
      * </style>
+     *
+     * <h5>LEGACY-level guaranteed configurations</h5>
+     *
      * <p>Legacy devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
      * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}) support at
      * least the following stream combinations:
-     *
-     * <h5>LEGACY-level guaranteed configurations</h5>
      *
      * <table>
      * <tr> <th colspan="2" id="rb">Target 1</th> <th colspan="2" id="rb">Target 2</th>  <th colspan="2" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
@@ -652,12 +652,12 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
+     * <h5>LIMITED-level additional guaranteed configurations</h5>
+     *
      * <p>Limited-level ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
      * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}) devices
      * support at least the following stream combinations in addition to those for
      * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY} devices:
-     *
-     * <h5>LIMITED-level additional guaranteed configurations</h5>
      *
      * <table>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
@@ -671,12 +671,12 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
+     * <h5>FULL-level additional guaranteed configurations</h5>
+     *
      * <p>FULL-level ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
      * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}) devices
      * support at least the following stream combinations in addition to those for
      * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} devices:
-     *
-     * <h5>FULL-level additional guaranteed configurations</h5>
      *
      * <table>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
@@ -690,13 +690,13 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
+     * <h5>RAW-capability additional guaranteed configurations</h5>
+     *
      * <p>RAW-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} includes
      * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_RAW RAW}) devices additionally support
      * at least the following stream combinations on both
      * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL} and
      * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED} devices:
-     *
-     * <h5>RAW-capability additional guaranteed configurations</h5>
      *
      * <table>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
@@ -712,6 +712,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
+     * <h5>BURST-capability additional guaranteed configurations</h5>
+     *
      * <p>BURST-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} includes
      * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE BURST_CAPTURE}) devices
      * support at least the below stream combinations in addition to those for
@@ -719,8 +721,6 @@ public abstract class CameraDevice implements AutoCloseable {
      * FULL-level devices support the BURST capability, and the below list is a strict subset of the
      * list for FULL-level devices, so this table is only relevant for LIMITED-level devices that
      * support the BURST_CAPTURE capability.
-     *
-     * <h5>BURST-capability additional guaranteed configurations</h5>
      *
      * <table>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th rowspan="2">Sample use case(s)</th> </tr>
@@ -731,14 +731,14 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
+     * <h5>LEVEL-3 additional guaranteed configurations</h5>
+     *
      * <p>LEVEL-3 ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL}
      * {@code == }{@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_3 LEVEL_3})
      * support at least the following stream combinations in addition to the combinations for
      * {@link CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL} and for
      * RAW capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} includes
      * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_RAW RAW}):
-     *
-     * <h5>LEVEL-3 additional guaranteed configurations</h5>
      *
      * <table>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th><th colspan="2" id="rb">Target 4</th><th rowspan="2">Sample use case(s)</th> </tr>
@@ -748,14 +748,16 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
-     *<p>BACKWARD_COMPATIBLE devices capable of streaming concurrently with other devices as described by
-     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds} have the
+     * <h5>Concurrent stream guaranteed configurations</h5>
+     *
+     * <p>BACKWARD_COMPATIBLE devices capable of streaming concurrently with other devices as
+     * described by {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds} have the
      * following guaranteed streams (when streaming concurrently with other devices)</p>
+     *
      * <p> Note: The sizes mentioned for these concurrent streams are the maximum sizes guaranteed
      * to be supported. Sizes smaller than these, obtained by {@link StreamConfigurationMap#getOutputSizes} for a particular format, are supported as well. </p>
      *
-     * <h5>Concurrent stream guaranteed configurations</h5>
-     *
+     * <p>
      * <table>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th rowspan="2">Sample use case(s)</th> </tr>
      * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th> </tr>
@@ -791,6 +793,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * level and capabilities. Calling createCaptureSession with both JPEG and HEIC outputs is not
      * supported.</p>
      *
+     * <h5>LEGACY-level additional guaranteed combinations with multi-resolution outputs</h5>
+     *
      * <p>Devices capable of multi-resolution output for a particular format (
      * {@link android.hardware.camera2.params.MultiResolutionStreamConfigurationMap#getOutputInfo}
      * returns a non-empty list) support using {@link MultiResolutionImageReader} for MAXIMUM
@@ -801,8 +805,6 @@ public abstract class CameraDevice implements AutoCloseable {
      * stream combinations ({@code MULTI_RES} in the Max size column refers to a {@link
      * MultiResolutionImageReader} created based on the variable max resolutions supported):
      *
-     * <h5>LEGACY-level additional guaranteed combinations with MultiResolutionoutputs</h5>
-     *
      * <table>
      * <tr> <th colspan="2" id="rb">Target 1</th> <th colspan="2" id="rb">Target 2</th>  <th colspan="2" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
      * <tr> <th>Type</th><th id="rb">Max size</th> <th>Type</th><th id="rb">Max size</th> <th>Type</th><th id="rb">Max size</th></tr>
@@ -811,8 +813,12 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td colspan="2" id="rb"></td> <td>Standard still imaging.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td>Still capture plus in-app processing.</td> </tr>
      * </table><br>
+     * </p>
+     *
+     * <h5>LIMITED-level additional guaranteed configurations with multi-resolution outputs</h5>
+     *
+     * <p>
      * <table>
-     * <tr><th colspan="7">LIMITED-level additional guaranteed configurations with MultiResolutionoutputs</th></tr>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
      * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
      * <tr> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MULTI_RES}</td> <td>Two-input in-app processing with still capture.</td> </tr>
@@ -820,10 +826,10 @@ public abstract class CameraDevice implements AutoCloseable {
      * The same logic applies to other hardware levels and capabilities.
      * </p>
      *
-     * <p> Devices with the ULTRA_HIGH_RESOLUTION_SENSOR capability have some additional guarantees
-     * which clients can take advantage of : </p>
-     *
      * <h5>Additional guaranteed combinations for ULTRA_HIGH_RESOLUTION sensors</h5>
+     *
+     * <p> Devices with the ULTRA_HIGH_RESOLUTION_SENSOR capability have some additional guarantees
+     * which clients can take advantage of:
      *
      * <table>
      * <tr> <th colspan="3" id="rb">Target 1</th> <th colspan="3" id="rb">Target 2</th>  <th colspan="3" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
@@ -832,6 +838,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code YUV / JPEG / RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code PRIV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PRIV / YUV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code RECORD}</td> <td>Ultra high res still capture with preview + app based RECORD size analysis</td> </tr>
      * <tr> <td>{@code YUV / JPEG / RAW}</td><td id="rb">{@code MAX_RES}</td><td id="rb">{@code MAX}</td><td id="rb">{@code PRIV}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code JPEG / YUV / RAW}</td><td id="rb">{@code DEFAULT}</td><td id="rb">{@code MAX}</td> <td>Ultra high res still image capture with preview + default sensor pixel mode analysis stream</td> </tr>
      * </table><br>
+     * </p>
      *
      * <p> Here, SC Map, refers to the {@link StreamConfigurationMap}, the target stream sizes must
      * be chosen from. {@code DEFAULT} refers to the default sensor pixel mode {@link
@@ -841,17 +848,17 @@ public abstract class CameraDevice implements AutoCloseable {
      * Note: The same capture request must not mix targets from
      * {@link StreamConfigurationMap}s corresponding to different sensor pixel modes. </p>
      *
-     * <p> 10-bit output capable
-     * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT}
-     * devices support at least the following stream combinations: </p>
-     *
      * <h5>10-bit output additional guaranteed configurations</h5>
+     *
+     * <p>10-bit output capable
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT}
+     * devices support at least the following stream combinations:
      *
      * <table>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th colspan="2" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
      * <tr><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th><th>Type</th><th id="rb">Max size</th></tr>
-     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> }</td> <td colspan="4" id="rb"></td> <td>Simple preview, GPU video processing, or no-preview video recording.</td> </tr>
-     * <tr> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> }</td> <td colspan="4" id="rb"></td> <td>In-application video/image processing.</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code MAXIMUM}</td> </td> <td colspan="4" id="rb"></td> <td>Simple preview, GPU video processing, or no-preview video recording.</td> </tr>
+     * <tr> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> </td> <td colspan="4" id="rb"></td> <td>In-application video/image processing.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM }</td> <td colspan="2" id="rb"></td> <td>Standard still imaging.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV }</td><td id="rb">{@code MAXIMUM }</td> <td colspan="2" id="rb"></td> <td>Maximum-resolution in-app processing with preview.</td> </tr>
      * <tr> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code MAXIMUM }</td> <td colspan="2" id="rb"></td> <td>Maximum-resolution two-input in-app processing.</td> </tr>
@@ -859,6 +866,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code RECORD }</td> <td>{@code YUV}</td><td id="rb">{@code RECORD }</td> <td>High-resolution recording with in-app snapshot.</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV }</td><td id="rb">{@code RECORD }</td> <td>{@code JPEG}</td><td id="rb">{@code RECORD }</td> <td>High-resolution recording with video snapshot.</td> </tr>
      * </table><br>
+     * </p>
+     *
      * <p>Here PRIV can be either 8 or 10-bit {@link android.graphics.ImageFormat#PRIVATE} pixel
      * format. YUV can be either {@link android.graphics.ImageFormat#YUV_420_888} or
      * {@link android.graphics.ImageFormat#YCBCR_P010}.
@@ -891,15 +900,15 @@ public abstract class CameraDevice implements AutoCloseable {
      * supported sizes.
      * Camera clients that register a Jpeg/R output within a stream combination that doesn't fit
      * in the mandatory stream table above can call
-     * {@link CameraDevice#isSessionConfigurationSupported} to ensure that this particular
+     * {@link #isSessionConfigurationSupported} to ensure that this particular
      * configuration is supported.</p>
+     *
+     * <h5>STREAM_USE_CASE capability additional guaranteed configurations</h5>
      *
      * <p>Devices with the STREAM_USE_CASE capability ({@link
      * CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} includes {@link
      * CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE}) support below additional
      * stream combinations:
-     *
-     * <h5>STREAM_USE_CASE capability additional guaranteed configurations</h5>
      *
      * <table>
      * <tr><th colspan="3" id="rb">Target 1</th><th colspan="3" id="rb">Target 2</th><th colspan="3" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
@@ -920,11 +929,11 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
+     * <h5>STREAM_USE_CASE_CROPPED_RAW capability additional guaranteed configurations</h5>
+     *
      * <p>Devices that include the {@link CameraMetadata#SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW}
      * stream use-case in {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES},
      * support the additional stream combinations below:
-     *
-     * <h5>STREAM_USE_CASE_CROPPED_RAW capability additional guaranteed configurations</h5>
      *
      * <table>
      * <tr><th colspan="3" id="rb">Target 1</th><th colspan="3" id="rb">Target 2</th><th colspan="3" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
@@ -933,15 +942,17 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td colspan="3" id="rb"></td> <td>Preview with cropped RAW still capture</td> </tr>
      * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td>Preview with YUV / JPEG and cropped RAW still capture</td> </tr>
      * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code VIDEO_RECORD / PREVIEW}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td>Video recording with preview and cropped RAW still capture</td> </tr>
-     *
-     *
-     *<p> For devices where {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES}
-     * includes {@link CameraMetadata#CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION},
-     * the following stream combinations are guaranteed,
-     * for CaptureRequests where {@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE} is set to
-     * {@link CameraMetadata#CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION} <p>
+     * </table><br>
+     * </p>
      *
      * <h5>Preview stabilization guaranteed stream configurations</h5>
+     *
+     * <p>For devices where
+     * {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES} includes
+     * {@link CameraMetadata#CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION},
+     * the following stream combinations are guaranteed,
+     * for CaptureRequests where {@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE} is set to
+     * {@link CameraMetadata#CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION}
      *
      * <table>
      * <tr><th colspan="2" id="rb">Target 1</th><th colspan="2" id="rb">Target 2</th><th rowspan="2">Sample use case(s)</th> </tr>
@@ -950,6 +961,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code s1440p}</td> <td>{@code JPEG / YUV}</td><td id="rb">{@code MAXIMUM }</td><td>Standard still imaging with stabilized preview.</td> </tr>
      * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV / YUV}</td><td id="rb">{@code s1440p }</td><td>High-resolution recording with stabilized preview and recording stream.</td> </tr>
      * </table><br>
+     * </p>
+     *
      * <p>
      * For the maximum size column, PREVIEW refers to the best size match to the device's screen
      * resolution, or to 1080p (1920x1080), whichever is smaller. RECORD refers to the camera
@@ -960,8 +973,8 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <p>Since the capabilities of camera devices vary greatly, a given camera device may support
      * target combinations with sizes outside of these guarantees, but this can only be tested for
-     * by calling {@link #isSessionConfigurationSupported} or attempting to create a session with
-     * such targets.</p>
+     * by calling {@link #isSessionConfigurationSupported} or attempting
+     * to create a session with such targets.</p>
      *
      * <p>Exception on 176x144 (QCIF) resolution:
      * Camera devices usually have a fixed capability for downscaling from larger resolution to
@@ -1385,8 +1398,12 @@ public abstract class CameraDevice implements AutoCloseable {
      * {@link android.hardware.camera2.params.MandatoryStreamCombination} are better suited for this
      * purpose.</p>
      *
-     * <p>Note that session parameters will be ignored and calls to
-     * {@link SessionConfiguration#setSessionParameters} are not required.</p>
+     * <p><b>NOTE:</b>
+     * For apps targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and above,
+     * this method will ensure session parameters set through calls to
+     * {@link SessionConfiguration#setSessionParameters} are also supported if the Camera Device
+     * supports it. For apps targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and
+     * below, session parameters will be ignored.</p>
      *
      * @return {@code true} if the given session configuration is supported by the camera device
      *         {@code false} otherwise.
@@ -1396,6 +1413,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
+     *
      */
     public boolean isSessionConfigurationSupported(
             @NonNull SessionConfiguration sessionConfig) throws CameraAccessException {
@@ -1583,6 +1601,182 @@ public abstract class CameraDevice implements AutoCloseable {
          */
         public abstract void onError(@NonNull CameraDevice camera,
                 @ErrorCode int error); // Must implement
+    }
+
+    /**
+     * CameraDeviceSetup is a limited representation of {@link CameraDevice} that can be used to
+     * query device specific information which would otherwise need a CameraDevice instance.
+     * This class can be constructed without calling {@link CameraManager#openCamera} and paying
+     * the latency cost of CameraDevice creation. Use {@link CameraManager#getCameraDeviceSetup}
+     * to get an instance of this class.
+     *
+     * <p>Can only be instantiated for camera devices for which
+     * {@link CameraManager#isCameraDeviceSetupSupported} returns true.</p>
+     *
+     * @see CameraManager#isCameraDeviceSetupSupported(String)
+     * @see CameraManager#getCameraDeviceSetup(String)
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public abstract static class CameraDeviceSetup {
+        /**
+         * Create a {@link CaptureRequest.Builder} for new capture requests,
+         * initialized with a template for target use case.
+         *
+         * <p>The settings are chosen to be the best options for the specific camera device,
+         * so it is not recommended to reuse the same request for a different camera device;
+         * create a builder specific for that device and template and override the
+         * settings as desired, instead.</p>
+         *
+         * <p>Supported if {@link CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION}
+         * is at least {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}. If less or equal to
+         * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, this function throws an
+         * {@link UnsupportedOperationException}.</p>
+         *
+         * @param templateType An enumeration selecting the use case for this request. Not all
+         *                     template types are supported on every device. See the documentation
+         *                     for each template type for details.
+         *
+         * @return a builder for a capture request, initialized with default settings for that
+         * template, and no output streams
+         *
+         * @throws CameraAccessException if the querying the camera device failed or there has been
+         * a fatal error
+         * @throws IllegalArgumentException if the templateType is not supported by this device
+         */
+        @NonNull
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        public abstract CaptureRequest.Builder createCaptureRequest(
+                @RequestTemplate int templateType) throws CameraAccessException;
+
+        /**
+         * Checks whether a particular {@link SessionConfiguration} is supported by the camera
+         * device.
+         *
+         * <p>This method performs a runtime check of a given {@link SessionConfiguration}. The
+         * result confirms whether or not the {@code SessionConfiguration}, <b>including the
+         * parameters specified via {@link SessionConfiguration#setSessionParameters}</b>, can
+         * be used to create a camera capture session using
+         * {@link CameraDevice#createCaptureSession(SessionConfiguration)}.</p>
+         *
+         * <p>This method is supported if the
+         * {@link CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION}
+         * is at least {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}. If less or equal
+         * to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, this function throws
+         * {@link UnsupportedOperationException}.</p>
+         *
+         * <p>Although this method is much faster than creating a new capture session, it can still
+         * take a few milliseconds per call. Applications should therefore not use this method to
+         * explore the entire space of supported session combinations.</p>
+         *
+         * <p>Instead, applications should use this method to query whether combinations of
+         * certain features are supported. {@link
+         * CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION} provides the list of
+         * feature combinations the camera device will reliably report.</p>
+         *
+         * <p><b>IMPORTANT:</b></p>
+         * <ul>
+         * <li>If a feature support can be queried via
+         * {@link CameraCharacteristics#SCALER_MANDATORY_STREAM_COMBINATIONS} or
+         * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP}, applications should
+         * directly use it rather than calling this function as: (1) using
+         * {@code CameraCharacteristics} is more efficient, and (2) calling this function with on
+         * non-supported devices will throw a {@link UnsupportedOperationException}.
+         *
+         * <li>To minimize latency of {@link SessionConfiguration} creation, applications can
+         * use deferred surfaces for SurfaceView and SurfaceTexture to avoid waiting for UI
+         * creation before setting up the camera. For {@link android.media.MediaRecorder} and
+         * {@link android.media.MediaCodec} uses, applications can use {@code ImageReader} with
+         * {@link android.hardware.HardwareBuffer#USAGE_VIDEO_ENCODE}. The lightweight nature of
+         * {@code ImageReader} helps minimize the latency cost.
+         * </ul>
+         *
+         * @return {@code true} if the given session configuration is supported by the camera
+         * device, {@code false} otherwise.
+         *
+         * @throws CameraAccessException if the camera device is no longer connected or has
+         * encountered a fatal error
+         * @throws IllegalArgumentException if the session configuration is invalid
+         *
+         * @see CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION
+         * @see SessionConfiguration
+         * @see android.media.ImageReader
+         */
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        public abstract boolean isSessionConfigurationSupported(
+                @NonNull SessionConfiguration config) throws CameraAccessException;
+
+        /**
+         * <p>Get camera characteristics for a particular session configuration for this camera
+         * device</p>
+         *
+         * <p>The camera characteristics returned by this method are different from those returned
+         * from {@link CameraManager#getCameraCharacteristics}. The characteristics returned here
+         * reflect device capabilities more accurately if the device were to be configured with
+         * {@code sessionConfig}. The keys that may get updated are listed in
+         * {@link CameraCharacteristics#getAvailableSessionCharacteristicsKeys}.</p>
+         *
+         * <p>Other than that, the characteristics returned here can be used in the same way as
+         * those returned from {@link CameraManager#getCameraCharacteristics}.</p>
+         *
+         * @param sessionConfig : The session configuration for which characteristics are fetched.
+         * @return CameraCharacteristics specific to a given session configuration.
+         *
+         * @throws IllegalArgumentException      if the session configuration is invalid
+         * @throws CameraAccessException         if the camera device is no longer connected or has
+         *                                       encountered a fatal error
+         *
+         * @see CameraCharacteristics#getAvailableSessionCharacteristicsKeys
+         */
+        @NonNull
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        public abstract CameraCharacteristics getSessionCharacteristics(
+                @NonNull SessionConfiguration sessionConfig) throws CameraAccessException;
+
+        /**
+         * Utility function to forward the call to
+         * {@link CameraManager#openCamera(String, Executor, StateCallback)}. This function simply
+         * calls {@code CameraManager.openCamera} for the cameraId for which this class was
+         * constructed. All semantics are consistent with {@code CameraManager.openCamera}.
+         *
+         * @param executor The executor which will be used when invoking the callback.
+         * @param callback The callback which is invoked once the camera is opened
+         *
+         * @throws CameraAccessException if the camera is disabled by device policy,
+         * has been disconnected, or is being used by a higher-priority camera API client.
+         *
+         * @throws IllegalArgumentException if cameraId, the callback or the executor was null,
+         * or the cameraId does not match any currently or previously available
+         * camera device.
+         *
+         * @throws SecurityException if the application does not have permission to
+         * access the camera
+         *
+         * @see CameraManager#openCamera(String, Executor, StateCallback)
+         */
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        @RequiresPermission(android.Manifest.permission.CAMERA)
+        public abstract void openCamera(@NonNull @CallbackExecutor Executor executor,
+                @NonNull StateCallback callback) throws CameraAccessException;
+
+        /**
+         * Get the ID of this camera device.
+         *
+         * <p>This matches the ID given to {@link CameraManager#getCameraDeviceSetup} to instantiate
+         * this object.</p>
+         *
+         * @return the ID for this camera device
+         *
+         * @see CameraManager#getCameraIdList
+         */
+        @NonNull
+        @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+        public abstract String getId();
+
+        /**
+         * To be implemented by camera2 classes only.
+         * @hide
+         */
+        public CameraDeviceSetup() {}
     }
 
     /**

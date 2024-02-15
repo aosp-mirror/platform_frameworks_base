@@ -23,6 +23,7 @@ import android.app.PictureInPictureParams;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.PersistableBundle;
@@ -91,6 +92,9 @@ interface IActivityClientController {
     int getLaunchedFromUid(in IBinder token);
     String getLaunchedFromPackage(in IBinder token);
 
+    int checkActivityCallerContentUriPermission(in IBinder activityToken, in IBinder callerToken,
+            in Uri uri, int modeFlags, int userId);
+
     void setRequestedOrientation(in IBinder token, int requestedOrientation);
     int getRequestedOrientation(in IBinder token);
 
@@ -119,7 +123,7 @@ interface IActivityClientController {
 
     oneway void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
     oneway void setInheritShowWhenLocked(in IBinder token, boolean setInheritShownWhenLocked);
-    oneway void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
+    void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
     oneway void setAllowCrossUidActivitySwitchFromBelow(in IBinder token, boolean allowed);
     oneway void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
     oneway void overrideActivityTransition(IBinder token, boolean open, int enterAnim, int exitAnim,
@@ -191,4 +195,14 @@ interface IActivityClientController {
      */
     boolean isRequestedToLaunchInTaskFragment(in IBinder activityToken,
             in IBinder taskFragmentToken);
+
+    /**
+     * Enable or disable ActivityRecordInputSink to block input events.
+     *
+     * @param token The token for the activity that requests to toggle.
+     * @param enabled Whether the input evens are blocked by ActivityRecordInputSink.
+     */
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.INTERNAL_SYSTEM_WINDOW)")
+    oneway void setActivityRecordInputSinkEnabled(in IBinder activityToken, boolean enabled);
 }

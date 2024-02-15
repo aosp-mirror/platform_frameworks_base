@@ -17,6 +17,7 @@
 -->
 <resources>
     <!-- Clock maximum font size (dp is intentional, to prevent any further scaling) -->
+    <dimen name="presentation_clock_text_size">50dp</dimen>
     <dimen name="large_clock_text_size">150dp</dimen>
     <dimen name="small_clock_text_size">86dp</dimen>
 
@@ -24,4 +25,12 @@
     <item name="keyguard_clock_line_spacing_scale" type="dimen" format="float">.7</item>
     <!-- Burmese line spacing multiplier between hours and minutes of the keyguard clock -->
     <item name="keyguard_clock_line_spacing_scale_burmese" type="dimen" format="float">1</item>
+
+    <!-- With the large clock, move up slightly from the center -->
+    <dimen name="keyguard_large_clock_top_margin">-60dp</dimen>
+
+    <!-- additional offset for clock switch area items -->
+    <dimen name="small_clock_height">114dp</dimen>
+    <dimen name="small_clock_padding_top">28dp</dimen>
+    <dimen name="clock_padding_start">28dp</dimen>
 </resources>

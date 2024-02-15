@@ -31,16 +31,21 @@ import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.telephony.PhoneConstants
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.R
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
@@ -73,7 +78,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -90,7 +94,9 @@ import org.mockito.MockitoAnnotations
 // to run the callback and this makes the looper place nicely with TestScope etc.
 @TestableLooper.RunWithLooper
 class MobileConnectionsRepositoryTest : SysuiTestCase() {
-    private lateinit var underTest: MobileConnectionsRepositoryImpl
+
+    private val flags =
+        FakeFeatureFlagsClassic().also { it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
 
     private lateinit var connectionFactory: MobileConnectionRepositoryImpl.Factory
     private lateinit var carrierMergedFactory: CarrierMergedConnectionRepository.Factory
@@ -99,18 +105,22 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var wifiRepository: WifiRepository
     private lateinit var carrierConfigRepository: CarrierConfigRepository
+
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: MobileInputLogger
     @Mock private lateinit var summaryLogger: TableLogBuffer
     @Mock private lateinit var logBufferFactory: TableLogBufferFactory
+    @Mock private lateinit var updateMonitor: KeyguardUpdateMonitor
 
     private val mobileMappings = FakeMobileMappingsProxy()
     private val subscriptionManagerProxy = FakeSubscriptionManagerProxy()
 
     private val dispatcher = StandardTestDispatcher()
     private val testScope = TestScope(dispatcher)
+
+    private lateinit var underTest: MobileConnectionsRepositoryImpl
 
     @Before
     fun setUp() {
@@ -120,7 +130,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         // Set up so the individual connection repositories
         whenever(telephonyManager.createForSubscriptionId(anyInt())).thenAnswer { invocation ->
             telephonyManager.also {
-                whenever(telephonyManager.subscriptionId).thenReturn(invocation.getArgument(0))
+                whenever(it.subscriptionId).thenReturn(invocation.getArgument(0))
             }
         }
 
@@ -160,6 +170,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 mock(),
                 mock(),
                 FakeExecutor(FakeSystemClock()),
+                dispatcher,
                 testScope.backgroundScope,
                 mock(),
             )
@@ -175,17 +186,21 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         connectionFactory =
             MobileConnectionRepositoryImpl.Factory(
+                context,
                 fakeBroadcastDispatcher,
+                connectivityManager,
                 telephonyManager = telephonyManager,
                 bgDispatcher = dispatcher,
                 logger = logger,
                 mobileMappingsProxy = mobileMappings,
                 scope = testScope.backgroundScope,
+                flags = flags,
                 carrierConfigRepository = carrierConfigRepository,
             )
         carrierMergedFactory =
             CarrierMergedConnectionRepository.Factory(
                 telephonyManager,
+                testScope.backgroundScope.coroutineContext,
                 testScope.backgroundScope,
                 wifiRepository,
             )
@@ -213,6 +228,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 airplaneModeRepository,
                 wifiRepository,
                 fullConnectionFactory,
+                updateMonitor,
             )
 
         testScope.runCurrent()
@@ -588,11 +604,10 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun testConnectionRepository_invalidSubId_throws() =
+    fun testConnectionRepository_invalidSubId_doesNotThrow() =
         testScope.runTest {
-            assertThrows(IllegalArgumentException::class.java) {
-                underTest.getRepoForSubId(SUB_1_ID)
-            }
+            underTest.getRepoForSubId(SUB_1_ID)
+            // No exception
         }
 
     @Test
@@ -626,23 +641,17 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
             assertThat(latest).isEqualTo(INVALID_SUBSCRIPTION_ID)
 
-            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
-                receiver.onReceive(
-                    context,
-                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_2_ID)
-                )
-            }
+            val intent2 =
+                Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                    .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_2_ID)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(context, intent2)
 
             assertThat(latest).isEqualTo(SUB_2_ID)
 
-            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
-                receiver.onReceive(
-                    context,
-                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_1_ID)
-                )
-            }
+            val intent1 =
+                Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                    .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_1_ID)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(context, intent1)
 
             assertThat(latest).isEqualTo(SUB_1_ID)
         }
@@ -1054,6 +1063,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     airplaneModeRepository,
                     wifiRepository,
                     fullConnectionFactory,
+                    updateMonitor
                 )
 
             val latest by collectLastValue(underTest.defaultDataSubRatConfig)
@@ -1074,13 +1084,10 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(configFromContext.showAtLeast3G).isTrue()
 
             // WHEN the change event is fired
-            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
-                receiver.onReceive(
-                    context,
-                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_1_ID)
-                )
-            }
+            val intent =
+                Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                    .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_1_ID)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(context, intent)
 
             // THEN the config is updated
             assertTrue(latest!!.areEqual(configFromContext))
@@ -1099,12 +1106,10 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(configFromContext.showAtLeast3G).isTrue()
 
             // WHEN the change event is fired
-            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
-                receiver.onReceive(
-                    context,
-                    Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)
-                )
-            }
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED),
+            )
 
             // THEN the config is updated
             assertThat(latest!!.areEqual(configFromContext)).isTrue()
@@ -1114,7 +1119,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Test
     fun carrierConfig_initialValueIsFetched() =
         testScope.runTest {
-
             // Value starts out false
             assertThat(underTest.defaultDataSubRatConfig.value.showAtLeast3G).isFalse()
 
@@ -1123,12 +1127,10 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(configFromContext.showAtLeast3G).isTrue()
 
             // WHEN the change event is fired
-            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
-                receiver.onReceive(
-                    context,
-                    Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)
-                )
-            }
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED),
+            )
 
             // WHEN collection starts AFTER the broadcast is sent out
             val latest by collectLastValue(underTest.defaultDataSubRatConfig)
@@ -1162,6 +1164,56 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 .onActiveDataSubscriptionIdChanged(SUB_1_ID)
 
             assertThat(latest).isEqualTo(null)
+        }
+
+    @Test
+    fun anySimSecure_propagatesStateFromKeyguardUpdateMonitor() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isAnySimSecure)
+            assertThat(latest).isFalse()
+
+            val updateMonitorCallback = argumentCaptor<KeyguardUpdateMonitorCallback>()
+            verify(updateMonitor).registerCallback(updateMonitorCallback.capture())
+
+            whenever(updateMonitor.isSimPinSecure).thenReturn(true)
+            updateMonitorCallback.value.onSimStateChanged(0, 0, 0)
+
+            assertThat(latest).isTrue()
+
+            whenever(updateMonitor.isSimPinSecure).thenReturn(false)
+            updateMonitorCallback.value.onSimStateChanged(0, 0, 0)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun getIsAnySimSecure_delegatesCallToKeyguardUpdateMonitor() =
+        testScope.runTest {
+            assertThat(underTest.getIsAnySimSecure()).isFalse()
+
+            whenever(updateMonitor.isSimPinSecure).thenReturn(true)
+
+            assertThat(underTest.getIsAnySimSecure()).isTrue()
+        }
+
+    @Test
+    fun noSubscriptionsInEcmMode_notInEcmMode() =
+        testScope.runTest {
+            whenever(telephonyManager.emergencyCallbackMode).thenReturn(false)
+
+            runCurrent()
+
+            assertThat(underTest.isInEcmMode()).isFalse()
+        }
+
+    @Test
+    fun someSubscriptionsInEcmMode_inEcmMode() =
+        testScope.runTest {
+            whenever(telephonyManager.emergencyCallbackMode).thenReturn(true)
+
+            runCurrent()
+
+            assertThat(underTest.isInEcmMode()).isTrue()
         }
 
     private fun TestScope.getDefaultNetworkCallback(): ConnectivityManager.NetworkCallback {
@@ -1204,30 +1256,40 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     companion object {
         // Subscription 1
         private const val SUB_1_ID = 1
+        private const val SUB_1_NAME = "Carrier $SUB_1_ID"
         private val GROUP_1 = ParcelUuid(UUID.randomUUID())
         private val SUB_1 =
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_1_ID)
                 whenever(it.groupUuid).thenReturn(GROUP_1)
+                whenever(it.carrierName).thenReturn(SUB_1_NAME)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
         private val MODEL_1 =
             SubscriptionModel(
                 subscriptionId = SUB_1_ID,
                 groupUuid = GROUP_1,
+                carrierName = SUB_1_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
 
         // Subscription 2
         private const val SUB_2_ID = 2
+        private const val SUB_2_NAME = "Carrier $SUB_2_ID"
         private val GROUP_2 = ParcelUuid(UUID.randomUUID())
         private val SUB_2 =
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_2_ID)
                 whenever(it.groupUuid).thenReturn(GROUP_2)
+                whenever(it.carrierName).thenReturn(SUB_2_NAME)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
         private val MODEL_2 =
             SubscriptionModel(
                 subscriptionId = SUB_2_ID,
                 groupUuid = GROUP_2,
+                carrierName = SUB_2_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
 
         // Subs 3 and 4 are considered to be in the same group ------------------------------------
@@ -1239,6 +1301,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_3_ID_GROUPED)
                 whenever(it.groupUuid).thenReturn(GROUP_ID_3_4)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
 
         // Subscription 4
@@ -1247,6 +1310,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_4_ID_GROUPED)
                 whenever(it.groupUuid).thenReturn(GROUP_ID_3_4)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
 
         // Subs 3 and 4 are considered to be in the same group ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1256,9 +1320,19 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         // Carrier merged subscription
         private const val SUB_CM_ID = 5
+        private const val SUB_CM_NAME = "Carrier $SUB_CM_ID"
         private val SUB_CM =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_CM_ID) }
-        private val MODEL_CM = SubscriptionModel(subscriptionId = SUB_CM_ID)
+            mock<SubscriptionInfo>().also {
+                whenever(it.subscriptionId).thenReturn(SUB_CM_ID)
+                whenever(it.carrierName).thenReturn(SUB_CM_NAME)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
+            }
+        private val MODEL_CM =
+            SubscriptionModel(
+                subscriptionId = SUB_CM_ID,
+                carrierName = SUB_CM_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
+            )
 
         private val WIFI_INFO_CM =
             mock<WifiInfo>().apply {

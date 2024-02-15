@@ -23,9 +23,41 @@ import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.FakeCommandQueue
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
+import com.android.systemui.shade.LargeScreenHeaderHelper
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
+import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
+import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
+import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
+import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
+import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.mock
+import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -36,21 +68,28 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class StatusBarStateControllerImplTest : SysuiTestCase() {
 
-    @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
-    @Mock private lateinit var mockDarkAnimator: ObjectAnimator
-    @Mock private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val testDispatcher = kosmos.testDispatcher
+    private lateinit var shadeInteractor: ShadeInteractor
+    private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
+    private lateinit var fromPrimaryBouncerTransitionInteractor:
+        FromPrimaryBouncerTransitionInteractor
+    private val interactionJankMonitor = mock<InteractionJankMonitor>()
+    private val mockDarkAnimator = mock<ObjectAnimator>()
+    private val deviceEntryUdfpsInteractor = mock<DeviceEntryUdfpsInteractor>()
+    private val largeScreenHeaderHelper = mock<LargeScreenHeaderHelper>()
 
     private lateinit var controller: StatusBarStateControllerImpl
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -62,13 +101,70 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         whenever(interactionJankMonitor.end(anyInt())).thenReturn(true)
 
         uiEventLogger = UiEventLoggerFake()
-        controller = object : StatusBarStateControllerImpl(
-            uiEventLogger,
-            mock(DumpManager::class.java),
-            interactionJankMonitor, shadeExpansionStateManager
-        ) {
-            override fun createDarkAnimator(): ObjectAnimator { return mockDarkAnimator }
-        }
+        controller =
+            object :
+                StatusBarStateControllerImpl(
+                    uiEventLogger,
+                    interactionJankMonitor,
+                    mock(),
+                    { shadeInteractor }
+                ) {
+                override fun createDarkAnimator(): ObjectAnimator {
+                    return mockDarkAnimator
+                }
+            }
+
+        val powerInteractor =
+            PowerInteractor(FakePowerRepository(), FalsingCollectorFake(), mock(), controller)
+        val keyguardRepository = FakeKeyguardRepository()
+        val keyguardTransitionRepository = FakeKeyguardTransitionRepository()
+        val featureFlags = FakeFeatureFlagsClassic()
+        val shadeRepository = FakeShadeRepository()
+        val sceneContainerFlags = FakeSceneContainerFlags()
+        val configurationRepository = FakeConfigurationRepository()
+        val keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor
+        fromLockscreenTransitionInteractor = kosmos.fromLockscreenTransitionInteractor
+        fromPrimaryBouncerTransitionInteractor = kosmos.fromPrimaryBouncerTransitionInteractor
+
+        val keyguardInteractor =
+            KeyguardInteractor(
+                keyguardRepository,
+                FakeCommandQueue(),
+                powerInteractor,
+                sceneContainerFlags,
+                FakeKeyguardBouncerRepository(),
+                ConfigurationInteractor(configurationRepository),
+                shadeRepository,
+                keyguardTransitionInteractor,
+                { kosmos.sceneInteractor },
+            )
+
+        whenever(deviceEntryUdfpsInteractor.isUdfpsSupported).thenReturn(emptyFlow())
+        shadeInteractor =
+            ShadeInteractorImpl(
+                testScope.backgroundScope,
+                kosmos.deviceProvisioningInteractor,
+                FakeDisableFlagsRepository(),
+                mock(),
+                keyguardRepository,
+                keyguardTransitionInteractor,
+                powerInteractor,
+                FakeUserSetupRepository(),
+                mock(),
+                ShadeInteractorLegacyImpl(
+                    testScope.backgroundScope,
+                    keyguardRepository,
+                    SharedNotificationContainerInteractor(
+                        configurationRepository,
+                        mContext,
+                        ResourcesSplitShadeStateController(),
+                        keyguardInteractor,
+                        deviceEntryUdfpsInteractor,
+                        largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
+                    ),
+                    shadeRepository,
+                )
+            )
     }
 
     @Test

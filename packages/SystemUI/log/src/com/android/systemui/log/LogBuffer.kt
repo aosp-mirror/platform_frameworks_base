@@ -19,11 +19,13 @@ package com.android.systemui.log
 import android.os.Trace
 import android.util.Log
 import com.android.systemui.common.buffer.RingBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogMessage
+import com.android.systemui.log.core.MessageBuffer
+import com.android.systemui.log.core.MessageInitializer
+import com.android.systemui.log.core.MessagePrinter
 import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingQueue
-import kotlin.concurrent.thread
 import kotlin.math.max
 
 /**
@@ -46,12 +48,12 @@ import kotlin.math.max
  *
  * To enable logcat echoing for an entire buffer:
  * ```
- * $ adb shell settings put global systemui/buffer/<bufferName> <level>
+ * $ adb shell cmd statusbar echo -b <bufferName>:<level>
  * ```
  *
  * To enable logcat echoing for a specific tag:
  * ```
- * $ adb shell settings put global systemui/tag/<tag> <level>
+ * $ adb shell cmd statusbar echo -t <tagName>:<level>
  * ```
  *
  * In either case, `level` can be any of `verbose`, `debug`, `info`, `warn`, `error`, `assert`, or
@@ -73,25 +75,8 @@ constructor(
     private val maxSize: Int,
     private val logcatEchoTracker: LogcatEchoTracker,
     private val systrace: Boolean = true,
-) {
+) : MessageBuffer {
     private val buffer = RingBuffer(maxSize) { LogMessageImpl.create() }
-
-    private val echoMessageQueue: BlockingQueue<LogMessage>? =
-        if (logcatEchoTracker.logInBackgroundThread) ArrayBlockingQueue(10) else null
-
-    init {
-        if (logcatEchoTracker.logInBackgroundThread && echoMessageQueue != null) {
-            thread(start = true, name = "LogBuffer-$name", priority = Thread.NORM_PRIORITY) {
-                try {
-                    while (true) {
-                        echoToDesiredEndpoints(echoMessageQueue.take())
-                    }
-                } catch (e: InterruptedException) {
-                    Thread.currentThread().interrupt()
-                }
-            }
-        }
-    }
 
     var frozen = false
         private set
@@ -174,11 +159,11 @@ constructor(
      * store any relevant data on the message and then call [commit].
      */
     @Synchronized
-    fun obtain(
+    override fun obtain(
         tag: String,
         level: LogLevel,
         messagePrinter: MessagePrinter,
-        exception: Throwable? = null,
+        exception: Throwable?,
     ): LogMessage {
         if (!mutable) {
             return FROZEN_MESSAGE
@@ -195,22 +180,11 @@ constructor(
      * have finished filling in its data fields. The message will be echoed to logcat if necessary.
      */
     @Synchronized
-    fun commit(message: LogMessage) {
+    override fun commit(message: LogMessage) {
         if (!mutable) {
             return
         }
-        // Log in the background thread only if echoMessageQueue exists and has capacity (checking
-        // capacity avoids the possibility of blocking this thread)
-        if (echoMessageQueue != null && echoMessageQueue.remainingCapacity() > 0) {
-            try {
-                echoMessageQueue.put(message)
-            } catch (e: InterruptedException) {
-                // the background thread has been shut down, so just log on this one
-                echoToDesiredEndpoints(message)
-            }
-        } else {
-            echoToDesiredEndpoints(message)
-        }
+        echoToDesiredEndpoints(message)
     }
 
     /** Sends message to echo after determining whether to use Logcat and/or systrace. */
@@ -218,7 +192,18 @@ constructor(
         val includeInLogcat =
             logcatEchoTracker.isBufferLoggable(name, message.level) ||
                 logcatEchoTracker.isTagLoggable(message.tag, message.level)
-        echo(message, toLogcat = includeInLogcat, toSystrace = systrace)
+
+        val includeInSystrace = systrace && Trace.isTagEnabled(Trace.TRACE_TAG_APP)
+
+        if (includeInLogcat || includeInSystrace) {
+            val strMessage = message.messagePrinter(message)
+            if (includeInLogcat) {
+                echoToLogcat(message, strMessage)
+            }
+            if (includeInSystrace) {
+                echoToSystrace(message.level, message.tag, strMessage)
+            }
+        }
     }
 
     /** Converts the entire buffer to a newline-delimited string */
@@ -258,26 +243,12 @@ constructor(
         }
     }
 
-    private fun echo(message: LogMessage, toLogcat: Boolean, toSystrace: Boolean) {
-        if (toLogcat || toSystrace) {
-            val strMessage = message.messagePrinter(message)
-            if (toSystrace) {
-                echoToSystrace(message, strMessage)
-            }
-            if (toLogcat) {
-                echoToLogcat(message, strMessage)
-            }
-        }
-    }
-
-    private fun echoToSystrace(message: LogMessage, strMessage: String) {
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
-            Trace.instantForTrack(
-                Trace.TRACE_TAG_APP,
-                "UI Events",
-                "$name - ${message.level.shortString} ${message.tag}: $strMessage"
-            )
-        }
+    private fun echoToSystrace(level: LogLevel, tag: String, strMessage: String) {
+        Trace.instantForTrack(
+            Trace.TRACE_TAG_APP,
+            "UI Events",
+            "$name - ${level.shortString} $tag: $strMessage"
+        )
     }
 
     private fun echoToLogcat(message: LogMessage, strMessage: String) {
@@ -291,12 +262,6 @@ constructor(
         }
     }
 }
-
-/**
- * A function that will be called immediately to store relevant data on the log message. The value
- * of `this` will be the LogMessage to be initialized.
- */
-typealias MessageInitializer = LogMessage.() -> Unit
 
 private const val TAG = "LogBuffer"
 private val FROZEN_MESSAGE = LogMessageImpl.create()

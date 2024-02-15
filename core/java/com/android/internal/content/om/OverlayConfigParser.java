@@ -28,6 +28,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayScanner.ParsedOverlayInfo;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -54,8 +55,11 @@ import java.util.Map;
  *
  * @see #parseOverlay(File, XmlPullParser, OverlayScanner, ParsingContext)
  * @see #parseMerge(File, XmlPullParser, OverlayScanner, ParsingContext)
+ *
+ * @hide
  **/
-final class OverlayConfigParser {
+@VisibleForTesting
+public final class OverlayConfigParser {
 
     /** Represents a part of a parsed overlay configuration XML file. */
     public static class ParsedConfigFile {
@@ -160,7 +164,11 @@ final class OverlayConfigParser {
         }
     }
 
-    static class OverlayPartition extends SystemPartition {
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static class OverlayPartition extends SystemPartition {
         // Policies passed to idmap2 during idmap creation.
         // Keep partition policy constants in sync with f/b/cmds/idmap2/include/idmap2/Policies.h.
         static final String POLICY_ODM = "odm";
@@ -173,7 +181,11 @@ final class OverlayConfigParser {
         @NonNull
         public final String policy;
 
-        OverlayPartition(@NonNull SystemPartition partition) {
+        /**
+         * @hide
+         **/
+        @VisibleForTesting
+        public OverlayPartition(@NonNull SystemPartition partition) {
             super(partition);
             this.policy = policyForPartition(partition);
         }

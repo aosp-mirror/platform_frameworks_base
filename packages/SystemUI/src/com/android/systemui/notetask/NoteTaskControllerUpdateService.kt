@@ -44,7 +44,7 @@ constructor(
     override fun onCreate() {
         super.onCreate()
         // TODO(b/278729185): Replace fire and forget service with a bounded service.
-        controller.updateNoteTaskAsUser(user)
+        controller.launchUpdateNoteTaskAsUser(user)
         stopSelf()
     }
 

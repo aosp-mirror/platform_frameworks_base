@@ -18,10 +18,11 @@ package com.android.keyguard;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
+import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
+import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,21 +37,20 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
-import com.android.systemui.R;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.doze.util.BurnInHelperKt;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository;
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -75,6 +75,8 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
 
     protected MockitoSession mStaticMockSession;
 
+    protected final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    protected @Mock DeviceEntryInteractor mDeviceEntryInteractor;
     protected @Mock LockIconView mLockIconView;
     protected @Mock AnimatedStateListDrawable mIconDrawable;
     protected @Mock Context mContext;
@@ -91,10 +93,10 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
     protected @Mock ConfigurationController mConfigurationController;
     protected @Mock VibratorHelper mVibrator;
     protected @Mock AuthRippleController mAuthRippleController;
-    protected @Mock FeatureFlags mFeatureFlags;
-    protected @Mock KeyguardTransitionRepository mTransitionRepository;
-    protected @Mock CommandQueue mCommandQueue;
     protected FakeExecutor mDelayableExecutor = new FakeExecutor(new FakeSystemClock());
+    protected FakeFeatureFlags mFeatureFlags;
+
+    protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
 
     protected LockIconViewController mUnderTest;
 
@@ -144,8 +146,13 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         when(mStatusBarStateController.isDozing()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
 
+        mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
+
+        mFeatureFlags = new FakeFeatureFlags();
+        mFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
+        mFeatureFlags.set(LOCKSCREEN_ENABLE_LANDSCAPE, false);
+
         mUnderTest = new LockIconViewController(
-                mLockIconView,
                 mStatusBarStateController,
                 mKeyguardUpdateMonitor,
                 mKeyguardViewController,
@@ -159,15 +166,13 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mVibrator,
                 mAuthRippleController,
                 mResources,
-                new KeyguardTransitionInteractor(mTransitionRepository,
-                        TestScopeProvider.getTestScope().getBackgroundScope()),
-                new KeyguardInteractor(
-                        new FakeKeyguardRepository(),
-                        mCommandQueue,
-                        mFeatureFlags,
-                        new FakeKeyguardBouncerRepository()
-                ),
-                mFeatureFlags
+                mKosmos.getKeyguardTransitionInteractor(),
+                KeyguardInteractorFactory.create(mFeatureFlags).getKeyguardInteractor(),
+                mFeatureFlags,
+                mPrimaryBouncerInteractor,
+                mContext,
+                () -> mDeviceEntryInteractor,
+                mKosmos.getFakeSceneContainerFlags()
         );
     }
 
@@ -226,11 +231,8 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         setupLockIconViewMocks();
     }
 
-    protected void init(boolean useMigrationFlag) {
-        when(mFeatureFlags.isEnabled(DOZING_MIGRATION_1)).thenReturn(useMigrationFlag);
-        mUnderTest.init();
-
-        verify(mLockIconView, atLeast(1)).addOnAttachStateChangeListener(mAttachCaptor.capture());
-        mAttachCaptor.getValue().onViewAttachedToWindow(mLockIconView);
+    protected void init(boolean useDozeMigrationFlag) {
+        mFeatureFlags.set(DOZING_MIGRATION_1, useDozeMigrationFlag);
+        mUnderTest.setLockIconView(mLockIconView);
     }
 }

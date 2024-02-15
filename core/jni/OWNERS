@@ -104,3 +104,9 @@ per-file com_android_internal_os_*MultiStateCounter* = file:/BATTERY_STATS_OWNER
 
 # PM
 per-file com_android_internal_content_* = file:/PACKAGE_MANAGER_OWNERS
+
+# SQLite
+per-file android_database_SQLite* = file:/SQLITE_OWNERS
+
+# PerformanceHintManager
+per-file android_os_PerformanceHintManager.cpp = file:/ADPF_OWNERS

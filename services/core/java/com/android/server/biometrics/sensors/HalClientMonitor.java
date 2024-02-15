@@ -19,8 +19,10 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.IBinder;
 
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
@@ -58,7 +60,8 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
         super(context, token, listener, userId, owner, cookie, sensorId,
                 biometricLogger, biometricContext);
         mLazyDaemon = lazyDaemon;
-        mOperationContext = new OperationContextExt(isBiometricPrompt());
+        int modality = listener != null ? listener.getModality() : BiometricAuthenticator.TYPE_NONE;
+        mOperationContext = new OperationContextExt(isBiometricPrompt(), modality);
     }
 
     @Nullable
@@ -91,6 +94,9 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
     }
 
     protected OperationContextExt getOperationContext() {
+        if (Flags.deHidl()) {
+            return mOperationContext;
+        }
         return getBiometricContext().updateContext(mOperationContext, isCryptoOperation());
     }
 

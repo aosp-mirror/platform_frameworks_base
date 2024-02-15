@@ -37,6 +37,7 @@ import java.util.Objects;
  * Contains information about the modem's activity. May be useful for power stats reporting.
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 @SystemApi
 public final class ModemActivityInfo implements Parcelable {
     private static final int TX_POWER_LEVELS = 5;

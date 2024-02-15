@@ -16,57 +16,69 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.shared.model.SceneKey
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the shade scene. */
+@SysUISingleton
 class ShadeSceneViewModel
-@AssistedInject
+@Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    lockscreenSceneInteractorFactory: LockscreenSceneInteractor.Factory,
-    @Assisted private val containerName: String,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
+    val qsSceneAdapter: QSSceneAdapter,
+    val shadeHeaderViewModel: ShadeHeaderViewModel,
+    val notifications: NotificationsPlaceholderViewModel,
+    val mediaDataManager: MediaDataManager,
 ) {
-    private val lockScreenInteractor: LockscreenSceneInteractor =
-        lockscreenSceneInteractorFactory.create(containerName)
-
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: StateFlow<SceneKey> =
-        lockScreenInteractor.isDeviceLocked
-            .map { isLocked -> upDestinationSceneKey(isLocked = isLocked) }
+        combine(
+                deviceEntryInteractor.isUnlocked,
+                deviceEntryInteractor.canSwipeToEnter,
+            ) { isUnlocked, canSwipeToDismiss ->
+                upDestinationSceneKey(
+                    isUnlocked = isUnlocked,
+                    canSwipeToDismiss = canSwipeToDismiss,
+                )
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue =
                     upDestinationSceneKey(
-                        isLocked = lockScreenInteractor.isDeviceLocked.value,
+                        isUnlocked = deviceEntryInteractor.isUnlocked.value,
+                        canSwipeToDismiss = deviceEntryInteractor.canSwipeToEnter.value,
                     ),
             )
 
     /** Notifies that some content in the shade was clicked. */
-    fun onContentClicked() {
-        lockScreenInteractor.dismissLockscreen()
-    }
+    fun onContentClicked() = deviceEntryInteractor.attemptDeviceEntry()
 
     private fun upDestinationSceneKey(
-        isLocked: Boolean,
+        isUnlocked: Boolean,
+        canSwipeToDismiss: Boolean?,
     ): SceneKey {
-        return if (isLocked) SceneKey.Lockscreen else SceneKey.Gone
+        return when {
+            canSwipeToDismiss == true -> SceneKey.Lockscreen
+            isUnlocked -> SceneKey.Gone
+            else -> SceneKey.Lockscreen
+        }
     }
 
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            containerName: String,
-        ): ShadeSceneViewModel
+    fun isMediaVisible(): Boolean {
+        // TODO(b/296122467): handle updates to carousel visibility while scene is still visible
+        return mediaDataManager.hasActiveMediaOrRecommendation()
     }
 }

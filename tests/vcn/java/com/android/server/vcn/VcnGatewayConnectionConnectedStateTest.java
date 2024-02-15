@@ -42,6 +42,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -74,6 +75,9 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.vcn.VcnGatewayConnection.VcnChildSessionCallback;
+import com.android.server.vcn.VcnGatewayConnection.VcnChildSessionConfiguration;
+import com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
+import com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
 import com.android.server.vcn.util.MtuUtils;
 
@@ -265,6 +269,7 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     @Test
     public void testCreatedTransformsAreApplied() throws Exception {
         verifyVcnTransformsApplied(mGatewayConnection, false /* expectForwardTransform */);
+        verify(mUnderlyingNetworkController).updateInboundTransform(any(), any());
     }
 
     @Test
@@ -323,6 +328,8 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                             eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(direction), anyInt(), any());
         }
 
+        verify(mUnderlyingNetworkController).updateInboundTransform(any(), any());
+
         assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
 
         final List<ChildSaProposal> saProposals =
@@ -343,6 +350,33 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         // Verify revalidation is triggered on VCN network
         verify(mConnMgr).reportNetworkConnectivity(eq(mNetworkAgent.getNetwork()), eq(false));
+    }
+
+    @Test
+    public void testMigrationHandleFailure() throws Exception {
+        triggerChildOpened();
+        mTestLooper.dispatchAll();
+        assertEquals(mIkeConnectionInfo, mGatewayConnection.getIkeConnectionInfo());
+
+        mGatewayConnection
+                .getUnderlyingNetworkControllerCallback()
+                .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
+
+        final IkeSessionConnectionInfo newIkeConnectionInfo =
+                new IkeSessionConnectionInfo(
+                        TEST_ADDR_V4, TEST_ADDR_V4_2, TEST_UNDERLYING_NETWORK_RECORD_2.network);
+        getIkeSessionCallback().onIkeSessionConnectionInfoChanged(newIkeConnectionInfo);
+        getChildSessionCallback()
+                .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());
+
+        doThrow(new IllegalArgumentException("testMigrationHandleFailure"))
+                .when(mIpSecSvc)
+                .setNetworkForTunnelInterface(anyInt(), any(), any());
+
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        verify(mIkeSession).close();
     }
 
     private void triggerChildOpened() {
@@ -621,6 +655,74 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         mTestLooper.dispatchAll();
 
         verifySafeModeStateAndCallbackFired(2 /* invocationCount */, true /* isInSafeMode */);
+    }
+
+    private void verifySetSafeModeAlarm(
+            boolean safeModeEnabledByCaller,
+            boolean safeModeConfigFlagEnabled,
+            boolean expectingSafeModeEnabled)
+            throws Exception {
+        final VcnGatewayConnectionConfig config =
+                VcnGatewayConnectionConfigTest.newTestBuilderMinimal()
+                        .setSafeModeEnabled(safeModeEnabledByCaller)
+                        .build();
+        final VcnGatewayConnection.Dependencies deps =
+                mock(VcnGatewayConnection.Dependencies.class);
+        setUpWakeupMessage(
+                mSafeModeTimeoutAlarm, VcnGatewayConnection.SAFEMODE_TIMEOUT_ALARM, deps);
+        doReturn(safeModeConfigFlagEnabled).when(mFeatureFlags).safeModeConfig();
+
+        final VcnGatewayConnection connection =
+                new VcnGatewayConnection(
+                        mVcnContext,
+                        TEST_SUB_GRP,
+                        TEST_SUBSCRIPTION_SNAPSHOT,
+                        config,
+                        mGatewayStatusCallback,
+                        true /* isMobileDataEnabled */,
+                        deps);
+
+        connection.setSafeModeAlarm();
+
+        final int expectedCallCnt = expectingSafeModeEnabled ? 1 : 0;
+        verify(deps, times(expectedCallCnt))
+                .newWakeupMessage(
+                        eq(mVcnContext),
+                        any(),
+                        eq(VcnGatewayConnection.SAFEMODE_TIMEOUT_ALARM),
+                        any());
+    }
+
+    @Test
+    public void testSafeModeEnabled_configFlagEnabled() throws Exception {
+        verifySetSafeModeAlarm(
+                true /* safeModeEnabledByCaller */,
+                true /* safeModeConfigFlagEnabled */,
+                true /* expectingSafeModeEnabled */);
+    }
+
+    @Test
+    public void testSafeModeEnabled_configFlagDisabled() throws Exception {
+        verifySetSafeModeAlarm(
+                true /* safeModeEnabledByCaller */,
+                false /* safeModeConfigFlagEnabled */,
+                true /* expectingSafeModeEnabled */);
+    }
+
+    @Test
+    public void testSafeModeDisabled_configFlagEnabled() throws Exception {
+        verifySetSafeModeAlarm(
+                false /* safeModeEnabledByCaller */,
+                true /* safeModeConfigFlagEnabled */,
+                false /* expectingSafeModeEnabled */);
+    }
+
+    @Test
+    public void testSafeModeDisabled_configFlagDisabled() throws Exception {
+        verifySetSafeModeAlarm(
+                false /* safeModeEnabledByCaller */,
+                false /* safeModeConfigFlagEnabled */,
+                true /* expectingSafeModeEnabled */);
     }
 
     private Consumer<VcnNetworkAgent> setupNetworkAndGetUnwantedCallback() {

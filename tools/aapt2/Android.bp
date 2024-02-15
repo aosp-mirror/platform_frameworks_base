@@ -47,6 +47,7 @@ cc_defaults {
         "-Wno-missing-field-initializers",
         "-fno-exceptions",
         "-fno-rtti",
+        "-Wno-deprecated-declarations",
     ],
     target: {
         windows: {
@@ -91,10 +92,6 @@ cc_library_host_static {
     srcs: [
         "compile/IdAssigner.cpp",
         "compile/InlineXmlFormatParser.cpp",
-        "compile/NinePatch.cpp",
-        "compile/Png.cpp",
-        "compile/PngChunkFilter.cpp",
-        "compile/PngCrunch.cpp",
         "compile/PseudolocaleGenerator.cpp",
         "compile/Pseudolocalizer.cpp",
         "compile/XmlIdCollector.cpp",
@@ -111,17 +108,15 @@ cc_library_host_static {
         "format/binary/XmlFlattener.cpp",
         "format/proto/ProtoDeserialize.cpp",
         "format/proto/ProtoSerialize.cpp",
-        "io/BigBufferStream.cpp",
         "io/File.cpp",
-        "io/FileStream.cpp",
         "io/FileSystem.cpp",
         "io/StringStream.cpp",
         "io/Util.cpp",
         "io/ZipArchive.cpp",
         "link/AutoVersioner.cpp",
+        "link/FeatureFlagsFilter.cpp",
         "link/ManifestFixer.cpp",
         "link/NoDefaultResourceRemover.cpp",
-        "link/ProductFilter.cpp",
         "link/PrivateAttributeMover.cpp",
         "link/ReferenceLinker.cpp",
         "link/ResourceExcluder.cpp",
@@ -134,6 +129,7 @@ cc_library_host_static {
         "optimize/ResourceFilter.cpp",
         "optimize/Obfuscator.cpp",
         "optimize/VersionCollapser.cpp",
+        "process/ProductFilter.cpp",
         "process/SymbolTable.cpp",
         "split/TableSplitter.cpp",
         "text/Printer.cpp",
@@ -219,6 +215,7 @@ genrule {
     name: "aapt2-protos",
     tools: [":soong_zip"],
     srcs: [
+        "ApkInfo.proto",
         "Configuration.proto",
         "ResourcesInternal.proto",
         "ResourceMetadata.proto",
@@ -234,4 +231,57 @@ genrule {
             "aapt2_artifacts",
         ],
     },
+}
+
+cc_genrule {
+    name: "aapt2_results",
+    srcs: [
+        ":aapt2_tests",
+        "integration-tests/CompileTest/**/*",
+        "integration-tests/CommandTests/**/*",
+        "integration-tests/ConvertTest/**/*",
+        "integration-tests/DumpTest/**/*",
+    ],
+    host_supported: true,
+    device_supported: false,
+    target: {
+        windows: {
+            compile_multilib: "64",
+        },
+    },
+    out: ["result.xml"],
+    cmd: "mkdir -p $(genDir)/integration-tests/CompileTest/ && " +
+        "cp $(locations integration-tests/CompileTest/**/*) $(genDir)/integration-tests/CompileTest/ && " +
+        "mkdir -p $(genDir)/integration-tests/CommandTests/ && " +
+        "cp $(locations integration-tests/CommandTests/**/*) $(genDir)/integration-tests/CompileTest/ && " +
+        "mkdir -p $(genDir)/integration-tests/ConvertTest/ && " +
+        "cp $(locations integration-tests/ConvertTest/**/*) $(genDir)/integration-tests/ConvertTest/ && " +
+        "mkdir -p $(genDir)/integration-tests/DumpTest/ && " +
+        "cp $(locations integration-tests/DumpTest/**/*) $(genDir)/integration-tests/DumpTest/ && " +
+        "cp $(locations :aapt2_tests) $(genDir)/ && " +
+        "$(genDir)/aapt2_tests " +
+        "--gtest_output=xml:$(out) " +
+        ">/dev/null 2>&1 ; true",
+    dist: {
+        targets: ["aapt2_run_host_unit_tests"],
+        dir: "gtest",
+        dest: "aapt2_host_unit_tests_result.xml",
+    },
+    arch: {
+        x86: {
+            dist: {
+                suffix: "_x86",
+            },
+        },
+        x86_64: {
+            dist: {
+                suffix: "_x86_64",
+            },
+        },
+    },
+}
+
+phony_rule {
+    name: "aapt2_run_host_unit_tests",
+    phony_deps: ["aapt2_results"],
 }

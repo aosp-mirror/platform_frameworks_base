@@ -123,6 +123,7 @@ public class ContentRecordingControllerTests extends WindowTestsBase {
         controller.setContentRecordingSessionLocked(mWaitingDisplaySession, mWm);
         verify(mVirtualDisplayContent, atLeastOnce()).setContentRecordingSession(
                 mWaitingDisplaySession);
+        verify(mVirtualDisplayContent, atLeastOnce()).updateRecording();
 
         // WHEN updating the session on the same display, so no longer waiting to record.
         ContentRecordingSession sessionUpdate = ContentRecordingSession.createTaskSession(
@@ -135,7 +136,7 @@ public class ContentRecordingControllerTests extends WindowTestsBase {
         // THEN the session was accepted.
         assertThat(resultingSession).isEqualTo(sessionUpdate);
         verify(mVirtualDisplayContent, atLeastOnce()).setContentRecordingSession(sessionUpdate);
-        verify(mVirtualDisplayContent).updateRecording();
+        verify(mVirtualDisplayContent, atLeastOnce()).updateRecording();
     }
 
     @Test

@@ -21,8 +21,8 @@ import android.util.AttributeSet
 import android.widget.ImageView
 import androidx.core.graphics.drawable.DrawableCompat
 import com.android.settingslib.Utils
-import com.android.systemui.R
-import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.EMERGENCY_BUTTON
+import com.android.systemui.res.R
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.EMERGENCY_BUTTON
 
 abstract class KeyguardSimInputView(context: Context, attrs: AttributeSet) :
     KeyguardPinBasedInputView(context, attrs) {

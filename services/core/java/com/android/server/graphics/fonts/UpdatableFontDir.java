@@ -578,7 +578,8 @@ final class UpdatableFontDir {
                 return null;
             }
             resolvedFonts.add(new FontConfig.Font(info.mFile, null, info.getPostScriptName(),
-                    font.getFontStyle(), font.getIndex(), font.getFontVariationSettings(), null));
+                    font.getFontStyle(), font.getIndex(), font.getFontVariationSettings(),
+                    null /* family name */, FontConfig.Font.VAR_TYPE_AXES_NONE));
         }
         FontConfig.FontFamily family = new FontConfig.FontFamily(resolvedFonts,
                 LocaleList.getEmptyLocaleList(), FontConfig.FontFamily.VARIANT_DEFAULT);
@@ -616,8 +617,8 @@ final class UpdatableFontDir {
         }
 
         return new FontConfig(
-                config.getFontFamilies(), config.getAliases(), mergedFamilies, mLastModifiedMillis,
-                mConfigVersion);
+                config.getFontFamilies(), config.getAliases(), mergedFamilies,
+                config.getLocaleFallbackCustomizations(), mLastModifiedMillis, mConfigVersion);
     }
 
     private PersistentSystemFontConfig.Config readPersistentConfig() {

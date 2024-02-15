@@ -19,20 +19,22 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Context
 import androidx.annotation.DimenRes
-import com.android.systemui.R
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.util.time.SystemClock
+import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
@@ -46,23 +48,33 @@ constructor(
     private val burnInHelperWrapper: BurnInHelperWrapper,
     @Application private val scope: CoroutineScope,
     private val configurationRepository: ConfigurationRepository,
-    private val systemClock: SystemClock,
+    private val keyguardInteractor: KeyguardInteractor,
 ) {
-    private val _dozeTimeTick = MutableStateFlow<Long>(0)
-    val dozeTimeTick: StateFlow<Long> = _dozeTimeTick.asStateFlow()
-
-    val udfpsBurnInXOffset: StateFlow<Int> =
+    val deviceEntryIconXOffset: StateFlow<Int> =
         burnInOffsetDefinedInPixels(R.dimen.udfps_burn_in_offset_x, isXAxis = true)
-    val udfpsBurnInYOffset: StateFlow<Int> =
+    val deviceEntryIconYOffset: StateFlow<Int> =
         burnInOffsetDefinedInPixels(R.dimen.udfps_burn_in_offset_y, isXAxis = false)
-    val udfpsBurnInProgress: StateFlow<Float> =
-        dozeTimeTick
+    val udfpsProgress: StateFlow<Float> =
+        keyguardInteractor.dozeTimeTick
             .mapLatest { burnInHelperWrapper.burnInProgressOffset() }
-            .stateIn(scope, SharingStarted.Lazily, burnInHelperWrapper.burnInProgressOffset())
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                burnInHelperWrapper.burnInProgressOffset()
+            )
 
-    fun dozeTimeTick() {
-        _dozeTimeTick.value = systemClock.uptimeMillis()
-    }
+    val keyguardBurnIn: Flow<BurnInModel> =
+        combine(
+                burnInOffset(R.dimen.burn_in_prevention_offset_x, isXAxis = true),
+                burnInOffset(R.dimen.burn_in_prevention_offset_y, isXAxis = false).map {
+                    it * 2 -
+                        context.resources.getDimensionPixelSize(R.dimen.burn_in_prevention_offset_y)
+                }
+            ) { translationX, translationY ->
+                BurnInModel(translationX, translationY, burnInHelperWrapper.burnInScale())
+            }
+            .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Lazily, BurnInModel())
 
     /**
      * Use for max burn-in offsets that are NOT specified in pixels. This flow will recalculate the
@@ -77,7 +89,9 @@ constructor(
             .flatMapLatest {
                 val maxBurnInOffsetPixels =
                     context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId)
-                dozeTimeTick.mapLatest { calculateOffset(maxBurnInOffsetPixels, isXAxis) }
+                keyguardInteractor.dozeTimeTick.mapLatest {
+                    calculateOffset(maxBurnInOffsetPixels, isXAxis)
+                }
             }
             .stateIn(
                 scope,
@@ -102,7 +116,9 @@ constructor(
             .flatMapLatest { scale ->
                 val maxBurnInOffsetPixels =
                     context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId)
-                dozeTimeTick.mapLatest { calculateOffset(maxBurnInOffsetPixels, isXAxis, scale) }
+                keyguardInteractor.dozeTimeTick.mapLatest {
+                    calculateOffset(maxBurnInOffsetPixels, isXAxis, scale)
+                }
             }
             .stateIn(
                 scope,

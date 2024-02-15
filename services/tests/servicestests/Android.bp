@@ -2,6 +2,13 @@
 // Build FrameworksServicesTests package
 //########################################################################
 
+java_defaults {
+    name: "FrameworksServicesTests-jni-defaults",
+    jni_libs: [
+        "libservicestestjni",
+    ],
+}
+
 package {
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
@@ -13,29 +20,38 @@ package {
 
 android_test {
     name: "FrameworksServicesTests",
+    defaults: [
+        "FrameworksServicesTests-jni-defaults",
+    ],
 
     // Include all test java files.
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
 
-        "test-apps/JobTestApp/src/**/*.java",
-
         "test-apps/SuspendTestApp/src/**/*.java",
     ],
+
+    kotlincflags: [
+        "-Werror",
+    ],
     static_libs: [
+        "cts-input-lib",
         "frameworks-base-testutils",
         "services.accessibility",
         "services.appwidget",
         "services.autofill",
+        "services.contentcapture",
         "services.backup",
         "services.companion",
         "services.core",
         "services.credentials",
         "services.devicepolicy",
+        "services.flags",
         "services.net",
         "services.people",
         "services.usage",
+        "service-permission.stubs.system_server",
         "guava",
         "guava-android-testlib",
         "androidx.test.core",
@@ -48,9 +64,9 @@ android_test {
         "mockito-target-minus-junit4",
         "platform-test-annotations",
         "ShortcutManagerTestUtils",
-        "truth-prebuilt",
+        "truth",
         "testables",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "platformprotosnano",
         "framework-protos",
         "hamcrest-library",
@@ -59,12 +75,16 @@ android_test {
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
-        "truth-prebuilt",
+        "truth",
         "junit",
         "junit-params",
         "ActivityContext",
         "coretests-aidl",
         "securebox",
+        "flag-junit",
+        "ravenwood-junit",
+        "net_flags_lib",
+        "CtsVirtualDeviceCommonLib",
     ],
 
     libs: [
@@ -109,8 +129,6 @@ android_test {
     },
 
     data: [
-        ":BstatsTestApp",
-        ":JobTestApp",
         ":SimpleServiceTestApp1",
         ":SimpleServiceTestApp2",
         ":SimpleServiceTestApp3",
@@ -127,11 +145,27 @@ android_test {
     resource_zips: [":FrameworksServicesTests_apks_as_resources"],
 }
 
+android_ravenwood_test {
+    name: "FrameworksServicesTestsRavenwood",
+    libs: [
+        "android.test.mock",
+    ],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "services.core",
+        "flag-junit",
+    ],
+    srcs: [
+        "src/com/android/server/uri/**/*.java",
+    ],
+    auto_gen_config: true,
+}
+
 java_library {
     name: "servicestests-core-utils",
     srcs: [
         "src/com/android/server/am/DeviceConfigSession.java",
-        "src/com/android/server/display/TestUtils.java",
         "src/com/android/server/pm/PackageSettingBuilder.java",
         "src/com/android/server/pm/parsing/TestPackageParser2.kt",
     ],
@@ -181,6 +215,16 @@ java_library {
     ],
     libs: [
         "android.test.runner",
+    ],
+}
+
+java_library {
+    name: "mockito-test-utils",
+    srcs: [
+        "utils-mockito/**/*.kt",
+    ],
+    static_libs: [
+        "mockito-target-minus-junit4",
     ],
 }
 

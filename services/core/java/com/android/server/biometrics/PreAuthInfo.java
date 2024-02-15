@@ -27,7 +27,6 @@ import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.Context;
-import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.PromptInfo;
@@ -73,13 +72,16 @@ class PreAuthInfo {
     final Context context;
     private final boolean mBiometricRequested;
     private final int mBiometricStrengthRequested;
+    private final BiometricCameraManager mBiometricCameraManager;
+
     private PreAuthInfo(boolean biometricRequested, int biometricStrengthRequested,
             boolean credentialRequested, List<BiometricSensor> eligibleSensors,
             List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable,
             boolean confirmationRequested, boolean ignoreEnrollmentState, int userId,
-            Context context) {
+            Context context, BiometricCameraManager biometricCameraManager) {
         mBiometricRequested = biometricRequested;
         mBiometricStrengthRequested = biometricStrengthRequested;
+        mBiometricCameraManager = biometricCameraManager;
         this.credentialRequested = credentialRequested;
 
         this.eligibleSensors = eligibleSensors;
@@ -96,7 +98,8 @@ class PreAuthInfo {
             BiometricService.SettingObserver settingObserver,
             List<BiometricSensor> sensors,
             int userId, PromptInfo promptInfo, String opPackageName,
-            boolean checkDevicePolicyManager, Context context)
+            boolean checkDevicePolicyManager, Context context,
+            BiometricCameraManager biometricCameraManager)
             throws RemoteException {
 
         final boolean confirmationRequested = promptInfo.isConfirmationRequested();
@@ -105,7 +108,7 @@ class PreAuthInfo {
         final boolean credentialRequested = Utils.isCredentialRequested(promptInfo);
 
         final boolean credentialAvailable = trustManager.isDeviceSecure(userId,
-                context.getAssociatedDisplayId());
+                context.getDeviceId());
 
         // Assuming that biometric authenticators are listed in priority-order, the rest of this
         // function will attempt to find the first authenticator that's as strong or stronger than
@@ -124,7 +127,7 @@ class PreAuthInfo {
                         checkDevicePolicyManager, requestedStrength,
                         promptInfo.getAllowedSensorIds(),
                         promptInfo.isIgnoreEnrollmentState(),
-                        context);
+                        biometricCameraManager);
 
                 Slog.d(TAG, "Package: " + opPackageName
                         + " Sensor ID: " + sensor.id
@@ -138,7 +141,7 @@ class PreAuthInfo {
                 //
                 // Note: if only a certain sensor is required and the privacy is enabled,
                 // canAuthenticate() will return false.
-                if (status == AUTHENTICATOR_OK || status == BIOMETRIC_SENSOR_PRIVACY_ENABLED) {
+                if (status == AUTHENTICATOR_OK) {
                     eligibleSensors.add(sensor);
                 } else {
                     ineligibleSensors.add(new Pair<>(sensor, status));
@@ -148,7 +151,7 @@ class PreAuthInfo {
 
         return new PreAuthInfo(biometricRequested, requestedStrength, credentialRequested,
                 eligibleSensors, ineligibleSensors, credentialAvailable, confirmationRequested,
-                promptInfo.isIgnoreEnrollmentState(), userId, context);
+                promptInfo.isIgnoreEnrollmentState(), userId, context, biometricCameraManager);
     }
 
     /**
@@ -165,10 +168,14 @@ class PreAuthInfo {
             BiometricSensor sensor, int userId, String opPackageName,
             boolean checkDevicePolicyManager, int requestedStrength,
             @NonNull List<Integer> requestedSensorIds,
-            boolean ignoreEnrollmentState, Context context) {
+            boolean ignoreEnrollmentState, BiometricCameraManager biometricCameraManager) {
 
         if (!requestedSensorIds.isEmpty() && !requestedSensorIds.contains(sensor.id)) {
             return BIOMETRIC_NO_HARDWARE;
+        }
+
+        if (sensor.modality == TYPE_FACE && biometricCameraManager.isAnyCameraUnavailable()) {
+            return BIOMETRIC_HARDWARE_NOT_DETECTED;
         }
 
         final boolean wasStrongEnough =
@@ -191,12 +198,10 @@ class PreAuthInfo {
                     && !ignoreEnrollmentState) {
                 return BIOMETRIC_NOT_ENROLLED;
             }
-            final SensorPrivacyManager sensorPrivacyManager = context
-                    .getSystemService(SensorPrivacyManager.class);
 
-            if (sensorPrivacyManager != null && sensor.modality == TYPE_FACE) {
-                if (sensorPrivacyManager
-                        .isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA, userId)) {
+            if (biometricCameraManager != null && sensor.modality == TYPE_FACE) {
+                if (biometricCameraManager.isCameraPrivacyEnabled()) {
+                    //Camera privacy is enabled as the access is disabled
                     return BIOMETRIC_SENSOR_PRIVACY_ENABLED;
                 }
             }
@@ -266,17 +271,38 @@ class PreAuthInfo {
     }
 
     private Pair<BiometricSensor, Integer> calculateErrorByPriority() {
-        // If the caller requested STRONG, and the device contains both STRONG and non-STRONG
-        // sensors, prioritize BIOMETRIC_NOT_ENROLLED over the weak sensor's
-        // BIOMETRIC_INSUFFICIENT_STRENGTH error. Pretty sure we can always prioritize
-        // BIOMETRIC_NOT_ENROLLED over any other error (unless of course its calculation is
-        // wrong, in which case we should fix that instead).
+        Pair<BiometricSensor, Integer> sensorNotEnrolled = null;
+        Pair<BiometricSensor, Integer> sensorLockout = null;
+        Pair<BiometricSensor, Integer> hardwareNotDetected = null;
         for (Pair<BiometricSensor, Integer> pair : ineligibleSensors) {
-            if (pair.second == BIOMETRIC_NOT_ENROLLED) {
-                return pair;
+            final int status = pair.second;
+            if (status == BIOMETRIC_LOCKOUT_TIMED || status == BIOMETRIC_LOCKOUT_PERMANENT) {
+                sensorLockout = pair;
+            }
+            if (status == BIOMETRIC_NOT_ENROLLED) {
+                sensorNotEnrolled = pair;
+            }
+            if (status == BIOMETRIC_HARDWARE_NOT_DETECTED) {
+                hardwareNotDetected = pair;
             }
         }
 
+        // If there is a sensor locked out, prioritize lockout over other sensor's error.
+        // See b/286923477.
+        if (sensorLockout != null) {
+            return sensorLockout;
+        }
+
+        if (hardwareNotDetected != null) {
+            return hardwareNotDetected;
+        }
+
+        // If the caller requested STRONG, and the device contains both STRONG and non-STRONG
+        // sensors, prioritize BIOMETRIC_NOT_ENROLLED over the weak sensor's
+        // BIOMETRIC_INSUFFICIENT_STRENGTH error.
+        if (sensorNotEnrolled != null) {
+            return sensorNotEnrolled;
+        }
         return ineligibleSensors.get(0);
     }
 
@@ -292,13 +318,9 @@ class PreAuthInfo {
         @AuthenticatorStatus final int status;
         @BiometricAuthenticator.Modality int modality = TYPE_NONE;
 
-        final SensorPrivacyManager sensorPrivacyManager = context
-                .getSystemService(SensorPrivacyManager.class);
-
         boolean cameraPrivacyEnabled = false;
-        if (sensorPrivacyManager != null) {
-            cameraPrivacyEnabled = sensorPrivacyManager
-                    .isSensorPrivacyEnabled(SensorPrivacyManager.Sensors.CAMERA, userId);
+        if (mBiometricCameraManager != null) {
+            cameraPrivacyEnabled = mBiometricCameraManager.isCameraPrivacyEnabled();
         }
 
         if (mBiometricRequested && credentialRequested) {
@@ -315,7 +337,7 @@ class PreAuthInfo {
                     // and the face sensor privacy is enabled then return
                     // BIOMETRIC_SENSOR_PRIVACY_ENABLED.
                     //
-                    // Note: This sensor will still be eligible for calls to authenticate.
+                    // Note: This sensor will not be eligible for calls to authenticate.
                     status = BIOMETRIC_SENSOR_PRIVACY_ENABLED;
                 } else {
                     status = AUTHENTICATOR_OK;
@@ -340,7 +362,7 @@ class PreAuthInfo {
                     // If the only modality requested is face and the privacy is enabled
                     // then return BIOMETRIC_SENSOR_PRIVACY_ENABLED.
                     //
-                    // Note: This sensor will still be eligible for calls to authenticate.
+                    // Note: This sensor will not be eligible for calls to authenticate.
                     status = BIOMETRIC_SENSOR_PRIVACY_ENABLED;
                 } else {
                     status = AUTHENTICATOR_OK;

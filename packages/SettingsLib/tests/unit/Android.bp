@@ -20,6 +20,7 @@ package {
 
 android_test {
     name: "SettingsLibUnitTests",
+    use_resource_processor: true,
     test_suites: ["device-tests"],
 
     srcs: [
@@ -30,6 +31,6 @@ android_test {
         "SettingsLib",
         "androidx.test.ext.junit",
         "androidx.test.runner",
-        "truth-prebuilt",
+        "truth",
     ],
 }

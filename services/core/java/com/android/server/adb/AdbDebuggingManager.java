@@ -42,6 +42,7 @@ import android.debug.AdbManager;
 import android.debug.AdbNotifications;
 import android.debug.AdbProtoEnums;
 import android.debug.AdbTransportType;
+import android.debug.IAdbTransport;
 import android.debug.PairDevice;
 import android.net.ConnectivityManager;
 import android.net.LocalSocket;
@@ -66,6 +67,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.adb.AdbDebuggingManagerProto;
+import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
@@ -244,16 +246,6 @@ public class AdbDebuggingManager {
 
         @Override
         public void run() {
-            if (mGuid.isEmpty()) {
-                Slog.e(TAG, "adbwifi guid was not set");
-                return;
-            }
-            mPort = native_pairing_start(mGuid, mPairingCode);
-            if (mPort <= 0 || mPort > 65535) {
-                Slog.e(TAG, "Unable to start pairing server");
-                return;
-            }
-
             // Register the mdns service
             NsdServiceInfo serviceInfo = new NsdServiceInfo();
             serviceInfo.setServiceName(mServiceName);
@@ -284,6 +276,28 @@ public class AdbDebuggingManager {
                                              AdbDebuggingHandler.MSG_RESPONSE_PAIRING_RESULT,
                                              bundle);
             mHandler.sendMessage(message);
+        }
+
+        @Override
+        public void start() {
+            /*
+             * If a user is fast enough to click cancel, native_pairing_cancel can be invoked
+             * while native_pairing_start is running which run the destruction of the object
+             * while it is being constructed. Here we start the pairing server on foreground
+             * Thread so native_pairing_cancel can never be called concurrently. Then we let
+             * the pairing server run on a background Thread.
+             */
+            if (mGuid.isEmpty()) {
+                Slog.e(TAG, "adbwifi guid was not set");
+                return;
+            }
+            mPort = native_pairing_start(mGuid, mPairingCode);
+            if (mPort <= 0) {
+                Slog.e(TAG, "Unable to start pairing server");
+                return;
+            }
+
+            super.start();
         }
 
         public void cancelPairing() {
@@ -679,16 +693,17 @@ public class AdbDebuggingManager {
                             return;
                         }
 
-                        // Check for network change
-                        String bssid = wifiInfo.getBSSID();
-                        if (bssid == null || bssid.isEmpty()) {
-                            Slog.e(TAG, "Unable to get the wifi ap's BSSID. Disabling adbwifi.");
-                            Settings.Global.putInt(mContentResolver,
-                                    Settings.Global.ADB_WIFI_ENABLED, 0);
-                            return;
-                        }
                         synchronized (mAdbConnectionInfo) {
-                            if (!bssid.equals(mAdbConnectionInfo.getBSSID())) {
+                            // Check for network change
+                            final String bssid = wifiInfo.getBSSID();
+                            if (TextUtils.isEmpty(bssid)) {
+                                Slog.e(TAG,
+                                        "Unable to get the wifi ap's BSSID. Disabling adbwifi.");
+                                Settings.Global.putInt(mContentResolver,
+                                        Settings.Global.ADB_WIFI_ENABLED, 0);
+                                return;
+                            }
+                            if (!TextUtils.equals(bssid, mAdbConnectionInfo.getBSSID())) {
                                 Slog.i(TAG, "Detected wifi network change. Disabling adbwifi.");
                                 Settings.Global.putInt(mContentResolver,
                                         Settings.Global.ADB_WIFI_ENABLED, 0);
@@ -1397,7 +1412,7 @@ public class AdbDebuggingManager {
             }
 
             String bssid = wifiInfo.getBSSID();
-            if (bssid == null || bssid.isEmpty()) {
+            if (TextUtils.isEmpty(bssid)) {
                 Slog.e(TAG, "Unable to get the wifi ap's BSSID.");
                 return null;
             }
@@ -1797,8 +1812,13 @@ public class AdbDebuggingManager {
                 mFingerprints);
 
         try {
-            dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
-                    FileUtils.readTextFile(new File("/data/misc/adb/adb_keys"), 0, null));
+            File userKeys = new File("/data/misc/adb/adb_keys");
+            if (userKeys.exists()) {
+                dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
+                           FileUtils.readTextFile(userKeys, 0, null));
+            } else {
+                Slog.i(TAG, "No user keys on this device");
+            }
         } catch (IOException e) {
             Slog.i(TAG, "Cannot read user keys", e);
         }

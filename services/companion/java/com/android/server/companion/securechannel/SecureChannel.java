@@ -23,12 +23,12 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Slog;
 
-import com.google.security.cryptauth.lib.securegcm.BadHandleException;
-import com.google.security.cryptauth.lib.securegcm.CryptoException;
-import com.google.security.cryptauth.lib.securegcm.D2DConnectionContextV1;
-import com.google.security.cryptauth.lib.securegcm.D2DHandshakeContext;
-import com.google.security.cryptauth.lib.securegcm.D2DHandshakeContext.Role;
-import com.google.security.cryptauth.lib.securegcm.HandshakeException;
+import com.google.security.cryptauth.lib.securegcm.ukey2.BadHandleException;
+import com.google.security.cryptauth.lib.securegcm.ukey2.CryptoException;
+import com.google.security.cryptauth.lib.securegcm.ukey2.D2DConnectionContextV1;
+import com.google.security.cryptauth.lib.securegcm.ukey2.D2DHandshakeContext;
+import com.google.security.cryptauth.lib.securegcm.ukey2.D2DHandshakeContext.Role;
+import com.google.security.cryptauth.lib.securegcm.ukey2.HandshakeException;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
@@ -340,7 +340,7 @@ public class SecureChannel {
             return;
         }
 
-        mRole = Role.Initiator;
+        mRole = Role.INITIATOR;
         mHandshakeContext = D2DHandshakeContext.forInitiator();
         mClientInit = mHandshakeContext.getNextHandshakeMessage();
 
@@ -412,7 +412,7 @@ public class SecureChannel {
 
         // Proceed with the rest of Ukey2 handshake
         if (mHandshakeContext == null) { // Server-side logic
-            mRole = Role.Responder;
+            mRole = Role.RESPONDER;
             mHandshakeContext = D2DHandshakeContext.forResponder();
 
             // Receive Client Init
@@ -479,9 +479,9 @@ public class SecureChannel {
         }
         sendMessage(MessageType.PRE_SHARED_KEY, constructToken(mRole, mPreSharedKey));
         byte[] receivedAuthToken = readMessage(MessageType.PRE_SHARED_KEY);
-        byte[] expectedAuthToken = constructToken(mRole == Role.Initiator
-                ? Role.Responder
-                : Role.Initiator,
+        byte[] expectedAuthToken = constructToken(mRole == Role.INITIATOR
+                ? Role.RESPONDER
+                : Role.INITIATOR,
                 mPreSharedKey);
         mPskVerified = Arrays.equals(receivedAuthToken, expectedAuthToken);
 
@@ -515,9 +515,9 @@ public class SecureChannel {
         byte[] remoteAttestation = readMessage(MessageType.ATTESTATION);
 
         // Verifying remote attestation with public key local binding param
-        byte[] expectedChallenge = constructToken(mRole == Role.Initiator
-                ? Role.Responder
-                : Role.Initiator,
+        byte[] expectedChallenge = constructToken(mRole == Role.INITIATOR
+                ? Role.RESPONDER
+                : Role.INITIATOR,
                 mConnectionContext.getSessionUnique());
         mVerificationResult = mVerifier.verifyAttestation(remoteAttestation, expectedChallenge);
 
@@ -554,7 +554,7 @@ public class SecureChannel {
     // This information is needed to help resolve potential role collision.
     private byte[] constructHandshakeInitMessage(byte[] message) {
         return ByteBuffer.allocate(1 + message.length)
-                .put((byte) (Role.Initiator.equals(mRole) ? 0 : 1))
+                .put((byte) (Role.INITIATOR.equals(mRole) ? 0 : 1))
                 .put(message)
                 .array();
     }
@@ -562,7 +562,8 @@ public class SecureChannel {
     private byte[] constructToken(D2DHandshakeContext.Role role, byte[] authValue)
             throws GeneralSecurityException {
         MessageDigest hash = MessageDigest.getInstance("SHA-256");
-        byte[] roleUtf8 = role.name().getBytes(StandardCharsets.UTF_8);
+        String roleName = role == Role.INITIATOR ? "Initiator" : "Responder";
+        byte[] roleUtf8 = roleName.getBytes(StandardCharsets.UTF_8);
         int tokenLength = roleUtf8.length + authValue.length;
         return hash.digest(ByteBuffer.allocate(tokenLength)
                 .put(roleUtf8)

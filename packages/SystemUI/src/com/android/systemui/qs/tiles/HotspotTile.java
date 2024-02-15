@@ -33,7 +33,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -180,7 +180,8 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
     private String getSecondaryLabel(boolean isActive, boolean isTransient,
             boolean isDataSaverEnabled, int numConnectedDevices, boolean isWifiTetheringAllowed) {
         if (!isWifiTetheringAllowed) {
-            return mContext.getString(R.string.wifitrackerlib_admin_restricted_network);
+            return mContext.getString(
+                    com.android.wifitrackerlib.R.string.wifitrackerlib_admin_restricted_network);
         } else if (isTransient) {
             return mContext.getString(R.string.quick_settings_hotspot_secondary_label_transient);
         } else if (isDataSaverEnabled) {

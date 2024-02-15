@@ -13,7 +13,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.annotation.Px
-import com.android.systemui.util.traceSection
+import com.android.app.tracing.traceSection
 
 class DrawableSize {
 

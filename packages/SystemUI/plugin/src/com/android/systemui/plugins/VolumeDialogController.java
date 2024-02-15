@@ -58,9 +58,26 @@ public interface VolumeDialogController {
     void userActivity();
     void getState();
 
-    boolean areCaptionsEnabled();
-    void setCaptionsEnabled(boolean isEnabled);
+    /**
+     * Get Captions enabled state
+     *
+     * @param checkForSwitchState set true when we'd like to switch captions enabled state after
+     *                            getting the latest captions state.
+     */
+    void getCaptionsEnabledState(boolean checkForSwitchState);
 
+    /**
+     * Set Captions enabled state
+     *
+     * @param enabled the captions enabled state we'd like to update.
+     */
+    void setCaptionsEnabledState(boolean enabled);
+
+    /**
+     * Get Captions component state
+     *
+     * @param fromTooltip if it's triggered from tooltip.
+     */
     void getCaptionsComponentState(boolean fromTooltip);
 
     @ProvidesInterface(version = StreamState.VERSION)
@@ -192,8 +209,28 @@ public interface VolumeDialogController {
         void onScreenOff();
         void onShowSafetyWarning(int flags);
         void onAccessibilityModeChanged(Boolean showA11yStream);
+
+        /**
+         * Callback function for captions component state changed event
+         *
+         * @param isComponentEnabled the lateset captions component state.
+         * @param fromTooltip if it's triggered from tooltip.
+         */
         void onCaptionComponentStateChanged(Boolean isComponentEnabled, Boolean fromTooltip);
+
+        /**
+         * Callback function for captions enabled state changed event
+         *
+         * @param isEnabled the lateset captions enabled state.
+         * @param checkBeforeSwitch intend to switch captions enabled state after the callback.
+         */
+        void onCaptionEnabledStateChanged(Boolean isEnabled, Boolean checkBeforeSwitch);
         // requires version 2
         void onShowCsdWarning(@AudioManager.CsdWarning int csdWarning, int durationMs);
+
+        /**
+         * Callback function for when the volume changed due to a physical key press.
+         */
+        void onVolumeChangedFromKey();
     }
 }

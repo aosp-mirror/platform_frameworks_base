@@ -35,8 +35,8 @@ import android.content.Context;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
-import com.android.wm.shell.pip.PipMediaController;
-import com.android.wm.shell.pip.PipUtils;
+import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
@@ -56,8 +56,10 @@ public class TvPipActionsProvider implements TvPipAction.SystemActionsHandler {
     private final List<Listener> mListeners = new ArrayList<>();
     private final TvPipAction.SystemActionsHandler mSystemActionsHandler;
 
-    private final List<TvPipAction> mActionsList;
+    private final List<TvPipAction> mActionsList = new ArrayList<>();
+    private final TvPipSystemAction mFullscreenAction;
     private final TvPipSystemAction mDefaultCloseAction;
+    private final TvPipSystemAction mMoveAction;
     private final TvPipSystemAction mExpandCollapseAction;
 
     private final List<RemoteAction> mMediaActions = new ArrayList<>();
@@ -67,24 +69,25 @@ public class TvPipActionsProvider implements TvPipAction.SystemActionsHandler {
             TvPipAction.SystemActionsHandler systemActionsHandler) {
         mSystemActionsHandler = systemActionsHandler;
 
-        mActionsList = new ArrayList<>();
-        mActionsList.add(new TvPipSystemAction(ACTION_FULLSCREEN, R.string.pip_fullscreen,
+        mFullscreenAction = new TvPipSystemAction(ACTION_FULLSCREEN, R.string.pip_fullscreen,
                 R.drawable.pip_ic_fullscreen_white, ACTION_TO_FULLSCREEN, context,
-                mSystemActionsHandler));
-
+                mSystemActionsHandler);
         mDefaultCloseAction = new TvPipSystemAction(ACTION_CLOSE, R.string.pip_close,
                 R.drawable.pip_ic_close_white, ACTION_CLOSE_PIP, context, mSystemActionsHandler);
-        mActionsList.add(mDefaultCloseAction);
-
-        mActionsList.add(new TvPipSystemAction(ACTION_MOVE, R.string.pip_move,
-                R.drawable.pip_ic_move_white, ACTION_MOVE_PIP, context, mSystemActionsHandler));
-
+        mMoveAction = new TvPipSystemAction(ACTION_MOVE, R.string.pip_move,
+                R.drawable.pip_ic_move_white, ACTION_MOVE_PIP, context, mSystemActionsHandler);
         mExpandCollapseAction = new TvPipSystemAction(ACTION_EXPAND_COLLAPSE, R.string.pip_collapse,
                 R.drawable.pip_ic_collapse, ACTION_TOGGLE_EXPANDED_PIP, context,
                 mSystemActionsHandler);
-        mActionsList.add(mExpandCollapseAction);
+        initActions();
 
         pipMediaController.addActionListener(this::onMediaActionsChanged);
+    }
+
+    private void initActions() {
+        mActionsList.add(mFullscreenAction);
+        mActionsList.add(mDefaultCloseAction);
+        mActionsList.add(mMoveAction);
     }
 
     @Override
@@ -197,6 +200,14 @@ public class TvPipActionsProvider implements TvPipAction.SystemActionsHandler {
             notifyActionsChanged(/* added= */ 0, /* updated= */ 1,
                     mActionsList.indexOf(mExpandCollapseAction));
         }
+    }
+
+    void reset() {
+        mActionsList.clear();
+        mMediaActions.clear();
+        mAppActions.clear();
+
+        initActions();
     }
 
     List<TvPipAction> getActionsList() {

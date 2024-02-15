@@ -39,7 +39,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text.Companion.loadText
@@ -49,6 +48,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
@@ -88,7 +88,7 @@ constructor(
     private val chipbarAnimator: ChipbarAnimator,
     private val falsingManager: FalsingManager,
     private val falsingCollector: FalsingCollector,
-    private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler?,
+    private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler,
     private val viewUtil: ViewUtil,
     private val vibratorHelper: VibratorHelper,
     wakeLockBuilder: WakeLock.Builder,
@@ -289,10 +289,6 @@ constructor(
     }
 
     private fun updateGestureListening() {
-        if (swipeChipbarAwayGestureHandler == null) {
-            return
-        }
-
         val currentDisplayInfo = getCurrentDisplayInfo()
         if (currentDisplayInfo != null && currentDisplayInfo.info.allowSwipeToDismiss) {
             swipeChipbarAwayGestureHandler.setViewFetcher { currentDisplayInfo.view }

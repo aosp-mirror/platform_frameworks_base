@@ -21,22 +21,29 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ParcelTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private static final int WORK_SOURCE_1 = 1000;
     private static final int WORK_SOURCE_2 = 1002;
     private static final String INTERFACE_TOKEN_1 = "IBinder interface token";
     private static final String INTERFACE_TOKEN_2 = "Another IBinder interface token";
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testIsForRpc() {
         Parcel p = Parcel.obtain();
         assertEquals(false, p.isForRpc());
@@ -44,6 +51,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCallingWorkSourceUidAfterWrite() {
         Parcel p = Parcel.obtain();
         // Method does not throw if replaceCallingWorkSourceUid is called before requests headers
@@ -64,6 +72,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCallingWorkSourceUidAfterEnforce() {
         Parcel p = Parcel.obtain();
         p.writeInterfaceToken(INTERFACE_TOKEN_1);
@@ -81,6 +90,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testParcelWithMultipleHeaders() {
         Parcel p = Parcel.obtain();
         Binder.setCallingWorkSourceUid(WORK_SOURCE_1);
@@ -138,6 +148,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenSameDataWithBinder() {
         Binder binder = new Binder();
         Parcel pA = Parcel.obtain();
@@ -245,5 +256,95 @@ public class ParcelTest {
 
         assertThrows(IllegalArgumentException.class, () -> Parcel.compareData(pA, -1, pB, iB, 0));
         assertThrows(IllegalArgumentException.class, () -> Parcel.compareData(pA, 0, pB, -1, 0));
+    }
+
+    /***
+     * Tests for b/205282403
+     * This test checks if allocations made over limit of 1MB for primitive types
+     * and 1M length for complex objects are not allowed.
+     */
+    @Test
+    public void testAllocationsOverLimit_whenOverLimit_throws() {
+        Binder.setIsDirectlyHandlingTransactionOverride(true);
+        Parcel p = Parcel.obtain();
+        p.setDataPosition(0);
+        p.writeInt(Integer.MAX_VALUE);
+
+        p.setDataPosition(0);
+        assertThrows(BadParcelableException.class, () ->p.createBooleanArray());
+
+        p.setDataPosition(0);
+        assertThrows(BadParcelableException.class, () ->p.createCharArray());
+
+        p.setDataPosition(0);
+        assertThrows(BadParcelableException.class, () ->p.createIntArray());
+
+        p.setDataPosition(0);
+        assertThrows(BadParcelableException.class, () ->p.createLongArray());
+
+        p.setDataPosition(0);
+        assertThrows(BadParcelableException.class, () ->p.createBinderArray());
+
+        int[] dimensions = new int[]{Integer.MAX_VALUE, 100, 100};
+        p.setDataPosition(0);
+        assertThrows(BadParcelableException.class,
+                () -> p.createFixedArray(int[][][].class, dimensions));
+
+        p.setDataPosition(0);
+        assertThrows(BadParcelableException.class,
+                () -> p.createFixedArray(String[][][].class, dimensions));
+
+        p.setDataPosition(0);
+        assertThrows(BadParcelableException.class,
+                () -> p.createFixedArray(IBinder[][][].class, dimensions));
+
+        p.recycle();
+        Binder.setIsDirectlyHandlingTransactionOverride(false);
+    }
+
+    /***
+     * Tests for b/205282403
+     * This test checks if allocations made under limit of 1MB for primitive types
+     * and 1M length for complex objects are allowed.
+     */
+    @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
+    public void testAllocations_whenWithinLimit() {
+        Binder.setIsDirectlyHandlingTransactionOverride(true);
+        Parcel p = Parcel.obtain();
+        p.setDataPosition(0);
+        p.writeInt(100000);
+
+        p.setDataPosition(0);
+        p.createByteArray();
+
+        p.setDataPosition(0);
+        p.createCharArray();
+
+        p.setDataPosition(0);
+        p.createIntArray();
+
+        p.setDataPosition(0);
+        p.createLongArray();
+
+        p.setDataPosition(0);
+        p.createBinderArray();
+
+        int[] dimensions = new int[]{ 100, 100, 100 };
+
+        p.setDataPosition(0);
+        int[][][] data  =  new int[100][100][100];
+        p.writeFixedArray(data, 0, dimensions);
+        p.setDataPosition(0);
+        p.createFixedArray(int[][][].class, dimensions);
+
+        p.setDataPosition(0);
+        IBinder[][][] parcelables  =  new IBinder[100][100][100];
+        p.writeFixedArray(parcelables, 0, dimensions);
+        p.setDataPosition(0);
+        p.createFixedArray(IBinder[][][].class, dimensions);
+
+        p.recycle();
+        Binder.setIsDirectlyHandlingTransactionOverride(false);
     }
 }

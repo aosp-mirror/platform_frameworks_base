@@ -22,6 +22,8 @@ import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.util.NamedListenerSet
+import com.android.app.tracing.traceSection
 
 /**
  * Set of classes that represent the various events that [NotifCollection] can dispatch to
@@ -30,10 +32,10 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
  * These events build up in a queue and are periodically emitted in chunks by the collection.
  */
 
-sealed class NotifEvent {
-    fun dispatchTo(listeners: List<NotifCollectionListener>) {
-        for (i in listeners.indices) {
-            dispatchToListener(listeners[i])
+sealed class NotifEvent(private val traceName: String) {
+    fun dispatchTo(listeners: NamedListenerSet<NotifCollectionListener>) {
+        traceSection(traceName) {
+            listeners.forEachTraced(::dispatchToListener)
         }
     }
 
@@ -43,7 +45,7 @@ sealed class NotifEvent {
 data class BindEntryEvent(
     val entry: NotificationEntry,
     val sbn: StatusBarNotification
-) : NotifEvent() {
+) : NotifEvent("onEntryBind") {
     override fun dispatchToListener(listener: NotifCollectionListener) {
         listener.onEntryBind(entry, sbn)
     }
@@ -51,7 +53,7 @@ data class BindEntryEvent(
 
 data class InitEntryEvent(
     val entry: NotificationEntry
-) : NotifEvent() {
+) : NotifEvent("onEntryInit") {
     override fun dispatchToListener(listener: NotifCollectionListener) {
         listener.onEntryInit(entry)
     }
@@ -59,7 +61,7 @@ data class InitEntryEvent(
 
 data class EntryAddedEvent(
     val entry: NotificationEntry
-) : NotifEvent() {
+) : NotifEvent("onEntryAdded") {
     override fun dispatchToListener(listener: NotifCollectionListener) {
         listener.onEntryAdded(entry)
     }
@@ -68,7 +70,7 @@ data class EntryAddedEvent(
 data class EntryUpdatedEvent(
     val entry: NotificationEntry,
     val fromSystem: Boolean
-) : NotifEvent() {
+) : NotifEvent(if (fromSystem) "onEntryUpdated" else "onEntryUpdated fromSystem=true") {
     override fun dispatchToListener(listener: NotifCollectionListener) {
         listener.onEntryUpdated(entry, fromSystem)
     }
@@ -77,7 +79,7 @@ data class EntryUpdatedEvent(
 data class EntryRemovedEvent(
     val entry: NotificationEntry,
     val reason: Int
-) : NotifEvent() {
+) : NotifEvent("onEntryRemoved ${cancellationReasonDebugString(reason)}") {
     override fun dispatchToListener(listener: NotifCollectionListener) {
         listener.onEntryRemoved(entry, reason)
     }
@@ -85,7 +87,7 @@ data class EntryRemovedEvent(
 
 data class CleanUpEntryEvent(
     val entry: NotificationEntry
-) : NotifEvent() {
+) : NotifEvent("onEntryCleanUp") {
     override fun dispatchToListener(listener: NotifCollectionListener) {
         listener.onEntryCleanUp(entry)
     }
@@ -93,13 +95,13 @@ data class CleanUpEntryEvent(
 
 data class RankingUpdatedEvent(
     val rankingMap: RankingMap
-) : NotifEvent() {
+) : NotifEvent("onRankingUpdate") {
     override fun dispatchToListener(listener: NotifCollectionListener) {
         listener.onRankingUpdate(rankingMap)
     }
 }
 
-class RankingAppliedEvent() : NotifEvent() {
+class RankingAppliedEvent : NotifEvent("onRankingApplied") {
     override fun dispatchToListener(listener: NotifCollectionListener) {
         listener.onRankingApplied()
     }
@@ -110,7 +112,7 @@ data class ChannelChangedEvent(
     val user: UserHandle,
     val channel: NotificationChannel,
     val modificationType: Int
-) : NotifEvent() {
+) : NotifEvent("onNotificationChannelModified") {
     override fun dispatchToListener(listener: NotifCollectionListener) {
         listener.onNotificationChannelModified(pkgName, user, channel, modificationType)
     }

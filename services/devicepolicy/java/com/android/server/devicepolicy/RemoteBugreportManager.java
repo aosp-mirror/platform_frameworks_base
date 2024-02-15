@@ -111,7 +111,7 @@ public class RemoteBugreportManager {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            mInjector.getNotificationManager().cancel(LOG_TAG, NOTIFICATION_ID);
+            cancelNotification();
             if (ACTION_BUGREPORT_SHARING_ACCEPTED.equals(action)) {
                 onBugreportSharingAccepted();
             } else if (ACTION_BUGREPORT_SHARING_DECLINED.equals(action)) {
@@ -213,8 +213,7 @@ public class RemoteBugreportManager {
             mRemoteBugreportServiceIsActive.set(true);
             mRemoteBugreportSharingAccepted.set(false);
             registerRemoteBugreportReceivers();
-            mInjector.getNotificationManager().notifyAsUser(LOG_TAG, NOTIFICATION_ID,
-                    buildNotification(NOTIFICATION_BUGREPORT_STARTED), UserHandle.ALL);
+            notify(NOTIFICATION_BUGREPORT_STARTED);
             mHandler.postDelayed(mRemoteBugreportTimeoutRunnable, REMOTE_BUGREPORT_TIMEOUT_MILLIS);
             return true;
         } catch (RemoteException re) {
@@ -258,13 +257,10 @@ public class RemoteBugreportManager {
         final String bugreportHash = intent.getStringExtra(EXTRA_REMOTE_BUGREPORT_HASH);
         if (mRemoteBugreportSharingAccepted.get()) {
             shareBugreportWithDeviceOwnerIfExists(bugreportUriString, bugreportHash);
-            mInjector.getNotificationManager().cancel(LOG_TAG,
-                    NOTIFICATION_ID);
+            cancelNotification();
         } else {
             mService.setDeviceOwnerRemoteBugreportUriAndHash(bugreportUriString, bugreportHash);
-            mInjector.getNotificationManager().notifyAsUser(LOG_TAG, NOTIFICATION_ID,
-                    buildNotification(NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED),
-                    UserHandle.ALL);
+            notify(NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED);
         }
         mContext.unregisterReceiver(mRemoteBugreportFinishedReceiver);
     }
@@ -274,7 +270,7 @@ public class RemoteBugreportManager {
         mInjector.systemPropertiesSet(CTL_STOP, REMOTE_BUGREPORT_SERVICE);
         mRemoteBugreportSharingAccepted.set(false);
         mService.setDeviceOwnerRemoteBugreportUriAndHash(null, null);
-        mInjector.getNotificationManager().cancel(LOG_TAG, NOTIFICATION_ID);
+        cancelNotification();
         final Bundle extras = new Bundle();
         extras.putInt(DeviceAdminReceiver.EXTRA_BUGREPORT_FAILURE_REASON,
                 DeviceAdminReceiver.BUGREPORT_FAILURE_FAILED_COMPLETING);
@@ -289,9 +285,7 @@ public class RemoteBugreportManager {
         if (uriAndHash != null) {
             shareBugreportWithDeviceOwnerIfExists(uriAndHash.first, uriAndHash.second);
         } else if (mRemoteBugreportServiceIsActive.get()) {
-            mInjector.getNotificationManager().notifyAsUser(LOG_TAG, NOTIFICATION_ID,
-                    buildNotification(NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED),
-                    UserHandle.ALL);
+            notify(NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED);
         }
     }
 
@@ -340,7 +334,16 @@ public class RemoteBugreportManager {
         filterConsent.addAction(ACTION_BUGREPORT_SHARING_DECLINED);
         filterConsent.addAction(ACTION_BUGREPORT_SHARING_ACCEPTED);
         mContext.registerReceiver(mRemoteBugreportConsentReceiver, filterConsent);
-        mInjector.getNotificationManager().notifyAsUser(LOG_TAG, NOTIFICATION_ID,
-                buildNotification(NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED), UserHandle.ALL);
+        notify(NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED);
+    }
+
+    private void notify(@RemoteBugreportNotificationType int type) {
+        mInjector.getNotificationManager()
+                .notifyAsUser(LOG_TAG, NOTIFICATION_ID, buildNotification(type), UserHandle.ALL);
+    }
+
+    private void cancelNotification() {
+        mInjector.getNotificationManager()
+                .cancelAsUser(LOG_TAG, NOTIFICATION_ID, UserHandle.ALL);
     }
 }

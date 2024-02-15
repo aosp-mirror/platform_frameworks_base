@@ -47,6 +47,17 @@ final class RolesUtils {
         return roleHolders.contains(packageName);
     }
 
+    /**
+     * Attempt to add the association's companion app as the role holder for the device profile
+     * specified in the association. If the association does not have any device profile specified,
+     * then the operation will always be successful as a no-op.
+     *
+     * @param context
+     * @param associationInfo the association for which the role should be granted to the app
+     * @param roleGrantResult the result callback for adding role holder. True if successful, and
+     *                        false if failed. If the association does not have any device profile
+     *                        specified, then the operation will always be successful as a no-op.
+     */
     static void addRoleHolderForAssociation(
             @NonNull Context context, @NonNull AssociationInfo associationInfo,
             @NonNull Consumer<Boolean> roleGrantResult) {
@@ -55,7 +66,11 @@ final class RolesUtils {
         }
 
         final String deviceProfile = associationInfo.getDeviceProfile();
-        if (deviceProfile == null) return;
+        if (deviceProfile == null) {
+            // If no device profile is specified, then no-op and resolve callback with success.
+            roleGrantResult.accept(true);
+            return;
+        }
 
         final RoleManager roleManager = context.getSystemService(RoleManager.class);
 

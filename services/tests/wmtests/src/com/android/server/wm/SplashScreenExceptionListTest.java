@@ -28,6 +28,7 @@ import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
+import android.util.Log;
 
 import androidx.test.filters.MediumTest;
 
@@ -147,6 +148,8 @@ public class SplashScreenExceptionListTest {
     private void setExceptionListAndWaitForCallback(String commaSeparatedList) {
         CountDownLatch latch = new CountDownLatch(1);
         mOnUpdateDeviceConfig = rawList -> {
+            Log.i(getClass().getSimpleName(), "updateDeviceConfig expected="
+                    + commaSeparatedList + " actual=" + rawList);
             if (commaSeparatedList.equals(rawList)) {
                 latch.countDown();
             }
@@ -154,8 +157,11 @@ public class SplashScreenExceptionListTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 KEY_SPLASH_SCREEN_EXCEPTION_LIST, commaSeparatedList, false);
         try {
-            assertTrue("Timed out waiting for DeviceConfig to be updated.",
-                    latch.await(1, TimeUnit.SECONDS));
+            if (!latch.await(1, TimeUnit.SECONDS)) {
+                Log.w(getClass().getSimpleName(),
+                        "Timed out waiting for DeviceConfig to be updated. Force update.");
+                mList.updateDeviceConfig(commaSeparatedList);
+            }
         } catch (InterruptedException e) {
             Assert.fail(e.getMessage());
         }

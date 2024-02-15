@@ -26,12 +26,12 @@ import android.app.ActivityTaskManager;
 import android.app.EmptyActivity;
 import android.app.Instrumentation;
 import android.os.RemoteException;
-import android.support.test.uiautomator.UiDevice;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.Before;
 import org.junit.Rule;

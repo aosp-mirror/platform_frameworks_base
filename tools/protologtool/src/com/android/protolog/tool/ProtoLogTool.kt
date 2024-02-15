@@ -25,6 +25,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.time.LocalDateTime
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.jar.JarOutputStream
@@ -40,6 +41,13 @@ object ProtoLogTool {
     private fun containsProtoLogText(source: String, protoLogClassName: String): Boolean {
         val protoLogSimpleClassName = protoLogClassName.substringAfterLast('.')
         return source.contains(protoLogSimpleClassName)
+    }
+
+    private fun zipEntry(path: String): ZipEntry {
+        val entry = ZipEntry(path)
+        // Use a constant time to improve the cachability of build actions.
+        entry.timeLocal = LocalDateTime.of(2008, 1, 1, 0, 0, 0)
+        return entry
     }
 
     private fun processClasses(command: CommandOptions) {
@@ -77,7 +85,7 @@ object ProtoLogTool {
                 }
             }.map { future ->
                 val (path, outSrc) = future.get()
-                outJar.putNextEntry(ZipEntry(path))
+                outJar.putNextEntry(zipEntry(path))
                 outJar.write(outSrc.toByteArray())
                 outJar.closeEntry()
             }
@@ -90,7 +98,7 @@ object ProtoLogTool {
         val cachePackage = cacheSplit.dropLast(1).joinToString(".")
         val cachePath = "gen/${cacheSplit.joinToString("/")}.java"
 
-        outJar.putNextEntry(ZipEntry(cachePath))
+        outJar.putNextEntry(zipEntry(cachePath))
         outJar.write(generateLogGroupCache(cachePackage, cacheName, groups,
                 command.protoLogImplClassNameArg, command.protoLogGroupsClassNameArg).toByteArray())
 

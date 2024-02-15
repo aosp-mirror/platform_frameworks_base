@@ -1,1 +1,4 @@
 per-file PackageParsingPerfTest.kt = file:/services/core/java/com/android/server/pm/OWNERS
+
+# Bug component: 345036
+per-file VibratorPerfTest.java = file:/services/core/java/com/android/server/vibrator/OWNERS

@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -202,10 +201,10 @@ public class BatterySaverUtils {
     }
 
     private static void setBatterySaverConfirmationAcknowledged(Context context) {
-        Secure.putIntForUser(context.getContentResolver(),
-                Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 1, UserHandle.USER_CURRENT);
-        Secure.putIntForUser(context.getContentResolver(),
-                Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED, 1, UserHandle.USER_CURRENT);
+        Secure.putInt(context.getContentResolver(),
+                Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 1);
+        Secure.putInt(context.getContentResolver(),
+                Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED, 1);
     }
 
     /**

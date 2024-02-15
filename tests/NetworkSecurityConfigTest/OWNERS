@@ -1,1 +1,2 @@
 include /services/core/java/com/android/server/net/OWNERS
+include /core/java/android/security/net/OWNERS

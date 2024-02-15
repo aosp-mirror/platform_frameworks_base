@@ -22,6 +22,7 @@
 #endif
 #include <GrContextOptions.h>
 #include <SkSurface.h>
+#include <android-base/unique_fd.h>
 #include <utils/StrongPointer.h>
 #include <vk/GrVkBackendContext.h>
 #include <vk/GrVkExtensions.h>
@@ -70,7 +71,7 @@ public:
     void initialize();
 
     // Quick check to see if the VulkanManager has been initialized.
-    bool hasVkContext() { return mDevice != VK_NULL_HANDLE; }
+    bool hasVkContext() { return mInitialized; }
 
     // Create and destroy functions for wrapping an ANativeWindow in a VulkanSurface
     VulkanSurface* createSurface(ANativeWindow* window,
@@ -82,10 +83,17 @@ public:
     void destroySurface(VulkanSurface* surface);
 
     Frame dequeueNextBuffer(VulkanSurface* surface);
+
+    struct VkDrawResult {
+        // The estimated start time for intiating GPU work, -1 if unknown.
+        nsecs_t submissionTime;
+        android::base::unique_fd presentFence;
+    };
+
     // Finishes the frame and submits work to the GPU
-    // Returns the estimated start time for intiating GPU work, -1 otherwise.
-    nsecs_t finishFrame(SkSurface* surface);
-    void swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect);
+    VkDrawResult finishFrame(SkSurface* surface);
+    void swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect,
+                     android::base::unique_fd&& presentFence);
 
     // Inserts a wait on fence command into the Vulkan command buffer.
     status_t fenceWait(int fence, GrDirectContext* grContext);
@@ -201,10 +209,8 @@ private:
     GrVkExtensions mExtensions;
     uint32_t mDriverVersion = 0;
 
-    VkSemaphore mSwapSemaphore = VK_NULL_HANDLE;
-    void* mDestroySemaphoreContext = nullptr;
-
-    std::mutex mInitializeLock;
+    std::once_flag mInitFlag;
+    std::atomic_bool mInitialized = false;
 };
 
 } /* namespace renderthread */

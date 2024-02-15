@@ -17,8 +17,10 @@
 package com.android.systemui.media.controls.pipeline
 
 import android.content.Context
+import android.content.pm.UserInfo
 import android.os.SystemProperties
 import android.util.Log
+import com.android.internal.annotations.KeepForWeakReference
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dagger.qualifiers.Main
@@ -82,10 +84,16 @@ constructor(
     private var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
     private var reactivatedKey: String? = null
 
+    // Ensure the field (and associated reference) isn't removed during optimization.
+    @KeepForWeakReference
     private val userTrackerCallback =
         object : UserTracker.Callback {
             override fun onUserChanged(newUser: Int, userContext: Context) {
-                handleUserSwitched(newUser)
+                handleUserSwitched()
+            }
+
+            override fun onProfilesChanged(profiles: List<UserInfo>) {
+                handleProfileChanged()
             }
         }
 
@@ -106,7 +114,10 @@ constructor(
         }
         allEntries.put(key, data)
 
-        if (!lockscreenUserManager.isCurrentProfile(data.userId)) {
+        if (
+            !lockscreenUserManager.isCurrentProfile(data.userId) ||
+                !lockscreenUserManager.isProfileAvailable(data.userId)
+        ) {
             return
         }
 
@@ -149,11 +160,7 @@ constructor(
         // Check if smartspace has explicitly specified whether to re-activate resumable media.
         // The default behavior is to trigger if the smartspace data is active.
         val shouldTriggerResume =
-            if (data.cardAction?.extras?.containsKey(EXTRA_KEY_TRIGGER_RESUME) == true) {
-                data.cardAction.extras.getBoolean(EXTRA_KEY_TRIGGER_RESUME, true)
-            } else {
-                true
-            }
+            data.cardAction?.extras?.getBoolean(EXTRA_KEY_TRIGGER_RESUME, true) ?: true
         val shouldReactivate =
             shouldTriggerResume && !hasActiveMedia() && hasAnyMedia() && data.isActive
 
@@ -232,7 +239,20 @@ constructor(
     }
 
     @VisibleForTesting
-    internal fun handleUserSwitched(id: Int) {
+    internal fun handleProfileChanged() {
+        // TODO(b/317221348) re-add media removed when profile is available.
+        allEntries.forEach { (key, data) ->
+            if (!lockscreenUserManager.isProfileAvailable(data.userId)) {
+                // Only remove media when the profile is unavailable.
+                if (DEBUG) Log.d(TAG, "Removing $key after profile change")
+                userEntries.remove(key, data)
+                listeners.forEach { listener -> listener.onMediaDataRemoved(key) }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    internal fun handleUserSwitched() {
         // If the user changes, remove all current MediaData objects and inform listeners
         val listenersCopy = listeners
         val keyCopy = userEntries.keys.toMutableList()
@@ -269,9 +289,7 @@ constructor(
                     "Cannot create dismiss action click action: extras missing dismiss_intent."
                 )
             } else if (
-                dismissIntent.getComponent() != null &&
-                    dismissIntent.getComponent().getClassName() ==
-                        EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME
+                dismissIntent.component?.className == EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME
             ) {
                 // Dismiss the card Smartspace data through Smartspace trampoline activity.
                 context.startActivity(dismissIntent)

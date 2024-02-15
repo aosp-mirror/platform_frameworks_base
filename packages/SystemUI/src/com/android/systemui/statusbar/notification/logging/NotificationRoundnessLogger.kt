@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.logging
 
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.INFO
 import com.android.systemui.log.dagger.NotificationRenderLog
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView

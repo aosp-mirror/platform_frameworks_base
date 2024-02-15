@@ -15,4 +15,4 @@ particular order):
 Todo
 - Per-feature docs
 - Feature flagging
-- Best practices
+- Best practices & patterns

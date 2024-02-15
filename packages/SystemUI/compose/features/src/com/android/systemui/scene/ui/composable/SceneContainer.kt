@@ -14,32 +14,36 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalAnimationApi::class)
+@file:OptIn(ExperimentalComposeUiApi::class)
 
 package com.android.systemui.scene.ui.composable
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.android.systemui.scene.shared.model.Direction
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.input.pointer.pointerInput
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.observableTransitionState
+import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
+import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import java.util.Locale
+import kotlinx.coroutines.flow.map
 
 /**
  * Renders a container of a collection of "scenes" that the user can switch between using certain
@@ -58,87 +62,90 @@ import java.util.Locale
  *   must have entries in this map.
  * @param modifier A modifier.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SceneContainer(
     viewModel: SceneContainerViewModel,
     sceneByKey: Map<SceneKey, ComposableScene>,
+    dataSourceDelegator: SceneDataSourceDelegator,
     modifier: Modifier = Modifier,
 ) {
-    val currentScene: SceneModel by viewModel.currentScene.collectAsState()
-
-    AnimatedContent(
-        targetState = currentScene.key,
-        label = "scene container",
-        modifier = modifier,
-    ) { currentSceneKey ->
-        sceneByKey.forEach { (key, composableScene) ->
-            if (key == currentSceneKey) {
-                Scene(
-                    scene = composableScene,
-                    containerName = viewModel.containerName,
-                    onSceneChanged = viewModel::setCurrentScene,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-        }
+    val coroutineScope = rememberCoroutineScope()
+    val currentSceneKey: SceneKey by viewModel.currentScene.collectAsState()
+    val currentScene = checkNotNull(sceneByKey[currentSceneKey])
+    val currentDestinations: Map<UserAction, UserActionResult> by
+        currentScene.destinationScenes.collectAsState()
+    val state: MutableSceneTransitionLayoutState = remember {
+        MutableSceneTransitionLayoutState(
+            initialScene = currentSceneKey.asComposeAware(),
+            transitions = SceneContainerTransitions,
+        )
     }
-}
 
-/** Renders the given [ComposableScene]. */
-@Composable
-private fun Scene(
-    scene: ComposableScene,
-    containerName: String,
-    onSceneChanged: (SceneModel) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    // TODO(b/280880714): replace with the real UI and make sure to call onTransitionProgress.
-    Box(modifier) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.align(Alignment.Center),
-        ) {
-            scene.Content(
-                containerName = containerName,
-                modifier = Modifier,
-            )
-
-            val destinationScenes: Map<UserAction, SceneModel> by
-                scene.destinationScenes(containerName).collectAsState()
-            val swipeLeftDestinationScene = destinationScenes[UserAction.Swipe(Direction.LEFT)]
-            val swipeUpDestinationScene = destinationScenes[UserAction.Swipe(Direction.UP)]
-            val swipeRightDestinationScene = destinationScenes[UserAction.Swipe(Direction.RIGHT)]
-            val swipeDownDestinationScene = destinationScenes[UserAction.Swipe(Direction.DOWN)]
-            val backDestinationScene = destinationScenes[UserAction.Back]
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                DirectionalButton(Direction.LEFT, swipeLeftDestinationScene, onSceneChanged)
-                DirectionalButton(Direction.UP, swipeUpDestinationScene, onSceneChanged)
-                DirectionalButton(Direction.RIGHT, swipeRightDestinationScene, onSceneChanged)
-                DirectionalButton(Direction.DOWN, swipeDownDestinationScene, onSceneChanged)
-            }
-
-            if (backDestinationScene != null) {
-                BackHandler { onSceneChanged.invoke(backDestinationScene) }
-            }
-        }
+    DisposableEffect(state) {
+        val dataSource = SceneTransitionLayoutDataSource(state, coroutineScope)
+        dataSourceDelegator.setDelegate(dataSource)
+        onDispose { dataSourceDelegator.setDelegate(null) }
     }
-}
 
-@Composable
-private fun DirectionalButton(
-    direction: Direction,
-    destinationScene: SceneModel?,
-    onSceneChanged: (SceneModel) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Button(
-        onClick = { destinationScene?.let { onSceneChanged.invoke(it) } },
-        enabled = destinationScene != null,
-        modifier = modifier,
+    DisposableEffect(viewModel, state) {
+        viewModel.setTransitionState(
+            state.observableTransitionState().map { it.asComposeUnaware() }
+        )
+        onDispose { viewModel.setTransitionState(null) }
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
     ) {
-        Text(direction.name.lowercase(Locale.getDefault()))
+        SceneTransitionLayout(
+            state = state,
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .motionEventSpy { event -> viewModel.onMotionEvent(event) }
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                awaitPointerEvent(PointerEventPass.Final)
+                                viewModel.onMotionEventComplete()
+                            }
+                        }
+                    }
+        ) {
+            sceneByKey.forEach { (sceneKey, composableScene) ->
+                scene(
+                    key = sceneKey.asComposeAware(),
+                    userActions =
+                        if (sceneKey == currentSceneKey) {
+                                currentDestinations
+                            } else {
+                                composableScene.destinationScenes.value
+                            }
+                            .map { (userAction, userActionResult) ->
+                                userAction.asComposeAware() to userActionResult.asComposeAware()
+                            }
+                            .toMap(),
+                ) {
+                    with(composableScene) {
+                        this@scene.Content(
+                            modifier =
+                                Modifier.element(sceneKey.asComposeAware().rootElementKey)
+                                    .fillMaxSize(),
+                        )
+                    }
+                }
+            }
+        }
+
+        BottomRightCornerRibbon(
+            content = {
+                Text(
+                    text = "flexi\uD83E\uDD43",
+                    color = Color.White,
+                )
+            },
+            modifier = Modifier.align(Alignment.BottomEnd),
+        )
     }
 }

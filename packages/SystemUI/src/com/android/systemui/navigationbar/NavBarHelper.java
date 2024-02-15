@@ -41,6 +41,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -51,7 +52,6 @@ import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowInsets;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
@@ -62,6 +62,7 @@ import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
@@ -69,18 +70,20 @@ import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Extracts shared elements between navbar and taskbar delegate to de-dupe logic and help them
@@ -101,6 +104,7 @@ public final class NavBarHelper implements
     private static final String TAG = NavBarHelper.class.getSimpleName();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Executor mMainExecutor;
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -111,6 +115,7 @@ public final class NavBarHelper implements
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
     private final List<NavbarTaskbarStateUpdater> mStateListeners = new ArrayList<>();
     private final Context mContext;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final CommandQueue mCommandQueue;
     private final ContentResolver mContentResolver;
     private final EdgeBackGestureHandler mEdgeBackGestureHandler;
@@ -182,9 +187,16 @@ public final class NavBarHelper implements
             IWindowManager wm,
             UserTracker userTracker,
             DisplayTracker displayTracker,
+            NotificationShadeWindowController notificationShadeWindowController,
             DumpManager dumpManager,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            @Main Executor mainExecutor) {
+        // b/319489709: This component shouldn't be running for a non-primary user
+        if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
+            Log.wtf(TAG, "Unexpected initialization for non-primary user", new Throwable());
+        }
         mContext = context;
+        mNotificationShadeWindowController = notificationShadeWindowController;
         mCommandQueue = commandQueue;
         mContentResolver = mContext.getContentResolver();
         mAccessibilityManager = accessibilityManager;
@@ -198,6 +210,7 @@ public final class NavBarHelper implements
         mWm = wm;
         mDefaultDisplayId = displayTracker.getDefaultDisplayId();
         mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
+        mMainExecutor = mainExecutor;
 
         mNavBarMode = navigationModeController.addListener(this);
         mCommandQueue.addCallback(this);
@@ -228,6 +241,9 @@ public final class NavBarHelper implements
                 false /* notifyForDescendants */, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED),
+                false, mAssistContentObserver, UserHandle.USER_ALL);
+        mContentResolver.registerContentObserver(
+                Settings.Secure.getUriFor(Secure.SEARCH_LONG_PRESS_HOME_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
@@ -412,18 +428,28 @@ public final class NavBarHelper implements
     @Override
     public void onConnectionChanged(boolean isConnected) {
         if (isConnected) {
-            updateAssistantAvailability();
+            // We add the OPS callback during construction, so if the service is already connected
+            // then we will try to get the AssistManager dependency which itself has an indirect
+            // dependency on NavBarHelper leading to a cycle. For now, we can defer updating the
+            // assistant availability.
+            mMainExecutor.execute(this::updateAssistantAvailability);
         }
     }
 
     private void updateAssistantAvailability() {
         boolean assistantAvailableForUser = mAssistManagerLazy.get()
                 .getAssistInfoForUser(mUserTracker.getUserId()) != null;
-        boolean longPressDefault = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
+
+        boolean overrideLongPressHome = mAssistManagerLazy.get()
+                .shouldOverrideAssist(AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
+        boolean longPressDefault = mContext.getResources().getBoolean(overrideLongPressHome
+                ? com.android.internal.R.bool.config_searchLongPressHomeEnabledDefault
+                : com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
         mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
-                Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
+                overrideLongPressHome ? Secure.SEARCH_LONG_PRESS_HOME_ENABLED
+                        : Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
                 mUserTracker.getUserId()) != 0;
+
         boolean gestureDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistTouchGestureEnabledDefault);
         mAssistantTouchGestureEnabled = Settings.Secure.getIntForUser(mContentResolver,
@@ -450,6 +476,12 @@ public final class NavBarHelper implements
     }
 
     @Override
+    public void setAssistantOverridesRequested(int[] invocationTypes) {
+        mAssistManagerLazy.get().setAssistantOverridesRequested(invocationTypes);
+        updateAssistantAvailability();
+    }
+
+    @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
         updateAssistantAvailability();
@@ -460,11 +492,7 @@ public final class NavBarHelper implements
      * {@link InputMethodService} and the keyguard states.
      */
     public boolean isImeShown(int vis) {
-        View shadeWindowView = null;
-        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
-            shadeWindowView =
-                    mCentralSurfacesOptionalLazy.get().get().getNotificationShadeWindowView();
-        }
+        View shadeWindowView =  mNotificationShadeWindowController.getWindowRootView();
         boolean isKeyguardShowing = mKeyguardStateController.isShowing();
         boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
                 && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());

@@ -23,46 +23,53 @@ import android.content.IntentFilter
 import android.os.UserHandle
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 class DisposableBroadcastReceiverAsUserTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @get:Rule
-    val mockito: MockitoRule = MockitoJUnit.rule()
-
-    @Mock
-    private lateinit var context: Context
-
     private var registeredBroadcastReceiver: BroadcastReceiver? = null
 
-    @Before
-    fun setUp() {
-        whenever(context.registerReceiverAsUser(any(), any(), any(), any(), any()))
-            .thenAnswer {
-                registeredBroadcastReceiver = it.arguments[0] as BroadcastReceiver
-                null
-            }
+    private val context = mock<Context> {
+        on {
+            registerReceiverAsUser(
+                any(),
+                eq(USER_HANDLE),
+                eq(INTENT_FILTER),
+                isNull(),
+                isNull(),
+                eq(Context.RECEIVER_NOT_EXPORTED),
+            )
+        } doAnswer {
+            registeredBroadcastReceiver = it.arguments[0] as BroadcastReceiver
+            null
+        }
     }
 
     @Test
     fun broadcastReceiver_registered() {
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalContext provides context) {
-                DisposableBroadcastReceiverAsUser(IntentFilter(), USER_HANDLE) {}
+            CompositionLocalProvider(
+                LocalContext provides context,
+                LocalLifecycleOwner provides TestLifecycleOwner(),
+            ) {
+                DisposableBroadcastReceiverAsUser(INTENT_FILTER, USER_HANDLE) {}
             }
         }
 
@@ -70,22 +77,28 @@ class DisposableBroadcastReceiverAsUserTest {
     }
 
     @Test
-    fun broadcastReceiver_isCalledOnReceive() {
+    fun broadcastReceiver_isCalledOnReceive() = runBlocking {
         var onReceiveIsCalled = false
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalContext provides context) {
-                DisposableBroadcastReceiverAsUser(IntentFilter(), USER_HANDLE) {
+            CompositionLocalProvider(
+                LocalContext provides context,
+                LocalLifecycleOwner provides TestLifecycleOwner(),
+            ) {
+                DisposableBroadcastReceiverAsUser(INTENT_FILTER, USER_HANDLE) {
                     onReceiveIsCalled = true
                 }
             }
         }
 
         registeredBroadcastReceiver!!.onReceive(context, Intent())
+        delay(100)
 
         assertThat(onReceiveIsCalled).isTrue()
     }
 
     private companion object {
         val USER_HANDLE: UserHandle = UserHandle.of(0)
+
+        val INTENT_FILTER = IntentFilter()
     }
 }

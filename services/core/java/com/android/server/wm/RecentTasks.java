@@ -64,6 +64,7 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -183,6 +184,8 @@ class RecentTasks {
 
     /** The non-empty tasks that are removed from recent tasks (see {@link #removeForAddTask}). */
     private final ArrayList<Task> mHiddenTasks = new ArrayList<>();
+    /** The maximum size that the hidden tasks are cached. */
+    private static final int MAX_HIDDEN_TASK_SIZE = 10;
 
     /** Whether to trim inactive tasks when activities are idle. */
     private boolean mCheckTrimmableTasksOnIdle;
@@ -501,6 +504,16 @@ class RecentTasks {
 
         Slog.i(TAG, "Loading recents for user " + userId + " into memory.");
         List<Task> tasks = mTaskPersister.restoreTasksForUserLocked(userId, preaddedTasks);
+
+        // Tasks are ordered from most recent to least recent. Update the last active time to be
+        // in sync with task recency when device reboots, so the most recent task has the
+        // highest last active time
+        long currentElapsedTime = SystemClock.elapsedRealtime();
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            task.lastActiveTime = currentElapsedTime - i;
+        }
+
         mTasks.addAll(tasks);
         cleanupLocked(userId);
         mUsersWithRecentsLoaded.put(userId, true);
@@ -680,6 +693,26 @@ class RecentTasks {
                 remove(task);
             }
         }
+    }
+
+    /**
+     * Removes the oldest recent task that is compatible with the given one. This is possible if
+     * the task windowing mode changed after being added to the Recents.
+     */
+    void removeCompatibleRecentTask(Task task) {
+        final int taskIndex = mTasks.indexOf(task);
+        if (taskIndex < 0) {
+            return;
+        }
+
+        final int candidateIndex = findRemoveIndexForTask(task, false /* includingSelf */);
+        if (candidateIndex == -1) {
+            // Nothing to trim
+            return;
+        }
+
+        final Task taskToRemove = taskIndex > candidateIndex ? task : mTasks.get(candidateIndex);
+        remove(taskToRemove);
     }
 
     void removeTasksByPackageName(String packageName, int userId) {
@@ -1102,12 +1135,17 @@ class RecentTasks {
                     if (!mFreezeTaskListReordering) {
                         // Simple case: this is not an affiliated task, so we just move it to the
                         // front unless overridden by the provided activity options
+                        int indexToAdd = findIndexToAdd(task);
                         mTasks.remove(taskIndex);
-                        mTasks.add(0, task);
+                        mTasks.add(indexToAdd, task);
+                        if (taskIndex != 0) {
+                            // Only notify when position changes
+                            mTaskNotificationController.notifyTaskListUpdated();
+                        }
 
                         if (DEBUG_RECENTS) {
-                            Slog.d(TAG_RECENTS, "addRecent: moving to top " + task
-                                    + " from " + taskIndex);
+                            Slog.d(TAG_RECENTS, "addRecent: moving " + task + " to index "
+                                    + indexToAdd + " from " + taskIndex);
                         }
                     }
                     notifyTaskPersisterLocked(task, false);
@@ -1192,6 +1230,37 @@ class RecentTasks {
 
         mCheckTrimmableTasksOnIdle = true;
         notifyTaskPersisterLocked(task, false /* flush */);
+    }
+
+    // Looks for a new index to move the recent Task. Note that the recent Task should not be
+    // placed higher than another recent Task that has higher hierarchical z-ordering.
+    private int findIndexToAdd(Task task) {
+        int indexToAdd = 0;
+        for (int i = 0; i < mTasks.size(); i++) {
+            final Task otherTask = mTasks.get(i);
+            if (task == otherTask) {
+                break;
+            }
+
+            if (!otherTask.isAttached()) {
+                // Stop searching if not attached.
+                break;
+            }
+
+            if (otherTask.inPinnedWindowingMode()) {
+                // Skip pip task without increasing index since pip is always on screen.
+                continue;
+            }
+
+            // Stop searching if the task has higher z-ordering, or increase the index and
+            // continue the search.
+            if (task.compareTo(otherTask) > 0) {
+                break;
+            }
+
+            indexToAdd = i + 1;
+        }
+        return indexToAdd;
     }
 
     /**
@@ -1473,9 +1542,13 @@ class RecentTasks {
         return task.compareTo(rootHomeTask) < 0;
     }
 
-    /** Remove the tasks that user may not be able to return. */
+    /** Remove the tasks that user may not be able to return when exceeds the cache limit. */
     private void removeUnreachableHiddenTasks(int windowingMode) {
-        for (int i = mHiddenTasks.size() - 1; i >= 0; i--) {
+        final int size = mHiddenTasks.size();
+        if (size <= MAX_HIDDEN_TASK_SIZE) {
+            return;
+        }
+        for (int i = size - 1; i >= MAX_HIDDEN_TASK_SIZE; i--) {
             final Task hiddenTask = mHiddenTasks.get(i);
             if (!hiddenTask.hasChild() || hiddenTask.inRecents) {
                 // The task was removed by other path or it became reachable (added to recents).
@@ -1519,7 +1592,7 @@ class RecentTasks {
                 // A non-empty task is replaced by a new task. Because the removed task is no longer
                 // managed by the recent tasks list, add it to the hidden list to prevent the task
                 // from becoming dangling.
-                mHiddenTasks.add(removedTask);
+                mHiddenTasks.add(0, removedTask);
             }
             notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */);
             if (DEBUG_RECENTS_TRIM_TASKS) {
@@ -1536,6 +1609,10 @@ class RecentTasks {
      * list (if any).
      */
     private int findRemoveIndexForAddTask(Task task) {
+        return findRemoveIndexForTask(task, true /* includingSelf */);
+    }
+
+    private int findRemoveIndexForTask(Task task, boolean includingSelf) {
         final int recentsCount = mTasks.size();
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
@@ -1552,7 +1629,7 @@ class RecentTasks {
                         task.affinity != null && task.affinity.equals(t.affinity);
                 final boolean sameIntent = intent != null && intent.filterEquals(trIntent);
                 boolean multiTasksAllowed = false;
-                final int flags = intent.getFlags();
+                final int flags = intent != null ? intent.getFlags() : 0;
                 if ((flags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NEW_DOCUMENT)) != 0
                         && (flags & FLAG_ACTIVITY_MULTIPLE_TASK) != 0) {
                     multiTasksAllowed = true;
@@ -1591,6 +1668,8 @@ class RecentTasks {
                     // existing task
                     continue;
                 }
+            } else if (!includingSelf) {
+                continue;
             }
             return i;
         }

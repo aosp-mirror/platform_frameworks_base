@@ -48,6 +48,7 @@ import java.util.Map;
  * developer guide.</p>
  * </div>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ClipDescription implements Parcelable {
     /**
      * The MIME type for a clip holding plain text.

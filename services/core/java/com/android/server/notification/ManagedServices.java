@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
@@ -24,8 +25,10 @@ import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.NotificationListenerService.META_DATA_DEFAULT_AUTOBIND;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -1020,7 +1023,7 @@ abstract public class ManagedServices {
         synchronized (mSnoozing) {
             mSnoozing.remove(user);
         }
-        rebindServices(true, user);
+        unbindUserServices(user);
     }
 
     public void onUserSwitched(int user) {
@@ -1248,6 +1251,21 @@ abstract public class ManagedServices {
                     }
                 }
             }
+            // Remove uninstalled components from user-set list
+            final ArraySet<String> userSet = mUserSetServices.get(uninstalledUserId);
+            if (userSet != null) {
+                int numServices = userSet.size();
+                for (int i = numServices - 1; i >= 0; i--) {
+                    String pkgOrComponent = userSet.valueAt(i);
+                    if (TextUtils.equals(pkg, getPackageName(pkgOrComponent))) {
+                        userSet.removeAt(i);
+                        if (DEBUG) {
+                            Slog.v(TAG, "Removing " + pkgOrComponent
+                                    + " from user-set list; uninstalled");
+                        }
+                    }
+                }
+            }
         }
         return removed;
     }
@@ -1371,7 +1389,9 @@ abstract public class ManagedServices {
     protected void rebindServices(boolean forceRebind, int userToRebind) {
         if (DEBUG) Slog.d(TAG, "rebindServices " + forceRebind + " " + userToRebind);
         IntArray userIds = mUserProfiles.getCurrentProfileIds();
-        if (userToRebind != USER_ALL) {
+        boolean rebindAllCurrentUsers = mUserProfiles.isProfileUser(userToRebind)
+                && allowRebindForParentUser();
+        if (userToRebind != USER_ALL && !rebindAllCurrentUsers) {
             userIds = new IntArray(1);
             userIds.add(userToRebind);
         }
@@ -1405,12 +1425,24 @@ abstract public class ManagedServices {
     void unbindOtherUserServices(int currentUser) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("ManagedServices.unbindOtherUserServices_current" + currentUser);
-        final SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
+        unbindServicesImpl(currentUser, true /* allExceptUser */);
+        t.traceEnd();
+    }
 
+    void unbindUserServices(int user) {
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("ManagedServices.unbindUserServices" + user);
+        unbindServicesImpl(user, false /* allExceptUser */);
+        t.traceEnd();
+    }
+
+    void unbindServicesImpl(int user, boolean allExceptUser) {
+        final SparseArray<Set<ComponentName>> componentsToUnbind = new SparseArray<>();
         synchronized (mMutex) {
             final Set<ManagedServiceInfo> removableBoundServices = getRemovableConnectedServices();
             for (ManagedServiceInfo info : removableBoundServices) {
-                if (info.userid != currentUser) {
+                if ((allExceptUser && (info.userid != user))
+                        || (!allExceptUser && (info.userid == user))) {
                     Set<ComponentName> toUnbind =
                             componentsToUnbind.get(info.userid, new ArraySet<>());
                     toUnbind.add(info.component);
@@ -1419,7 +1451,6 @@ abstract public class ManagedServices {
             }
         }
         unbindFromServices(componentsToUnbind);
-        t.traceEnd();
     }
 
     protected void unbindFromServices(SparseArray<Set<ComponentName>> componentsToUnbind) {
@@ -1540,8 +1571,11 @@ abstract public class ManagedServices {
 
         intent.putExtra(Intent.EXTRA_CLIENT_LABEL, mConfig.clientLabel);
 
+        final ActivityOptions activityOptions = ActivityOptions.makeBasic();
+        activityOptions.setIgnorePendingIntentCreatorForegroundState(true);
         final PendingIntent pendingIntent = PendingIntent.getActivity(
-            mContext, 0, new Intent(mConfig.settingsAction), PendingIntent.FLAG_IMMUTABLE);
+                mContext, 0, new Intent(mConfig.settingsAction), PendingIntent.FLAG_IMMUTABLE,
+                activityOptions.toBundle());
         intent.putExtra(Intent.EXTRA_CLIENT_INTENT, pendingIntent);
 
         ApplicationInfo appInfo = null;
@@ -1758,11 +1792,20 @@ abstract public class ManagedServices {
         return true;
     }
 
+    /**
+     * Returns true if services in the parent user should be rebound
+     *  when rebindServices is called with a profile userId.
+     * Must be false for NotificationAssistants.
+     */
+    protected abstract boolean allowRebindForParentUser();
+
     public class ManagedServiceInfo implements IBinder.DeathRecipient {
         public IInterface service;
         public ComponentName component;
         public int userid;
         public boolean isSystem;
+        @FlaggedApi(FLAG_LIFETIME_EXTENSION_REFACTOR)
+        public boolean isSystemUi;
         public ServiceConnection connection;
         public int targetSdkVersion;
         public Pair<ComponentName, Integer> mKey;
@@ -1795,6 +1838,11 @@ abstract public class ManagedServices {
 
         public boolean isSystem() {
             return isSystem;
+        }
+
+        @FlaggedApi(FLAG_LIFETIME_EXTENSION_REFACTOR)
+        public boolean isSystemUi() {
+            return isSystemUi;
         }
 
         @Override

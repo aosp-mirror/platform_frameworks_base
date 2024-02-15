@@ -18,8 +18,7 @@ package android.security;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
-import android.os.UserHandle;
-import android.security.maintenance.UserState;
+import android.os.StrictMode;
 
 /**
  * @hide This should not be made public in its present form because it
@@ -36,42 +35,11 @@ public class KeyStore {
     // Used for UID field to indicate the calling UID.
     public static final int UID_SELF = -1;
 
-    // States
-    public enum State {
-        @UnsupportedAppUsage
-        UNLOCKED,
-        @UnsupportedAppUsage
-        LOCKED,
-        UNINITIALIZED
-    };
-
     private static final KeyStore KEY_STORE = new KeyStore();
 
     @UnsupportedAppUsage
     public static KeyStore getInstance() {
         return KEY_STORE;
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public State state(int userId) {
-        int userState = AndroidKeyStoreMaintenance.getState(userId);
-        switch (userState) {
-            case UserState.UNINITIALIZED:
-                return KeyStore.State.UNINITIALIZED;
-            case UserState.LSKF_UNLOCKED:
-                return KeyStore.State.UNLOCKED;
-            case UserState.LSKF_LOCKED:
-                return KeyStore.State.LOCKED;
-            default:
-                throw new AssertionError(userState);
-        }
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage
-    public State state() {
-        return state(UserHandle.myUserId());
     }
 
     /** @hide */
@@ -126,6 +94,8 @@ public class KeyStore {
      * a {@code KeymasterDefs.KM_ERROR_} value or {@code KeyStore} ResponseCode.
      */
     public int addAuthToken(byte[] authToken) {
+        StrictMode.noteDiskWrite();
+
         return Authorization.addAuthToken(authToken);
     }
 

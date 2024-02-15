@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,6 +35,8 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
+
+import com.android.hardware.input.Flags;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -1285,6 +1288,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * </ul>
      * These values are relative to the state from the last event, not accumulated, so developers
      * should make sure to process this axis value for all batched historical events.
+     * <p>
+     * This axis is only set on the first pointer in a motion event.
      */
     public static final int AXIS_GESTURE_X_OFFSET = 48;
 
@@ -1304,6 +1309,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * </ul>
      * These values are relative to the state from the last event, not accumulated, so developers
      * should make sure to process this axis value for all batched historical events.
+     * <p>
+     * This axis is only set on the first pointer in a motion event.
      */
     public static final int AXIS_GESTURE_SCROLL_X_DISTANCE = 50;
 
@@ -1324,14 +1331,29 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * </ul>
      * These values are relative to the state from the last event, not accumulated, so developers
      * should make sure to process this axis value for all batched historical events.
+     * <p>
+     * This axis is only set on the first pointer in a motion event.
      */
     public static final int AXIS_GESTURE_PINCH_SCALE_FACTOR = 52;
+
+    /**
+     * Axis constant: the number of fingers being used in a multi-finger swipe gesture.
+     * <p>
+     * <ul>
+     * <li>For a touch pad, reports the number of fingers being used in a multi-finger swipe gesture
+     * (with CLASSIFICATION_MULTI_FINGER_SWIPE).
+     * </ul>
+     * <p>
+     * Since CLASSIFICATION_MULTI_FINGER_SWIPE is a hidden API, so is this axis. It is only set on
+     * the first pointer in a motion event.
+     * @hide
+     */
+    public static final int AXIS_GESTURE_SWIPE_FINGER_COUNT = 53;
 
     // NOTE: If you add a new axis here you must also add it to:
     //  frameworks/native/include/android/input.h
     //  frameworks/native/libs/input/InputEventLabels.cpp
-    //  platform/cts/tests/tests/view/src/android/view/cts/MotionEventTest.java
-    //    (testAxisFromToString)
+    //  cts/tests/tests/view/src/android/view/cts/MotionEventTest.java (testAxisFromToString)
 
     // Symbolic names of all axes.
     private static final SparseArray<String> AXIS_SYMBOLIC_NAMES = new SparseArray<String>();
@@ -1387,6 +1409,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         names.append(AXIS_GESTURE_SCROLL_X_DISTANCE, "AXIS_GESTURE_SCROLL_X_DISTANCE");
         names.append(AXIS_GESTURE_SCROLL_Y_DISTANCE, "AXIS_GESTURE_SCROLL_Y_DISTANCE");
         names.append(AXIS_GESTURE_PINCH_SCALE_FACTOR, "AXIS_GESTURE_PINCH_SCALE_FACTOR");
+        names.append(AXIS_GESTURE_SWIPE_FINGER_COUNT, "AXIS_GESTURE_SWIPE_FINGER_COUNT");
     }
 
     /**
@@ -2177,6 +2200,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             float xOffset, float yOffset, float xPrecision, float yPrecision,
             long downTimeNanos, long eventTimeNanos,
             int pointerCount, PointerProperties[] pointerIds, PointerCoords[] pointerCoords) {
+        if (action == ACTION_CANCEL) {
+            flags |= FLAG_CANCELED;
+        }
         mNativePtr = nativeInitialize(mNativePtr, deviceId, source, displayId, action, flags,
                 edgeFlags, metaState, buttonState, classification, xOffset, yOffset,
                 xPrecision, yPrecision, downTimeNanos, eventTimeNanos, pointerCount, pointerIds,
@@ -2367,6 +2393,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         nativeSetFlags(mNativePtr, tainted ? flags | FLAG_TAINTED : flags & ~FLAG_TAINTED);
     }
 
+    private void setCanceled(boolean canceled) {
+        final int flags = getFlags();
+        nativeSetFlags(mNativePtr, canceled ? flags | FLAG_CANCELED : flags & ~FLAG_CANCELED);
+    }
+
     /** @hide */
     public  boolean isTargetAccessibilityFocus() {
         final int flags = getFlags();
@@ -2424,27 +2455,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @Override
     public final long getEventTime() {
         return nativeGetEventTimeNanos(mNativePtr, HISTORY_CURRENT) / NS_PER_MS;
-    }
-
-    /**
-     * Retrieve the time this event occurred,
-     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
-     * nanosecond precision.
-     * <p>
-     * The value is in nanosecond precision but it may not have nanosecond accuracy.
-     * </p>
-     *
-     * @return Returns the time this event occurred,
-     * in the {@link android.os.SystemClock#uptimeMillis} time base but with
-     * nanosecond precision.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage(publicAlternatives =
-            "Use {@link #getEventTimeNanos()} public API instead.",
-            maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    public final long getEventTimeNano() {
-        return nativeGetEventTimeNanos(mNativePtr, HISTORY_CURRENT);
     }
 
     /**
@@ -3511,6 +3521,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Sets this event's action.
      */
     public final void setAction(int action) {
+        final int actionMasked = action & ACTION_MASK;
+        if (actionMasked == ACTION_CANCEL) {
+            setCanceled(true);
+        } else if (actionMasked == ACTION_POINTER_UP) {
+            // Do nothing - we don't know what the real intent here is
+        } else {
+            setCanceled(false);
+        }
         nativeSetAction(mNativePtr, action);
     }
 
@@ -4158,6 +4176,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     /** @hide */
     @Override
     public final void cancel() {
+        setCanceled(true);
         setAction(ACTION_CANCEL);
     }
 
@@ -4360,6 +4379,28 @@ public final class MotionEvent extends InputEvent implements Parcelable {
          * @hide
          */
         public boolean isResampled;
+
+        /**
+         * Returns true if these pointer coordinates were generated by resampling, rather than from
+         * an actual input event from the device at this time.
+         * <p>
+         * Resampling extrapolates or interpolates touch coordinates reported by the input device to
+         * better align them with the refresh rate of the display, resulting in smoother movements,
+         * in particular for scrolling. Resampled coordinates are always added to batches, so a
+         * motion event will always contain at least one sample that is an original event from the
+         * input device (i.e. for which this method will return {@code false}).
+         * </p><p>
+         * Resampling does not occur if unbuffered dispatch has been requested, or if it has been
+         * disabled by the manufacturer (for example, on hardware that already synchronizes its
+         * touch events and display frames).
+         * </p>
+         * @see android.view.View#requestUnbufferedDispatch(int)
+         * @see android.view.View#requestUnbufferedDispatch(MotionEvent)
+         */
+        @FlaggedApi(Flags.FLAG_POINTER_COORDS_IS_RESAMPLED_API)
+        public boolean isResampled() {
+            return isResampled;
+        }
 
         /**
          * Clears the contents of this object.

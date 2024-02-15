@@ -23,5 +23,6 @@ import android.os.PersistableBundle;
 /** @hide */
 interface ISystemUpdateManager {
     Bundle retrieveSystemUpdateInfo();
+    @EnforcePermission("RECOVERY")
     void updateSystemUpdateInfo(in PersistableBundle data);
 }

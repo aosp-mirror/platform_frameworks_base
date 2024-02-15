@@ -18,6 +18,7 @@ package com.android.internal.util;
 
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
@@ -39,12 +40,13 @@ import java.util.function.Consumer;
  * {@hide}
  */
 public class TraceBuffer<P, S extends P, T extends P> {
-    private final Object mBufferLock = new Object();
-
     private final ProtoProvider<P, S, T> mProtoProvider;
+    @GuardedBy("this")
     private final Queue<T> mBuffer = new ArrayDeque<>();
     private final Consumer mProtoDequeuedCallback;
+    @GuardedBy("this")
     private int mBufferUsedSize;
+    @GuardedBy("this")
     private int mBufferCapacity;
 
     /**
@@ -115,18 +117,18 @@ public class TraceBuffer<P, S extends P, T extends P> {
         resetBuffer();
     }
 
-    public int getAvailableSpace() {
+    public synchronized int getAvailableSpace() {
         return mBufferCapacity - mBufferUsedSize;
     }
 
     /**
      * Returns buffer size.
      */
-    public int size() {
+    public synchronized int size() {
         return mBuffer.size();
     }
 
-    public void setCapacity(int capacity) {
+    public synchronized void setCapacity(int capacity) {
         mBufferCapacity = capacity;
     }
 
@@ -137,22 +139,19 @@ public class TraceBuffer<P, S extends P, T extends P> {
      * @throws IllegalStateException if the element cannot be added because it is larger
      *                               than the buffer size.
      */
-    public void add(T proto) {
+    public synchronized void add(T proto) {
         int protoLength = mProtoProvider.getItemSize(proto);
         if (protoLength > mBufferCapacity) {
             throw new IllegalStateException("Trace object too large for the buffer. Buffer size:"
                     + mBufferCapacity + " Object size: " + protoLength);
         }
-        synchronized (mBufferLock) {
-            discardOldest(protoLength);
-            mBuffer.add(proto);
-            mBufferUsedSize += protoLength;
-            mBufferLock.notify();
-        }
+        discardOldest(protoLength);
+        mBuffer.add(proto);
+        mBufferUsedSize += protoLength;
     }
 
     @VisibleForTesting
-    public boolean contains(byte[] other) {
+    public synchronized boolean contains(byte[] other) {
         return mBuffer.stream()
                 .anyMatch(p -> Arrays.equals(mProtoProvider.getBytes(p), other));
     }
@@ -160,15 +159,13 @@ public class TraceBuffer<P, S extends P, T extends P> {
     /**
      * Writes the trace buffer to disk inside the encapsulatingProto.
      */
-    public void writeTraceToFile(File traceFile, S encapsulatingProto)
+    public synchronized void writeTraceToFile(File traceFile, S encapsulatingProto)
             throws IOException {
-        synchronized (mBufferLock) {
-            traceFile.delete();
-            try (OutputStream os = new FileOutputStream(traceFile)) {
-                traceFile.setReadable(true /* readable */, false /* ownerOnly */);
-                mProtoProvider.write(encapsulatingProto, mBuffer, os);
-                os.flush();
-            }
+        traceFile.delete();
+        try (OutputStream os = new FileOutputStream(traceFile)) {
+            traceFile.setReadable(true /* readable */, false /* ownerOnly */);
+            mProtoProvider.write(encapsulatingProto, mBuffer, os);
+            os.flush();
         }
     }
 
@@ -199,31 +196,27 @@ public class TraceBuffer<P, S extends P, T extends P> {
     /**
      * Removes all elements from the buffer
      */
-    public void resetBuffer() {
-        synchronized (mBufferLock) {
-            if (mProtoDequeuedCallback != null) {
-                for (T item : mBuffer) {
-                    mProtoDequeuedCallback.accept(item);
-                }
+    public synchronized void resetBuffer() {
+        if (mProtoDequeuedCallback != null) {
+            for (T item : mBuffer) {
+                mProtoDequeuedCallback.accept(item);
             }
-            mBuffer.clear();
-            mBufferUsedSize = 0;
         }
+        mBuffer.clear();
+        mBufferUsedSize = 0;
     }
 
     @VisibleForTesting
-    public int getBufferSize() {
+    public synchronized int getBufferSize() {
         return mBufferUsedSize;
     }
 
     /**
      * Returns the buffer status in human-readable form.
      */
-    public String getStatus() {
-        synchronized (mBufferLock) {
-            return "Buffer size: " + mBufferCapacity + " bytes" + "\n"
-                    + "Buffer usage: " + mBufferUsedSize + " bytes" + "\n"
-                    + "Elements in the buffer: " + mBuffer.size();
-        }
+    public synchronized String getStatus() {
+        return "Buffer size: " + mBufferCapacity + " bytes" + "\n"
+                + "Buffer usage: " + mBufferUsedSize + " bytes" + "\n"
+                + "Elements in the buffer: " + mBuffer.size();
     }
 }

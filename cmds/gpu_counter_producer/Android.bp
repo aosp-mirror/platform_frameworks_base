@@ -18,9 +18,5 @@ cc_binary {
         "-Werror",
         "-Wunused",
         "-Wunreachable-code",
-        "-fPIE",
-        "-pie",
     ],
-
-    soc_specific: true,
 }

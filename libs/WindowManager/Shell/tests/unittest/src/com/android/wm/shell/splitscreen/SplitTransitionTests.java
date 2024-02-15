@@ -47,11 +47,8 @@ import static org.mockito.Mockito.spy;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.window.IRemoteTransition;
-import android.window.IRemoteTransitionFinishedCallback;
 import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -66,16 +63,20 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
-import com.android.wm.shell.TransitionInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.transition.DefaultMixedHandler;
+import com.android.wm.shell.transition.TestRemoteTransition;
+import com.android.wm.shell.transition.TransitionInfoBuilder;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -100,7 +101,10 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private Transitions mTransitions;
     @Mock private SurfaceSession mSurfaceSession;
     @Mock private IconProvider mIconProvider;
+    @Mock private WindowDecorViewModel mWindowDecorViewModel;
     @Mock private ShellExecutor mMainExecutor;
+    @Mock private LaunchAdjacentController mLaunchAdjacentController;
+    @Mock private DefaultMixedHandler mMixedHandler;
     private SplitLayout mSplitLayout;
     private MainStage mMainStage;
     private SideStage mSideStage;
@@ -121,16 +125,18 @@ public class SplitTransitionTests extends ShellTestCase {
         mSplitLayout = SplitTestUtils.createMockSplitLayout();
         mMainStage = spy(new MainStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
                 StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession,
-                mIconProvider));
+                mIconProvider, Optional.of(mWindowDecorViewModel)));
         mMainStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mSideStage = spy(new SideStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
                 StageTaskListener.StageListenerCallbacks.class), mSyncQueue, mSurfaceSession,
-                mIconProvider));
+                mIconProvider, Optional.of(mWindowDecorViewModel)));
         mSideStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
                 mSyncQueue, mTaskOrganizer, mMainStage, mSideStage, mDisplayController,
                 mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
-                mTransactionPool, mMainExecutor, Optional.empty());
+                mTransactionPool, mMainExecutor, Optional.empty(),
+                mLaunchAdjacentController, Optional.empty());
+        mStageCoordinator.setMixedHandler(mMixedHandler);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();
         doAnswer((Answer<IBinder>) invocation -> mock(IBinder.class))
                 .when(mTransitions).startTransition(anyInt(), any(), any());
@@ -197,7 +203,31 @@ public class SplitTransitionTests extends ShellTestCase {
 
         // Make sure split-screen is now visible
         assertTrue(mStageCoordinator.isSplitScreenVisible());
-        assertTrue(testRemote.mCalled);
+        assertTrue(testRemote.isCalled());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testRemoteTransitionConsumed() {
+        // Omit side child change
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(TRANSIT_OPEN, mMainChild)
+                .build();
+        TestRemoteTransition testRemote = new TestRemoteTransition();
+
+        IBinder transition = mSplitScreenTransitions.startEnterTransition(
+                TRANSIT_OPEN, new WindowContainerTransaction(),
+                new RemoteTransition(testRemote, "Test"), mStageCoordinator,
+                TRANSIT_SPLIT_SCREEN_PAIR_OPEN, false);
+        mMainStage.onTaskAppeared(mMainChild, createMockSurface());
+        boolean accepted = mStageCoordinator.startAnimation(transition, info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(Transitions.TransitionFinishCallback.class));
+        assertTrue(accepted);
+
+        assertTrue(testRemote.isConsumed());
+
     }
 
     @Test
@@ -458,26 +488,6 @@ public class SplitTransitionTests extends ShellTestCase {
         out.setMode(mode);
         out.setTaskInfo(taskInfo);
         return out;
-    }
-
-    class TestRemoteTransition extends IRemoteTransition.Stub {
-        boolean mCalled = false;
-        final WindowContainerTransaction mRemoteFinishWCT = new WindowContainerTransaction();
-
-        @Override
-        public void startAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction startTransaction,
-                IRemoteTransitionFinishedCallback finishCallback)
-                throws RemoteException {
-            mCalled = true;
-            finishCallback.onTransitionFinished(mRemoteFinishWCT, null /* sct */);
-        }
-
-        @Override
-        public void mergeAnimation(IBinder transition, TransitionInfo info,
-                SurfaceControl.Transaction t, IBinder mergeTarget,
-                IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
-        }
     }
 
 }

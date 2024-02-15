@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLAY_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAYER;
@@ -36,11 +37,14 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.RenderNode;
+import android.hardware.input.InputManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -49,11 +53,14 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.window.SurfaceSyncGroup;
 
+import com.android.graphics.hwui.flags.Flags;
 import com.android.internal.view.SurfaceCallbackHelper;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -152,6 +159,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private static final String TAG = "SurfaceView";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_POSITION = false;
+
+    private static final long FORWARD_BACK_KEY_TOLERANCE_MS = 100;
 
     @UnsupportedAppUsage(
             maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
@@ -301,6 +310,63 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private SurfaceControl mBlastSurfaceControl;
     private BLASTBufferQueue mBlastBufferQueue;
+
+    private final ConcurrentLinkedQueue<WindowManager.LayoutParams> mEmbeddedWindowParams =
+            new ConcurrentLinkedQueue<>();
+
+    private final ISurfaceControlViewHostParent mSurfaceControlViewHostParent =
+            new ISurfaceControlViewHostParent.Stub() {
+        @Override
+        public void updateParams(WindowManager.LayoutParams[] childAttrs) {
+            mEmbeddedWindowParams.clear();
+            mEmbeddedWindowParams.addAll(Arrays.asList(childAttrs));
+
+            if (isAttachedToWindow()) {
+                runOnUiThread(() -> {
+                    if (mParent != null) {
+                        mParent.recomputeViewAttributes(SurfaceView.this);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void forwardBackKeyToParent(@NonNull KeyEvent keyEvent) {
+                runOnUiThread(() -> {
+                    if (!isAttachedToWindow() || keyEvent.getKeyCode() != KeyEvent.KEYCODE_BACK) {
+                        return;
+                    }
+                    final ViewRootImpl vri = getViewRootImpl();
+                    if (vri == null) {
+                        return;
+                    }
+                    final InputManager inputManager = mContext.getSystemService(InputManager.class);
+                    if (inputManager == null) {
+                        return;
+                    }
+                    // Check that the event was created recently.
+                    final long timeDiff = SystemClock.uptimeMillis() - keyEvent.getEventTime();
+                    if (timeDiff > FORWARD_BACK_KEY_TOLERANCE_MS) {
+                        Log.e(TAG, "Ignore the input event that exceed the tolerance time, "
+                                + "exceed " + timeDiff + "ms");
+                        return;
+                    }
+                    if (inputManager.verifyInputEvent(keyEvent) == null) {
+                        Log.e(TAG, "Received invalid input event");
+                        return;
+                    }
+                    try {
+                        vri.processingBackKey(true);
+                        vri.enqueueInputEvent(keyEvent, null /* receiver */, 0 /* flags */,
+                                true /* processImmediately */);
+                    } finally {
+                        vri.processingBackKey(false);
+                    }
+                });
+        }
+    };
+
+    private final boolean mRtDrivenClipping = Flags.clipSurfaceviews();
 
     public SurfaceView(Context context) {
         this(context, null);
@@ -547,6 +613,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     @Override
     public void setClipBounds(Rect clipBounds) {
         super.setClipBounds(clipBounds);
+
+        if (mRtDrivenClipping && isHardwareAccelerated()) {
+            return;
+        }
 
         if (!mClipSurfaceToBounds || mSurfaceControl == null) {
             return;
@@ -801,9 +871,18 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mBlastSurfaceControl = null;
             }
 
-            if (releaseSurfacePackage && mSurfacePackage != null) {
-                mSurfacePackage.release();
-                mSurfacePackage = null;
+            if (mSurfacePackage != null) {
+                try {
+                    mSurfacePackage.getRemoteInterface().attachParentInterface(null);
+                    mEmbeddedWindowParams.clear();
+                } catch (RemoteException e) {
+                    Log.d(TAG, "Failed to remove parent interface from SCVH. Likely SCVH is "
+                            + "already dead");
+                }
+                if (releaseSurfacePackage) {
+                    mSurfacePackage.release();
+                    mSurfacePackage = null;
+                }
             }
 
             applyTransactionOnVriDraw(transaction);
@@ -882,15 +961,17 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             }
             if (sizeChanged || creating || !isHardwareAccelerated()) {
 
-                // Set a window crop when creating the surface or changing its size to
-                // crop the buffer to the surface size since the buffer producer may
-                // use SCALING_MODE_SCALE and submit a larger size than the surface
-                // size.
-                if (mClipSurfaceToBounds && mClipBounds != null) {
-                    surfaceUpdateTransaction.setWindowCrop(mSurfaceControl, mClipBounds);
-                } else {
-                    surfaceUpdateTransaction.setWindowCrop(mSurfaceControl, mSurfaceWidth,
-                            mSurfaceHeight);
+                if (!mRtDrivenClipping || !isHardwareAccelerated()) {
+                    // Set a window crop when creating the surface or changing its size to
+                    // crop the buffer to the surface size since the buffer producer may
+                    // use SCALING_MODE_SCALE and submit a larger size than the surface
+                    // size.
+                    if (mClipSurfaceToBounds && mClipBounds != null) {
+                        surfaceUpdateTransaction.setWindowCrop(mSurfaceControl, mClipBounds);
+                    } else {
+                        surfaceUpdateTransaction.setWindowCrop(mSurfaceControl, mSurfaceWidth,
+                                mSurfaceHeight);
+                    }
                 }
 
                 surfaceUpdateTransaction.setDesintationFrame(mBlastSurfaceControl, mSurfaceWidth,
@@ -908,7 +989,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                             mScreenRect.height() / (float) mSurfaceHeight /*postScaleY*/);
                 }
                 if (DEBUG_POSITION) {
-                    Log.d(TAG, String.format(
+                    Log.d(TAG, TextUtils.formatSimple(
                             "%d performSurfaceTransaction %s "
                                 + "position = [%d, %d, %d, %d] surfaceSize = %dx%d",
                             System.identityHashCode(this),
@@ -1307,7 +1388,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
                     .setName(name)
                     .setLocalOwnerView(this)
-                    .setParent(viewRoot.getBoundsLayer())
+                    .setParent(viewRoot.updateAndGetBoundsLayer(surfaceUpdateTransaction))
                     .setCallsite("SurfaceView.updateSurface")
                     .setContainerLayer()
                     .build();
@@ -1420,6 +1501,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private final Rect mRTLastReportedPosition = new Rect();
+    private final Rect mRTLastSetCrop = new Rect();
 
     private class SurfaceViewPositionUpdateListener implements RenderNode.PositionUpdateListener {
         private final int mRtSurfaceWidth;
@@ -1455,6 +1537,54 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                                     / (float) mRtSurfaceHeight /*postScaleY*/);
 
                     mPositionChangedTransaction.show(mSurfaceControl);
+                }
+                applyOrMergeTransaction(mPositionChangedTransaction, frameNumber);
+            } catch (Exception ex) {
+                Log.e(TAG, "Exception from repositionChild", ex);
+            }
+        }
+
+        @Override
+        public void positionChanged(long frameNumber, int left, int top, int right, int bottom,
+                int clipLeft, int clipTop, int clipRight, int clipBottom) {
+            try {
+                if (DEBUG_POSITION) {
+                    Log.d(TAG, String.format(
+                            "%d updateSurfacePosition RenderWorker, frameNr = %d, "
+                                    + "position = [%d, %d, %d, %d] clip = [%d, %d, %d, %d] "
+                                    + "surfaceSize = %dx%d",
+                            System.identityHashCode(SurfaceView.this), frameNumber,
+                            left, top, right, bottom, clipLeft, clipTop, clipRight, clipBottom,
+                            mRtSurfaceWidth, mRtSurfaceHeight));
+                }
+                synchronized (mSurfaceControlLock) {
+                    if (mSurfaceControl == null) return;
+
+                    mRTLastReportedPosition.set(left, top, right, bottom);
+                    final float postScaleX = mRTLastReportedPosition.width()
+                            / (float) mRtSurfaceWidth;
+                    final float postScaleY = mRTLastReportedPosition.height()
+                            / (float) mRtSurfaceHeight;
+                    onSetSurfacePositionAndScale(mPositionChangedTransaction, mSurfaceControl,
+                            mRTLastReportedPosition.left /*positionLeft*/,
+                            mRTLastReportedPosition.top /*positionTop*/,
+                            postScaleX, postScaleY);
+
+                    mRTLastSetCrop.set((int) (clipLeft / postScaleX), (int) (clipTop / postScaleY),
+                            (int) Math.ceil(clipRight / postScaleX),
+                            (int) Math.ceil(clipBottom / postScaleY));
+                    if (DEBUG_POSITION) {
+                        Log.d(TAG, String.format("Setting layer crop = [%d, %d, %d, %d] "
+                                        + "from scale %f, %f", mRTLastSetCrop.left,
+                                mRTLastSetCrop.top, mRTLastSetCrop.right, mRTLastSetCrop.bottom,
+                                postScaleX, postScaleY));
+                    }
+                    mPositionChangedTransaction.setCrop(mSurfaceControl, mRTLastSetCrop);
+                    if (mRTLastSetCrop.isEmpty()) {
+                        mPositionChangedTransaction.hide(mSurfaceControl);
+                    } else {
+                        mPositionChangedTransaction.show(mSurfaceControl);
+                    }
                 }
                 applyOrMergeTransaction(mPositionChangedTransaction, frameNumber);
             } catch (Exception ex) {
@@ -1854,6 +1984,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             applyTransactionOnVriDraw(transaction);
         }
         mSurfacePackage = p;
+        try {
+            mSurfacePackage.getRemoteInterface().attachParentInterface(
+                    mSurfaceControlViewHostParent);
+        } catch (RemoteException e) {
+            Log.d(TAG, "Failed to attach parent interface to SCVH. Likely SCVH is already dead.");
+        }
 
         if (isFocused()) {
             requestEmbeddedFocus(true);
@@ -1963,7 +2099,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
         try {
             viewRoot.mWindowSession.grantEmbeddedWindowFocus(viewRoot.mWindow,
-                    mSurfacePackage.getInputToken(), gainFocus);
+                    mSurfacePackage.getInputTransferToken(), gainFocus);
         } catch (Exception e) {
             Log.e(TAG, System.identityHashCode(this)
                     + "Exception requesting focus on embedded window", e);
@@ -2012,6 +2148,21 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
             long frameNumber = mBlastBufferQueue.getLastAcquiredFrameNum() + 1;
             mBlastBufferQueue.mergeWithNextTransaction(transaction, frameNumber);
+        }
+    }
+
+    @Override
+    void performCollectViewAttributes(AttachInfo attachInfo, int visibility) {
+        super.performCollectViewAttributes(attachInfo, visibility);
+        if (mEmbeddedWindowParams.isEmpty()) {
+            return;
+        }
+
+        for (WindowManager.LayoutParams embeddedWindowAttr : mEmbeddedWindowParams) {
+            if ((embeddedWindowAttr.flags & FLAG_KEEP_SCREEN_ON) == FLAG_KEEP_SCREEN_ON) {
+                attachInfo.mKeepScreenOn = true;
+                break;
+            }
         }
     }
 }

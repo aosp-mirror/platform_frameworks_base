@@ -152,14 +152,14 @@ based on animation progression.
 
 To enable it, add the following line as the second line of desc.txt:
 
-    dynamic_colors PATH #RGBHEX0 #RGBHEX1 #RGBHEX2 #RGBHEX3
+    dynamic_colors PATH #RGBHEX1 #RGBHEX2 #RGBHEX3 #RGBHEX4
 
   * **PATH:** file path of the part to apply dynamic color transition to.
     Any part before this part will be rendered in the start colors.
     Any part after will be rendered in the end colors.
   * **RGBHEX1:** the first start color (masked by the R channel), specified as `#RRGGBB`.
   * **RGBHEX2:** the second start color (masked by the G channel), specified as `#RRGGBB`.
-  * **RGBHEX3:** the thrid start color (masked by the B channel), specified as `#RRGGBB`.
+  * **RGBHEX3:** the third start color (masked by the B channel), specified as `#RRGGBB`.
   * **RGBHEX4:** the forth start color (masked by the A channel), specified as `#RRGGBB`.
 
 The end colors will be read from the following system properties:

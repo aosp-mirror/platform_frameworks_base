@@ -146,7 +146,7 @@ public class AssistDataRequesterTest {
 
     private void setupMocks(boolean currentActivityAssistAllowed, boolean assistStructureAllowed,
             boolean assistScreenshotAllowed) throws Exception {
-        doReturn(currentActivityAssistAllowed).when(mAtm).isAssistDataAllowedOnCurrentActivity();
+        doReturn(currentActivityAssistAllowed).when(mAtm).isAssistDataAllowed();
         doReturn(assistStructureAllowed ? MODE_ALLOWED : MODE_ERRORED).when(mAppOpsManager)
                 .noteOpNoThrow(eq(OP_ASSIST_STRUCTURE), anyInt(), anyString(), any(), any());
         doReturn(assistScreenshotAllowed ? MODE_ALLOWED : MODE_ERRORED).when(mAppOpsManager)
@@ -317,7 +317,8 @@ public class AssistDataRequesterTest {
         assertEquals("Expected " + numPendingScreenshots + " pending screenshots, got "
                         + mDataRequester.getPendingScreenshotCount(),
                 numPendingScreenshots, mDataRequester.getPendingScreenshotCount());
-        assertFalse("Expected request NOT completed", mCallbacks.mRequestCompleted);
+        assertEquals("Expected request NOT completed, unless no pending data",
+                numPendingData == 0 && numPendingScreenshots == 0, mCallbacks.mRequestCompleted);
         mGate.countDown();
         waitForIdle(mHandler);
         assertEquals("Expected " + numReceivedData + " data, received "
@@ -376,14 +377,7 @@ public class AssistDataRequesterTest {
 
         @Override
         public void onAssistRequestCompleted() {
-            mHandler.post(() -> {
-                try {
-                    mGate.await(10, TimeUnit.SECONDS);
-                    mRequestCompleted = true;
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "Failed to wait", e);
-                }
-            });
+            mRequestCompleted = true;
         }
     }
 }

@@ -21,15 +21,18 @@ import java.util.List;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialRequest;
+import android.credentials.GetCandidateCredentialsRequest;
 import android.credentials.GetCredentialRequest;
 import android.credentials.RegisterCredentialDescriptionRequest;
 import android.credentials.UnregisterCredentialDescriptionRequest;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.IGetCredentialCallback;
+import android.credentials.IGetCandidateCredentialsCallback;
 import android.credentials.IPrepareGetCredentialCallback;
 import android.credentials.ISetEnabledProvidersCallback;
 import android.content.ComponentName;
+import android.os.IBinder;
 import android.os.ICancellationSignal;
 
 /**
@@ -44,6 +47,8 @@ interface ICredentialManager {
     @nullable ICancellationSignal executePrepareGetCredential(in GetCredentialRequest request, in IPrepareGetCredentialCallback prepareGetCredentialCallback, in IGetCredentialCallback getCredentialCallback, String callingPackage);
 
     @nullable ICancellationSignal executeCreateCredential(in CreateCredentialRequest request, in ICreateCredentialCallback callback, String callingPackage);
+
+    @nullable ICancellationSignal getCandidateCredentials(in GetCredentialRequest request, in IGetCandidateCredentialsCallback callback, in IBinder clientCallback, String callingPackage);
 
     @nullable ICancellationSignal clearCredentialState(in ClearCredentialStateRequest request, in IClearCredentialStateCallback callback, String callingPackage);
 

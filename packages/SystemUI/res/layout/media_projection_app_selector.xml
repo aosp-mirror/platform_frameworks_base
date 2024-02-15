@@ -20,10 +20,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    androidprv:maxCollapsedHeight="0dp"
+    androidprv:maxCollapsedHeight="10000dp"
     androidprv:maxCollapsedHeightSmall="56dp"
     androidprv:maxWidth="@*android:dimen/chooser_width"
     android:id="@*android:id/contentPanel">
+    <!-- maxCollapsedHeight above is huge, to make sure the layout is always expanded. -->
 
     <LinearLayout
         android:id="@*android:id/chooser_header"

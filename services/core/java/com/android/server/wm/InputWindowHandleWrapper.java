@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.InputConfig;
-import android.view.IWindow;
 import android.view.InputApplicationHandle;
 import android.view.InputWindowHandle;
 import android.view.InputWindowHandle.InputConfigFlags;
@@ -195,6 +194,11 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
+    void setTrustedOverlay(SurfaceControl.Transaction t, SurfaceControl sc,
+            boolean trustedOverlay) {
+        mHandle.setTrustedOverlay(t, sc, trustedOverlay);
+    }
+
     void setOwnerPid(int pid) {
         if (mHandle.ownerPid == pid) {
             return;
@@ -224,18 +228,6 @@ class InputWindowHandleWrapper {
             return;
         }
         mHandle.displayId = displayId;
-        mChanged = true;
-    }
-
-    void setFrame(int left, int top, int right, int bottom) {
-        if (mHandle.frameLeft == left && mHandle.frameTop == top && mHandle.frameRight == right
-                && mHandle.frameBottom == bottom) {
-            return;
-        }
-        mHandle.frameLeft = left;
-        mHandle.frameTop = top;
-        mHandle.frameRight = right;
-        mHandle.frameBottom = bottom;
         mChanged = true;
     }
 
@@ -271,8 +263,8 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
-    void setWindowToken(IWindow windowToken) {
-        if (mHandle.getWindow() == windowToken) {
+    void setWindowToken(IBinder windowToken) {
+        if (mHandle.getWindowToken() == windowToken) {
             return;
         }
         mHandle.setWindowToken(windowToken);

@@ -17,13 +17,15 @@
 package com.android.systemui.statusbar.phone;
 
 
+import static com.android.systemui.Flags.truncatedStatusBarIconsFix;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,10 +38,12 @@ import android.widget.LinearLayout;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
+import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.leak.RotationUtils;
@@ -49,9 +53,10 @@ import java.util.Objects;
 public class PhoneStatusBarView extends FrameLayout {
     private static final String TAG = "PhoneStatusBarView";
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
+    private final StatusBarWindowController mStatusBarWindowController;
 
     private DarkReceiver mBattery;
-    private DarkReceiver mClock;
+    private Clock mClock;
     private int mRotationOrientation = -1;
     @Nullable
     private View mCutoutSpace;
@@ -71,6 +76,7 @@ public class PhoneStatusBarView extends FrameLayout {
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContentInsetsProvider = Dependency.get(StatusBarContentInsetsProvider.class);
+        mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
     }
 
     void setTouchEventHandler(Gefingerpoken handler) {
@@ -100,6 +106,9 @@ public class PhoneStatusBarView extends FrameLayout {
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mClock);
         if (updateDisplayParameters()) {
             updateLayoutForCutout();
+            if (truncatedStatusBarIconsFix()) {
+                updateWindowHeight();
+            }
         }
     }
 
@@ -111,6 +120,9 @@ public class PhoneStatusBarView extends FrameLayout {
         mDisplayCutout = null;
     }
 
+    // Per b/300629388, we let the PhoneStatusBarView detect onConfigurationChanged to
+    // updateResources, instead of letting the PhoneStatusBarViewController detect onConfigChanged
+    // then notify PhoneStatusBarView.
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -121,6 +133,13 @@ public class PhoneStatusBarView extends FrameLayout {
             updateLayoutForCutout();
             requestLayout();
         }
+        if (truncatedStatusBarIconsFix()) {
+            updateWindowHeight();
+        }
+    }
+
+    void onDensityOrFontScaleChanged() {
+        mClock.onDensityOrFontScaleChanged();
     }
 
     @Override
@@ -208,25 +227,29 @@ public class PhoneStatusBarView extends FrameLayout {
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         layoutParams.height = mStatusBarHeight - waterfallTopInset;
+        updatePaddings();
+        setLayoutParams(layoutParams);
+    }
 
-        int statusBarPaddingTop = getResources().getDimensionPixelSize(
-                R.dimen.status_bar_padding_top);
+    private void updatePaddings() {
         int statusBarPaddingStart = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_padding_start);
-        int statusBarPaddingEnd = getResources().getDimensionPixelSize(
-                R.dimen.status_bar_padding_end);
 
-        View sbContents = findViewById(R.id.status_bar_contents);
-        sbContents.setPaddingRelative(
+        findViewById(R.id.status_bar_contents).setPaddingRelative(
                 statusBarPaddingStart,
-                statusBarPaddingTop,
-                statusBarPaddingEnd,
+                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_top),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_padding_end),
                 0);
 
         findViewById(R.id.notification_lights_out)
                 .setPaddingRelative(0, statusBarPaddingStart, 0, 0);
 
-        setLayoutParams(layoutParams);
+        findViewById(R.id.system_icons).setPaddingRelative(
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_start),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_top),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_end),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_bottom)
+        );
     }
 
     private void updateLayoutForCutout() {
@@ -259,13 +282,16 @@ public class PhoneStatusBarView extends FrameLayout {
     }
 
     private void updateSafeInsets() {
-        Pair<Integer, Integer> insets = mContentInsetsProvider
+        Insets insets = mContentInsetsProvider
                 .getStatusBarContentInsetsForCurrentRotation();
-
         setPadding(
-                insets.first,
-                getPaddingTop(),
-                insets.second,
+                insets.left,
+                insets.top,
+                insets.right,
                 getPaddingBottom());
+    }
+
+    private void updateWindowHeight() {
+        mStatusBarWindowController.refreshStatusBarHeight();
     }
 }

@@ -162,7 +162,7 @@ public class ComponentAliasResolver {
                     // avoid deadlocks.
                     if (enabled) {
                         mPackageMonitor.register(mAm.mContext, UserHandle.ALL,
-                                /* externalStorage= */ false, BackgroundThread.getHandler());
+                                BackgroundThread.getHandler());
                     } else {
                         mPackageMonitor.unregister();
                     }
@@ -457,7 +457,7 @@ public class ComponentAliasResolver {
     @Nullable
     public Resolution<ResolveInfo> resolveReceiver(@NonNull Intent intent,
             @NonNull ResolveInfo receiver, @Nullable String resolvedType,
-            int packageFlags, int userId, int callingUid, boolean forSend) {
+            long packageFlags, int userId, int callingUid, boolean forSend) {
         // Resolve this alias.
         final Resolution<ComponentName> resolution = resolveComponentAlias(() ->
                 receiver.activityInfo.getComponentName());

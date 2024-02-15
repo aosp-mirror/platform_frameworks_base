@@ -24,12 +24,14 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_NONE;
+import static android.hardware.biometrics.Flags.FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
 
 import static com.android.internal.util.FrameworkStatsLog.AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_AUTHENTICATE;
 import static com.android.internal.util.FrameworkStatsLog.AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_HAS_ENROLLED_FINGERPRINTS;
 import static com.android.internal.util.FrameworkStatsLog.AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_IS_HARDWARE_DETECTED;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -76,6 +78,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
 
 /**
@@ -103,6 +106,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private static final int MSG_UDFPS_POINTER_DOWN = 108;
     private static final int MSG_UDFPS_POINTER_UP = 109;
     private static final int MSG_POWER_BUTTON_PRESSED = 110;
+    private static final int MSG_UDFPS_OVERLAY_SHOWN = 111;
 
     /**
      * @hide
@@ -119,6 +123,24 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @IntDef({ENROLL_FIND_SENSOR, ENROLL_ENROLL})
     @Retention(RetentionPolicy.SOURCE)
     public @interface EnrollReason {}
+
+    /**
+     * Udfps ui event of overlay is shown on the screen.
+     * @hide
+     */
+    public static final int UDFPS_UI_OVERLAY_SHOWN = 1;
+    /**
+     * Udfps ui event of the udfps UI being ready (e.g. HBM illumination is enabled).
+     * @hide
+     */
+    public static final int UDFPS_UI_READY = 2;
+
+    /**
+     * @hide
+     */
+    @IntDef({UDFPS_UI_OVERLAY_SHOWN, UDFPS_UI_READY})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UdfpsUiEvent{}
 
     /**
      * Request authentication with any single sensor.
@@ -293,6 +315,16 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         public PresentationSession getPresentationSession() {
             return super.getPresentationSession();
         }
+
+        /**
+         * Get {@link KeyAgreement} object.
+         * @return {@link KeyAgreement} object or null if this doesn't contain one.
+         * @hide
+         */
+        @FlaggedApi(FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT)
+        public KeyAgreement getKeyAgreement() {
+            return super.getKeyAgreement();
+        }
     }
 
     /**
@@ -430,6 +462,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          * Invoked when a fingerprint has been detected.
          */
         void onFingerprintDetected(int sensorId, int userId, boolean isStrongBiometric);
+
+        /**
+         * An error has occurred with fingerprint detection.
+         *
+         * This callback signifies that this operation has been completed, and
+         * no more callbacks should be expected.
+         */
+        default void onDetectionError(int errorMsgId) {}
     }
 
     /**
@@ -475,12 +515,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         /**
          * Called when a pointer down event has occurred.
          */
-        public void onPointerDown(int sensorId){ }
+        public void onUdfpsPointerDown(int sensorId){ }
 
         /**
          * Called when a pointer up event has occurred.
          */
-        public void onPointerUp(int sensorId){ }
+        public void onUdfpsPointerUp(int sensorId){ }
+
+        /**
+         * Called when udfps overlay is shown.
+         */
+        public void onUdfpsOverlayShown() { }
     }
 
     /**
@@ -938,6 +983,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     /**
      * @hide
      */
@@ -950,23 +996,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
 
         try {
             mService.setSidefpsController(controller);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void setUdfpsOverlay(@NonNull IUdfpsOverlay controller) {
-        if (mService == null) {
-            Slog.w(TAG, "setUdfpsOverlay: no fingerprint service");
-            return;
-        }
-
-        try {
-            mService.setUdfpsOverlay(controller);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1112,14 +1141,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void onUiReady(long requestId, int sensorId) {
+    public void onUdfpsUiEvent(@UdfpsUiEvent int event, long requestId, int sensorId) {
         if (mService == null) {
-            Slog.w(TAG, "onUiReady: no fingerprint service");
+            Slog.w(TAG, "onUdfpsUiEvent: no fingerprint service");
             return;
         }
 
         try {
-            mService.onUiReady(requestId, sensorId);
+            mService.onUdfpsUiEvent(event, requestId, sensorId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1365,6 +1394,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 case MSG_POWER_BUTTON_PRESSED:
                     sendPowerPressed();
                     break;
+                case MSG_UDFPS_OVERLAY_SHOWN:
+                    sendUdfpsOverlayShown();
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
 
@@ -1462,6 +1493,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                     ? mRemoveTracker.mSingleFingerprint : null;
             mRemovalCallback.onRemovalError(fp, clientErrMsgId,
                     getErrorString(mContext, errMsgId, vendorCode));
+        } else if (mFingerprintDetectionCallback != null) {
+            mFingerprintDetectionCallback.onDetectionError(errMsgId);
+            mFingerprintDetectionCallback = null;
         }
     }
 
@@ -1489,7 +1523,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
 
         if (mEnrollmentCallback != null) {
-            mEnrollmentCallback.onPointerDown(sensorId);
+            mEnrollmentCallback.onUdfpsPointerDown(sensorId);
         }
     }
 
@@ -1500,7 +1534,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             mAuthenticationCallback.onUdfpsPointerUp(sensorId);
         }
         if (mEnrollmentCallback != null) {
-            mEnrollmentCallback.onPointerUp(sensorId);
+            mEnrollmentCallback.onUdfpsPointerUp(sensorId);
         }
     }
 
@@ -1509,6 +1543,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             mService.onPowerPressed();
         } catch (RemoteException e) {
             Slog.e(TAG, "Error sending power press", e);
+        }
+    }
+
+    private void sendUdfpsOverlayShown() {
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onUdfpsOverlayShown();
         }
     }
 
@@ -1786,6 +1826,11 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         @Override // binder call
         public void onUdfpsPointerUp(int sensorId) {
             mHandler.obtainMessage(MSG_UDFPS_POINTER_UP, sensorId, 0).sendToTarget();
+        }
+
+        @Override
+        public void onUdfpsOverlayShown() {
+            mHandler.obtainMessage(MSG_UDFPS_OVERLAY_SHOWN).sendToTarget();
         }
     };
 

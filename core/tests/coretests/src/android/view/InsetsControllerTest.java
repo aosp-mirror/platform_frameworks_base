@@ -16,7 +16,7 @@
 
 package android.view;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.ANIMATION_TYPE_RESIZE;
@@ -131,10 +131,10 @@ public class InsetsControllerTest {
             mTestClock = new OffsettableClock();
             mTestHandler = new TestHandler(null, mTestClock);
             mTestHost = spy(new TestHost(mViewRoot));
-            mController = new InsetsController(mTestHost, (controller, source) -> {
-                if (source.getType() == ime()) {
-                    return new InsetsSourceConsumer(source.getId(), source.getType(),
-                            controller.getState(), Transaction::new, controller) {
+            mController = new InsetsController(mTestHost, (controller, id, type) -> {
+                if (type == ime()) {
+                    return new InsetsSourceConsumer(id, type, controller.getState(),
+                            Transaction::new, controller) {
 
                         private boolean mImeRequestedShow;
 
@@ -150,8 +150,8 @@ public class InsetsControllerTest {
                         }
                     };
                 } else {
-                    return new InsetsSourceConsumer(source.getId(), source.getType(),
-                            controller.getState(), Transaction::new, controller);
+                    return new InsetsSourceConsumer(id, type, controller.getState(),
+                            Transaction::new, controller);
                 }
             }, mTestHandler);
             final Rect rect = new Rect(5, 5, 5, 5);
@@ -171,8 +171,7 @@ public class InsetsControllerTest {
             mController.onStateChanged(state);
             mController.calculateInsets(
                     false,
-                    false,
-                    TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
+                    TYPE_APPLICATION, ACTIVITY_TYPE_UNDEFINED,
                     SOFT_INPUT_ADJUST_RESIZE, 0, 0);
             mController.onFrameChanged(new Rect(0, 0, 100, 100));
         });
@@ -182,7 +181,8 @@ public class InsetsControllerTest {
     @Test
     public void testControlsChanged() {
         mController.onControlsChanged(createSingletonControl(ID_STATUS_BAR, statusBars()));
-        assertNotNull(mController.getSourceConsumer(mStatusSource).getControl().getLeash());
+        assertNotNull(
+                mController.getSourceConsumer(ID_STATUS_BAR, statusBars()).getControl().getLeash());
         mController.addOnControllableInsetsChangedListener(
                 ((controller, typeMask) -> assertEquals(statusBars(), typeMask)));
     }
@@ -194,7 +194,7 @@ public class InsetsControllerTest {
         mController.addOnControllableInsetsChangedListener(listener);
         mController.onControlsChanged(createSingletonControl(ID_STATUS_BAR, statusBars()));
         mController.onControlsChanged(new InsetsSourceControl[0]);
-        assertNull(mController.getSourceConsumer(mStatusSource).getControl());
+        assertNull(mController.getSourceConsumer(ID_STATUS_BAR, statusBars()).getControl());
         InOrder inOrder = Mockito.inOrder(listener);
         inOrder.verify(listener).onControllableInsetsChanged(eq(mController), eq(0));
         inOrder.verify(listener).onControllableInsetsChanged(eq(mController), eq(statusBars()));
@@ -254,7 +254,7 @@ public class InsetsControllerTest {
         // only the original thread that created view hierarchy can touch its views
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.setSystemDrivenInsetsAnimationLoggingListener(loggingListener);
-            mController.getSourceConsumer(mImeSource).onWindowFocusGained(true);
+            mController.getSourceConsumer(ID_IME, ime()).onWindowFocusGained(true);
             // since there is no focused view, forcefully make IME visible.
             mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
             // When using the animation thread, this must not invoke onReady()
@@ -271,7 +271,7 @@ public class InsetsControllerTest {
         prepareControls();
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            mController.getSourceConsumer(mImeSource).onWindowFocusGained(true);
+            mController.getSourceConsumer(ID_IME, ime()).onWindowFocusGained(true);
             // since there is no focused view, forcefully make IME visible.
             mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
             mController.show(all());
@@ -284,7 +284,7 @@ public class InsetsControllerTest {
             mController.hide(all());
             mController.cancelExistingAnimations();
             assertEquals(0, mController.getRequestedVisibleTypes() & types);
-            mController.getSourceConsumer(mImeSource).onWindowFocusLost();
+            mController.getSourceConsumer(ID_IME, ime()).onWindowFocusLost();
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
@@ -294,14 +294,14 @@ public class InsetsControllerTest {
         InsetsSourceControl ime = createControl(ID_IME, ime());
         mController.onControlsChanged(new InsetsSourceControl[] { ime });
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            mController.getSourceConsumer(mImeSource).onWindowFocusGained(true);
+            mController.getSourceConsumer(ID_IME, ime()).onWindowFocusGained(true);
             mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
             mController.cancelExistingAnimations();
             assertTrue(isRequestedVisible(mController, ime()));
             mController.hide(ime(), true /* fromIme */, null /* statsToken */);
             mController.cancelExistingAnimations();
             assertFalse(isRequestedVisible(mController, ime()));
-            mController.getSourceConsumer(mImeSource).onWindowFocusLost();
+            mController.getSourceConsumer(ID_IME, ime()).onWindowFocusLost();
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
@@ -914,7 +914,7 @@ public class InsetsControllerTest {
             // Simulate IME insets is not controllable
             mController.onControlsChanged(new InsetsSourceControl[0]);
             final InsetsSourceConsumer imeInsetsConsumer =
-                    mController.getSourceConsumer(mImeSource);
+                    mController.getSourceConsumer(ID_IME, ime());
             assertNull(imeInsetsConsumer.getControl());
 
             // Verify IME requested visibility should be updated to IME consumer from controller.

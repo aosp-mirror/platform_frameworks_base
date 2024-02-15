@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.permission.PermissionManager
 import com.android.server.permission.access.util.andInv
+import com.android.server.permission.access.util.flagsToString
 import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
 
@@ -31,15 +32,12 @@ import com.android.server.permission.access.util.hasBits
  *
  * The old binary permission state is now tracked by multiple `*_GRANTED` and `*_REVOKED` flags, so
  * that:
- *
  * - With [INSTALL_GRANTED] and [INSTALL_REVOKED], we can now get rid of the old per-package
  *   `areInstallPermissionsFixed` attribute and correctly track it per-permission, finally fixing
  *   edge cases during module rollbacks.
- *
  * - With [LEGACY_GRANTED] and [IMPLICIT_GRANTED], we can now ensure that legacy permissions and
  *   implicit permissions split from non-runtime permissions are never revoked, without checking
  *   split permissions and package state everywhere slowly and in slightly different ways.
- *
  * - With [RESTRICTION_REVOKED], we can now get rid of the error-prone logic about revoking and
  *   potentially re-granting permissions upon restriction state changes.
  *
@@ -54,9 +52,7 @@ import com.android.server.permission.access.util.hasBits
  * don't have any effect on the binary permission state.
  */
 object PermissionFlags {
-    /**
-     * Permission flag for a normal permission that is granted at package installation.
-     */
+    /** Permission flag for a normal permission that is granted at package installation. */
     const val INSTALL_GRANTED = 1 shl 0
 
     /**
@@ -96,8 +92,8 @@ object PermissionFlags {
     /**
      * Permission flag for a runtime permission whose state is set by the user.
      *
-     * For example, this flag may be set when the permission is allowed by the user in the
-     * request permission dialog, or managed in the permission settings.
+     * For example, this flag may be set when the permission is allowed by the user in the request
+     * permission dialog, or managed in the permission settings.
      *
      * @see PackageManager.FLAG_PERMISSION_USER_SET
      */
@@ -137,7 +133,7 @@ object PermissionFlags {
      * For example, this flag may be set in
      * [com.android.server.pm.permission.DefaultPermissionGrantPolicy].
      *
-     * @see PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
+     * @see PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT
      */
     const val PREGRANT = 1 shl 9
 
@@ -289,8 +285,8 @@ object PermissionFlags {
     /**
      * Permission flag for a runtime permission that is selected by the user.
      *
-     * For example, this flag may be set when one of the coarse/fine location accuracies is
-     * selected by the user.
+     * For example, this flag may be set when one of the coarse/fine location accuracies is selected
+     * by the user.
      *
      * This flag is informational and managed by PermissionController.
      *
@@ -298,24 +294,38 @@ object PermissionFlags {
      */
     const val USER_SELECTED = 1 shl 23
 
-    /**
-     * Mask for all permission flags.
-     */
+    /** Mask for all permission flags. */
     const val MASK_ALL = 0.inv()
 
-    /**
-     * Mask for all permission flags that may be applied to a runtime permission.
-     */
-    const val MASK_RUNTIME = ROLE or RUNTIME_GRANTED or USER_SET or USER_FIXED or POLICY_FIXED or
-        SYSTEM_FIXED or PREGRANT or LEGACY_GRANTED or IMPLICIT_GRANTED or IMPLICIT or
-        USER_SENSITIVE_WHEN_GRANTED or USER_SENSITIVE_WHEN_REVOKED or INSTALLER_EXEMPT or
-        SYSTEM_EXEMPT or UPGRADE_EXEMPT or RESTRICTION_REVOKED or SOFT_RESTRICTED or
-        APP_OP_REVOKED or ONE_TIME or HIBERNATION or USER_SELECTED
+    /** Mask for all permission flags that may be applied to a runtime permission. */
+    const val MASK_RUNTIME =
+        ROLE or
+            RUNTIME_GRANTED or
+            USER_SET or
+            USER_FIXED or
+            POLICY_FIXED or
+            SYSTEM_FIXED or
+            PREGRANT or
+            LEGACY_GRANTED or
+            IMPLICIT_GRANTED or
+            IMPLICIT or
+            USER_SENSITIVE_WHEN_GRANTED or
+            USER_SENSITIVE_WHEN_REVOKED or
+            INSTALLER_EXEMPT or
+            SYSTEM_EXEMPT or
+            UPGRADE_EXEMPT or
+            RESTRICTION_REVOKED or
+            SOFT_RESTRICTED or
+            APP_OP_REVOKED or
+            ONE_TIME or
+            HIBERNATION or
+            USER_SELECTED
 
-    /**
-     * Mask for all permission flags about permission exemption.
-     */
+    /** Mask for all permission flags about permission exemption. */
     const val MASK_EXEMPT = INSTALLER_EXEMPT or SYSTEM_EXEMPT or UPGRADE_EXEMPT
+
+    /** Mask for all permission flags about permission restriction. */
+    const val MASK_RESTRICTED = RESTRICTION_REVOKED or SOFT_RESTRICTED
 
     fun isPermissionGranted(flags: Int): Boolean {
         if (flags.hasBits(INSTALL_GRANTED)) {
@@ -357,11 +367,13 @@ object PermissionFlags {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT
         }
         if (flags.hasBits(IMPLICIT)) {
-            apiFlags = apiFlags or if (flags.hasBits(LEGACY_GRANTED)) {
-                PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
-            } else {
-                PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED
-            }
+            apiFlags =
+                apiFlags or
+                    if (flags.hasBits(LEGACY_GRANTED)) {
+                        PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
+                    } else {
+                        PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED
+                    }
         }
         if (flags.hasBits(USER_SENSITIVE_WHEN_GRANTED)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED
@@ -434,8 +446,10 @@ object PermissionFlags {
         }
         flags = flags or (oldFlags and LEGACY_GRANTED)
         flags = flags or (oldFlags and IMPLICIT_GRANTED)
-        if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) ||
-            apiFlags.hasBits(PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED)) {
+        if (
+            apiFlags.hasBits(PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) ||
+                apiFlags.hasBits(PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED)
+        ) {
             flags = flags or IMPLICIT
         }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED)) {
@@ -477,4 +491,38 @@ object PermissionFlags {
         }
         return flags
     }
+
+    fun flagToString(flag: Int): String =
+        when (flag) {
+            INSTALL_GRANTED -> "INSTALL_GRANTED"
+            INSTALL_REVOKED -> "INSTALL_REVOKED"
+            PROTECTION_GRANTED -> "PROTECTION_GRANTED"
+            ROLE -> "ROLE"
+            RUNTIME_GRANTED -> "RUNTIME_GRANTED"
+            USER_SET -> "USER_SET"
+            USER_FIXED -> "USER_FIXED"
+            POLICY_FIXED -> "POLICY_FIXED"
+            SYSTEM_FIXED -> "SYSTEM_FIXED"
+            PREGRANT -> "PREGRANT"
+            LEGACY_GRANTED -> "LEGACY_GRANTED"
+            IMPLICIT_GRANTED -> "IMPLICIT_GRANTED"
+            IMPLICIT -> "IMPLICIT"
+            USER_SENSITIVE_WHEN_GRANTED -> "USER_SENSITIVE_WHEN_GRANTED"
+            USER_SENSITIVE_WHEN_REVOKED -> "USER_SENSITIVE_WHEN_REVOKED"
+            INSTALLER_EXEMPT -> "INSTALLER_EXEMPT"
+            SYSTEM_EXEMPT -> "SYSTEM_EXEMPT"
+            UPGRADE_EXEMPT -> "UPGRADE_EXEMPT"
+            RESTRICTION_REVOKED -> "RESTRICTION_REVOKED"
+            SOFT_RESTRICTED -> "SOFT_RESTRICTED"
+            APP_OP_REVOKED -> "APP_OP_REVOKED"
+            ONE_TIME -> "ONE_TIME"
+            HIBERNATION -> "HIBERNATION"
+            USER_SELECTED -> "USER_SELECTED"
+            else -> "0x${flag.toUInt().toString(16).uppercase()}"
+        }
+
+    fun toString(flags: Int): String = flags.flagsToString { flagToString(it) }
+
+    fun apiFlagsToString(apiFlags: Int): String =
+        apiFlags.flagsToString { PackageManager.permissionFlagToString(it) }
 }

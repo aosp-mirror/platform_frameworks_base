@@ -32,6 +32,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.window.flags.Flags.multiCrop;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -39,6 +40,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -47,12 +49,10 @@ import static org.mockito.Mockito.verify;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.util.MergedConfiguration;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.DisplayShape;
@@ -63,13 +63,12 @@ import android.view.RoundedCorners;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.window.ClientWindowFrames;
 
 import androidx.test.filters.SmallTest;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalMatchers;
 
 import java.util.List;
 
@@ -86,14 +85,6 @@ public class WallpaperControllerTests extends WindowTestsBase {
     private static final int INITIAL_WIDTH = 600;
     private static final int INITIAL_HEIGHT = 900;
     private static final int SECOND_WIDTH = 300;
-
-    @Before
-    public void setup() {
-        Resources resources = mWm.mContext.getResources();
-        spyOn(resources);
-        doReturn(false).when(resources).getBoolean(
-                com.android.internal.R.bool.config_offsetWallpaperToCenterOfLargestDisplay);
-    }
 
     @Test
     public void testWallpaperScreenshot() {
@@ -127,10 +118,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
     public void testWallpaperSizeWithFixedTransform() {
         // No wallpaper
         final DisplayContent dc = mDisplayContent;
-        if (dc.mBaseDisplayHeight == dc.mBaseDisplayWidth) {
-            // Make sure the size is different when changing orientation.
-            resizeDisplay(dc, 500, 1000);
-        }
+        makeDisplayPortrait(dc);
 
         // No wallpaper WSA Surface
         final WindowState wallpaperWindow = createWallpaperWindow(dc);
@@ -192,16 +180,24 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
         spyOn(dc.mWallpaperController);
         doReturn(true).when(dc.mWallpaperController).isWallpaperVisible();
-
+        dc.mWallpaperController.setMinWallpaperScale(.6f);
+        dc.mWallpaperController.setMaxWallpaperScale(1.2f);
         dc.mWallpaperController.adjustWallpaperWindows();
 
+        spyOn(wallpaperWindow);
         spyOn(wallpaperWindow.mClient);
 
         float zoom = .5f;
+        float zoomScale = .9f;
+        wallpaperWindow.mShouldScaleWallpaper = true;
+
         dc.mWallpaperController.setWallpaperZoomOut(homeWindow, zoom);
         assertEquals(zoom, wallpaperWindow.mWallpaperZoomOut, .01f);
-        verify(wallpaperWindow.mClient).dispatchWallpaperOffsets(anyFloat(), anyFloat(), anyFloat(),
-                anyFloat(), eq(zoom), anyBoolean());
+        verify(wallpaperWindow.mClient)
+                .dispatchWallpaperOffsets(
+                        anyFloat(), anyFloat(), anyFloat(), anyFloat(), eq(zoom), anyBoolean());
+        verify(wallpaperWindow)
+                .setWallpaperOffset(anyInt(), anyInt(), AdditionalMatchers.eq(zoomScale, .01f));
     }
 
     @Test
@@ -215,9 +211,12 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
         spyOn(dc.mWallpaperController);
         doReturn(true).when(dc.mWallpaperController).isWallpaperVisible();
+        dc.mWallpaperController.setMinWallpaperScale(.6f);
+        dc.mWallpaperController.setMaxWallpaperScale(1.2f);
 
         dc.mWallpaperController.adjustWallpaperWindows();
 
+        spyOn(wallpaperWindow);
         spyOn(wallpaperWindow.mClient);
 
         float newZoom = .5f;
@@ -229,6 +228,9 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertEquals(1f, wallpaperWindow.mWallpaperScale, .01f);
         verify(wallpaperWindow.mClient).dispatchWallpaperOffsets(anyFloat(), anyFloat(), anyFloat(),
                 anyFloat(), eq(newZoom), anyBoolean());
+        // As the expected scale is .9 with a zoom of .5f and min and max scale of .6 and 1.2,
+        // if it's passing a scale of 1 it's not scaling the wallpaper.
+        verify(wallpaperWindow).setWallpaperOffset(anyInt(), anyInt(), eq(1f));
     }
 
     @Test
@@ -380,8 +382,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         wallpaperWindow.mLayoutSeq = mDisplayContent.mLayoutSeq;
         // Assume the token was invisible and the latest config was reported.
         wallpaperToken.commitVisibility(false);
-        wallpaperWindow.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
-                new MergedConfiguration(), true /* useLatestConfig */, false /* relayoutVisible */);
+        makeLastConfigReportedToClient(wallpaperWindow, false /* visible */);
         assertTrue(wallpaperWindow.isLastConfigReportedToClient());
 
         final Rect bounds = wallpaperToken.getBounds();
@@ -485,6 +486,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
     @Test
     public void testUpdateWallpaperOffset_resize_shouldCenterEnabled() {
+        assumeFalse(multiCrop());
         final DisplayContent dc = new TestDisplayContent.Builder(mAtm, INITIAL_WIDTH,
                 INITIAL_HEIGHT).build();
         dc.mWallpaperController.setShouldOffsetWallpaperCenter(true);

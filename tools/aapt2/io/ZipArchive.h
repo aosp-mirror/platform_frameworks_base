@@ -35,9 +35,10 @@ class ZipFile : public IFile {
   ZipFile(::ZipArchiveHandle handle, const ::ZipEntry& entry, const android::Source& source);
 
   std::unique_ptr<IData> OpenAsData() override;
-  std::unique_ptr<io::InputStream> OpenInputStream() override;
+  std::unique_ptr<android::InputStream> OpenInputStream() override;
   const android::Source& GetSource() const override;
   bool WasCompressed() override;
+  bool GetModificationTime(struct tm* buf) const override;
 
  private:
   ::ZipArchiveHandle zip_handle_;

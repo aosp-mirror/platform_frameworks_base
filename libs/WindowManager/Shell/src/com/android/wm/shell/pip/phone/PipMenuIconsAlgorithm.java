@@ -32,7 +32,6 @@ public class PipMenuIconsAlgorithm {
     protected ViewGroup mViewRoot;
     protected ViewGroup mTopEndContainer;
     protected View mDragHandle;
-    protected View mEnterSplitButton;
     protected View mSettingsButton;
     protected View mDismissButton;
 
@@ -43,11 +42,10 @@ public class PipMenuIconsAlgorithm {
      * Bind the necessary views.
      */
     public void bindViews(ViewGroup viewRoot, ViewGroup topEndContainer, View dragHandle,
-            View enterSplitButton, View settingsButton, View dismissButton) {
+            View settingsButton, View dismissButton) {
         mViewRoot = viewRoot;
         mTopEndContainer = topEndContainer;
         mDragHandle = dragHandle;
-        mEnterSplitButton = enterSplitButton;
         mSettingsButton = settingsButton;
         mDismissButton = dismissButton;
     }

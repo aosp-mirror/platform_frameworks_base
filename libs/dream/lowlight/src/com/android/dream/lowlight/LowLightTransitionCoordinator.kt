@@ -110,9 +110,5 @@ class LowLightTransitionCoordinator @Inject constructor() {
                 }
             }
             animator.addListener(listener)
-            continuation.invokeOnCancellation {
-                animator.removeListener(listener)
-                animator.cancel()
-            }
         }
 }

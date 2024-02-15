@@ -19,7 +19,7 @@ package com.android.settingslib.drawer;
 import android.os.Bundle;
 
 /**
- *  Interface for {@link SwitchController} whose instances support icon provided from the content
+ *  Interface for {@link EntryController} whose instances support icon provided from the content
  *  provider
  */
 public interface ProviderIcon {

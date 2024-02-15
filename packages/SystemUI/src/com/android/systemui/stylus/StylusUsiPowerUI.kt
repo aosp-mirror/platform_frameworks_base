@@ -36,7 +36,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.DebugLogger.debugLog
@@ -64,9 +64,9 @@ constructor(
     // These values must only be accessed on the handler.
     private var batteryCapacity = 1.0f
     private var suppressed = false
-    private var inputDeviceId: Int? = null
     private var instanceId: InstanceId? = null
-
+    @VisibleForTesting var inputDeviceId: Int? = null
+      private set
     @VisibleForTesting var instanceIdSequence = InstanceIdSequence(1 shl 13)
 
     fun init() {
@@ -110,10 +110,10 @@ constructor(
 
     fun updateBatteryState(deviceId: Int, batteryState: BatteryState) {
         handler.post updateBattery@{
+            inputDeviceId = deviceId
             if (batteryState.capacity == batteryCapacity || batteryState.capacity <= 0f)
                 return@updateBattery
 
-            inputDeviceId = deviceId
             batteryCapacity = batteryState.capacity
             debugLog {
                 "Updating notification battery state to $batteryCapacity " +
@@ -162,6 +162,7 @@ constructor(
                 .setContentText(context.getString(R.string.stylus_battery_low_subtitle))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setLocalOnly(true)
+                .setOnlyAlertOnce(true)
                 .setAutoCancel(true)
                 .build()
 

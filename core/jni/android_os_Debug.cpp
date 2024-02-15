@@ -52,7 +52,7 @@
 #include <memunreachable/memunreachable.h>
 #include <android-base/strings.h>
 #include "android_os_Debug.h"
-#include <vintf/VintfObject.h>
+#include <vintf/KernelConfigs.h>
 
 namespace android
 {
@@ -565,6 +565,51 @@ static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
     return android_os_Debug_getPssPid(env, clazz, getpid(), NULL, NULL);
 }
 
+static jlong android_os_Debug_getRssPid(JNIEnv* env, jobject clazz, jint pid,
+                                        jlongArray outMemtrack) {
+    jlong rss = 0;
+    jlong memtrack = 0;
+
+    struct graphics_memory_pss graphics_mem;
+    if (read_memtrack_memory(pid, &graphics_mem) == 0) {
+        rss = memtrack = graphics_mem.graphics + graphics_mem.gl + graphics_mem.other;
+    }
+
+    ::android::meminfo::ProcMemInfo proc_mem(pid);
+    uint64_t status_rss;
+    if (proc_mem.StatusVmRSS(&status_rss)) {
+        rss += status_rss;
+    } else {
+        return 0;
+    }
+
+    if (outMemtrack != NULL) {
+        int outLen = env->GetArrayLength(outMemtrack);
+        if (outLen >= 1) {
+            jlong* outMemtrackArray = env->GetLongArrayElements(outMemtrack, 0);
+            if (outMemtrackArray != NULL) {
+                outMemtrackArray[0] = memtrack;
+                if (outLen >= 2) {
+                    outMemtrackArray[1] = graphics_mem.graphics;
+                }
+                if (outLen >= 3) {
+                    outMemtrackArray[2] = graphics_mem.gl;
+                }
+                if (outLen >= 4) {
+                    outMemtrackArray[3] = graphics_mem.other;
+                }
+            }
+            env->ReleaseLongArrayElements(outMemtrack, outMemtrackArray, 0);
+        }
+    }
+
+    return rss;
+}
+
+static jlong android_os_Debug_getRss(JNIEnv* env, jobject clazz) {
+    return android_os_Debug_getRssPid(env, clazz, getpid(), NULL);
+}
+
 // The 1:1 mapping of MEMINFO_* enums here must match with the constants from
 // Debug.java.
 enum {
@@ -959,14 +1004,17 @@ static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
     } cfg_state = CONFIG_UNKNOWN;
 
     if (cfg_state == CONFIG_UNKNOWN) {
-        auto runtime_info = vintf::VintfObject::GetInstance()->getRuntimeInfo(
-                vintf::RuntimeInfo::FetchFlag::CONFIG_GZ);
-        CHECK(runtime_info != nullptr) << "Kernel configs cannot be fetched. b/151092221";
-        const std::map<std::string, std::string>& configs = runtime_info->kernelConfigs();
+        std::map<std::string, std::string> configs;
+        const status_t result = android::kernelconfigs::LoadKernelConfigs(&configs);
+        CHECK(result == OK) << "Kernel configs could not be fetched. b/151092221";
         std::map<std::string, std::string>::const_iterator it = configs.find("CONFIG_VMAP_STACK");
         cfg_state = (it != configs.end() && it->second == "y") ? CONFIG_SET : CONFIG_UNSET;
     }
     return cfg_state == CONFIG_SET;
+}
+
+static jboolean android_os_Debug_logAllocatorStats(JNIEnv*, jobject) {
+    return mallopt(M_LOG_STATS, 0) == 1 ? JNI_TRUE : JNI_FALSE;
 }
 
 /*
@@ -974,62 +1022,44 @@ static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
  */
 
 static const JNINativeMethod gMethods[] = {
-    { "getNativeHeapSize",      "()J",
-            (void*) android_os_Debug_getNativeHeapSize },
-    { "getNativeHeapAllocatedSize", "()J",
-            (void*) android_os_Debug_getNativeHeapAllocatedSize },
-    { "getNativeHeapFreeSize",  "()J",
-            (void*) android_os_Debug_getNativeHeapFreeSize },
-    { "getMemoryInfo",          "(Landroid/os/Debug$MemoryInfo;)V",
-            (void*) android_os_Debug_getDirtyPages },
-    { "getMemoryInfo",          "(ILandroid/os/Debug$MemoryInfo;)Z",
-            (void*) android_os_Debug_getDirtyPagesPid },
-    { "getPss",                 "()J",
-            (void*) android_os_Debug_getPss },
-    { "getPss",                 "(I[J[J)J",
-            (void*) android_os_Debug_getPssPid },
-    { "getMemInfo",             "([J)V",
-            (void*) android_os_Debug_getMemInfo },
-    { "dumpNativeHeap",         "(Ljava/io/FileDescriptor;)V",
-            (void*) android_os_Debug_dumpNativeHeap },
-    { "dumpNativeMallocInfo",   "(Ljava/io/FileDescriptor;)V",
-            (void*) android_os_Debug_dumpNativeMallocInfo },
-    { "getBinderSentTransactions", "()I",
-            (void*) android_os_Debug_getBinderSentTransactions },
-    { "getBinderReceivedTransactions", "()I",
-            (void*) android_os_getBinderReceivedTransactions },
-    { "getBinderLocalObjectCount", "()I",
-            (void*)android_os_Debug_getLocalObjectCount },
-    { "getBinderProxyObjectCount", "()I",
-            (void*)android_os_Debug_getProxyObjectCount },
-    { "getBinderDeathObjectCount", "()I",
-            (void*)android_os_Debug_getDeathObjectCount },
-    { "dumpJavaBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
-            (void*)android_os_Debug_dumpJavaBacktraceToFileTimeout },
-    { "dumpNativeBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
-            (void*)android_os_Debug_dumpNativeBacktraceToFileTimeout },
-    { "getUnreachableMemory", "(IZ)Ljava/lang/String;",
-            (void*)android_os_Debug_getUnreachableMemory },
-    { "getZramFreeKb", "()J",
-            (void*)android_os_Debug_getFreeZramKb },
-    { "getIonHeapsSizeKb", "()J",
-            (void*)android_os_Debug_getIonHeapsSizeKb },
-    { "getDmabufTotalExportedKb", "()J",
-            (void*)android_os_Debug_getDmabufTotalExportedKb },
-    { "getGpuPrivateMemoryKb", "()J",
-            (void*)android_os_Debug_getGpuPrivateMemoryKb },
-    { "getDmabufHeapTotalExportedKb", "()J",
-            (void*)android_os_Debug_getDmabufHeapTotalExportedKb },
-    { "getIonPoolsSizeKb", "()J",
-            (void*)android_os_Debug_getIonPoolsSizeKb },
-    { "getDmabufMappedSizeKb", "()J",
-            (void*)android_os_Debug_getDmabufMappedSizeKb },
-    { "getDmabufHeapPoolsSizeKb", "()J",
-            (void*)android_os_Debug_getDmabufHeapPoolsSizeKb },
-    { "getGpuTotalUsageKb", "()J",
-            (void*)android_os_Debug_getGpuTotalUsageKb },
-    { "isVmapStack", "()Z",
-            (void*)android_os_Debug_isVmapStack },
+        {"getNativeHeapSize", "()J", (void*)android_os_Debug_getNativeHeapSize},
+        {"getNativeHeapAllocatedSize", "()J", (void*)android_os_Debug_getNativeHeapAllocatedSize},
+        {"getNativeHeapFreeSize", "()J", (void*)android_os_Debug_getNativeHeapFreeSize},
+        {"getMemoryInfo", "(Landroid/os/Debug$MemoryInfo;)V",
+         (void*)android_os_Debug_getDirtyPages},
+        {"getMemoryInfo", "(ILandroid/os/Debug$MemoryInfo;)Z",
+         (void*)android_os_Debug_getDirtyPagesPid},
+        {"getPss", "()J", (void*)android_os_Debug_getPss},
+        {"getPss", "(I[J[J)J", (void*)android_os_Debug_getPssPid},
+        {"getRss", "()J", (void*)android_os_Debug_getRss},
+        {"getRss", "(I[J)J", (void*)android_os_Debug_getRssPid},
+        {"getMemInfo", "([J)V", (void*)android_os_Debug_getMemInfo},
+        {"dumpNativeHeap", "(Ljava/io/FileDescriptor;)V", (void*)android_os_Debug_dumpNativeHeap},
+        {"dumpNativeMallocInfo", "(Ljava/io/FileDescriptor;)V",
+         (void*)android_os_Debug_dumpNativeMallocInfo},
+        {"getBinderSentTransactions", "()I", (void*)android_os_Debug_getBinderSentTransactions},
+        {"getBinderReceivedTransactions", "()I", (void*)android_os_getBinderReceivedTransactions},
+        {"getBinderLocalObjectCount", "()I", (void*)android_os_Debug_getLocalObjectCount},
+        {"getBinderProxyObjectCount", "()I", (void*)android_os_Debug_getProxyObjectCount},
+        {"getBinderDeathObjectCount", "()I", (void*)android_os_Debug_getDeathObjectCount},
+        {"dumpJavaBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
+         (void*)android_os_Debug_dumpJavaBacktraceToFileTimeout},
+        {"dumpNativeBacktraceToFileTimeout", "(ILjava/lang/String;I)Z",
+         (void*)android_os_Debug_dumpNativeBacktraceToFileTimeout},
+        {"getUnreachableMemory", "(IZ)Ljava/lang/String;",
+         (void*)android_os_Debug_getUnreachableMemory},
+        {"getZramFreeKb", "()J", (void*)android_os_Debug_getFreeZramKb},
+        {"getIonHeapsSizeKb", "()J", (void*)android_os_Debug_getIonHeapsSizeKb},
+        {"getDmabufTotalExportedKb", "()J", (void*)android_os_Debug_getDmabufTotalExportedKb},
+        {"getGpuPrivateMemoryKb", "()J", (void*)android_os_Debug_getGpuPrivateMemoryKb},
+        {"getDmabufHeapTotalExportedKb", "()J",
+         (void*)android_os_Debug_getDmabufHeapTotalExportedKb},
+        {"getIonPoolsSizeKb", "()J", (void*)android_os_Debug_getIonPoolsSizeKb},
+        {"getDmabufMappedSizeKb", "()J", (void*)android_os_Debug_getDmabufMappedSizeKb},
+        {"getDmabufHeapPoolsSizeKb", "()J", (void*)android_os_Debug_getDmabufHeapPoolsSizeKb},
+        {"getGpuTotalUsageKb", "()J", (void*)android_os_Debug_getGpuTotalUsageKb},
+        {"isVmapStack", "()Z", (void*)android_os_Debug_isVmapStack},
+        {"logAllocatorStats", "()Z", (void*)android_os_Debug_logAllocatorStats},
 };
 
 int register_android_os_Debug(JNIEnv *env)

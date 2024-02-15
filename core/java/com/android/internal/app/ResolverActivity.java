@@ -31,6 +31,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_PERS
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_PROFILE_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_TAB;
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_TAB_ACCESSIBILITY;
+import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.PermissionChecker.PID_UNKNOWN;
 import static android.stats.devicepolicy.nano.DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL;
@@ -39,6 +40,7 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PROTECTED;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
@@ -67,6 +69,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Insets;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -92,6 +95,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -245,6 +249,7 @@ public class ResolverActivity extends Activity implements
 
     private UserHandle mCloneProfileUserHandle;
     private UserHandle mTabOwnerUserHandleForLaunch;
+    private UserHandle mPrivateProfileUserHandle;
 
     protected final LatencyTracker mLatencyTracker = getLatencyTracker();
 
@@ -356,6 +361,12 @@ public class ResolverActivity extends Activity implements
         // flag set, we are now losing it.  That should be a very rare case
         // and we can live with this.
         intent.setFlags(intent.getFlags()&~Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+
+        // If FLAG_ACTIVITY_LAUNCH_ADJACENT was set, ResolverActivity was opened in the alternate
+        // side, which means we want to open the target app on the same side as ResolverActivity.
+        if ((intent.getFlags() & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
+            intent.setFlags(intent.getFlags() & ~FLAG_ACTIVITY_LAUNCH_ADJACENT);
+        }
         return intent;
     }
 
@@ -431,6 +442,7 @@ public class ResolverActivity extends Activity implements
         mPersonalProfileUserHandle = fetchPersonalProfileUserHandle();
         mWorkProfileUserHandle = fetchWorkProfileUserProfile();
         mCloneProfileUserHandle = fetchCloneProfileUserHandle();
+        mPrivateProfileUserHandle = fetchPrivateProfileUserHandle();
         mTabOwnerUserHandleForLaunch = fetchTabOwnerUserHandleForLaunch();
 
         // The last argument of createResolverListAdapter is whether to do special handling
@@ -481,6 +493,14 @@ public class ResolverActivity extends Activity implements
             rdl.setOnApplyWindowInsetsListener(this::onApplyWindowInsets);
 
             mResolverDrawerLayout = rdl;
+
+            for (int i = 0, size = mMultiProfilePagerAdapter.getCount(); i < size; i++) {
+                View view = mMultiProfilePagerAdapter.getItem(i).rootView.findViewById(
+                        R.id.resolver_list);
+                if (view != null) {
+                    view.setAccessibilityDelegate(new AppListAccessibilityDelegate(rdl));
+                }
+            }
         }
 
         mProfileView = findViewById(R.id.profile_button);
@@ -630,7 +650,8 @@ public class ResolverActivity extends Activity implements
                 initialIntents,
                 rList,
                 filterLastUsed,
-                /* userHandle */ getPersonalProfileUserHandle());
+                getPersonalProfileUserHandle());
+
         QuietModeManager quietModeManager = createQuietModeManager();
         return new ResolverMultiProfilePagerAdapter(
                 /* context */ this,
@@ -729,6 +750,9 @@ public class ResolverActivity extends Activity implements
     }
 
     protected UserHandle getPersonalProfileUserHandle() {
+        if (privateSpaceEnabled() && isLaunchedAsPrivateProfile()){
+            return mPrivateProfileUserHandle;
+        }
         return mPersonalProfileUserHandle;
     }
     protected @Nullable UserHandle getWorkProfileUserHandle() {
@@ -741,6 +765,10 @@ public class ResolverActivity extends Activity implements
 
     protected UserHandle getTabOwnerUserHandleForLaunch() {
         return mTabOwnerUserHandleForLaunch;
+    }
+
+    protected UserHandle getPrivateProfileUserHandle() {
+        return mPrivateProfileUserHandle;
     }
 
     protected UserHandle fetchPersonalProfileUserHandle() {
@@ -777,12 +805,28 @@ public class ResolverActivity extends Activity implements
         return mCloneProfileUserHandle;
     }
 
+    protected @Nullable UserHandle fetchPrivateProfileUserHandle() {
+        mPrivateProfileUserHandle = null;
+        UserManager userManager = getSystemService(UserManager.class);
+        for (final UserInfo userInfo :
+                userManager.getProfiles(mPersonalProfileUserHandle.getIdentifier())) {
+            if (userInfo.isPrivateProfile()) {
+                mPrivateProfileUserHandle = userInfo.getUserHandle();
+                break;
+            }
+        }
+        return mPrivateProfileUserHandle;
+    }
+
     private UserHandle fetchTabOwnerUserHandleForLaunch() {
-        // If we are in work profile's process, return WorkProfile user as owner, otherwise we
-        // always return PersonalProfile user as owner
-        return UserHandle.of(UserHandle.myUserId()).equals(getWorkProfileUserHandle())
-                ? getWorkProfileUserHandle()
-                : getPersonalProfileUserHandle();
+        // If we are in work or private profile's process, return WorkProfile/PrivateProfile user
+        // as owner, otherwise we always return PersonalProfile user as owner
+        if (UserHandle.of(UserHandle.myUserId()).equals(getWorkProfileUserHandle())) {
+            return getWorkProfileUserHandle();
+        } else if (privateSpaceEnabled() && isLaunchedAsPrivateProfile()) {
+            return getPrivateProfileUserHandle();
+        }
+        return getPersonalProfileUserHandle();
     }
 
     private boolean hasWorkProfile() {
@@ -798,7 +842,15 @@ public class ResolverActivity extends Activity implements
                 && (UserHandle.myUserId() == getCloneProfileUserHandle().getIdentifier());
     }
 
+    protected final boolean isLaunchedAsPrivateProfile() {
+        return getPrivateProfileUserHandle() != null
+                && (UserHandle.myUserId() == getPrivateProfileUserHandle().getIdentifier());
+    }
+
     protected boolean shouldShowTabs() {
+        if (privateSpaceEnabled() && isLaunchedAsPrivateProfile()) {
+            return false;
+        }
         return hasWorkProfile() && ENABLE_TABBED_VIEW;
     }
 
@@ -2599,5 +2651,47 @@ public class ResolverActivity extends Activity implements
             Log.e(TAG, "ResolveInfo with null UserHandle found: " + resolveInfo);
         }
         return resolveInfo.userHandle;
+    }
+
+    private boolean privateSpaceEnabled() {
+        return mIsIntentPicker && android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.allowResolverSheetForPrivateSpace();
+    }
+
+    /**
+     * An a11y delegate that expands resolver drawer when gesture navigation reaches a partially
+     * invisible target in the list.
+     */
+    public static class AppListAccessibilityDelegate extends View.AccessibilityDelegate {
+        private final ResolverDrawerLayout mDrawer;
+        @Nullable
+        private final View mBottomBar;
+        private final Rect mRect = new Rect();
+
+        public AppListAccessibilityDelegate(ResolverDrawerLayout drawer) {
+            mDrawer = drawer;
+            mBottomBar = mDrawer.findViewById(R.id.button_bar_container);
+        }
+
+        @Override
+        public boolean onRequestSendAccessibilityEvent(@androidx.annotation.NonNull ViewGroup host,
+                @NonNull View child,
+                @NonNull AccessibilityEvent event) {
+            boolean result = super.onRequestSendAccessibilityEvent(host, child, event);
+            if (result && event.getEventType() == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
+                    && mDrawer.isCollapsed()) {
+                child.getBoundsOnScreen(mRect);
+                int childTop = mRect.top;
+                int childBottom = mRect.bottom;
+                mDrawer.getBoundsOnScreen(mRect, true);
+                int bottomBarHeight = mBottomBar == null ? 0 : mBottomBar.getHeight();
+                int drawerTop = mRect.top;
+                int drawerBottom = mRect.bottom - bottomBarHeight;
+                if (drawerTop > childTop || childBottom > drawerBottom) {
+                    mDrawer.setCollapsed(false);
+                }
+            }
+            return result;
+        }
     }
 }

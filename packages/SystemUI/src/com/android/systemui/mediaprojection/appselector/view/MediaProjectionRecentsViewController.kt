@@ -17,15 +17,16 @@
 package com.android.systemui.mediaprojection.appselector.view
 
 import android.app.ActivityOptions
+import android.app.ActivityOptions.LaunchCookie
+import android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.IActivityTaskManager
 import android.graphics.Rect
-import android.os.Binder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorScope
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
@@ -35,8 +36,8 @@ import com.android.systemui.util.recycler.HorizontalSpacerItemDecoration
 import javax.inject.Inject
 
 /**
- * Controller that handles view of the recent apps selector in the media projection activity.
- * It is responsible for creating and updating recent apps view.
+ * Controller that handles view of the recent apps selector in the media projection activity. It is
+ * responsible for creating and updating recent apps view.
  */
 @MediaProjectionAppSelectorScope
 class MediaProjectionRecentsViewController
@@ -51,15 +52,21 @@ constructor(
     private var views: Views? = null
     private var lastBoundData: List<RecentTask>? = null
 
+    val hasRecentTasks: Boolean
+        get() = lastBoundData?.isNotEmpty() ?: false
+
     init {
         taskViewSizeProvider.addCallback(this)
     }
 
     fun createView(parent: ViewGroup): ViewGroup =
-        views?.root ?: createRecentViews(parent).also {
-            views = it
-            lastBoundData?.let { recents -> bind(recents) }
-        }.root
+        views?.root
+            ?: createRecentViews(parent)
+                .also {
+                    views = it
+                    lastBoundData?.let { recents -> bind(recents) }
+                }
+                .root
 
     fun bind(recentTasks: List<RecentTask>) {
         views?.apply {
@@ -88,7 +95,8 @@ constructor(
                 .inflate(R.layout.media_projection_recent_tasks, parent, /* attachToRoot= */ false)
                 as ViewGroup
 
-        val container = recentsRoot.findViewById<View>(R.id.media_projection_recent_tasks_container)
+        val container =
+            recentsRoot.requireViewById<View>(R.id.media_projection_recent_tasks_container)
         container.setTaskHeightSize()
 
         val progress = recentsRoot.requireViewById<View>(R.id.media_projection_recent_tasks_loader)
@@ -113,7 +121,7 @@ constructor(
     }
 
     override fun onRecentAppClicked(task: RecentTask, view: View) {
-        val launchCookie = Binder()
+        val launchCookie = LaunchCookie()
         val activityOptions =
             ActivityOptions.makeScaleUpAnimation(
                 view,
@@ -122,7 +130,10 @@ constructor(
                 view.width,
                 view.height
             )
-        activityOptions.launchCookie = launchCookie
+        activityOptions.pendingIntentBackgroundActivityStartMode =
+            MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+        activityOptions.setLaunchCookie(launchCookie)
+        activityOptions.launchDisplayId = task.displayId
 
         activityTaskManager.startActivityFromRecents(task.taskId, activityOptions.toBundle())
         resultHandler.returnSelectedApp(launchCookie)

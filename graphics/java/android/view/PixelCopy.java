@@ -96,7 +96,7 @@ public final class PixelCopy {
      *
      * The contents of the source will be scaled to fit exactly inside the bitmap.
      * The pixel format of the source buffer will be converted, as part of the copy,
-     * to fit the the bitmap's {@link Bitmap.Config}. The most recently queued buffer
+     * to fit the bitmap's {@link Bitmap.Config}. The most recently queued buffer
      * in the SurfaceView's Surface will be used as the source of the copy.
      *
      * @param source The source from which to copy
@@ -117,7 +117,7 @@ public final class PixelCopy {
      *
      * The contents of the source will be scaled to fit exactly inside the bitmap.
      * The pixel format of the source buffer will be converted, as part of the copy,
-     * to fit the the bitmap's {@link Bitmap.Config}. The most recently queued buffer
+     * to fit the bitmap's {@link Bitmap.Config}. The most recently queued buffer
      * in the SurfaceView's Surface will be used as the source of the copy.
      *
      * @param source The source from which to copy
@@ -143,7 +143,7 @@ public final class PixelCopy {
      *
      * The contents of the source will be scaled to fit exactly inside the bitmap.
      * The pixel format of the source buffer will be converted, as part of the copy,
-     * to fit the the bitmap's {@link Bitmap.Config}. The most recently queued buffer
+     * to fit the bitmap's {@link Bitmap.Config}. The most recently queued buffer
      * in the Surface will be used as the source of the copy.
      *
      * @param source The source from which to copy
@@ -164,7 +164,7 @@ public final class PixelCopy {
      *
      * The contents of the source rect will be scaled to fit exactly inside the bitmap.
      * The pixel format of the source buffer will be converted, as part of the copy,
-     * to fit the the bitmap's {@link Bitmap.Config}. The most recently queued buffer
+     * to fit the bitmap's {@link Bitmap.Config}. The most recently queued buffer
      * in the Surface will be used as the source of the copy.
      *
      * @param source The source from which to copy
@@ -201,7 +201,7 @@ public final class PixelCopy {
      *
      * The contents of the source will be scaled to fit exactly inside the bitmap.
      * The pixel format of the source buffer will be converted, as part of the copy,
-     * to fit the the bitmap's {@link Bitmap.Config}. The most recently queued buffer
+     * to fit the bitmap's {@link Bitmap.Config}. The most recently queued buffer
      * in the Window's Surface will be used as the source of the copy.
      *
      * Note: This is limited to being able to copy from Window's with a non-null
@@ -231,7 +231,7 @@ public final class PixelCopy {
      *
      * The contents of the source rect will be scaled to fit exactly inside the bitmap.
      * The pixel format of the source buffer will be converted, as part of the copy,
-     * to fit the the bitmap's {@link Bitmap.Config}. The most recently queued buffer
+     * to fit the bitmap's {@link Bitmap.Config}. The most recently queued buffer
      * in the Window's Surface will be used as the source of the copy.
      *
      * Note: This is limited to being able to copy from Window's with a non-null
@@ -322,7 +322,7 @@ public final class PixelCopy {
         }
 
         /**
-         * Returns the {@link CopyResultStatus} of the copy request.
+         * Returns the status of the copy request.
          */
         public @CopyResultStatus int getStatus() {
             return mStatus;

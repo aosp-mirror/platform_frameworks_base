@@ -228,7 +228,8 @@ final class EnforcingAdmin {
         return new android.app.admin.EnforcingAdmin(
                 mPackageName,
                 authority,
-                UserHandle.of(mUserId));
+                UserHandle.of(mUserId),
+                mComponentName);
     }
 
     /**
@@ -326,6 +327,6 @@ final class EnforcingAdmin {
     public String toString() {
         return "EnforcingAdmin { mPackageName= " + mPackageName + ", mComponentName= "
                 + mComponentName + ", mAuthorities= " + mAuthorities + ", mUserId= "
-                + mUserId + ", mIsRoleAuthority= " + mIsRoleAuthority + " }";
+                + mUserId + ", mIsRoleAuthority= " + mIsRoleAuthority + " }\n";
     }
 }

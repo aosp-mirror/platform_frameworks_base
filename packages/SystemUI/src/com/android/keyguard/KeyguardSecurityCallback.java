@@ -87,16 +87,31 @@ public interface KeyguardSecurityCallback {
     default void onUserInput() {
     }
 
+    /**
+     * Invoked when the auth input is disabled for specified number of seconds.
+     * @param seconds Number of seconds for which the auth input is disabled.
+     */
+    default void onAttemptLockoutStart(long seconds) {}
 
     /**
      * Dismisses keyguard and go to unlocked state.
      */
-    default void finish(boolean strongAuth, int targetUserId) {
+    default void finish(int targetUserId) {
     }
 
     /**
      * Specifies that security mode has changed.
      */
     default void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
+    }
+
+    /**
+     * Shows the security screen that should be shown.
+     *
+     * This can be considered as a "refresh" of the bouncer view. Based on certain parameters,
+     * we might switch to a different bouncer screen. e.g. SimPin to SimPuk.
+     */
+    default void showCurrentSecurityScreen() {
+
     }
 }

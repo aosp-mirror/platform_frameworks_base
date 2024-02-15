@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
-import android.graphics.text.LineBreakConfig;
 import android.os.LocaleList;
 import android.platform.test.annotations.Presubmit;
 import android.text.Layout.Alignment;
@@ -925,25 +924,5 @@ public class StaticLayoutTest {
 
         assertEquals(0, layout.getHeight(true));
         assertEquals(2, layout.getLineCount());
-    }
-
-    @Test
-    public void testBuilder_autoPhraseBreaking() {
-        {
-            // setAutoPhraseBreaking true
-            LineBreakConfig lineBreakConfig = new LineBreakConfig.Builder()
-                    .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_STYLE_NONE)
-                    .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
-                    .setAutoPhraseBreaking(true)
-                    .build();
-            final String text = "これが正解。";
-            // Obtain.
-            StaticLayout.Builder builder = StaticLayout.Builder.obtain(text, 0,
-                    text.length(), mDefaultPaint, DEFAULT_OUTER_WIDTH);
-            builder.setLineBreakConfig(lineBreakConfig);
-            builder.build();
-            assertEquals(LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE,
-                    builder.getLineBreakWordStyle());
-        }
     }
 }

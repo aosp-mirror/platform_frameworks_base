@@ -27,24 +27,29 @@ import androidx.core.graphics.drawable.IconCompat;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
-import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.res.R;
 
 /**
  * Dialog for media output transferring.
  */
 @SysUISingleton
 public class MediaOutputDialog extends MediaOutputBaseDialog {
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final UiEventLogger mUiEventLogger;
 
-    MediaOutputDialog(Context context, boolean aboveStatusbar, BroadcastSender broadcastSender,
-            MediaOutputController mediaOutputController, DialogLaunchAnimator dialogLaunchAnimator,
-            UiEventLogger uiEventLogger) {
-        super(context, broadcastSender, mediaOutputController);
-        mDialogLaunchAnimator = dialogLaunchAnimator;
+    MediaOutputDialog(
+            Context context,
+            boolean aboveStatusbar,
+            BroadcastSender broadcastSender,
+            MediaOutputController mediaOutputController,
+            DialogTransitionAnimator dialogTransitionAnimator,
+            UiEventLogger uiEventLogger,
+            boolean includePlaybackAndAppMetadata) {
+        super(context, broadcastSender, mediaOutputController, includePlaybackAndAppMetadata);
+        mDialogTransitionAnimator = dialogTransitionAnimator;
         mUiEventLogger = uiEventLogger;
         mAdapter = new MediaOutputAdapter(mMediaOutputController);
         if (!aboveStatusbar) {
@@ -104,11 +109,16 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     @Override
     public boolean isBroadcastSupported() {
         boolean isBluetoothLeDevice = false;
+        boolean isBroadcastEnabled = false;
         if (FeatureFlagUtils.isEnabled(mContext,
                 FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST)) {
             if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
                 isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
                     mMediaOutputController.getCurrentConnectedMediaDevice());
+                // if broadcast is active, broadcast should be considered as supported
+                // there could be a valid case that broadcast is ongoing
+                // without active LEA device connected
+                isBroadcastEnabled = mMediaOutputController.isBluetoothLeBroadcastEnabled();
             }
         } else {
             // To decouple LE Audio Broadcast and Unicast, it always displays the button when there
@@ -116,7 +126,8 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             isBluetoothLeDevice = true;
         }
 
-        return mMediaOutputController.isBroadcastSupported() && isBluetoothLeDevice;
+        return mMediaOutputController.isBroadcastSupported()
+                && (isBluetoothLeDevice || isBroadcastEnabled);
     }
 
     @Override
@@ -142,7 +153,7 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             }
         } else {
             mMediaOutputController.releaseSession();
-            mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
+            mDialogTransitionAnimator.disableAllCurrentDialogsExitAnimations();
             dismiss();
         }
     }

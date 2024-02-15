@@ -26,7 +26,7 @@ import android.util.AttributeSet
 import android.view.View
 import com.android.app.animation.Interpolators
 import com.android.settingslib.Utils
-import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.TITLE
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.TITLE
 
 /** Displays security messages for the keyguard bouncer. */
 open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
@@ -105,7 +105,7 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
 
         hideAnimator.addListener(
             object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     super@BouncerKeyguardMessageArea.setMessage(msg, animate)
                 }
             }
@@ -118,7 +118,7 @@ open class BouncerKeyguardMessageArea(context: Context?, attrs: AttributeSet?) :
 
         showAnimator.addListener(
             object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     textAboutToShow = null
                 }
             }

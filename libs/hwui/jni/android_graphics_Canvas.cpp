@@ -158,6 +158,13 @@ static void concat(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong matrixHan
     get_canvas(canvasHandle)->concat(*matrix);
 }
 
+static void concat44(JNIEnv* env, jobject obj, jlong canvasHandle, jfloatArray arr) {
+    jfloat* matVals = env->GetFloatArrayElements(arr, 0);
+    const SkM44 matrix = SkM44::RowMajor(matVals);
+    get_canvas(canvasHandle)->concat(matrix);
+    env->ReleaseFloatArrayElements(arr, matVals, 0);
+}
+
 static void rotate(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat degrees) {
     get_canvas(canvasHandle)->rotate(degrees);
 }
@@ -613,6 +620,12 @@ static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray c
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     const Typeface* typeface = paint->getAndroidTypeface();
     ScopedCharArrayRO text(env, charArray);
+
+    // The drawText API is designed to draw entire line, so ignore the text run flag and draw the
+    // text as entire line mode.
+    const minikin::RunFlag originalRunFlag = paint->getRunFlag();
+    paint->setRunFlag(minikin::RunFlag::WHOLE_LINE);
+
     // drawTextString and drawTextChars doesn't use context info
     get_canvas(canvasHandle)->drawText(
             text.get() + index, count,  // text buffer
@@ -620,6 +633,7 @@ static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray c
             0, count,  // context range
             x, y,  // draw position
             static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr /* measured text */);
+    paint->setRunFlag(originalRunFlag);
 }
 
 static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring strObj,
@@ -629,6 +643,12 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring str
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     const Typeface* typeface = paint->getAndroidTypeface();
     const int count = end - start;
+
+    // The drawText API is designed to draw entire line, so ignore the text run flag and draw the
+    // text as entire line mode.
+    const minikin::RunFlag originalRunFlag = paint->getRunFlag();
+    paint->setRunFlag(minikin::RunFlag::WHOLE_LINE);
+
     // drawTextString and drawTextChars doesn't use context info
     get_canvas(canvasHandle)->drawText(
             text.get() + start, count,  // text buffer
@@ -636,6 +656,7 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring str
             0, count,  // context range
             x, y,  // draw position
             static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr /* measured text */);
+    paint->setRunFlag(originalRunFlag);
 }
 
 static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray charArray,
@@ -681,9 +702,15 @@ static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharA
 
     jchar* jchars = env->GetCharArrayElements(text, NULL);
 
+    // The drawText API is designed to draw entire line, so ignore the text run flag and draw the
+    // text as entire line mode.
+    const minikin::RunFlag originalRunFlag = paint->getRunFlag();
+    paint->setRunFlag(minikin::RunFlag::WHOLE_LINE);
+
     get_canvas(canvasHandle)->drawTextOnPath(jchars + index, count,
             static_cast<minikin::Bidi>(bidiFlags), *path, hOffset, vOffset, *paint, typeface);
 
+    paint->setRunFlag(originalRunFlag);
     env->ReleaseCharArrayElements(text, jchars, 0);
 }
 
@@ -697,9 +724,15 @@ static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstri
     const jchar* jchars = env->GetStringChars(text, NULL);
     int count = env->GetStringLength(text);
 
+    // The drawText API is designed to draw entire line, so ignore the text run flag and draw the
+    // text as entire line mode.
+    const minikin::RunFlag originalRunFlag = paint->getRunFlag();
+    paint->setRunFlag(minikin::RunFlag::WHOLE_LINE);
+
     get_canvas(canvasHandle)->drawTextOnPath(jchars, count, static_cast<minikin::Bidi>(bidiFlags),
             *path, hOffset, vOffset, *paint, typeface);
 
+    paint->setRunFlag(originalRunFlag);
     env->ReleaseStringChars(text, jchars);
 }
 
@@ -730,40 +763,41 @@ static void punchHole(JNIEnv* env, jobject, jlong canvasPtr, jfloat left, jfloat
 }; // namespace CanvasJNI
 
 static const JNINativeMethod gMethods[] = {
-    {"nGetNativeFinalizer", "()J", (void*) CanvasJNI::getNativeFinalizer},
-    {"nFreeCaches", "()V", (void*) CanvasJNI::freeCaches},
-    {"nFreeTextLayoutCaches", "()V", (void*) CanvasJNI::freeTextLayoutCaches},
-    {"nSetCompatibilityVersion", "(I)V", (void*) CanvasJNI::setCompatibilityVersion},
+        {"nGetNativeFinalizer", "()J", (void*)CanvasJNI::getNativeFinalizer},
+        {"nFreeCaches", "()V", (void*)CanvasJNI::freeCaches},
+        {"nFreeTextLayoutCaches", "()V", (void*)CanvasJNI::freeTextLayoutCaches},
+        {"nSetCompatibilityVersion", "(I)V", (void*)CanvasJNI::setCompatibilityVersion},
 
-    // ------------ @FastNative ----------------
-    {"nInitRaster", "(J)J", (void*) CanvasJNI::initRaster},
-    {"nSetBitmap", "(JJ)V", (void*) CanvasJNI::setBitmap},
-    {"nGetClipBounds","(JLandroid/graphics/Rect;)Z", (void*) CanvasJNI::getClipBounds},
+        // ------------ @FastNative ----------------
+        {"nInitRaster", "(J)J", (void*)CanvasJNI::initRaster},
+        {"nSetBitmap", "(JJ)V", (void*)CanvasJNI::setBitmap},
+        {"nGetClipBounds", "(JLandroid/graphics/Rect;)Z", (void*)CanvasJNI::getClipBounds},
 
-    // ------------ @CriticalNative ----------------
-    {"nIsOpaque","(J)Z", (void*) CanvasJNI::isOpaque},
-    {"nGetWidth","(J)I", (void*) CanvasJNI::getWidth},
-    {"nGetHeight","(J)I", (void*) CanvasJNI::getHeight},
-    {"nSave","(JI)I", (void*) CanvasJNI::save},
-    {"nSaveLayer","(JFFFFJ)I", (void*) CanvasJNI::saveLayer},
-    {"nSaveLayerAlpha","(JFFFFI)I", (void*) CanvasJNI::saveLayerAlpha},
-    {"nSaveUnclippedLayer","(JIIII)I", (void*) CanvasJNI::saveUnclippedLayer},
-    {"nRestoreUnclippedLayer","(JIJ)V", (void*) CanvasJNI::restoreUnclippedLayer},
-    {"nGetSaveCount","(J)I", (void*) CanvasJNI::getSaveCount},
-    {"nRestore","(J)Z", (void*) CanvasJNI::restore},
-    {"nRestoreToCount","(JI)V", (void*) CanvasJNI::restoreToCount},
-    {"nGetMatrix", "(JJ)V", (void*)CanvasJNI::getMatrix},
-    {"nSetMatrix","(JJ)V", (void*) CanvasJNI::setMatrix},
-    {"nConcat","(JJ)V", (void*) CanvasJNI::concat},
-    {"nRotate","(JF)V", (void*) CanvasJNI::rotate},
-    {"nScale","(JFF)V", (void*) CanvasJNI::scale},
-    {"nSkew","(JFF)V", (void*) CanvasJNI::skew},
-    {"nTranslate","(JFF)V", (void*) CanvasJNI::translate},
-    {"nQuickReject","(JJ)Z", (void*) CanvasJNI::quickRejectPath},
-    {"nQuickReject","(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
-    {"nClipRect","(JFFFFI)Z", (void*) CanvasJNI::clipRect},
-    {"nClipPath","(JJI)Z", (void*) CanvasJNI::clipPath},
-    {"nSetDrawFilter", "(JJ)V", (void*) CanvasJNI::setPaintFilter},
+        // ------------ @CriticalNative ----------------
+        {"nIsOpaque", "(J)Z", (void*)CanvasJNI::isOpaque},
+        {"nGetWidth", "(J)I", (void*)CanvasJNI::getWidth},
+        {"nGetHeight", "(J)I", (void*)CanvasJNI::getHeight},
+        {"nSave", "(JI)I", (void*)CanvasJNI::save},
+        {"nSaveLayer", "(JFFFFJ)I", (void*)CanvasJNI::saveLayer},
+        {"nSaveLayerAlpha", "(JFFFFI)I", (void*)CanvasJNI::saveLayerAlpha},
+        {"nSaveUnclippedLayer", "(JIIII)I", (void*)CanvasJNI::saveUnclippedLayer},
+        {"nRestoreUnclippedLayer", "(JIJ)V", (void*)CanvasJNI::restoreUnclippedLayer},
+        {"nGetSaveCount", "(J)I", (void*)CanvasJNI::getSaveCount},
+        {"nRestore", "(J)Z", (void*)CanvasJNI::restore},
+        {"nRestoreToCount", "(JI)V", (void*)CanvasJNI::restoreToCount},
+        {"nGetMatrix", "(JJ)V", (void*)CanvasJNI::getMatrix},
+        {"nSetMatrix", "(JJ)V", (void*)CanvasJNI::setMatrix},
+        {"nConcat", "(JJ)V", (void*)CanvasJNI::concat},
+        {"nConcat", "(J[F)V", (void*)CanvasJNI::concat44},
+        {"nRotate", "(JF)V", (void*)CanvasJNI::rotate},
+        {"nScale", "(JFF)V", (void*)CanvasJNI::scale},
+        {"nSkew", "(JFF)V", (void*)CanvasJNI::skew},
+        {"nTranslate", "(JFF)V", (void*)CanvasJNI::translate},
+        {"nQuickReject", "(JJ)Z", (void*)CanvasJNI::quickRejectPath},
+        {"nQuickReject", "(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
+        {"nClipRect", "(JFFFFI)Z", (void*)CanvasJNI::clipRect},
+        {"nClipPath", "(JJI)Z", (void*)CanvasJNI::clipPath},
+        {"nSetDrawFilter", "(JJ)V", (void*)CanvasJNI::setPaintFilter},
 };
 
 // If called from Canvas these are regular JNI

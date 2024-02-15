@@ -27,9 +27,12 @@ import android.view.Display;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.AutomaticBrightnessController;
+import com.android.server.display.BrightnessMappingStrategy;
 import com.android.server.display.BrightnessSetting;
 import com.android.server.display.DisplayBrightnessState;
+import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 
@@ -38,6 +41,7 @@ import java.io.PrintWriter;
  * display. Applies the chosen brightness.
  */
 public final class DisplayBrightnessController {
+
     // The ID of the display tied to this DisplayBrightnessController
     private final int mDisplayId;
 
@@ -101,7 +105,8 @@ public final class DisplayBrightnessController {
      */
     public DisplayBrightnessController(Context context, Injector injector, int displayId,
             float defaultScreenBrightness, BrightnessSetting brightnessSetting,
-            Runnable onBrightnessChangeRunnable, HandlerExecutor brightnessChangeExecutor) {
+            Runnable onBrightnessChangeRunnable, HandlerExecutor brightnessChangeExecutor,
+            DisplayManagerFlags flags) {
         if (injector == null) {
             injector = new Injector();
         }
@@ -113,7 +118,7 @@ public final class DisplayBrightnessController {
         mCurrentScreenBrightness = getScreenBrightnessSetting();
         mOnBrightnessChangeRunnable = onBrightnessChangeRunnable;
         mDisplayBrightnessStrategySelector = injector.getDisplayBrightnessStrategySelector(context,
-                displayId);
+                displayId, flags);
         mBrightnessChangeExecutor = brightnessChangeExecutor;
         mPersistBrightnessNitsForDefaultDisplay = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_persistBrightnessNitsForDefaultDisplay);
@@ -132,11 +137,21 @@ public final class DisplayBrightnessController {
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState) {
+
+        DisplayBrightnessState state;
         synchronized (mLock) {
             mDisplayBrightnessStrategy = mDisplayBrightnessStrategySelector.selectStrategy(
                     displayPowerRequest, targetDisplayState);
-            return mDisplayBrightnessStrategy.updateBrightness(displayPowerRequest);
+            state = mDisplayBrightnessStrategy.updateBrightness(displayPowerRequest);
         }
+
+        // This is a temporary measure until AutomaticBrightnessStrategy works as a traditional
+        // strategy.
+        // TODO: Remove when AutomaticBrightnessStrategy is populating the values directly.
+        if (state != null) {
+            state = addAutomaticBrightnessState(state);
+        }
+        return state;
     }
 
     /**
@@ -151,10 +166,22 @@ public final class DisplayBrightnessController {
     /**
      * Sets the brightness to follow
      */
-    public void setBrightnessToFollow(Float brightnessToFollow) {
+    public void setBrightnessToFollow(float brightnessToFollow, boolean slowChange) {
         synchronized (mLock) {
             mDisplayBrightnessStrategySelector.getFollowerDisplayBrightnessStrategy()
-                    .setBrightnessToFollow(brightnessToFollow);
+                    .setBrightnessToFollow(brightnessToFollow, slowChange);
+        }
+    }
+
+    /**
+     * Sets the brightness from the offload session.
+     */
+    public void setBrightnessFromOffload(float brightness) {
+        synchronized (mLock) {
+            if (mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy() != null) {
+                mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy()
+                        .setOffloadScreenBrightness(brightness);
+            }
         }
     }
 
@@ -286,6 +313,14 @@ public final class DisplayBrightnessController {
     }
 
     /**
+     * Notifies the brightnessSetting to persist the supplied brightness value for a user.
+     */
+    public void setBrightness(float brightnessValue, int userSerial) {
+        mBrightnessSetting.setUserSerial(userSerial);
+        setBrightness(brightnessValue);
+    }
+
+    /**
      * Sets the current screen brightness, and notifies the BrightnessSetting about the change.
      */
     public void updateScreenBrightnessSetting(float brightnessValue) {
@@ -312,16 +347,24 @@ public final class DisplayBrightnessController {
     }
 
     /**
+     * TODO(b/253226419): Remove once auto-brightness is a fully-functioning strategy.
+     */
+    public AutomaticBrightnessStrategy getAutomaticBrightnessStrategy() {
+        return mDisplayBrightnessStrategySelector.getAutomaticBrightnessStrategy();
+    }
+
+    /**
      * Convert a brightness float scale value to a nit value. Adjustments, such as RBC, are not
      * applied. This is used when storing the brightness in nits for the default display and when
      * passing the brightness value to follower displays.
      *
      * @param brightness The float scale value
-     * @return The nit value or -1f if no conversion is possible.
+     * @return The nit value or {@link BrightnessMappingStrategy.INVALID_NITS} if no conversion is
+     * possible.
      */
     public float convertToNits(float brightness) {
         if (mAutomaticBrightnessController == null) {
-            return -1f;
+            return BrightnessMappingStrategy.INVALID_NITS;
         }
         return mAutomaticBrightnessController.convertToNits(brightness);
     }
@@ -332,11 +375,12 @@ public final class DisplayBrightnessController {
      * {@link com.android.server.display.BrightnessTracker}.
      *
      * @param brightness The float scale value
-     * @return The nit value or -1f if no conversion is possible.
+     * @return The nit value or {@link BrightnessMappingStrategy.INVALID_NITS} if no conversion is
+     * possible.
      */
     public float convertToAdjustedNits(float brightness) {
         if (mAutomaticBrightnessController == null) {
-            return -1f;
+            return BrightnessMappingStrategy.INVALID_NITS;
         }
         return mAutomaticBrightnessController.convertToAdjustedNits(brightness);
     }
@@ -349,11 +393,11 @@ public final class DisplayBrightnessController {
      * @return The float scale value or {@link PowerManager.BRIGHTNESS_INVALID_FLOAT} if no
      * conversion is possible.
      */
-    public float convertToFloatScale(float nits) {
+    public float getBrightnessFromNits(float nits) {
         if (mAutomaticBrightnessController == null) {
             return PowerManager.BRIGHTNESS_INVALID_FLOAT;
         }
-        return mAutomaticBrightnessController.convertToFloatScale(nits);
+        return mAutomaticBrightnessController.getBrightnessFromNits(nits);
     }
 
     /**
@@ -395,8 +439,9 @@ public final class DisplayBrightnessController {
     @VisibleForTesting
     static class Injector {
         DisplayBrightnessStrategySelector getDisplayBrightnessStrategySelector(Context context,
-                int displayId) {
-            return new DisplayBrightnessStrategySelector(context, /* injector= */ null, displayId);
+                int displayId, DisplayManagerFlags flags) {
+            return new DisplayBrightnessStrategySelector(context, /* injector= */ null, displayId,
+                    flags);
         }
     }
 
@@ -413,6 +458,18 @@ public final class DisplayBrightnessController {
         synchronized (mLock) {
             return mDisplayBrightnessStrategy;
         }
+    }
+
+    /**
+     * TODO(b/253226419): Remove once auto-brightness is a fully-functioning strategy.
+     */
+    private DisplayBrightnessState addAutomaticBrightnessState(DisplayBrightnessState state) {
+        AutomaticBrightnessStrategy autoStrat = getAutomaticBrightnessStrategy();
+
+        DisplayBrightnessState.Builder builder = DisplayBrightnessState.Builder.from(state);
+        builder.setShouldUseAutoBrightness(
+                autoStrat != null && autoStrat.shouldUseAutoBrightness());
+        return builder.build();
     }
 
     @GuardedBy("mLock")
@@ -442,7 +499,7 @@ public final class DisplayBrightnessController {
             float brightnessNitsForDefaultDisplay =
                     mBrightnessSetting.getBrightnessNitsForDefaultDisplay();
             if (brightnessNitsForDefaultDisplay >= 0) {
-                float brightnessForDefaultDisplay = convertToFloatScale(
+                float brightnessForDefaultDisplay = getBrightnessFromNits(
                         brightnessNitsForDefaultDisplay);
                 if (BrightnessUtils.isValidBrightnessValue(brightnessForDefaultDisplay)) {
                     mBrightnessSetting.setBrightness(brightnessForDefaultDisplay);

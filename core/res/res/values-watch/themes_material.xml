@@ -42,26 +42,31 @@ please see styles_device_defaults.xml.
 
     <!-- Override behaviour to set the theme colours for dialogs, keep them the same. -->
     <style name="ThemeOverlay.Material.Dialog" parent="ThemeOverlay.Material.BaseDialog">
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+        <item name="android:windowFullscreen">true</item>
     </style>
 
     <!-- Force the background and floating colours to be the default colours. -->
     <style name="Theme.Material.Dialog" parent="Theme.Material.BaseDialog">
+        <item name="android:windowFullscreen">true</item>
         <item name="colorBackground">@color/background_material_dark</item>
         <item name="colorBackgroundFloating">@color/background_floating_material_dark</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_dark</item>
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
+    </style>
+
+    <!-- Force the background and floating colours to be the default colours. -->
+    <style name="Theme.Material.Dialog.Alert" parent="Theme.Material.Dialog.BaseAlert">
+        <item name="android:windowFullscreen">true</item>
+        <item name="colorBackground">@color/background_material_dark</item>
+        <item name="colorBackgroundFloating">@color/background_floating_material_dark</item>
+        <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_dark</item>
     </style>
 
     <!-- Force the background and floating colours to be the default colours. -->
     <style name="Theme.Material.Light.Dialog" parent="Theme.Material.Light.BaseDialog">
+        <item name="android:windowFullscreen">true</item>
         <item name="colorBackground">@color/background_material_light</item>
         <item name="colorBackgroundFloating">@color/background_floating_material_light</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_light</item>
-        <item name="windowIsFloating">false</item>
-        <item name="windowElevation">0dp</item>
     </style>
 
     <!-- Force all settings themes to use normal Material theme. -->

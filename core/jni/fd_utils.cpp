@@ -17,6 +17,7 @@
 #include "fd_utils.h"
 
 #include <algorithm>
+#include <utility>
 
 #include <fcntl.h>
 #include <grp.h>
@@ -174,7 +175,7 @@ FileDescriptorAllowlist* FileDescriptorAllowlist::instance_ = nullptr;
 class FileDescriptorInfo {
  public:
   // Create a FileDescriptorInfo for a given file descriptor.
-  static FileDescriptorInfo* CreateFromFd(int fd, fail_fn_t fail_fn);
+  static std::unique_ptr<FileDescriptorInfo> CreateFromFd(int fd, fail_fn_t fail_fn);
 
   // Checks whether the file descriptor associated with this object refers to
   // the same description.
@@ -213,7 +214,7 @@ class FileDescriptorInfo {
   DISALLOW_COPY_AND_ASSIGN(FileDescriptorInfo);
 };
 
-FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) {
+std::unique_ptr<FileDescriptorInfo> FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) {
   struct stat f_stat;
   // This should never happen; the zygote should always have the right set
   // of permissions required to stat all its open files.
@@ -234,7 +235,7 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) 
                                             socket_name.c_str(), fd));
     }
 
-    return new FileDescriptorInfo(fd);
+    return std::unique_ptr<FileDescriptorInfo>(new FileDescriptorInfo(fd));
   }
 
   // We only handle allowlisted regular files and character devices. Allowlisted
@@ -315,7 +316,8 @@ FileDescriptorInfo* FileDescriptorInfo::CreateFromFd(int fd, fail_fn_t fail_fn) 
   int open_flags = fs_flags & (kOpenFlags);
   fs_flags = fs_flags & (~(kOpenFlags));
 
-  return new FileDescriptorInfo(f_stat, file_path, fd, open_flags, fd_flags, fs_flags, offset);
+  return std::unique_ptr<FileDescriptorInfo>(
+    new FileDescriptorInfo(f_stat, file_path, fd, open_flags, fd_flags, fs_flags, offset));
 }
 
 bool FileDescriptorInfo::RefersToSameFile() const {
@@ -482,11 +484,11 @@ static std::unique_ptr<std::set<int>> GetOpenFdsIgnoring(const std::vector<int>&
 FileDescriptorTable* FileDescriptorTable::Create(const std::vector<int>& fds_to_ignore,
                                                  fail_fn_t fail_fn) {
   std::unique_ptr<std::set<int>> open_fds = GetOpenFdsIgnoring(fds_to_ignore, fail_fn);
-  std::unordered_map<int, FileDescriptorInfo*> open_fd_map;
+  std::unordered_map<int, std::unique_ptr<FileDescriptorInfo>> open_fd_map;
   for (auto fd : *open_fds) {
     open_fd_map[fd] = FileDescriptorInfo::CreateFromFd(fd, fail_fn);
   }
-  return new FileDescriptorTable(open_fd_map);
+  return new FileDescriptorTable(std::move(open_fd_map));
 }
 
 static std::unique_ptr<std::set<int>> GetOpenFdsIgnoring(const std::vector<int>& fds_to_ignore,
@@ -535,9 +537,9 @@ void FileDescriptorTable::Restat(const std::vector<int>& fds_to_ignore, fail_fn_
 
 // Reopens all file descriptors that are contained in the table.
 void FileDescriptorTable::ReopenOrDetach(fail_fn_t fail_fn) {
-  std::unordered_map<int, FileDescriptorInfo*>::const_iterator it;
+  std::unordered_map<int, std::unique_ptr<FileDescriptorInfo>>::const_iterator it;
   for (it = open_fd_map_.begin(); it != open_fd_map_.end(); ++it) {
-    const FileDescriptorInfo* info = it->second;
+    const FileDescriptorInfo* info = it->second.get();
     if (info == nullptr) {
       return;
     } else {
@@ -547,15 +549,11 @@ void FileDescriptorTable::ReopenOrDetach(fail_fn_t fail_fn) {
 }
 
 FileDescriptorTable::FileDescriptorTable(
-    const std::unordered_map<int, FileDescriptorInfo*>& map)
-    : open_fd_map_(map) {
+  std::unordered_map<int, std::unique_ptr<FileDescriptorInfo>> map)
+  : open_fd_map_(std::move(map)) {
 }
 
-FileDescriptorTable::~FileDescriptorTable() {
-    for (auto& it : open_fd_map_) {
-        delete it.second;
-    }
-}
+FileDescriptorTable::~FileDescriptorTable() {}
 
 void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail_fn) {
   // ART creates a file through memfd for optimization purposes. We make sure
@@ -569,7 +567,7 @@ void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail
   // (b) they refer to the same file.
   //
   // We'll only store the last error message.
-  std::unordered_map<int, FileDescriptorInfo*>::iterator it = open_fd_map_.begin();
+  std::unordered_map<int, std::unique_ptr<FileDescriptorInfo>>::iterator it = open_fd_map_.begin();
   while (it != open_fd_map_.end()) {
     std::set<int>::const_iterator element = open_fds.find(it->first);
     if (element == open_fds.end()) {
@@ -580,7 +578,6 @@ void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail
       // TODO(narayan): This will be an error in a future android release.
       // error = true;
       // ALOGW("Zygote closed file descriptor %d.", it->first);
-      delete it->second;
       it = open_fd_map_.erase(it);
     } else {
       // The entry from the file descriptor table is still open. Restat
@@ -588,7 +585,6 @@ void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail
       if (!it->second->RefersToSameFile()) {
         // The file descriptor refers to a different description. We must
         // update our entry in the table.
-        delete it->second;
         it->second = FileDescriptorInfo::CreateFromFd(*element, fail_fn);
       } else {
         // It's the same file. Nothing to do here. Move on to the next open

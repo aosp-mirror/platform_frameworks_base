@@ -16,11 +16,16 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+
+import android.os.Trace;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.File;
 import java.util.Arrays;
@@ -64,10 +69,11 @@ class TaskSnapshotPersister extends BaseAppSnapshotPersister {
      * @param taskId The id of task that has been removed.
      * @param userId The id of the user the task belonged to.
      */
-    void onTaskRemovedFromRecents(int taskId, int userId) {
+    @Override
+    void removeSnapshot(int taskId, int userId) {
         synchronized (mLock) {
             mPersistedTaskIdsSinceLastRemoveObsolete.remove(taskId);
-            super.removeSnap(taskId, userId);
+            super.removeSnapshot(taskId, userId);
         }
     }
 
@@ -80,6 +86,9 @@ class TaskSnapshotPersister extends BaseAppSnapshotPersister {
      *                       model.
      */
     void removeObsoleteFiles(ArraySet<Integer> persistentTaskIds, int[] runningUserIds) {
+        if (runningUserIds.length == 0) {
+            return;
+        }
         synchronized (mLock) {
             mPersistedTaskIdsSinceLastRemoveObsolete.clear();
             mSnapshotPersistQueue.sendToQueueLocked(new RemoveObsoleteFilesQueueItem(
@@ -95,13 +104,24 @@ class TaskSnapshotPersister extends BaseAppSnapshotPersister {
         @VisibleForTesting
         RemoveObsoleteFilesQueueItem(ArraySet<Integer> persistentTaskIds,
                 int[] runningUserIds, PersistInfoProvider provider) {
-            super(provider);
+            super(provider, runningUserIds.length > 0 ? runningUserIds[0] : UserHandle.USER_SYSTEM);
             mPersistentTaskIds = new ArraySet<>(persistentTaskIds);
             mRunningUserIds = Arrays.copyOf(runningUserIds, runningUserIds.length);
         }
 
         @Override
+        boolean isReady(UserManagerInternal userManagerInternal) {
+            for (int i = mRunningUserIds.length - 1; i >= 0; --i) {
+                if (!userManagerInternal.isUserUnlocked(mRunningUserIds[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
         void write() {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "RemoveObsoleteFilesQueueItem");
             final ArraySet<Integer> newPersistedTaskIds;
             synchronized (mLock) {
                 newPersistedTaskIds = new ArraySet<>(mPersistedTaskIdsSinceLastRemoveObsolete);
@@ -120,6 +140,7 @@ class TaskSnapshotPersister extends BaseAppSnapshotPersister {
                     }
                 }
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         @VisibleForTesting

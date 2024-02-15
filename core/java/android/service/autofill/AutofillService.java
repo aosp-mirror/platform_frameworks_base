@@ -37,6 +37,7 @@ import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -599,6 +600,14 @@ public abstract class AutofillService extends Service {
      */
     public static final String EXTRA_ERROR = "error";
 
+    /**
+     * Name of the key used to mark whether the fill response is for a webview.
+     *
+     * @hide
+     */
+    public static final String WEBVIEW_REQUESTED_CREDENTIAL_KEY = "webview_requested_credential";
+
+
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
         @Override
         public void onConnectedStateChanged(boolean connected) {
@@ -619,6 +628,32 @@ public abstract class AutofillService extends Service {
                     AutofillService::onFillRequest,
                     AutofillService.this, request, CancellationSignal.fromTransport(transport),
                     new FillCallback(callback, request.getId())));
+        }
+
+        @Override
+        public void onConvertCredentialRequest(
+                @NonNull ConvertCredentialRequest convertCredentialRequest,
+                @NonNull IConvertCredentialCallback convertCredentialCallback) {
+            mHandler.sendMessage(obtainMessage(
+                    AutofillService::onConvertCredentialRequest,
+                    AutofillService.this, convertCredentialRequest,
+                    new ConvertCredentialCallback(convertCredentialCallback)));
+        }
+
+        @Override
+        public void onFillCredentialRequest(FillRequest request, IFillCallback callback,
+                IAutoFillManagerClient autofillClientCallback) {
+            ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            mHandler.sendMessage(obtainMessage(
+                    AutofillService::onFillCredentialRequest,
+                    AutofillService.this, request, CancellationSignal.fromTransport(transport),
+                    new FillCallback(callback, request.getId()),
+                    autofillClientCallback));
         }
 
         @Override
@@ -681,6 +716,27 @@ public abstract class AutofillService extends Service {
      */
     public abstract void onFillRequest(@NonNull FillRequest request,
             @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback);
+
+    /**
+     * Variant of onFillRequest for internal credential manager proxy autofill service only.
+     *
+     * @hide
+     */
+    public void onFillCredentialRequest(@NonNull FillRequest request,
+            @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback,
+            @NonNull IAutoFillManagerClient autofillClientCallback) {}
+
+    /**
+     * Called by the Android system to convert a credential manager response to a dataset
+     *
+     * @param convertCredentialRequest the request that has the original credential manager response
+     * @param convertCredentialCallback callback used to notify the result of the request.
+     *
+     * @hide
+     */
+    public void onConvertCredentialRequest(
+            @NonNull ConvertCredentialRequest convertCredentialRequest,
+            @NonNull ConvertCredentialCallback convertCredentialCallback){}
 
     /**
      * Called when the user requests the service to save the contents of a screen.

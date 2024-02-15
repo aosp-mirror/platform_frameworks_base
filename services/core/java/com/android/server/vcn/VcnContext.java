@@ -18,6 +18,8 @@ package com.android.server.vcn;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.net.vcn.FeatureFlags;
+import android.net.vcn.FeatureFlagsImpl;
 import android.os.Looper;
 
 import java.util.Objects;
@@ -31,6 +33,8 @@ public class VcnContext {
     @NonNull private final Context mContext;
     @NonNull private final Looper mLooper;
     @NonNull private final VcnNetworkProvider mVcnNetworkProvider;
+    @NonNull private final FeatureFlags mFeatureFlags;
+    @NonNull private final android.net.platform.flags.FeatureFlags mCoreNetFeatureFlags;
     private final boolean mIsInTestMode;
 
     public VcnContext(
@@ -42,6 +46,10 @@ public class VcnContext {
         mLooper = Objects.requireNonNull(looper, "Missing looper");
         mVcnNetworkProvider = Objects.requireNonNull(vcnNetworkProvider, "Missing networkProvider");
         mIsInTestMode = isInTestMode;
+
+        // Auto-generated class
+        mFeatureFlags = new FeatureFlagsImpl();
+        mCoreNetFeatureFlags = new android.net.platform.flags.FeatureFlagsImpl();
     }
 
     @NonNull
@@ -61,6 +69,23 @@ public class VcnContext {
 
     public boolean isInTestMode() {
         return mIsInTestMode;
+    }
+
+    public boolean isFlagNetworkMetricMonitorEnabled() {
+        return mFeatureFlags.networkMetricMonitor();
+    }
+
+    public boolean isFlagIpSecTransformStateEnabled() {
+        return mCoreNetFeatureFlags.ipsecTransformState();
+    }
+
+    @NonNull
+    public FeatureFlags getFeatureFlags() {
+        return mFeatureFlags;
+    }
+
+    public boolean isFlagSafeModeTimeoutConfigEnabled() {
+        return mFeatureFlags.safeModeTimeoutConfig();
     }
 
     /**

@@ -16,10 +16,13 @@
 
 package com.android.server.pm.pkg;
 
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
+import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -44,9 +47,44 @@ import java.util.Objects;
 /** @hide */
 @DataClass(genConstructor = false, genBuilder = false, genEqualsHashCode = true)
 @DataClass.Suppress({"mOverlayPathsLock", "mOverlayPaths", "mSharedLibraryOverlayPathsLock",
-        "mSharedLibraryOverlayPaths", "setOverlayPaths", "setCachedOverlayPaths", "getWatchable"})
+        "mSharedLibraryOverlayPaths", "setOverlayPaths", "setCachedOverlayPaths", "getWatchable",
+        "getBooleans"
+})
 public class PackageUserStateImpl extends WatchableImpl implements PackageUserStateInternal,
         Snappable {
+    // Use a bitset to store boolean data to save memory
+    private static class Booleans {
+        @IntDef({
+                INSTALLED,
+                STOPPED,
+                NOT_LAUNCHED,
+                HIDDEN,
+                INSTANT_APP,
+                VIRTUAL_PRELOADED,
+        })
+        public @interface Flags {
+        }
+        private static final int INSTALLED = 1;
+        private static final int STOPPED = 1 << 1;
+        private static final int NOT_LAUNCHED = 1 << 2;
+        // Is the app restricted by owner / admin
+        private static final int HIDDEN = 1 << 3;
+        private static final int INSTANT_APP = 1 << 4;
+        private static final int VIRTUAL_PRELOADED = 1 << 5;
+    }
+    private int mBooleans;
+
+    private void setBoolean(@Booleans.Flags int flag, boolean value) {
+        if (value) {
+            mBooleans |= flag;
+        } else {
+            mBooleans &= ~flag;
+        }
+    }
+
+    private boolean getBoolean(@Booleans.Flags int flag) {
+        return (mBooleans & flag) != 0;
+    }
 
     @Nullable
     protected WatchedArraySet<String> mDisabledComponentsWatched;
@@ -54,13 +92,9 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     protected WatchedArraySet<String> mEnabledComponentsWatched;
 
     private long mCeDataInode;
-    private boolean mInstalled = true;
-    private boolean mStopped;
-    private boolean mNotLaunched;
-    private boolean mHidden; // Is the app restricted by owner / admin
+    private long mDeDataInode;
     private int mDistractionFlags;
-    private boolean mInstantApp;
-    private boolean mVirtualPreload;
+    @PackageManager.EnabledState
     private int mEnabledState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
     @PackageManager.InstallReason
     private int mInstallReason = PackageManager.INSTALL_REASON_UNKNOWN;
@@ -81,20 +115,26 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     @Nullable
     private String mSplashScreenTheme;
 
+    @PackageManager.UserMinAspectRatio
+    private int mMinAspectRatio = PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
+
     /**
      * Suspending package to suspend params
      */
     @Nullable
-    private WatchedArrayMap<String, SuspendParams> mSuspendParams;
+    private WatchedArrayMap<UserPackage, SuspendParams> mSuspendParams;
 
     @Nullable
     private WatchedArrayMap<ComponentName, Pair<String, Integer>> mComponentLabelIconOverrideMap;
 
-    private long mFirstInstallTime;
+    private @CurrentTimeMillisLong long mFirstInstallTimeMillis;
 
     // TODO(b/239050028): Remove, enforce notifying parent through PMS commit method
     @Nullable
     private Watchable mWatchable;
+
+    @Nullable
+    private ArchiveState mArchiveState;
 
     @NonNull
     final SnapshotCache<PackageUserStateImpl> mSnapshot;
@@ -114,15 +154,18 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         super();
         mWatchable = null;
         mSnapshot = makeCache();
+        setBoolean(Booleans.INSTALLED, true);
     }
 
     public PackageUserStateImpl(@NonNull Watchable watchable) {
         mWatchable = watchable;
         mSnapshot = makeCache();
+        setBoolean(Booleans.INSTALLED, true);
     }
 
     public PackageUserStateImpl(@NonNull Watchable watchable, PackageUserStateImpl other) {
         mWatchable = watchable;
+        mBooleans = other.mBooleans;
         mDisabledComponentsWatched = other.mDisabledComponentsWatched == null
                 ? null : other.mDisabledComponentsWatched.snapshot();
         mEnabledComponentsWatched =  other.mEnabledComponentsWatched == null
@@ -131,23 +174,20 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         mSharedLibraryOverlayPaths = other.mSharedLibraryOverlayPaths == null
                 ? null : other.mSharedLibraryOverlayPaths.snapshot();
         mCeDataInode = other.mCeDataInode;
-        mInstalled = other.mInstalled;
-        mStopped = other.mStopped;
-        mNotLaunched = other.mNotLaunched;
-        mHidden = other.mHidden;
+        mDeDataInode = other.mDeDataInode;
         mDistractionFlags = other.mDistractionFlags;
-        mInstantApp = other.mInstantApp;
-        mVirtualPreload = other.mVirtualPreload;
         mEnabledState = other.mEnabledState;
         mInstallReason = other.mInstallReason;
         mUninstallReason = other.mUninstallReason;
         mHarmfulAppWarning = other.mHarmfulAppWarning;
         mLastDisableAppCaller = other.mLastDisableAppCaller;
         mSplashScreenTheme = other.mSplashScreenTheme;
+        mMinAspectRatio = other.mMinAspectRatio;
         mSuspendParams = other.mSuspendParams == null ? null : other.mSuspendParams.snapshot();
         mComponentLabelIconOverrideMap = other.mComponentLabelIconOverrideMap == null
                 ? null : other.mComponentLabelIconOverrideMap.snapshot();
-        mFirstInstallTime = other.mFirstInstallTime;
+        mFirstInstallTimeMillis = other.mFirstInstallTimeMillis;
+        mArchiveState = other.mArchiveState;
         mSnapshot = new SnapshotCache.Sealed<>();
     }
 
@@ -330,7 +370,10 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         return !CollectionUtils.isEmpty(mSuspendParams);
     }
 
-    public PackageUserStateImpl putSuspendParams(@NonNull String suspendingPackage,
+    /**
+     * Adds or updates suspension params by the given package.
+     */
+    public PackageUserStateImpl putSuspendParams(@NonNull UserPackage suspendingPackage,
             @Nullable SuspendParams suspendParams) {
         if (mSuspendParams == null) {
             mSuspendParams = new WatchedArrayMap<>();
@@ -345,7 +388,10 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         return this;
     }
 
-    public PackageUserStateImpl removeSuspension(@NonNull String suspendingPackage) {
+    /**
+     * Removes suspension by the given package.
+     */
+    public PackageUserStateImpl removeSuspension(@NonNull UserPackage suspendingPackage) {
         if (mSuspendParams != null) {
             mSuspendParams.remove(suspendingPackage);
             onChanged();
@@ -354,29 +400,27 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     }
 
     public @NonNull PackageUserStateImpl setDisabledComponents(@Nullable ArraySet<String> value) {
-        if (value == null) {
-            return this;
-        }
         if (mDisabledComponentsWatched == null) {
             mDisabledComponentsWatched = new WatchedArraySet<>();
             mDisabledComponentsWatched.registerObserver(mSnapshot);
         }
         mDisabledComponentsWatched.clear();
-        mDisabledComponentsWatched.addAll(value);
+        if (value != null) {
+            mDisabledComponentsWatched.addAll(value);
+        }
         onChanged();
         return this;
     }
 
     public @NonNull PackageUserStateImpl setEnabledComponents(@Nullable ArraySet<String> value) {
-        if (value == null) {
-            return this;
-        }
         if (mEnabledComponentsWatched == null) {
             mEnabledComponentsWatched = new WatchedArraySet<>();
             mEnabledComponentsWatched.registerObserver(mSnapshot);
         }
         mEnabledComponentsWatched.clear();
-        mEnabledComponentsWatched.addAll(value);
+        if (value != null) {
+            mEnabledComponentsWatched.addAll(value);
+        }
         onChanged();
         return this;
     }
@@ -407,26 +451,32 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         return this;
     }
 
+    public @NonNull PackageUserStateImpl setDeDataInode(long value) {
+        mDeDataInode = value;
+        onChanged();
+        return this;
+    }
+
     public @NonNull PackageUserStateImpl setInstalled(boolean value) {
-        mInstalled = value;
+        setBoolean(Booleans.INSTALLED, value);
         onChanged();
         return this;
     }
 
     public @NonNull PackageUserStateImpl setStopped(boolean value) {
-        mStopped = value;
+        setBoolean(Booleans.STOPPED, value);
         onChanged();
         return this;
     }
 
     public @NonNull PackageUserStateImpl setNotLaunched(boolean value) {
-        mNotLaunched = value;
+        setBoolean(Booleans.NOT_LAUNCHED, value);
         onChanged();
         return this;
     }
 
     public @NonNull PackageUserStateImpl setHidden(boolean value) {
-        mHidden = value;
+        setBoolean(Booleans.HIDDEN, value);
         onChanged();
         return this;
     }
@@ -438,13 +488,13 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     }
 
     public @NonNull PackageUserStateImpl setInstantApp(boolean value) {
-        mInstantApp = value;
+        setBoolean(Booleans.INSTANT_APP, value);
         onChanged();
         return this;
     }
 
     public @NonNull PackageUserStateImpl setVirtualPreload(boolean value) {
-        mVirtualPreload = value;
+        setBoolean(Booleans.VIRTUAL_PRELOADED, value);
         onChanged();
         return this;
     }
@@ -506,10 +556,23 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     }
 
     /**
+     * Sets user min aspect ratio override value
+     * @see PackageManager.UserMinAspectRatio
+     */
+    public @NonNull PackageUserStateImpl setMinAspectRatio(
+            @PackageManager.UserMinAspectRatio int value) {
+        mMinAspectRatio = value;
+        com.android.internal.util.AnnotationValidations.validate(
+                PackageManager.UserMinAspectRatio.class, null, mMinAspectRatio);
+        onChanged();
+        return this;
+    }
+
+    /**
      * Suspending package to suspend params
      */
     public @NonNull PackageUserStateImpl setSuspendParams(
-            @NonNull ArrayMap<String, SuspendParams> value) {
+            @NonNull ArrayMap<UserPackage, SuspendParams> value) {
         if (value == null) {
             return this;
         }
@@ -538,8 +601,18 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         return this;
     }
 
-    public @NonNull PackageUserStateImpl setFirstInstallTime(long value) {
-        mFirstInstallTime = value;
+    public @NonNull PackageUserStateImpl setFirstInstallTimeMillis(long value) {
+        mFirstInstallTimeMillis = value;
+        onChanged();
+        return this;
+    }
+
+    /**
+     * Sets the value for {@link #getArchiveState()}.
+     */
+    @NonNull
+    public PackageUserStateImpl setArchiveState(@NonNull ArchiveState archiveState) {
+        mArchiveState = archiveState;
         onChanged();
         return this;
     }
@@ -578,6 +651,57 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     }
 
 
+    @Override
+    public boolean isInstalled() {
+        return getBoolean(Booleans.INSTALLED);
+    }
+
+    @Override
+    public boolean isStopped() {
+        return getBoolean(Booleans.STOPPED);
+    }
+
+    @Override
+    public boolean isNotLaunched() {
+        return getBoolean(Booleans.NOT_LAUNCHED);
+    }
+
+    @Override
+    public boolean isHidden() {
+        return getBoolean(Booleans.HIDDEN);
+    }
+
+    @Override
+    public boolean isInstantApp() {
+        return getBoolean(Booleans.INSTANT_APP);
+    }
+
+    @Override
+    public boolean isVirtualPreload() {
+        return getBoolean(Booleans.VIRTUAL_PRELOADED);
+    }
+
+    @Override
+    public boolean isQuarantined() {
+        if (!isSuspended()) {
+            return false;
+        }
+        final var suspendParams = mSuspendParams;
+        for (int i = 0, size = suspendParams.size(); i < size; i++) {
+            final SuspendParams params = suspendParams.valueAt(i);
+            if (params.isQuarantined()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean dataExists() {
+        return getCeDataInode() > 0 || getDeDataInode() > 0;
+    }
+
+
 
     // Code below generated by codegen v1.0.23.
     //
@@ -608,23 +732,8 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     }
 
     @DataClass.Generated.Member
-    public boolean isInstalled() {
-        return mInstalled;
-    }
-
-    @DataClass.Generated.Member
-    public boolean isStopped() {
-        return mStopped;
-    }
-
-    @DataClass.Generated.Member
-    public boolean isNotLaunched() {
-        return mNotLaunched;
-    }
-
-    @DataClass.Generated.Member
-    public boolean isHidden() {
-        return mHidden;
+    public long getDeDataInode() {
+        return mDeDataInode;
     }
 
     @DataClass.Generated.Member
@@ -633,17 +742,7 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     }
 
     @DataClass.Generated.Member
-    public boolean isInstantApp() {
-        return mInstantApp;
-    }
-
-    @DataClass.Generated.Member
-    public boolean isVirtualPreload() {
-        return mVirtualPreload;
-    }
-
-    @DataClass.Generated.Member
-    public int getEnabledState() {
+    public @PackageManager.EnabledState int getEnabledState() {
         return mEnabledState;
     }
 
@@ -677,11 +776,16 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         return mSplashScreenTheme;
     }
 
+    @DataClass.Generated.Member
+    public @PackageManager.UserMinAspectRatio int getMinAspectRatio() {
+        return mMinAspectRatio;
+    }
+
     /**
      * Suspending package to suspend params
      */
     @DataClass.Generated.Member
-    public @Nullable WatchedArrayMap<String,SuspendParams> getSuspendParams() {
+    public @Nullable WatchedArrayMap<UserPackage,SuspendParams> getSuspendParams() {
         return mSuspendParams;
     }
 
@@ -691,13 +795,24 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     }
 
     @DataClass.Generated.Member
-    public long getFirstInstallTimeMillis() {
-        return mFirstInstallTime;
+    public @CurrentTimeMillisLong long getFirstInstallTimeMillis() {
+        return mFirstInstallTimeMillis;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable ArchiveState getArchiveState() {
+        return mArchiveState;
     }
 
     @DataClass.Generated.Member
     public @NonNull SnapshotCache<PackageUserStateImpl> getSnapshot() {
         return mSnapshot;
+    }
+
+    @DataClass.Generated.Member
+    public @NonNull PackageUserStateImpl setBooleans( int value) {
+        mBooleans = value;
+        return this;
     }
 
     @DataClass.Generated.Member
@@ -722,7 +837,7 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
      * Suspending package to suspend params
      */
     @DataClass.Generated.Member
-    public @NonNull PackageUserStateImpl setSuspendParams(@NonNull WatchedArrayMap<String,SuspendParams> value) {
+    public @NonNull PackageUserStateImpl setSuspendParams(@NonNull WatchedArrayMap<UserPackage,SuspendParams> value) {
         mSuspendParams = value;
         return this;
     }
@@ -746,16 +861,12 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         PackageUserStateImpl that = (PackageUserStateImpl) o;
         //noinspection PointlessBooleanExpression
         return true
+                && mBooleans == that.mBooleans
                 && Objects.equals(mDisabledComponentsWatched, that.mDisabledComponentsWatched)
                 && Objects.equals(mEnabledComponentsWatched, that.mEnabledComponentsWatched)
                 && mCeDataInode == that.mCeDataInode
-                && mInstalled == that.mInstalled
-                && mStopped == that.mStopped
-                && mNotLaunched == that.mNotLaunched
-                && mHidden == that.mHidden
+                && mDeDataInode == that.mDeDataInode
                 && mDistractionFlags == that.mDistractionFlags
-                && mInstantApp == that.mInstantApp
-                && mVirtualPreload == that.mVirtualPreload
                 && mEnabledState == that.mEnabledState
                 && mInstallReason == that.mInstallReason
                 && mUninstallReason == that.mUninstallReason
@@ -764,10 +875,12 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
                 && Objects.equals(mOverlayPaths, that.mOverlayPaths)
                 && Objects.equals(mSharedLibraryOverlayPaths, that.mSharedLibraryOverlayPaths)
                 && Objects.equals(mSplashScreenTheme, that.mSplashScreenTheme)
+                && mMinAspectRatio == that.mMinAspectRatio
                 && Objects.equals(mSuspendParams, that.mSuspendParams)
                 && Objects.equals(mComponentLabelIconOverrideMap, that.mComponentLabelIconOverrideMap)
-                && mFirstInstallTime == that.mFirstInstallTime
+                && mFirstInstallTimeMillis == that.mFirstInstallTimeMillis
                 && watchableEquals(that.mWatchable)
+                && Objects.equals(mArchiveState, that.mArchiveState)
                 && snapshotEquals(that.mSnapshot);
     }
 
@@ -778,16 +891,12 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         // int fieldNameHashCode() { ... }
 
         int _hash = 1;
+        _hash = 31 * _hash + mBooleans;
         _hash = 31 * _hash + Objects.hashCode(mDisabledComponentsWatched);
         _hash = 31 * _hash + Objects.hashCode(mEnabledComponentsWatched);
         _hash = 31 * _hash + Long.hashCode(mCeDataInode);
-        _hash = 31 * _hash + Boolean.hashCode(mInstalled);
-        _hash = 31 * _hash + Boolean.hashCode(mStopped);
-        _hash = 31 * _hash + Boolean.hashCode(mNotLaunched);
-        _hash = 31 * _hash + Boolean.hashCode(mHidden);
+        _hash = 31 * _hash + Long.hashCode(mDeDataInode);
         _hash = 31 * _hash + mDistractionFlags;
-        _hash = 31 * _hash + Boolean.hashCode(mInstantApp);
-        _hash = 31 * _hash + Boolean.hashCode(mVirtualPreload);
         _hash = 31 * _hash + mEnabledState;
         _hash = 31 * _hash + mInstallReason;
         _hash = 31 * _hash + mUninstallReason;
@@ -796,19 +905,21 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         _hash = 31 * _hash + Objects.hashCode(mOverlayPaths);
         _hash = 31 * _hash + Objects.hashCode(mSharedLibraryOverlayPaths);
         _hash = 31 * _hash + Objects.hashCode(mSplashScreenTheme);
+        _hash = 31 * _hash + mMinAspectRatio;
         _hash = 31 * _hash + Objects.hashCode(mSuspendParams);
         _hash = 31 * _hash + Objects.hashCode(mComponentLabelIconOverrideMap);
-        _hash = 31 * _hash + Long.hashCode(mFirstInstallTime);
+        _hash = 31 * _hash + Long.hashCode(mFirstInstallTimeMillis);
         _hash = 31 * _hash + watchableHashCode();
+        _hash = 31 * _hash + Objects.hashCode(mArchiveState);
         _hash = 31 * _hash + snapshotHashCode();
         return _hash;
     }
 
     @DataClass.Generated(
-            time = 1668033772891L,
+            time = 1701864813354L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/PackageUserStateImpl.java",
-            inputSignatures = "protected @android.annotation.Nullable com.android.server.utils.WatchedArraySet<java.lang.String> mDisabledComponentsWatched\nprotected @android.annotation.Nullable com.android.server.utils.WatchedArraySet<java.lang.String> mEnabledComponentsWatched\nprivate  long mCeDataInode\nprivate  boolean mInstalled\nprivate  boolean mStopped\nprivate  boolean mNotLaunched\nprivate  boolean mHidden\nprivate  int mDistractionFlags\nprivate  boolean mInstantApp\nprivate  boolean mVirtualPreload\nprivate  int mEnabledState\nprivate @android.content.pm.PackageManager.InstallReason int mInstallReason\nprivate @android.content.pm.PackageManager.UninstallReason int mUninstallReason\nprivate @android.annotation.Nullable java.lang.String mHarmfulAppWarning\nprivate @android.annotation.Nullable java.lang.String mLastDisableAppCaller\nprivate @android.annotation.Nullable android.content.pm.overlay.OverlayPaths mOverlayPaths\nprotected @android.annotation.Nullable com.android.server.utils.WatchedArrayMap<java.lang.String,android.content.pm.overlay.OverlayPaths> mSharedLibraryOverlayPaths\nprivate @android.annotation.Nullable java.lang.String mSplashScreenTheme\nprivate @android.annotation.Nullable com.android.server.utils.WatchedArrayMap<java.lang.String,com.android.server.pm.pkg.SuspendParams> mSuspendParams\nprivate @android.annotation.Nullable com.android.server.utils.WatchedArrayMap<android.content.ComponentName,android.util.Pair<java.lang.String,java.lang.Integer>> mComponentLabelIconOverrideMap\nprivate  long mFirstInstallTime\nprivate @android.annotation.Nullable com.android.server.utils.Watchable mWatchable\nfinal @android.annotation.NonNull com.android.server.utils.SnapshotCache<com.android.server.pm.pkg.PackageUserStateImpl> mSnapshot\nprivate  com.android.server.utils.SnapshotCache<com.android.server.pm.pkg.PackageUserStateImpl> makeCache()\nprivate  void onChanged()\npublic @android.annotation.NonNull @java.lang.Override com.android.server.pm.pkg.PackageUserStateImpl snapshot()\npublic @android.annotation.Nullable boolean setOverlayPaths(android.content.pm.overlay.OverlayPaths)\npublic  boolean setSharedLibraryOverlayPaths(java.lang.String,android.content.pm.overlay.OverlayPaths)\npublic @android.annotation.Nullable @java.lang.Override com.android.server.utils.WatchedArraySet<java.lang.String> getDisabledComponentsNoCopy()\npublic @android.annotation.Nullable @java.lang.Override com.android.server.utils.WatchedArraySet<java.lang.String> getEnabledComponentsNoCopy()\npublic @android.annotation.NonNull @java.lang.Override android.util.ArraySet<java.lang.String> getDisabledComponents()\npublic @android.annotation.NonNull @java.lang.Override android.util.ArraySet<java.lang.String> getEnabledComponents()\npublic @java.lang.Override boolean isComponentEnabled(java.lang.String)\npublic @java.lang.Override boolean isComponentDisabled(java.lang.String)\npublic @java.lang.Override android.content.pm.overlay.OverlayPaths getAllOverlayPaths()\npublic @com.android.internal.annotations.VisibleForTesting boolean overrideLabelAndIcon(android.content.ComponentName,java.lang.String,java.lang.Integer)\npublic  void resetOverrideComponentLabelIcon()\npublic @android.annotation.Nullable android.util.Pair<java.lang.String,java.lang.Integer> getOverrideLabelIconForComponent(android.content.ComponentName)\npublic @java.lang.Override boolean isSuspended()\npublic  com.android.server.pm.pkg.PackageUserStateImpl putSuspendParams(java.lang.String,com.android.server.pm.pkg.SuspendParams)\npublic  com.android.server.pm.pkg.PackageUserStateImpl removeSuspension(java.lang.String)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setDisabledComponents(android.util.ArraySet<java.lang.String>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setEnabledComponents(android.util.ArraySet<java.lang.String>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setEnabledComponents(com.android.server.utils.WatchedArraySet<java.lang.String>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setDisabledComponents(com.android.server.utils.WatchedArraySet<java.lang.String>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setCeDataInode(long)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setInstalled(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setStopped(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setNotLaunched(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setHidden(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setDistractionFlags(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setInstantApp(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setVirtualPreload(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setEnabledState(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setInstallReason(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setUninstallReason(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setHarmfulAppWarning(java.lang.String)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setLastDisableAppCaller(java.lang.String)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setSharedLibraryOverlayPaths(android.util.ArrayMap<java.lang.String,android.content.pm.overlay.OverlayPaths>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setSplashScreenTheme(java.lang.String)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setSuspendParams(android.util.ArrayMap<java.lang.String,com.android.server.pm.pkg.SuspendParams>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setComponentLabelIconOverrideMap(android.util.ArrayMap<android.content.ComponentName,android.util.Pair<java.lang.String,java.lang.Integer>>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setFirstInstallTime(long)\npublic @android.annotation.NonNull @java.lang.Override java.util.Map<java.lang.String,android.content.pm.overlay.OverlayPaths> getSharedLibraryOverlayPaths()\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setWatchable(com.android.server.utils.Watchable)\nprivate  boolean watchableEquals(com.android.server.utils.Watchable)\nprivate  int watchableHashCode()\nprivate  boolean snapshotEquals(com.android.server.utils.SnapshotCache<com.android.server.pm.pkg.PackageUserStateImpl>)\nprivate  int snapshotHashCode()\nclass PackageUserStateImpl extends com.android.server.utils.WatchableImpl implements [com.android.server.pm.pkg.PackageUserStateInternal, com.android.server.utils.Snappable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=false, genEqualsHashCode=true)")
+            inputSignatures = "private  int mBooleans\nprotected @android.annotation.Nullable com.android.server.utils.WatchedArraySet<java.lang.String> mDisabledComponentsWatched\nprotected @android.annotation.Nullable com.android.server.utils.WatchedArraySet<java.lang.String> mEnabledComponentsWatched\nprivate  long mCeDataInode\nprivate  long mDeDataInode\nprivate  int mDistractionFlags\nprivate @android.content.pm.PackageManager.EnabledState int mEnabledState\nprivate @android.content.pm.PackageManager.InstallReason int mInstallReason\nprivate @android.content.pm.PackageManager.UninstallReason int mUninstallReason\nprivate @android.annotation.Nullable java.lang.String mHarmfulAppWarning\nprivate @android.annotation.Nullable java.lang.String mLastDisableAppCaller\nprivate @android.annotation.Nullable android.content.pm.overlay.OverlayPaths mOverlayPaths\nprotected @android.annotation.Nullable com.android.server.utils.WatchedArrayMap<java.lang.String,android.content.pm.overlay.OverlayPaths> mSharedLibraryOverlayPaths\nprivate @android.annotation.Nullable java.lang.String mSplashScreenTheme\nprivate @android.content.pm.PackageManager.UserMinAspectRatio int mMinAspectRatio\nprivate @android.annotation.Nullable com.android.server.utils.WatchedArrayMap<android.content.pm.UserPackage,com.android.server.pm.pkg.SuspendParams> mSuspendParams\nprivate @android.annotation.Nullable com.android.server.utils.WatchedArrayMap<android.content.ComponentName,android.util.Pair<java.lang.String,java.lang.Integer>> mComponentLabelIconOverrideMap\nprivate @android.annotation.CurrentTimeMillisLong long mFirstInstallTimeMillis\nprivate @android.annotation.Nullable com.android.server.utils.Watchable mWatchable\nprivate @android.annotation.Nullable com.android.server.pm.pkg.ArchiveState mArchiveState\nfinal @android.annotation.NonNull com.android.server.utils.SnapshotCache<com.android.server.pm.pkg.PackageUserStateImpl> mSnapshot\nprivate  void setBoolean(int,boolean)\nprivate  boolean getBoolean(int)\nprivate  com.android.server.utils.SnapshotCache<com.android.server.pm.pkg.PackageUserStateImpl> makeCache()\nprivate  void onChanged()\npublic @android.annotation.NonNull @java.lang.Override com.android.server.pm.pkg.PackageUserStateImpl snapshot()\npublic @android.annotation.Nullable boolean setOverlayPaths(android.content.pm.overlay.OverlayPaths)\npublic  boolean setSharedLibraryOverlayPaths(java.lang.String,android.content.pm.overlay.OverlayPaths)\npublic @android.annotation.Nullable @java.lang.Override com.android.server.utils.WatchedArraySet<java.lang.String> getDisabledComponentsNoCopy()\npublic @android.annotation.Nullable @java.lang.Override com.android.server.utils.WatchedArraySet<java.lang.String> getEnabledComponentsNoCopy()\npublic @android.annotation.NonNull @java.lang.Override android.util.ArraySet<java.lang.String> getDisabledComponents()\npublic @android.annotation.NonNull @java.lang.Override android.util.ArraySet<java.lang.String> getEnabledComponents()\npublic @java.lang.Override boolean isComponentEnabled(java.lang.String)\npublic @java.lang.Override boolean isComponentDisabled(java.lang.String)\npublic @java.lang.Override android.content.pm.overlay.OverlayPaths getAllOverlayPaths()\npublic @com.android.internal.annotations.VisibleForTesting boolean overrideLabelAndIcon(android.content.ComponentName,java.lang.String,java.lang.Integer)\npublic  void resetOverrideComponentLabelIcon()\npublic @android.annotation.Nullable android.util.Pair<java.lang.String,java.lang.Integer> getOverrideLabelIconForComponent(android.content.ComponentName)\npublic @java.lang.Override boolean isSuspended()\npublic  com.android.server.pm.pkg.PackageUserStateImpl putSuspendParams(android.content.pm.UserPackage,com.android.server.pm.pkg.SuspendParams)\npublic  com.android.server.pm.pkg.PackageUserStateImpl removeSuspension(android.content.pm.UserPackage)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setDisabledComponents(android.util.ArraySet<java.lang.String>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setEnabledComponents(android.util.ArraySet<java.lang.String>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setEnabledComponents(com.android.server.utils.WatchedArraySet<java.lang.String>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setDisabledComponents(com.android.server.utils.WatchedArraySet<java.lang.String>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setCeDataInode(long)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setDeDataInode(long)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setInstalled(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setStopped(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setNotLaunched(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setHidden(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setDistractionFlags(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setInstantApp(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setVirtualPreload(boolean)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setEnabledState(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setInstallReason(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setUninstallReason(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setHarmfulAppWarning(java.lang.String)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setLastDisableAppCaller(java.lang.String)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setSharedLibraryOverlayPaths(android.util.ArrayMap<java.lang.String,android.content.pm.overlay.OverlayPaths>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setSplashScreenTheme(java.lang.String)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setMinAspectRatio(int)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setSuspendParams(android.util.ArrayMap<android.content.pm.UserPackage,com.android.server.pm.pkg.SuspendParams>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setComponentLabelIconOverrideMap(android.util.ArrayMap<android.content.ComponentName,android.util.Pair<java.lang.String,java.lang.Integer>>)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setFirstInstallTimeMillis(long)\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setArchiveState(com.android.server.pm.pkg.ArchiveState)\npublic @android.annotation.NonNull @java.lang.Override java.util.Map<java.lang.String,android.content.pm.overlay.OverlayPaths> getSharedLibraryOverlayPaths()\npublic @android.annotation.NonNull com.android.server.pm.pkg.PackageUserStateImpl setWatchable(com.android.server.utils.Watchable)\nprivate  boolean watchableEquals(com.android.server.utils.Watchable)\nprivate  int watchableHashCode()\nprivate  boolean snapshotEquals(com.android.server.utils.SnapshotCache<com.android.server.pm.pkg.PackageUserStateImpl>)\nprivate  int snapshotHashCode()\npublic @java.lang.Override boolean isInstalled()\npublic @java.lang.Override boolean isStopped()\npublic @java.lang.Override boolean isNotLaunched()\npublic @java.lang.Override boolean isHidden()\npublic @java.lang.Override boolean isInstantApp()\npublic @java.lang.Override boolean isVirtualPreload()\npublic @java.lang.Override boolean isQuarantined()\npublic @java.lang.Override boolean dataExists()\nclass PackageUserStateImpl extends com.android.server.utils.WatchableImpl implements [com.android.server.pm.pkg.PackageUserStateInternal, com.android.server.utils.Snappable]\nprivate static final  int INSTALLED\nprivate static final  int STOPPED\nprivate static final  int NOT_LAUNCHED\nprivate static final  int HIDDEN\nprivate static final  int INSTANT_APP\nprivate static final  int VIRTUAL_PRELOADED\nclass Booleans extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=false, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

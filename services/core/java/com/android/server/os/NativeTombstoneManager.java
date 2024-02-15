@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A class to manage native tombstones.
@@ -73,6 +74,8 @@ public final class NativeTombstoneManager {
     private final Context mContext;
     private final Handler mHandler;
     private final TombstoneWatcher mWatcher;
+
+    private final ReentrantLock mTmpFileLock = new ReentrantLock();
 
     private final Object mLock = new Object();
 
@@ -96,6 +99,8 @@ public final class NativeTombstoneManager {
         registerForUserRemoval();
         registerForPackageRemoval();
 
+        BootReceiver.initDropboxRateLimiter();
+
         // Scan existing tombstones.
         mHandler.post(() -> {
             final File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
@@ -112,7 +117,12 @@ public final class NativeTombstoneManager {
 
         // Clean up temporary files if they made it this far (e.g. if system server crashes).
         if (filename.endsWith(".tmp")) {
-            path.delete();
+            mTmpFileLock.lock();
+            try {
+                path.delete();
+            } finally {
+                mTmpFileLock.unlock();
+            }
             return;
         }
 
@@ -128,7 +138,7 @@ public final class NativeTombstoneManager {
         if (parsedTombstone.isPresent()) {
             processName = parsedTombstone.get().getProcessName();
         }
-        BootReceiver.addTombstoneToDropBox(mContext, path, isProtoFile, processName);
+        BootReceiver.addTombstoneToDropBox(mContext, path, isProtoFile, processName, mTmpFileLock);
     }
 
     private Optional<TombstoneFile> handleProtoTombstone(File path, boolean addToList) {
@@ -370,7 +380,7 @@ public final class NativeTombstoneManager {
                 return false;
             }
 
-            if (Math.abs(exitInfo.getTimestamp() - mTimestampMs) > 5000) {
+            if (Math.abs(exitInfo.getTimestamp() - mTimestampMs) > 10000) {
                 return false;
             }
 
@@ -567,6 +577,10 @@ public final class NativeTombstoneManager {
 
         @Override
         public void onEvent(int event, @Nullable String path) {
+            if (path == null) {
+                Slog.w(TAG, "path is null at TombstoneWatcher.onEvent()");
+                return;
+            }
             mHandler.post(() -> {
                 // Ignore .tmp files.
                 if (path.endsWith(".tmp")) {

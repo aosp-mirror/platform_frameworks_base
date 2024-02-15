@@ -27,9 +27,6 @@ android_app {
     name: "WallpaperBackup",
     defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
-    optimize: {
-        proguard_flags_files: ["proguard.flags"],
-    },
     platform_apis: true,
     certificate: "platform",
     privileged: false,
@@ -52,7 +49,7 @@ android_test {
         "androidx.test.core",
         "androidx.test.rules",
         "mockito-target-minus-junit4",
-        "truth-prebuilt",
+        "truth",
     ],
     resource_dirs: ["test/res"],
     certificate: "platform",

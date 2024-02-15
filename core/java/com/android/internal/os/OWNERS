@@ -5,13 +5,10 @@ per-file *Binder* = file:BINDER_OWNERS
 per-file *BinaryTransparency* = file:/core/java/android/transparency/OWNERS
 
 # BatteryStats
-per-file BatterySipper.java = file:/BATTERY_STATS_OWNERS
 per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
-per-file BatteryUsageStats* = file:/BATTERY_STATS_OWNERS
-per-file *ChargeCalculator* = file:/BATTERY_STATS_OWNERS
-per-file *PowerCalculator* = file:/BATTERY_STATS_OWNERS
-per-file *PowerEstimator* = file:/BATTERY_STATS_OWNERS
 per-file *Kernel* = file:/BATTERY_STATS_OWNERS
+per-file *Clock* = file:/BATTERY_STATS_OWNERS
 per-file *MultiState* = file:/BATTERY_STATS_OWNERS
 per-file *PowerProfile* = file:/BATTERY_STATS_OWNERS
+per-file *PowerStats* = file:/BATTERY_STATS_OWNERS
 

@@ -96,31 +96,30 @@ public final class WallpaperInfo implements Parcelable {
             throws XmlPullParserException, IOException {
         mService = service;
         ServiceInfo si = service.serviceInfo;
-        
+
         final PackageManager pm = context.getPackageManager();
-        XmlResourceParser parser = null;
-        try {
-            parser = si.loadXmlMetaData(pm, WallpaperService.SERVICE_META_DATA);
+        try (XmlResourceParser parser = si.loadXmlMetaData(pm,
+                WallpaperService.SERVICE_META_DATA)) {
             if (parser == null) {
                 throw new XmlPullParserException("No "
                         + WallpaperService.SERVICE_META_DATA + " meta-data");
             }
-        
+
             Resources res = pm.getResourcesForApplication(si.applicationInfo);
-            
+
             AttributeSet attrs = Xml.asAttributeSet(parser);
-            
+
             int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                     && type != XmlPullParser.START_TAG) {
             }
-            
+
             String nodeName = parser.getName();
             if (!"wallpaper".equals(nodeName)) {
                 throw new XmlPullParserException(
                         "Meta-data does not start with wallpaper tag");
             }
-            
+
             TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.Wallpaper);
             mSettingsActivityName = sa.getString(
@@ -143,9 +142,13 @@ public final class WallpaperInfo implements Parcelable {
             mShowMetadataInPreview = sa.getBoolean(
                     com.android.internal.R.styleable.Wallpaper_showMetadataInPreview,
                     false);
+
+            // Watch wallpapers support ambient mode by default.
+            final boolean defSupportsAmbientMode =
+                    pm.hasSystemFeature(PackageManager.FEATURE_WATCH);
             mSupportsAmbientMode = sa.getBoolean(
                     com.android.internal.R.styleable.Wallpaper_supportsAmbientMode,
-                    false);
+                    defSupportsAmbientMode);
             mShouldUseDefaultUnfoldTransition = sa.getBoolean(
                     com.android.internal.R.styleable
                             .Wallpaper_shouldUseDefaultUnfoldTransition, true);
@@ -159,8 +162,6 @@ public final class WallpaperInfo implements Parcelable {
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException(
                     "Unable to create context for: " + si.packageName);
-        } finally {
-            if (parser != null) parser.close();
         }
     }
 

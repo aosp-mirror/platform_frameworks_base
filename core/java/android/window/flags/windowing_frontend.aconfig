@@ -1,0 +1,100 @@
+package: "com.android.window.flags"
+
+flag {
+  name: "nav_bar_transparent_by_default"
+  namespace: "windowing_frontend"
+  description: "Make nav bar color transparent by default when targeting SDK 35 or greater"
+  bug: "232195501"
+}
+
+flag {
+  name: "edge_to_edge_by_default"
+  namespace: "windowing_frontend"
+  description: "Make app go edge-to-edge by default when targeting SDK 35 or greater"
+  bug: "309578419"
+}
+
+flag {
+  name: "enforce_edge_to_edge"
+  namespace: "windowing_frontend"
+  description: "Make app go edge-to-edge when targeting SDK level 35 or greater"
+  bug: "309578419"
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "defer_display_updates"
+    namespace: "windowing_frontend"
+    description: "Feature flag for deferring DisplayManager updates to WindowManager if Shell transition is running"
+    bug: "259220649"
+    is_fixed_read_only: true
+}
+
+flag {
+  name: "close_to_square_config_includes_status_bar"
+  namespace: "windowing_frontend"
+  description: "On close to square display, when necessary, configuration includes status bar"
+  bug: "291870756"
+}
+
+flag {
+  name: "introduce_smoother_dimmer"
+  namespace: "windowing_frontend"
+  description: "Refactor dim to fix flickers"
+  bug: "295291019"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "transit_ready_tracking"
+  namespace: "windowing_frontend"
+  description: "Enable accurate transition readiness tracking"
+  bug: "294925498"
+}
+
+flag {
+    name: "wallpaper_offset_async"
+    namespace: "windowing_frontend"
+    description: "Do not synchronise the wallpaper offset"
+    bug: "293248754"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "predictive_back_system_anims"
+    namespace: "systemui"
+    description: "Predictive back for system animations"
+    bug: "320510464"
+}
+
+flag {
+    name: "activity_snapshot_by_default"
+    namespace: "systemui"
+    description: "Enable record activity snapshot by default"
+    bug: "259497289"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "supports_multi_instance_system_ui"
+    namespace: "multitasking"
+    description: "Feature flag to enable a multi-instance system ui component property."
+    bug: "262864589"
+    is_fixed_read_only: true
+}
+
+flag {
+  name: "delegate_unhandled_drags"
+  namespace: "multitasking"
+  description: "Enables delegating unhandled drags to SystemUI"
+  bug: "320797628"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "insets_decoupled_configuration"
+  namespace: "windowing_frontend"
+  description: "Configuration decoupled from insets"
+  bug: "151861875"
+  is_fixed_read_only: true
+}

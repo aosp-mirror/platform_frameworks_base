@@ -17,6 +17,7 @@
 package com.android.systemui.util.service;
 
 import static com.android.systemui.util.service.dagger.ObservableServiceModule.BASE_RECONNECT_DELAY_MS;
+import static com.android.systemui.util.service.dagger.ObservableServiceModule.DUMPSYS_NAME;
 import static com.android.systemui.util.service.dagger.ObservableServiceModule.MAX_RECONNECT_ATTEMPTS;
 import static com.android.systemui.util.service.dagger.ObservableServiceModule.MIN_CONNECTION_DURATION_MS;
 import static com.android.systemui.util.service.dagger.ObservableServiceModule.OBSERVER;
@@ -24,8 +25,14 @@ import static com.android.systemui.util.service.dagger.ObservableServiceModule.S
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
+
+import java.io.PrintWriter;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,7 +42,7 @@ import javax.inject.Named;
  * {@link ObservableServiceConnection}.
  * @param <T> The transformed connection type handled by the service.
  */
-public class PersistentConnectionManager<T> {
+public class PersistentConnectionManager<T> implements Dumpable {
     private static final String TAG = "PersistentConnManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -45,6 +52,8 @@ public class PersistentConnectionManager<T> {
     private final int mMaxReconnectAttempts;
     private final int mMinConnectionDuration;
     private final Observer mObserver;
+    private final DumpManager mDumpManager;
+    private final String mDumpsysName;
 
     private int mReconnectAttempts = 0;
     private Runnable mCurrentReconnectCancelable;
@@ -89,6 +98,8 @@ public class PersistentConnectionManager<T> {
     public PersistentConnectionManager(
             SystemClock clock,
             DelayableExecutor mainExecutor,
+            DumpManager dumpManager,
+            @Named(DUMPSYS_NAME) String dumpsysName,
             @Named(SERVICE_CONNECTION) ObservableServiceConnection<T> serviceConnection,
             @Named(MAX_RECONNECT_ATTEMPTS) int maxReconnectAttempts,
             @Named(BASE_RECONNECT_DELAY_MS) int baseReconnectDelayMs,
@@ -98,6 +109,8 @@ public class PersistentConnectionManager<T> {
         mMainExecutor = mainExecutor;
         mConnection = serviceConnection;
         mObserver = observer;
+        mDumpManager = dumpManager;
+        mDumpsysName = TAG + "#" + dumpsysName;
 
         mMaxReconnectAttempts = maxReconnectAttempts;
         mBaseReconnectDelayMs = baseReconnectDelayMs;
@@ -108,6 +121,7 @@ public class PersistentConnectionManager<T> {
      * Begins the {@link PersistentConnectionManager} by connecting to the associated service.
      */
     public void start() {
+        mDumpManager.registerCriticalDumpable(mDumpsysName, this);
         mConnection.addCallback(mConnectionCallback);
         mObserver.addCallback(mObserverCallback);
         initiateConnectionAttempt();
@@ -120,6 +134,32 @@ public class PersistentConnectionManager<T> {
         mConnection.removeCallback(mConnectionCallback);
         mObserver.removeCallback(mObserverCallback);
         mConnection.unbind();
+        mDumpManager.unregisterDumpable(mDumpsysName);
+    }
+
+    /**
+     * Add a callback to the {@link ObservableServiceConnection}.
+     * @param callback The callback to add.
+     */
+    public void addConnectionCallback(ObservableServiceConnection.Callback<T> callback) {
+        mConnection.addCallback(callback);
+    }
+
+    /**
+     * Remove a callback from the {@link ObservableServiceConnection}.
+     * @param callback The callback to remove.
+     */
+    public void removeConnectionCallback(ObservableServiceConnection.Callback<T> callback) {
+        mConnection.removeCallback(callback);
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("mMaxReconnectAttempts: " + mMaxReconnectAttempts);
+        pw.println("mBaseReconnectDelayMs: " + mBaseReconnectDelayMs);
+        pw.println("mMinConnectionDuration: " + mMinConnectionDuration);
+        pw.println("mReconnectAttempts: " + mReconnectAttempts);
+        mConnection.dump(pw);
     }
 
     private void initiateConnectionAttempt() {

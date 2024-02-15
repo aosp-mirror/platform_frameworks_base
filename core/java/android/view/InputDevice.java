@@ -16,7 +16,10 @@
 
 package android.view;
 
+import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
+
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,6 +31,7 @@ import android.hardware.BatteryState;
 import android.hardware.SensorManager;
 import android.hardware.input.HostUsiVersion;
 import android.hardware.input.InputDeviceIdentifier;
+import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.hardware.lights.LightsManager;
 import android.icu.util.ULocale;
@@ -37,6 +41,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Vibrator;
 import android.os.VibratorManager;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -68,6 +73,7 @@ public final class InputDevice implements Parcelable {
     private final String mName;
     private final int mVendorId;
     private final int mProductId;
+    private final int mDeviceBus;
     private final String mDescriptor;
     private final InputDeviceIdentifier mIdentifier;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -87,6 +93,8 @@ public final class InputDevice implements Parcelable {
     private final HostUsiVersion mHostUsiVersion;
     private final int mAssociatedDisplayId;
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
+
+    private final ViewBehavior mViewBehavior = new ViewBehavior(this);
 
     @GuardedBy("mMotionRanges")
     private Vibrator mVibrator; // guarded by mMotionRanges during initialization
@@ -467,8 +475,8 @@ public final class InputDevice implements Parcelable {
      * Called by native code
      */
     private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
-            int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
-            KeyCharacterMap keyCharacterMap, @Nullable String keyboardLanguageTag,
+            int productId, int deviceBus, String descriptor, boolean isExternal, int sources,
+            int keyboardType, KeyCharacterMap keyCharacterMap, @Nullable String keyboardLanguageTag,
             @Nullable String keyboardLayoutType, boolean hasVibrator, boolean hasMicrophone,
             boolean hasButtonUnderPad, boolean hasSensor, boolean hasBattery, int usiVersionMajor,
             int usiVersionMinor, int associatedDisplayId) {
@@ -478,15 +486,18 @@ public final class InputDevice implements Parcelable {
         mName = name;
         mVendorId = vendorId;
         mProductId = productId;
+        mDeviceBus = deviceBus;
         mDescriptor = descriptor;
         mIsExternal = isExternal;
         mSources = sources;
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
-        if (keyboardLanguageTag != null) {
-            mKeyboardLanguageTag = ULocale
+        if (!TextUtils.isEmpty(keyboardLanguageTag)) {
+            String langTag;
+            langTag = ULocale
                     .createCanonical(ULocale.forLanguageTag(keyboardLanguageTag))
                     .toLanguageTag();
+            mKeyboardLanguageTag = TextUtils.equals(langTag, "und") ? null : langTag;
         } else {
             mKeyboardLanguageTag = null;
         }
@@ -509,6 +520,7 @@ public final class InputDevice implements Parcelable {
         mName = in.readString();
         mVendorId = in.readInt();
         mProductId = in.readInt();
+        mDeviceBus = in.readInt();
         mDescriptor = in.readString();
         mIsExternal = in.readInt() != 0;
         mSources = in.readInt();
@@ -533,6 +545,8 @@ public final class InputDevice implements Parcelable {
             addMotionRange(in.readInt(), in.readInt(), in.readFloat(), in.readFloat(),
                     in.readFloat(), in.readFloat(), in.readFloat());
         }
+
+        mViewBehavior.mShouldSmoothScroll = in.readBoolean();
     }
 
     /**
@@ -548,6 +562,7 @@ public final class InputDevice implements Parcelable {
         private String mName = "";
         private int mVendorId = 0;
         private int mProductId = 0;
+        private int mDeviceBus = 0;
         private String mDescriptor = "";
         private boolean mIsExternal = false;
         private int mSources = 0;
@@ -564,6 +579,7 @@ public final class InputDevice implements Parcelable {
         private int mUsiVersionMinor = -1;
         private int mAssociatedDisplayId = Display.INVALID_DISPLAY;
         private List<MotionRange> mMotionRanges = new ArrayList<>();
+        private boolean mShouldSmoothScroll;
 
         /** @see InputDevice#getId() */
         public Builder setId(int id) {
@@ -598,6 +614,12 @@ public final class InputDevice implements Parcelable {
         /** @see InputDevice#getProductId() */
         public Builder setProductId(int productId) {
             mProductId = productId;
+            return this;
+        }
+
+        /** @see InputDevice#getDeviceBus() */
+        public Builder setDeviceBus(int deviceBus) {
+            mDeviceBus = deviceBus;
             return this;
         }
 
@@ -693,6 +715,16 @@ public final class InputDevice implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the view behavior for smooth scrolling ({@code false} by default).
+         *
+         * @see ViewBehavior#shouldSmoothScroll(int, int)
+         */
+        public Builder setShouldSmoothScroll(boolean shouldSmoothScroll) {
+            mShouldSmoothScroll = shouldSmoothScroll;
+            return this;
+        }
+
         /** Build {@link InputDevice}. */
         public InputDevice build() {
             InputDevice device = new InputDevice(
@@ -702,6 +734,7 @@ public final class InputDevice implements Parcelable {
                     mName,
                     mVendorId,
                     mProductId,
+                    mDeviceBus,
                     mDescriptor,
                     mIsExternal,
                     mSources,
@@ -730,6 +763,8 @@ public final class InputDevice implements Parcelable {
                         range.getFuzz(),
                         range.getResolution());
             }
+
+            device.setShouldSmoothScroll(mShouldSmoothScroll);
 
             return device;
         }
@@ -775,7 +810,8 @@ public final class InputDevice implements Parcelable {
      * Each gamepad or joystick is given a unique, positive controller number when initially
      * configured by the system. This number may change due to events such as device disconnects /
      * reconnects or user initiated reassignment. Any change in number will trigger an event that
-     * can be observed by registering an {@link InputManagerGlobal.InputDeviceListener}.
+     * can be observed by registering an
+     * {@link android.hardware.input.InputManager.InputDeviceListener}.
      * </p>
      * <p>
      * All input devices which are not gamepads or joysticks will be assigned a controller number
@@ -840,6 +876,21 @@ public final class InputDevice implements Parcelable {
      */
     public int getProductId() {
         return mProductId;
+    }
+
+    /**
+     * Gets the device bus used by given device, if available.
+     * <p>
+     * The device bus is the communication system used for transferring data
+     * (e.g. USB, Bluetooth etc.). This value comes from the kernel (from input.h).
+     * A value of 0 will be assigned where the device bus is not available.
+     * </p>
+     *
+     * @return The device bus of a given device
+     * @hide
+     */
+    public int getDeviceBus() {
+        return mDeviceBus;
     }
 
     /**
@@ -958,6 +1009,7 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     @Nullable
+    @TestApi
     public String getKeyboardLanguageTag() {
         return mKeyboardLanguageTag;
     }
@@ -968,6 +1020,7 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     @Nullable
+    @TestApi
     public String getKeyboardLayoutType() {
         return mKeyboardLayoutType;
     }
@@ -1091,11 +1144,32 @@ public final class InputDevice implements Parcelable {
         return mMotionRanges;
     }
 
+    /**
+     * Provides the {@link ViewBehavior} for the device.
+     *
+     * <p>This behavior is designed to be obtained using the
+     * {@link InputManager#getInputDeviceViewBehavior(int)} API, to allow associating the behavior
+     * with a {@link Context} (since input device is not associated with a context).
+     * The ability to associate the behavior with a context opens capabilities like linking the
+     * behavior to user settings, for example.
+     *
+     * @hide
+     */
+    @NonNull
+    public ViewBehavior getViewBehavior() {
+        return mViewBehavior;
+    }
+
     // Called from native code.
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void addMotionRange(int axis, int source,
             float min, float max, float flat, float fuzz, float resolution) {
         mMotionRanges.add(new MotionRange(axis, source, min, max, flat, fuzz, resolution));
+    }
+
+    // Called from native code.
+    private void setShouldSmoothScroll(boolean shouldSmoothScroll) {
+        mViewBehavior.mShouldSmoothScroll = shouldSmoothScroll;
     }
 
     /**
@@ -1276,24 +1350,6 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
-     * Sets the current pointer type.
-     * @param pointerType the type of the pointer icon.
-     * @hide
-     */
-    public void setPointerType(int pointerType) {
-        InputManagerGlobal.getInstance().setPointerIconType(pointerType);
-    }
-
-    /**
-     * Specifies the current custom pointer.
-     * @param icon the icon data.
-     * @hide
-     */
-    public void setCustomPointerIcon(PointerIcon icon) {
-        InputManagerGlobal.getInstance().setCustomPointerIcon(icon);
-    }
-
-    /**
      * Reports whether the device has a battery.
      * @return true if the device has a battery, false otherwise.
      * @hide
@@ -1317,6 +1373,7 @@ public final class InputDevice implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public int getAssociatedDisplayId() {
         return mAssociatedDisplayId;
     }
@@ -1432,6 +1489,82 @@ public final class InputDevice implements Parcelable {
         }
     }
 
+    /**
+     * Provides information on how views processing {@link MotionEvent}s generated by this input
+     * device should respond to the events. Use {@link InputManager#getInputDeviceViewBehavior(int)}
+     * to get an instance of the view behavior for an input device.
+     *
+     * <p>See an example below how a {@link View} can use this class to determine and apply the
+     * scrolling behavior for a generic {@link MotionEvent}.
+     *
+     * <pre>{@code
+     *     public boolean onGenericMotionEvent(MotionEvent event) {
+     *         InputManager manager = context.getSystemService(InputManager.class);
+     *         ViewBehavior viewBehavior = manager.getInputDeviceViewBehavior(event.getDeviceId());
+     *         // Assume a helper function that tells us which axis to use for scrolling purpose.
+     *         int axis = getScrollAxisForGenericMotionEvent(event);
+     *         int source = event.getSource();
+     *
+     *         boolean shouldSmoothScroll =
+     *                 viewBehavior != null && viewBehavior.shouldSmoothScroll(axis, source);
+     *         // Proceed to running the scrolling logic...
+     *     }
+     * }</pre>
+     *
+     * @see InputManager#getInputDeviceViewBehavior(int)
+     */
+    @FlaggedApi(FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API)
+    public static final class ViewBehavior {
+        private static final boolean DEFAULT_SHOULD_SMOOTH_SCROLL = false;
+
+        private final InputDevice mInputDevice;
+
+        // TODO(b/246946631): implement support for InputDevices to adjust this configuration
+        // by axis and source. When implemented, the axis/source specific config will take
+        // precedence over this global config.
+        /** A global smooth scroll configuration applying to all motion axis and input source. */
+        private boolean mShouldSmoothScroll = DEFAULT_SHOULD_SMOOTH_SCROLL;
+
+        /** @hide */
+        public ViewBehavior(@NonNull InputDevice inputDevice) {
+            mInputDevice = inputDevice;
+        }
+
+        /**
+         * Returns whether a view should smooth scroll when scrolling due to a {@link MotionEvent}
+         * generated by the input device.
+         *
+         * <p>Smooth scroll in this case refers to a scroll that animates the transition between
+         * the starting and ending positions of the scroll. When this method returns {@code true},
+         * views should try to animate a scroll generated by this device at the given axis and with
+         * the given source to produce a good scroll user experience. If this method returns
+         * {@code false}, animating scrolls is not necessary.
+         *
+         * <p>If the input device does not have a {@link MotionRange} with the provided axis and
+         * source, this method returns {@code false}.
+         *
+         * @param axis the {@link MotionEvent} axis whose value is used to get the scroll extent.
+         * @param source the {@link InputDevice} source from which the {@link MotionEvent} that
+         *      triggers the scroll came.
+         * @return {@code true} if smooth scrolling should be used for the scroll, or {@code false}
+         *      if smooth scrolling is not necessary, or if the provided axis and source combination
+         *      is not available for the input device.
+         */
+        @FlaggedApi(FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API)
+        public boolean shouldSmoothScroll(int axis, int source) {
+            // Note: although we currently do not use axis and source in computing the return value,
+            // we will keep the API params to avoid further public API changes when we start
+            // supporting axis/source configuration. Also, having these params lets OEMs provide
+            // their custom implementation of the API that depends on axis and source.
+
+            // TODO(b/246946631): speed up computation using caching of results.
+            if (mInputDevice.getMotionRange(axis, source) == null) {
+                return false;
+            }
+            return mShouldSmoothScroll;
+        }
+    }
+
     @Override
     public void writeToParcel(Parcel out, int flags) {
         mKeyCharacterMap.writeToParcel(out, flags);
@@ -1441,6 +1574,7 @@ public final class InputDevice implements Parcelable {
         out.writeString(mName);
         out.writeInt(mVendorId);
         out.writeInt(mProductId);
+        out.writeInt(mDeviceBus);
         out.writeString(mDescriptor);
         out.writeInt(mIsExternal ? 1 : 0);
         out.writeInt(mSources);
@@ -1468,6 +1602,8 @@ public final class InputDevice implements Parcelable {
             out.writeFloat(range.mFuzz);
             out.writeFloat(range.mResolution);
         }
+
+        out.writeBoolean(mViewBehavior.mShouldSmoothScroll);
     }
 
     @Override

@@ -36,6 +36,7 @@ import java.util.Random;
 /**
  * Representation of a user on the device.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class UserHandle implements Parcelable {
     // NOTE: keep logic in sync with system/core/libcutils/multiuser.c
 
@@ -125,7 +126,8 @@ public final class UserHandle implements Parcelable {
     public static final int MIN_SECONDARY_USER_ID = 10;
 
     /** @hide */
-    public static final int MAX_SECONDARY_USER_ID = Integer.MAX_VALUE / UserHandle.PER_USER_RANGE;
+    public static final int MAX_SECONDARY_USER_ID =
+            Integer.MAX_VALUE / UserHandle.PER_USER_RANGE - 1;
 
     /**
      * (Arbitrary) user handle cache size.
@@ -606,12 +608,9 @@ public final class UserHandle implements Parcelable {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        try {
-            if (obj != null) {
-                UserHandle other = (UserHandle)obj;
-                return mHandle == other.mHandle;
-            }
-        } catch (ClassCastException ignore) {
+        if (obj instanceof UserHandle) {
+            UserHandle other = (UserHandle) obj;
+            return mHandle == other.mHandle;
         }
         return false;
     }

@@ -40,12 +40,13 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -68,6 +69,7 @@ public class WalletActivity extends ComponentActivity implements
     private final Executor mExecutor;
     private final Handler mHandler;
     private final FalsingManager mFalsingManager;
+    private final DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     private FalsingCollector mFalsingCollector;
     private final UserTracker mUserTracker;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -91,7 +93,8 @@ public class WalletActivity extends ComponentActivity implements
             UserTracker userTracker,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarKeyguardViewManager keyguardViewManager,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor) {
         mKeyguardStateController = keyguardStateController;
         mKeyguardDismissUtil = keyguardDismissUtil;
         mActivityStarter = activityStarter;
@@ -103,6 +106,7 @@ public class WalletActivity extends ComponentActivity implements
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardViewManager = keyguardViewManager;
         mUiEventLogger = uiEventLogger;
+        mDeviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor;
     }
 
     @Override
@@ -209,14 +213,13 @@ public class WalletActivity extends ComponentActivity implements
                 true,
                 Utils.getColorAttrDefaultColor(
                         this, com.android.internal.R.attr.colorAccentPrimary));
-        mKeyguardViewManager.requestFace(true);
+        mDeviceEntryFaceAuthInteractor.onWalletLaunched();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mKeyguardViewManager.requestFp(false, -1);
-        mKeyguardViewManager.requestFace(false);
     }
 
     @Override
@@ -278,7 +281,7 @@ public class WalletActivity extends ComponentActivity implements
 
     private Drawable getHomeIndicatorDrawable() {
         Drawable drawable = getDrawable(R.drawable.ic_close);
-        drawable.setTint(getColor(R.color.material_dynamic_neutral70));
+        drawable.setTint(getColor(com.google.android.material.R.color.material_dynamic_neutral70));
         return drawable;
     }
 }

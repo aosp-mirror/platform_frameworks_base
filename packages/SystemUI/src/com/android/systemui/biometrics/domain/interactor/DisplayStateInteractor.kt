@@ -18,13 +18,17 @@ package com.android.systemui.biometrics.domain.interactor
 
 import android.content.Context
 import android.content.res.Configuration
-import com.android.systemui.biometrics.data.repository.RearDisplayStateRepository
+import android.view.Display
+import com.android.systemui.biometrics.data.repository.DisplayStateRepository
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
 import com.android.systemui.unfold.updates.FoldProvider
+import com.android.systemui.util.kotlin.sample
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -32,16 +36,35 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Aggregates display state information. */
 interface DisplayStateInteractor {
+    /** Whether the default display is currently off. */
+    val isDefaultDisplayOff: Flow<Boolean>
 
     /** Whether the device is currently in rear display mode. */
     val isInRearDisplayMode: StateFlow<Boolean>
 
     /** Whether the device is currently folded. */
     val isFolded: Flow<Boolean>
+
+    /** Current rotation of the display */
+    val currentRotation: StateFlow<DisplayRotation>
+
+    /** Display change event indicating a change to the given displayId has occurred. */
+    val displayChanges: Flow<Int>
+
+    /**
+     * If true, the direction rotation is applied to get to an application's requested orientation
+     * is reversed. Normally, the model is that landscape is clockwise from portrait; thus on a
+     * portrait device an app requesting landscape will cause a clockwise rotation, and on a
+     * landscape device an app requesting portrait will cause a counter-clockwise rotation. Setting
+     * true here reverses that logic. See go/natural-orientation for context.
+     */
+    val isReverseDefaultRotation: Boolean
 
     /** Called on configuration changes, used to keep the display state in sync */
     fun onConfigurationChanged(newConfig: Configuration)
@@ -54,13 +77,16 @@ constructor(
     @Application applicationScope: CoroutineScope,
     @Application context: Context,
     @Main mainExecutor: Executor,
-    rearDisplayStateRepository: RearDisplayStateRepository,
+    displayStateRepository: DisplayStateRepository,
+    displayRepository: DisplayRepository,
 ) : DisplayStateInteractor {
     private var screenSizeFoldProvider: ScreenSizeFoldProvider = ScreenSizeFoldProvider(context)
 
     fun setScreenSizeFoldProvider(foldProvider: ScreenSizeFoldProvider) {
         screenSizeFoldProvider = foldProvider
     }
+
+    override val displayChanges = displayRepository.displayChangeEvent
 
     override val isFolded: Flow<Boolean> =
         conflatedCallbackFlow {
@@ -90,11 +116,27 @@ constructor(
             )
 
     override val isInRearDisplayMode: StateFlow<Boolean> =
-        rearDisplayStateRepository.isInRearDisplayMode
+        displayStateRepository.isInRearDisplayMode
+
+    override val currentRotation: StateFlow<DisplayRotation> =
+        displayStateRepository.currentRotation
+
+    override val isReverseDefaultRotation: Boolean = displayStateRepository.isReverseDefaultRotation
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         screenSizeFoldProvider.onConfigurationChange(newConfig)
     }
+
+    private val defaultDisplay =
+        displayRepository.displays.map { displays ->
+            displays.firstOrNull { it.displayId == Display.DEFAULT_DISPLAY }
+        }
+
+    override val isDefaultDisplayOff =
+        displayRepository.displayChangeEvent
+            .filter { it == Display.DEFAULT_DISPLAY }
+            .sample(defaultDisplay)
+            .map { it?.state == Display.STATE_OFF }
 
     companion object {
         private const val TAG = "DisplayStateInteractor"

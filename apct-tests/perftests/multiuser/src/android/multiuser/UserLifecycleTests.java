@@ -104,16 +104,16 @@ public class UserLifecycleTests {
     /** Name of users/profiles in the test. Users with this name may be freely removed. */
     private static final String TEST_USER_NAME = "UserLifecycleTests_test_user";
 
-    /** Name of dummy package used when timing how long app launches take. */
+    /** Name of placeholder package used when timing how long app launches take. */
     private static final String DUMMY_PACKAGE_NAME = "perftests.multiuser.apps.dummyapp";
 
-    // Copy of UserSystemPackageInstaller whitelist mode constants.
-    private static final String PACKAGE_WHITELIST_MODE_PROP =
+    // Copy of UserSystemPackageInstaller allowlist mode constants.
+    private static final String PACKAGE_ALLOWLIST_MODE_PROP =
             "persist.debug.user.package_whitelist_mode";
-    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE = 0;
-    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE = 0b001;
-    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST = 0b100;
-    private static final int USER_TYPE_PACKAGE_WHITELIST_MODE_DEVICE_DEFAULT = -1;
+    private static final int USER_TYPE_PACKAGE_ALLOWLIST_MODE_DISABLE = 0;
+    private static final int USER_TYPE_PACKAGE_ALLOWLIST_MODE_ENFORCE = 0b001;
+    private static final int USER_TYPE_PACKAGE_ALLOWLIST_MODE_IMPLICIT_ALLOWLIST = 0b100;
+    private static final int USER_TYPE_PACKAGE_ALLOWLIST_MODE_DEVICE_DEFAULT = -1;
 
     private UserManager mUm;
     private ActivityManager mAm;
@@ -1178,13 +1178,13 @@ public class UserLifecycleTests {
     }
 
     // TODO: This is just a POC. Do this properly and add more.
-    /** Tests starting (unlocking) a newly-created profile using the user-type-pkg-whitelist. */
+    /** Tests starting (unlocking) a newly-created profile using the user-type-pkg-allowlist. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileUnlock_usingWhitelist() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
-        final int origMode = getUserTypePackageWhitelistMode();
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE
-                | USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST);
+        final int origMode = getUserTypePackageAllowlistMode();
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_ALLOWLIST_MODE_ENFORCE
+                | USER_TYPE_PACKAGE_ALLOWLIST_MODE_IMPLICIT_ALLOWLIST);
 
         try {
             while (mRunner.keepRunning()) {
@@ -1201,15 +1201,15 @@ public class UserLifecycleTests {
                 mRunner.resumeTimingForNextIteration();
             }
         } finally {
-            setUserTypePackageWhitelistMode(origMode);
+            setUserTypePackageAllowlistMode(origMode);
         }
     }
-    /** Tests starting (unlocking) a newly-created profile NOT using the user-type-pkg-whitelist. */
+    /** Tests starting (unlocking) a newly-created profile NOT using the user-type-pkg-allowlist. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void managedProfileUnlock_notUsingWhitelist() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
-        final int origMode = getUserTypePackageWhitelistMode();
-        setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE);
+        final int origMode = getUserTypePackageAllowlistMode();
+        setUserTypePackageAllowlistMode(USER_TYPE_PACKAGE_ALLOWLIST_MODE_DISABLE);
 
         try {
             while (mRunner.keepRunning()) {
@@ -1226,7 +1226,7 @@ public class UserLifecycleTests {
                 mRunner.resumeTimingForNextIteration();
             }
         } finally {
-            setUserTypePackageWhitelistMode(origMode);
+            setUserTypePackageAllowlistMode(origMode);
         }
     }
 
@@ -1456,17 +1456,17 @@ public class UserLifecycleTests {
         attestTrue(errMsg, success);
     }
 
-    /** Gets the PACKAGE_WHITELIST_MODE_PROP System Property. */
-    private int getUserTypePackageWhitelistMode() {
-        return SystemProperties.getInt(PACKAGE_WHITELIST_MODE_PROP,
-                USER_TYPE_PACKAGE_WHITELIST_MODE_DEVICE_DEFAULT);
+    /** Gets the PACKAGE_ALLOWLIST_MODE_PROP System Property. */
+    private int getUserTypePackageAllowlistMode() {
+        return SystemProperties.getInt(PACKAGE_ALLOWLIST_MODE_PROP,
+                USER_TYPE_PACKAGE_ALLOWLIST_MODE_DEVICE_DEFAULT);
     }
 
-    /** Sets the PACKAGE_WHITELIST_MODE_PROP System Property to the given value. */
-    private void setUserTypePackageWhitelistMode(int mode) {
+    /** Sets the PACKAGE_ALLOWLIST_MODE_PROP System Property to the given value. */
+    private void setUserTypePackageAllowlistMode(int mode) {
         String result = ShellHelper.runShellCommand(
-                String.format("setprop %s %d", PACKAGE_WHITELIST_MODE_PROP, mode));
-        attestFalse("Failed to set sysprop " + PACKAGE_WHITELIST_MODE_PROP + ": " + result,
+                String.format("setprop %s %d", PACKAGE_ALLOWLIST_MODE_PROP, mode));
+        attestFalse("Failed to set sysprop " + PACKAGE_ALLOWLIST_MODE_PROP + ": " + result,
                 result != null && result.contains("Failed"));
     }
 
@@ -1557,6 +1557,7 @@ public class UserLifecycleTests {
     }
 
     private void waitCoolDownPeriod() {
+        // Heuristic value based on local tests. Stability increased compared to no waiting.
         final int tenSeconds = 1000 * 10;
         waitForBroadcastIdle();
         sleep(tenSeconds);

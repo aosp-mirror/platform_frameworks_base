@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Provides an immutable reference to an entity that appears repeatedly on different surfaces of the
@@ -175,6 +176,24 @@ public final class Person implements Parcelable {
         dest.writeString(mKey);
         dest.writeBoolean(mIsImportant);
         dest.writeBoolean(mIsBot);
+    }
+
+    /**
+     * Note all {@link Uri} that are referenced internally, with the expectation that Uri permission
+     * grants will need to be issued to ensure the recipient of this object is able to render its
+     * contents.
+     * See b/281044385 for more context and examples about what happens when this isn't done
+     * correctly.
+     *
+     * @hide
+     */
+    public void visitUris(@NonNull Consumer<Uri> visitor) {
+        visitor.accept(getIconUri());
+        if (Flags.visitRiskyUris()) {
+            if (mUri != null && !mUri.isEmpty()) {
+                visitor.accept(Uri.parse(mUri));
+            }
+        }
     }
 
     /** Builder for the immutable {@link Person} class. */

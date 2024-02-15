@@ -16,34 +16,69 @@
 
 package com.android.systemui.biometrics.domain.interactor
 
+import android.content.Context
+import android.util.Log
 import android.view.MotionEvent
-import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.res.R
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business logic for interacting with the UDFPS overlay. */
 @SysUISingleton
 class UdfpsOverlayInteractor
 @Inject
-constructor(private val authController: AuthController, @Application scope: CoroutineScope) {
+constructor(
+    @Application private val context: Context,
+    private val authController: AuthController,
+    private val selectedUserInteractor: SelectedUserInteractor,
+    @Application scope: CoroutineScope
+) {
+    private fun calculateIconSize(): Int {
+        val pixelPitch = context.resources.getFloat(R.dimen.pixel_pitch)
+        if (pixelPitch <= 0) {
+            Log.e(
+                "UdfpsOverlayInteractor",
+                "invalid pixelPitch: $pixelPitch. Pixel pitch must be updated per device."
+            )
+        }
+        return (context.resources.getFloat(R.dimen.udfps_icon_size) / pixelPitch).toInt()
+    }
+
+    private var iconSize: Int = calculateIconSize()
 
     /** Whether a touch is within the under-display fingerprint sensor area */
     fun isTouchWithinUdfpsArea(ev: MotionEvent): Boolean {
-        val isUdfpsEnrolled = authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())
+        val isUdfpsEnrolled =
+            authController.isUdfpsEnrolled(selectedUserInteractor.getSelectedUserId())
         val isWithinOverlayBounds =
             udfpsOverlayParams.value.overlayBounds.contains(ev.rawX.toInt(), ev.rawY.toInt())
         return isUdfpsEnrolled && isWithinOverlayBounds
     }
+
+    /** Sets whether Udfps overlay should handle touches */
+    fun setHandleTouches(shouldHandle: Boolean = true) {
+        _shouldHandleTouches.value = shouldHandle
+    }
+
+    private var _shouldHandleTouches = MutableStateFlow(true)
+
+    /** Whether Udfps overlay should handle touches */
+    val shouldHandleTouches: StateFlow<Boolean> = _shouldHandleTouches.asStateFlow()
 
     /** Returns the current udfpsOverlayParams */
     val udfpsOverlayParams: StateFlow<UdfpsOverlayParams> =
@@ -64,6 +99,14 @@ constructor(private val authController: AuthController, @Application scope: Coro
                 awaitClose { authController.removeCallback(callback) }
             }
             .stateIn(scope, started = SharingStarted.Eagerly, initialValue = UdfpsOverlayParams())
+
+    // Padding between the fingerprint icon and its bounding box in pixels.
+    val iconPadding: Flow<Int> =
+        udfpsOverlayParams.map { params ->
+            val sensorWidth = params.nativeSensorBounds.right - params.nativeSensorBounds.left
+            val nativePadding = (sensorWidth - iconSize) / 2
+            (nativePadding * params.scaleFactor).toInt()
+        }
 
     companion object {
         private const val TAG = "UdfpsOverlayInteractor"

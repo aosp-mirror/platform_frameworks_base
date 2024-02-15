@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.debug.IAdbManager;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ServiceManager;
@@ -38,7 +39,7 @@ import android.widget.CheckBox;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import javax.inject.Inject;
@@ -69,8 +70,7 @@ public class UsbDebuggingActivity extends AlertActivity
         super.onCreate(icicle);
 
         // Emulator does not support reseating the usb cable to reshow the dialog.
-        boolean isEmulator = SystemProperties.get("ro.boot.qemu").equals("1");
-        if (SystemProperties.getInt("service.adb.tcp.port", 0) == 0 && !isEmulator) {
+        if (SystemProperties.getInt("service.adb.tcp.port", 0) == 0 && !Build.IS_EMULATOR) {
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this);
             IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_STATE);
             mBroadcastDispatcher.registerReceiver(mDisconnectedReceiver, filter);

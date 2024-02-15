@@ -84,7 +84,16 @@ constructor(
     @Background private val bgExecutor: RepeatableExecutor,
     private val falsingManager: FalsingManager,
 ) {
-    private var _data = Progress(false, false, false, false, null, 0)
+    private var _data =
+        Progress(
+            enabled = false,
+            seekAvailable = false,
+            playing = false,
+            scrubbing = false,
+            elapsedTime = null,
+            duration = 0,
+            listening = false
+        )
         set(value) {
             val enabledChanged = value.enabled != field.enabled
             field = value
@@ -132,6 +141,7 @@ constructor(
                 if (field != value) {
                     field = value
                     checkIfPollingNeeded()
+                    _data = _data.copy(listening = value)
                 }
             }
 
@@ -239,7 +249,7 @@ constructor(
             )
                 false
             else true
-        _data = Progress(enabled, seekAvailable, playing, scrubbing, position, duration)
+        _data = Progress(enabled, seekAvailable, playing, scrubbing, position, duration, listening)
         checkIfPollingNeeded()
     }
 
@@ -258,6 +268,7 @@ constructor(
                 scrubbing = false,
                 elapsedTime = position,
                 duration = 100,
+                listening = false,
             )
     }
 
@@ -514,7 +525,7 @@ constructor(
          * Returns true when the down event of the scroll hits within the target box of the thumb.
          */
         override fun onScroll(
-            eventStart: MotionEvent,
+            eventStart: MotionEvent?,
             event: MotionEvent,
             distanceX: Float,
             distanceY: Float
@@ -528,7 +539,7 @@ constructor(
          * Gestures that include a fling are considered a false gesture on the seek bar.
          */
         override fun onFling(
-            eventStart: MotionEvent,
+            eventStart: MotionEvent?,
             event: MotionEvent,
             velocityX: Float,
             velocityY: Float
@@ -548,9 +559,12 @@ constructor(
     data class Progress(
         val enabled: Boolean,
         val seekAvailable: Boolean,
+        /** whether playback state is not paused or connecting */
         val playing: Boolean,
         val scrubbing: Boolean,
         val elapsedTime: Int?,
-        val duration: Int
+        val duration: Int,
+        /** whether seekBar is listening to progress updates */
+        val listening: Boolean,
     )
 }

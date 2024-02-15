@@ -34,7 +34,8 @@ import android.view.WindowMetrics;
 
 import androidx.annotation.DimenRes;
 
-import com.android.systemui.R;
+import com.android.systemui.Flags;
+import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -154,8 +155,10 @@ class MenuViewAppearance {
         final int margin = getMenuMargin();
         final Rect draggableBounds = new Rect(getWindowAvailableBounds());
 
-        // Initializes start position for mapping the translation of the menu view.
-        draggableBounds.offsetTo(/* newLeft= */ 0, /* newTop= */ 0);
+        if (!Flags.floatingMenuOverlapsNavBarsFlag()) {
+            // Initializes start position for mapping the translation of the menu view.
+            draggableBounds.offsetTo(/* newLeft= */ 0, /* newTop= */ 0);
+        }
 
         draggableBounds.top += margin;
         draggableBounds.right -= getMenuWidth();
@@ -278,7 +281,7 @@ class MenuViewAppearance {
                 : new float[]{radius, radius, 0.0f, 0.0f, 0.0f, 0.0f, radius, radius};
     }
 
-    private Rect getWindowAvailableBounds() {
+    public Rect getWindowAvailableBounds() {
         final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
         final WindowInsets windowInsets = windowMetrics.getWindowInsets();
         final Insets insets = windowInsets.getInsetsIgnoringVisibility(

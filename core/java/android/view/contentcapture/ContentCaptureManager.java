@@ -18,6 +18,7 @@ package android.view.contentcapture;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureHelper.toSet;
+import static android.view.contentcapture.flags.Flags.runOnBackgroundThreadEnabled;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -52,6 +53,8 @@ import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.RingBuffer;
 import com.android.internal.util.SyncResultReceiver;
 
 import java.io.PrintWriter;
@@ -59,7 +62,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -352,6 +357,71 @@ public final class ContentCaptureManager {
     public static final String DEVICE_CONFIG_PROPERTY_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING =
             "disable_flush_for_view_tree_appearing";
 
+    /**
+     * Enables the content protection receiver.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_ENABLE_CONTENT_PROTECTION_RECEIVER =
+            "enable_content_protection_receiver";
+
+    /**
+     * Sets the size of the in-memory ring buffer for the content protection flow.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_BUFFER_SIZE =
+            "content_protection_buffer_size";
+
+    /**
+     * Sets the config for content protection required groups.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_REQUIRED_GROUPS_CONFIG =
+            "content_protection_required_groups_config";
+
+    /**
+     * Sets the config for content protection optional groups.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG =
+            "content_protection_optional_groups_config";
+
+    /**
+     * Sets the threshold for content protection optional groups.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD =
+            "content_protection_optional_groups_threshold";
+
+    /**
+     * Sets the initial delay for fetching content protection allowlist in milliseconds.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS =
+            "content_protection_allowlist_delay_ms";
+
+    /**
+     * Sets the timeout for fetching content protection allowlist in milliseconds.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS =
+            "content_protection_allowlist_timeout_ms";
+
+    /**
+     * Sets the auto disconnect timeout for the content protection service in milliseconds.
+     *
+     * @hide
+     */
+    // Unit can't be in the name in order to pass the checkstyle hook, line would be too long.
+    public static final String DEVICE_CONFIG_PROPERTY_CONTENT_PROTECTION_AUTO_DISCONNECT_TIMEOUT =
+            "content_protection_auto_disconnect_timeout_ms";
+
     /** @hide */
     @TestApi
     public static final int LOGGING_LEVEL_OFF = 0;
@@ -384,6 +454,30 @@ public final class ContentCaptureManager {
     public static final int DEFAULT_LOG_HISTORY_SIZE = 10;
     /** @hide */
     public static final boolean DEFAULT_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING = false;
+    /** @hide */
+    public static final boolean DEFAULT_ENABLE_CONTENT_CAPTURE_RECEIVER = true;
+    /** @hide */
+    public static final boolean DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER = false;
+    /** @hide */
+    public static final int DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE = 150;
+    /** @hide */
+    public static final List<List<String>> DEFAULT_CONTENT_PROTECTION_REQUIRED_GROUPS =
+            Collections.emptyList();
+    /** @hide */
+    public static final String DEFAULT_CONTENT_PROTECTION_REQUIRED_GROUPS_CONFIG = "";
+    /** @hide */
+    public static final List<List<String>> DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS =
+            Collections.emptyList();
+    /** @hide */
+    public static final String DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS_CONFIG = "";
+    /** @hide */
+    public static final int DEFAULT_CONTENT_PROTECTION_OPTIONAL_GROUPS_THRESHOLD = 0;
+    /** @hide */
+    public static final long DEFAULT_CONTENT_PROTECTION_ALLOWLIST_DELAY_MS = 30000;
+    /** @hide */
+    public static final long DEFAULT_CONTENT_PROTECTION_ALLOWLIST_TIMEOUT_MS = 250;
+    /** @hide */
+    public static final long DEFAULT_CONTENT_PROTECTION_AUTO_DISCONNECT_TIMEOUT_MS = 3000;
 
     private final Object mLock = new Object();
 
@@ -403,16 +497,22 @@ public final class ContentCaptureManager {
     @GuardedBy("mLock")
     private int mFlags;
 
-    // TODO(b/119220549): use UI Thread directly (as calls are one-way) or a shared thread / handler
-    // held at the Application level
-    @NonNull
-    private final Handler mHandler;
+    @Nullable
+    @GuardedBy("mLock")
+    private Handler mUiHandler;
+
+    @Nullable
+    @GuardedBy("mLock")
+    private Handler mContentCaptureHandler;
 
     @GuardedBy("mLock")
-    private MainContentCaptureSession mMainSession;
+    private ContentCaptureSession mMainSession;
 
     @Nullable // set on-demand by addDumpable()
     private Dumper mDumpable;
+
+    // Created here in order to live across activity and session changes
+    @Nullable private final RingBuffer<ContentCaptureEvent> mContentProtectionEventBuffer;
 
     /** @hide */
     public interface ContentCaptureClient {
@@ -424,12 +524,15 @@ public final class ContentCaptureManager {
     }
 
     /** @hide */
-    static class StrippedContext {
-        final String mPackageName;
-        final String mContext;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static class StrippedContext {
+        @NonNull final String mPackageName;
+        @NonNull final String mContext;
         final @UserIdInt int mUserId;
 
-        private StrippedContext(Context context) {
+        /** @hide */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+        public StrippedContext(@NonNull Context context) {
             mPackageName = context.getPackageName();
             mContext = context.toString();
             mUserId = context.getUserId();
@@ -440,6 +543,7 @@ public final class ContentCaptureManager {
             return mContext;
         }
 
+        @NonNull
         public String getPackageName() {
             return mPackageName;
         }
@@ -463,12 +567,17 @@ public final class ContentCaptureManager {
 
         if (sVerbose) Log.v(TAG, "Constructor for " + context.getPackageName());
 
-        // TODO(b/119220549): we might not even need a handler, as the IPCs are oneway. But if we
-        // do, then we should optimize it to run the tests after the Choreographer finishes the most
-        // important steps of the frame.
-        mHandler = Handler.createAsync(Looper.getMainLooper());
-
         mDataShareAdapterResourceManager = new LocalDataShareAdapterResourceManager();
+
+        if (mOptions.contentProtectionOptions.enableReceiver
+                && mOptions.contentProtectionOptions.bufferSize > 0) {
+            mContentProtectionEventBuffer =
+                    new RingBuffer(
+                            ContentCaptureEvent.class,
+                            mOptions.contentProtectionOptions.bufferSize);
+        } else {
+            mContentProtectionEventBuffer = null;
+        }
     }
 
     /**
@@ -482,14 +591,48 @@ public final class ContentCaptureManager {
      */
     @NonNull
     @UiThread
-    public MainContentCaptureSession getMainContentCaptureSession() {
+    public ContentCaptureSession getMainContentCaptureSession() {
         synchronized (mLock) {
             if (mMainSession == null) {
-                mMainSession = new MainContentCaptureSession(mContext, this, mHandler, mService);
+                mMainSession = prepareMainSession();
                 if (sVerbose) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
             }
             return mMainSession;
         }
+    }
+
+    @NonNull
+    @GuardedBy("mLock")
+    private ContentCaptureSession prepareMainSession() {
+        if (runOnBackgroundThreadEnabled()) {
+            return new MainContentCaptureSessionV2(
+                    mContext,
+                    this,
+                    prepareUiHandler(),
+                    prepareContentCaptureHandler(),
+                    mService
+            );
+        } else {
+            return new MainContentCaptureSession(mContext, this, prepareUiHandler(), mService);
+        }
+    }
+
+    @NonNull
+    @GuardedBy("mLock")
+    private Handler prepareContentCaptureHandler() {
+        if (mContentCaptureHandler == null) {
+            mContentCaptureHandler = BackgroundThread.getHandler();
+        }
+        return mContentCaptureHandler;
+    }
+
+    @NonNull
+    @GuardedBy("mLock")
+    private Handler prepareUiHandler() {
+        if (mUiHandler == null) {
+            mUiHandler = Handler.createAsync(Looper.getMainLooper());
+        }
+        return mUiHandler;
     }
 
     /** @hide */
@@ -607,7 +750,7 @@ public final class ContentCaptureManager {
     public boolean isContentCaptureEnabled() {
         if (mOptions.lite) return false;
 
-        final MainContentCaptureSession mainSession;
+        final ContentCaptureSession mainSession;
         synchronized (mLock) {
             mainSession = mMainSession;
         }
@@ -658,7 +801,7 @@ public final class ContentCaptureManager {
             Log.d(TAG, "setContentCaptureEnabled(): setting to " + enabled + " for " + mContext);
         }
 
-        MainContentCaptureSession mainSession;
+        ContentCaptureSession mainSession;
         synchronized (mLock) {
             if (enabled) {
                 mFlags &= ~ContentCaptureContext.FLAG_DISABLED_BY_APP;
@@ -684,8 +827,10 @@ public final class ContentCaptureManager {
         final boolean flagSecureEnabled =
                 (params.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0;
 
-        MainContentCaptureSession mainSession;
+        ContentCaptureSession mainSession;
+        boolean alreadyDisabledByApp;
         synchronized (mLock) {
+            alreadyDisabledByApp = (mFlags & ContentCaptureContext.FLAG_DISABLED_BY_APP) != 0;
             if (flagSecureEnabled) {
                 mFlags |= ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE;
             } else {
@@ -693,7 +838,9 @@ public final class ContentCaptureManager {
             }
             mainSession = mMainSession;
         }
-        if (mainSession != null) {
+
+        // Prevent overriding the status of disabling by app
+        if (mainSession != null && !alreadyDisabledByApp) {
             mainSession.setDisabled(flagSecureEnabled);
         }
     }
@@ -835,6 +982,13 @@ public final class ContentCaptureManager {
             mDumpable = new Dumper();
         }
         activity.addDumpable(mDumpable);
+    }
+
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @Nullable
+    public RingBuffer<ContentCaptureEvent> getContentProtectionEventBuffer() {
+        return mContentProtectionEventBuffer;
     }
 
     // NOTE: ContentCaptureManager cannot implement it directly as it would be exposed as public API

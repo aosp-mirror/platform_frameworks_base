@@ -4,6 +4,10 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.processStateAmToProto;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.app.WaitResult.INVALID_DELAY;
 import static android.app.WaitResult.LAUNCH_STATE_COLD;
 import static android.app.WaitResult.LAUNCH_STATE_HOT;
@@ -84,8 +88,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.ActivityOptions.SourceInfo;
-import android.app.TaskInfo;
-import android.app.TaskInfo.CameraCompatControlState;
+import android.app.AppCompatTaskInfo.CameraCompatControlState;
 import android.app.WaitResult;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.ComponentName;
@@ -285,9 +288,9 @@ class ActivityMetricsLogger {
         final LaunchingState mLaunchingState;
 
         /** The type can be cold (new process), warm (new activity), or hot (bring to front). */
-        final int mTransitionType;
+        int mTransitionType;
         /** Whether the process was already running when the transition started. */
-        final boolean mProcessRunning;
+        boolean mProcessRunning;
         /** whether the process of the launching activity didn't have any active activity. */
         final boolean mProcessSwitch;
         /** The process state of the launching activity prior to the launch */
@@ -972,6 +975,19 @@ class ActivityMetricsLogger {
             // App isn't attached to record yet, so match with info.
             if (info.mLastLaunchedActivity.info.applicationInfo == appInfo) {
                 info.mBindApplicationDelayMs = info.calculateCurrentDelay();
+                if (info.mProcessRunning) {
+                    // It was HOT/WARM launch, but the process was died somehow right after the
+                    // launch request.
+                    info.mProcessRunning = false;
+                    info.mTransitionType = TYPE_TRANSITION_COLD_LAUNCH;
+                    final String msg = "Process " + info.mLastLaunchedActivity.info.processName
+                            + " restarted";
+                    Slog.i(TAG, msg);
+                    if (info.mLaunchingState.mTraceName != null) {
+                        Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, msg + "#"
+                                + LaunchingState.sTraceSeqId);
+                    }
+                }
             }
         }
     }
@@ -1589,17 +1605,17 @@ class ActivityMetricsLogger {
     void logCameraCompatControlAppearedEventReported(@CameraCompatControlState int state,
             int packageUid) {
         switch (state) {
-            case TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED:
+            case CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED:
                 logCameraCompatControlEventReported(
                         CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_APPLY_TREATMENT,
                         packageUid);
                 break;
-            case TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED:
+            case CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED:
                 logCameraCompatControlEventReported(
                         CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_REVERT_TREATMENT,
                         packageUid);
                 break;
-            case TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN:
+            case CAMERA_COMPAT_CONTROL_HIDDEN:
                 // Nothing to log.
                 break;
             default:
@@ -1616,17 +1632,17 @@ class ActivityMetricsLogger {
     void logCameraCompatControlClickedEventReported(@CameraCompatControlState int state,
             int packageUid) {
         switch (state) {
-            case TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED:
+            case CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED:
                 logCameraCompatControlEventReported(
                         CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_APPLY_TREATMENT,
                         packageUid);
                 break;
-            case TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED:
+            case CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED:
                 logCameraCompatControlEventReported(
                         CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_REVERT_TREATMENT,
                         packageUid);
                 break;
-            case TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED:
+            case CAMERA_COMPAT_CONTROL_DISMISSED:
                 logCameraCompatControlEventReported(
                         CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_DISMISS,
                         packageUid);
@@ -1721,7 +1737,8 @@ class ActivityMetricsLogger {
 
         // Beginning a launch is timing sensitive and so should be observed as soon as possible.
         mLaunchObserver.onActivityLaunched(info.mLaunchingState.mStartUptimeNs,
-                info.mLastLaunchedActivity.mActivityComponent, temperature);
+                info.mLastLaunchedActivity.mActivityComponent, temperature,
+                info.mLastLaunchedActivity.mUserId);
 
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -1758,7 +1775,8 @@ class ActivityMetricsLogger {
                 "MetricsLogger:launchObserverNotifyActivityLaunchFinished");
 
         mLaunchObserver.onActivityLaunchFinished(info.mLaunchingState.mStartUptimeNs,
-                info.mLastLaunchedActivity.mActivityComponent, timestampNs);
+                info.mLastLaunchedActivity.mActivityComponent, timestampNs,
+                info.mLastLaunchedActivity.launchMode);
 
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }

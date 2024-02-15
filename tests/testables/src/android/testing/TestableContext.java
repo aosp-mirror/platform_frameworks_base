@@ -62,8 +62,9 @@ import java.util.ArrayList;
  */
 public class TestableContext extends ContextWrapper implements TestRule {
 
-    private final TestableContentResolver mTestableContentResolver;
-    private final TestableSettingsProvider mSettingsProvider;
+    private TestableContentResolver mTestableContentResolver;
+    private TestableSettingsProvider mSettingsProvider;
+    private RuntimeException mSettingsProviderFailure;
 
     private ArrayList<MockServiceResolver> mMockServiceResolvers;
     private ArrayMap<String, Object> mMockSystemServices;
@@ -83,12 +84,24 @@ public class TestableContext extends ContextWrapper implements TestRule {
 
     public TestableContext(Context base, LeakCheck check) {
         super(base);
-        mTestableContentResolver = new TestableContentResolver(base);
-        ContentProviderClient settings = base.getContentResolver()
-                .acquireContentProviderClient(Settings.AUTHORITY);
-        mSettingsProvider = TestableSettingsProvider.getFakeSettingsProvider(settings);
-        mTestableContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider);
-        mSettingsProvider.clearValuesAndCheck(TestableContext.this);
+
+        // Configure TestableSettingsProvider when possible; if we fail to initialize some
+        // underlying infrastructure then remember the error and report it later when a test
+        // attempts to interact with it
+        try {
+            ContentProviderClient settings = base.getContentResolver()
+                    .acquireContentProviderClient(Settings.AUTHORITY);
+            mSettingsProvider = TestableSettingsProvider.getFakeSettingsProvider(settings);
+            mTestableContentResolver = new TestableContentResolver(base);
+            mTestableContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider);
+            mSettingsProvider.clearValuesAndCheck(TestableContext.this);
+            mSettingsProviderFailure = null;
+        } catch (Throwable t) {
+            mTestableContentResolver = null;
+            mSettingsProvider = null;
+            mSettingsProviderFailure = new RuntimeException(
+                    "Failed to initialize TestableSettingsProvider", t);
+        }
         mReceiver = check != null ? check.getTracker("receiver") : null;
         mService = check != null ? check.getTracker("service") : null;
         mComponent = check != null ? check.getTracker("component") : null;
@@ -171,11 +184,17 @@ public class TestableContext extends ContextWrapper implements TestRule {
     }
 
     TestableSettingsProvider getSettingsProvider() {
+        if (mSettingsProviderFailure != null) {
+            throw mSettingsProviderFailure;
+        }
         return mSettingsProvider;
     }
 
     @Override
     public TestableContentResolver getContentResolver() {
+        if (mSettingsProviderFailure != null) {
+            throw mSettingsProviderFailure;
+        }
         return mTestableContentResolver;
     }
 
@@ -515,12 +534,16 @@ public class TestableContext extends ContextWrapper implements TestRule {
         return new TestWatcher() {
             @Override
             protected void succeeded(Description description) {
-                mSettingsProvider.clearValuesAndCheck(TestableContext.this);
+                if (mSettingsProvider != null) {
+                    mSettingsProvider.clearValuesAndCheck(TestableContext.this);
+                }
             }
 
             @Override
             protected void failed(Throwable e, Description description) {
-                mSettingsProvider.clearValuesAndCheck(TestableContext.this);
+                if (mSettingsProvider != null) {
+                    mSettingsProvider.clearValuesAndCheck(TestableContext.this);
+                }
             }
         }.apply(base, description);
     }

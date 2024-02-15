@@ -194,7 +194,7 @@ class Cea708CCParser {
     private final StringBuffer mBuffer = new StringBuffer();
     private int mCommand = 0;
 
-    // Assign a dummy listener in order to avoid null checks.
+    // Assign a placeholder listener in order to avoid null checks.
     private DisplayListener mListener = new DisplayListener() {
         @Override
         public void emitEvent(CaptionEvent event) {

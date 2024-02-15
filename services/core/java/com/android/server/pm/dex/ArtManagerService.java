@@ -61,7 +61,7 @@ import com.android.server.pm.PackageManagerServiceCompilerMapping;
 import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
@@ -536,41 +536,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             }
         } catch (InstallerException e) {
             Slog.w(TAG, "Failed to dump profiles", e);
-        }
-    }
-
-    /**
-     * Compile layout resources in a given package.
-     */
-    public boolean compileLayouts(@NonNull PackageState packageState, @NonNull AndroidPackage pkg) {
-        try {
-            final String packageName = pkg.getPackageName();
-            final String apkPath = pkg.getSplits().get(0).getPath();
-            // TODO(b/143971007): Use a cross-user directory
-            File dataDir = PackageInfoUtils.getDataDir(pkg, UserHandle.myUserId());
-            final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
-            if (packageState.isPrivileged() || pkg.isUseEmbeddedDex()
-                    || pkg.isDefaultToDeviceProtectedStorage()) {
-                // Privileged apps prefer to load trusted code so they don't use compiled views.
-                // If the app is not privileged but prefers code integrity, also avoid compiling
-                // views.
-                // Also disable the view compiler for protected storage apps since there are
-                // selinux permissions required for writing to user_de.
-                return false;
-            }
-            Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
-                    ") to " + outDexFile);
-            final long callingId = Binder.clearCallingIdentity();
-            try {
-                return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
-                        pkg.getUid());
-            } finally {
-                Binder.restoreCallingIdentity(callingId);
-            }
-        }
-        catch (Throwable e) {
-            Log.e("PackageManager", "Failed to compile layouts", e);
-            return false;
         }
     }
 

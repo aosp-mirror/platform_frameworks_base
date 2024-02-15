@@ -52,7 +52,7 @@
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"ಇನ್ನೊಂದು ಸಾಧನದಲ್ಲಿ ಪಾಸ್‌ಕೀ ಅನ್ನು ರಚಿಸಬೇಕೆ?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"ಇನ್ನೊಂದು ಸಾಧನದಲ್ಲಿ ಪಾಸ್‌ವರ್ಡ್ ಉಳಿಸಬೇಕೆ?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"ಮತ್ತೊಂದು ಸಾಧನದಲ್ಲಿ ಸೈನ್-ಇನ್ ಅನ್ನು ಉಳಿಸಬೇಕೆ?"</string>
-    <string name="use_provider_for_all_title" msgid="4201020195058980757">"ನಿಮ್ಮ ಎಲ್ಲಾ ಸೈನ್-ಇನ್‌ಗಳಿಗಾಗಿ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ಅನ್ನು ಬಳಸುವುದೇ?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"ನಿಮ್ಮ ಎಲ್ಲಾ ಸೈನ್-ಇನ್‌ಗಳಿಗಾಗಿ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ಅನ್ನು ಬಳಸಬೇಕೇ?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ ಈ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕವು ನಿಮಗೆ ಸುಲಭವಾಗಿ ಸೈನ್ ಇನ್ ಮಾಡುವುದಕ್ಕೆ ಸಹಾಯ ಮಾಡಲು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಾಸ್‌ಕೀಗಳನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ಡೀಫಾಲ್ಟ್ ಆಗಿ ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="settings" msgid="6536394145760913145">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
@@ -92,4 +92,6 @@
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ಮತ್ತೊಂದು ಸಾಧನದಿಂದ"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ಬೇರೆ ಸಾಧನವನ್ನು ಬಳಸಿ"</string>
     <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನಿಂದ ವಿನಂತಿಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="dropdown_presentation_more_sign_in_options_text" msgid="1693727354272417902">"ಸೈನ್ ಇನ್ ಆಯ್ಕೆಗಳು"</string>
+    <string name="more_options_content_description" msgid="1323427365788198808">"ಇನ್ನಷ್ಟು"</string>
 </resources>

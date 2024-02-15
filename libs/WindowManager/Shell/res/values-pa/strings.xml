@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ਅਣਸਟੈਸ਼"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ਐਪ ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ਇਹ ਐਪ ਸਿਰਫ਼ 1 ਵਿੰਡੋ ਵਿੱਚ ਖੋਲ੍ਹੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"ਇਹ ਐਪ ਸਿਰਫ਼ 1 ਵਿੰਡੋ ਵਿੱਚ ਖੋਲ੍ਹੀ ਜਾ ਸਕਦੀ ਹੈ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇ \'ਤੇ ਕੰਮ ਨਾ ਕਰੇ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ਐਪ ਸੈਕੰਡਰੀ ਡਿਸਪਲੇਆਂ \'ਤੇ ਲਾਂਚ ਕਰਨ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਵਿਭਾਜਕ"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ਉੱਪਰ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ਹੇਠਾਂ ਵੱਲ ਖੱਬੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ਹੇਠਾਂ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ਦਾ ਵਿਸਤਾਰ ਕਰੋ"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ਨੂੰ ਸਮੇਟੋ"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ਸੈਟਿੰਗਾਂ"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ਬਬਲ ਨੂੰ ਖਾਰਜ ਕਰੋ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"ਗੱਲਬਾਤ \'ਤੇ ਬਬਲ ਨਾ ਲਾਓ"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ਸਮਝ ਲਿਆ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ਕੋਈ ਹਾਲੀਆ ਬਬਲ ਨਹੀਂ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ਹਾਲੀਆ ਬਬਲ ਅਤੇ ਖਾਰਜ ਕੀਤੇ ਬਬਲ ਇੱਥੇ ਦਿਸਣਗੇ"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"ਬਬਲ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਚੈਟ ਕਰੋ"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"ਨਵੀਂਆਂ ਗੱਲਾਂਬਾਤਾਂ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਲੇ ਕੋਨੇ ਵਿੱਚ ਪ੍ਰਤੀਕਾਂ ਦੇ ਰੂਪ ਵਿੱਚ ਦਿਖਦੀਆਂ ਹਨ। ਉਨ੍ਹਾਂ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ ਜਾਂ ਉਨ੍ਹਾਂ ਨੂੰ ਖਾਰਜ ਕਰਨ ਲਈ ਘਸੀਟੋ।"</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ਬਬਲ ਦੀ ਸੁਵਿਧਾ ਨੂੰ ਕਿਸੇ ਵੀ ਵੇਲੇ ਕੰਟਰੋਲ ਕਰੋ"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"ਇਹ ਪ੍ਰਬੰਧਨ ਕਰਨ ਲਈ ਇੱਥੇ ਟੈਪ ਕਰੋ ਕਿ ਕਿਹੜੀਆਂ ਐਪਾਂ ਅਤੇ ਗੱਲਾਂਬਾਤਾਂ ਬਬਲ ਹੋ ਸਕਦੀਆਂ ਹਨ"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ਬੁਲਬੁਲਾ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ਬਬਲ ਨੂੰ ਖਾਰਜ ਕੀਤਾ ਗਿਆ।"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਲਈ ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਵਾਸਤੇ ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਇਸ ਐਪ ਦੇ ਆਕਾਰ ਅਨੁਪਾਤ ਨੂੰ ਬਦਲੋ"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"ਆਕਾਰ ਅਨੁਪਾਤ ਬਦਲੋ"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ਕੀ ਕੈਮਰੇ ਸੰਬੰਧੀ ਸਮੱਸਿਆਵਾਂ ਹਨ?\nਮੁੜ-ਫਿੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ਕੀ ਇਹ ਠੀਕ ਨਹੀਂ ਹੋਈ?\nਵਾਪਸ ਉਹੀ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ਕੀ ਕੈਮਰੇ ਸੰਬੰਧੀ ਕੋਈ ਸਮੱਸਿਆ ਨਹੀਂ ਹੈ? ਖਾਰਜ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>

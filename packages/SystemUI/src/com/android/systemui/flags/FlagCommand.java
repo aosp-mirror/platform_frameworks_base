@@ -38,12 +38,12 @@ public class FlagCommand implements Command {
     private final List<String> mOnCommands = List.of("true", "on", "1", "enabled");
     private final List<String> mOffCommands = List.of("false", "off", "0", "disable");
     private final List<String> mSetCommands = List.of("set", "put");
-    private final FeatureFlagsDebug mFeatureFlags;
+    private final FeatureFlagsClassicDebug mFeatureFlags;
     private final Map<String, Flag<?>> mAllFlags;
 
     @Inject
     FlagCommand(
-            FeatureFlagsDebug featureFlags,
+            FeatureFlagsClassicDebug featureFlags,
             @Named(ALL_FLAGS) Map<String, Flag<?>> allFlags
     ) {
         mFeatureFlags = featureFlags;
@@ -177,6 +177,13 @@ public class FlagCommand implements Command {
                 || (flag instanceof SysPropFlag);
     }
 
+    private Boolean isTeamfoodFlag(Flag<?>  flag) {
+        if (!(flag instanceof BooleanFlag)) {
+            return null;
+        }
+        return flag.getTeamfood();
+    }
+
     private boolean isBooleanFlagEnabled(Flag<?> flag) {
         if (flag instanceof ReleasedFlag) {
             return mFeatureFlags.isEnabled((ReleasedFlag) flag);
@@ -219,17 +226,6 @@ public class FlagCommand implements Command {
         return 0;
     }
 
-    private int flagNameToId(String flagName) {
-        Map<String, Flag<?>> flagFields = FlagsFactory.INSTANCE.getKnownFlags();
-        for (String fieldName : flagFields.keySet()) {
-            if (flagName.equals(fieldName)) {
-                return flagFields.get(fieldName).getId();
-            }
-        }
-
-        return 0;
-    }
-
     private void printKnownFlags(PrintWriter pw) {
         Map<String, Flag<?>> fields = FlagsFactory.INSTANCE.getKnownFlags();
 
@@ -243,11 +239,13 @@ public class FlagCommand implements Command {
         for (int i = 0; i < longestFieldName - "Flag Name".length() + 1; i++) {
             pw.print(" ");
         }
-        pw.println(" Value");
+        pw.print(" Value  ");
+        pw.println(" Teamfood?");
         for (int i = 0; i < longestFieldName; i++) {
             pw.print("=");
         }
-        pw.println(" ========");
+        pw.println(" ======= ===========");
+
         for (String fieldName : fields.keySet()) {
             Flag<?> flag = fields.get(fieldName);
             if (!mAllFlags.containsKey(flag.getName())) {
@@ -260,7 +258,19 @@ public class FlagCommand implements Command {
             }
             pw.print(" ");
             if (isBooleanFlag(flag)) {
-                pw.println(isBooleanFlagEnabled(flag));
+                boolean enabled = isBooleanFlagEnabled(flag);
+                pw.print(enabled);
+                if (enabled) {
+                    pw.print("    ");
+                } else {
+                    pw.print("   ");
+                }
+                Boolean teamfood = isTeamfoodFlag(flag);
+                if (teamfood != null) {
+                    pw.print(teamfood);
+                }
+                pw.println();
+
             } else if (isStringFlag(flag)) {
                 pw.println(getStringFlag(flag));
             } else if (isIntFlag(flag)) {

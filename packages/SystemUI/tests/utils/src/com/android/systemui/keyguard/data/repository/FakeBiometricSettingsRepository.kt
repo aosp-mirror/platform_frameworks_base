@@ -18,39 +18,36 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 
-class FakeBiometricSettingsRepository : BiometricSettingsRepository {
+@SysUISingleton
+class FakeBiometricSettingsRepository @Inject constructor() : BiometricSettingsRepository {
+    private val _isFingerprintEnrolledAndEnabled = MutableStateFlow(false)
+    override val isFingerprintEnrolledAndEnabled: StateFlow<Boolean>
+        get() = _isFingerprintEnrolledAndEnabled
 
-    private val _isFingerprintEnrolled = MutableStateFlow<Boolean>(false)
-    override val isFingerprintEnrolled: StateFlow<Boolean> = _isFingerprintEnrolled.asStateFlow()
+    private val _isFingerprintAuthCurrentlyAllowed = MutableStateFlow(false)
+    override val isFingerprintAuthCurrentlyAllowed: StateFlow<Boolean>
+        get() = _isFingerprintAuthCurrentlyAllowed
 
-    private val _isFaceEnrolled = MutableStateFlow(false)
-    override val isFaceEnrolled: Flow<Boolean>
-        get() = _isFaceEnrolled
+    private val _isFaceAuthEnrolledAndEnabled = MutableStateFlow(false)
+    override val isFaceAuthEnrolledAndEnabled: StateFlow<Boolean>
+        get() = _isFaceAuthEnrolledAndEnabled
 
-    private val _isFaceAuthEnabled = MutableStateFlow(false)
-    override val isFaceAuthenticationEnabled: Flow<Boolean>
-        get() = _isFaceAuthEnabled
-
-    private val _isStrongBiometricAllowed = MutableStateFlow(false)
-    override val isStrongBiometricAllowed = _isStrongBiometricAllowed.asStateFlow()
-
-    private val _isNonStrongBiometricAllowed = MutableStateFlow(false)
-    override val isNonStrongBiometricAllowed: StateFlow<Boolean>
-        get() = _isNonStrongBiometricAllowed
-
-    private val _isFingerprintEnabledByDevicePolicy = MutableStateFlow(false)
-    override val isFingerprintEnabledByDevicePolicy =
-        _isFingerprintEnabledByDevicePolicy.asStateFlow()
+    private val _isFaceAuthCurrentlyAllowed = MutableStateFlow(false)
+    override val isFaceAuthCurrentlyAllowed: Flow<Boolean>
+        get() = _isFaceAuthCurrentlyAllowed
 
     private val _isFaceAuthSupportedInCurrentPosture = MutableStateFlow(false)
-    override val isFaceAuthSupportedInCurrentPosture: Flow<Boolean>
+    override val isFaceAuthSupportedInCurrentPosture: StateFlow<Boolean>
         get() = _isFaceAuthSupportedInCurrentPosture
 
     override val isCurrentUserInLockdown: Flow<Boolean>
@@ -60,32 +57,30 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
     override val authenticationFlags: Flow<AuthenticationFlags>
         get() = _authFlags
 
-    fun setFingerprintEnrolled(isFingerprintEnrolled: Boolean) {
-        _isFingerprintEnrolled.value = isFingerprintEnrolled
-    }
-
-    fun setStrongBiometricAllowed(isStrongBiometricAllowed: Boolean) {
-        _isStrongBiometricAllowed.value = isStrongBiometricAllowed
-    }
-
-    fun setFingerprintEnabledByDevicePolicy(isFingerprintEnabledByDevicePolicy: Boolean) {
-        _isFingerprintEnabledByDevicePolicy.value = isFingerprintEnabledByDevicePolicy
-    }
-
     fun setAuthenticationFlags(value: AuthenticationFlags) {
         _authFlags.value = value
     }
 
-    fun setFaceEnrolled(isFaceEnrolled: Boolean) {
-        _isFaceEnrolled.value = isFaceEnrolled
+    fun setIsFingerprintAuthEnrolledAndEnabled(value: Boolean) {
+        _isFingerprintEnrolledAndEnabled.value = value
+        _isFingerprintAuthCurrentlyAllowed.value = _isFingerprintAuthCurrentlyAllowed.value && value
+    }
+
+    fun setIsFingerprintAuthCurrentlyAllowed(value: Boolean) {
+        _isFingerprintAuthCurrentlyAllowed.value = value
+    }
+
+    fun setIsFaceAuthEnrolledAndEnabled(value: Boolean) {
+        _isFaceAuthEnrolledAndEnabled.value = value
+        _isFaceAuthCurrentlyAllowed.value = _isFaceAuthCurrentlyAllowed.value && value
+    }
+
+    fun setIsFaceAuthCurrentlyAllowed(value: Boolean) {
+        _isFaceAuthCurrentlyAllowed.value = value
     }
 
     fun setIsFaceAuthSupportedInCurrentPosture(value: Boolean) {
         _isFaceAuthSupportedInCurrentPosture.value = value
-    }
-
-    fun setIsFaceAuthEnabled(enabled: Boolean) {
-        _isFaceAuthEnabled.value = enabled
     }
 
     fun setIsUserInLockdown(value: Boolean) {
@@ -106,8 +101,9 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
             )
         }
     }
+}
 
-    fun setIsNonStrongBiometricAllowed(value: Boolean) {
-        _isNonStrongBiometricAllowed.value = value
-    }
+@Module
+interface FakeBiometricSettingsRepositoryModule {
+    @Binds fun bindFake(fake: FakeBiometricSettingsRepository): BiometricSettingsRepository
 }

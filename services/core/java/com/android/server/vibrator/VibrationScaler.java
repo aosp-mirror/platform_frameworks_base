@@ -16,14 +16,20 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.os.IExternalVibratorService;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.VibrationEffectSegment;
 import android.util.Slog;
 import android.util.SparseArray;
+
+import java.util.ArrayList;
 
 /** Controls vibration scaling. */
 final class VibrationScaler {
@@ -51,6 +57,7 @@ final class VibrationScaler {
     private final SparseArray<ScaleLevel> mScaleLevels;
     private final VibrationSettings mSettingsController;
     private final int mDefaultVibrationAmplitude;
+    private final SparseArray<Float> mAdaptiveHapticsScales = new SparseArray<>();
 
     VibrationScaler(Context context, VibrationSettings settingsController) {
         mSettingsController = settingsController;
@@ -100,7 +107,14 @@ final class VibrationScaler {
      * @return The same given effect, if no changes were made, or a new {@link VibrationEffect} with
      * resolved and scaled amplitude
      */
-    public <T extends VibrationEffect> T scale(VibrationEffect effect, int usageHint) {
+    @NonNull
+    public VibrationEffect scale(@NonNull VibrationEffect effect, int usageHint) {
+        if (!(effect instanceof VibrationEffect.Composed)) {
+            // This only scales composed vibration effects.
+            Slog.wtf(TAG, "Error scaling unsupported vibration effect: " + effect);
+            return effect;
+        }
+
         int defaultIntensity = mSettingsController.getDefaultIntensity(usageHint);
         int currentIntensity = mSettingsController.getCurrentIntensity(usageHint);
 
@@ -110,17 +124,45 @@ final class VibrationScaler {
         }
 
         int newEffectStrength = intensityToEffectStrength(currentIntensity);
-        effect = effect.applyEffectStrength(newEffectStrength).resolve(mDefaultVibrationAmplitude);
-        ScaleLevel scale = mScaleLevels.get(currentIntensity - defaultIntensity);
+        ScaleLevel scaleLevel = mScaleLevels.get(currentIntensity - defaultIntensity);
 
-        if (scale == null) {
+        if (scaleLevel == null) {
             // Something about our scaling has gone wrong, so just play with no scaling.
             Slog.e(TAG, "No configured scaling level!"
                     + " (current=" + currentIntensity + ", default= " + defaultIntensity + ")");
-            return (T) effect;
         }
 
-        return (T) effect.scale(scale.factor);
+        VibrationEffect.Composed composedEffect = (VibrationEffect.Composed) effect;
+        ArrayList<VibrationEffectSegment> segments =
+                new ArrayList<>(composedEffect.getSegments());
+        int segmentCount = segments.size();
+        for (int i = 0; i < segmentCount; i++) {
+            VibrationEffectSegment segment = segments.get(i);
+            segment = segment.resolve(mDefaultVibrationAmplitude)
+                    .applyEffectStrength(newEffectStrength);
+            if (scaleLevel != null) {
+                segment = segment.scale(scaleLevel.factor);
+            }
+
+            // If adaptive haptics scaling is available for this usage, apply it to the segment.
+            if (Flags.adaptiveHapticsEnabled()
+                    && mAdaptiveHapticsScales.size() > 0
+                    && mAdaptiveHapticsScales.contains(usageHint)) {
+                float adaptiveScale = mAdaptiveHapticsScales.get(usageHint);
+                segment = segment.scale(adaptiveScale);
+            }
+
+            segments.set(i, segment);
+        }
+        if (segments.equals(composedEffect.getSegments())) {
+            // No segment was updated, return original effect.
+            return effect;
+        }
+        VibrationEffect.Composed scaled =
+                new VibrationEffect.Composed(segments, composedEffect.getRepeatIndex());
+        // Make sure we validate what was scaled, since we're using the constructor directly
+        scaled.validate();
+        return scaled;
     }
 
     /**
@@ -141,6 +183,38 @@ final class VibrationScaler {
 
         int newEffectStrength = intensityToEffectStrength(currentIntensity);
         return prebaked.applyEffectStrength(newEffectStrength);
+    }
+
+    /**
+     * Updates the adaptive haptics scales list by adding or modifying the scale for this usage.
+     *
+     * @param usageHint one of VibrationAttributes.USAGE_*.
+     * @param scale The scaling factor that should be applied to vibrations of this usage.
+     *
+     * @hide
+     */
+    public void updateAdaptiveHapticsScale(@VibrationAttributes.Usage int usageHint, float scale) {
+        mAdaptiveHapticsScales.put(usageHint, scale);
+    }
+
+    /**
+     * Removes the usage from the cached adaptive haptics scales list.
+     *
+     * @param usageHint one of VibrationAttributes.USAGE_*.
+     *
+     * @hide
+     */
+    public void removeAdaptiveHapticsScale(@VibrationAttributes.Usage int usageHint) {
+        mAdaptiveHapticsScales.remove(usageHint);
+    }
+
+    /**
+     * Removes all cached adaptive haptics scales.
+     *
+     * @hide
+     */
+    public void clearAdaptiveHapticsScales() {
+        mAdaptiveHapticsScales.clear();
     }
 
     /** Mapping of Vibrator.VIBRATION_INTENSITY_* values to {@link EffectStrength}. */

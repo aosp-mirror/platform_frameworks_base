@@ -21,7 +21,8 @@ import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
 import static android.app.AlarmManager.RTC;
 import static android.app.AlarmManager.RTC_WAKEUP;
 
-import static com.android.server.alarm.AlarmManagerService.clampPositive;
+import static com.android.server.alarm.AlarmManagerService.PRIORITY_NORMAL;
+import static com.android.server.alarm.AlarmManagerService.addClampPositive;
 
 import android.app.AlarmManager;
 import android.app.IAlarmListener;
@@ -128,8 +129,9 @@ class Alarm {
     /** The ultimate delivery time to be used for this alarm */
     private long mWhenElapsed;
     private long mMaxWhenElapsed;
-    public int mExactAllowReason;
-    public AlarmManagerService.PriorityClass priorityClass;
+    public int exactAllowReason;
+    @AlarmManagerService.DispatchPriority
+    public int priorityClass;
     /** Broadcast options to use when delivering this alarm */
     public Bundle mIdleOptions;
     public boolean mUsingReserveQuota;
@@ -146,7 +148,7 @@ class Alarm {
         mPolicyWhenElapsed[REQUESTER_POLICY_INDEX] = requestedWhenElapsed;
         mWhenElapsed = requestedWhenElapsed;
         this.windowLength = windowLength;
-        mMaxWhenElapsed = clampPositive(requestedWhenElapsed + windowLength);
+        mMaxWhenElapsed = addClampPositive(requestedWhenElapsed, windowLength);
         repeatInterval = interval;
         operation = op;
         listener = rec;
@@ -158,10 +160,11 @@ class Alarm {
         this.uid = uid;
         packageName = pkgName;
         mIdleOptions = idleOptions;
-        mExactAllowReason = exactAllowReason;
+        this.exactAllowReason = exactAllowReason;
         sourcePackage = (operation != null) ? operation.getCreatorPackage() : packageName;
         creatorUid = (operation != null) ? operation.getCreatorUid() : this.uid;
         mUsingReserveQuota = false;
+        priorityClass = PRIORITY_NORMAL;
     }
 
     public static String makeTag(PendingIntent pi, String tag, int type) {
@@ -241,8 +244,8 @@ class Alarm {
 
         final long oldMaxWhenElapsed = mMaxWhenElapsed;
         // windowLength should always be >= 0 here.
-        final long maxRequestedElapsed = clampPositive(
-                mPolicyWhenElapsed[REQUESTER_POLICY_INDEX] + windowLength);
+        final long maxRequestedElapsed = addClampPositive(
+                mPolicyWhenElapsed[REQUESTER_POLICY_INDEX], windowLength);
         mMaxWhenElapsed = Math.max(maxRequestedElapsed, mWhenElapsed);
 
         return (oldWhenElapsed != mWhenElapsed) || (oldMaxWhenElapsed != mMaxWhenElapsed);
@@ -333,9 +336,9 @@ class Alarm {
         }
         ipw.print(" window=");
         TimeUtils.formatDuration(windowLength, ipw);
-        if (mExactAllowReason != EXACT_ALLOW_REASON_NOT_APPLICABLE) {
+        if (exactAllowReason != EXACT_ALLOW_REASON_NOT_APPLICABLE) {
             ipw.print(" exactAllowReason=");
-            ipw.print(exactReasonToString(mExactAllowReason));
+            ipw.print(exactReasonToString(exactAllowReason));
         }
         ipw.print(" repeatInterval=");
         ipw.print(repeatInterval);

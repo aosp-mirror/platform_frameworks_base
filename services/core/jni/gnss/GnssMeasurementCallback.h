@@ -53,7 +53,8 @@ void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
 
 class GnssMeasurementCallbackAidl : public hardware::gnss::BnGnssMeasurementCallback {
 public:
-    GnssMeasurementCallbackAidl() : mCallbacksObj(getCallbacksObj()) {}
+    GnssMeasurementCallbackAidl(int version)
+          : mCallbacksObj(getCallbacksObj()), interfaceVersion(version) {}
     android::binder::Status gnssMeasurementCb(const hardware::gnss::GnssData& data) override;
 
 private:
@@ -71,6 +72,7 @@ private:
     void translateGnssClock(JNIEnv* env, const hardware::gnss::GnssData& data, JavaObject& object);
 
     jobject& mCallbacksObj;
+    const int interfaceVersion;
 };
 
 /*
@@ -110,10 +112,10 @@ private:
 
 class GnssMeasurementCallback {
 public:
-    GnssMeasurementCallback() {}
+    GnssMeasurementCallback(int version) : interfaceVersion(version) {}
     sp<GnssMeasurementCallbackAidl> getAidl() {
         if (callbackAidl == nullptr) {
-            callbackAidl = sp<GnssMeasurementCallbackAidl>::make();
+            callbackAidl = sp<GnssMeasurementCallbackAidl>::make(interfaceVersion);
         }
         return callbackAidl;
     }
@@ -128,6 +130,7 @@ public:
 private:
     sp<GnssMeasurementCallbackAidl> callbackAidl;
     sp<GnssMeasurementCallbackHidl> callbackHidl;
+    const int interfaceVersion;
 };
 
 template <class T>

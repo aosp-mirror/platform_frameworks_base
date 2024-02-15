@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include <SkString.h>
 #include <SkTraceMemoryDump.h>
+#include <optional>
+#include <string>
 #include <utils/String8.h>
 #include <unordered_map>
 #include <vector>
@@ -60,17 +61,17 @@ private:
         TraceValue(const char* units, uint64_t value) : units(units), value(value), count(1) {}
         TraceValue(const TraceValue& v) : units(v.units), value(v.value), count(v.count) {}
 
-        const char* units;
+        std::string units;
         float value;
         int count;
     };
 
-    const char* mapName(const char* resourceName);
+    std::optional<std::string> mapName(const std::string& resourceName);
     void processElement();
     TraceValue convertUnits(const TraceValue& value);
 
     const std::vector<ResourcePair> mResourceMap;
-    const char* mCategoryKey = nullptr;
+    std::optional<std::string> mCategoryKey;
     const bool mItemizeType;
 
     // variables storing the size of all elements being dumped
@@ -79,10 +80,10 @@ private:
 
     // variables storing information on the current node being dumped
     std::string mCurrentElement;
-    std::unordered_map<const char*, TraceValue> mCurrentValues;
+    std::unordered_map<std::string, TraceValue> mCurrentValues;
 
     // variable that stores the final format of the data after the individual elements are processed
-    std::unordered_map<std::string, std::unordered_map<const char*, TraceValue>> mResults;
+    std::unordered_map<std::string, std::unordered_map<std::string, TraceValue>> mResults;
 };
 
 } /* namespace skiapipeline */

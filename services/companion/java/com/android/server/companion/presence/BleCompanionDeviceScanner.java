@@ -56,7 +56,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 import android.util.Slog;
 
@@ -73,20 +72,6 @@ import java.util.Set;
 class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
     private static final String TAG = "CDM_BleCompanionDeviceScanner";
 
-    /**
-     * When using {@link ScanSettings#SCAN_MODE_LOW_POWER}, it usually takes from 20 seconds to
-     * 2 minutes for the BLE scanner to find advertisements sent from the same device.
-     * On the other hand, {@link android.bluetooth.BluetoothAdapter.LeScanCallback} will report
-     * {@link ScanSettings#CALLBACK_TYPE_MATCH_LOST MATCH_LOST} 10 sec after it finds the
-     * advertisement for the first time (add reports
-     * {@link ScanSettings#CALLBACK_TYPE_FIRST_MATCH FIRST_MATCH}).
-     * To avoid constantly reporting {@link Callback#onBleCompanionDeviceFound(int) onDeviceFound()}
-     * and {@link Callback#onBleCompanionDeviceLost(int) onDeviceLost()} (while the device is
-     * actually present) to its clients, {@link BleCompanionDeviceScanner}, will add 1-minute delay
-     * after it receives {@link ScanSettings#CALLBACK_TYPE_MATCH_LOST MATCH_LOST}.
-     */
-    private static final int NOTIFY_DEVICE_LOST_DELAY = 2 * 60 * 1000; // 2 Min.
-
     interface Callback {
         void onBleCompanionDeviceFound(int associationId);
 
@@ -95,7 +80,6 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
 
     private final @NonNull AssociationStore mAssociationStore;
     private final @NonNull Callback mCallback;
-    private final @NonNull MainThreadHandler mMainThreadHandler;
 
     // Non-null after init().
     private @Nullable BluetoothAdapter mBtAdapter;
@@ -108,7 +92,6 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
             @NonNull AssociationStore associationStore, @NonNull Callback callback) {
         mAssociationStore = associationStore;
         mCallback = callback;
-        mMainThreadHandler = new MainThreadHandler();
     }
 
     @MainThread
@@ -146,7 +129,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         if (Looper.getMainLooper().isCurrentThread()) {
             restartScan();
         } else {
-            mMainThreadHandler.post(this::restartScan);
+            new Handler(Looper.getMainLooper()).post(this::restartScan);
         }
     }
 
@@ -182,11 +165,10 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
     }
 
     @MainThread
-    private void startScan() {
+    void startScan() {
         enforceInitialized();
 
         if (DEBUG) Log.i(TAG, "startScan()");
-
         // This method should not be called if scan is already in progress.
         if (mScanning) {
             Slog.w(TAG, "Scan is already in progress.");
@@ -243,7 +225,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         }
     }
 
-    private void stopScanIfNeeded() {
+    void stopScanIfNeeded() {
         enforceInitialized();
 
         if (DEBUG) Log.i(TAG, "stopScan()");
@@ -343,16 +325,11 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
 
             switch (callbackType) {
                 case CALLBACK_TYPE_FIRST_MATCH:
-                    if (mMainThreadHandler.hasNotifyDeviceLostMessages(device)) {
-                        mMainThreadHandler.removeNotifyDeviceLostMessages(device);
-                        return;
-                    }
-
                     notifyDeviceFound(device);
                     break;
 
                 case CALLBACK_TYPE_MATCH_LOST:
-                    mMainThreadHandler.sendNotifyDeviceLostDelayedMessage(device);
+                    notifyDeviceLost(device);
                     break;
 
                 default:
@@ -369,36 +346,6 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
             mScanning = false;
         }
     };
-
-    @SuppressLint("HandlerLeak")
-    private class MainThreadHandler extends Handler {
-        private static final int NOTIFY_DEVICE_LOST = 1;
-
-        MainThreadHandler() {
-            super(Looper.getMainLooper());
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message message) {
-            if  (message.what != NOTIFY_DEVICE_LOST) return;
-
-            final BluetoothDevice device = (BluetoothDevice) message.obj;
-            notifyDeviceLost(device);
-        }
-
-        void sendNotifyDeviceLostDelayedMessage(BluetoothDevice device) {
-            final Message message = obtainMessage(NOTIFY_DEVICE_LOST, device);
-            sendMessageDelayed(message, NOTIFY_DEVICE_LOST_DELAY);
-        }
-
-        boolean hasNotifyDeviceLostMessages(BluetoothDevice device) {
-            return hasEqualMessages(NOTIFY_DEVICE_LOST, device);
-        }
-
-        void removeNotifyDeviceLostMessages(BluetoothDevice device) {
-            removeEqualMessages(NOTIFY_DEVICE_LOST, device);
-        }
-    }
 
     private static String nameForBtState(int state) {
         return nameForState(state) + "(" + state + ")";

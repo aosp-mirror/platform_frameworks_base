@@ -1,5 +1,8 @@
 package android.app.assist;
 
+import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -7,6 +10,9 @@ import android.annotation.SystemApi;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.GetCredentialException;
+import android.credentials.GetCredentialRequest;
+import android.credentials.GetCredentialResponse;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -15,6 +21,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.OutcomeReceiver;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PooledStringReader;
@@ -22,7 +29,10 @@ import android.os.PooledStringWriter;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.FillRequest;
+import android.text.InputType;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -634,6 +644,12 @@ public class AssistStructure implements Parcelable {
         AutofillId mAutofillId;
         @View.AutofillType int mAutofillType = View.AUTOFILL_TYPE_NONE;
         @Nullable String[] mAutofillHints;
+
+        @Nullable GetCredentialRequest mGetCredentialRequest;
+
+        @Nullable OutcomeReceiver<GetCredentialResponse, GetCredentialException>
+                mGetCredentialCallback;
+
         AutofillValue mAutofillValue;
         CharSequence[] mAutofillOptions;
         boolean mSanitized;
@@ -648,6 +664,7 @@ public class AssistStructure implements Parcelable {
         // POJO used to override some autofill-related values when the node is parcelized.
         // Not written to parcel.
         AutofillOverlay mAutofillOverlay;
+        boolean mIsCredential;
 
         int mX;
         int mY;
@@ -796,6 +813,7 @@ public class AssistStructure implements Parcelable {
 
             if (autofillFlags != 0) {
                 mSanitized = in.readInt() == 1;
+                mIsCredential = in.readInt() == 1;
                 mImportantForAutofill = in.readInt();
 
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID) != 0) {
@@ -1030,6 +1048,7 @@ public class AssistStructure implements Parcelable {
 
             if (autofillFlags != 0) {
                 out.writeInt(mSanitized ? 1 : 0);
+                out.writeInt(mIsCredential ? 1 : 0);
                 out.writeInt(mImportantForAutofill);
                 writeSensitive = mSanitized || !sanitizeOnWrite;
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID) != 0) {
@@ -1240,6 +1259,45 @@ public class AssistStructure implements Parcelable {
          */
         @Nullable public CharSequence[] getAutofillOptions() {
             return mAutofillOptions;
+        }
+
+        /**
+         * @return whether the node is a credential.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         * TODO(b/303677885): add TestApi
+         *
+         * @hide
+         */
+        public boolean isCredential() {
+            return mIsCredential;
+        }
+
+        /**
+         * Returns the request associated with this node
+         * @return
+         *
+         * @hide
+         */
+        @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
+        @Nullable
+        public GetCredentialRequest getCredentialManagerRequest() {
+            return mGetCredentialRequest;
+        }
+
+        /**
+         *
+         * @return
+         *
+         * @hide
+         *
+         */
+        @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
+        @Nullable
+        public OutcomeReceiver<GetCredentialResponse,
+                GetCredentialException> getCredentialManagerCallback() {
+            return mGetCredentialCallback;
         }
 
         /**
@@ -1557,6 +1615,10 @@ public class AssistStructure implements Parcelable {
         /**
          * Returns any text associated with the node that is displayed to the user, or null
          * if there is none.
+         *
+         * <p> The text will be stripped of any spans that could potentially contain reference to
+         * the activity context, to avoid memory leak. If the text contained a span, a plain
+         * string version of the text will be returned.
          */
         @Nullable
         public CharSequence getText() {
@@ -1996,14 +2058,16 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setText(CharSequence text) {
             ViewNodeText t = getNodeText();
-            t.mText = TextUtils.trimNoCopySpans(text);
+            // Strip spans from the text to avoid memory leak
+            t.mText = TextUtils.trimToParcelableSize(stripAllSpansFromText(text));
             t.mTextSelectionStart = t.mTextSelectionEnd = -1;
         }
 
         @Override
         public void setText(CharSequence text, int selectionStart, int selectionEnd) {
             ViewNodeText t = getNodeText();
-            t.mText = TextUtils.trimNoCopySpans(text);
+            // Strip spans from the text to avoid memory leak
+            t.mText = stripAllSpansFromText(text);
             t.mTextSelectionStart = selectionStart;
             t.mTextSelectionEnd = selectionEnd;
         }
@@ -2114,6 +2178,19 @@ public class AssistStructure implements Parcelable {
             }
         }
 
+        @Nullable
+        @Override
+        public GetCredentialRequest getCredentialManagerRequest() {
+            return mNode.mGetCredentialRequest;
+        }
+
+        @Nullable
+        @Override
+        public OutcomeReceiver<
+                GetCredentialResponse, GetCredentialException> getCredentialManagerCallback() {
+            return mNode.mGetCredentialCallback;
+        }
+
         @Override
         public void asyncCommit() {
             synchronized (mAssist) {
@@ -2174,6 +2251,18 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
+        public void setIsCredential(boolean isCredential) {
+            mNode.mIsCredential = isCredential;
+        }
+
+        @Override
+        public void setCredentialManagerRequest(@NonNull GetCredentialRequest request,
+                @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
+            mNode.mGetCredentialRequest = request;
+            mNode.mGetCredentialCallback = callback;
+        }
+
+        @Override
         public void setReceiveContentMimeTypes(@Nullable String[] mimeTypes) {
             mNode.mReceiveContentMimeTypes = mimeTypes;
         }
@@ -2221,6 +2310,13 @@ public class AssistStructure implements Parcelable {
         @Override
         public void setHtmlInfo(@NonNull HtmlInfo htmlInfo) {
             mNode.mHtmlInfo = htmlInfo;
+        }
+
+        private CharSequence stripAllSpansFromText(CharSequence text) {
+            if (text instanceof Spanned) {
+                return text.toString();
+            }
+            return text;
         }
     }
 
@@ -2438,7 +2534,7 @@ public class AssistStructure implements Parcelable {
                     + node.getTextStyle());
             Log.i(TAG, prefix + "  Text color fg: #" + Integer.toHexString(node.getTextColor())
                     + ", bg: #" + Integer.toHexString(node.getTextBackgroundColor()));
-            Log.i(TAG, prefix + "  Input type: " + node.getInputType());
+            Log.i(TAG, prefix + "  Input type: " + getInputTypeString(node.getInputType()));
             Log.i(TAG, prefix + "  Resource id: " + node.getTextIdEntry());
         }
         String webDomain = node.getWebDomain();
@@ -2481,7 +2577,18 @@ public class AssistStructure implements Parcelable {
                     + ", hints=" + Arrays.toString(node.getAutofillHints())
                     + ", value=" + node.getAutofillValue()
                     + ", sanitized=" + node.isSanitized()
-                    + ", important=" + node.getImportantForAutofill());
+                    + ", important=" + node.getImportantForAutofill()
+                    + ", visibility=" + node.getVisibility()
+                    + ", isCredential=" + node.isCredential()
+            );
+        }
+        GetCredentialRequest getCredentialRequest = node.getCredentialManagerRequest();
+        if (getCredentialRequest == null) {
+            Log.i(TAG, prefix + " NO Credential Manager Request");
+        } else {
+            Log.i(TAG, prefix + "  GetCredentialRequest: no. of options= "
+                    + getCredentialRequest.getCredentialOptions().size()
+            );
         }
 
         final int NCHILDREN = node.getChildCount();
@@ -2649,4 +2756,33 @@ public class AssistStructure implements Parcelable {
             return new AssistStructure[size];
         }
     };
+
+    private static final ArrayMap<Integer, String> INPUT_TYPE_VARIATIONS = new ArrayMap<>();
+    static {
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS, "EmailSubject");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS, "PostalAddress");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_PERSON_NAME, "PersonName");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_PASSWORD, "Password");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD, "VisiblePassword");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_URI, "URI");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS, "WebEmailAddress");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD, "WebPassword");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_LONG_MESSAGE, "LongMessage");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE, "ShortMessage");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_FLAG_MULTI_LINE, "MultiLine");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE, "ImeMultiLine");
+        INPUT_TYPE_VARIATIONS.put(InputType.TYPE_TEXT_VARIATION_FILTER, "Filter");
+    }
+
+    private static String getInputTypeString(int inputType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(inputType);
+        sb.append("(class=").append(inputType & InputType.TYPE_MASK_CLASS).append(')');
+        for (int variation : INPUT_TYPE_VARIATIONS.keySet()) {
+            if ((variation & inputType) == variation) {
+                sb.append('|').append(INPUT_TYPE_VARIATIONS.get(variation));
+            }
+        }
+        return sb.toString();
+    }
 }

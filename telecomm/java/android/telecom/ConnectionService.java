@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -43,6 +44,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IConnectionService;
 import com.android.internal.telecom.IConnectionServiceAdapter;
 import com.android.internal.telecom.RemoteServiceCallback;
+import com.android.server.telecom.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -3235,27 +3237,27 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
-     * Called after the {@link Connection} returned by
+     * Called by Telecom after the {@link Connection} returned by
      * {@link #onCreateIncomingConnection(PhoneAccountHandle, ConnectionRequest)}
      * or {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)} has been
      * added to the {@link ConnectionService} and sent to Telecom.
      *
-     * @param connection the {@link Connection}.
-     * @hide
+     * @param connection the {@link Connection} which was added to Telecom.
      */
-    public void onCreateConnectionComplete(Connection connection) {
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    public void onCreateConnectionComplete(@NonNull Connection connection) {
     }
 
     /**
-     * Called after the {@link Conference} returned by
+     * Called by Telecom after the {@link Conference} returned by
      * {@link #onCreateIncomingConference(PhoneAccountHandle, ConnectionRequest)}
      * or {@link #onCreateOutgoingConference(PhoneAccountHandle, ConnectionRequest)} has been
      * added to the {@link ConnectionService} and sent to Telecom.
      *
-     * @param conference the {@link Conference}.
-     * @hide
+     * @param conference the {@link Conference} which was added to Telecom.
      */
-    public void onCreateConferenceComplete(Conference conference) {
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    public void onCreateConferenceComplete(@NonNull Conference conference) {
     }
 
 

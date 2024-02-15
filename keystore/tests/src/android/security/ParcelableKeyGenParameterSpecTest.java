@@ -17,6 +17,7 @@
 package android.security;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -101,6 +102,7 @@ public final class ParcelableKeyGenParameterSpecTest {
         assertThat(spec.getKeyValidityForOriginationEnd(), is(KEY_VALIDITY_FOR_ORIG_END));
         assertThat(spec.getKeyValidityForConsumptionEnd(), is(KEY_VALIDITY_FOR_CONSUMPTION_END));
         assertThat(spec.getDigests(), is(new String[] {DIGEST}));
+        assertThat(spec.isMgf1DigestsSpecified(), is(false));
         assertThat(spec.getEncryptionPaddings(), is(new String[] {ENCRYPTION_PADDING}));
         assertThat(spec.getSignaturePaddings(), is(new String[] {SIGNATURE_PADDING}));
         assertThat(spec.getBlockModes(), is(new String[] {BLOCK_MODE}));
@@ -188,5 +190,20 @@ public final class ParcelableKeyGenParameterSpecTest {
         // implement equals()
         ECGenParameterSpec parcelSpec = (ECGenParameterSpec) fromParcel.getAlgorithmParameterSpec();
         assertEquals(parcelSpec.getName(), ecSpec.getName());
+    }
+
+    @Test
+    public void testParcelingMgf1Digests() {
+        String[] mgf1Digests =
+                new String[] {KeyProperties.DIGEST_SHA1, KeyProperties.DIGEST_SHA256};
+
+        ParcelableKeyGenParameterSpec spec = new ParcelableKeyGenParameterSpec(
+                new KeyGenParameterSpec.Builder(ALIAS, KEY_PURPOSES)
+                        .setMgf1Digests(mgf1Digests)
+                        .build());
+        Parcel parcel = parcelForReading(spec);
+        KeyGenParameterSpec fromParcel =
+                ParcelableKeyGenParameterSpec.CREATOR.createFromParcel(parcel).getSpec();
+        assertArrayEquals(fromParcel.getMgf1Digests().toArray(), mgf1Digests);
     }
 }

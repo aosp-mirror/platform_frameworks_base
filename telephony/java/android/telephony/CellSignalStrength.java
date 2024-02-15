@@ -23,6 +23,7 @@ import android.os.PersistableBundle;
 /**
  * Abstract base class for cell phone signal strength related information.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class CellSignalStrength {
 
     public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN =

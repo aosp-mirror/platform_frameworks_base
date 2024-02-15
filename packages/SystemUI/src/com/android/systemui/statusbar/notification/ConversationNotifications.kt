@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.BindEven
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
+import com.android.systemui.statusbar.notification.row.NotificationContentInflaterLogger
 import com.android.systemui.statusbar.notification.row.NotificationContentView
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.HeadsUpManager
@@ -47,14 +48,19 @@ class ConversationNotificationProcessor @Inject constructor(
     private val launcherApps: LauncherApps,
     private val conversationNotificationManager: ConversationNotificationManager
 ) {
-    fun processNotification(entry: NotificationEntry, recoveredBuilder: Notification.Builder) {
-        val messagingStyle = recoveredBuilder.style as? Notification.MessagingStyle ?: return
+    fun processNotification(
+            entry: NotificationEntry,
+            recoveredBuilder: Notification.Builder,
+            logger: NotificationContentInflaterLogger
+    ): Notification.MessagingStyle? {
+        val messagingStyle = recoveredBuilder.style as? Notification.MessagingStyle ?: return null
         messagingStyle.conversationType =
                 if (entry.ranking.channel.isImportantConversation)
                     Notification.MessagingStyle.CONVERSATION_TYPE_IMPORTANT
                 else
                     Notification.MessagingStyle.CONVERSATION_TYPE_NORMAL
         entry.ranking.conversationShortcutInfo?.let { shortcutInfo ->
+            logger.logAsyncTaskProgress(entry, "getting shortcut icon")
             messagingStyle.shortcutIcon = launcherApps.getShortcutIcon(shortcutInfo)
             shortcutInfo.label?.let { label ->
                 messagingStyle.conversationTitle = label
@@ -62,6 +68,7 @@ class ConversationNotificationProcessor @Inject constructor(
         }
         messagingStyle.unreadMessageCount =
                 conversationNotificationManager.getUnreadCount(entry, recoveredBuilder)
+        return messagingStyle
     }
 }
 

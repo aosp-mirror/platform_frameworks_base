@@ -20,9 +20,12 @@ import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIO
 import static android.Manifest.permission.DETECT_SCREEN_CAPTURE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
+
+import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 
 import static java.lang.Character.MIN_VALUE;
 
@@ -31,6 +34,7 @@ import android.annotation.CallSuper;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.LayoutRes;
@@ -43,6 +47,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
+import android.app.ActivityOptions.SceneTransitionInfo;
 import android.app.VoiceInteractor.Request;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
@@ -98,6 +103,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 import android.service.voice.VoiceInteractionSession;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -838,6 +844,7 @@ public class Activity extends ContextThemeWrapper
     private IBinder mToken;
     private IBinder mAssistToken;
     private IBinder mShareableActivityToken;
+    private ComponentCaller mInitialCaller;
     @UnsupportedAppUsage
     private int mIdent;
     @UnsupportedAppUsage
@@ -927,8 +934,8 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     final FragmentController mFragments = FragmentController.createController(new HostCallbacks());
 
-    /** The options for scene transition. */
-    ActivityOptions mPendingOptions;
+    /** The scene transition info. */
+    SceneTransitionInfo mSceneTransitionInfo;
 
     /** Whether this activity was launched from a bubble. **/
     boolean mLaunchedFromBubble;
@@ -966,8 +973,9 @@ public class Activity extends ContextThemeWrapper
     private int mDefaultKeyMode = DEFAULT_KEYS_DISABLE;
     private SpannableStringBuilder mDefaultKeySsb = null;
 
-    private ActivityManager.TaskDescription mTaskDescription =
+    private final ActivityManager.TaskDescription mTaskDescription =
             new ActivityManager.TaskDescription();
+    private int mLastTaskDescriptionHashCode;
 
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
@@ -977,7 +985,7 @@ public class Activity extends ContextThemeWrapper
     private Thread mUiThread;
 
     @UnsupportedAppUsage
-    ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
+    final ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
     SharedElementCallback mEnterTransitionListener = SharedElementCallback.NULL_CALLBACK;
     SharedElementCallback mExitTransitionListener = SharedElementCallback.NULL_CALLBACK;
 
@@ -998,6 +1006,7 @@ public class Activity extends ContextThemeWrapper
             FULLSCREEN_MODE_REQUEST_EXIT,
             FULLSCREEN_MODE_REQUEST_ENTER
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface FullscreenModeRequest {}
 
     /** Request type of {@link #requestFullscreenMode(int, OutcomeReceiver)}, to request exiting the
@@ -1014,6 +1023,7 @@ public class Activity extends ContextThemeWrapper
             OVERRIDE_TRANSITION_OPEN,
             OVERRIDE_TRANSITION_CLOSE
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface OverrideTransition {}
 
     /**
@@ -1080,6 +1090,16 @@ public class Activity extends ContextThemeWrapper
         @Override
         public void updateStatusBarColor(int color) {
             mTaskDescription.setStatusBarColor(color);
+            setTaskDescription(mTaskDescription);
+        }
+
+        /**
+         * Update the forced status bar appearance.
+         * @hide
+         */
+        @Override
+        public void updateStatusBarAppearance(int appearance) {
+            mTaskDescription.setStatusBarAppearance(appearance);
             setTaskDescription(mTaskDescription);
         }
 
@@ -1883,7 +1903,7 @@ public class Activity extends ContextThemeWrapper
         final int numDialogs = ids.length;
         mManagedDialogs = new SparseArray<ManagedDialog>(numDialogs);
         for (int i = 0; i < numDialogs; i++) {
-            final Integer dialogId = ids[i];
+            final int dialogId = ids[i];
             Bundle dialogState = b.getBundle(savedDialogKeyFor(dialogId));
             if (dialogState != null) {
                 // Calling onRestoreInstanceState() below will invoke dispatchOnCreate
@@ -1953,7 +1973,7 @@ public class Activity extends ContextThemeWrapper
      * <code>persistAcrossReboots</code>.
      *
      * @param savedInstanceState The data most recently supplied in {@link #onSaveInstanceState}
-     * @param persistentState The data caming from the PersistableBundle first
+     * @param persistentState The data coming from the PersistableBundle first
      * saved in {@link #onSaveInstanceState(Bundle, PersistableBundle)}.
      *
      * @see #onCreate
@@ -2039,7 +2059,7 @@ public class Activity extends ContextThemeWrapper
      * indicator that the activity became active and ready to receive input. This sometimes could
      * also be a transit state toward another resting state. For instance, an activity may be
      * relaunched to {@link #onPause} due to configuration changes and the activity was visible,
-     * but wasn’t the top-most activity of an activity task. {@link #onResume} is guaranteed to be
+     * but wasn't the top-most activity of an activity task. {@link #onResume} is guaranteed to be
      * called before {@link #onPause} in this case which honors the activity lifecycle policy and
      * the activity eventually rests in {@link #onPause}.
      *
@@ -2258,9 +2278,9 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>An activity can never receive a new intent in the resumed state. You can count on
      * {@link #onResume} being called after this method, though not necessarily immediately after
-     * the completion this callback. If the activity was resumed, it will be paused and new intent
-     * will be delivered, followed by {@link #onResume}. If the activity wasn't in the resumed
-     * state, then new intent can be delivered immediately, with {@link #onResume()} called
+     * the completion of this callback. If the activity was resumed, it will be paused and new
+     * intent will be delivered, followed by {@link #onResume}. If the activity wasn't in the
+     * resumed state, then new intent can be delivered immediately, with {@link #onResume()} called
      * sometime later when activity becomes active again.
      *
      * <p>Note that {@link #getIntent} still returns the original Intent.  You
@@ -3045,21 +3065,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Request to put the a freeform activity into fullscreen. This will only be allowed if the
-     * activity is on a freeform display, such as a desktop device. The requester has to be the
-     * top-most activity of the focused display, and the request should be a response to a user
-     * input. When getting fullscreen and receiving corresponding
+     * Request to put the activity into fullscreen. The requester must be pinned or the top-most
+     * activity of the focused display which can be verified using
+     * {@link #onTopResumedActivityChanged(boolean)}. The request should also be a response to a
+     * user input. When getting fullscreen and receiving corresponding
      * {@link #onConfigurationChanged(Configuration)} and
      * {@link #onMultiWindowModeChanged(boolean, Configuration)}, the activity should relayout
      * itself and the system bars' visibilities can be controlled as usual fullscreen apps.
      *
      * Calling it again with the exit request can restore the activity to the previous status.
      * This will only happen when it got into fullscreen through this API.
-     *
-     * If an app wants to be in fullscreen always, it should claim as not being resizable
-     * by setting
-     * <a href="https://developer.android.com/guide/topics/large-screens/multi-window-support#resizeableActivity">
-     * {@code android:resizableActivity="false"}</a> instead of calling this API.
      *
      * @param request Can be {@link #FULLSCREEN_MODE_REQUEST_ENTER} or
      *                {@link #FULLSCREEN_MODE_REQUEST_EXIT} to indicate this request is to get
@@ -3146,13 +3161,17 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Called by the system when the device configuration changes while your
-     * activity is running.  Note that this will <em>only</em> be called if
-     * you have selected configurations you would like to handle with the
+     * activity is running.  Note that this will only be called if you have
+     * selected configurations you would like to handle with the
      * {@link android.R.attr#configChanges} attribute in your manifest.  If
      * any configuration change occurs that is not selected to be reported
      * by that attribute, then instead of reporting it the system will stop
      * and restart the activity (to have it launched with the new
-     * configuration).
+     * configuration). The only exception is if a size-based configuration
+     * is not large enough to be considered significant, in which case the
+     * system will not recreate the activity and will instead call this
+     * method. For details on this see the documentation on
+     * <a href="{@docRoot}guide/topics/resources/runtime-changes.html">size-based config change</a>.
      *
      * <p>At the time that this function has been called, your Resources
      * object will have been updated to return resource values matching the
@@ -3882,7 +3901,9 @@ public class Activity extends ContextThemeWrapper
      * it will set up the dispatch to call {@link #onKeyUp} where the action
      * will be performed; for earlier applications, it will perform the
      * action immediately in on-down, as those versions of the platform
-     * behaved.
+     * behaved. This implementation will also take care of {@link KeyEvent#KEYCODE_ESCAPE}
+     * by finishing the activity if it would be closed by touching outside
+     * of it.
      *
      * <p>Other additional default key handling may be performed
      * if configured with {@link #setDefaultKeyMode}.
@@ -3901,6 +3922,12 @@ public class Activity extends ContextThemeWrapper
             } else {
                 onBackPressed();
             }
+            return true;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_ESCAPE && mWindow.shouldCloseOnTouchOutside()) {
+            event.startTracking();
+            finish();
             return true;
         }
 
@@ -3999,6 +4026,12 @@ public class Activity extends ContextThemeWrapper
                 return true;
             }
         }
+
+        if (keyCode == KeyEvent.KEYCODE_ESCAPE
+                && event.isTracking()) {
+            return true;
+        }
+
         return false;
     }
 
@@ -5141,7 +5174,7 @@ public class Activity extends ContextThemeWrapper
      * This hook is called when the user signals the desire to start a search.
      *
      * <p>You can use this function as a simple way to launch the search UI, in response to a
-     * menu item, search button, or other widgets within your activity. Unless overidden,
+     * menu item, search button, or other widgets within your activity. Unless overridden,
      * calling this function is the same as calling
      * {@link #startSearch startSearch(null, false, null, false)}, which launches
      * search for the current activity as specified in its manifest, see {@link SearchManager}.
@@ -5419,14 +5452,14 @@ public class Activity extends ContextThemeWrapper
      * the signature of the app declaring the permissions.
      * </p>
      * <p>
-     * Call {@link #shouldShowRequestPermissionRationale(String)} before calling this API to
+     * Call {@link #shouldShowRequestPermissionRationale} before calling this API to
      * check if the system recommends to show a rationale UI before asking for a permission.
      * </p>
      * <p>
      * If your app does not have the requested permissions the user will be presented
      * with UI for accepting them. After the user has accepted or rejected the
      * requested permissions you will receive a callback on {@link
-     * #onRequestPermissionsResult(int, String[], int[])} reporting whether the
+     * #onRequestPermissionsResult} reporting whether the
      * permissions were granted or not.
      * </p>
      * <p>
@@ -5438,8 +5471,7 @@ public class Activity extends ContextThemeWrapper
      * to grant and which to reject. Hence, you should be prepared that your activity
      * may be paused and resumed. Further, granting some permissions may require
      * a restart of you application. In such a case, the system will recreate the
-     * activity stack before delivering the result to {@link
-     * #onRequestPermissionsResult(int, String[], int[])}.
+     * activity stack before delivering the result to {@link #onRequestPermissionsResult}.
      * </p>
      * <p>
      * When checking whether you have a permission you should use {@link
@@ -5449,26 +5481,97 @@ public class Activity extends ContextThemeWrapper
      * You cannot request a permission if your activity sets {@link
      * android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
      * <code>true</code> because in this case the activity would not receive
-     * result callbacks including {@link #onRequestPermissionsResult(int, String[], int[])}.
+     * result callbacks including {@link #onRequestPermissionsResult}.
      * </p>
      * <p>
-     * The <a href="https://github.com/android/permissions-samples">
-     * RuntimePermissions</a> sample apps demonstrate how to use this method to
+     * The <a href="https://github.com/android/platform-samples/tree/main/samples/privacy/permissions">
+     * permissions samples</a> repo demonstrates how to use this method to
      * request permissions at run time.
      * </p>
      *
-     * @param permissions The requested permissions. Must me non-null and not empty.
+     * @param permissions The requested permissions. Must be non-null and not empty.
      * @param requestCode Application specific request code to match with a result
-     *    reported to {@link #onRequestPermissionsResult(int, String[], int[])}.
-     *    Should be >= 0.
+     *                    reported to {@link #onRequestPermissionsResult}.
+     *                    Should be >= 0.
      *
      * @throws IllegalArgumentException if requestCode is negative.
      *
-     * @see #onRequestPermissionsResult(int, String[], int[])
-     * @see #checkSelfPermission(String)
-     * @see #shouldShowRequestPermissionRationale(String)
+     * @see #onRequestPermissionsResult
+     * @see #checkSelfPermission
+     * @see #shouldShowRequestPermissionRationale
      */
     public final void requestPermissions(@NonNull String[] permissions, int requestCode) {
+        requestPermissions(permissions, requestCode, getDeviceId());
+    }
+
+    /**
+     * Requests permissions to be granted to this application. These permissions
+     * must be requested in your manifest, they should not be granted to your app,
+     * and they should have protection level {@link
+     * android.content.pm.PermissionInfo#PROTECTION_DANGEROUS dangerous}, regardless
+     * whether they are declared by the platform or a third-party app.
+     * <p>
+     * Normal permissions {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL}
+     * are granted at install time if requested in the manifest. Signature permissions
+     * {@link android.content.pm.PermissionInfo#PROTECTION_SIGNATURE} are granted at
+     * install time if requested in the manifest and the signature of your app matches
+     * the signature of the app declaring the permissions.
+     * </p>
+     * <p>
+     * Call {@link #shouldShowRequestPermissionRationale} before calling this API to
+     * check if the system recommends to show a rationale UI before asking for a permission.
+     * </p>
+     * <p>
+     * If your app does not have the requested permissions the user will be presented
+     * with UI for accepting them. After the user has accepted or rejected the
+     * requested permissions you will receive a callback on {@link #onRequestPermissionsResult}
+     * reporting whether the permissions were granted or not.
+     * </p>
+     * <p>
+     * Note that requesting a permission does not guarantee it will be granted and
+     * your app should be able to run without having this permission.
+     * </p>
+     * <p>
+     * This method may start an activity allowing the user to choose which permissions
+     * to grant and which to reject. Hence, you should be prepared that your activity
+     * may be paused and resumed. Further, granting some permissions may require
+     * a restart of you application. In such a case, the system will recreate the
+     * activity stack before delivering the result to {@link #onRequestPermissionsResult}.
+     * </p>
+     * <p>
+     * When checking whether you have a permission you should use {@link
+     * #checkSelfPermission(String)}.
+     * </p>
+     * <p>
+     * You cannot request a permission if your activity sets {@link
+     * android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
+     * <code>true</code> because in this case the activity would not receive
+     * result callbacks including {@link #onRequestPermissionsResult}.
+     * </p>
+     * <p>
+     * The <a href="https://github.com/android/platform-samples/tree/main/samples/privacy/permissions">
+     * permissions samples</a> repo demonstrates how to use this method to
+     * request permissions at run time.
+     * </p>
+     *
+     * @param permissions The requested permissions. Must be non-null and not empty.
+     * @param requestCode Application specific request code to match with a result
+     *                    reported to {@link #onRequestPermissionsResult}.
+     *                    Should be >= 0.
+     * @param deviceId The app is requesting permissions for this device. The primary/physical
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
+     *                 are assigned unique device Ids.
+     *
+     * @throws IllegalArgumentException if requestCode is negative.
+     *
+     * @see #onRequestPermissionsResult
+     * @see #checkSelfPermission
+     * @see #shouldShowRequestPermissionRationale
+     * @see Context#DEVICE_ID_DEFAULT
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public final void requestPermissions(@NonNull String[] permissions, int requestCode,
+            int deviceId) {
         if (requestCode < 0) {
             throw new IllegalArgumentException("requestCode should be >= 0");
         }
@@ -5476,7 +5579,7 @@ public class Activity extends ContextThemeWrapper
         if (mHasCurrentPermissionsRequest) {
             Log.w(TAG, "Can request only one set of permissions at a time");
             // Dispatch the callback with empty arrays which means a cancellation.
-            onRequestPermissionsResult(requestCode, new String[0], new int[0]);
+            onRequestPermissionsResult(requestCode, new String[0], new int[0], deviceId);
             return;
         }
 
@@ -5490,31 +5593,59 @@ public class Activity extends ContextThemeWrapper
             }
         }
 
-        final Intent intent = getPackageManager().buildRequestPermissionsIntent(permissions);
+        PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
+                : createDeviceContext(deviceId).getPackageManager();
+        final Intent intent = packageManager.buildRequestPermissionsIntent(permissions);
         startActivityForResult(REQUEST_PERMISSIONS_WHO_PREFIX, intent, requestCode, null);
         mHasCurrentPermissionsRequest = true;
     }
 
     /**
      * Callback for the result from requesting permissions. This method
-     * is invoked for every call on {@link #requestPermissions(String[], int)}.
+     * is invoked for every call on {@link #requestPermissions}
      * <p>
      * <strong>Note:</strong> It is possible that the permissions request interaction
      * with the user is interrupted. In this case you will receive empty permissions
      * and results arrays which should be treated as a cancellation.
      * </p>
      *
-     * @param requestCode The request code passed in {@link #requestPermissions(String[], int)}.
+     * @param requestCode The request code passed in {@link #requestPermissions}.
      * @param permissions The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions
-     *     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
-     *     or {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     * @param grantResults The grant results for the corresponding permissions which is either
+     *                     {@link android.content.pm.PackageManager#PERMISSION_GRANTED} or
+     *                     {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
      *
-     * @see #requestPermissions(String[], int)
+     * @see #requestPermissions
      */
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults) {
         /* callback - no nothing */
+    }
+
+    /**
+     * Callback for the result from requesting permissions. This method
+     * is invoked for every call on {@link #requestPermissions}.
+     * <p>
+     * <strong>Note:</strong> It is possible that the permissions request interaction
+     * with the user is interrupted. In this case you will receive empty permissions
+     * and results arrays which should be treated as a cancellation.
+     * </p>
+     *
+     * @param requestCode The request code passed in {@link #requestPermissions}.
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions which is either
+     *                     {@link android.content.pm.PackageManager#PERMISSION_GRANTED} or
+     *                     {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     * @param deviceId The deviceId for which permissions were requested. The primary/physical
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
+     *                 are assigned unique device Ids.
+     *
+     * @see #requestPermissions
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults, int deviceId) {
+        onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     /**
@@ -5523,12 +5654,32 @@ public class Activity extends ContextThemeWrapper
      * @param permission A permission your app wants to request.
      * @return Whether you should show permission rationale UI.
      *
-     * @see #checkSelfPermission(String)
-     * @see #requestPermissions(String[], int)
-     * @see #onRequestPermissionsResult(int, String[], int[])
+     * @see #checkSelfPermission
+     * @see #requestPermissions
+     * @see #onRequestPermissionsResult
      */
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission) {
         return getPackageManager().shouldShowRequestPermissionRationale(permission);
+    }
+
+    /**
+     * Gets whether you should show UI with rationale before requesting a permission.
+     *
+     * @param permission A permission your app wants to request.
+     * @param deviceId The app is requesting permissions for this device. The primary/physical
+     *                 device is assigned {@link Context#DEVICE_ID_DEFAULT}, and virtual devices
+     *                 are assigned unique device Ids.
+     * @return Whether you should show permission rationale UI.
+     *
+     * @see #checkSelfPermission
+     * @see #requestPermissions
+     * @see #onRequestPermissionsResult
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public boolean shouldShowRequestPermissionRationale(@NonNull String permission, int deviceId) {
+        final PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
+                : createDeviceContext(deviceId).getPackageManager();
+        return packageManager.shouldShowRequestPermissionRationale(permission);
     }
 
     /**
@@ -5647,10 +5798,9 @@ public class Activity extends ContextThemeWrapper
 
     private Bundle transferSpringboardActivityOptions(@Nullable Bundle options) {
         if (options == null && (mWindow != null && !mWindow.isActive())) {
-            final ActivityOptions activityOptions = getActivityOptions();
-            if (activityOptions != null &&
-                    activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
-                return activityOptions.toBundle();
+            final SceneTransitionInfo info = getSceneTransitionInfo();
+            if (info != null) {
+                return ActivityOptions.makeBasic().setSceneTransitionInfo(info).toBundle();
             }
         }
         return options;
@@ -6198,6 +6348,10 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean startActivityIfNeeded(@RequiresPermission @NonNull Intent intent,
             int requestCode, @Nullable Bundle options) {
+        if (Instrumentation.DEBUG_START_ACTIVITY) {
+            Log.d("Instrumentation", "startActivity: intent=" + intent
+                    + " requestCode=" + requestCode + " options=" + options, new Throwable());
+        }
         if (mParent == null) {
             int result = ActivityManager.START_RETURN_INTENT_TO_CALLER;
             try {
@@ -6726,8 +6880,8 @@ public class Activity extends ContextThemeWrapper
      * application package was involved.
      *
      * <p>If called while inside the handling of {@link #onNewIntent}, this function will
-     * return the referrer that submitted that new intent to the activity.  Otherwise, it
-     * always returns the referrer of the original Intent.</p>
+     * return the referrer that submitted that new intent to the activity only after
+     * {@link #setIntent(Intent)} is called with the provided intent.</p>
      *
      * <p>Note that this is <em>not</em> a security feature -- you can not trust the
      * referrer information, applications can spoof it.</p>
@@ -6873,6 +7027,20 @@ public class Activity extends ContextThemeWrapper
     @Nullable
     public String getLaunchedFromPackage() {
         return ActivityClient.getInstance().getLaunchedFromPackage(getActivityToken());
+    }
+
+    /**
+     * Returns the ComponentCaller instance of the app that initially launched this activity.
+     *
+     * <p>Note that calls to {@link #onNewIntent} have no effect on the returned value of this
+     * method.
+     *
+     * @return {@link ComponentCaller} instance
+     * @see ComponentCaller
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    public @NonNull ComponentCaller getInitialCaller() {
+        return mInitialCaller;
     }
 
     /**
@@ -7455,6 +7623,13 @@ public class Activity extends ContextThemeWrapper
                 mTaskDescription.setIcon(Icon.createWithBitmap(icon));
             }
         }
+        if (mLastTaskDescriptionHashCode == mTaskDescription.hashCode()) {
+            // Early return if the hashCode is the same.
+            // Note that we do not use #equals() to perform the check because there are several
+            // places in this class that directly sets the value to mTaskDescription.
+            return;
+        }
+        mLastTaskDescriptionHashCode = mTaskDescription.hashCode();
         ActivityClient.getInstance().setTaskDescription(mToken, mTaskDescription);
     }
 
@@ -7908,8 +8083,10 @@ public class Activity extends ContextThemeWrapper
      *
      * @param callback the method to call when all visible activities behind this one have been
      * drawn and it is safe to make this activity translucent again.
-     * @param options activity options delivered to the activity below this one. The options
-     * are retrieved using {@link #getActivityOptions}.
+     * @param options activity options that created from
+     *             {@link ActivityOptions#makeSceneTransitionAnimation} which will be converted to
+     *             {@link SceneTransitionInfo} and delivered to the activity below this one. The
+     *              options are retrieved using {@link #getSceneTransitionInfo}.
      * @return <code>true</code> if Window was opaque and will become translucent or
      * <code>false</code> if window was translucent and no change needed to be made.
      *
@@ -7945,27 +8122,27 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */
-    public void onNewActivityOptions(ActivityOptions options) {
-        mActivityTransitionState.setEnterActivityOptions(this, options);
+    public void onNewSceneTransitionInfo(ActivityOptions.SceneTransitionInfo info) {
+        mActivityTransitionState.setEnterSceneTransitionInfo(this, info);
         if (!mStopped) {
             mActivityTransitionState.enterReady(this);
         }
     }
 
     /**
-     * Takes the ActivityOptions passed in from the launching activity or passed back
+     * Takes the {@link SceneTransitionInfo} passed in from the launching activity or passed back
      * from an activity launched by this activity in its call to {@link
      * #convertToTranslucent(TranslucentConversionListener, ActivityOptions)}
      *
-     * @return The ActivityOptions passed to {@link #convertToTranslucent}.
+     * @return The {@link SceneTransitionInfo} which based on the ActivityOptions that originally
+     *         passed to {@link #convertToTranslucent}.
      * @hide
      */
-    @UnsupportedAppUsage
-    ActivityOptions getActivityOptions() {
-        final ActivityOptions options = mPendingOptions;
-        // The option only applies once.
-        mPendingOptions = null;
-        return options;
+    SceneTransitionInfo getSceneTransitionInfo() {
+        final SceneTransitionInfo sceneTransitionInfo = mSceneTransitionInfo;
+        // The info only applies once.
+        mSceneTransitionInfo = null;
+        return sceneTransitionInfo;
     }
 
     /**
@@ -8483,6 +8660,25 @@ public class Activity extends ContextThemeWrapper
             Configuration config, String referrer, IVoiceInteractor voiceInteractor,
             Window window, ActivityConfigCallback activityConfigCallback, IBinder assistToken,
             IBinder shareableActivityToken) {
+        attach(context, aThread, instr, token, ident, application, intent, info, title, parent, id,
+                lastNonConfigurationInstances, config, referrer, voiceInteractor, window,
+                activityConfigCallback, assistToken, shareableActivityToken, null);
+    }
+
+    final void attach(Context context, ActivityThread aThread,
+            Instrumentation instr, IBinder token, int ident,
+            Application application, Intent intent, ActivityInfo info,
+            CharSequence title, Activity parent, String id,
+            NonConfigurationInstances lastNonConfigurationInstances,
+            Configuration config, String referrer, IVoiceInteractor voiceInteractor,
+            Window window, ActivityConfigCallback activityConfigCallback, IBinder assistToken,
+            IBinder shareableActivityToken, IBinder initialCallerInfoAccessToken) {
+        if (sandboxActivitySdkBasedContext()) {
+            // Sandbox activities extract a token from the intent's extra to identify the related
+            // SDK as part of overriding attachBaseContext, then it wraps the passed context in an
+            // SDK ContextWrapper, so mIntent has to be set before calling attachBaseContext.
+            mIntent = intent;
+        }
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
@@ -8508,6 +8704,7 @@ public class Activity extends ContextThemeWrapper
         mShareableActivityToken = shareableActivityToken;
         mIdent = ident;
         mApplication = application;
+        //TODO(b/300059435): do not set the mIntent again as part of the flag clean up.
         mIntent = intent;
         mReferrer = referrer;
         mComponent = intent.getComponent();
@@ -8540,6 +8737,10 @@ public class Activity extends ContextThemeWrapper
 
         getAutofillClientController().onActivityAttached(application);
         setContentCaptureOptions(application.getContentCaptureOptions());
+
+        if (android.security.Flags.contentUriPermissionApis()) {
+            mInitialCaller = new ComponentCaller(getActivityToken(), initialCallerInfoAccessToken);
+        }
     }
 
     /** @hide */
@@ -8602,7 +8803,7 @@ public class Activity extends ContextThemeWrapper
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
-        mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
+        mActivityTransitionState.setEnterSceneTransitionInfo(this, getSceneTransitionInfo());
         dispatchActivityPostCreated(icicle);
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
@@ -8620,7 +8821,7 @@ public class Activity extends ContextThemeWrapper
                     + mComponent.getClassName());
         }
         dispatchActivityPreStarted();
-        mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
+        mActivityTransitionState.setEnterSceneTransitionInfo(this, getSceneTransitionInfo());
         mFragments.noteStateNotSaved();
         mCalled = false;
         mFragments.execPendingActions();
@@ -8915,6 +9116,8 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @UnsupportedAppUsage
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public final boolean isResumed() {
         return mResumed;
     }
@@ -9076,17 +9279,20 @@ public class Activity extends ContextThemeWrapper
          * @see Activity#convertFromTranslucent()
          * @see Activity#convertToTranslucent(TranslucentConversionListener, ActivityOptions)
          */
-        public void onTranslucentConversionComplete(boolean drawComplete);
+        void onTranslucentConversionComplete(boolean drawComplete);
     }
 
     private void dispatchRequestPermissionsResult(int requestCode, Intent data) {
         mHasCurrentPermissionsRequest = false;
-        // If the package installer crashed we may have not data - best effort.
+        // If the package installer crashed we may have no data - best effort.
         String[] permissions = (data != null) ? data.getStringArrayExtra(
                 PackageManager.EXTRA_REQUEST_PERMISSIONS_NAMES) : new String[0];
         final int[] grantResults = (data != null) ? data.getIntArrayExtra(
                 PackageManager.EXTRA_REQUEST_PERMISSIONS_RESULTS) : new int[0];
-        onRequestPermissionsResult(requestCode, permissions, grantResults);
+        final int deviceId = (data != null) ? data.getIntExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_DEVICE_ID, Context.DEVICE_ID_DEFAULT
+        ) : Context.DEVICE_ID_DEFAULT;
+        onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId);
     }
 
     private void dispatchRequestPermissionsResultToFragment(int requestCode, Intent data,
@@ -9209,8 +9415,8 @@ public class Activity extends ContextThemeWrapper
      *
      * @param allowed {@code true} to disable the UID restrictions; {@code false} to revert back to
      *                            the default behaviour
-     * @hide
      */
+    @FlaggedApi(android.security.Flags.FLAG_ASM_RESTRICTIONS_ENABLED)
     public void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
         ActivityClient.getInstance().setAllowCrossUidActivitySwitchFromBelow(mToken, allowed);
     }
@@ -9218,7 +9424,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * Registers remote animations per transition type for this activity.
      *
-     * @param definition The remote animation definition that defines which transition whould run
+     * @param definition The remote animation definition that defines which transition would run
      *                   which remote animation.
      * @hide
      */
@@ -9268,6 +9474,15 @@ public class Activity extends ContextThemeWrapper
      */
     public void enableTaskLocaleOverride() {
         ActivityClient.getInstance().enableTaskLocaleOverride(mToken);
+    }
+
+    /**
+     * Request ActivityRecordInputSink to enable or disable blocking input events.
+     * @hide
+     */
+    @RequiresPermission(INTERNAL_SYSTEM_WINDOW)
+    public void setActivityRecordInputSinkEnabled(boolean enabled) {
+        ActivityClient.getInstance().setActivityRecordInputSinkEnabled(mToken, enabled);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {

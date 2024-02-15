@@ -20,7 +20,7 @@ import android.content.res.ColorStateList
 import android.view.View
 import android.view.WindowManager
 import com.android.settingslib.Utils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 /**
@@ -68,9 +68,9 @@ constructor(
         )
         rippleView.addOnAttachStateChangeListener(
             object : View.OnAttachStateChangeListener {
-                override fun onViewDetachedFromWindow(view: View?) {}
+                override fun onViewDetachedFromWindow(view: View) {}
 
-                override fun onViewAttachedToWindow(view: View?) {
+                override fun onViewAttachedToWindow(view: View) {
                     if (view == null) {
                         return
                     }

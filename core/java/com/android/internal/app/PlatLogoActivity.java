@@ -259,7 +259,7 @@ public class PlatLogoActivity extends Activity {
             }
             return true;
         }
-        return false;
+        return super.onKeyDown(keyCode,event);
     }
 
     @Override
@@ -268,7 +268,7 @@ public class PlatLogoActivity extends Activity {
             stopWarp();
             return true;
         }
-        return false;
+        return super.onKeyUp(keyCode,event);
     }
 
     private void startWarp() {

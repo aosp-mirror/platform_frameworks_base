@@ -15,6 +15,7 @@
  */
 package com.android.server.pm;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 
 import android.Manifest.permission;
@@ -24,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.IUriGrantsManager;
@@ -35,6 +37,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -74,6 +77,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -110,7 +114,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -293,24 +296,26 @@ public class ShortcutService extends IShortcutService.Stub {
     private final Object mNonPersistentUsersLock = new Object();
     private final Object mWtfLock = new Object();
 
-    private static List<ResolveInfo> EMPTY_RESOLVE_INFO = new ArrayList<>(0);
+    private static final List<ResolveInfo> EMPTY_RESOLVE_INFO = new ArrayList<>(0);
 
     // Temporarily reverted to anonymous inner class form due to: b/32554459
-    private static Predicate<ResolveInfo> ACTIVITY_NOT_EXPORTED = new Predicate<ResolveInfo>() {
-        public boolean test(ResolveInfo ri) {
-            return !ri.activityInfo.exported;
-        }
-    };
+    private static final Predicate<ResolveInfo> ACTIVITY_NOT_EXPORTED =
+            new Predicate<ResolveInfo>() {
+                public boolean test(ResolveInfo ri) {
+                    return !ri.activityInfo.exported;
+                }
+            };
 
-    private static Predicate<ResolveInfo> ACTIVITY_NOT_INSTALLED = (ri) ->
+    private static final Predicate<ResolveInfo> ACTIVITY_NOT_INSTALLED = (ri) ->
             !isInstalled(ri.activityInfo);
 
     // Temporarily reverted to anonymous inner class form due to: b/32554459
-    private static Predicate<PackageInfo> PACKAGE_NOT_INSTALLED = new Predicate<PackageInfo>() {
-        public boolean test(PackageInfo pi) {
-            return !isInstalled(pi);
-        }
-    };
+    private static final Predicate<PackageInfo> PACKAGE_NOT_INSTALLED =
+            new Predicate<PackageInfo>() {
+                public boolean test(PackageInfo pi) {
+                    return !isInstalled(pi);
+                }
+            };
 
     private final Handler mHandler;
 
@@ -366,7 +371,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private CompressFormat mIconPersistFormat;
     private int mIconPersistQuality;
 
-    private int mSaveDelayMillis;
+    int mSaveDelayMillis;
 
     private final IPackageManager mIPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
@@ -480,7 +485,14 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     public ShortcutService(Context context) {
-        this(context, BackgroundThread.get().getLooper(), /*onyForPackgeManagerApis*/ false);
+        this(context, getBgLooper(), /*onyForPackgeManagerApis*/ false);
+    }
+
+    private static Looper getBgLooper() {
+        final HandlerThread handlerThread = new HandlerThread("shortcut",
+                android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        handlerThread.start();
+        return handlerThread.getLooper();
     }
 
     @VisibleForTesting
@@ -1366,7 +1378,7 @@ public class ShortcutService extends IShortcutService.Stub {
     ShortcutNonPersistentUser getNonPersistentUserLocked(@UserIdInt int userId) {
         ShortcutNonPersistentUser ret = mShortcutNonPersistentUsers.get(userId);
         if (ret == null) {
-            ret = new ShortcutNonPersistentUser(this, userId);
+            ret = new ShortcutNonPersistentUser(userId);
             mShortcutNonPersistentUsers.put(userId, ret);
         }
         return ret;
@@ -1740,6 +1752,10 @@ public class ShortcutService extends IShortcutService.Stub {
             android.util.EventLog.writeEvent(0x534e4554, "109824443", -1, "");
             throw new SecurityException("Shortcut package name mismatch");
         }
+        final int callingUid = injectBinderCallingUid();
+        if (UserHandle.getUserId(callingUid) != si.getUserId()) {
+            throw new SecurityException("User-ID in shortcut doesn't match the caller");
+        }
     }
 
     private void verifyShortcutInfoPackages(
@@ -1925,9 +1941,30 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         if (shortcut.getIcon() != null) {
             ShortcutInfo.validateIcon(shortcut.getIcon());
+            validateIconURI(shortcut);
         }
 
         shortcut.replaceFlags(shortcut.getFlags() & ShortcutInfo.FLAG_LONG_LIVED);
+    }
+
+    // Validates the calling process has permission to access shortcut icon's image uri
+    private void validateIconURI(@NonNull final ShortcutInfo si) {
+        final int callingUid = injectBinderCallingUid();
+        final Icon icon = si.getIcon();
+        if (icon == null) {
+            // There's no icon in this shortcut, nothing to validate here.
+            return;
+        }
+        int iconType = icon.getType();
+        if (iconType != Icon.TYPE_URI && iconType != Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+            // The icon is not URI-based, nothing to validate.
+            return;
+        }
+        final Uri uri = icon.getUri();
+        mUriGrantsManagerInternal.checkGrantUriPermission(callingUid, si.getPackage(),
+                ContentProvider.getUriWithoutUserId(uri),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(callingUid)));
     }
 
     private void fixUpIncomingShortcutInfo(@NonNull ShortcutInfo shortcut, boolean forUpdate) {
@@ -2254,7 +2291,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         packageShortcutsChanged(ps, changedShortcuts, removedShortcuts);
 
-        reportShortcutUsedInternal(packageName, shortcut.getId(), userId);
+        ps.reportShortcutUsed(mUsageStatsManagerInternal, shortcut.getId());
 
         verifyStates();
     }
@@ -2658,25 +2695,17 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, String.format("reportShortcutUsed: Shortcut %s package %s used on user %d",
                     shortcutId, packageName, userId));
         }
+        final ShortcutPackage ps;
         synchronized (mLock) {
             throwIfUserLockedL(userId);
-            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
+            ps = getPackageShortcutsForPublisherLocked(packageName, userId);
             if (ps.findShortcutById(shortcutId) == null) {
                 Log.w(TAG, String.format("reportShortcutUsed: package %s doesn't have shortcut %s",
                         packageName, shortcutId));
                 return;
             }
         }
-        reportShortcutUsedInternal(packageName, shortcutId, userId);
-    }
-
-    private void reportShortcutUsedInternal(String packageName, String shortcutId, int userId) {
-        final long token = injectClearCallingIdentity();
-        try {
-            mUsageStatsManagerInternal.reportShortcutUsage(packageName, shortcutId, userId);
-        } finally {
-            injectRestoreCallingIdentity(token);
-        }
+        ps.reportShortcutUsed(mUsageStatsManagerInternal, shortcutId);
     }
 
     @Override
@@ -3587,8 +3616,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Otherwise check persisted shortcuts
             getShortcutInfoAsync(launcherUserId, packageName, shortcutId, userId, si -> {
-                cb.complete(getShortcutIconUriInternal(launcherUserId, launcherPackage,
-                        packageName, si, userId));
+                cb.complete(si == null ? null : getShortcutIconUriInternal(launcherUserId,
+                        launcherPackage, packageName, si, userId));
             });
         }
 
@@ -4407,8 +4436,11 @@ public class ShortcutService extends IShortcutService.Stub {
             return;
         }
         try {
+            ActivityOptions options = ActivityOptions.makeBasic()
+                    .setPendingIntentBackgroundActivityStartMode(
+                            MODE_BACKGROUND_ACTIVITY_START_DENIED);
             intentSender.sendIntent(mContext, /* code= */ 0, extras,
-                    /* onFinished=*/ null, /* handler= */ null);
+                    /* onFinished=*/ null, /* handler= */ null, null, options.toBundle());
         } catch (SendIntentException e) {
             Slog.w(TAG, "sendIntent failed().", e);
         }
@@ -4625,8 +4657,8 @@ public class ShortcutService extends IShortcutService.Stub {
         private boolean mDumpFiles = false;
 
         private boolean mDumpDetails = true;
-        private List<Pattern> mPackagePatterns = new ArrayList<>();
-        private List<Integer> mUsers = new ArrayList<>();
+        private final List<Pattern> mPackagePatterns = new ArrayList<>();
+        private final List<Integer> mUsers = new ArrayList<>();
 
         void addPackageRegex(String regex) {
             mPackagePatterns.add(Pattern.compile(regex));
@@ -5162,13 +5194,11 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     // Injection point.
-    @VisibleForTesting
     long injectClearCallingIdentity() {
         return Binder.clearCallingIdentity();
     }
 
     // Injection point.
-    @VisibleForTesting
     void injectRestoreCallingIdentity(long token) {
         Binder.restoreCallingIdentity(token);
     }

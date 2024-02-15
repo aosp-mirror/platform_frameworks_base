@@ -25,14 +25,16 @@ import android.hardware.camera2.extension.LatencyPair;
 import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.OutputSurface;
 
+import android.os.IBinder;
+
 /** @hide */
 interface ISessionProcessorImpl
 {
-    CameraSessionConfig initSession(in String cameraId,
+    CameraSessionConfig initSession(in IBinder token, in String cameraId,
             in Map<String, CameraMetadataNative> charsMap, in OutputSurface previewSurface,
             in OutputSurface imageCaptureSurface, in OutputSurface postviewSurface);
-    void deInitSession();
-    void onCaptureSessionStart(IRequestProcessorImpl requestProcessor);
+    void deInitSession(in IBinder token);
+    void onCaptureSessionStart(IRequestProcessorImpl requestProcessor, in String statsKey);
     void onCaptureSessionEnd();
     int startRepeating(in ICaptureCallback callback);
     void stopRepeating();

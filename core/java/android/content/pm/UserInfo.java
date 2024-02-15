@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -51,6 +52,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @TestApi
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class UserInfo implements Parcelable {
 
     /**
@@ -386,6 +388,16 @@ public class UserInfo implements Parcelable {
         return UserManager.isUserTypeCloneProfile(userType);
     }
 
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
+    public boolean isCommunalProfile() {
+        return UserManager.isUserTypeCommunalProfile(userType);
+    }
+
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    public boolean isPrivateProfile() {
+        return UserManager.isUserTypePrivateProfile(userType);
+    }
+
     @UnsupportedAppUsage
     public boolean isEnabled() {
         return (flags & FLAG_DISABLED) != FLAG_DISABLED;
@@ -427,6 +439,7 @@ public class UserInfo implements Parcelable {
     /**
      * @return true if this user can be switched to.
      **/
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean supportsSwitchTo() {
         if (partial || !isEnabled()) {
             // Don't support switching to disabled or partial users, which includes users with
@@ -444,6 +457,7 @@ public class UserInfo implements Parcelable {
      * @return true if user is of type {@link UserManager#USER_TYPE_SYSTEM_HEADLESS} and
      * {@link com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser} is true.
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     private boolean canSwitchToHeadlessSystemUser() {
         return UserManager.USER_TYPE_SYSTEM_HEADLESS.equals(userType) && Resources.getSystem()
                 .getBoolean(com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser);
@@ -454,6 +468,7 @@ public class UserInfo implements Parcelable {
      * @deprecated Use {@link UserInfo#supportsSwitchTo} instead.
      */
     @Deprecated
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean supportsSwitchToByUser() {
         return supportsSwitchTo();
     }

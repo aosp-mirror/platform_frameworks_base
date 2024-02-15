@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.net.ConnectivityManager
 import android.telephony.ServiceState
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.CarrierNetworkListener
@@ -31,11 +32,14 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfig
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfigTest
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
@@ -47,6 +51,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -94,9 +99,14 @@ class MobileConnectionTelephonySmokeTests : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl
     private lateinit var connectionsRepo: FakeMobileConnectionsRepository
 
+    private val flags =
+        FakeFeatureFlagsClassic().also { it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
+
+    @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: MobileInputLogger
     @Mock private lateinit var tableLogger: TableLogBuffer
+    @Mock private lateinit var subscriptionModel: StateFlow<SubscriptionModel?>
 
     private val mobileMappings = FakeMobileMappingsProxy()
     private val systemUiCarrierConfig =
@@ -113,13 +123,20 @@ class MobileConnectionTelephonySmokeTests : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(telephonyManager.subscriptionId).thenReturn(SUB_1_ID)
 
-        connectionsRepo = FakeMobileConnectionsRepository(mobileMappings, tableLogger)
+        connectionsRepo =
+            FakeMobileConnectionsRepository(
+                mobileMappings,
+                tableLogger,
+            )
 
         underTest =
             MobileConnectionRepositoryImpl(
                 SUB_1_ID,
+                context,
+                subscriptionModel,
                 DEFAULT_NAME,
                 SEP,
+                connectivityManager,
                 telephonyManager,
                 systemUiCarrierConfig,
                 fakeBroadcastDispatcher,
@@ -127,6 +144,7 @@ class MobileConnectionTelephonySmokeTests : SysuiTestCase() {
                 testDispatcher,
                 logger,
                 tableLogger,
+                flags,
                 testScope.backgroundScope,
             )
     }

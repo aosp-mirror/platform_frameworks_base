@@ -29,8 +29,10 @@ import com.android.server.criticalevents.nano.CriticalEventLogStorageProto;
 import com.android.server.criticalevents.nano.CriticalEventProto;
 import com.android.server.criticalevents.nano.CriticalEventProto.AppNotResponding;
 import com.android.server.criticalevents.nano.CriticalEventProto.HalfWatchdog;
+import com.android.server.criticalevents.nano.CriticalEventProto.InstallPackages;
 import com.android.server.criticalevents.nano.CriticalEventProto.JavaCrash;
 import com.android.server.criticalevents.nano.CriticalEventProto.NativeCrash;
+import com.android.server.criticalevents.nano.CriticalEventProto.SystemServerStarted;
 import com.android.server.criticalevents.nano.CriticalEventProto.Watchdog;
 
 import java.io.File;
@@ -139,6 +141,20 @@ public class CriticalEventLog {
     @VisibleForTesting
     protected long getWallTimeMillis() {
         return System.currentTimeMillis();
+    }
+
+    /** Logs when one or more packages are installed. */
+    public void logInstallPackagesStarted() {
+        CriticalEventProto event = new CriticalEventProto();
+        event.setInstallPackages(new InstallPackages());
+        log(event);
+    }
+
+    /** Logs when system server started. */
+    public void logSystemServerStarted() {
+        CriticalEventProto event = new CriticalEventProto();
+        event.setSystemServerStarted(new SystemServerStarted());
+        log(event);
     }
 
     /** Logs a watchdog. */

@@ -52,7 +52,8 @@ import android.hardware.display.DisplayManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
-import android.nfc.INfcAdapter;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -77,6 +78,7 @@ import android.view.WindowManagerGlobal;
 import com.android.framework.protobuf.nano.MessageNano;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.camera.flags.Flags;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -162,10 +164,6 @@ public class CameraServiceProxy extends SystemService
      * SCALER_ROTATE_AND_CROP_NONE  -> Always return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE
      */
 
-    // Flags arguments to NFC adapter to enable/disable NFC
-    public static final int DISABLE_POLLING_FLAGS = 0x1000;
-    public static final int ENABLE_POLLING_FLAGS = 0x0000;
-
     // Handler message codes
     private static final int MSG_SWITCH_USER = 1;
     private static final int MSG_NOTIFY_DEVICE_STATE = 2;
@@ -215,7 +213,6 @@ public class CameraServiceProxy extends SystemService
     private final List<CameraUsageEvent> mCameraUsageHistory = new ArrayList<>();
 
     private static final String NFC_NOTIFICATION_PROP = "ro.camera.notify_nfc";
-    private static final String NFC_SERVICE_BINDER_NAME = "nfc";
     private static final IBinder nfcInterfaceToken = new Binder();
 
     private final boolean mNotifyNfc;
@@ -244,6 +241,8 @@ public class CameraServiceProxy extends SystemService
         public List<CameraStreamStats> mStreamStats;
         public String mUserTag;
         public int mVideoStabilizationMode;
+        public boolean mUsedUltraWide;
+        public boolean mUsedZoomOverride;
         public final long mLogId;
         public final int mSessionIndex;
 
@@ -271,7 +270,8 @@ public class CameraServiceProxy extends SystemService
         public void markCompleted(int internalReconfigure, long requestCount,
                 long resultErrorCount, boolean deviceError,
                 List<CameraStreamStats>  streamStats, String userTag,
-                int videoStabilizationMode, CameraExtensionSessionStats extStats) {
+                int videoStabilizationMode, boolean usedUltraWide,
+                boolean usedZoomOverride, CameraExtensionSessionStats extStats) {
             if (mCompleted) {
                 return;
             }
@@ -284,6 +284,8 @@ public class CameraServiceProxy extends SystemService
             mStreamStats = streamStats;
             mUserTag = userTag;
             mVideoStabilizationMode = videoStabilizationMode;
+            mUsedUltraWide = usedUltraWide;
+            mUsedZoomOverride = usedZoomOverride;
             mExtSessionStats = extStats;
             if (CameraServiceProxy.DEBUG) {
                 Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
@@ -613,16 +615,26 @@ public class CameraServiceProxy extends SystemService
 
         @Override
         public boolean isCameraDisabled(int userId) {
-            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-            if (dpm == null) {
-                Slog.e(TAG, "Failed to get the device policy manager service");
+            if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
+                Slog.e(TAG, "Calling UID: " + Binder.getCallingUid()
+                        + " doesn't match expected camera service UID!");
                 return false;
             }
+            final long ident = Binder.clearCallingIdentity();
             try {
-                return dpm.getCameraDisabled(null, userId);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
+                DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+                if (dpm == null) {
+                    Slog.e(TAG, "Failed to get the device policy manager service");
+                    return false;
+                }
+                try {
+                    return dpm.getCameraDisabled(null, userId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
     };
@@ -863,6 +875,13 @@ public class CameraServiceProxy extends SystemService
                 streamCount = e.mStreamStats.size();
             }
             if (CameraServiceProxy.DEBUG) {
+                String ultrawideDebug = Flags.logUltrawideUsage()
+                        ? ", wideAngleUsage " + e.mUsedUltraWide
+                        : "";
+                String zoomOverrideDebug = Flags.logZoomOverrideUsage()
+                        ? ", zoomOverrideUsage " + e.mUsedZoomOverride
+                        : "";
+
                 Slog.v(TAG, "CAMERA_ACTION_EVENT: action " + e.mAction
                         + " clientName " + e.mClientName
                         + ", duration " + e.getDuration()
@@ -879,6 +898,8 @@ public class CameraServiceProxy extends SystemService
                         + ", streamCount is " + streamCount
                         + ", userTag is " + e.mUserTag
                         + ", videoStabilizationMode " + e.mVideoStabilizationMode
+                        + ultrawideDebug
+                        + zoomOverrideDebug
                         + ", logId " + e.mLogId
                         + ", sessionIndex " + e.mSessionIndex
                         + ", mExtSessionStats {type " + extensionType
@@ -942,8 +963,10 @@ public class CameraServiceProxy extends SystemService
                     MessageNano.toByteArray(streamProtos[2]),
                     MessageNano.toByteArray(streamProtos[3]),
                     MessageNano.toByteArray(streamProtos[4]),
-                    e.mUserTag, e.mVideoStabilizationMode, e.mLogId, e.mSessionIndex,
-                    extensionType, extensionIsAdvanced);
+                    e.mUserTag, e.mVideoStabilizationMode,
+                    e.mLogId, e.mSessionIndex,
+                    extensionType, extensionIsAdvanced, e.mUsedUltraWide,
+                    e.mUsedZoomOverride);
         }
     }
 
@@ -997,12 +1020,24 @@ public class CameraServiceProxy extends SystemService
         }
     }
 
+    private boolean isAutomotive() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
     private Set<Integer> getEnabledUserHandles(int currentUserHandle) {
         int[] userProfiles = mUserManager.getEnabledProfileIds(currentUserHandle);
         Set<Integer> handles = new ArraySet<>(userProfiles.length);
 
         for (int id : userProfiles) {
             handles.add(id);
+        }
+
+        if (Flags.cameraHsumPermission()) {
+            // If the device is running in headless system user mode then allow
+            // User 0 to access camera only for automotive form factor.
+            if (UserManager.isHeadlessSystemUserMode() && isAutomotive()) {
+                handles.add(UserHandle.USER_SYSTEM);
+            }
         }
 
         return handles;
@@ -1132,6 +1167,9 @@ public class CameraServiceProxy extends SystemService
         List<CameraStreamStats> streamStats = cameraState.getStreamStats();
         String userTag = cameraState.getUserTag();
         int videoStabilizationMode = cameraState.getVideoStabilizationMode();
+        boolean usedUltraWide = Flags.logUltrawideUsage() ? cameraState.getUsedUltraWide() : false;
+        boolean usedZoomOverride =
+                Flags.logZoomOverrideUsage() ? cameraState.getUsedZoomOverride() : false;
         long logId = cameraState.getLogId();
         int sessionIdx = cameraState.getSessionIndex();
         CameraExtensionSessionStats extSessionStats = cameraState.getExtensionSessionStats();
@@ -1189,8 +1227,8 @@ public class CameraServiceProxy extends SystemService
                         Slog.w(TAG, "Camera " + cameraId + " was already marked as active");
                         oldEvent.markCompleted(/*internalReconfigure*/0, /*requestCount*/0,
                                 /*resultErrorCount*/0, /*deviceError*/false, streamStats,
-                                /*userTag*/"", /*videoStabilizationMode*/-1,
-                                new CameraExtensionSessionStats());
+                                /*userTag*/"", /*videoStabilizationMode*/-1, /*usedUltraWide*/false,
+                                /*usedZoomOverride*/false, new CameraExtensionSessionStats());
                         mCameraUsageHistory.add(oldEvent);
                     }
                     break;
@@ -1201,7 +1239,8 @@ public class CameraServiceProxy extends SystemService
 
                         doneEvent.markCompleted(internalReconfigureCount, requestCount,
                                 resultErrorCount, deviceError, streamStats, userTag,
-                                videoStabilizationMode, extSessionStats);
+                                videoStabilizationMode, usedUltraWide, usedZoomOverride,
+                                extSessionStats);
                         mCameraUsageHistory.add(doneEvent);
                         // Do not double count device error
                         deviceError = false;
@@ -1246,20 +1285,18 @@ public class CameraServiceProxy extends SystemService
     }
 
     private void notifyNfcService(boolean enablePolling) {
-
-        IBinder nfcServiceBinder = getBinderService(NFC_SERVICE_BINDER_NAME);
-        if (nfcServiceBinder == null) {
+        NfcManager nfcManager = mContext.getSystemService(NfcManager.class);
+        if (nfcManager == null) {
             Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
             return;
         }
-        INfcAdapter nfcAdapterRaw = INfcAdapter.Stub.asInterface(nfcServiceBinder);
-        int flags = enablePolling ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
-        if (DEBUG) Slog.v(TAG, "Setting NFC reader mode to flags " + flags);
-        try {
-            nfcAdapterRaw.setReaderMode(nfcInterfaceToken, null, flags, null);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Could not notify NFC service, remote exception: " + e);
+        NfcAdapter nfcAdapter = nfcManager.getDefaultAdapter();
+        if (nfcAdapter == null) {
+            Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
+            return;
         }
+        if (DEBUG) Slog.v(TAG, "Setting NFC reader mode. enablePolling: " + enablePolling);
+        nfcAdapter.setReaderModePollingEnabled(enablePolling);
     }
 
     private static int[] toArray(Collection<Integer> c) {

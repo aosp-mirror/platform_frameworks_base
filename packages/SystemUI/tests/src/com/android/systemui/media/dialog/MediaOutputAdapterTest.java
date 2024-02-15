@@ -46,7 +46,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 
 import com.google.common.collect.ImmutableList;
@@ -291,13 +291,13 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTitleText.getText().toString()).isEqualTo(TEST_DEVICE_NAME_1);
-        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mEndTouchArea.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mEndTouchArea.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -467,7 +467,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     @Test
     public void subStatusSupported_onBindViewHolder_bindDeviceRequirePremium_verifyView() {
         String deviceStatus = (String) mContext.getText(
-                R.string.media_output_status_require_premium);
+                com.android.settingslib.R.string.media_output_status_require_premium);
         when(mMediaDevice2.hasSubtext()).thenReturn(true);
         when(mMediaDevice2.getSubtext()).thenReturn(SUBTEXT_SUBSCRIPTION_REQUIRED);
         when(mMediaDevice2.getSubtextString()).thenReturn(deviceStatus);
@@ -491,7 +491,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     @Test
     public void subStatusSupported_onBindViewHolder_bindDeviceWithAdPlaying_verifyView() {
         String deviceStatus = (String) mContext.getText(
-                R.string.media_output_status_try_after_ad);
+                com.android.settingslib.R.string.media_output_status_try_after_ad);
         when(mMediaDevice2.hasSubtext()).thenReturn(true);
         when(mMediaDevice2.getSubtext()).thenReturn(SUBTEXT_AD_ROUTING_DISALLOWED);
         when(mMediaDevice2.getSubtextString()).thenReturn(deviceStatus);
@@ -525,16 +525,16 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
 
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mSubTitleText.getText().toString()).isEqualTo(TEST_CUSTOM_SUBTEXT);
         assertThat(mViewHolder.mTwoLineTitleText.getText().toString()).isEqualTo(
                 TEST_DEVICE_NAME_1);
-        assertThat(mViewHolder.mContainerLayout.hasOnClickListeners()).isTrue();
+        assertThat(mViewHolder.mContainerLayout.hasOnClickListeners()).isFalse();
     }
 
     @Test

@@ -21,11 +21,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_OWN_FOCUS;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
@@ -39,6 +37,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -52,6 +51,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -61,15 +61,17 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityThread;
+import android.app.IApplicationThread;
 import android.content.pm.ActivityInfo;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.display.VirtualDisplay;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -78,10 +80,10 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
-import android.util.DisplayMetrics;
+import android.util.ArraySet;
 import android.util.MergedConfiguration;
+import android.view.ContentRecordingSession;
 import android.view.IWindow;
-import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -92,6 +94,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.window.ClientWindowFrames;
+import android.window.InputTransferToken;
 import android.window.ScreenCapture;
 import android.window.WindowContainerToken;
 
@@ -99,11 +102,20 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.AdoptShellPermissionsRule;
+import com.android.internal.os.IResultReceiver;
+import com.android.server.LocalServices;
+import com.android.server.wm.SensitiveContentPackages.PackageInfo;
+import com.android.server.wm.WindowManagerService.WindowContainerInfo;
 
+import com.google.common.truth.Expect;
+
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+
+import java.util.ArrayList;
 
 /**
  * Build/Install/Run:
@@ -114,10 +126,21 @@ import org.mockito.ArgumentCaptor;
 @RunWith(WindowTestRunner.class)
 public class WindowManagerServiceTests extends WindowTestsBase {
 
+    private final IApplicationThread mAppThread = ActivityThread.currentActivityThread()
+            .getApplicationThread();
+
     @Rule
     public AdoptShellPermissionsRule mAdoptShellPermissionsRule = new AdoptShellPermissionsRule(
             InstrumentationRegistry.getInstrumentation().getUiAutomation(),
             ADD_TRUSTED_DISPLAY);
+
+    @Rule
+    public Expect mExpect = Expect.create();
+
+    @After
+    public void tearDown() {
+        mWm.mSensitiveContentPackages.clearBlockedApps();
+    }
 
     @Test
     public void testIsRequestedOrientationMapped() {
@@ -261,7 +284,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         assertFalse(win.mHasSurface);
         assertNull(win.mWinAnimator.mSurfaceController);
 
-        doReturn(mSystemServicesTestRule.mTransaction).when(SurfaceControl::getGlobalTransaction);
         // Invisible requested activity should not get the last config even if its view is visible.
         mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
                 outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
@@ -423,7 +445,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     public void testAttachWindowContextToWindowToken_InvalidToken_EarlyReturn() {
         spyOn(mWm.mWindowContextListenerController);
 
-        mWm.attachWindowContextToWindowToken(new Binder(), new Binder());
+        mWm.attachWindowContextToWindowToken(mAppThread, new Binder(), new Binder());
 
         verify(mWm.mWindowContextListenerController, never()).getWindowType(any());
     }
@@ -436,7 +458,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         doReturn(INVALID_WINDOW_TYPE).when(mWm.mWindowContextListenerController)
                 .getWindowType(any());
 
-        mWm.attachWindowContextToWindowToken(new Binder(), windowToken.token);
+        mWm.attachWindowContextToWindowToken(mAppThread, new Binder(), windowToken.token);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -447,7 +469,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         doReturn(TYPE_APPLICATION).when(mWm.mWindowContextListenerController)
                 .getWindowType(any());
 
-        mWm.attachWindowContextToWindowToken(new Binder(), windowToken.token);
+        mWm.attachWindowContextToWindowToken(mAppThread, new Binder(), windowToken.token);
     }
 
     @Test
@@ -460,10 +482,10 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         doReturn(false).when(mWm.mWindowContextListenerController)
                 .assertCallerCanModifyListener(any(), anyBoolean(), anyInt());
 
-        mWm.attachWindowContextToWindowToken(new Binder(), windowToken.token);
+        mWm.attachWindowContextToWindowToken(mAppThread, new Binder(), windowToken.token);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(
-                any(), any(), anyInt(), anyInt(), any());
+                any(), any(), any(), anyInt(), any(), anyBoolean());
     }
 
     @Test
@@ -477,26 +499,27 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .assertCallerCanModifyListener(any(), anyBoolean(), anyInt());
 
         final IBinder clientToken = new Binder();
-        mWm.attachWindowContextToWindowToken(clientToken, windowToken.token);
-
-        verify(mWm.mWindowContextListenerController).registerWindowContainerListener(
-                eq(clientToken), eq(windowToken), anyInt(), eq(TYPE_INPUT_METHOD),
-                eq(windowToken.mOptions));
+        mWm.attachWindowContextToWindowToken(mAppThread, clientToken, windowToken.token);
+        final WindowProcessController wpc = mAtm.getProcessController(mAppThread);
+        verify(mWm.mWindowContextListenerController).registerWindowContainerListener(wpc,
+                clientToken, windowToken, TYPE_INPUT_METHOD, windowToken.mOptions,
+                false /* shouldDispatchConfigWhenRegistering */);
     }
 
     @Test
     public void testAddWindowWithSubWindowTypeByWindowContext() {
         spyOn(mWm.mWindowContextListenerController);
 
-        final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float v) throws RemoteException {
-            }
-        });
+        final WindowState parentWin = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final IBinder parentToken = parentWin.mToken.token;
+        parentWin.mAttrs.token = parentToken;
+        mWm.mWindowMap.put(parentToken, parentWin);
+        final Session session = parentWin.mSession;
+        session.onWindowAdded(parentWin);
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 TYPE_APPLICATION_ATTACHED_DIALOG);
-        params.token = windowToken.token;
+        params.token = parentToken;
+        params.setTitle("attached-dialog");
         final IBinder windowContextToken = new Binder();
         params.setWindowContextToken(windowContextToken);
         doReturn(true).when(mWm.mWindowContextListenerController)
@@ -509,7 +532,20 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 new InsetsSourceControl.Array(), new Rect(), new float[1]);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
-                any(), anyInt(), anyInt(), any());
+                any(), any(), anyInt(), any(), anyBoolean());
+
+        assertTrue(parentWin.hasChild());
+        assertTrue(parentWin.isAttached());
+        session.binderDied();
+        assertFalse(parentWin.hasChild());
+        assertFalse(parentWin.isAttached());
+    }
+
+    @Test
+    public void testIsInTouchMode_returnsDefaultInTouchModeForinexistingDisplay() {
+        assertThat(mWm.isInTouchMode(INVALID_DISPLAY)).isEqualTo(
+                mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_defaultInTouchMode));
     }
 
     @Test
@@ -558,13 +594,14 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.mPerDisplayFocusEnabled = false;
 
         // Create one extra display
-        final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ false);
-        final VirtualDisplay virtualDisplayOwnTouchMode =
-                createVirtualDisplay(/* ownFocus= */ true);
+        final DisplayContent display = createMockSimulatedDisplay();
+        display.getDisplayInfo().flags &= ~FLAG_OWN_FOCUS;
+        final DisplayContent displayOwnTouchMode = createMockSimulatedDisplay();
+        displayOwnTouchMode.getDisplayInfo().flags |= FLAG_OWN_FOCUS;
         final int numberOfDisplays = mWm.mRoot.mChildren.size();
         assertThat(numberOfDisplays).isAtLeast(3);
         final int numberOfGlobalTouchModeDisplays = (int) mWm.mRoot.mChildren.stream()
-                .filter(d -> (d.getDisplay().getFlags() & FLAG_OWN_FOCUS) == 0)
+                .filter(d -> (d.getDisplayInfo().flags & FLAG_OWN_FOCUS) == 0)
                 .count();
         assertThat(numberOfGlobalTouchModeDisplays).isAtLeast(2);
 
@@ -584,12 +621,13 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetInTouchMode_multiDisplay_perDisplayFocus_singleDisplayTouchModeUpdate() {
+    public void testSetInTouchMode_multiDisplay_singleDisplayTouchModeUpdate() {
         // Enable global touch mode
         mWm.mPerDisplayFocusEnabled = true;
 
         // Create one extra display
-        final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ false);
+        final DisplayContent virtualDisplay = createMockSimulatedDisplay();
+        virtualDisplay.getDisplayInfo().flags &= ~FLAG_OWN_FOCUS;
         final int numberOfDisplays = mWm.mRoot.mChildren.size();
         assertThat(numberOfDisplays).isAtLeast(2);
 
@@ -601,161 +639,272 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
                 android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
 
-        mWm.setInTouchMode(!currentTouchMode, virtualDisplay.getDisplay().getDisplayId());
+        mWm.setInTouchMode(!currentTouchMode, virtualDisplay.mDisplayId);
 
         // Ensure that new display touch mode state has changed.
         verify(mWm.mInputManager).setInTouchMode(
                 !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true,
-                virtualDisplay.getDisplay().getDisplayId());
-    }
+                virtualDisplay.mDisplayId);
 
-    @Test
-    public void testSetInTouchMode_multiDisplay_ownTouchMode_singleDisplayTouchModeUpdate() {
-        // Disable global touch mode
+        // Disable global touch mode and make the virtual display own focus.
         mWm.mPerDisplayFocusEnabled = false;
-
-        // Create one extra display
-        final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ true);
-        final int numberOfDisplays = mWm.mRoot.mChildren.size();
-        assertThat(numberOfDisplays).isAtLeast(2);
-
-        // Get current touch mode state and setup WMS to run setInTouchMode
-        boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
-        int callingPid = Binder.getCallingPid();
-        int callingUid = Binder.getCallingUid();
-        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
-        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
-                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
-
-        mWm.setInTouchMode(!currentTouchMode, virtualDisplay.getDisplay().getDisplayId());
+        virtualDisplay.getDisplayInfo().flags |= FLAG_OWN_FOCUS;
+        clearInvocations(mWm.mInputManager);
+        mWm.setInTouchMode(!currentTouchMode, virtualDisplay.mDisplayId);
 
         // Ensure that new display touch mode state has changed.
         verify(mWm.mInputManager).setInTouchMode(
                 !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true,
-                virtualDisplay.getDisplay().getDisplayId());
+                virtualDisplay.mDisplayId);
     }
 
     @Test
-    public void testSetInTouchModeOnAllDisplays_perDisplayFocusDisabled() {
-        testSetInTouchModeOnAllDisplays(/* perDisplayFocusEnabled= */ false);
-    }
-
-    @Test
-    public void testSetInTouchModeOnAllDisplays_perDisplayFocusEnabled() {
-        testSetInTouchModeOnAllDisplays(/* perDisplayFocusEnabled= */ true);
-    }
-
-    private void testSetInTouchModeOnAllDisplays(boolean perDisplayFocusEnabled) {
-        // Set global touch mode with the value passed as argument.
-        mWm.mPerDisplayFocusEnabled = perDisplayFocusEnabled;
-
+    public void testSetInTouchModeOnAllDisplays() {
         // Create a couple of extra displays.
         // setInTouchModeOnAllDisplays should ignore the ownFocus setting.
-        final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ false);
-        final VirtualDisplay virtualDisplayOwnFocus = createVirtualDisplay(/* ownFocus= */ true);
+        final DisplayContent display = createMockSimulatedDisplay();
+        display.getDisplayInfo().flags &= ~FLAG_OWN_FOCUS;
+        final DisplayContent displayOwnTouchMode = createMockSimulatedDisplay();
+        displayOwnTouchMode.getDisplayInfo().flags |= FLAG_OWN_FOCUS;
 
         int callingPid = Binder.getCallingPid();
         int callingUid = Binder.getCallingUid();
+        doReturn(true).when(mWm.mInputManager).setInTouchMode(anyBoolean(), anyInt(),
+                anyInt(), anyBoolean(), anyInt());
         doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
         when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
                 android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
 
-        for (boolean inTouchMode : new boolean[]{true, false}) {
-            mWm.setInTouchModeOnAllDisplays(inTouchMode);
-            for (int i = 0; i < mWm.mRoot.mChildren.size(); ++i) {
-                DisplayContent dc = mWm.mRoot.mChildren.get(i);
-                // All displays that are not already in the desired touch mode are requested to
-                // change their touch mode.
-                if (dc.isInTouchMode() != inTouchMode) {
-                    verify(mWm.mInputManager).setInTouchMode(
-                            true, callingPid, callingUid, /* hasPermission= */ true,
-                            dc.getDisplay().getDisplayId());
+        final Runnable verification = () -> {
+            for (boolean inTouchMode : new boolean[] { true, false }) {
+                mWm.setInTouchModeOnAllDisplays(inTouchMode);
+                for (int i = 0; i < mRootWindowContainer.getChildCount(); ++i) {
+                    final DisplayContent dc = mRootWindowContainer.getChildAt(i);
+                    // All displays that are not already in the desired touch mode are requested to
+                    // change their touch mode.
+                    if (dc.isInTouchMode() != inTouchMode) {
+                        verify(mWm.mInputManager, description("perDisplayFocusEnabled="
+                                + mWm.mPerDisplayFocusEnabled)).setInTouchMode(true,
+                                callingPid, callingUid, /* hasPermission= */ true, dc.mDisplayId);
+                    }
                 }
             }
-        }
-    }
+        };
 
-    private VirtualDisplay createVirtualDisplay(boolean ownFocus) {
-        // Create virtual display
-        Point surfaceSize = new Point(
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
-        int flags = VIRTUAL_DISPLAY_FLAG_PUBLIC;
-        if (ownFocus) {
-            flags |= VIRTUAL_DISPLAY_FLAG_OWN_FOCUS | VIRTUAL_DISPLAY_FLAG_TRUSTED;
-        }
-        VirtualDisplay virtualDisplay = mWm.mDisplayManager.createVirtualDisplay("VirtualDisplay",
-                surfaceSize.x, surfaceSize.y, DisplayMetrics.DENSITY_140, new Surface(), flags);
-        final int displayId = virtualDisplay.getDisplay().getDisplayId();
-        mWm.mRoot.onDisplayAdded(displayId);
+        mWm.mPerDisplayFocusEnabled = false;
+        verification.run();
 
-        // Ensure that virtual display was properly created and stored in WRC
-        assertThat(mWm.mRoot.getDisplayContent(
-                virtualDisplay.getDisplay().getDisplayId())).isNotNull();
-
-        return virtualDisplay;
+        clearInvocations(mWm.mInputManager);
+        mWm.mPerDisplayFocusEnabled = true;
+        verification.run();
     }
 
     @Test
     public void testGetTaskWindowContainerTokenForLaunchCookie_nullCookie() {
-        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(null);
-        assertThat(wct).isNull();
+        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForLaunchCookie(null);
+        assertThat(wci).isNull();
     }
 
     @Test
     public void testGetTaskWindowContainerTokenForLaunchCookie_invalidCookie() {
         Binder cookie = new Binder("test cookie");
-        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie);
-        assertThat(wct).isNull();
+        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForLaunchCookie(cookie);
+        assertThat(wci).isNull();
 
         final ActivityRecord testActivity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
                 .build();
 
-        wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie);
-        assertThat(wct).isNull();
+        wci = mWm.getTaskWindowContainerInfoForLaunchCookie(cookie);
+        assertThat(wci).isNull();
     }
 
     @Test
     public void testGetTaskWindowContainerTokenForLaunchCookie_validCookie() {
         final Binder cookie = new Binder("ginger cookie");
         final WindowContainerToken launchRootTask = mock(WindowContainerToken.class);
-        setupActivityWithLaunchCookie(cookie, launchRootTask);
+        final int uid = 123;
+        setupActivityWithLaunchCookie(cookie, launchRootTask, uid);
 
-        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie);
-        assertThat(wct).isEqualTo(launchRootTask);
+        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForLaunchCookie(cookie);
+        mExpect.that(wci.getToken()).isEqualTo(launchRootTask);
+        mExpect.that(wci.getUid()).isEqualTo(uid);
     }
 
     @Test
     public void testGetTaskWindowContainerTokenForLaunchCookie_multipleCookies() {
         final Binder cookie1 = new Binder("ginger cookie");
         final WindowContainerToken launchRootTask1 = mock(WindowContainerToken.class);
-        setupActivityWithLaunchCookie(cookie1, launchRootTask1);
+        final int uid1 = 123;
+        setupActivityWithLaunchCookie(cookie1, launchRootTask1, uid1);
 
         setupActivityWithLaunchCookie(new Binder("choc chip cookie"),
-                mock(WindowContainerToken.class));
+                mock(WindowContainerToken.class), /* uid= */ 456);
 
         setupActivityWithLaunchCookie(new Binder("peanut butter cookie"),
-                mock(WindowContainerToken.class));
+                mock(WindowContainerToken.class), /* uid= */ 789);
 
-        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie1);
-        assertThat(wct).isEqualTo(launchRootTask1);
+        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForLaunchCookie(cookie1);
+        mExpect.that(wci.getToken()).isEqualTo(launchRootTask1);
+        mExpect.that(wci.getUid()).isEqualTo(uid1);
     }
 
     @Test
     public void testGetTaskWindowContainerTokenForLaunchCookie_multipleCookies_noneValid() {
         setupActivityWithLaunchCookie(new Binder("ginger cookie"),
-                mock(WindowContainerToken.class));
+                mock(WindowContainerToken.class), /* uid= */ 123);
 
         setupActivityWithLaunchCookie(new Binder("choc chip cookie"),
-                mock(WindowContainerToken.class));
+                mock(WindowContainerToken.class), /* uid= */ 456);
 
         setupActivityWithLaunchCookie(new Binder("peanut butter cookie"),
-                mock(WindowContainerToken.class));
+                mock(WindowContainerToken.class), /* uid= */ 789);
 
-        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(
+        WindowContainerInfo wci = mWm.getTaskWindowContainerInfoForLaunchCookie(
                 new Binder("some other cookie"));
-        assertThat(wct).isNull();
+        assertThat(wci).isNull();
+    }
+
+    @Test
+    public void setContentRecordingSession_sessionNull_returnsTrue() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+
+        boolean result = wmInternal.setContentRecordingSession(/* incomingSession= */ null);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void setContentRecordingSession_sessionContentDisplay_returnsTrue() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
+                DEFAULT_DISPLAY);
+
+        boolean result = wmInternal.setContentRecordingSession(session);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void setContentRecordingSession_sessionContentTask_noMatchingTask_returnsFalse() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        IBinder launchCookie = new Binder();
+        ContentRecordingSession session = ContentRecordingSession.createTaskSession(launchCookie);
+
+        boolean result = wmInternal.setContentRecordingSession(session);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void setContentRecordingSession_sessionContentTask_matchingTask_returnsTrue() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        ActivityRecord activityRecord = createActivityRecord(createTask(mDefaultDisplay));
+        ContentRecordingSession session = ContentRecordingSession.createTaskSession(
+                activityRecord.mLaunchCookie);
+
+        boolean result = wmInternal.setContentRecordingSession(session);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void setContentRecordingSession_matchingTask_mutatesSessionWithWindowContainerInfo() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        Task task = createTask(mDefaultDisplay);
+        ActivityRecord activityRecord = createActivityRecord(task);
+        ContentRecordingSession session =
+                ContentRecordingSession.createTaskSession(activityRecord.mLaunchCookie);
+
+        wmInternal.setContentRecordingSession(session);
+
+        mExpect.that(session.getTokenToRecord())
+                .isEqualTo(task.mRemoteToken.toWindowContainerToken().asBinder());
+        mExpect.that(session.getTargetUid()).isEqualTo(activityRecord.getUid());
+    }
+
+    @Test
+    public void addBlockScreenCaptureForApps() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        int ownerId2 = 21;
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+
+        assertTrue(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
+        assertFalse(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId2));
+        verify(mWm).refreshScreenCaptureDisabled();
+    }
+
+    @Test
+    public void addBlockScreenCaptureForApps_duplicate_verifyNoRefresh() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        int ownerId2 = 21;
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+
+        verify(mWm, times(1)).refreshScreenCaptureDisabled();
+    }
+
+    @Test
+    public void addBlockScreenCaptureForApps_notDuplicate_verifyRefresh() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        int ownerId2 = 21;
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        PackageInfo blockedPackage2 = new PackageInfo(testPackage, ownerId2);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+        ArraySet<PackageInfo> blockedPackages2 = new ArraySet();
+        blockedPackages2.add(blockedPackage);
+        blockedPackages2.add(blockedPackage2);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages2);
+
+        assertTrue(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
+        assertTrue(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId2));
+        verify(mWm, times(2)).refreshScreenCaptureDisabled();
+    }
+
+    @Test
+    public void clearBlockedApps_clearsCache() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+        wmInternal.clearBlockedApps();
+
+        assertFalse(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
+        verify(mWm, times(2)).refreshScreenCaptureDisabled();
+    }
+
+    @Test
+    public void clearBlockedApps_alreadyEmpty_verifyNoRefresh() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.clearBlockedApps();
+
+        verify(mWm, never()).refreshScreenCaptureDisabled();
     }
 
     @Test
@@ -815,17 +964,15 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int callingUid = Process.FIRST_APPLICATION_UID;
         final int callingPid = 1234;
         final SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        final IWindow window = mock(IWindow.class);
-        final IBinder windowToken = mock(IBinder.class);
-        when(window.asBinder()).thenReturn(windowToken);
-        final IBinder focusGrantToken = mock(IBinder.class);
+        final IBinder window = new Binder();
+        final InputTransferToken inputTransferToken = mock(InputTransferToken.class);
 
         final InputChannel inputChannel = new InputChannel();
         assertThrows(IllegalArgumentException.class, () ->
                 mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY,
                         surfaceControl, window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE,
                         PRIVATE_FLAG_TRUSTED_OVERLAY, INPUT_FEATURE_SPY, TYPE_APPLICATION,
-                        null /* windowToken */, focusGrantToken, "TestInputChannel",
+                        null /* windowToken */, inputTransferToken, "TestInputChannel",
                         inputChannel));
     }
 
@@ -835,15 +982,13 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int callingUid = Process.SYSTEM_UID;
         final int callingPid = 1234;
         final SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        final IWindow window = mock(IWindow.class);
-        final IBinder windowToken = mock(IBinder.class);
-        when(window.asBinder()).thenReturn(windowToken);
-        final IBinder focusGrantToken = mock(IBinder.class);
+        final IBinder window = new Binder();
+        final InputTransferToken inputTransferToken = mock(InputTransferToken.class);
 
         final InputChannel inputChannel = new InputChannel();
         mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
                 window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
-                INPUT_FEATURE_SPY, TYPE_APPLICATION, null /* windowToken */, focusGrantToken,
+                INPUT_FEATURE_SPY, TYPE_APPLICATION, null /* windowToken */, inputTransferToken,
                 "TestInputChannel", inputChannel);
 
         verify(mTransaction).setInputWindowInfo(
@@ -857,15 +1002,13 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int callingUid = Process.FIRST_APPLICATION_UID;
         final int callingPid = 1234;
         final SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        final IWindow window = mock(IWindow.class);
-        final IBinder windowToken = mock(IBinder.class);
-        when(window.asBinder()).thenReturn(windowToken);
-        final IBinder focusGrantToken = mock(IBinder.class);
+        final IBinder window = new Binder();
+        final InputTransferToken inputTransferToken = mock(InputTransferToken.class);
 
         final InputChannel inputChannel = new InputChannel();
         mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
                 window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
-                0 /* inputFeatures */, TYPE_APPLICATION, null /* windowToken */, focusGrantToken,
+                0 /* inputFeatures */, TYPE_APPLICATION, null /* windowToken */, inputTransferToken,
                 "TestInputChannel", inputChannel);
         verify(mTransaction).setInputWindowInfo(
                 eq(surfaceControl),
@@ -883,15 +1026,13 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int callingUid = Process.SYSTEM_UID;
         final int callingPid = 1234;
         final SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        final IWindow window = mock(IWindow.class);
-        final IBinder windowToken = mock(IBinder.class);
-        when(window.asBinder()).thenReturn(windowToken);
-        final IBinder focusGrantToken = mock(IBinder.class);
+        final IBinder window = new Binder();
+        final InputTransferToken inputTransferToken = mock(InputTransferToken.class);
 
         final InputChannel inputChannel = new InputChannel();
         mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
                 window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
-                0 /* inputFeatures */, TYPE_APPLICATION, null /* windowToken */, focusGrantToken,
+                0 /* inputFeatures */, TYPE_APPLICATION, null /* windowToken */, inputTransferToken,
                 "TestInputChannel", inputChannel);
         verify(mTransaction).setInputWindowInfo(
                 eq(surfaceControl),
@@ -905,19 +1046,137 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
     }
 
-    private void setupActivityWithLaunchCookie(IBinder launchCookie, WindowContainerToken wct) {
+    @Test
+    public void testDrawMagnifiedViewport() {
+        final int displayId = mDisplayContent.mDisplayId;
+        // Use real surface, so ViewportWindow's BlastBufferQueue can be created.
+        final ArrayList<SurfaceControl> surfaceControls = new ArrayList<>();
+        mWm.mSurfaceControlFactory = s -> new SurfaceControl.Builder() {
+            @Override
+            public SurfaceControl build() {
+                final SurfaceControl sc = super.build();
+                surfaceControls.add(sc);
+                return sc;
+            }
+        };
+        mWm.mAccessibilityController.setMagnificationCallbacks(displayId,
+                mock(WindowManagerInternal.MagnificationCallbacks.class));
+        final boolean[] lockCanvasInWmLock = { false };
+        final Surface surface = mWm.mAccessibilityController.forceShowMagnifierSurface(displayId);
+        spyOn(surface);
+        doAnswer(invocationOnMock -> {
+            lockCanvasInWmLock[0] |= Thread.holdsLock(mWm.mGlobalLock);
+            invocationOnMock.callRealMethod();
+            return null;
+        }).when(surface).lockCanvas(any());
+        mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId);
+        waitUntilHandlersIdle();
+        try {
+            verify(surface).lockCanvas(any());
+
+            clearInvocations(surface);
+            // Invalidate and redraw.
+            mWm.mAccessibilityController.onDisplaySizeChanged(mDisplayContent);
+            mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId);
+            // Turn off magnification to release surface.
+            mWm.mAccessibilityController.setMagnificationCallbacks(displayId, null);
+            waitUntilHandlersIdle();
+            // lockCanvas must not be called after releasing.
+            verify(surface, never()).lockCanvas(any());
+            verify(surface).release();
+            assertFalse(lockCanvasInWmLock[0]);
+        } finally {
+            for (int i = surfaceControls.size() - 1; i >= 0; --i) {
+                surfaceControls.get(i).release();
+            }
+        }
+    }
+
+    @Test
+    public void testRequestKeyboardShortcuts_noWindow() {
+        doNothing().when(mWm.mContext).enforceCallingOrSelfPermission(anyString(), anyString());
+        doReturn(null).when(mWm).getFocusedWindowLocked();
+        doReturn(null).when(mWm.mRoot).getCurrentInputMethodWindow();
+
+        TestResultReceiver receiver = new TestResultReceiver();
+        mWm.requestAppKeyboardShortcuts(receiver, 0);
+        assertNotNull(receiver.resultData);
+        assertTrue(receiver.resultData.isEmpty());
+
+        receiver = new TestResultReceiver();
+        mWm.requestImeKeyboardShortcuts(receiver, 0);
+        assertNotNull(receiver.resultData);
+        assertTrue(receiver.resultData.isEmpty());
+    }
+
+    @Test
+    public void testRequestKeyboardShortcuts() throws RemoteException {
+        final IWindow window = mock(IWindow.class);
+        final IBinder binder = mock(IBinder.class);
+        doReturn(binder).when(window).asBinder();
+        final WindowState windowState =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "appWin", window);
+        doNothing().when(mWm.mContext).enforceCallingOrSelfPermission(anyString(), anyString());
+        doReturn(windowState).when(mWm).getFocusedWindowLocked();
+        doReturn(windowState).when(mWm.mRoot).getCurrentInputMethodWindow();
+
+        TestResultReceiver receiver = new TestResultReceiver();
+        mWm.requestAppKeyboardShortcuts(receiver, 0);
+        mWm.requestImeKeyboardShortcuts(receiver, 0);
+        verify(window, times(2)).requestAppKeyboardShortcuts(receiver, 0);
+    }
+
+    @Test
+    public void testReportSystemGestureExclusionChanged_invalidWindow() {
+        final Session session = mock(Session.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder binder = mock(IBinder.class);
+        doReturn(binder).when(window).asBinder();
+
+        // No exception even if the window doesn't exist
+        mWm.reportSystemGestureExclusionChanged(session, window, new ArrayList<>());
+    }
+
+    @Test
+    public void testReportKeepClearAreasChanged_invalidWindow() {
+        final Session session = mock(Session.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder binder = mock(IBinder.class);
+        doReturn(binder).when(window).asBinder();
+
+        // No exception even if the window doesn't exist
+        mWm.reportKeepClearAreasChanged(session, window, new ArrayList<>(), new ArrayList<>());
+    }
+
+    class TestResultReceiver implements IResultReceiver {
+        public android.os.Bundle resultData;
+        private final IBinder mBinder = mock(IBinder.class);
+
+        @Override
+        public void send(int resultCode, android.os.Bundle resultData)
+                throws android.os.RemoteException {
+            this.resultData = resultData;
+        }
+
+        @Override
+        public android.os.IBinder asBinder() {
+            return mBinder;
+        }
+    }
+
+    private void setupActivityWithLaunchCookie(
+            IBinder launchCookie, WindowContainerToken wct, int uid) {
         final WindowContainer.RemoteToken remoteToken = mock(WindowContainer.RemoteToken.class);
         when(remoteToken.toWindowContainerToken()).thenReturn(wct);
-        final ActivityRecord testActivity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .build();
+        final ActivityRecord testActivity =
+                new ActivityBuilder(mAtm).setCreateTask(true).setUid(uid).build();
         testActivity.mLaunchCookie = launchCookie;
         testActivity.getTask().mRemoteToken = remoteToken;
     }
 
     private boolean setupLetterboxConfigurationWithBackgroundType(
             @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType) {
-        mWm.mLetterboxConfiguration.setLetterboxBackgroundType(letterboxBackgroundType);
+        mWm.mLetterboxConfiguration.setLetterboxBackgroundTypeOverride(letterboxBackgroundType);
         return mWm.isLetterboxBackgroundMultiColored();
     }
 }

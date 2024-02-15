@@ -910,7 +910,7 @@ void IncrementalService::disallowReadLogs(StorageId storageId) {
                                                constants().readLogsDisabledMarkerName),
                                     0777, idFromMetadata(metadata), {})) {
         //{.metadata = {metadata.data(), (IncFsSize)metadata.size()}})) {
-        LOG(ERROR) << "Failed to make marker file for storageId: " << storageId;
+        LOG(ERROR) << "Failed to make marker file for storageId: " << storageId << " err: " << -err;
         return;
     }
 

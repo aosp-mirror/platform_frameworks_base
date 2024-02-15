@@ -163,9 +163,6 @@ object CustomizationProviderContract {
         const val TABLE_NAME = "flags"
         val URI: Uri = BASE_URI.buildUpon().path(TABLE_NAME).build()
 
-        /** Flag denoting whether the Wallpaper Picker should use the new, revamped UI. */
-        const val FLAG_NAME_REVAMPED_WALLPAPER_UI = "revamped_wallpaper_ui"
-
         /**
          * Flag denoting whether the customizable lock screen quick affordances feature is enabled.
          */
@@ -183,6 +180,19 @@ object CustomizationProviderContract {
 
         /** Flag denoting AI Wallpapers are enabled in wallpaper picker. */
         const val FLAG_NAME_WALLPAPER_PICKER_UI_FOR_AIWP = "wallpaper_picker_ui_for_aiwp"
+
+        /** Flag denoting transit clock are enabled in wallpaper picker. */
+        const val FLAG_NAME_TRANSIT_CLOCK = "lockscreen_custom_transit_clock"
+
+        /** Flag denoting transit clock are enabled in wallpaper picker. */
+        const val FLAG_NAME_PAGE_TRANSITIONS = "wallpaper_picker_page_transitions"
+
+        /** Flag denoting adding apply button to wallpaper picker's grid preview page. */
+        const val FLAG_NAME_GRID_APPLY_BUTTON = "wallpaper_picker_grid_apply_button"
+
+        /** Flag denoting whether preview loading animation is enabled. */
+        const val FLAG_NAME_WALLPAPER_PICKER_PREVIEW_ANIMATION =
+            "wallpaper_picker_preview_animation"
 
         object Columns {
             /** String. Unique ID for the flag. */

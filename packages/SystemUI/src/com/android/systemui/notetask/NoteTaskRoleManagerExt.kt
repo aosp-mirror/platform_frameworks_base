@@ -19,11 +19,12 @@ package com.android.systemui.notetask
 import android.app.role.RoleManager
 import android.app.role.RoleManager.ROLE_NOTES
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.pm.ShortcutInfo
 import android.graphics.drawable.Icon
 import android.os.PersistableBundle
 import android.os.UserHandle
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
 
 /** Extension functions for [RoleManager] used **internally** by note task. */
@@ -42,21 +43,47 @@ internal object NoteTaskRoleManagerExt {
         context: Context,
         user: UserHandle,
     ): ShortcutInfo {
+        val packageName = getDefaultRoleHolderAsUser(ROLE_NOTES, user)
+
         val extras = PersistableBundle()
-        getDefaultRoleHolderAsUser(ROLE_NOTES, user)?.let { packageName ->
+        if (packageName != null) {
             // Set custom app badge using the icon from ROLES_NOTES default app.
             extras.putString(NoteTaskController.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE, packageName)
         }
+
+        val shortLabel = context.getString(R.string.note_task_button_label)
+
+        val applicationLabel = context.packageManager.getApplicationLabel(packageName)
+        val longLabel =
+            if (applicationLabel == null) {
+                shortLabel
+            } else {
+                context.getString(
+                    R.string.note_task_shortcut_long_label,
+                    applicationLabel,
+                )
+            }
 
         val icon = Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
 
         return ShortcutInfo.Builder(context, NoteTaskController.SHORTCUT_ID)
             .setIntent(LaunchNoteTaskActivity.createIntent(context))
             .setActivity(LaunchNoteTaskActivity.createComponent(context))
-            .setShortLabel(context.getString(R.string.note_task_button_label))
+            .setShortLabel(shortLabel)
+            .setLongLabel(longLabel)
             .setLongLived(true)
             .setIcon(icon)
             .setExtras(extras)
             .build()
+    }
+
+    private fun PackageManager.getApplicationLabel(packageName: String?): String? {
+        if (packageName == null) {
+            return null
+        }
+
+        return runCatching { getApplicationInfo(packageName, /* flags= */ 0)!! }
+            .getOrNull()
+            ?.let { info -> getApplicationLabel(info).toString() }
     }
 }

@@ -57,7 +57,7 @@ constructor(
      * in the wallpaper picker application. This should _always_ be `false` for the real lock screen
      * experience.
      */
-    private val previewMode = MutableStateFlow(PreviewMode())
+    val previewMode = MutableStateFlow(PreviewMode())
 
     /**
      * ID of the slot that's currently selected in the preview that renders exclusively in the
@@ -101,12 +101,6 @@ constructor(
                 bottomAreaInteractor.alpha.distinctUntilChanged()
             }
         }
-    /** An observable for whether the indication area should be padded. */
-    val isIndicationAreaPadded: Flow<Boolean> =
-        combine(startButton, endButton) { startButtonModel, endButtonModel ->
-                startButtonModel.isVisible || endButtonModel.isVisible
-            }
-            .distinctUntilChanged()
     /** An observable for the x-offset by which the indication area should be translated. */
     val indicationAreaTranslationX: Flow<Float> =
         bottomAreaInteractor.clockPosition.map { it.x.toFloat() }.distinctUntilChanged()

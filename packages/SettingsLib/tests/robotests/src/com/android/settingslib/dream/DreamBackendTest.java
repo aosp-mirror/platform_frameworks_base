@@ -75,6 +75,9 @@ public final class DreamBackendTest {
         when(res.getStringArray(
                 com.android.internal.R.array.config_disabledDreamComponents)).thenReturn(
                 new String[]{});
+        when(res.getStringArray(
+                com.android.internal.R.array.config_loggable_dream_prefixes)).thenReturn(
+                new String[]{});
         mBackend = new DreamBackend(mContext);
     }
 

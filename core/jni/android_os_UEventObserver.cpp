@@ -51,8 +51,8 @@ static bool isMatch(const char* buffer, size_t length) {
         const char* field = buffer;
         const char* end = buffer + length + 1;
         do {
-            if (strstr(field, match.string())) {
-                ALOGV("Matched uevent message with pattern: %s", match.string());
+            if (strstr(field, match.c_str())) {
+                ALOGV("Matched uevent message with pattern: %s", match.c_str());
                 return true;
             }
             field += strlen(field) + 1;
@@ -71,7 +71,11 @@ static jstring nativeWaitForNextEvent(JNIEnv *env, jclass clazz) {
         }
         buffer[length] = '\0';
 
-        ALOGV("Received uevent message: %s", buffer);
+        IF_ALOGV() {
+            std::string message(buffer, length);
+            std::replace(message.begin(), message.end(), '\0', ' ');
+            ALOGV("Received uevent message: %s", message.c_str());
+        }
 
         if (isMatch(buffer, length)) {
             // Assume the message is ASCII.

@@ -17,34 +17,48 @@
 
 package com.android.systemui.controls.management
 
+import android.content.Context
 import android.content.DialogInterface
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class PanelConfirmationDialogFactoryTest : SysuiTestCase() {
 
+    @Mock private lateinit var mockDialog : SystemUIDialog
+    @Mock private lateinit var mockDialogFactory : SystemUIDialog.Factory
+    private lateinit var factory : PanelConfirmationDialogFactory
+    @Before
+    fun setup() {
+        MockitoAnnotations.initMocks(this)
+
+        whenever(mockDialogFactory.create(any(Context::class.java))).thenReturn(mockDialog)
+        whenever(mockDialog.context).thenReturn(mContext)
+        factory = PanelConfirmationDialogFactory(mockDialogFactory)
+    }
+
     @Test
     fun testDialogHasCorrectInfo() {
-        val mockDialog: SystemUIDialog = mock() { `when`(context).thenReturn(mContext) }
-        val factory = PanelConfirmationDialogFactory { mockDialog }
         val appName = "appName"
 
-        factory.createConfirmationDialog(context, appName) {}
+        factory.createConfirmationDialog(mContext, appName) {}
 
         verify(mockDialog).setCanceledOnTouchOutside(true)
         verify(mockDialog)
@@ -55,12 +69,9 @@ class PanelConfirmationDialogFactoryTest : SysuiTestCase() {
 
     @Test
     fun testDialogPositiveButton() {
-        val mockDialog: SystemUIDialog = mock() { `when`(context).thenReturn(mContext) }
-        val factory = PanelConfirmationDialogFactory { mockDialog }
-
         var response: Boolean? = null
 
-        factory.createConfirmationDialog(context, "") { response = it }
+        factory.createConfirmationDialog(mContext,"") { response = it }
 
         val captor: ArgumentCaptor<DialogInterface.OnClickListener> = argumentCaptor()
         verify(mockDialog).setPositiveButton(eq(R.string.controls_dialog_ok), capture(captor))
@@ -72,12 +83,9 @@ class PanelConfirmationDialogFactoryTest : SysuiTestCase() {
 
     @Test
     fun testDialogNeutralButton() {
-        val mockDialog: SystemUIDialog = mock() { `when`(context).thenReturn(mContext) }
-        val factory = PanelConfirmationDialogFactory { mockDialog }
-
         var response: Boolean? = null
 
-        factory.createConfirmationDialog(context, "") { response = it }
+        factory.createConfirmationDialog(mContext, "") { response = it }
 
         val captor: ArgumentCaptor<DialogInterface.OnClickListener> = argumentCaptor()
         verify(mockDialog).setNeutralButton(eq(R.string.cancel), capture(captor))
@@ -89,12 +97,9 @@ class PanelConfirmationDialogFactoryTest : SysuiTestCase() {
 
     @Test
     fun testDialogCancel() {
-        val mockDialog: SystemUIDialog = mock() { `when`(context).thenReturn(mContext) }
-        val factory = PanelConfirmationDialogFactory { mockDialog }
-
         var response: Boolean? = null
 
-        factory.createConfirmationDialog(context, "") { response = it }
+        factory.createConfirmationDialog(mContext, "") { response = it }
 
         val captor: ArgumentCaptor<DialogInterface.OnCancelListener> = argumentCaptor()
         verify(mockDialog).setOnCancelListener(capture(captor))

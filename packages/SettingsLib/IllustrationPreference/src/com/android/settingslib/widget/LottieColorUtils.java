@@ -21,6 +21,8 @@ import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 
+import com.android.settingslib.color.R;
+
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieProperty;
 import com.airbnb.lottie.model.KeyPath;
@@ -42,9 +44,6 @@ public class LottieColorUtils {
                 ".grey600",
                 R.color.settingslib_color_grey400);
         map.put(
-                ".grey700",
-                R.color.settingslib_color_grey500);
-        map.put(
                 ".grey800",
                 R.color.settingslib_color_grey300);
         map.put(
@@ -62,6 +61,12 @@ public class LottieColorUtils {
         map.put(
                 ".green400",
                 R.color.settingslib_color_green600);
+        map.put(
+                ".green200",
+                R.color.settingslib_color_green500);
+        map.put(
+                ".red200",
+                R.color.settingslib_color_red500);
         DARK_TO_LIGHT_THEME_COLOR_MAP = Collections.unmodifiableMap(map);
     }
 

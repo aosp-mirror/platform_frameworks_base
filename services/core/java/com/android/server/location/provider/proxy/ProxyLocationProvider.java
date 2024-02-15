@@ -305,7 +305,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider implements
                     return;
                 }
 
-                reportLocation(LocationResult.wrap(location).validate());
+                reportLocation(LocationResult.wrap(location));
             }
         }
 
@@ -316,8 +316,7 @@ public class ProxyLocationProvider extends AbstractLocationProvider implements
                 if (mProxy != this) {
                     return;
                 }
-
-                reportLocation(LocationResult.wrap(locations).validate());
+                reportLocation(LocationResult.wrap(locations));
             }
         }
 

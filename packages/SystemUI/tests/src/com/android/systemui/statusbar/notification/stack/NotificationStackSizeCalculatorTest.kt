@@ -21,7 +21,7 @@ import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.view.View.VISIBLE
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
@@ -70,7 +71,8 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
                 statusBarStateController = sysuiStatusBarStateController,
                 lockscreenShadeTransitionController = lockscreenShadeTransitionController,
                 mediaDataManager = mediaDataManager,
-                testableResources.resources
+                testableResources.resources,
+                    ResourcesSplitShadeStateController()
             )
     }
 

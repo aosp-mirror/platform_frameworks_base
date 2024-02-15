@@ -16,16 +16,22 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
+
 import android.view.View;
 
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.R;
+import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 public class KeyguardPinViewController
         extends KeyguardPinBasedInputViewController<KeyguardPINView> {
@@ -41,6 +47,7 @@ public class KeyguardPinViewController
     private View mOkButton = mView.findViewById(R.id.key_enter);
 
     private long mPinLength;
+    private final UiEventLogger mUiEventLogger;
 
     private boolean mDisabledAutoConfirmation;
 
@@ -52,17 +59,21 @@ public class KeyguardPinViewController
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
             EmergencyButtonController emergencyButtonController,
             FalsingCollector falsingCollector,
-            DevicePostureController postureController,
-            FeatureFlags featureFlags) {
+            DevicePostureController postureController, FeatureFlags featureFlags,
+            SelectedUserInteractor selectedUserInteractor, UiEventLogger uiEventLogger,
+            KeyguardKeyboardInteractor keyguardKeyboardInteractor) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
-                emergencyButtonController, falsingCollector, featureFlags);
+                emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor,
+                keyguardKeyboardInteractor);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPostureController = postureController;
         mLockPatternUtils = lockPatternUtils;
         mFeatureFlags = featureFlags;
+        view.setIsLockScreenLandscapeEnabled(mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE));
         mBackspaceKey = view.findViewById(R.id.delete_button);
-        mPinLength = mLockPatternUtils.getPinLength(KeyguardUpdateMonitor.getCurrentUser());
+        mPinLength = mLockPatternUtils.getPinLength(selectedUserInteractor.getSelectedUserId());
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -77,7 +88,12 @@ public class KeyguardPinViewController
             });
         }
         mPasswordEntry.setUserActivityListener(this::onUserInput);
+        mView.onDevicePostureChanged(mPostureController.getDevicePosture());
         mPostureController.addCallback(mPostureCallback);
+        if (mFeatureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)) {
+            mPasswordEntry.setUsePinShapes(true);
+            updateAutoConfirmationState();
+        }
     }
 
     protected void onUserInput() {
@@ -86,6 +102,7 @@ public class KeyguardPinViewController
             updateAutoConfirmationState();
             if (mPasswordEntry.getText().length() == mPinLength
                     && mOkButton.getVisibility() == View.INVISIBLE) {
+                mUiEventLogger.log(PinBouncerUiEvent.ATTEMPT_UNLOCK_WITH_AUTO_CONFIRM_FEATURE);
                 verifyPasswordAndUnlock();
             }
         }
@@ -99,10 +116,6 @@ public class KeyguardPinViewController
 
     @Override
     public void startAppearAnimation() {
-        if (mFeatureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)) {
-            mPasswordEntry.setUsePinShapes(true);
-            updateAutoConfirmationState();
-        }
         super.startAppearAnimation();
     }
 
@@ -120,7 +133,7 @@ public class KeyguardPinViewController
 
     private void updateAutoConfirmationState() {
         mDisabledAutoConfirmation = mLockPatternUtils.getCurrentFailedPasswordAttempts(
-                KeyguardUpdateMonitor.getCurrentUser()) >= MIN_FAILED_PIN_ATTEMPTS;
+                mSelectedUserInteractor.getSelectedUserId()) >= MIN_FAILED_PIN_ATTEMPTS;
         updateOKButtonVisibility();
         updateBackSpaceVisibility();
         updatePinHinting();
@@ -164,15 +177,36 @@ public class KeyguardPinViewController
      * Responsible for identifying if PIN hinting is to be enabled or not
      */
     private boolean isPinHinting() {
-        return mLockPatternUtils.getPinLength(KeyguardUpdateMonitor.getCurrentUser())
-                == DEFAULT_PIN_LENGTH;
+        return mPinLength == DEFAULT_PIN_LENGTH;
     }
 
     /**
-     * Responsible for identifying if auto confirm is enabled or not in Settings
+     * Responsible for identifying if auto confirm is enabled or not in Settings and
+     * a valid PIN_LENGTH is stored on the device (though the latter check is only to make it more
+     * robust since we only allow enabling PIN confirmation if the user has a valid PIN length
+     * saved on device)
      */
     private boolean isAutoPinConfirmEnabledInSettings() {
         //Checks if user has enabled the auto confirm in Settings
-        return mLockPatternUtils.isAutoPinConfirmEnabled(KeyguardUpdateMonitor.getCurrentUser());
+        return mLockPatternUtils.isAutoPinConfirmEnabled(
+                mSelectedUserInteractor.getSelectedUserId())
+                && mPinLength != LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
+    }
+
+    /** UI Events for the auto confirmation feature in*/
+    enum PinBouncerUiEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Attempting to unlock the device with the auto confirm feature.")
+        ATTEMPT_UNLOCK_WITH_AUTO_CONFIRM_FEATURE(1547);
+
+        private final int mId;
+
+        PinBouncerUiEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
     }
 }

@@ -48,16 +48,19 @@ interface DisplayTracker {
     /** Remove a [Callback] previously added. */
     fun removeCallback(callback: Callback)
 
+    /** Gets the Display with the given displayId */
+    fun getDisplay(displayId: Int): Display
+
     /** Ćallback for notifying of changes. */
     interface Callback {
 
         /** Notifies that a display has been added. */
-        @JvmDefault fun onDisplayAdded(displayId: Int) {}
+        fun onDisplayAdded(displayId: Int) {}
 
         /** Notifies that a display has been removed. */
-        @JvmDefault fun onDisplayRemoved(displayId: Int) {}
+        fun onDisplayRemoved(displayId: Int) {}
 
         /** Notifies a display has been changed */
-        @JvmDefault fun onDisplayChanged(displayId: Int) {}
+        fun onDisplayChanged(displayId: Int) {}
     }
 }

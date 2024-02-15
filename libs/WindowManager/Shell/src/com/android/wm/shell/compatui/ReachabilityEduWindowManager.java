@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
 import android.annotation.Nullable;
+import android.app.AppCompatTaskInfo;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Rect;
@@ -28,6 +29,7 @@ import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
@@ -36,13 +38,13 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
 /**
  * Window manager for the reachability education
  */
 class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
-
-    // The time to wait before hiding the education
-    private static final long DISAPPEAR_DELAY_MS = 4000L;
 
     private static final int REACHABILITY_LEFT_OR_UP_POSITION = 0;
     private static final int REACHABILITY_RIGHT_OR_BOTTOM_POSITION = 2;
@@ -73,6 +75,10 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
     // we need to animate them.
     private boolean mHasLetterboxSizeChanged;
 
+    private final BiConsumer<TaskInfo, ShellTaskOrganizer.TaskListener> mOnDismissCallback;
+
+    private final Function<Integer, Integer> mDisappearTimeSupplier;
+
     @Nullable
     @VisibleForTesting
     ReachabilityEduLayout mLayout;
@@ -80,15 +86,20 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
     ReachabilityEduWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue,
             ShellTaskOrganizer.TaskListener taskListener, DisplayLayout displayLayout,
-            CompatUIConfiguration compatUIConfiguration, ShellExecutor mainExecutor) {
+            CompatUIConfiguration compatUIConfiguration, ShellExecutor mainExecutor,
+            BiConsumer<TaskInfo, ShellTaskOrganizer.TaskListener> onDismissCallback,
+            Function<Integer, Integer> disappearTimeSupplier) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
-        mIsActivityLetterboxed = taskInfo.isLetterboxDoubleTapEnabled;
-        mLetterboxVerticalPosition = taskInfo.topActivityLetterboxVerticalPosition;
-        mLetterboxHorizontalPosition = taskInfo.topActivityLetterboxHorizontalPosition;
-        mTopActivityLetterboxWidth = taskInfo.topActivityLetterboxWidth;
-        mTopActivityLetterboxHeight = taskInfo.topActivityLetterboxHeight;
+        final AppCompatTaskInfo appCompatTaskInfo = taskInfo.appCompatTaskInfo;
+        mIsActivityLetterboxed = appCompatTaskInfo.isLetterboxDoubleTapEnabled;
+        mLetterboxVerticalPosition = appCompatTaskInfo.topActivityLetterboxVerticalPosition;
+        mLetterboxHorizontalPosition = appCompatTaskInfo.topActivityLetterboxHorizontalPosition;
+        mTopActivityLetterboxWidth = appCompatTaskInfo.topActivityLetterboxWidth;
+        mTopActivityLetterboxHeight = appCompatTaskInfo.topActivityLetterboxHeight;
         mCompatUIConfiguration = compatUIConfiguration;
         mMainExecutor = mainExecutor;
+        mOnDismissCallback = onDismissCallback;
+        mDisappearTimeSupplier = disappearTimeSupplier;
     }
 
     @Override
@@ -136,12 +147,13 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
         final int prevLetterboxHorizontalPosition = mLetterboxHorizontalPosition;
         final int prevTopActivityLetterboxWidth = mTopActivityLetterboxWidth;
         final int prevTopActivityLetterboxHeight = mTopActivityLetterboxHeight;
-        mIsActivityLetterboxed = taskInfo.isLetterboxDoubleTapEnabled;
-        mLetterboxVerticalPosition = taskInfo.topActivityLetterboxVerticalPosition;
-        mLetterboxHorizontalPosition = taskInfo.topActivityLetterboxHorizontalPosition;
-        mTopActivityLetterboxWidth = taskInfo.topActivityLetterboxWidth;
-        mTopActivityLetterboxHeight = taskInfo.topActivityLetterboxHeight;
-        mHasUserDoubleTapped = taskInfo.isFromLetterboxDoubleTap;
+        final AppCompatTaskInfo appCompatTaskInfo = taskInfo.appCompatTaskInfo;
+        mIsActivityLetterboxed = appCompatTaskInfo.isLetterboxDoubleTapEnabled;
+        mLetterboxVerticalPosition = appCompatTaskInfo.topActivityLetterboxVerticalPosition;
+        mLetterboxHorizontalPosition = appCompatTaskInfo.topActivityLetterboxHorizontalPosition;
+        mTopActivityLetterboxWidth = appCompatTaskInfo.topActivityLetterboxWidth;
+        mTopActivityLetterboxHeight = appCompatTaskInfo.topActivityLetterboxHeight;
+        mHasUserDoubleTapped = appCompatTaskInfo.isFromLetterboxDoubleTap;
 
         if (!super.updateCompatInfo(taskInfo, taskListener, canShow)) {
             return false;
@@ -209,7 +221,12 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
     }
 
     void updateHideTime() {
-        mNextHideTime = SystemClock.uptimeMillis() + DISAPPEAR_DELAY_MS;
+        mNextHideTime = SystemClock.uptimeMillis() + getDisappearTimeMs();
+    }
+
+    private long getDisappearTimeMs() {
+        return mDisappearTimeSupplier.apply(
+                AccessibilityManager.FLAG_CONTENT_ICONS | AccessibilityManager.FLAG_CONTENT_TEXT);
     }
 
     private void updateVisibilityOfViews() {
@@ -217,13 +234,17 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
             return;
         }
         final TaskInfo lastTaskInfo = getLastTaskInfo();
+        final boolean hasSeenHorizontalReachabilityEdu =
+                mCompatUIConfiguration.hasSeenHorizontalReachabilityEducation(lastTaskInfo);
+        final boolean hasSeenVerticalReachabilityEdu =
+                mCompatUIConfiguration.hasSeenVerticalReachabilityEducation(lastTaskInfo);
         final boolean eligibleForDisplayHorizontalEducation = mForceUpdate
-                || !mCompatUIConfiguration.hasSeenHorizontalReachabilityEducation(lastTaskInfo)
+                || !hasSeenHorizontalReachabilityEdu
                 || (mHasUserDoubleTapped
                     && (mLetterboxHorizontalPosition == REACHABILITY_LEFT_OR_UP_POSITION
                         || mLetterboxHorizontalPosition == REACHABILITY_RIGHT_OR_BOTTOM_POSITION));
         final boolean eligibleForDisplayVerticalEducation = mForceUpdate
-                || !mCompatUIConfiguration.hasSeenVerticalReachabilityEducation(lastTaskInfo)
+                || !hasSeenVerticalReachabilityEdu
                 || (mHasUserDoubleTapped
                     && (mLetterboxVerticalPosition == REACHABILITY_LEFT_OR_UP_POSITION
                         || mLetterboxVerticalPosition == REACHABILITY_RIGHT_OR_BOTTOM_POSITION));
@@ -238,12 +259,53 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
                     availableHeight, mCompatUIConfiguration, lastTaskInfo);
             if (!mHasLetterboxSizeChanged) {
                 updateHideTime();
-                mMainExecutor.executeDelayed(this::hideReachability, DISAPPEAR_DELAY_MS);
+                final long disappearTimeMs = getDisappearTimeMs();
+                mMainExecutor.executeDelayed(this::hideReachability, disappearTimeMs);
+                // If reachability education has been seen for the first time, trigger callback to
+                // display aspect ratio settings button once reachability education disappears
+                if (hasShownHorizontalReachabilityEduFirstTime(hasSeenHorizontalReachabilityEdu)
+                        || hasShownVerticalReachabilityEduFirstTime(
+                        hasSeenVerticalReachabilityEdu)) {
+                    mMainExecutor.executeDelayed(this::triggerOnDismissCallback,
+                            disappearTimeMs);
+                }
             }
             mHasUserDoubleTapped = false;
         } else {
             mLayout.hideAllImmediately();
         }
+    }
+
+    /**
+     * Compares the value of
+     * {@link CompatUIConfiguration#hasSeenHorizontalReachabilityEducation} before and after the
+     * layout is shown. Horizontal reachability education is considered seen for the first time if
+     * prior to viewing the layout,
+     * {@link CompatUIConfiguration#hasSeenHorizontalReachabilityEducation} is {@code false}
+     * but becomes {@code true} once the current layout is shown.
+     */
+    private boolean hasShownHorizontalReachabilityEduFirstTime(
+            boolean previouslyShownHorizontalReachabilityEducation) {
+        return !previouslyShownHorizontalReachabilityEducation
+                && mCompatUIConfiguration.hasSeenHorizontalReachabilityEducation(getLastTaskInfo());
+    }
+
+    /**
+     * Compares the value of
+     * {@link CompatUIConfiguration#hasSeenVerticalReachabilityEducation} before and after the
+     * layout is shown. Horizontal reachability education is considered seen for the first time if
+     * prior to viewing the layout,
+     * {@link CompatUIConfiguration#hasSeenVerticalReachabilityEducation} is {@code false}
+     * but becomes {@code true} once the current layout is shown.
+     */
+    private boolean hasShownVerticalReachabilityEduFirstTime(
+            boolean previouslyShownVerticalReachabilityEducation) {
+        return !previouslyShownVerticalReachabilityEducation
+                && mCompatUIConfiguration.hasSeenVerticalReachabilityEducation(getLastTaskInfo());
+    }
+
+    private void triggerOnDismissCallback() {
+        mOnDismissCallback.accept(getLastTaskInfo(), getTaskListener());
     }
 
     private void hideReachability() {

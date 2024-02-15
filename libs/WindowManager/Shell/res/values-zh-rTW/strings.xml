@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"取消暫時隱藏"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"應用程式可能無法在分割畫面中運作"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"這個應用程式不支援分割畫面"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"這個應用程式只能在 1 個視窗中開啟。"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"這個應用程式只能在 1 個視窗中開啟"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"應用程式可能無法在次要顯示器上運作。"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"應用程式無法在次要顯示器上啟動。"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"分割畫面分隔線"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"移至右上方"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"移至左下方"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"移至右下方"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"展開「<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>」"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"收合「<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>」"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"「<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>」設定"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"關閉對話框"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"不要以對話框形式顯示對話"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"我知道了"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"最近沒有任何對話框"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"最近的對話框和已關閉的對話框會顯示在這裡"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"透過對話框進行即時通訊"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"畫面底部的角落會顯示新對話圖示。輕觸可展開圖示，拖曳即可關閉。"</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"你隨時可以控管對話框的各項設定"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"輕觸這裡即可管理哪些應用程式和對話可顯示對話框"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"泡泡"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"已關閉泡泡。"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"請輕觸並重新啟動此應用程式，取得更良好的觀看體驗。"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"輕觸此按鈕重新啟動這個應用程式，即可獲得更良好的觀看體驗"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"前往「設定」變更這個應用程式的顯示比例"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"變更顯示比例"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"相機有問題嗎？\n輕觸即可修正"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"未修正問題嗎？\n輕觸即可還原"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"相機沒問題嗎？輕觸即可關閉。"</string>

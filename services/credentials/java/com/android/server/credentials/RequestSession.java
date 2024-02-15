@@ -17,20 +17,24 @@
 package com.android.server.credentials;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.CredentialProviderInfo;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.UserSelectionDialogResult;
+import android.credentials.flags.Flags;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.UserSelectionDialogResult;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IInterface;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.service.credentials.CallingAppInfo;
 import android.util.Slog;
@@ -94,7 +98,13 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
 
     private final Set<ComponentName> mEnabledProviders;
 
+    private final RequestSessionDeathRecipient mDeathRecipient =
+            new RequestSessionDeathRecipient();
+
     protected PendingIntent mPendingIntent;
+
+    @Nullable
+    protected ResultReceiver mFinalResponseReceiver;
 
     @NonNull
     protected RequestSessionStatus mRequestSessionStatus =
@@ -117,7 +127,8 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             @NonNull String requestType,
             CallingAppInfo callingAppInfo,
             Set<ComponentName> enabledProviders,
-            CancellationSignal cancellationSignal, long timestampStarted) {
+            CancellationSignal cancellationSignal, long timestampStarted,
+            boolean shouldBindClientToDeath) {
         mContext = context;
         mLock = lock;
         mSessionCallback = sessionCallback;
@@ -141,11 +152,28 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         mRequestSessionMetric.collectInitialPhaseMetricInfo(timestampStarted,
                 mCallingUid, ApiName.getMetricCodeFromRequestInfo(mRequestType));
         setCancellationListener();
+        if (shouldBindClientToDeath && Flags.clearSessionEnabled()) {
+            if (mClientCallback != null && mClientCallback instanceof IInterface) {
+                setUpClientCallbackListener(((IInterface) mClientCallback).asBinder());
+            }
+        }
+    }
+
+    protected void setUpClientCallbackListener(IBinder clientBinder) {
+        if (mClientCallback != null && mClientCallback instanceof IInterface) {
+            IInterface callback = (IInterface) mClientCallback;
+            try {
+                clientBinder.linkToDeath(mDeathRecipient, 0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, e.getMessage());
+            }
+        }
     }
 
     private void setCancellationListener() {
         mCancellationSignal.setOnCancelListener(
                 () -> {
+                    Slog.d(TAG, "Cancellation invoked from the client - clearing session");
                     boolean isUiActive = maybeCancelUi();
                     finishSession(!isUiActive);
                 }
@@ -168,6 +196,17 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         return false;
     }
 
+    private boolean isUiWaitingForData() {
+        // Technically, the status can also be IN_PROGRESS when the user has made a selection
+        // so this an over estimation, but safe to do so as it is used for cancellation
+        // propagation to the provider in a very narrow time frame. If provider has
+        // already responded, cancellation is not an issue as the cancellation listener
+        // is independent of the service binding.
+        // TODO(b/313512500): Do not propagate cancelation if provider has responded in
+        // query phase.
+        return mCredentialManagerUi.getStatus() == CredentialManagerUi.UiStatus.IN_PROGRESS;
+    }
+
     public abstract ProviderSession initiateProviderSession(CredentialProviderInfo providerInfo,
             RemoteCredentialService remoteCredentialService);
 
@@ -185,7 +224,8 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     // UI callbacks
 
     @Override // from CredentialManagerUiCallbacks
-    public void onUiSelection(UserSelectionDialogResult selection) {
+    public void onUiSelection(UserSelectionDialogResult selection,
+            ResultReceiver finalResponseReceiver) {
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
             Slog.w(TAG, "Request has already been completed. This is strange.");
             return;
@@ -200,6 +240,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             Slog.w(TAG, "providerSession not found in onUiSelection. This is strange.");
             return;
         }
+        mFinalResponseReceiver = finalResponseReceiver;
         ProviderSessionMetric providerSessionMetric = providerSession.mProviderSessionMetric;
         int initialAuthMetricsProvider = providerSessionMetric.getBrowsedAuthenticationMetric()
                 .size();
@@ -372,5 +413,13 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         var chosenProviderSession = mProviders.get(componentName.flattenToString());
         return chosenProviderSession != null && chosenProviderSession.mProviderInfo != null
                 && chosenProviderSession.mProviderInfo.isPrimary();
+    }
+
+    private class RequestSessionDeathRecipient implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            Slog.d(TAG, "Client binder died - clearing session");
+            finishSession(isUiWaitingForData());
+        }
     }
 }

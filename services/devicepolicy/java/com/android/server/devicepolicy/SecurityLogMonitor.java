@@ -101,6 +101,10 @@ class SecurityLogMonitor implements Runnable {
     /** Minimum time between forced fetch attempts. */
     private static final long FORCE_FETCH_THROTTLE_NS = TimeUnit.SECONDS.toNanos(10);
 
+    /**
+     * Monitor thread is not null iff SecurityLogMonitor is running, i.e. started and not stopped.
+     * Pausing doesn't change it.
+     */
     @GuardedBy("mLock")
     private Thread mMonitorThread = null;
     @GuardedBy("mLock")
@@ -147,7 +151,6 @@ class SecurityLogMonitor implements Runnable {
     void start(int enabledUser) {
         Slog.i(TAG, "Starting security logging for user " + enabledUser);
         mEnabledUser = enabledUser;
-        SecurityLog.writeEvent(SecurityLog.TAG_LOGGING_STARTED);
         mLock.lock();
         try {
             if (mMonitorThread == null) {
@@ -160,6 +163,11 @@ class SecurityLogMonitor implements Runnable {
 
                 mMonitorThread = new Thread(this);
                 mMonitorThread.start();
+
+                SecurityLog.writeEvent(SecurityLog.TAG_LOGGING_STARTED);
+                Slog.i(TAG, "Security log monitor thread started");
+            } else {
+                Slog.i(TAG, "Security log monitor thread is already running");
             }
         } finally {
             mLock.unlock();

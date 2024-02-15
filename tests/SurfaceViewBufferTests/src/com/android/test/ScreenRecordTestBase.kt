@@ -19,7 +19,6 @@ import android.annotation.ColorInt
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
-import android.server.wm.WindowManagerState.getLogicalDisplaySize
 import android.view.cts.surfacevalidator.CapturedActivity
 import android.view.cts.surfacevalidator.ISurfaceValidatorTestCase
 import android.view.cts.surfacevalidator.PixelChecker
@@ -44,8 +43,6 @@ open class ScreenRecordTestBase(useBlastAdapter: Boolean) :
         mActivity = mActivityRule.launchActivity(Intent())
         lateinit var surfaceReadyLatch: CountDownLatch
         runOnUiThread {
-            it.dismissPermissionDialog()
-            it.setLogicalDisplaySize(getLogicalDisplaySize())
             surfaceReadyLatch = it.addSurfaceView(defaultBufferSize)
         }
         surfaceReadyLatch.await()

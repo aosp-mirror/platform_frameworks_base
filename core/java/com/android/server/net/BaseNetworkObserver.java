@@ -64,7 +64,7 @@ public class BaseNetworkObserver extends INetworkManagementEventObserver.Stub {
     }
 
     @Override
-    public void interfaceClassDataActivityChanged(int transportType, boolean active, long tsNanos,
+    public void interfaceClassDataActivityChanged(int label, boolean active, long tsNanos,
             int uid) {
         // default no-op
     }

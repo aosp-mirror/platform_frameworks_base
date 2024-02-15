@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
 
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
 
 import static org.junit.Assert.assertFalse;
@@ -64,6 +65,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewBarn;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 import com.android.systemui.util.settings.SecureSettings;
@@ -110,6 +112,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
     private final SectionStyleProvider mSectionStyleProvider = new SectionStyleProvider();
     @Mock private UserTracker mUserTracker;
+    @Mock private GroupMembershipManager mGroupMembershipManager;
 
     private NotifUiAdjustmentProvider mAdjustmentProvider;
 
@@ -126,7 +129,9 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mSecureSettings,
                 mLockscreenUserManager,
                 mSectionStyleProvider,
-                mUserTracker);
+                mUserTracker,
+                mGroupMembershipManager
+                );
         mEntry = getNotificationEntryBuilder().setParent(ROOT_ENTRY).build();
         mInflationError = new Exception(TEST_MESSAGE);
         mErrorManager = new NotifInflationErrorManager();
@@ -134,7 +139,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         setSectionIsLowPriority(false);
 
         PreparationCoordinator coordinator = new PreparationCoordinator(
-                mock(PreparationCoordinatorLogger.class),
+                new PreparationCoordinatorLogger(logcatLogBuffer()),
                 mNotifInflater,
                 mErrorManager,
                 mock(NotifViewBarn.class),

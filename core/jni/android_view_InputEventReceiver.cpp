@@ -82,6 +82,7 @@ public:
     status_t initialize();
     void dispose();
     status_t finishInputEvent(uint32_t seq, bool handled);
+    bool probablyHasInput();
     status_t reportTimeline(int32_t inputEventId, nsecs_t gpuCompletedTime, nsecs_t presentTime);
     status_t consumeEvents(JNIEnv* env, bool consumeBatches, nsecs_t frameTime,
             bool* outConsumedBatch);
@@ -165,6 +166,10 @@ status_t NativeInputEventReceiver::finishInputEvent(uint32_t seq, bool handled) 
     return processOutboundEvents();
 }
 
+bool NativeInputEventReceiver::probablyHasInput() {
+    return mInputConsumer.probablyHasInput();
+}
+
 status_t NativeInputEventReceiver::reportTimeline(int32_t inputEventId, nsecs_t gpuCompletedTime,
                                                   nsecs_t presentTime) {
     if (kDebugDispatchCycle) {
@@ -184,7 +189,7 @@ status_t NativeInputEventReceiver::reportTimeline(int32_t inputEventId, nsecs_t 
 void NativeInputEventReceiver::setFdEvents(int events) {
     if (mFdEvents != events) {
         mFdEvents = events;
-        int fd = mInputConsumer.getChannel()->getFd();
+        const int fd = mInputConsumer.getChannel()->getFd();
         if (events) {
             mMessageQueue->getLooper()->addFd(fd, 0, events, this, nullptr);
         } else {
@@ -278,7 +283,7 @@ int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data)
 
     if (events & ALOOPER_EVENT_INPUT) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        status_t status = consumeEvents(env, false /*consumeBatches*/, -1, nullptr);
+        status_t status = consumeEvents(env, /*consumeBatches=*/false, -1, nullptr);
         mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
         return status == OK || status == NO_MEMORY ? KEEP_CALLBACK : REMOVE_CALLBACK;
     }
@@ -398,7 +403,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     env->CallVoidMethod(receiverObj.get(),
                                         gInputEventReceiverClassInfo.onFocusEvent,
                                         jboolean(focusEvent->getHasFocus()));
-                    finishInputEvent(seq, true /* handled */);
+                    finishInputEvent(seq, /*handled=*/true);
                     continue;
                 }
                 case InputEventType::CAPTURE: {
@@ -411,7 +416,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     env->CallVoidMethod(receiverObj.get(),
                                         gInputEventReceiverClassInfo.onPointerCaptureEvent,
                                         jboolean(captureEvent->getPointerCaptureEnabled()));
-                    finishInputEvent(seq, true /* handled */);
+                    finishInputEvent(seq, /*handled=*/true);
                     continue;
                 }
                 case InputEventType::DRAG: {
@@ -423,7 +428,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onDragEvent,
                                         jboolean(dragEvent->isExiting()), dragEvent->getX(),
                                         dragEvent->getY());
-                    finishInputEvent(seq, true /* handled */);
+                    finishInputEvent(seq, /*handled=*/true);
                     continue;
                 }
                 case InputEventType::TOUCH_MODE: {
@@ -436,7 +441,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     env->CallVoidMethod(receiverObj.get(),
                                         gInputEventReceiverClassInfo.onTouchModeChanged,
                                         jboolean(touchModeEvent->isInTouchMode()));
-                    finishInputEvent(seq, true /* handled */);
+                    finishInputEvent(seq, /*handled=*/true);
                     continue;
                 }
 
@@ -547,6 +552,12 @@ static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jlong receiverPtr,
     }
 }
 
+static bool nativeProbablyHasInput(JNIEnv* env, jclass clazz, jlong receiverPtr) {
+    sp<NativeInputEventReceiver> receiver =
+            reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
+    return receiver->probablyHasInput();
+}
+
 static void nativeReportTimeline(JNIEnv* env, jclass clazz, jlong receiverPtr, jint inputEventId,
                                  jlong gpuCompletedTime, jlong presentTime) {
     if (IdGenerator::getSource(inputEventId) != IdGenerator::Source::INPUT_READER) {
@@ -571,8 +582,8 @@ static jboolean nativeConsumeBatchedInputEvents(JNIEnv* env, jclass clazz, jlong
     sp<NativeInputEventReceiver> receiver =
             reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
     bool consumedBatch;
-    status_t status = receiver->consumeEvents(env, true /*consumeBatches*/, frameTimeNanos,
-            &consumedBatch);
+    status_t status =
+            receiver->consumeEvents(env, /*consumeBatches=*/true, frameTimeNanos, &consumedBatch);
     if (status && status != DEAD_OBJECT && !env->ExceptionCheck()) {
         std::string message =
                 android::base::StringPrintf("Failed to consume batched input event.  status=%s(%d)",
@@ -597,6 +608,7 @@ static const JNINativeMethod gMethods[] = {
          (void*)nativeInit},
         {"nativeDispose", "(J)V", (void*)nativeDispose},
         {"nativeFinishInputEvent", "(JIZ)V", (void*)nativeFinishInputEvent},
+        {"nativeProbablyHasInput", "(J)Z", (void*)nativeProbablyHasInput},
         {"nativeReportTimeline", "(JIJJ)V", (void*)nativeReportTimeline},
         {"nativeConsumeBatchedInputEvents", "(JJ)Z", (void*)nativeConsumeBatchedInputEvents},
         {"nativeDump", "(JLjava/lang/String;)Ljava/lang/String;", (void*)nativeDump},

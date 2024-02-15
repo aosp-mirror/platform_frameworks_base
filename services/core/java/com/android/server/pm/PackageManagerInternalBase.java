@@ -19,6 +19,8 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -37,6 +39,7 @@ import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SuspendDialogInfo;
+import android.content.pm.UserPackage;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -47,13 +50,13 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.SharedUserApi;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.mutate.PackageStateMutator;
 
 import java.io.IOException;
@@ -97,7 +100,16 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Deprecated
     public final List<ApplicationInfo> getInstalledApplications(
             @PackageManager.ApplicationInfoFlagsBits long flags, int userId, int callingUid) {
-        return snapshot().getInstalledApplications(flags, userId, callingUid);
+        return snapshot().getInstalledApplications(flags, userId, callingUid,
+                /* forceAllowCrossUser= */ false);
+    }
+
+    @Override
+    @Deprecated
+    public final List<ApplicationInfo> getInstalledApplicationsCrossUser(
+            @PackageManager.ApplicationInfoFlagsBits long flags, int userId, int callingUid) {
+        return snapshot().getInstalledApplications(flags, userId, callingUid,
+                /* forceAllowCrossUser= */ true);
     }
 
     @Override
@@ -241,7 +253,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
         getSuspendPackageHelper().removeSuspensionsBySuspendingPackage(snapshot(),
                 new String[]{packageName},
                 (suspendingPackage) -> !PackageManagerService.PLATFORM_PACKAGE_NAME.equals(
-                        suspendingPackage),
+                        suspendingPackage.packageName),
                 userId);
     }
 
@@ -260,7 +272,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
 
     @Override
     @Deprecated
-    public final String getSuspendingPackage(String suspendedPackage, int userId) {
+    public final UserPackage getSuspendingPackage(String suspendedPackage, int userId) {
         return getSuspendPackageHelper().getSuspendingPackage(snapshot(), suspendedPackage, userId,
                 Binder.getCallingUid());
     }
@@ -268,7 +280,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Override
     @Deprecated
     public final SuspendDialogInfo getSuspendedDialogInfo(String suspendedPackage,
-            String suspendingPackage, int userId) {
+            UserPackage suspendingPackage, int userId) {
         return getSuspendPackageHelper().getSuspendedDialogInfo(snapshot(), suspendedPackage,
                 suspendingPackage, userId, Binder.getCallingUid());
     }
@@ -674,14 +686,16 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
 
     @Override
     @Deprecated
-    public final void unsuspendForSuspendingPackage(final String packageName, int affectedUser) {
-        mService.unsuspendForSuspendingPackage(snapshot(), packageName, affectedUser);
+    public final void unsuspendAdminSuspendedPackages(int affectedUser) {
+        final int suspendingUserId = affectedUser;
+        mService.unsuspendForSuspendingPackage(snapshot(), PLATFORM_PACKAGE_NAME, suspendingUserId);
     }
 
     @Override
     @Deprecated
-    public final boolean isSuspendingAnyPackages(String suspendingPackage, int userId) {
-        return snapshot().isSuspendingAnyPackages(suspendingPackage, userId);
+    public final boolean isAdminSuspendingAnyPackages(int userId) {
+        final int suspendingUserId = userId;
+        return snapshot().isSuspendingAnyPackages(PLATFORM_PACKAGE_NAME, suspendingUserId, userId);
     }
 
     @Override
@@ -743,6 +757,25 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     public void setPackageStoppedState(@NonNull String packageName, boolean stopped,
             int userId) {
         mService.setPackageStoppedState(snapshot(), packageName, stopped, userId);
+    }
+
+    @Override
+    public void notifyComponentUsed(@NonNull String packageName, @UserIdInt int userId,
+            @Nullable String recentCallingPackage, @NonNull String debugInfo) {
+        mService.notifyComponentUsed(snapshot(), packageName, userId,
+                recentCallingPackage, debugInfo);
+    }
+
+    @Override
+    public boolean isPackageQuarantined(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException {
+        return snapshot().isPackageQuarantinedForUser(packageName, userId);
+    }
+
+    @Override
+    public boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException {
+        return snapshot().isPackageStoppedForUser(packageName, userId);
     }
 
     @NonNull

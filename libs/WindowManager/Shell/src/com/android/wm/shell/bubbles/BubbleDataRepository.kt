@@ -17,7 +17,6 @@ package com.android.wm.shell.bubbles
 
 import android.annotation.SuppressLint
 import android.annotation.UserIdInt
-import android.content.Context
 import android.content.pm.LauncherApps
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_CACHED
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC
@@ -25,6 +24,8 @@ import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LA
 import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.util.Log
+import android.util.SparseArray
+import com.android.internal.annotations.VisibleForTesting
 import com.android.wm.shell.bubbles.Bubbles.BubbleMetadataFlagListener
 import com.android.wm.shell.bubbles.storage.BubbleEntity
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
@@ -33,19 +34,19 @@ import com.android.wm.shell.common.ShellExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
-internal class BubbleDataRepository(
-    context: Context,
+class BubbleDataRepository(
     private val launcherApps: LauncherApps,
-    private val mainExecutor: ShellExecutor
+    private val mainExecutor: ShellExecutor,
+    private val persistentRepository: BubblePersistentRepository,
 ) {
     private val volatileRepository = BubbleVolatileRepository(launcherApps)
-    private val persistentRepository = BubblePersistentRepository(context)
 
-    private val ioScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var job: Job? = null
 
     // For use in Bubble construction.
@@ -98,6 +99,44 @@ internal class BubbleDataRepository(
         if (volatileRepository.sanitizeBubbles(userIds)) persistToDisk()
     }
 
+    /**
+     * Removes all entities that don't have a user in the activeUsers list, if any entities were
+     * removed it persists the new list to disk.
+     */
+    @VisibleForTesting
+    fun filterForActiveUsersAndPersist(
+            activeUsers: List<Int>,
+            entitiesByUser: SparseArray<List<BubbleEntity>>
+    ): SparseArray<List<BubbleEntity>> {
+        val validEntitiesByUser = SparseArray<List<BubbleEntity>>()
+        var entitiesChanged = false
+        for (i in 0 until entitiesByUser.size()) {
+            val parentUserId = entitiesByUser.keyAt(i)
+            if (activeUsers.contains(parentUserId)) {
+                val validEntities = mutableListOf<BubbleEntity>()
+                // Check if each of the bubbles in the top-level user still has a valid user
+                // as it could belong to a profile and have a different id from the parent.
+                for (entity in entitiesByUser.get(parentUserId)) {
+                    if (activeUsers.contains(entity.userId)) {
+                        validEntities.add(entity)
+                    } else {
+                        entitiesChanged = true
+                    }
+                }
+                if (validEntities.isNotEmpty()) {
+                    validEntitiesByUser.put(parentUserId, validEntities)
+                }
+            } else {
+                entitiesChanged = true
+            }
+        }
+        if (entitiesChanged) {
+            persistToDisk(validEntitiesByUser)
+            return validEntitiesByUser
+        }
+        return entitiesByUser
+    }
+
     private fun transform(bubbles: List<Bubble>): List<BubbleEntity> {
         return bubbles.mapNotNull { b ->
             BubbleEntity(
@@ -129,15 +168,18 @@ internal class BubbleDataRepository(
      * Job C resumes and reaches yield() and is then cancelled
      * Job D resumes and performs another blocking I/O
      */
-    private fun persistToDisk() {
+    @VisibleForTesting
+    fun persistToDisk(
+            entitiesByUser: SparseArray<List<BubbleEntity>> = volatileRepository.bubbles
+    ) {
         val prev = job
-        job = ioScope.launch {
+        job = coroutineScope.launch {
             // if there was an ongoing disk I/O operation, they can be cancelled
             prev?.cancelAndJoin()
             // check for cancellation before disk I/O
             yield()
             // save to disk
-            persistentRepository.persistsToDisk(volatileRepository.bubbles)
+            persistentRepository.persistsToDisk(entitiesByUser)
         }
     }
 
@@ -148,7 +190,11 @@ internal class BubbleDataRepository(
      *           bubbles.
      */
     @SuppressLint("WrongConstant")
-    fun loadBubbles(userId: Int, cb: (List<Bubble>) -> Unit) = ioScope.launch {
+    fun loadBubbles(
+            userId: Int,
+            currentUsers: List<Int>,
+            cb: (List<Bubble>) -> Unit
+    ) = coroutineScope.launch {
         /**
          * Load BubbleEntity from disk.
          * e.g.
@@ -159,7 +205,12 @@ internal class BubbleDataRepository(
          * ]
          */
         val entitiesByUser = persistentRepository.readFromDisk()
-        val entities = entitiesByUser.get(userId) ?: return@launch
+
+        // Before doing anything, validate that the entities we loaded are valid & have an existing
+        // user.
+        val validEntitiesByUser = filterForActiveUsersAndPersist(currentUsers, entitiesByUser)
+
+        val entities = validEntitiesByUser.get(userId) ?: return@launch
         volatileRepository.addBubbles(userId, entities)
         /**
          * Extract userId/packageName from these entities.

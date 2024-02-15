@@ -20,20 +20,22 @@ import android.content.Context
 import android.hardware.display.DisplayManager
 import android.os.Handler
 import android.os.RemoteException
-import com.android.systemui.unfold.dagger.UnfoldMain
+import android.os.Trace
 import com.android.systemui.unfold.util.CallbackController
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 /**
- * Allows to subscribe to rotation changes. Updates are provided for the display associated
- * to [context].
+ * Allows to subscribe to rotation changes. Updates are provided for the display associated to
+ * [context].
  */
 class RotationChangeProvider
-@Inject
+@AssistedInject
 constructor(
     private val displayManager: DisplayManager,
     private val context: Context,
-    @UnfoldMain private val mainHandler: Handler,
+    @Assisted private val handler: Handler,
 ) : CallbackController<RotationChangeProvider.RotationListener> {
 
     private val listeners = mutableListOf<RotationListener>()
@@ -42,7 +44,7 @@ constructor(
     private var lastRotation: Int? = null
 
     override fun addCallback(listener: RotationListener) {
-        mainHandler.post {
+        handler.post {
             if (listeners.isEmpty()) {
                 subscribeToRotation()
             }
@@ -51,7 +53,7 @@ constructor(
     }
 
     override fun removeCallback(listener: RotationListener) {
-        mainHandler.post {
+        handler.post {
             listeners -= listener
             if (listeners.isEmpty()) {
                 unsubscribeToRotation()
@@ -62,7 +64,7 @@ constructor(
 
     private fun subscribeToRotation() {
         try {
-            displayManager.registerDisplayListener(displayListener, mainHandler)
+            displayManager.registerDisplayListener(displayListener, handler)
         } catch (e: RemoteException) {
             throw e.rethrowFromSystemServer()
         }
@@ -85,19 +87,30 @@ constructor(
     private inner class RotationDisplayListener : DisplayManager.DisplayListener {
 
         override fun onDisplayChanged(displayId: Int) {
-            val display = context.display ?: return
+            Trace.beginSection("RotationChangeProvider.RotationDisplayListener#onDisplayChanged")
+            try {
+                val display = context.display ?: return
 
-            if (displayId == display.displayId) {
-                val currentRotation = display.rotation
-                if (lastRotation == null || lastRotation != currentRotation) {
-                    listeners.forEach { it.onRotationChanged(currentRotation) }
-                    lastRotation = currentRotation
+                if (displayId == display.displayId) {
+                    val currentRotation = display.rotation
+                    if (lastRotation == null || lastRotation != currentRotation) {
+                        listeners.forEach { it.onRotationChanged(currentRotation) }
+                        lastRotation = currentRotation
+                    }
                 }
+            } finally {
+                Trace.endSection()
             }
         }
 
         override fun onDisplayAdded(displayId: Int) {}
 
         override fun onDisplayRemoved(displayId: Int) {}
+    }
+
+    @AssistedFactory
+    interface Factory {
+        /** Creates a new [RotationChangeProvider] that provides updated using [handler]. */
+        fun create(handler: Handler): RotationChangeProvider
     }
 }

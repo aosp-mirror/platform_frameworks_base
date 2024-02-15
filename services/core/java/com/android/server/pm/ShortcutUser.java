@@ -209,9 +209,8 @@ class ShortcutUser {
         if (ret == null) {
             ret = new ShortcutLauncher(this, mUserId, packageName, launcherUserId);
             mLaunchers.put(key, ret);
-        } else {
-            ret.attemptToRestoreIfNeededAndSave();
         }
+        ret.attemptToRestoreIfNeededAndSave();
         return ret;
     }
 
@@ -363,14 +362,14 @@ class ShortcutUser {
 
     private void saveShortcutPackageItem(TypedXmlSerializer out, ShortcutPackageItem spi,
             boolean forBackup) throws IOException, XmlPullParserException {
-        spi.waitForBitmapSaves();
         if (forBackup) {
             if (spi.getPackageUserId() != spi.getOwnerUserId()) {
                 return; // Don't save cross-user information.
             }
+            spi.waitForBitmapSaves();
             spi.saveToXml(out, forBackup);
         } else {
-            spi.saveShortcutPackageItem();
+            spi.scheduleSave();
         }
     }
 
@@ -437,14 +436,14 @@ class ShortcutUser {
         } else {
             final File root = s.injectUserDataPath(userId);
 
-            forAllFilesIn(new File(root, DIRECTORY_PACKAGES), (File f) -> {
+            forMainFilesIn(new File(root, DIRECTORY_PACKAGES), (File f) -> {
                 final ShortcutPackage sp = ShortcutPackage.loadFromFile(s, ret, f, fromBackup);
                 if (sp != null) {
                     ret.mPackages.put(sp.getPackageName(), sp);
                 }
             });
 
-            forAllFilesIn(new File(root, DIRECTORY_LUANCHERS), (File f) -> {
+            forMainFilesIn(new File(root, DIRECTORY_LUANCHERS), (File f) -> {
                 final ShortcutLauncher sl =
                         ShortcutLauncher.loadFromFile(f, ret, userId, fromBackup);
                 if (sl != null) {
@@ -456,13 +455,15 @@ class ShortcutUser {
         return ret;
     }
 
-    private static void forAllFilesIn(File path, Consumer<File> callback) {
+    private static void forMainFilesIn(File path, Consumer<File> callback) {
         if (!path.exists()) {
             return;
         }
         File[] list = path.listFiles();
         for (File f : list) {
-            callback.accept(f);
+            if (!f.getName().endsWith(".reservecopy") && !f.getName().endsWith(".backup")) {
+                callback.accept(f);
+            }
         }
     }
 

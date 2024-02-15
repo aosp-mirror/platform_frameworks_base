@@ -63,6 +63,7 @@ public class AccessibilityMenuService extends AccessibilityService
 
     private static final String TAG = "A11yMenuService";
     private static final long BUFFER_MILLISECONDS_TO_PREVENT_UPDATE_FAILURE = 100L;
+    private static final long HIDE_UI_DELAY_MS = 100L;
 
     private static final int BRIGHTNESS_UP_INCREMENT_GAMMA =
             (int) Math.ceil(BrightnessUtils.GAMMA_SPACE_MAX * 0.11f);
@@ -260,6 +261,27 @@ public class AccessibilityMenuService extends AccessibilityService
         // Shortcuts are repeatable in a11y menu rather than unique, so use tag ID to handle.
         int viewTag = (int) view.getTag();
 
+        // First check if this was a shortcut which should keep a11y menu visible. If so,
+        // perform the shortcut and return without hiding the UI.
+        if (viewTag == ShortcutId.ID_BRIGHTNESS_UP_VALUE.ordinal()) {
+            adjustBrightness(BRIGHTNESS_UP_INCREMENT_GAMMA);
+            return;
+        } else if (viewTag == ShortcutId.ID_BRIGHTNESS_DOWN_VALUE.ordinal()) {
+            adjustBrightness(BRIGHTNESS_DOWN_INCREMENT_GAMMA);
+            return;
+        } else if (viewTag == ShortcutId.ID_VOLUME_UP_VALUE.ordinal()) {
+            adjustVolume(AudioManager.ADJUST_RAISE);
+            return;
+        } else if (viewTag == ShortcutId.ID_VOLUME_DOWN_VALUE.ordinal()) {
+            adjustVolume(AudioManager.ADJUST_LOWER);
+            return;
+        }
+
+        if (Flags.a11yMenuHideBeforeTakingAction()) {
+            // Hide the a11y menu UI before performing the following shortcut actions.
+            mA11yMenuLayout.hideMenu();
+        }
+
         if (viewTag == ShortcutId.ID_ASSISTANT_VALUE.ordinal()) {
             // Always restart the voice command activity, so that the UI is reloaded.
             startActivityIfIntentIsSafe(
@@ -274,28 +296,32 @@ public class AccessibilityMenuService extends AccessibilityService
         } else if (viewTag == ShortcutId.ID_RECENT_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_RECENTS);
         } else if (viewTag == ShortcutId.ID_LOCKSCREEN_VALUE.ordinal()) {
-            performGlobalActionInternal(GLOBAL_ACTION_LOCK_SCREEN);
+            if (Flags.a11yMenuHideBeforeTakingAction()) {
+                // Delay before locking the screen to give time for the UI to close.
+                mHandler.postDelayed(
+                        () -> performGlobalActionInternal(GLOBAL_ACTION_LOCK_SCREEN),
+                        HIDE_UI_DELAY_MS);
+            } else {
+                performGlobalActionInternal(GLOBAL_ACTION_LOCK_SCREEN);
+            }
         } else if (viewTag == ShortcutId.ID_QUICKSETTING_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_QUICK_SETTINGS);
         } else if (viewTag == ShortcutId.ID_NOTIFICATION_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_NOTIFICATIONS);
         } else if (viewTag == ShortcutId.ID_SCREENSHOT_VALUE.ordinal()) {
-            performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT);
-        } else if (viewTag == ShortcutId.ID_BRIGHTNESS_UP_VALUE.ordinal()) {
-            adjustBrightness(BRIGHTNESS_UP_INCREMENT_GAMMA);
-            return;
-        } else if (viewTag == ShortcutId.ID_BRIGHTNESS_DOWN_VALUE.ordinal()) {
-            adjustBrightness(BRIGHTNESS_DOWN_INCREMENT_GAMMA);
-            return;
-        } else if (viewTag == ShortcutId.ID_VOLUME_UP_VALUE.ordinal()) {
-            adjustVolume(AudioManager.ADJUST_RAISE);
-            return;
-        } else if (viewTag == ShortcutId.ID_VOLUME_DOWN_VALUE.ordinal()) {
-            adjustVolume(AudioManager.ADJUST_LOWER);
-            return;
+            if (Flags.a11yMenuHideBeforeTakingAction()) {
+                // Delay before taking a screenshot to give time for the UI to close.
+                mHandler.postDelayed(
+                        () -> performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT),
+                        HIDE_UI_DELAY_MS);
+            } else {
+                performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT);
+            }
         }
 
-        mA11yMenuLayout.hideMenu();
+        if (!Flags.a11yMenuHideBeforeTakingAction()) {
+            mA11yMenuLayout.hideMenu();
+        }
     }
 
     /**

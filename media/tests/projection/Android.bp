@@ -26,11 +26,12 @@ android_test {
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
+        "frameworks-base-testutils",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "testng",
         "testables",
-        "truth-prebuilt",
+        "truth",
         "platform-compat-test-rules",
     ],
 

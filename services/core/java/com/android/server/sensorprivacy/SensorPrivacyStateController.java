@@ -16,9 +16,11 @@
 
 package com.android.server.sensorprivacy;
 
+import android.annotation.FlaggedApi;
 import android.os.Handler;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.camera.flags.Flags;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.internal.util.function.pooled.PooledLambda;
 
@@ -48,6 +50,14 @@ abstract class SensorPrivacyStateController {
             SetStateResultCallback callback) {
         synchronized (mLock) {
             setStateLocked(toggleType, userId, sensor, enabled, callbackHandler, callback);
+        }
+    }
+
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    void setState(int toggleType, int userId, int sensor, int state, Handler callbackHandler,
+            SetStateResultCallback callback) {
+        synchronized (mLock) {
+            setStateLocked(toggleType, userId, sensor, state, callbackHandler, callback);
         }
     }
 
@@ -125,6 +135,11 @@ abstract class SensorPrivacyStateController {
 
     @GuardedBy("mLock")
     abstract void setStateLocked(int toggleType, int userId, int sensor, boolean enabled,
+            Handler callbackHandler, SetStateResultCallback callback);
+
+    @GuardedBy("mLock")
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    abstract void setStateLocked(int toggleType, int userId, int sensor, int state,
             Handler callbackHandler, SetStateResultCallback callback);
 
     @GuardedBy("mLock")

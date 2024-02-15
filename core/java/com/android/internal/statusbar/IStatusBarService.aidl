@@ -17,6 +17,7 @@
 package com.android.internal.statusbar;
 
 import android.app.Notification;
+import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.graphics.drawable.Icon;
 import android.graphics.Rect;
@@ -52,9 +53,9 @@ interface IStatusBarService
     void togglePanel();
     @UnsupportedAppUsage
     void disable(int what, IBinder token, String pkg);
-    void disableForUser(int what, IBinder token, String pkg, int userId);
     void disable2(int what, IBinder token, String pkg);
-    void disable2ForUser(int what, IBinder token, String pkg, int userId);
+    void disableForUser(in StatusBarManager.DisableInfo info, IBinder token, String pkg, int userId, String reason);
+
     int[] getDisableFlags(IBinder token, int userId);
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel, String contentDescription);
     @UnsupportedAppUsage
@@ -90,7 +91,7 @@ interface IStatusBarService
     void onNotificationSettingsViewed(String key);
     void onNotificationBubbleChanged(String key, boolean isBubble, int flags);
     void onBubbleMetadataFlagChanged(String key, int flags);
-    void hideCurrentInputMethodForBubbles();
+    void hideCurrentInputMethodForBubbles(int displayId);
     void grantInlineReplyUriPermission(String key, in Uri uri, in UserHandle user, String packageName);
     oneway void clearInlineReplyUriPermissions(String key);
     void onNotificationFeedbackReceived(String key, in Bundle feedback);

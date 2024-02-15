@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.service.translation.TranslationService;
 import android.util.SparseArray;
 
 import com.android.internal.util.DataClass;
@@ -30,17 +29,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * Response from the {@link TranslationService}, which contains the translated result.
+ * Response from the translation service, which contains the translated result.
  */
 @DataClass(genBuilder = true, genToString = true, genHiddenConstDefs = true)
 public final class TranslationResponse implements Parcelable {
 
     /**
-     * The {@link TranslationService} was successful in translating.
+     * The translation service was successful in translating.
      */
     public static final int TRANSLATION_STATUS_SUCCESS = 0;
     /**
-     * The {@link TranslationService} returned unknown translation result.
+     * The translation service returned unknown translation result.
      */
     public static final int TRANSLATION_STATUS_UNKNOWN_ERROR = 1;
     /**

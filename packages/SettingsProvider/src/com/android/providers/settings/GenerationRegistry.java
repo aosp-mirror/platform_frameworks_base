@@ -45,7 +45,8 @@ final class GenerationRegistry {
 
     private static final boolean DEBUG = false;
 
-    private final Object mLock;
+    // This lock is not the same lock used in SettingsProvider and SettingsState
+    private final Object mLock = new Object();
 
     // Key -> backingStore mapping
     @GuardedBy("mLock")
@@ -74,8 +75,7 @@ final class GenerationRegistry {
 
     private final int mMaxNumBackingStore;
 
-    GenerationRegistry(Object lock, int maxNumUsers) {
-        mLock = lock;
+    GenerationRegistry(int maxNumUsers) {
         // Add some buffer to maxNumUsers to accommodate corner cases when the actual number of
         // users in the system exceeds the limit
         maxNumUsers = maxNumUsers + 2;

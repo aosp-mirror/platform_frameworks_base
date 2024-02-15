@@ -35,8 +35,7 @@ using ::testing::StrEq;
 namespace android {
 
 TEST(ApkAssetsTest, LoadApk) {
-  std::unique_ptr<const ApkAssets> loaded_apk =
-      ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
+  auto loaded_apk = ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
   ASSERT_THAT(loaded_apk, NotNull());
 
   const LoadedArsc* loaded_arsc = loaded_apk->GetLoadedArsc();
@@ -50,7 +49,7 @@ TEST(ApkAssetsTest, LoadApkFromFd) {
   unique_fd fd(::open(path.c_str(), O_RDONLY | O_BINARY));
   ASSERT_THAT(fd.get(), Ge(0));
 
-  std::unique_ptr<const ApkAssets> loaded_apk = ApkAssets::LoadFromFd(std::move(fd), path);
+  auto loaded_apk = ApkAssets::LoadFromFd(std::move(fd), path);
   ASSERT_THAT(loaded_apk, NotNull());
 
   const LoadedArsc* loaded_arsc = loaded_apk->GetLoadedArsc();
@@ -60,8 +59,7 @@ TEST(ApkAssetsTest, LoadApkFromFd) {
 }
 
 TEST(ApkAssetsTest, LoadApkAsSharedLibrary) {
-  std::unique_ptr<const ApkAssets> loaded_apk =
-      ApkAssets::Load(GetTestDataPath() + "/appaslib/appaslib.apk");
+  auto loaded_apk = ApkAssets::Load(GetTestDataPath() + "/appaslib/appaslib.apk");
   ASSERT_THAT(loaded_apk, NotNull());
 
   const LoadedArsc* loaded_arsc = loaded_apk->GetLoadedArsc();
@@ -79,8 +77,7 @@ TEST(ApkAssetsTest, LoadApkAsSharedLibrary) {
 }
 
 TEST(ApkAssetsTest, CreateAndDestroyAssetKeepsApkAssetsOpen) {
-  std::unique_ptr<const ApkAssets> loaded_apk =
-      ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
+  auto loaded_apk = ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
   ASSERT_THAT(loaded_apk, NotNull());
 
   { ASSERT_THAT(loaded_apk->GetAssetsProvider()->Open("res/layout/main.xml",
@@ -91,8 +88,7 @@ TEST(ApkAssetsTest, CreateAndDestroyAssetKeepsApkAssetsOpen) {
 }
 
 TEST(ApkAssetsTest, OpenUncompressedAssetFd) {
-  std::unique_ptr<const ApkAssets> loaded_apk =
-      ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
+  auto loaded_apk = ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
   ASSERT_THAT(loaded_apk, NotNull());
 
   auto asset = loaded_apk->GetAssetsProvider()->Open("assets/uncompressed.txt",

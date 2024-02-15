@@ -1543,7 +1543,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         String8 captureTime = nativeContext->getCaptureTime();
 
         if (writer->addEntry(TAG_DATETIME, NativeContext::DATETIME_COUNT,
-                reinterpret_cast<const uint8_t*>(captureTime.string()), TIFF_IFD_0) != OK) {
+                             reinterpret_cast<const uint8_t*>(captureTime.c_str()),
+                             TIFF_IFD_0) != OK) {
             jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                     "Invalid metadata for tag %x", TAG_DATETIME);
             return nullptr;
@@ -1551,7 +1552,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
         // datetime original
         if (writer->addEntry(TAG_DATETIMEORIGINAL, NativeContext::DATETIME_COUNT,
-                reinterpret_cast<const uint8_t*>(captureTime.string()), TIFF_IFD_0) != OK) {
+                             reinterpret_cast<const uint8_t*>(captureTime.c_str()),
+                             TIFF_IFD_0) != OK) {
             jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                     "Invalid metadata for tag %x", TAG_DATETIMEORIGINAL);
             return nullptr;
@@ -1879,8 +1881,10 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         cameraModel += brand.c_str();
 
         BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_UNIQUECAMERAMODEL, cameraModel.size() + 1,
-                reinterpret_cast<const uint8_t*>(cameraModel.string()), TIFF_IFD_0), env,
-                TAG_UNIQUECAMERAMODEL, writer);
+                                                     reinterpret_cast<const uint8_t*>(
+                                                             cameraModel.c_str()),
+                                                     TIFF_IFD_0),
+                                    env, TAG_UNIQUECAMERAMODEL, writer);
     }
 
     {
@@ -1888,8 +1892,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         camera_metadata_entry entry =
             results.find(ANDROID_SENSOR_NOISE_PROFILE);
 
-        const status_t numPlaneColors = isBayer ? 3 : 1;
-        const status_t numCfaChannels = isBayer ? 4 : 1;
+        const unsigned long numPlaneColors = isBayer ? 3 : 1;
+        const unsigned long numCfaChannels = isBayer ? 4 : 1;
 
         uint8_t cfaOut[numCfaChannels];
         if ((err = convertCFA(cfaEnum, /*out*/cfaOut)) != OK) {
@@ -2165,7 +2169,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         String8 description = nativeContext->getDescription();
         size_t len = description.bytes() + 1;
         if (writer->addEntry(TAG_IMAGEDESCRIPTION, len,
-                reinterpret_cast<const uint8_t*>(description.string()), TIFF_IFD_0) != OK) {
+                             reinterpret_cast<const uint8_t*>(description.c_str()),
+                             TIFF_IFD_0) != OK) {
             jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                     "Invalid metadata for tag %x", TAG_IMAGEDESCRIPTION);
         }

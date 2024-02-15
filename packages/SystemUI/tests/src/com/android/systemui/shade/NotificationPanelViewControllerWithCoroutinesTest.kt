@@ -18,15 +18,18 @@ package com.android.systemui.shade
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewStub
 import androidx.test.filters.SmallTest
 import com.android.internal.util.CollectionUtils
 import com.android.keyguard.KeyguardClockSwitch.LARGE
-import com.android.systemui.R
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
@@ -148,12 +151,41 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     }
 
     @Test
+    fun doubleTapRequired_onKeyguard_usesPerformHapticFeedback() = runTest {
+        launch(Dispatchers.Main.immediate) {
+            val listener = getFalsingTapListener()
+            mStatusBarStateController.setState(KEYGUARD)
+
+            listener.onAdditionalTapRequired()
+            verify(mKeyguardIndicationController).showTransientIndication(anyInt())
+            verify(mVibratorHelper)
+                .performHapticFeedback(eq(mView), eq(HapticFeedbackConstants.REJECT))
+        }
+        advanceUntilIdle()
+    }
+
+    @Test
     fun testDoubleTapRequired_ShadeLocked() = runTest {
         launch(Dispatchers.Main.immediate) {
             val listener = getFalsingTapListener()
             mStatusBarStateController.setState(SHADE_LOCKED)
 
             listener.onAdditionalTapRequired()
+
+            verify(mTapAgainViewController).show()
+        }
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun doubleTapRequired_shadeLocked_usesPerformHapticFeedback() = runTest {
+        launch(Dispatchers.Main.immediate) {
+            val listener = getFalsingTapListener()
+            mStatusBarStateController.setState(SHADE_LOCKED)
+
+            listener.onAdditionalTapRequired()
+            verify(mVibratorHelper)
+                .performHapticFeedback(eq(mView), eq(HapticFeedbackConstants.REJECT))
 
             verify(mTapAgainViewController).show()
         }
@@ -175,5 +207,32 @@ class NotificationPanelViewControllerWithCoroutinesTest :
                 )
         }
         advanceUntilIdle()
+    }
+
+    @Test
+    fun onLayoutChange_shadeCollapsed_bottomAreaAlphaIsZero() = runTest {
+        // GIVEN bottomAreaShadeAlpha was updated before
+        mNotificationPanelViewController.maybeAnimateBottomAreaAlpha()
+
+        // WHEN a layout change is triggered with the shade being closed
+        triggerLayoutChange()
+
+        // THEN the bottomAreaAlpha is zero
+        val bottomAreaAlpha by collectLastValue(mFakeKeyguardRepository.bottomAreaAlpha)
+        assertThat(bottomAreaAlpha).isEqualTo(0f)
+    }
+
+    @Test
+    fun onShadeExpanded_bottomAreaAlphaIsFullyOpaque() = runTest {
+        // GIVEN bottomAreaShadeAlpha was updated before
+        mNotificationPanelViewController.maybeAnimateBottomAreaAlpha()
+
+        // WHEN the shade expanded
+        val transitionDistance = mNotificationPanelViewController.maxPanelTransitionDistance
+        mNotificationPanelViewController.expandedHeight = transitionDistance.toFloat()
+
+        // THEN the bottomAreaAlpha is fully opaque
+        val bottomAreaAlpha by collectLastValue(mFakeKeyguardRepository.bottomAreaAlpha)
+        assertThat(bottomAreaAlpha).isEqualTo(1f)
     }
 }

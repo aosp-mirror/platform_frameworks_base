@@ -17,8 +17,10 @@
 package com.android.settingslib.spaprivileged.template.app
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.android.settingslib.spa.widget.scaffold.MoreOptionsAction
 import com.android.settingslib.spa.widget.scaffold.MoreOptionsScope
@@ -42,25 +44,24 @@ fun <T : AppRecord> AppListPage(
     showInstantApps: Boolean = false,
     noMoreOptions: Boolean = false,
     matchAnyUserForAdmin: Boolean = false,
-    primaryUserOnly: Boolean = false,
     noItemMessage: String? = null,
     moreOptions: @Composable MoreOptionsScope.() -> Unit = {},
     header: @Composable () -> Unit = {},
     appList: @Composable AppListInput<T>.() -> Unit = { AppList() },
 ) {
-    val showSystem = rememberSaveable { mutableStateOf(false) }
+    var showSystem by rememberSaveable { mutableStateOf(false) }
     SearchScaffold(
         title = title,
         actions = {
             if (!noMoreOptions) {
                 MoreOptionsAction {
-                    ShowSystemAction(showSystem.value) { showSystem.value = it }
+                    ShowSystemAction(showSystem) { showSystem = it }
                     moreOptions()
                 }
             }
         },
     ) { bottomPadding, searchQuery ->
-        UserProfilePager(primaryUserOnly) { userGroup ->
+        UserProfilePager { userGroup ->
             val appListInput = AppListInput(
                 config = AppListConfig(
                     userIds = userGroup.userInfos.map { it.id },
@@ -69,7 +70,7 @@ fun <T : AppRecord> AppListPage(
                 ),
                 listModel = listModel,
                 state = AppListState(
-                    showSystem = showSystem,
+                    showSystem = { showSystem },
                     searchQuery = searchQuery,
                 ),
                 header = header,

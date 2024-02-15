@@ -18,6 +18,7 @@
 // and this is more representative of a real caller. It also uses Mockito extended, and this
 // prevents converting the entire services test module.
 package {
+    default_team: "trendy_team_framework_android_packages",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -29,15 +30,16 @@ package {
 android_test {
     name: "PackageManagerComponentOverrideTests",
     srcs: [
-        "src/**/*.kt"
+        "src/**/*.kt",
     ],
     static_libs: [
         "androidx.test.runner",
         "mockito-target-extended-minus-junit4",
         "services.core",
+        "service-permission.stubs.system_server",
         "servicestests-utils-mockito-extended",
         "testng", // TODO: remove once Android migrates to JUnit 4.12, which provides assertThrows
-        "truth-prebuilt",
+        "truth",
     ],
 
     jni_libs: [

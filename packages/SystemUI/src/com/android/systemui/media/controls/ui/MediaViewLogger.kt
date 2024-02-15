@@ -18,7 +18,7 @@ package com.android.systemui.media.controls.ui
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.MediaViewLog
 import javax.inject.Inject
 
@@ -51,5 +51,9 @@ class MediaViewLogger @Inject constructor(@MediaViewLog private val buffer: LogB
             },
             { "location ($str1): $int1 -> $int2" }
         )
+    }
+
+    fun logMediaHostAttachment(host: Int) {
+        buffer.log(TAG, LogLevel.DEBUG, { int1 = host }, { "Host (updateHostAttachment): $int1" })
     }
 }

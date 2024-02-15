@@ -24,8 +24,6 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -42,7 +40,6 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class MuteQuickAffordanceCoreStartable @Inject constructor(
-    private val featureFlags: FeatureFlags,
     private val userTracker: UserTracker,
     private val ringerModeTracker: RingerModeTracker,
     private val userFileManager: UserFileManager,
@@ -54,8 +51,6 @@ class MuteQuickAffordanceCoreStartable @Inject constructor(
     private val observer = Observer(this::updateLastNonSilentRingerMode)
 
     override fun start() {
-        if (!featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)) return
-
         // only listen to ringerModeInternal changes when Mute is one of the selected affordances
         keyguardQuickAffordanceRepository
             .selections

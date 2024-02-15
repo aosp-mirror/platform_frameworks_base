@@ -16,17 +16,19 @@
 
 package com.android.systemui.scene.ui.composable
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Direction
+import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
+import com.android.systemui.scene.shared.model.UserActionResult
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,35 +37,32 @@ import kotlinx.coroutines.flow.asStateFlow
  * "Gone" is not a real scene but rather the absence of scenes when we want to skip showing any
  * content from the scene framework.
  */
-class GoneScene : ComposableScene {
+@SysUISingleton
+class GoneScene
+@Inject
+constructor(
+    private val notificationsViewModel: NotificationsPlaceholderViewModel,
+) : ComposableScene {
     override val key = SceneKey.Gone
 
-    override fun destinationScenes(
-        containerName: String,
-    ): StateFlow<Map<UserAction, SceneModel>> =
-        MutableStateFlow<Map<UserAction, SceneModel>>(
+    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+        MutableStateFlow<Map<UserAction, UserActionResult>>(
                 mapOf(
-                    UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.Shade),
+                    UserAction.Swipe(
+                        pointerCount = 2,
+                        fromEdge = Edge.TOP,
+                        direction = Direction.DOWN,
+                    ) to UserActionResult(SceneKey.QuickSettings),
+                    UserAction.Swipe(direction = Direction.DOWN) to
+                        UserActionResult(SceneKey.Shade),
                 )
             )
             .asStateFlow()
 
     @Composable
-    override fun Content(
-        containerName: String,
+    override fun SceneScope.Content(
         modifier: Modifier,
     ) {
-        /*
-         * TODO(b/279501596): once we start testing with the real Content Dynamics Framework,
-         *  replace this with an error to make sure it doesn't get rendered.
-         */
-        Box(modifier = modifier) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.align(Alignment.Center)
-            ) {
-                Text("Gone", style = MaterialTheme.typography.headlineMedium)
-            }
-        }
+        Spacer(modifier.fillMaxSize())
     }
 }

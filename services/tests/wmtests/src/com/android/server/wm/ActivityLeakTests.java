@@ -34,6 +34,8 @@ import android.os.StrictMode;
 import android.os.strictmode.InstanceCountViolation;
 import android.util.Log;
 
+import com.android.server.wm.utils.CommonUtils;
+
 import org.junit.After;
 import org.junit.Test;
 
@@ -62,6 +64,10 @@ public class ActivityLeakTests {
             if (!activity.isDestroyed()) {
                 activity.finish();
             }
+        }
+        if (!mStartedActivityList.isEmpty()) {
+            CommonUtils.waitUntilActivityRemoved(
+                    mStartedActivityList.get(mStartedActivityList.size() - 1));
         }
         mStartedActivityList.clear();
     }

@@ -21,6 +21,8 @@ import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STA
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.hardware.devicestate.DeviceState;
+import android.util.Dumpable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,7 +33,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @see DeviceStatePolicy
  */
-public interface DeviceStateProvider {
+public interface DeviceStateProvider extends Dumpable {
     int SUPPORTED_DEVICE_STATES_CHANGED_DEFAULT = 0;
 
     /**
@@ -63,13 +65,27 @@ public interface DeviceStateProvider {
      */
     int SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED = 5;
 
+    /**
+     * Indicating that the supported device states have changed because an external display was
+     * added.
+     */
+    int SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_ADDED = 6;
+
+    /**
+     * Indicating that the supported device states have changed because an external display was
+     * removed.
+     */
+    int SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_REMOVED = 7;
+
     @IntDef(prefix = { "SUPPORTED_DEVICE_STATES_CHANGED_" }, value = {
             SUPPORTED_DEVICE_STATES_CHANGED_DEFAULT,
             SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED,
             SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL,
             SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL,
             SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED,
-            SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED
+            SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED,
+            SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_ADDED,
+            SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_REMOVED
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface SupportedStatesUpdatedReason {}

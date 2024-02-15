@@ -119,7 +119,7 @@ internal constructor(
         ::AnimatingColorTransition
     )
 
-    val bgColor = context.getColor(com.android.systemui.R.color.material_dynamic_secondary95)
+    val bgColor = context.getColor(com.google.android.material.R.color.material_dynamic_neutral20)
     val surfaceColor =
         animatingColorTransitionFactory(bgColor, ::surfaceFromScheme) { surfaceColor ->
             val colorList = ColorStateList.valueOf(surfaceColor)

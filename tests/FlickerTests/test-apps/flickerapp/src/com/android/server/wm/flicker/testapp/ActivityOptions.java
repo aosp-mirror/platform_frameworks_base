@@ -40,6 +40,18 @@ public class ActivityOptions {
             public static final String LABEL = "ImeActivity";
             public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".ImeActivity");
+
+            /** Intent action used to finish the test activity. */
+            public static final String ACTION_FINISH_ACTIVITY =
+                    FLICKER_APP_PACKAGE + ".ImeActivity.FINISH_ACTIVITY";
+
+            /** Intent action used to start a {@link DialogThemedActivity}. */
+            public static final String ACTION_START_DIALOG_THEMED_ACTIVITY =
+                    FLICKER_APP_PACKAGE + ".ImeActivity.START_DIALOG_THEMED_ACTIVITY";
+
+            /** Intent action used to toggle activity orientation. */
+            public static final String ACTION_TOGGLE_ORIENTATION =
+                    FLICKER_APP_PACKAGE + ".ImeActivity.TOGGLE_ORIENTATION";
         }
 
         public static class AutoFocusActivity {
@@ -73,6 +85,24 @@ public class ActivityOptions {
                 FLICKER_APP_PACKAGE + ".NonResizeablePortraitActivity");
     }
 
+    public static class PortraitImmersiveActivity {
+        public static final String LABEL = "PortraitImmersiveActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".PortraitImmersiveActivity");
+    }
+
+    public static class TransparentActivity {
+        public static final String LABEL = "TransparentActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".TransparentActivity");
+    }
+
+    public static class LaunchTransparentActivity {
+        public static final String LABEL = "LaunchTransparentActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".LaunchTransparentActivity");
+    }
+
     public static class DialogThemedActivity {
         public static final String LABEL = "DialogThemedActivity";
         public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
@@ -99,6 +129,18 @@ public class ActivityOptions {
                     FLICKER_APP_PACKAGE + ".ActivityEmbeddingSecondaryActivity");
         }
 
+        public static class ThirdActivity {
+            public static final String LABEL = "ActivityEmbeddingThirdActivity";
+            public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ActivityEmbeddingThirdActivity");
+        }
+
+        public static class AlwaysExpandActivity {
+            public static final String LABEL = "ActivityEmbeddingAlwaysExpandActivity";
+            public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".ActivityEmbeddingAlwaysExpandActivity");
+        }
+
         public static class PlaceholderPrimaryActivity {
             public static final String LABEL = "ActivityEmbeddingPlaceholderPrimaryActivity";
             public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
@@ -109,6 +151,12 @@ public class ActivityOptions {
             public static final String LABEL = "ActivityEmbeddingPlaceholderSecondaryActivity";
             public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".ActivityEmbeddingPlaceholderSecondaryActivity");
+        }
+
+        public static class TrampolineActivity {
+            public static final String LABEL = "ActivityEmbeddingTrampolineActivity";
+            public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                    FLICKER_APP_PACKAGE + ".ActivityEmbeddingTrampolineActivity");
         }
     }
 
@@ -148,6 +196,12 @@ public class ActivityOptions {
                 FLICKER_APP_PACKAGE + ".LaunchNewActivity");
     }
 
+    public static class TransferSplashscreenActivity {
+        public static final String LABEL = "TransferSplashscreenActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".TransferSplashscreenActivity");
+    }
+
     public static class Pip {
         // Test App > Pip Activity
         public static final String LABEL = "PipActivity";
@@ -180,6 +234,8 @@ public class ActivityOptions {
             public static final String LABEL = "SplitScreenPrimaryActivity";
             public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".SplitScreenActivity");
+
+            public static final String EXTRA_LAUNCH_ADJACENT = "launch_adjacent";
         }
 
         public static class Secondary {

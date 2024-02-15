@@ -16,14 +16,9 @@
 
 package com.android.systemui.temporarydisplay.dagger
 
-import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.media.taptotransfer.MediaTttFlags
-import com.android.systemui.settings.DisplayTracker
-import com.android.systemui.statusbar.gesture.SwipeUpGestureLogger
-import com.android.systemui.temporarydisplay.chipbar.SwipeChipbarAwayGestureHandler
 import dagger.Module
 import dagger.Provides
 
@@ -35,21 +30,6 @@ interface TemporaryDisplayModule {
         @ChipbarLog
         fun provideChipbarLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("ChipbarLog", 40)
-        }
-
-        @Provides
-        @SysUISingleton
-        fun provideSwipeChipbarAwayGestureHandler(
-            mediaTttFlags: MediaTttFlags,
-            context: Context,
-            displayTracker: DisplayTracker,
-            logger: SwipeUpGestureLogger,
-        ): SwipeChipbarAwayGestureHandler? {
-            return if (mediaTttFlags.isMediaTttDismissGestureEnabled()) {
-                SwipeChipbarAwayGestureHandler(context, displayTracker, logger)
-            } else {
-                null
-            }
         }
     }
 }

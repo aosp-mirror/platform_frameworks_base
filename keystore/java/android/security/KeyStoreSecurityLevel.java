@@ -22,6 +22,7 @@ import android.hardware.security.keymint.KeyParameter;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.os.StrictMode;
 import android.security.keystore.BackendBusyException;
 import android.security.keystore.KeyStoreConnectException;
 import android.system.keystore2.AuthenticatorSpec;
@@ -75,6 +76,7 @@ public class KeyStoreSecurityLevel {
      */
     public KeyStoreOperation createOperation(@NonNull KeyDescriptor keyDescriptor,
             Collection<KeyParameter> args) throws KeyStoreException {
+        StrictMode.noteDiskWrite();
         while (true) {
             try {
                 CreateOperationResponse createOperationResponse =
@@ -142,6 +144,8 @@ public class KeyStoreSecurityLevel {
     public KeyMetadata generateKey(@NonNull KeyDescriptor descriptor, KeyDescriptor attestationKey,
             Collection<KeyParameter> args, int flags, byte[] entropy)
             throws KeyStoreException {
+        StrictMode.noteDiskWrite();
+
         return handleExceptions(() -> mSecurityLevel.generateKey(
                 descriptor, attestationKey, args.toArray(new KeyParameter[args.size()]),
                 flags, entropy));
@@ -163,6 +167,8 @@ public class KeyStoreSecurityLevel {
     public KeyMetadata importKey(KeyDescriptor descriptor, KeyDescriptor attestationKey,
             Collection<KeyParameter> args, int flags, byte[] keyData)
             throws KeyStoreException {
+        StrictMode.noteDiskWrite();
+
         return handleExceptions(() -> mSecurityLevel.importKey(descriptor, attestationKey,
                 args.toArray(new KeyParameter[args.size()]), flags, keyData));
     }
@@ -186,6 +192,7 @@ public class KeyStoreSecurityLevel {
             @NonNull byte[] wrappedKey, byte[] maskingKey,
             Collection<KeyParameter> args, @NonNull AuthenticatorSpec[] authenticatorSpecs)
             throws KeyStoreException {
+        StrictMode.noteDiskWrite();
         KeyDescriptor keyDescriptor = new KeyDescriptor();
         keyDescriptor.alias = wrappedKeyDescriptor.alias;
         keyDescriptor.nspace = wrappedKeyDescriptor.nspace;

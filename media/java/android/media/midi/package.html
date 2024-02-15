@@ -267,6 +267,56 @@ raw MIDI data and can contain multiple messages or partial messages. It might
 contain System Real-Time messages, which can be interleaved inside other
 messages.</p>
 
+<h1 id=using_midi_btle>Using MIDI Over Bluetooth LE</h1>
+
+<p>MIDI devices can be connected to Android using Bluetooth LE.</p>
+
+<p>Before using the device, the app must scan for available BTLE devices and then allow
+the user to connect.
+See the Android developer website for an
+<a href="https://source.android.com/devices/audio/midi_test#apps" target="_blank">example
+program</a>.</p>
+
+<h2 id=btle_location_permissions>Request Location Permission for BTLE</h2>
+
+<p>Applications that scan for Bluetooth devices must request permission in the
+manifest file. This LOCATION permission is required because it may be possible to
+guess the location of an Android device by seeing which BTLE devices are nearby.</p>
+
+<pre class=prettyprint>
+&lt;uses-permission android:name="android.permission.BLUETOOTH"/>
+&lt;uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+&lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+</pre>
+
+<p>Apps must also request location permission from the user at run-time.
+See the documentation for <code>Activity.requestPermissions()</code> for details and an example.
+</p>
+
+<h2 id=btle_scan_devices>Scan for MIDI Devices</h2>
+
+<p>The app will only want to see MIDI devices and not mice or other non-MIDI devices.
+So construct a ScanFilter using the UUID for standard MIDI over BTLE.</p>
+
+<pre class=prettyprint>
+MIDI over BTLE UUID = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"
+</pre>
+
+<h2 id=btle_open_device>Open a MIDI Bluetooth Device</h2>
+
+<p>See the documentation for <code>android.bluetooth.le.BluetoothLeScanner.startScan()</code>
+method for details. When the user selects a MIDI/BTLE device then you can open it
+using the MidiManager.</p>
+
+<pre class=prettyprint>
+m.openBluetoothDevice(bluetoothDevice, callback, handler);
+</pre>
+
+<p>Once the MIDI/BTLE device has been opened by one app then it will also become available to other
+apps using the
+<a href="#get_list_of_already_plugged_in_entities">MIDI device discovery calls described above</a>.
+</p>
+
 <h1 id=creating_a_midi_virtual_device_service>Creating a MIDI Virtual Device Service</h1>
 
 
@@ -355,62 +405,17 @@ public class MidiSynthDeviceService extends MidiDeviceService {
 }
 </pre>
 
-<h1 id=using_midi_btle>Using MIDI Over Bluetooth LE</h1>
 
-<p>MIDI devices can be connected to Android using Bluetooth LE.</p>
+<h1 id=using_midi_2_0>Using MIDI 2.0</h1>
 
-<p>Before using the device, the app must scan for available BTLE devices and then allow
-the user to connect.
-See the Android developer website for an
-<a href="https://source.android.com/devices/audio/midi_test#apps" target="_blank">example
-program</a>.</p>
-
-<h2 id=btle_location_permissions>Request Location Permission for BTLE</h2>
-
-<p>Applications that scan for Bluetooth devices must request permission in the
-manifest file. This LOCATION permission is required because it may be possible to
-guess the location of an Android device by seeing which BTLE devices are nearby.</p>
-
-<pre class=prettyprint>
-&lt;uses-permission android:name="android.permission.BLUETOOTH"/>
-&lt;uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-&lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-</pre>
-
-<p>Apps must also request location permission from the user at run-time.
-See the documentation for <code>Activity.requestPermissions()</code> for details and an example.
-</p>
-
-<h2 id=btle_scan_devices>Scan for MIDI Devices</h2>
-
-<p>The app will only want to see MIDI devices and not mice or other non-MIDI devices.
-So construct a ScanFilter using the UUID for standard MIDI over BTLE.</p>
-
-<pre class=prettyprint>
-MIDI over BTLE UUID = "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"
-</pre>
-
-<h2 id=btle_open_device>Open a MIDI Bluetooth Device</h2>
-
-<p>See the documentation for <code>android.bluetooth.le.BluetoothLeScanner.startScan()</code>
-method for details. When the user selects a MIDI/BTLE device then you can open it
-using the MidiManager.</p>
-
-<pre class=prettyprint>
-m.openBluetoothDevice(bluetoothDevice, callback, handler);
-</pre>
-
-<p>Once the MIDI/BTLE device has been opened by one app then it will also become available to other
-apps using the
-<a href="#get_list_of_already_plugged_in_entities">MIDI device discovery calls described above</a>.
-</p>
-
-<h1 id=using_midi_2_0_over_usb>Using MIDI 2.0 over USB</h1>
-
-<p>An app can use MIDI 2.0 over USB starting in Android T. MIDI 2.0 packets are embedded in
+<p>An app can use <a href=
+"https://www.midi.org/midi-articles/details-about-midi-2-0-midi-ci-profiles-and-property-exchange"
+class="external">MIDI 2.0</a> over USB starting in Android T. MIDI 2.0 packets are embedded in
 Universal MIDI Packets, or UMP for short. A MIDI 2.0 USB device should create two interfaces,
 one endpoint that accepts only MIDI 1.0 packets and one that accepts only UMP packets.
-For more info about MIDI 2.0 and UMP, please read the MIDI 2.0 USB spec.</p>
+For more info about MIDI 2.0 and UMP, please read the MIDI 2.0 and UMP spec. Starting from Android
+V, apps can also open <a href="#creating_a_midi_2_0_virtual_device_service"> MIDI 2.0 virtual</a>
+devices.</p>
 
 <p>MidiManager.getDevices() would simply return the 1.0 interface. This interface should work
 exactly the same as before. In order to use the new UMP interface, retrieve the device with the
@@ -421,15 +426,15 @@ Collection&#60;MidiDeviceInfo&#62; universalDeviceInfos = midiManager.getDevices
         MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS);
 </pre>
 
-<p>UMP Packets are always in multiple of 4 bytes. For each set of 4 bytes, they are sent in network
-order. Compare the following NoteOn code snippet with the NoteOn code snippet above. </p>
+<p>UMP packet sizes are always a multiple of 4 bytes. For each set of 4 bytes, they are sent in
+network order. Compare the following NoteOn code snippet with the NoteOn code snippet above. </p>
 
 <pre class=prettyprint>
 byte[] buffer = new byte[32];
 int numBytes = 0;
 int channel = 3; // MIDI channels 1-16 are encoded as 0-15.
 int group = 0;
-buffer[numBytes++] = (byte)(0x20 + group); // MIDI 1.0 voice message
+buffer[numBytes++] = (byte)(0x20 + group); // MIDI 1.0 Channel Voice Message
 buffer[numBytes++] = (byte)(0x90 + (channel - 1)); // note on
 buffer[numBytes++] = (byte)60; // pitch is middle C
 buffer[numBytes++] = (byte)127; // max velocity
@@ -444,6 +449,117 @@ For a MidiDeviceInfo, you can query the defaultProtocol.</p>
 
 <pre class=prettyprint>
 int defaultProtocol = info.getDefaultProtocol();
+</pre>
+
+<p>To register for callbacks when MIDI 2.0 devices are added or removed, use
+MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS as the transport.</p>
+
+<pre class=prettyprint>
+midiManager.registerDeviceCallback(
+        MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS, executor, callback);
+</pre>
+
+<h1 id=creating_a_midi_2_0_virtual_device_service>Creating a MIDI 2.0 Virtual Device Service</h1>
+
+
+<p>Starting in Android V, an app can provide a MIDI 2.0 Service that can be used by other apps.
+MIDI 2.0 packets are embedded in Universal MIDI Packets, or UMP for short. The service must be
+guarded with permission &quot;android.permission.BIND_MIDI_DEVICE_SERVICE&quot;.</p>
+
+<h2 id=manifest_files>Manifest Files</h2>
+
+
+<p>An app declares that it will function as a MIDI server in the AndroidManifest.xml file. Unlike
+MIDI 1.0 virtual devices, android.media.midi.MidiUmpDeviceService is used</p>
+
+<pre class=prettyprint>
+&lt;service android:name="<strong>MidiEchoDeviceService</strong>"
+  android:permission="android.permission.BIND_MIDI_DEVICE_SERVICE">
+  &lt;intent-filter>
+    &lt;action android:name="android.media.midi.MidiUmpDeviceService" />
+  &lt;/intent-filter>
+  &lt;meta-data android:name="android.media.midi.MidiUmpDeviceService"
+      android:resource="@xml/<strong>echo_device_info</strong>" />
+&lt;/service>
+</pre>
+
+
+<p>The details of the resource in this example is stored in &ldquo;res/xml/echo_device_info.xml
+&rdquo;. The port names that you declare in this file will be available from PortInfo.getName().
+Unlike MIDI 1.0, MIDI 2.0 ports are bidirectional. If you declare a port in this service, then it
+automatically creates an input port and an output port with the same name. Clients can use those
+two ports like the MIDI 1.0 ports.</p>
+
+<pre class=prettyprint>
+&lt;devices>
+    &lt;device manufacturer="MyCompany" product="MidiEcho">
+        &lt;port name="port1" />
+    &lt;/device>
+&lt;/devices>
+</pre>
+
+
+<h2 id=extend_midiumpdeviceservice>Extend MidiUmpDeviceService</h2>
+
+
+<p>You then define your server by extending android.media.midi.MidiUmpDeviceService.</p>
+
+<pre class=prettyprint>
+import android.media.midi.MidiDeviceStatus;
+import android.media.midi.MidiReceiver;
+import android.media.midi.MidiUmpDeviceService;
+
+public class MidiEchoDeviceService extends MidiUmpDeviceService {
+    private static final String TAG = "MidiEchoDeviceService";
+    // Other apps will write to this port.
+    private MidiReceiver mInputReceiver = new MyReceiver();
+    // This app will copy the data to this port.
+    private MidiReceiver mOutputReceiver;
+
+    &#64;Override
+    public void onCreate() {
+        super.onCreate();
+    }
+
+    &#64;Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    &#64;Override
+    // Declare the receivers associated with your input ports.
+    public List<MidiReceiver> onGetInputPortReceivers() {
+        return new ArrayList<MidiReceiver>(Collections.singletonList(mInputReceiver));
+    }
+
+    /**
+     * Sample receiver to echo from the input port to the output port.
+     * In this example, we are just echoing the data and not parsing it.
+     * You will probably want to convert the bytes to a packet and then interpret the packet.
+     * See the MIDI 2.0 spec at the MMA site. Packets are either 4, 8, 12 or 16 bytes.
+     */
+    class MyReceiver extends MidiReceiver {
+        &#64;Override
+        public void onSend(byte[] data, int offset, int count, long timestamp)
+                throws IOException {
+            if (mOutputReceiver == null) {
+                mOutputReceiver = getOutputPortReceivers().get(0);
+            }
+            // Copy input to output.
+            mOutputReceiver.send(data, offset, count, timestamp);
+        }
+    }
+
+    /**
+     * This will get called when clients connect or disconnect.
+     * You can use it to figure out how many devices are connected.
+     */
+    &#64;Override
+    public void onDeviceStatusChanged(MidiDeviceStatus status) {
+        // inputOpened = status.isInputPortOpen(0);
+        // outputOpenCount = status.getOutputPortOpenCount(0);
+    }
+}
 </pre>
 
 </body>

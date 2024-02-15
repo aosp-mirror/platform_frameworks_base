@@ -60,17 +60,6 @@ public abstract class LockSettingsInternal {
     public abstract void onThirdPartyAppsStarted();
 
     /**
-     * Unlocks the credential-encrypted storage for the given user if the user is not secured, i.e.
-     * doesn't have an LSKF.
-     * <p>
-     * This doesn't throw an exception on failure; whether the storage has been unlocked can be
-     * determined by {@link StorageManager#isUserKeyUnlocked()}.
-     *
-     * @param userId the ID of the user whose storage to unlock
-     */
-    public abstract void unlockUserKeyIfUnsecured(@UserIdInt int userId);
-
-    /**
      * Creates the locksettings state for a new user.
      * <p>
      * This includes creating a synthetic password and protecting it with an empty LSKF.
@@ -177,4 +166,16 @@ public abstract class LockSettingsInternal {
      * Refreshes pending strong auth timeout with the latest admin requirement set by device policy.
      */
     public abstract void refreshStrongAuthTimeout(int userId);
+
+    /**
+     * Register a LockSettingsStateListener
+     * @param listener The listener to be registered
+     */
+    public abstract void registerLockSettingsStateListener(LockSettingsStateListener listener);
+
+    /**
+     * Unregister a LockSettingsStateListener
+     * @param listener The listener to be unregistered
+     */
+    public abstract void unregisterLockSettingsStateListener(LockSettingsStateListener listener);
 }

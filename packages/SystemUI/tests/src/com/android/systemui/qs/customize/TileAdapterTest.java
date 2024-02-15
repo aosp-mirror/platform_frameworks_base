@@ -25,6 +25,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.qs.QSHost;
 
 import org.junit.Before;
@@ -46,10 +48,13 @@ public class TileAdapterTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
+        FakeFeatureFlags fakeFeatureFlags = new FakeFeatureFlags();
+        fakeFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
+
         MockitoAnnotations.initMocks(this);
 
         TestableLooper.get(this).runWithLooper(() -> mTileAdapter =
-                new TileAdapter(mContext, mQSHost, new UiEventLoggerFake()));
+                new TileAdapter(mContext, mQSHost, new UiEventLoggerFake(), fakeFeatureFlags));
     }
 
     @Test

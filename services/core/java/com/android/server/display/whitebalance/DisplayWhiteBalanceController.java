@@ -37,8 +37,11 @@ import java.util.Objects;
  * - Uses the AmbientColorTemperatureSensor to detect changes in the ambient color temperature;
  * - Uses the AmbientColorTemperatureFilter to average these changes over time, filter out the
  *   noise, and arrive at an estimate of the actual ambient color temperature;
- * - Uses the DisplayWhiteBalanceThrottler to decide whether the display color tempearture should
+ * - Uses the DisplayWhiteBalanceThrottler to decide whether the display color temperature should
  *   be updated, suppressing changes that are too frequent or too minor.
+ *
+ *   Calls to this class must happen on the DisplayPowerController(2) handler, to ensure
+ *   values do not get out of sync.
  */
 public class DisplayWhiteBalanceController implements
         AmbientSensor.AmbientBrightnessSensor.Callbacks,
@@ -60,10 +63,15 @@ public class DisplayWhiteBalanceController implements
     // high errors. This default is introduced to provide a fixed display color
     // temperature when sensor readings become unreliable.
     private final float mLowLightAmbientColorTemperature;
+    // As above, but used when in strong mode (idle screen brightness mode).
+    private final float mLowLightAmbientColorTemperatureStrong;
+
     // In high brightness conditions certain color temperatures can cause peak display
     // brightness to drop. This fixed color temperature can be used to compensate for
     // this effect.
     private final float mHighLightAmbientColorTemperature;
+    // As above, but used when in strong mode (idle screen brightness mode).
+    private final float mHighLightAmbientColorTemperatureStrong;
 
     private final boolean mLightModeAllowed;
 
@@ -94,9 +102,11 @@ public class DisplayWhiteBalanceController implements
     // ambient color temperature to the defaults. A piecewise linear relationship
     // between low light brightness and low light bias.
     private Spline.LinearSpline mLowLightAmbientBrightnessToBiasSpline;
+    private Spline.LinearSpline mLowLightAmbientBrightnessToBiasSplineStrong;
 
     // A piecewise linear relationship between high light brightness and high light bias.
     private Spline.LinearSpline mHighLightAmbientBrightnessToBiasSpline;
+    private Spline.LinearSpline mHighLightAmbientBrightnessToBiasSplineStrong;
 
     private float mLatestAmbientColorTemperature;
     private float mLatestAmbientBrightness;
@@ -131,7 +141,13 @@ public class DisplayWhiteBalanceController implements
      * @param lowLightAmbientBrightnesses
      *      The ambient brightness used to map the ambient brightnesses to the biases used to
      *      interpolate to lowLightAmbientColorTemperature.
+     * @param lowLightAmbientBrightnessesStrong
+     *      The ambient brightness used to map the ambient brightnesses to the biases used to
+     *      interpolate to lowLightAmbientColorTemperature.
      * @param lowLightAmbientBiases
+     *      The biases used to map the ambient brightnesses to the biases used to interpolate to
+     *      lowLightAmbientColorTemperature.
+     * @param lowLightAmbientBiasesStrong
      *      The biases used to map the ambient brightnesses to the biases used to interpolate to
      *      lowLightAmbientColorTemperature.
      * @param lowLightAmbientColorTemperature
@@ -139,7 +155,13 @@ public class DisplayWhiteBalanceController implements
      * @param highLightAmbientBrightnesses
      *      The ambient brightness used to map the ambient brightnesses to the biases used to
      *      interpolate to highLightAmbientColorTemperature.
+     * @param highLightAmbientBrightnessesStrong
+     *      The ambient brightness used to map the ambient brightnesses to the biases used to
+     *      interpolate to highLightAmbientColorTemperature.
      * @param highLightAmbientBiases
+     *      The biases used to map the ambient brightnesses to the biases used to interpolate to
+     *      highLightAmbientColorTemperature.
+     * @param highLightAmbientBiasesStrong
      *      The biases used to map the ambient brightnesses to the biases used to interpolate to
      *      highLightAmbientColorTemperature.
      * @param highLightAmbientColorTemperature
@@ -167,11 +189,17 @@ public class DisplayWhiteBalanceController implements
             @NonNull AmbientFilter colorTemperatureFilter,
             @NonNull DisplayWhiteBalanceThrottler throttler,
             float[] lowLightAmbientBrightnesses,
+            float[] lowLightAmbientBrightnessesStrong,
             float[] lowLightAmbientBiases,
+            float[] lowLightAmbientBiasesStrong,
             float lowLightAmbientColorTemperature,
+            float lowLightAmbientColorTemperatureStrong,
             float[] highLightAmbientBrightnesses,
+            float[] highLightAmbientBrightnessesStrong,
             float[] highLightAmbientBiases,
+            float[] highLightAmbientBiasesStrong,
             float highLightAmbientColorTemperature,
+            float highLightAmbientColorTemperatureStrong,
             float[] ambientColorTemperatures,
             float[] displayColorTemperatures,
             float[] strongAmbientColorTemperatures,
@@ -185,7 +213,9 @@ public class DisplayWhiteBalanceController implements
         mColorTemperatureFilter = colorTemperatureFilter;
         mThrottler = throttler;
         mLowLightAmbientColorTemperature = lowLightAmbientColorTemperature;
+        mLowLightAmbientColorTemperatureStrong = lowLightAmbientColorTemperatureStrong;
         mHighLightAmbientColorTemperature = highLightAmbientColorTemperature;
+        mHighLightAmbientColorTemperatureStrong = highLightAmbientColorTemperatureStrong;
         mAmbientColorTemperature = -1.0f;
         mPendingAmbientColorTemperature = -1.0f;
         mLastAmbientColorTemperature = -1.0f;
@@ -211,6 +241,23 @@ public class DisplayWhiteBalanceController implements
         }
 
         try {
+            mLowLightAmbientBrightnessToBiasSplineStrong = new Spline.LinearSpline(
+                    lowLightAmbientBrightnessesStrong, lowLightAmbientBiasesStrong);
+        } catch (Exception e) {
+            Slog.e(TAG, "failed to create strong low light ambient brightness to bias spline.", e);
+            mLowLightAmbientBrightnessToBiasSplineStrong = null;
+        }
+        if (mLowLightAmbientBrightnessToBiasSplineStrong != null) {
+            if (mLowLightAmbientBrightnessToBiasSplineStrong.interpolate(0.0f) != 0.0f
+                    || mLowLightAmbientBrightnessToBiasSplineStrong.interpolate(
+                    Float.POSITIVE_INFINITY) != 1.0f) {
+                Slog.d(TAG, "invalid strong low light ambient brightness to bias spline, "
+                        + "bias must begin at 0.0 and end at 1.0.");
+                mLowLightAmbientBrightnessToBiasSplineStrong = null;
+            }
+        }
+
+        try {
             mHighLightAmbientBrightnessToBiasSpline = new Spline.LinearSpline(
                     highLightAmbientBrightnesses, highLightAmbientBiases);
         } catch (Exception e) {
@@ -227,6 +274,23 @@ public class DisplayWhiteBalanceController implements
             }
         }
 
+        try {
+            mHighLightAmbientBrightnessToBiasSplineStrong = new Spline.LinearSpline(
+                    highLightAmbientBrightnessesStrong, highLightAmbientBiasesStrong);
+        } catch (Exception e) {
+            Slog.e(TAG, "failed to create strong high light ambient brightness to bias spline.", e);
+            mHighLightAmbientBrightnessToBiasSplineStrong = null;
+        }
+        if (mHighLightAmbientBrightnessToBiasSplineStrong != null) {
+            if (mHighLightAmbientBrightnessToBiasSplineStrong.interpolate(0.0f) != 0.0f
+                    || mHighLightAmbientBrightnessToBiasSplineStrong.interpolate(
+                    Float.POSITIVE_INFINITY) != 1.0f) {
+                Slog.d(TAG, "invalid strong high light ambient brightness to bias spline, "
+                        + "bias must begin at 0.0 and end at 1.0.");
+                mHighLightAmbientBrightnessToBiasSplineStrong = null;
+            }
+        }
+
         if (mLowLightAmbientBrightnessToBiasSpline != null &&
                 mHighLightAmbientBrightnessToBiasSpline != null) {
             if (lowLightAmbientBrightnesses[lowLightAmbientBrightnesses.length - 1] >
@@ -235,6 +299,18 @@ public class DisplayWhiteBalanceController implements
                         + "combination, defined domains must not intersect.");
                 mLowLightAmbientBrightnessToBiasSpline = null;
                 mHighLightAmbientBrightnessToBiasSpline = null;
+            }
+        }
+
+        if (mLowLightAmbientBrightnessToBiasSplineStrong != null
+                && mHighLightAmbientBrightnessToBiasSplineStrong != null) {
+            if (lowLightAmbientBrightnessesStrong[lowLightAmbientBrightnessesStrong.length - 1]
+                    > highLightAmbientBrightnessesStrong[0]) {
+                Slog.d(TAG,
+                        "invalid strong low light and high light ambient brightness to bias "
+                                + "spline combination, defined domains must not intersect.");
+                mLowLightAmbientBrightnessToBiasSplineStrong = null;
+                mHighLightAmbientBrightnessToBiasSplineStrong = null;
             }
         }
 
@@ -362,7 +438,11 @@ public class DisplayWhiteBalanceController implements
         mColorTemperatureFilter.dump(writer);
         mThrottler.dump(writer);
         writer.println("  mLowLightAmbientColorTemperature=" + mLowLightAmbientColorTemperature);
+        writer.println("  mLowLightAmbientColorTemperatureStrong="
+                + mLowLightAmbientColorTemperatureStrong);
         writer.println("  mHighLightAmbientColorTemperature=" + mHighLightAmbientColorTemperature);
+        writer.println("  mHighLightAmbientColorTemperatureStrong="
+                + mHighLightAmbientColorTemperatureStrong);
         writer.println("  mAmbientColorTemperature=" + mAmbientColorTemperature);
         writer.println("  mPendingAmbientColorTemperature=" + mPendingAmbientColorTemperature);
         writer.println("  mLastAmbientColorTemperature=" + mLastAmbientColorTemperature);
@@ -374,8 +454,12 @@ public class DisplayWhiteBalanceController implements
                 + mStrongAmbientToDisplayColorTemperatureSpline);
         writer.println("  mLowLightAmbientBrightnessToBiasSpline="
                 + mLowLightAmbientBrightnessToBiasSpline);
+        writer.println("  mLowLightAmbientBrightnessToBiasSplineStrong="
+                + mLowLightAmbientBrightnessToBiasSplineStrong);
         writer.println("  mHighLightAmbientBrightnessToBiasSpline="
                 + mHighLightAmbientBrightnessToBiasSpline);
+        writer.println("  mHighLightAmbientBrightnessToBiasSplineStrong="
+                + mHighLightAmbientBrightnessToBiasSplineStrong);
     }
 
     @Override // AmbientSensor.AmbientBrightnessSensor.Callbacks
@@ -397,6 +481,17 @@ public class DisplayWhiteBalanceController implements
      */
     public void updateAmbientColorTemperature() {
         final long time = System.currentTimeMillis();
+        final float lowLightAmbientColorTemperature = mStrongModeEnabled
+                ? mLowLightAmbientColorTemperatureStrong : mLowLightAmbientColorTemperature;
+        final float highLightAmbientColorTemperature = mStrongModeEnabled
+                ? mHighLightAmbientColorTemperatureStrong : mHighLightAmbientColorTemperature;
+        final Spline.LinearSpline lowLightAmbientBrightnessToBiasSpline = mStrongModeEnabled
+                ? mLowLightAmbientBrightnessToBiasSplineStrong
+                : mLowLightAmbientBrightnessToBiasSpline;
+        final Spline.LinearSpline highLightAmbientBrightnessToBiasSpline = mStrongModeEnabled
+                ? mHighLightAmbientBrightnessToBiasSplineStrong
+                : mHighLightAmbientBrightnessToBiasSpline;
+
         float ambientColorTemperature = mColorTemperatureFilter.getEstimate(time);
         mLatestAmbientColorTemperature = ambientColorTemperature;
 
@@ -420,19 +515,19 @@ public class DisplayWhiteBalanceController implements
         mLatestAmbientBrightness = ambientBrightness;
 
         if (ambientColorTemperature != -1.0f && ambientBrightness != -1.0f
-                && mLowLightAmbientBrightnessToBiasSpline != null) {
-            float bias = mLowLightAmbientBrightnessToBiasSpline.interpolate(ambientBrightness);
+                && lowLightAmbientBrightnessToBiasSpline != null) {
+            float bias = lowLightAmbientBrightnessToBiasSpline.interpolate(ambientBrightness);
             ambientColorTemperature =
                     bias * ambientColorTemperature + (1.0f - bias)
-                    * mLowLightAmbientColorTemperature;
+                    * lowLightAmbientColorTemperature;
             mLatestLowLightBias = bias;
         }
         if (ambientColorTemperature != -1.0f && ambientBrightness != -1.0f
-                && mHighLightAmbientBrightnessToBiasSpline != null) {
-            float bias = mHighLightAmbientBrightnessToBiasSpline.interpolate(ambientBrightness);
+                && highLightAmbientBrightnessToBiasSpline != null) {
+            float bias = highLightAmbientBrightnessToBiasSpline.interpolate(ambientBrightness);
             ambientColorTemperature =
                     (1.0f - bias) * ambientColorTemperature + bias
-                    * mHighLightAmbientColorTemperature;
+                    * highLightAmbientColorTemperature;
             mLatestHighLightBias = bias;
         }
 

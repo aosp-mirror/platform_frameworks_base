@@ -387,7 +387,7 @@ public abstract class ContentResolver implements ContentInterface {
      * {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
      * <li>When querying a provider, where no QUERY_ARG_SQL* otherwise exists in
      * the arguments {@link Bundle}, the Content framework will attempt to
-     * synthesize an QUERY_ARG_SQL* argument using the corresponding
+     * synthesize a QUERY_ARG_SQL* argument using the corresponding
      * QUERY_ARG_SORT* values.
      */
     public static final String QUERY_ARG_SORT_COLUMNS = "android:query-arg-sort-columns";
@@ -1985,7 +1985,7 @@ public abstract class ContentResolver implements ContentInterface {
      * Open a raw file descriptor to access (potentially type transformed)
      * data from a "content:" URI.  This interacts with the underlying
      * {@link ContentProvider#openTypedAssetFile} method of the provider
-     * associated with the given URI, to retrieve retrieve any appropriate
+     * associated with the given URI, to retrieve any appropriate
      * data stream for the data stored there.
      *
      * <p>Unlike {@link #openAssetFileDescriptor}, this function only works

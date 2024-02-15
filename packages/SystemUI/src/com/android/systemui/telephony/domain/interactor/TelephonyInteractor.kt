@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.telephony.data.repository.TelephonyRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /** Hosts business logic related to telephony. */
 @SysUISingleton
@@ -31,4 +32,8 @@ constructor(
     repository: TelephonyRepository,
 ) {
     @Annotation.CallState val callState: Flow<Int> = repository.callState
+
+    val isInCall: StateFlow<Boolean> = repository.isInCall
+
+    val hasTelephonyRadio: Boolean = repository.hasTelephonyRadio
 }

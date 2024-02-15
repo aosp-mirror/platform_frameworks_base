@@ -22,9 +22,11 @@ import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
@@ -45,6 +47,8 @@ import java.util.concurrent.Executor;
 @VisibleForTesting(visibility = Visibility.PACKAGE)
 public final class DeviceStateManagerGlobal {
     private static DeviceStateManagerGlobal sInstance;
+    private static final String TAG = "DeviceStateManagerGlobal";
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     /**
      * Returns an instance of {@link DeviceStateManagerGlobal}. May return {@code null} if a
@@ -400,11 +404,29 @@ public final class DeviceStateManagerGlobal {
         }
 
         void notifyBaseStateChanged(int newBaseState) {
-            mExecutor.execute(() -> mDeviceStateCallback.onBaseStateChanged(newBaseState));
+            execute("notifyBaseStateChanged",
+                    () -> mDeviceStateCallback.onBaseStateChanged(newBaseState));
         }
 
         void notifyStateChanged(int newDeviceState) {
-            mExecutor.execute(() -> mDeviceStateCallback.onStateChanged(newDeviceState));
+            execute("notifyStateChanged",
+                    () -> mDeviceStateCallback.onStateChanged(newDeviceState));
+        }
+
+        private void execute(String traceName, Runnable r) {
+            mExecutor.execute(() -> {
+                if (DEBUG) {
+                    Trace.beginSection(
+                            mDeviceStateCallback.getClass().getSimpleName() + "#" + traceName);
+                }
+                try {
+                    r.run();
+                } finally {
+                    if (DEBUG) {
+                        Trace.endSection();
+                    }
+                }
+            });
         }
     }
 

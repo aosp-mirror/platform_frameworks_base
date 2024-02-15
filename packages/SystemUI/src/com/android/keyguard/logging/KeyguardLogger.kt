@@ -19,7 +19,7 @@ package com.android.keyguard.logging
 import com.android.systemui.biometrics.AuthRippleController
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.KeyguardLog
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.google.errorprone.annotations.CompileTimeConstant
@@ -94,6 +94,26 @@ constructor(
                 bool3 = dozing
             },
             { "updateDeviceEntryIndication animate:$bool1 visible:$bool2 dozing $bool3" }
+        )
+    }
+
+    fun logUpdateLockScreenUserLockedMsg(
+        userId: Int,
+        userUnlocked: Boolean,
+        encryptedOrLockdown: Boolean,
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = userId
+                bool1 = userUnlocked
+                bool2 = encryptedOrLockdown
+            },
+            {
+                "updateLockScreenUserLockedMsg userId=$int1 " +
+                    "userUnlocked:$bool1 encryptedOrLockdown:$bool2"
+            }
         )
     }
 

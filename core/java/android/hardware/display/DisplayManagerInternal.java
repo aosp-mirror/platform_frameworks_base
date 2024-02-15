@@ -202,8 +202,11 @@ public abstract class DisplayManagerInternal {
     /**
      * Called by the window manager to perform traversals while holding a
      * surface flinger transaction.
+     * @param t The default transaction.
+     * @param displayTransactions The transactions mapped by display id.
      */
-    public abstract void performTraversal(Transaction t);
+    public abstract void performTraversal(Transaction t,
+            SparseArray<SurfaceControl.Transaction> displayTransactions);
 
     /**
      * Tells the display manager about properties of the display that depend on the windows on it.
@@ -370,8 +373,9 @@ public abstract class DisplayManagerInternal {
 
     /**
      * Returns the default size of the surface associated with the display, or null if the surface
-     * is not provided for layer mirroring by SurfaceFlinger.
-     * Only used for mirroring started from MediaProjection.
+     * is not provided for layer mirroring by SurfaceFlinger. Size is rotated to reflect the current
+     * display device orientation.
+     * Used for mirroring from MediaProjection, or a physical display based on display flags.
      */
     public abstract Point getDisplaySurfaceDefaultSize(int displayId);
 
@@ -413,9 +417,25 @@ public abstract class DisplayManagerInternal {
     public abstract HostUsiVersion getHostUsiVersion(int displayId);
 
     /**
+     * Get the ALS data for a particular display.
+     *
+     * @param displayId The id of the display.
+     * @return {@link AmbientLightSensorData}
+     */
+    @Nullable
+    public abstract AmbientLightSensorData getAmbientLightSensorData(int displayId);
+
+    /**
      * Get all available DisplayGroupIds.
      */
     public abstract IntArray getDisplayGroupIds();
+
+    /**
+     * Called upon presentation started/ended on the display.
+     * @param displayId the id of the display where presentation started.
+     * @param isShown whether presentation is shown.
+     */
+    public abstract void onPresentation(int displayId, boolean isShown);
 
     /**
      * Describes the requested power state of the display.
@@ -667,6 +687,100 @@ public abstract class DisplayManagerInternal {
         @Override
         public String toString() {
             return "RefreshRateLimitation(" + type + ": " + range + ")";
+        }
+    }
+
+    /**
+     * Class to provide Ambient sensor data using the API
+     * {@link DisplayManagerInternal#getAmbientLightSensorData(int)}
+     */
+    public static final class AmbientLightSensorData {
+        public String sensorName;
+        public String sensorType;
+
+        public AmbientLightSensorData(String name, String type) {
+            sensorName = name;
+            sensorType = type;
+        }
+
+        @Override
+        public String toString() {
+            return "AmbientLightSensorData(" + sensorName + ", " + sensorType + ")";
+        }
+    }
+
+    /**
+     * Associate a internal display to a {@link DisplayOffloader}.
+     *
+     * @param displayId the id of the internal display.
+     * @param displayOffloader the {@link DisplayOffloader} that controls offloading ops of internal
+     *                         display whose id is displayId.
+     * @return a {@link DisplayOffloadSession} associated with given displayId and displayOffloader.
+     */
+    public abstract DisplayOffloadSession registerDisplayOffloader(
+            int displayId, DisplayOffloader displayOffloader);
+
+    /** The callbacks that controls the entry & exit of display offloading. */
+    public interface DisplayOffloader {
+        boolean startOffload();
+
+        void stopOffload();
+
+        /**
+         * Called when {@link DisplayOffloadSession} tries to block screen turning on.
+         *
+         * @param unblocker a {@link Runnable} executed upon all work required before screen turning
+         *                  on is done.
+         */
+        void onBlockingScreenOn(Runnable unblocker);
+    }
+
+    /** A session token that associates a internal display with a {@link DisplayOffloader}. */
+    public interface DisplayOffloadSession {
+        /** Provide the display state to use in place of state DOZE. */
+        void setDozeStateOverride(int displayState);
+
+        /** Whether the session is active. */
+        boolean isActive();
+
+        /**
+         * Update the brightness from the offload chip.
+         * @param brightness The brightness value between {@link PowerManager.BRIGHTNESS_MIN} and
+         *                   {@link PowerManager.BRIGHTNESS_MAX}, or
+         *                   {@link PowerManager.BRIGHTNESS_INVALID_FLOAT} which removes
+         *                   the brightness from offload. Other values will be ignored.
+         */
+        void updateBrightness(float brightness);
+
+        /**
+         * Called while display is turning to state ON to leave a small period for displayoffload
+         * session to finish some work.
+         *
+         * @param unblocker a {@link Runnable} used by displayoffload session to notify
+         *                  {@link DisplayManager} that it can continue turning screen on.
+         */
+        boolean blockScreenOn(Runnable unblocker);
+
+        /**
+         * Get the brightness levels used to determine automatic brightness based on lux levels.
+         * @param mode The auto-brightness mode
+         *             (AutomaticBrightnessController.AutomaticBrightnessMode)
+         * @return The brightness levels for the specified mode. The values are between
+         * {@link PowerManager.BRIGHTNESS_MIN} and {@link PowerManager.BRIGHTNESS_MAX}.
+         */
+        float[] getAutoBrightnessLevels(int mode);
+
+        /**
+         * Get the lux levels used to determine automatic brightness.
+         * @param mode The auto-brightness mode
+         *             (AutomaticBrightnessController.AutomaticBrightnessMode)
+         * @return The lux levels for the specified mode
+         */
+        float[] getAutoBrightnessLuxLevels(int mode);
+
+        /** Returns whether displayoffload supports the given display state. */
+        static boolean isSupportedOffloadState(int displayState) {
+            return Display.isSuspendedState(displayState);
         }
     }
 }

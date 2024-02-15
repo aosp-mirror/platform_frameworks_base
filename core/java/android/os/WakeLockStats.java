@@ -25,6 +25,7 @@ import java.util.List;
  * Snapshot of wake lock stats.
  *  @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class WakeLockStats implements Parcelable {
 
     /** @hide */

@@ -272,6 +272,17 @@ public final class RenderNode {
         void positionChanged(long frameNumber, int left, int top, int right, int bottom);
 
         /**
+         * Called by native by a Rendering Worker thread to update window position; includes
+         * the local rect that represents the clipped area of the RenderNode's bounds.
+         *
+         * @hide
+         */
+        default void positionChanged(long frameNumber, int left, int top, int right, int bottom,
+                int clipLeft, int clipTop, int clipRight, int clipBottom) {
+            positionChanged(frameNumber, left, top, right, bottom);
+        }
+
+        /**
          * Called by JNI
          *
          * @hide */
@@ -280,6 +291,23 @@ public final class RenderNode {
             final PositionUpdateListener listener = weakListener.get();
             if (listener != null) {
                 listener.positionChanged(frameNumber, left, top, right, bottom);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * Called by JNI
+         *
+         * @hide */
+        static boolean callPositionChanged2(WeakReference<PositionUpdateListener> weakListener,
+                long frameNumber, int left, int top, int right, int bottom,
+                int clipLeft, int clipTop, int clipRight, int clipBottom) {
+            final PositionUpdateListener listener = weakListener.get();
+            if (listener != null) {
+                listener.positionChanged(frameNumber, left, top, right, bottom, clipLeft,
+                        clipTop, clipRight, clipBottom);
                 return true;
             } else {
                 return false;
@@ -367,6 +395,15 @@ public final class RenderNode {
         public void positionChanged(long frameNumber, int left, int top, int right, int bottom) {
             for (PositionUpdateListener pul : mListeners) {
                 pul.positionChanged(frameNumber, left, top, right, bottom);
+            }
+        }
+
+        @Override
+        public void positionChanged(long frameNumber, int left, int top, int right, int bottom,
+                int clipLeft, int clipTop, int clipRight, int clipBottom) {
+            for (PositionUpdateListener pul : mListeners) {
+                pul.positionChanged(frameNumber, left, top, right, bottom, clipLeft, clipTop,
+                        clipRight, clipBottom);
             }
         }
 
@@ -967,6 +1004,23 @@ public final class RenderNode {
      */
     public boolean setRenderEffect(@Nullable RenderEffect renderEffect) {
         return nSetRenderEffect(mNativeRenderNode,
+                renderEffect != null ? renderEffect.getNativeInstance() : 0);
+    }
+
+    /**
+     * Configure the {@link android.graphics.RenderEffect} to apply to the backdrop contents of
+     * this RenderNode. This will apply a visual effect to the result of the backdrop contents
+     * of this RenderNode before the RenderNode is drawn into the destination. For example if
+     * {@link RenderEffect#createBlurEffect(float, float, RenderEffect, Shader.TileMode)}
+     * is provided, the previous content behind this RenderNode will be blurred before the
+     * RenderNode is drawn in to the destination.
+     * @param renderEffect to be applied to the backdrop contents of this RenderNode. Passing
+     *          null clears all previously configured RenderEffects
+     * @return True if the value changed, false if the new value was the same as the previous value.
+     * @hide
+     */
+    public boolean setBackdropRenderEffect(@Nullable RenderEffect renderEffect) {
+        return nSetBackdropRenderEffect(mNativeRenderNode,
                 renderEffect != null ? renderEffect.getNativeInstance() : 0);
     }
 
@@ -1795,6 +1849,9 @@ public final class RenderNode {
 
     @CriticalNative
     private static native boolean nSetRenderEffect(long renderNode, long renderEffect);
+
+    @CriticalNative
+    private static native boolean nSetBackdropRenderEffect(long renderNode, long renderEffect);
 
     @CriticalNative
     private static native boolean nSetHasOverlappingRendering(long renderNode,

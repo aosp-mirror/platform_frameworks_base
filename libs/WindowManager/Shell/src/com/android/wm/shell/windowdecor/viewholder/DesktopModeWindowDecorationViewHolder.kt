@@ -2,7 +2,6 @@ package com.android.wm.shell.windowdecor.viewholder
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
-import android.graphics.Color
 import android.view.View
 
 /**
@@ -10,19 +9,17 @@ import android.view.View
  * children (via findViewById) and updating to the latest data from [RunningTaskInfo].
  */
 internal abstract class DesktopModeWindowDecorationViewHolder(rootView: View) {
-    val context: Context = rootView.context
+  val context: Context = rootView.context
 
-    /**
-     * A signal to the view holder that new data is available and that the views should be updated
-     * to reflect it.
-     */
-    abstract fun bindData(taskInfo: RunningTaskInfo)
+  /**
+   * A signal to the view holder that new data is available and that the views should be updated to
+   * reflect it.
+   */
+  abstract fun bindData(taskInfo: RunningTaskInfo)
 
-    /**
-     * Whether the caption items should use the 'light' color variant so that there's good contrast
-     * with the caption background color.
-     */
-    protected fun shouldUseLightCaptionColors(taskInfo: RunningTaskInfo): Boolean {
-        return Color.valueOf(taskInfo.taskDescription.statusBarColor).luminance() < 0.5
-    }
+  /** Callback when the handle menu is opened. */
+  abstract fun onHandleMenuOpened()
+
+  /** Callback when the handle menu is closed. */
+  abstract fun onHandleMenuClosed()
 }

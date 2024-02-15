@@ -77,6 +77,8 @@ class FakeSecurityController(
 
     override fun isVpnBranded(): Boolean = fakeState.isVpnBranded
 
+    override fun isVpnValidated(): Boolean = fakeState.isVpnValidated
+
     override fun getPrimaryVpnName(): String? = fakeState.primaryVpnName
 
     override fun getWorkProfileVpnName(): String? = fakeState.workProfileVpnName
@@ -110,6 +112,7 @@ class FakeSecurityController(
         var isVpnEnabled: Boolean = false,
         var isVpnRestricted: Boolean = false,
         var isVpnBranded: Boolean = false,
+        var isVpnValidated: Boolean = false,
         var primaryVpnName: String? = null,
         var workProfileVpnName: String? = null,
         var hasCACertInCurrentUser: Boolean = false,

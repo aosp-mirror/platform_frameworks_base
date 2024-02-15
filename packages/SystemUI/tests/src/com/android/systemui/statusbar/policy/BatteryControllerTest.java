@@ -29,6 +29,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
+import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbPort;
+import android.hardware.usb.UsbPortStatus;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -56,6 +59,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -65,8 +72,10 @@ public class BatteryControllerTest extends SysuiTestCase {
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private DemoModeController mDemoModeController;
     @Mock private View mView;
+    @Mock private UsbPort mUsbPort;
+    @Mock private UsbManager mUsbManager;
+    @Mock private UsbPortStatus mUsbPortStatus;
     private BatteryControllerImpl mBatteryController;
-
     private MockitoSession mMockitoSession;
 
     @Before
@@ -83,6 +92,7 @@ public class BatteryControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 mDemoModeController,
                 mock(DumpManager.class),
+                mock(BatteryControllerLogger.class),
                 new Handler(),
                 new Handler());
         // Can throw if updateEstimate is called on the main thread
@@ -254,5 +264,57 @@ public class BatteryControllerTest extends SysuiTestCase {
         mBatteryController.onReceive(getContext(), intent);
 
         Assert.assertFalse(mBatteryController.isBatteryDefender());
+    }
+
+    @Test
+    public void complianceChanged_complianceIncompatible_outputsTrue() {
+        mContext.addMockSystemService(UsbManager.class, mUsbManager);
+        setupIncompatibleCharging();
+        Intent intent = new Intent(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertTrue(mBatteryController.isIncompatibleCharging());
+    }
+
+    @Test
+    public void complianceChanged_emptyComplianceWarnings_outputsFalse() {
+        mContext.addMockSystemService(UsbManager.class, mUsbManager);
+        setupIncompatibleCharging();
+        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[1]);
+        Intent intent = new Intent(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertFalse(mBatteryController.isIncompatibleCharging());
+    }
+
+    @Test
+    public void callbackRemovedWhileDispatching_doesntCrash() {
+        final AtomicBoolean remove = new AtomicBoolean(false);
+        BatteryStateChangeCallback callback = new BatteryStateChangeCallback() {
+            @Override
+            public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+                if (remove.get()) {
+                    mBatteryController.removeCallback(this);
+                }
+            }
+        };
+        mBatteryController.addCallback(callback);
+        // Add another callback so the iteration continues
+        mBatteryController.addCallback(new BatteryStateChangeCallback() {});
+        remove.set(true);
+        mBatteryController.fireBatteryLevelChanged();
+    }
+
+    private void setupIncompatibleCharging() {
+        final List<UsbPort> usbPorts = new ArrayList<>();
+        usbPorts.add(mUsbPort);
+        when(mUsbManager.getPorts()).thenReturn(usbPorts);
+        when(mUsbPort.getStatus()).thenReturn(mUsbPortStatus);
+        when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
+        when(mUsbPortStatus.isConnected()).thenReturn(true);
+        when(mUsbPortStatus.getComplianceWarnings())
+                .thenReturn(new int[]{UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY});
     }
 }

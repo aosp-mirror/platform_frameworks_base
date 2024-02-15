@@ -17,6 +17,8 @@
 package android.app.servertransaction;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.os.Parcel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -50,12 +52,18 @@ public abstract class ActivityLifecycleItem extends ActivityTransactionItem {
     public static final int ON_DESTROY = 6;
     public static final int ON_RESTART = 7;
 
+    ActivityLifecycleItem() {}
+
+    ActivityLifecycleItem(@NonNull Parcel in) {
+        super(in);
+    }
+
+    @Override
+    public boolean isActivityLifecycleItem() {
+        return true;
+    }
+
     /** A final lifecycle state that an activity should reach. */
     @LifecycleState
     public abstract int getTargetState();
-
-    /** Called by subclasses to make sure base implementation is cleaned up */
-    @Override
-    public void recycle() {
-    }
 }

@@ -28,7 +28,7 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import com.android.app.animation.Interpolators
 import com.android.internal.R.interpolator.fast_out_extra_slow_in
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /** Animates constraint layout changes for the security view. */
 class KeyguardSecurityViewTransition : Transition() {
@@ -66,11 +66,11 @@ class KeyguardSecurityViewTransition : Transition() {
     }
 
     override fun createAnimator(
-        sceneRoot: ViewGroup?,
+        sceneRoot: ViewGroup,
         startValues: TransitionValues?,
         endValues: TransitionValues?
     ): Animator? {
-        if (sceneRoot == null || startValues == null || endValues == null) {
+        if (startValues == null || endValues == null) {
             return null
         }
 

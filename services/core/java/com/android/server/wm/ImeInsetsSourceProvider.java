@@ -222,8 +222,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             @Nullable ImeTracker.Token statsToken) {
         boolean targetChanged = isTargetChangedWithinActivity(imeTarget);
         mImeRequester = imeTarget;
-        // There was still a stats token, so that request presumably failed.
-        ImeTracker.forLogging().onFailed(
+        // Cancel the pre-existing stats token, if any.
+        ImeTracker.forLogging().onCancelled(
                 mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
         mImeRequesterStatsToken = statsToken;
         if (targetChanged) {
@@ -300,8 +300,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         mImeRequester = null;
         mIsImeLayoutDrawn = false;
         mShowImeRunner = null;
-        ImeTracker.forLogging().onCancelled(
-                mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
+        ImeTracker.forLogging().onFailed(
+                mImeRequesterStatsToken, ImeTracker.PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT);
         mImeRequesterStatsToken = null;
     }
 

@@ -17,15 +17,15 @@
 package com.android.server.pm.parsing
 
 import android.content.pm.PackageManager
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import android.platform.test.annotations.Postsubmit
-import com.android.server.pm.PackageManagerException
+import com.android.internal.pm.parsing.PackageParserException
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.PackageManagerService
 import com.android.server.pm.PackageManagerServiceUtils
+import java.io.File
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import java.io.File
 
 /**
  * This test parses all the system APKs on the device image to ensure that they succeed.
@@ -39,7 +39,7 @@ import java.io.File
 @Postsubmit
 class SystemPartitionParseTest {
 
-    private val parser = PackageParser2.forParsingFileWithDefaults()
+    private val parser = PackageParserUtils.forParsingFileWithDefaults()
 
     @get:Rule
     val tempFolder = TemporaryFolder()
@@ -86,7 +86,7 @@ class SystemPartitionParseTest {
                     }
                 }
                 .mapNotNull { it.exceptionOrNull() }
-                .filterNot { (it as? PackageManagerException)?.error ==
+                .filterNot { (it as? PackageParserException)?.error ==
                         PackageManager.INSTALL_PARSE_FAILED_SKIPPED }
 
         if (exceptions.isEmpty()) return

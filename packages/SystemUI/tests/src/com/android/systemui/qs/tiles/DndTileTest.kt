@@ -25,12 +25,13 @@ import android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
 import android.provider.Settings.Global.ZEN_MODE_OFF
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.ContextThemeWrapper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
@@ -93,7 +94,7 @@ class DndTileTest : SysuiTestCase() {
     private lateinit var sharedPreferences: SharedPreferences
 
     @Mock
-    private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
 
     @Mock
     private lateinit var hostDialog: Dialog
@@ -110,7 +111,9 @@ class DndTileTest : SysuiTestCase() {
 
         whenever(qsHost.userId).thenReturn(DEFAULT_USER)
 
-        val wrappedContext = object : ContextWrapper(context) {
+        val wrappedContext = object : ContextWrapper(
+                ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
+        ) {
             override fun getSharedPreferences(file: File?, mode: Int): SharedPreferences {
                 return sharedPreferences
             }
@@ -130,7 +133,7 @@ class DndTileTest : SysuiTestCase() {
             zenModeController,
             sharedPreferences,
             secureSettings,
-            dialogLaunchAnimator
+            mDialogTransitionAnimator
         )
     }
 
@@ -188,7 +191,7 @@ class DndTileTest : SysuiTestCase() {
         tile.handleClick(view)
         testableLooper.processAllMessages()
 
-        verify(dialogLaunchAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
+        verify(mDialogTransitionAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
     }
 
     @Test
@@ -202,7 +205,8 @@ class DndTileTest : SysuiTestCase() {
         tile.handleClick(view)
         testableLooper.processAllMessages()
 
-        verify(dialogLaunchAnimator, never()).showFromView(any(), any(), nullable(), anyBoolean())
+        verify(mDialogTransitionAnimator, never())
+            .showFromView(any(), any(), nullable(), anyBoolean())
     }
 
     @Test

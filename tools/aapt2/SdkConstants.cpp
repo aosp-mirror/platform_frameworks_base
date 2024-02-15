@@ -16,20 +16,24 @@
 
 #include "SdkConstants.h"
 
+#include <stdint.h>
+
 #include <algorithm>
 #include <string>
-#include <unordered_set>
-#include <vector>
+#include <string_view>
 
 using android::StringPiece;
+using namespace std::literals;
 
 namespace aapt {
 
-static ApiVersion sDevelopmentSdkLevel = 10000;
-static const auto sDevelopmentSdkCodeNames =
-    std::unordered_set<StringPiece>({"Q", "R", "S", "Sv2", "Tiramisu", "UpsideDownCake"});
+static constexpr ApiVersion sDevelopmentSdkLevel = 10000;
+static constexpr StringPiece sDevelopmentSdkCodeNames[] = {
+    "Q"sv, "R"sv, "S"sv, "Sv2"sv, "Tiramisu"sv, "UpsideDownCake"sv, "VanillaIceCream"sv};
 
-static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
+static constexpr auto sPrivacySandboxSuffix = "PrivacySandbox"sv;
+
+static constexpr std::pair<uint16_t, ApiVersion> sAttrIdMap[] = {
     {0x021c, 1},
     {0x021d, 2},
     {0x0269, SDK_CUPCAKE},
@@ -62,25 +66,37 @@ static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
     {0x064c, SDK_S_V2},
 };
 
-static bool less_entry_id(const std::pair<uint16_t, ApiVersion>& p, uint16_t entryId) {
-  return p.first < entryId;
-}
+static_assert(std::is_sorted(std::begin(sAttrIdMap), std::end(sAttrIdMap),
+                             [](auto&& l, auto&& r) { return l.first < r.first; }));
 
 ApiVersion FindAttributeSdkLevel(const ResourceId& id) {
   if (id.package_id() != 0x01 || id.type_id() != 0x01) {
     return 0;
   }
-  auto iter = std::lower_bound(sAttrIdMap.begin(), sAttrIdMap.end(), id.entry_id(), less_entry_id);
-  if (iter == sAttrIdMap.end()) {
+  const auto it =
+      std::lower_bound(std::begin(sAttrIdMap), std::end(sAttrIdMap), id.entry_id(),
+                       [](const auto& pair, uint16_t entryId) { return pair.first < entryId; });
+  if (it == std::end(sAttrIdMap)) {
     return SDK_LOLLIPOP_MR1;
   }
-  return iter->second;
+  return it->second;
 }
 
 std::optional<ApiVersion> GetDevelopmentSdkCodeNameVersion(StringPiece code_name) {
-  return (sDevelopmentSdkCodeNames.find(code_name) == sDevelopmentSdkCodeNames.end())
-             ? std::optional<ApiVersion>()
-             : sDevelopmentSdkLevel;
+  const auto it =
+      std::find_if(std::begin(sDevelopmentSdkCodeNames), std::end(sDevelopmentSdkCodeNames),
+                   [code_name](const auto& item) { return code_name.starts_with(item); });
+  if (it == std::end(sDevelopmentSdkCodeNames)) {
+    return {};
+  }
+  if (code_name.size() == it->size()) {
+    return sDevelopmentSdkLevel;
+  }
+  if (code_name.size() == it->size() + sPrivacySandboxSuffix.size() &&
+      code_name.ends_with(sPrivacySandboxSuffix)) {
+    return sDevelopmentSdkLevel;
+  }
+  return {};
 }
 
 }  // namespace aapt

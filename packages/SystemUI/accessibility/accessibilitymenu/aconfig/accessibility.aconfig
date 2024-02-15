@@ -1,0 +1,10 @@
+package: "com.android.systemui.accessibility.accessibilitymenu"
+
+# NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
+
+flag {
+    name: "a11y_menu_hide_before_taking_action"
+    namespace: "accessibility"
+    description: "Hides the AccessibilityMenuService UI before taking action instead of after."
+    bug: "292020123"
+}

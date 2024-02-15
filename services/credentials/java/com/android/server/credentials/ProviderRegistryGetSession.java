@@ -25,10 +25,10 @@ import android.content.Intent;
 import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
-import android.credentials.ui.Entry;
-import android.credentials.ui.GetCredentialProviderData;
-import android.credentials.ui.ProviderData;
-import android.credentials.ui.ProviderPendingIntentResponse;
+import android.credentials.selection.Entry;
+import android.credentials.selection.GetCredentialProviderData;
+import android.credentials.selection.ProviderData;
+import android.credentials.selection.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialEntry;
@@ -126,6 +126,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
         mElementKeys = new HashSet<>(requestOption
                 .getCredentialRetrievalData()
                 .getStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS));
+        mStatus = Status.PENDING;
     }
 
     protected ProviderRegistryGetSession(@NonNull Context context,
@@ -143,6 +144,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
         mElementKeys = new HashSet<>(requestOption
                 .getCredentialRetrievalData()
                 .getStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS));
+        mStatus = Status.PENDING;
     }
 
     private List<Entry> prepareUiCredentialEntries(

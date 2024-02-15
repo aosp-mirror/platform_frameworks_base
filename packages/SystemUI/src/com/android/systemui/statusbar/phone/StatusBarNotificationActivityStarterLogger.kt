@@ -19,10 +19,10 @@ package com.android.systemui.statusbar.phone
 import android.app.PendingIntent
 import com.android.systemui.log.dagger.NotifInteractionLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogLevel.WARNING
+import com.android.systemui.log.core.LogLevel.DEBUG
+import com.android.systemui.log.core.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.INFO
+import com.android.systemui.log.core.LogLevel.WARNING
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
@@ -30,11 +30,16 @@ import javax.inject.Inject
 class StatusBarNotificationActivityStarterLogger @Inject constructor(
     @NotifInteractionLog private val buffer: LogBuffer
 ) {
-    fun logStartingActivityFromClick(entry: NotificationEntry) {
+    fun logStartingActivityFromClick(entry: NotificationEntry, isHeadsUpState: Boolean,
+                                     isKeyguardVisible: Boolean, isPanelExpanded: Boolean) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
+            bool1 = isHeadsUpState
+            bool2 = isKeyguardVisible
+            bool3 = isPanelExpanded
         }, {
-            "(1/5) onNotificationClicked: $str1"
+            "(1/5) onNotificationClicked: $str1 isHeadsUpState: $bool1 " +
+                    "isKeyguardVisible: $bool2 isPanelExpanded: $bool3"
         })
     }
 
@@ -69,6 +74,14 @@ class StatusBarNotificationActivityStarterLogger @Inject constructor(
             int1 = result
         }, {
             "(5/5) Started intent $str2 for notification $str1 with result code $int1"
+        })
+    }
+
+    fun logCloseRemoteInput(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+        }, {
+            "Closing remote input for $str1"
         })
     }
 

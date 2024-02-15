@@ -19,12 +19,6 @@
     <!-- This is the battery capacity in mAh -->
     <item name="battery.capacity">3000</item>
 
-    <!-- Number of cores each CPU cluster contains -->
-    <array name="cpu.clusters.cores">
-        <value>4</value> <!-- Cluster 0 has 4 cores (cpu0, cpu1, cpu2, cpu3) -->
-        <value>4</value> <!-- Cluster 1 has 4 cores (cpu4, cpu5, cpu5, cpu7) -->
-    </array>
-
     <!-- Power consumption when CPU is suspended -->
     <item name="cpu.suspend">5</item>
     <!-- Additional power consumption when CPU is in a kernel idle loop -->
@@ -32,37 +26,21 @@
     <!-- Additional power consumption by CPU excluding cluster and core when  running -->
     <item name="cpu.active">2.55</item>
 
-    <!-- Additional power consumption by CPU cluster0 itself when running excluding cores in it -->
-    <item name="cpu.cluster_power.cluster0">2.11</item>
-    <!-- Additional power consumption by CPU cluster1 itself when running excluding cores in it -->
-    <item name="cpu.cluster_power.cluster1">2.22</item>
+    <!-- Additional power consumption of CPU policy0 itself when running on related cores -->
+    <item name="cpu.scaling_policy_power.policy0">2.11</item>
+    <!-- Additional power consumption of CPU policy4 itself when running on related cores -->
+    <item name="cpu.scaling_policy_power.policy3">2.22</item>
 
-    <!-- Different CPU speeds as reported in
-         /sys/devices/system/cpu/cpu0/cpufreq/stats/scaling_available_frequencies -->
-    <array name="cpu.core_speeds.cluster0">
-        <value>300000</value> <!-- 300 MHz CPU speed -->
-        <value>1000000</value> <!-- 1000 MHz CPU speed -->
-        <value>2000000</value> <!-- 2000 MHz CPU speed -->
-    </array>
-    <!-- Different CPU speeds as reported in
-         /sys/devices/system/cpu/cpu4/cpufreq/stats/scaling_available_frequencies -->
-    <array name="cpu.core_speeds.cluster1">
-        <value>300000</value> <!-- 300 MHz CPU speed -->
-        <value>1000000</value> <!-- 1000 MHz CPU speed -->
-        <value>2500000</value> <!-- 2500 MHz CPU speed -->
-        <value>3000000</value> <!-- 3000 MHz CPU speed -->
-    </array>
-
-    <!-- Additional power used by a CPU from cluster 0 when running at different
-         speeds. Currently this measurement also includes cluster cost. -->
-    <array name="cpu.core_power.cluster0">
+    <!-- Additional power used by a CPU related to policy3 when running at different
+     speeds. -->
+    <array name="cpu.scaling_step_power.policy0">
         <value>10</value> <!-- 300 MHz CPU speed -->
         <value>20</value> <!-- 1000 MHz CPU speed -->
         <value>30</value> <!-- 1900 MHz CPU speed -->
     </array>
-    <!-- Additional power used by a CPU from cluster 1 when running at different
-         speeds. Currently this measurement also includes cluster cost. -->
-    <array name="cpu.core_power.cluster1">
+    <!-- Additional power used by a CPU related to policy3 when running at different
+         speeds. -->
+    <array name="cpu.scaling_step_power.policy3">
         <value>25</value> <!-- 300 MHz CPU speed -->
         <value>35</value> <!-- 1000 MHz CPU speed -->
         <value>50</value> <!-- 2500 MHz CPU speed -->

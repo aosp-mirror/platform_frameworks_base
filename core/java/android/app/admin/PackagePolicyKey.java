@@ -19,6 +19,7 @@ package android.app.admin;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_PACKAGE_NAME;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_BUNDLE_KEY;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_KEY;
+import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -54,6 +55,9 @@ public final class PackagePolicyKey extends PolicyKey {
     @TestApi
     public PackagePolicyKey(@NonNull String key, @NonNull String packageName) {
         super(key);
+        if (devicePolicySizeTrackingEnabled()) {
+            PolicySizeVerifier.enforceMaxPackageNameLength(packageName);
+        }
         mPackageName = Objects.requireNonNull((packageName));
     }
 

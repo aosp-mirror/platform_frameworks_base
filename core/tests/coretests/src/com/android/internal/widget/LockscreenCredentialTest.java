@@ -16,52 +16,71 @@
 
 package com.android.internal.widget;
 
-
 import static com.google.common.truth.Truth.assertThat;
 
-import android.test.AndroidTestCase;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 
+@RunWith(AndroidJUnit4.class)
+public class LockscreenCredentialTest {
 
-public class LockscreenCredentialTest extends AndroidTestCase {
+    @Test
+    public void testNoneCredential() {
+        LockscreenCredential none = LockscreenCredential.createNone();
 
-    public void testEmptyCredential() {
-        LockscreenCredential empty = LockscreenCredential.createNone();
+        assertTrue(none.isNone());
+        assertEquals(0, none.size());
+        assertArrayEquals(new byte[0], none.getCredential());
 
-        assertTrue(empty.isNone());
-        assertEquals(0, empty.size());
-        assertNotNull(empty.getCredential());
-
-        assertFalse(empty.isPin());
-        assertFalse(empty.isPassword());
-        assertFalse(empty.isPattern());
+        assertFalse(none.isPin());
+        assertFalse(none.isPassword());
+        assertFalse(none.isPattern());
+        assertFalse(none.hasInvalidChars());
+        none.validateBasicRequirements();
     }
 
+    @Test
     public void testPinCredential() {
         LockscreenCredential pin = LockscreenCredential.createPin("3456");
 
         assertTrue(pin.isPin());
         assertEquals(4, pin.size());
-        assertTrue(Arrays.equals("3456".getBytes(), pin.getCredential()));
+        assertArrayEquals("3456".getBytes(), pin.getCredential());
 
         assertFalse(pin.isNone());
         assertFalse(pin.isPassword());
         assertFalse(pin.isPattern());
+        assertFalse(pin.hasInvalidChars());
+        pin.validateBasicRequirements();
     }
 
+    @Test
     public void testPasswordCredential() {
         LockscreenCredential password = LockscreenCredential.createPassword("password");
 
         assertTrue(password.isPassword());
         assertEquals(8, password.size());
-        assertTrue(Arrays.equals("password".getBytes(), password.getCredential()));
+        assertArrayEquals("password".getBytes(), password.getCredential());
 
         assertFalse(password.isNone());
         assertFalse(password.isPin());
         assertFalse(password.isPattern());
+        assertFalse(password.hasInvalidChars());
+        password.validateBasicRequirements();
     }
 
+    @Test
     public void testPatternCredential() {
         LockscreenCredential pattern = LockscreenCredential.createPattern(Arrays.asList(
                 LockPatternView.Cell.of(0, 0),
@@ -73,13 +92,34 @@ public class LockscreenCredentialTest extends AndroidTestCase {
 
         assertTrue(pattern.isPattern());
         assertEquals(5, pattern.size());
-        assertTrue(Arrays.equals("12369".getBytes(), pattern.getCredential()));
+        assertArrayEquals("12369".getBytes(), pattern.getCredential());
 
         assertFalse(pattern.isNone());
         assertFalse(pattern.isPin());
         assertFalse(pattern.isPassword());
+        assertFalse(pattern.hasInvalidChars());
+        pattern.validateBasicRequirements();
     }
 
+    // Constructing a LockscreenCredential with a too-short length, even 0, should not throw an
+    // exception.  This is because LockscreenCredential needs to be able to represent a request to
+    // set a credential that is too short.
+    @Test
+    public void testZeroLengthCredential() {
+        LockscreenCredential credential = LockscreenCredential.createPin("");
+        assertTrue(credential.isPin());
+        assertEquals(0, credential.size());
+
+        credential = createPattern("");
+        assertTrue(credential.isPattern());
+        assertEquals(0, credential.size());
+
+        credential = LockscreenCredential.createPassword("");
+        assertTrue(credential.isPassword());
+        assertEquals(0, credential.size());
+    }
+
+    @Test
     public void testPasswordOrNoneCredential() {
         assertEquals(LockscreenCredential.createNone(),
                 LockscreenCredential.createPasswordOrNone(null));
@@ -89,6 +129,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 LockscreenCredential.createPasswordOrNone("abcd"));
     }
 
+    @Test
     public void testPinOrNoneCredential() {
         assertEquals(LockscreenCredential.createNone(),
                 LockscreenCredential.createPinOrNone(null));
@@ -98,6 +139,35 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 LockscreenCredential.createPinOrNone("1357"));
     }
 
+    // Test that passwords containing invalid characters that were incorrectly allowed in
+    // Android 10–14 are still interpreted in the same way, but are not allowed for new passwords.
+    @Test
+    public void testPasswordWithInvalidChars() {
+        // ™ is U+2122, which was truncated to ASCII 0x22 which is double quote.
+        String[] passwords = new String[] { "foo™", "™™™™", "™foo" };
+        String[] equivalentAsciiPasswords = new String[] { "foo\"", "\"\"\"\"", "\"foo" };
+        for (int i = 0; i < passwords.length; i++) {
+            LockscreenCredential credential = LockscreenCredential.createPassword(passwords[i]);
+            assertTrue(credential.hasInvalidChars());
+            assertArrayEquals(equivalentAsciiPasswords[i].getBytes(), credential.getCredential());
+            try {
+                credential.validateBasicRequirements();
+                fail("should not be able to set password with invalid chars");
+            } catch (IllegalArgumentException expected) { }
+        }
+    }
+
+    @Test
+    public void testPinWithInvalidChars() {
+        LockscreenCredential pin = LockscreenCredential.createPin("\n\n\n\n");
+        assertTrue(pin.hasInvalidChars());
+        try {
+            pin.validateBasicRequirements();
+            fail("should not be able to set PIN with invalid chars");
+        } catch (IllegalArgumentException expected) { }
+    }
+
+    @Test
     public void testSanitize() {
         LockscreenCredential password = LockscreenCredential.createPassword("password");
         password.zeroize();
@@ -123,11 +193,16 @@ public class LockscreenCredentialTest extends AndroidTestCase {
             fail("Sanitized credential still accessible");
         } catch (IllegalStateException expected) { }
         try {
+            password.hasInvalidChars();
+            fail("Sanitized credential still accessible");
+        } catch (IllegalStateException expected) { }
+        try {
             password.getCredential();
             fail("Sanitized credential still accessible");
         } catch (IllegalStateException expected) { }
     }
 
+    @Test
     public void testEquals() {
         assertEquals(LockscreenCredential.createNone(), LockscreenCredential.createNone());
         assertEquals(LockscreenCredential.createPassword("1234"),
@@ -136,34 +211,40 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 LockscreenCredential.createPin("4321"));
         assertEquals(createPattern("1234"), createPattern("1234"));
 
-        assertNotSame(LockscreenCredential.createPassword("1234"),
+        assertNotEquals(LockscreenCredential.createPassword("1234"),
                 LockscreenCredential.createNone());
-        assertNotSame(LockscreenCredential.createPassword("1234"),
+        assertNotEquals(LockscreenCredential.createPassword("1234"),
                 LockscreenCredential.createPassword("4321"));
-        assertNotSame(LockscreenCredential.createPassword("1234"),
+        assertNotEquals(LockscreenCredential.createPassword("1234"),
                 createPattern("1234"));
-        assertNotSame(LockscreenCredential.createPassword("1234"),
+        assertNotEquals(LockscreenCredential.createPassword("1234"),
                 LockscreenCredential.createPin("1234"));
 
-        assertNotSame(LockscreenCredential.createPin("1111"),
+        assertNotEquals(LockscreenCredential.createPin("1111"),
                 LockscreenCredential.createNone());
-        assertNotSame(LockscreenCredential.createPin("1111"),
+        assertNotEquals(LockscreenCredential.createPin("1111"),
                 LockscreenCredential.createPin("2222"));
-        assertNotSame(LockscreenCredential.createPin("1111"),
+        assertNotEquals(LockscreenCredential.createPin("1111"),
                 createPattern("1111"));
-        assertNotSame(LockscreenCredential.createPin("1111"),
+        assertNotEquals(LockscreenCredential.createPin("1111"),
                 LockscreenCredential.createPassword("1111"));
 
-        assertNotSame(createPattern("5678"),
+        assertNotEquals(createPattern("5678"),
                 LockscreenCredential.createNone());
-        assertNotSame(createPattern("5678"),
+        assertNotEquals(createPattern("5678"),
                 createPattern("1234"));
-        assertNotSame(createPattern("5678"),
+        assertNotEquals(createPattern("5678"),
                 LockscreenCredential.createPassword("5678"));
-        assertNotSame(createPattern("5678"),
+        assertNotEquals(createPattern("5678"),
                 LockscreenCredential.createPin("5678"));
+
+        // Test that mHasInvalidChars is compared.  To do this, compare two passwords that map to
+        // the same byte[] (due to the truncation bug) but different values of mHasInvalidChars.
+        assertNotEquals(LockscreenCredential.createPassword("™™™™"),
+                LockscreenCredential.createPassword("\"\"\"\""));
     }
 
+    @Test
     public void testDuplicate() {
         LockscreenCredential credential;
 
@@ -175,8 +256,13 @@ public class LockscreenCredentialTest extends AndroidTestCase {
         assertEquals(credential, credential.duplicate());
         credential = createPattern("5678");
         assertEquals(credential, credential.duplicate());
+
+        // Test that mHasInvalidChars is duplicated.
+        credential = LockscreenCredential.createPassword("™™™™");
+        assertEquals(credential, credential.duplicate());
     }
 
+    @Test
     public void testPasswordToHistoryHash() {
         String password = "1234";
         LockscreenCredential credential = LockscreenCredential.createPassword(password);
@@ -193,6 +279,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 .isEqualTo(expectedHash);
     }
 
+    @Test
     public void testPasswordToHistoryHashInvalidInput() {
         String password = "1234";
         LockscreenCredential credential = LockscreenCredential.createPassword(password);
@@ -221,6 +308,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 .isNull();
     }
 
+    @Test
     public void testLegacyPasswordToHash() {
         String password = "1234";
         String salt = "6d5331dd120077a0";
@@ -233,6 +321,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 .isEqualTo(expectedHash);
     }
 
+    @Test
     public void testLegacyPasswordToHashInvalidInput() {
         String password = "1234";
         String salt = "6d5331dd120077a0";

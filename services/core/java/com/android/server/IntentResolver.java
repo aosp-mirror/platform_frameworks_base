@@ -94,7 +94,7 @@ public abstract class IntentResolver<F, R extends Object> {
             filter.dump(logPrinter, "  ");
         }
 
-        final int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
+        int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
                 intent.getData(), intent.getCategories(), TAG);
 
         if (match >= 0) {

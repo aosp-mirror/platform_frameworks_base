@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-#include <VectorDrawable.h>
-#include <gtest/gtest.h>
-
 #include <SkBlendMode.h>
 #include <SkClipStack.h>
 #include <SkSurface_Base.h>
+#include <VectorDrawable.h>
+#include <gtest/gtest.h>
+#include <include/effects/SkImageFilters.h>
 #include <string.h>
+
 #include "AnimationContext.h"
 #include "DamageAccumulator.h"
 #include "FatalTestCanvas.h"
 #include "IContextFactory.h"
-#include "hwui/Paint.h"
 #include "RecordingCanvas.h"
 #include "SkiaCanvas.h"
+#include "hwui/Paint.h"
+#include "pipeline/skia/BackdropFilterDrawable.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaPipeline.h"
@@ -141,7 +143,7 @@ TEST(RenderNodeDrawable, zReorder) {
 }
 
 TEST(RenderNodeDrawable, composeOnLayer) {
-    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
     SkCanvas& canvas = *surface->getCanvas();
     canvas.drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
@@ -152,7 +154,7 @@ TEST(RenderNodeDrawable, composeOnLayer) {
             });
 
     // attach a layer to the render node
-    auto surfaceLayer = SkSurface::MakeRasterN32Premul(1, 1);
+    auto surfaceLayer = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
     auto canvas2 = surfaceLayer->getCanvas();
     canvas2->drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     rootNode->setLayerSurface(surfaceLayer);
@@ -187,7 +189,7 @@ static SkMatrix getRecorderMatrix(const SkiaRecordingCanvas& recorder) {
 }
 
 TEST(RenderNodeDrawable, saveLayerClipAndMatrixRestore) {
-    auto surface = SkSurface::MakeRasterN32Premul(400, 800);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(400, 800));
     SkCanvas& canvas = *surface->getCanvas();
     canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
@@ -353,7 +355,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
     EXPECT_EQ(3, canvas.getIndex());
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
+RENDERTHREAD_TEST(RenderNodeDrawable, emptyReceiver) {
     class ProjectionTestCanvas : public SkCanvas {
     public:
         ProjectionTestCanvas(int width, int height) : SkCanvas(width, height) {}
@@ -417,7 +419,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
     EXPECT_EQ(2, canvas.getDrawCounter());
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, projectionHwLayer) {
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
     /* R is backward projected on B and C is a layer.
                 A
                / \
@@ -939,8 +941,9 @@ RENDERTHREAD_TEST(RenderNodeDrawable, simple) {
         void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
             EXPECT_EQ(0, mDrawCounter++);
         }
-        void onDrawImage2(const SkImage*, SkScalar dx, SkScalar dy, const SkSamplingOptions&,
-                          const SkPaint*) override {
+        void onDrawImageRect2(const SkImage*, const SkRect&, const SkRect&,
+                              const SkSamplingOptions&, const SkPaint*,
+                              SrcRectConstraint) override {
             EXPECT_EQ(1, mDrawCounter++);
         }
     };
@@ -1050,7 +1053,7 @@ TEST(RenderNodeDrawable, renderNode) {
 }
 
 // Verify that layers are composed with linear filtering.
-RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
+RENDERTHREAD_TEST(RenderNodeDrawable, layerComposeQuality) {
     static const int CANVAS_WIDTH = 1;
     static const int CANVAS_HEIGHT = 1;
     static const int LAYER_WIDTH = 1;
@@ -1074,7 +1077,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
             });
 
     layerNode->animatorProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
-    layerNode->setLayerSurface(SkSurface::MakeRasterN32Premul(LAYER_WIDTH, LAYER_HEIGHT));
+    layerNode->setLayerSurface(SkSurfaces::Raster(SkImageInfo::MakeN32Premul(LAYER_WIDTH, 
+                                                                             LAYER_HEIGHT)));
 
     FrameTestCanvas canvas;
     RenderNodeDrawable drawable(layerNode.get(), &canvas, true);
@@ -1167,7 +1171,7 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
 }
 
 // Draw a vector drawable twice but with different bounds and verify correct bounds are used.
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
+RENDERTHREAD_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
     static const int CANVAS_WIDTH = 100;
     static const int CANVAS_HEIGHT = 200;
     class VectorDrawableTestCanvas : public TestCanvasBase {
@@ -1209,4 +1213,78 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
     RenderNodeDrawable drawable(node.get(), &canvas, true);
     canvas.drawDrawable(&drawable);
     EXPECT_EQ(2, canvas.mDrawCounter);
+}
+
+// Verify drawing logics for BackdropFilterDrawable
+RENDERTHREAD_TEST(BackdropFilterDrawable, drawing) {
+    static const int CANVAS_WIDTH = 100;
+    static const int CANVAS_HEIGHT = 200;
+    class SimpleTestCanvas : public TestCanvasBase {
+    public:
+        SkRect mDstBounds;
+        SimpleTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {}
+        void onDrawRect(const SkRect& rect, const SkPaint& paint) override {
+            // did nothing.
+        }
+
+        // called when BackdropFilterDrawable is drawn.
+        void onDrawImageRect2(const SkImage*, const SkRect& src, const SkRect& dst,
+                              const SkSamplingOptions&, const SkPaint*,
+                              SrcRectConstraint) override {
+            mDrawCounter++;
+            mDstBounds = dst;
+        }
+    };
+    class SimpleLayer : public SkSurface_Base {
+    public:
+        SimpleLayer()
+                : SkSurface_Base(SkImageInfo::MakeN32Premul(CANVAS_WIDTH, CANVAS_HEIGHT), nullptr) {
+        }
+        virtual sk_sp<SkImage> onNewImageSnapshot(const SkIRect* bounds) override {
+            SkBitmap bitmap;
+            bitmap.allocN32Pixels(CANVAS_WIDTH, CANVAS_HEIGHT);
+            bitmap.setImmutable();
+            return bitmap.asImage();
+        }
+        SkCanvas* onNewCanvas() override { return new SimpleTestCanvas(); }
+        sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override { return nullptr; }
+        bool onCopyOnWrite(ContentChangeMode) override { return true; }
+        void onWritePixels(const SkPixmap&, int x, int y) {}
+    };
+
+    auto node = TestUtils::createSkiaNode(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+                                          [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                                              canvas.drawRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+                                                              Paint());
+                                          });
+
+    sk_sp<SkSurface> surface(new SimpleLayer());
+    auto* canvas = reinterpret_cast<SimpleTestCanvas*>(surface->getCanvas());
+    RenderNodeDrawable drawable(node.get(), canvas, true);
+    BackdropFilterDrawable backdropDrawable(node.get(), canvas);
+    canvas->drawDrawable(&drawable);
+    canvas->drawDrawable(&backdropDrawable);
+    // no backdrop filter, skip drawing.
+    EXPECT_EQ(0, canvas->mDrawCounter);
+
+    sk_sp<SkImageFilter> filter(SkImageFilters::Blur(3, 3, nullptr));
+    node->animatorProperties().mutateLayerProperties().setBackdropImageFilter(filter.get());
+    canvas->drawDrawable(&drawable);
+    canvas->drawDrawable(&backdropDrawable);
+    // backdrop filter is set, ok to draw.
+    EXPECT_EQ(1, canvas->mDrawCounter);
+    EXPECT_EQ(SkRect::MakeLTRB(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT), canvas->mDstBounds);
+
+    canvas->translate(30, 30);
+    canvas->drawDrawable(&drawable);
+    canvas->drawDrawable(&backdropDrawable);
+    // the drawable is still visible, ok to draw.
+    EXPECT_EQ(2, canvas->mDrawCounter);
+    EXPECT_EQ(SkRect::MakeLTRB(0, 0, CANVAS_WIDTH - 30, CANVAS_HEIGHT - 30), canvas->mDstBounds);
+
+    canvas->translate(CANVAS_WIDTH, CANVAS_HEIGHT);
+    canvas->drawDrawable(&drawable);
+    canvas->drawDrawable(&backdropDrawable);
+    // the drawable is invisible, skip drawing.
+    EXPECT_EQ(2, canvas->mDrawCounter);
 }

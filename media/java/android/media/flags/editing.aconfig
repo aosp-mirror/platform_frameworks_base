@@ -1,0 +1,8 @@
+package: "com.android.media.editing.flags"
+
+flag {
+  name: "add_media_metrics_editing"
+  namespace: "media_solutions"
+  description: "Add media metrics for transcoding/editing events."
+  bug: "297487694"
+}

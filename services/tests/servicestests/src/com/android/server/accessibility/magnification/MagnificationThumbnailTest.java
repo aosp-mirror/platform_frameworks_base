@@ -17,7 +17,6 @@
 package com.android.server.accessibility.magnification;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -27,13 +26,13 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Rect;
 import android.os.Handler;
-import android.platform.test.annotations.LargeTest;
 import android.testing.TestableContext;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
@@ -187,6 +186,29 @@ public class MagnificationThumbnailTest {
                 .addView(eq(mMagnificationThumbnail.mThumbnailLayout), any());
         verify(mMockWindowManager, never())
                 .removeView(eq(mMagnificationThumbnail.mThumbnailLayout));
+        verify(mMockWindowManager, never())
+                .updateViewLayout(eq(mMagnificationThumbnail.mThumbnailLayout), any());
+    }
+
+    @Test
+    public void whenVisible_setBoundsUpdatesLayout() throws InterruptedException {
+        runOnMainSync(() -> mMagnificationThumbnail.updateThumbnail(
+                /* scale=   */ 2f,
+                /* centerX= */ 5,
+                /* centerY= */ 10
+        ));
+        runOnMainSync(() -> mMagnificationThumbnail.setThumbnailBounds(
+                new Rect(),
+                /* scale=   */ 2f,
+                /* centerX= */ 5,
+                /* centerY= */ 10
+        ));
+        idle();
+
+        verify(mMockWindowManager).updateViewLayout(
+                eq(mMagnificationThumbnail.mThumbnailLayout),
+                /* params= */ any()
+        );
     }
 
     private static void idle() {

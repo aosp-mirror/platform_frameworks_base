@@ -136,7 +136,7 @@ public class LocalBluetoothProfileManager {
     /**
      * create profile instance according to bluetooth supported profile list
      */
-    void updateLocalProfiles() {
+    synchronized void updateLocalProfiles() {
         List<Integer> supportedList = BluetoothAdapter.getDefaultAdapter().getSupportedProfiles();
         if (CollectionUtils.isEmpty(supportedList)) {
             if (DEBUG) Log.d(TAG, "supportedList is null");
@@ -257,7 +257,7 @@ public class LocalBluetoothProfileManager {
             if (DEBUG) {
                 Log.d(TAG, "Adding local LE_AUDIO_BROADCAST profile");
             }
-            mLeAudioBroadcast = new LocalBluetoothLeBroadcast(mContext);
+            mLeAudioBroadcast = new LocalBluetoothLeBroadcast(mContext, mDeviceManager);
             // no event handler for the LE boradcast.
             mProfileNameMap.put(LocalBluetoothLeBroadcast.NAME, mLeAudioBroadcast);
         }

@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,6 +115,19 @@ public class PolicyVersionUpgrader {
             Slog.i(LOG_TAG, String.format("Upgrading from version %d", currentVersion));
             initializeEffectiveKeepProfilesRunning(allUsersData);
             currentVersion = 5;
+        }
+
+        if (currentVersion == 5) {
+            Slog.i(LOG_TAG, String.format("Upgrading from version %d", currentVersion));
+            // No-op upgrade here:
+            // DevicePolicyData.mEffectiveKeepProfilesRunning is only stored in XML file when it is
+            // different from its default value, otherwise the tag is not written. When loading, if
+            // the tag is missing, the field retains the value previously assigned in the
+            // constructor, which is the default value.
+            // In version 5 the default value was 'true', in version 6 it is 'false', so when
+            // loading XML version 5 we need to initialize the field to 'true' for it to be restored
+            // correctly in case the tag is missing. This is done in loadDataForUser().
+            currentVersion = 6;
         }
 
         writePoliciesAndVersion(allUsers, allUsersData, ownersData, currentVersion);
@@ -281,6 +295,10 @@ public class PolicyVersionUpgrader {
     private DevicePolicyData loadDataForUser(
             int userId, int loadVersion, ComponentName ownerComponent) {
         DevicePolicyData policy = new DevicePolicyData(userId);
+        // See version 5 -> 6 step in upgradePolicy()
+        if (loadVersion == 5 && userId == UserHandle.USER_SYSTEM) {
+            policy.mEffectiveKeepProfilesRunning = true;
+        }
         DevicePolicyData.load(policy,
                 mProvider.makeDevicePoliciesJournaledFile(userId),
                 mProvider.getAdminInfoSupplier(userId),
@@ -307,6 +325,8 @@ public class PolicyVersionUpgrader {
             String versionString = Files.readAllLines(
                     file.toPath(), Charset.defaultCharset()).get(0);
             return Integer.parseInt(versionString);
+        } catch (NoSuchFileException e) {
+            return 0; // expected on first boot
         } catch (IOException | NumberFormatException | IndexOutOfBoundsException e) {
             Slog.e(LOG_TAG, "Error reading version", e);
             return 0;

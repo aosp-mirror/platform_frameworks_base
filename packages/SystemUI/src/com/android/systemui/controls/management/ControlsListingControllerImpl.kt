@@ -33,7 +33,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.ActivityTaskManagerProxy
 import com.android.systemui.util.asIndenting
@@ -124,11 +123,9 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     }
 
     private fun updateServices(newServices: List<ControlsServiceInfo>) {
-        if (featureFlags.isEnabled(Flags.USE_APP_PANELS) &&
-                activityTaskManagerProxy.supportsMultiWindow(context)) {
-            val allowAllApps = featureFlags.isEnabled(Flags.APP_PANELS_ALL_APPS_ALLOWED)
+        if (activityTaskManagerProxy.supportsMultiWindow(context)) {
             newServices.forEach {
-                it.resolvePanelActivity(allowAllApps) }
+                it.resolvePanelActivity() }
         }
 
         if (newServices != availableServices) {

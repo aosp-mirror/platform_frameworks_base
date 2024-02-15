@@ -16,14 +16,19 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
@@ -41,15 +46,18 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MobileIconsViewModelTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsViewModel
     private val interactor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
+    private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
     private lateinit var airplaneModeInteractor: AirplaneModeInteractor
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
@@ -68,6 +76,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 FakeAirplaneModeRepository(),
                 FakeConnectivityRepository(),
+                FakeMobileConnectionsRepository(),
             )
 
         underTest =
@@ -77,8 +86,8 @@ class MobileIconsViewModelTest : SysuiTestCase() {
                 interactor,
                 airplaneModeInteractor,
                 constants,
+                flags,
                 testScope.backgroundScope,
-                statusBarPipelineFlags,
             )
 
         interactor.filteredSubscriptions.value = listOf(SUB_1, SUB_2)
@@ -92,15 +101,35 @@ class MobileIconsViewModelTest : SysuiTestCase() {
 
             interactor.filteredSubscriptions.value =
                 listOf(
-                    SubscriptionModel(subscriptionId = 1, isOpportunistic = false),
+                    SubscriptionModel(
+                        subscriptionId = 1,
+                        isOpportunistic = false,
+                        carrierName = "Carrier 1",
+                        profileClass = PROFILE_CLASS_UNSET,
+                    ),
                 )
             assertThat(latest).isEqualTo(listOf(1))
 
             interactor.filteredSubscriptions.value =
                 listOf(
-                    SubscriptionModel(subscriptionId = 2, isOpportunistic = false),
-                    SubscriptionModel(subscriptionId = 5, isOpportunistic = true),
-                    SubscriptionModel(subscriptionId = 7, isOpportunistic = true),
+                    SubscriptionModel(
+                        subscriptionId = 2,
+                        isOpportunistic = false,
+                        carrierName = "Carrier 2",
+                        profileClass = PROFILE_CLASS_UNSET,
+                    ),
+                    SubscriptionModel(
+                        subscriptionId = 5,
+                        isOpportunistic = true,
+                        carrierName = "Carrier 5",
+                        profileClass = PROFILE_CLASS_UNSET,
+                    ),
+                    SubscriptionModel(
+                        subscriptionId = 7,
+                        isOpportunistic = true,
+                        carrierName = "Carrier 7",
+                        profileClass = PROFILE_CLASS_UNSET,
+                    ),
                 )
             assertThat(latest).isEqualTo(listOf(2, 5, 7))
 
@@ -308,8 +337,26 @@ class MobileIconsViewModelTest : SysuiTestCase() {
         }
 
     companion object {
-        private val SUB_1 = SubscriptionModel(subscriptionId = 1, isOpportunistic = false)
-        private val SUB_2 = SubscriptionModel(subscriptionId = 2, isOpportunistic = false)
-        private val SUB_3 = SubscriptionModel(subscriptionId = 3, isOpportunistic = false)
+        private val SUB_1 =
+            SubscriptionModel(
+                subscriptionId = 1,
+                isOpportunistic = false,
+                carrierName = "Carrier 1",
+                profileClass = PROFILE_CLASS_UNSET,
+            )
+        private val SUB_2 =
+            SubscriptionModel(
+                subscriptionId = 2,
+                isOpportunistic = false,
+                carrierName = "Carrier 2",
+                profileClass = PROFILE_CLASS_UNSET,
+            )
+        private val SUB_3 =
+            SubscriptionModel(
+                subscriptionId = 3,
+                isOpportunistic = false,
+                carrierName = "Carrier 3",
+                profileClass = PROFILE_CLASS_UNSET,
+            )
     }
 }

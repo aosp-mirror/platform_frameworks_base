@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.graphics.Point
+import android.testing.TestableLooper
 import android.view.Display
 import android.view.Surface
 import android.view.View
@@ -19,6 +20,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@TestableLooper.RunWithLooper
 class StatusBarMoveFromCenterAnimationControllerTest : SysuiTestCase() {
 
     @Mock

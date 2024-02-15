@@ -18,6 +18,7 @@ package android.telecom;
 
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -30,11 +31,15 @@ import android.os.Parcelable;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.ArraySet;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Represents a distinct method to place or receive a phone call. Apps which can place calls and
@@ -185,6 +190,8 @@ public final class PhoneAccount implements Parcelable {
      * this may be used to skip call filtering when it has already been performed on another device.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     public static final String EXTRA_SKIP_CALL_FILTERING =
         "android.telecom.extra.SKIP_CALL_FILTERING";
 
@@ -491,6 +498,7 @@ public final class PhoneAccount implements Parcelable {
     private final Bundle mExtras;
     private boolean mIsEnabled;
     private String mGroupId;
+    private final Set<PhoneAccountHandle> mSimultaneousCallingRestriction;
 
     @Override
     public boolean equals(Object o) {
@@ -508,7 +516,9 @@ public final class PhoneAccount implements Parcelable {
                 Objects.equals(mShortDescription, that.mShortDescription) &&
                 Objects.equals(mSupportedUriSchemes, that.mSupportedUriSchemes) &&
                 areBundlesEqual(mExtras, that.mExtras) &&
-                Objects.equals(mGroupId, that.mGroupId);
+                Objects.equals(mGroupId, that.mGroupId)
+                && Objects.equals(mSimultaneousCallingRestriction,
+                        that.mSimultaneousCallingRestriction);
     }
 
     @Override
@@ -516,7 +526,7 @@ public final class PhoneAccount implements Parcelable {
         return Objects.hash(mAccountHandle, mAddress, mSubscriptionAddress, mCapabilities,
                 mHighlightColor, mLabel, mShortDescription, mSupportedUriSchemes,
                 mSupportedAudioRoutes,
-                mExtras, mIsEnabled, mGroupId);
+                mExtras, mIsEnabled, mGroupId, mSimultaneousCallingRestriction);
     }
 
     /**
@@ -537,6 +547,7 @@ public final class PhoneAccount implements Parcelable {
         private Bundle mExtras;
         private boolean mIsEnabled = false;
         private String mGroupId = "";
+        private Set<PhoneAccountHandle> mSimultaneousCallingRestriction = null;
 
         /**
          * Creates a builder with the specified {@link PhoneAccountHandle} and label.
@@ -571,6 +582,9 @@ public final class PhoneAccount implements Parcelable {
             mExtras = phoneAccount.getExtras();
             mGroupId = phoneAccount.getGroupId();
             mSupportedAudioRoutes = phoneAccount.getSupportedAudioRoutes();
+            if (phoneAccount.hasSimultaneousCallingRestriction()) {
+                mSimultaneousCallingRestriction = phoneAccount.getSimultaneousCallingRestriction();
+            }
         }
 
         /**
@@ -787,6 +801,60 @@ public final class PhoneAccount implements Parcelable {
         }
 
         /**
+         * Restricts the ability of this {@link PhoneAccount} to ONLY support simultaneous calling
+         * with the other {@link PhoneAccountHandle}s in this Set.
+         * <p>
+         * If two or more {@link PhoneAccount}s support calling simultaneously, it means that
+         * Telecom allows the user to place additional outgoing calls and receive additional
+         * incoming calls using other {@link PhoneAccount}s while this PhoneAccount also has one or
+         * more active calls.
+         * <p>
+         * If this setter method is never called or cleared using
+         * {@link #clearSimultaneousCallingRestriction()}, there is no restriction and all
+         * {@link PhoneAccount}s registered to Telecom by this package support simultaneous calling.
+         * If this setter is called and set as an empty Set, then this {@link PhoneAccount} does
+         * not support simultaneous calling with any other {@link PhoneAccount}s registered by the
+         * same application.
+         * <p>
+         * Note: Simultaneous calling restrictions can only be placed on {@link PhoneAccount}s that
+         * were registered by the same application. Simultaneous calling across applications is
+         * always possible as long as the {@link Connection} supports hold. If a
+         * {@link PhoneAccountHandle} is included here and the package name doesn't match this
+         * application's package name, {@link TelecomManager#registerPhoneAccount(PhoneAccount)}
+         * will throw a {@link SecurityException}.
+         *
+         * @param handles The other {@link PhoneAccountHandle}s that support calling simultaneously
+         * with this one. Use {@link #clearSimultaneousCallingRestriction()} to remove the
+         * restriction and allow simultaneous calling to be supported across all
+         * {@link PhoneAccount}s registered by this package.
+         * @return The Builder used to set up the new PhoneAccount.
+         */
+        @FlaggedApi(Flags.FLAG_SIMULTANEOUS_CALLING_INDICATIONS)
+        public @NonNull Builder setSimultaneousCallingRestriction(
+                @NonNull Set<PhoneAccountHandle> handles) {
+            if (handles == null) {
+                throw new IllegalArgumentException("the Set of PhoneAccountHandles must not be "
+                        + "null");
+            }
+            mSimultaneousCallingRestriction = handles;
+            return this;
+        }
+
+        /**
+         * Clears a previously set simultaneous calling restriction set when
+         * {@link PhoneAccount.Builder#Builder(PhoneAccount)} is used to create a new PhoneAccount
+         * from an existing one.
+         *
+         * @return The Builder used to set up the new PhoneAccount.
+         * @see #setSimultaneousCallingRestriction(Set)
+         */
+        @FlaggedApi(Flags.FLAG_SIMULTANEOUS_CALLING_INDICATIONS)
+        public @NonNull Builder clearSimultaneousCallingRestriction() {
+            mSimultaneousCallingRestriction = null;
+            return this;
+        }
+
+        /**
          * Creates an instance of a {@link PhoneAccount} based on the current builder settings.
          *
          * @return The {@link PhoneAccount}.
@@ -810,7 +878,8 @@ public final class PhoneAccount implements Parcelable {
                     mExtras,
                     mSupportedAudioRoutes,
                     mIsEnabled,
-                    mGroupId);
+                    mGroupId,
+                    mSimultaneousCallingRestriction);
         }
     }
 
@@ -827,7 +896,8 @@ public final class PhoneAccount implements Parcelable {
             Bundle extras,
             int supportedAudioRoutes,
             boolean isEnabled,
-            String groupId) {
+            String groupId,
+            Set<PhoneAccountHandle> simultaneousCallingRestriction) {
         mAccountHandle = account;
         mAddress = address;
         mSubscriptionAddress = subscriptionAddress;
@@ -841,6 +911,7 @@ public final class PhoneAccount implements Parcelable {
         mSupportedAudioRoutes = supportedAudioRoutes;
         mIsEnabled = isEnabled;
         mGroupId = groupId;
+        mSimultaneousCallingRestriction = simultaneousCallingRestriction;
     }
 
     public static Builder builder(
@@ -1050,6 +1121,49 @@ public final class PhoneAccount implements Parcelable {
         return (mCapabilities & CAPABILITY_SELF_MANAGED) == CAPABILITY_SELF_MANAGED;
     }
 
+    /**
+     * If a restriction is set (see {@link #hasSimultaneousCallingRestriction()}), this method
+     * returns the Set of {@link PhoneAccountHandle}s that are allowed to support calls
+     * simultaneously with this {@link PhoneAccount}.
+     * <p>
+     * If this {@link PhoneAccount} is busy with one or more ongoing calls, a restriction is set on
+     * this PhoneAccount (see {@link #hasSimultaneousCallingRestriction()} to check),  and a new
+     * incoming or outgoing call is received or placed on a PhoneAccount that is not in this Set,
+     * Telecom will reject or cancel the pending call in favor of keeping the ongoing call alive.
+     * <p>
+     * Note: Simultaneous calling restrictions can only be placed on {@link PhoneAccount}s that
+     * were registered by the same application. Simultaneous calling across applications is
+     * always possible as long as the {@link Connection} supports hold.
+     *
+     * @return the Set of {@link PhoneAccountHandle}s that this {@link PhoneAccount} supports
+     * simultaneous calls with.
+     * @throws IllegalStateException If there is no restriction set on this {@link PhoneAccount}
+     * and this method is called. Whether or not there is a restriction can be checked using
+     * {@link #hasSimultaneousCallingRestriction()}.
+     */
+    @FlaggedApi(Flags.FLAG_SIMULTANEOUS_CALLING_INDICATIONS)
+    public @NonNull Set<PhoneAccountHandle> getSimultaneousCallingRestriction() {
+        if (mSimultaneousCallingRestriction == null) {
+            throw new IllegalStateException("This method can not be called if there is no "
+                    + "simultaneous calling restriction. See #hasSimultaneousCallingRestriction");
+        }
+        return mSimultaneousCallingRestriction;
+    }
+
+    /**
+     * Whether or not this {@link PhoneAccount} contains a simultaneous calling restriction on it.
+     *
+     * @return {@code true} if this PhoneAccount contains a simultaneous calling restriction,
+     * {@code false} if it does not. Use {@link #getSimultaneousCallingRestriction()} to query which
+     * other {@link PhoneAccount}s support simultaneous calling with this one.
+     * @see #getSimultaneousCallingRestriction() for more information on how the sinultaneous
+     * calling restriction works.
+     */
+    @FlaggedApi(Flags.FLAG_SIMULTANEOUS_CALLING_INDICATIONS)
+    public boolean hasSimultaneousCallingRestriction() {
+        return mSimultaneousCallingRestriction != null;
+    }
+
     //
     // Parcelable implementation
     //
@@ -1095,6 +1209,12 @@ public final class PhoneAccount implements Parcelable {
         out.writeBundle(mExtras);
         out.writeString(mGroupId);
         out.writeInt(mSupportedAudioRoutes);
+        if (mSimultaneousCallingRestriction == null) {
+            out.writeBoolean(false);
+        } else {
+            out.writeBoolean(true);
+            out.writeTypedList(mSimultaneousCallingRestriction.stream().toList());
+        }
     }
 
     public static final @android.annotation.NonNull Creator<PhoneAccount> CREATOR
@@ -1140,6 +1260,13 @@ public final class PhoneAccount implements Parcelable {
         mExtras = in.readBundle();
         mGroupId = in.readString();
         mSupportedAudioRoutes = in.readInt();
+        if (in.readBoolean()) {
+            List<PhoneAccountHandle> list = new ArrayList<>();
+            in.readTypedList(list, PhoneAccountHandle.CREATOR);
+            mSimultaneousCallingRestriction = new ArraySet<>(list);
+        } else {
+            mSimultaneousCallingRestriction = null;
+        }
     }
 
     @Override
@@ -1161,6 +1288,17 @@ public final class PhoneAccount implements Parcelable {
         sb.append(mExtras);
         sb.append(" GroupId: ");
         sb.append(Log.pii(mGroupId));
+        sb.append(" SC Restrictions: ");
+        if (hasSimultaneousCallingRestriction()) {
+            sb.append("[ ");
+            for (PhoneAccountHandle handle : mSimultaneousCallingRestriction) {
+                sb.append(handle);
+                sb.append(" ");
+            }
+            sb.append("]");
+        } else {
+            sb.append("[NONE]");
+        }
         sb.append("]");
         return sb.toString();
     }

@@ -21,12 +21,13 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.preference.PreferenceViewHolder;
-import androidx.preference.SwitchPreference;
+import androidx.preference.SwitchPreferenceCompat;
 
+import com.android.settingslib.widget.preference.app.R;
 /**
  * The SwitchPreference for the pages need to show apps icon.
  */
-public class AppSwitchPreference extends SwitchPreference {
+public class AppSwitchPreference extends SwitchPreferenceCompat {
 
     public AppSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
@@ -52,7 +53,7 @@ public class AppSwitchPreference extends SwitchPreference {
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        final View switchView = holder.findViewById(android.R.id.switch_widget);
+        final View switchView = holder.findViewById(androidx.preference.R.id.switchWidget);
         if (switchView != null) {
             final View rootView = switchView.getRootView();
             rootView.setFilterTouchesWhenObscured(true);

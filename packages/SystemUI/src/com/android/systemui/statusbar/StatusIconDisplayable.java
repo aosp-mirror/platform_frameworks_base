@@ -21,6 +21,21 @@ import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 public interface StatusIconDisplayable extends DarkReceiver {
     String getSlot();
     void setStaticDrawableColor(int color);
+
+    /**
+     * For a layer drawable, or one that has a background, {@code tintColor} should be used as the
+     * background tint for the container, while {@code contrastColor} can be used as the foreground
+     * drawable's tint so that it is visible on the background. Essentially, tintColor should apply
+     * to the portion of the icon that borders the underlying window content (status bar's
+     * background), and the contrastColor only need be used to distinguish from the tintColor.
+     *
+     * Defaults to calling {@link #setStaticDrawableColor(int)} with only the tint color, so modern
+     * callers can just call this method and still get the default behavior.
+     */
+    default void setStaticDrawableColor(int tintColor, int contrastColor) {
+        setStaticDrawableColor(tintColor);
+    }
+
     void setDecorColor(int color);
 
     /** Sets the visible state that this displayable should be. */

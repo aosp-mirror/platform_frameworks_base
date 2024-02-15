@@ -32,7 +32,9 @@ import java.io.FileDescriptor;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -80,8 +82,8 @@ public final class BinderProxy implements IBinder {
         private static final int MAIN_INDEX_SIZE = 1 <<  LOG_MAIN_INDEX_SIZE;
         private static final int MAIN_INDEX_MASK = MAIN_INDEX_SIZE - 1;
         /**
-         * Debuggable builds will throw an BinderProxyMapSizeException if the number of
-         * map entries exceeds:
+         * We will throw a BinderProxyMapSizeException if the number of map entries
+         * exceeds:
          */
         private static final int CRASH_AT_SIZE = 25_000;
 
@@ -227,7 +229,7 @@ public final class BinderProxy implements IBinder {
                 Log.v(Binder.TAG, "BinderProxy map growth! bucket size = " + size
                         + " total = " + totalSize);
                 mWarnBucketSize += WARN_INCREMENT;
-                if (Build.IS_DEBUGGABLE && totalSize >= CRASH_AT_SIZE) {
+                if (totalSize >= CRASH_AT_SIZE) {
                     // Use the number of uncleared entries to determine whether we should
                     // really report a histogram and crash. We don't want to fundamentally
                     // change behavior for a debuggable process, so we GC only if we are
@@ -613,15 +615,35 @@ public final class BinderProxy implements IBinder {
      */
     public native boolean transactNative(int code, Parcel data, Parcel reply,
             int flags) throws RemoteException;
+
+    /* This list is to hold strong reference to the death recipients that are waiting for the death
+     * of binder that this proxy references. Previously, the death recipients were strongy
+     * referenced from JNI, but that can cause memory leak (b/298374304) when the application has a
+     * strong reference from the death recipient to the proxy object. The JNI reference is now weak.
+     * And this strong reference is to keep death recipients at least until the proxy is GC'ed. */
+    private List<DeathRecipient> mDeathRecipients = Collections.synchronizedList(new ArrayList<>());
+
     /**
      * See {@link IBinder#linkToDeath(DeathRecipient, int)}
      */
-    public native void linkToDeath(DeathRecipient recipient, int flags)
-            throws RemoteException;
+    public void linkToDeath(DeathRecipient recipient, int flags)
+            throws RemoteException {
+        linkToDeathNative(recipient, flags);
+        mDeathRecipients.add(recipient);
+    }
+
     /**
      * See {@link IBinder#unlinkToDeath}
      */
-    public native boolean unlinkToDeath(DeathRecipient recipient, int flags);
+    public boolean unlinkToDeath(DeathRecipient recipient, int flags) {
+        mDeathRecipients.remove(recipient);
+        return unlinkToDeathNative(recipient, flags);
+    }
+
+    private native void linkToDeathNative(DeathRecipient recipient, int flags)
+            throws RemoteException;
+
+    private native boolean unlinkToDeathNative(DeathRecipient recipient, int flags);
 
     /**
      * Perform a dump on the remote object

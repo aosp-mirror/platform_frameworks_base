@@ -46,10 +46,10 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArrayMap;
 import android.util.SparseIntArray;
-import android.util.TimeSparseArray;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -70,7 +70,7 @@ import java.util.Set;
  * in UsageStatsService.
  */
 class UserUsageStatsService {
-    private static final String TAG = "UsageStatsService";
+    private static final String TAG = UsageStatsService.TAG;
     private static final boolean DEBUG = UsageStatsService.DEBUG;
     private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final int sDateFormatFlags =
@@ -448,7 +448,7 @@ class UserUsageStatsService {
      */
     @Nullable
     private <T> List<T> queryStats(int intervalType, final long beginTime, final long endTime,
-            StatCombiner<T> combiner) {
+            StatCombiner<T> combiner, boolean skipEvents) {
         if (intervalType == INTERVAL_BEST) {
             intervalType = mDatabase.findBestFitBucket(beginTime, endTime);
             if (intervalType < 0) {
@@ -488,7 +488,7 @@ class UserUsageStatsService {
 
         // Get the stats from disk.
         List<T> results = mDatabase.queryUsageStats(intervalType, beginTime,
-                truncatedEndTime, combiner);
+                truncatedEndTime, combiner, skipEvents);
         if (DEBUG) {
             Slog.d(TAG, "Got " + (results != null ? results.size() : 0) + " results from disk");
             Slog.d(TAG, "Current stats beginTime=" + currentStats.beginTime +
@@ -518,26 +518,40 @@ class UserUsageStatsService {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
-        return queryStats(bucketType, beginTime, endTime, sUsageStatsCombiner);
+        return queryStats(bucketType, beginTime, endTime, sUsageStatsCombiner, true);
     }
 
     List<ConfigurationStats> queryConfigurationStats(int bucketType, long beginTime, long endTime) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
-        return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner);
+        return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner, true);
     }
 
     List<EventStats> queryEventStats(int bucketType, long beginTime, long endTime) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
-        return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner);
+        return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner, true);
     }
 
-    UsageEvents queryEvents(final long beginTime, final long endTime, int flags) {
+    UsageEvents queryEvents(final long beginTime, final long endTime, int flags,
+            int[] eventTypeFilter, ArraySet<String> pkgNameFilter) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
+        }
+
+        // Ensure valid event type filter.
+        final boolean isQueryForAllEvents = ArrayUtils.isEmpty(eventTypeFilter);
+        final boolean isQueryForAllPackages = pkgNameFilter == null || pkgNameFilter.isEmpty();
+        final boolean[] queryEventFilter = new boolean[Event.MAX_EVENT_TYPE + 1];
+        if (!isQueryForAllEvents) {
+            for (int eventType : eventTypeFilter) {
+                if (eventType < Event.NONE || eventType > Event.MAX_EVENT_TYPE) {
+                    throw new IllegalArgumentException("invalid event type: " + eventType);
+                }
+                queryEventFilter[eventType] = true;
+            }
         }
         final ArraySet<String> names = new ArraySet<>();
         List<Event> results = queryStats(INTERVAL_DAILY,
@@ -547,6 +561,7 @@ class UserUsageStatsService {
                             List<Event> accumulatedResult) {
                         final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                         final int size = stats.events.size();
+
                         for (int i = startIndex; i < size; i++) {
                             Event event = stats.events.get(i);
                             if (event.mTimeStamp >= endTime) {
@@ -554,6 +569,10 @@ class UserUsageStatsService {
                             }
 
                             final int eventType = event.mEventType;
+                            if (!isQueryForAllEvents && !queryEventFilter[eventType]) {
+                                continue;
+                            }
+
                             if (eventType == Event.SHORTCUT_INVOCATION
                                     && (flags & HIDE_SHORTCUT_EVENTS) == HIDE_SHORTCUT_EVENTS) {
                                 continue;
@@ -571,6 +590,11 @@ class UserUsageStatsService {
                             if ((flags & OBFUSCATE_INSTANT_APPS) == OBFUSCATE_INSTANT_APPS) {
                                 event = event.getObfuscatedIfInstantApp();
                             }
+
+                            if (!isQueryForAllPackages && !pkgNameFilter.contains(event.mPackage)) {
+                                continue;
+                            }
+
                             if (event.mPackage != null) {
                                 names.add(event.mPackage);
                             }
@@ -587,7 +611,7 @@ class UserUsageStatsService {
                         }
                         return true;
                     }
-                });
+                }, false);
 
         if (results == null || results.isEmpty()) {
             return null;
@@ -637,7 +661,7 @@ class UserUsageStatsService {
                         }
                     }
                     return true;
-                });
+                }, false);
 
         if (results == null || results.isEmpty()) {
             return null;
@@ -684,7 +708,7 @@ class UserUsageStatsService {
                         accumulatedResult.add(event);
                     }
                     return true;
-                });
+                }, false);
 
         if (results == null || results.isEmpty()) {
             return null;
@@ -770,7 +794,7 @@ class UserUsageStatsService {
                         }
                     }
                     return true;
-                });
+                }, false);
 
         if (results == null || results.isEmpty()) {
             // There won't be any new events added earlier than endTime, so we can use endTime to
@@ -974,6 +998,10 @@ class UserUsageStatsService {
         mDatabase.dumpMappings(ipw);
     }
 
+    void deleteDataFor(String pkg) {
+        mDatabase.deleteDataFor(pkg);
+    }
+
     void dumpFile(IndentingPrintWriter ipw, String[] args) {
         if (args == null || args.length == 0) {
             // dump all files for every interval for specified user
@@ -1024,7 +1052,7 @@ class UserUsageStatsService {
     }
 
     private void dumpFileDetailsForInterval(IndentingPrintWriter ipw, int interval) {
-        final TimeSparseArray<AtomicFile> files = mDatabase.mSortedStatFiles[interval];
+        final LongSparseArray<AtomicFile> files = mDatabase.mSortedStatFiles[interval];
         final int numFiles = files.size();
         for (int i = 0; i < numFiles; i++) {
             final long filename = files.keyAt(i);
@@ -1055,7 +1083,7 @@ class UserUsageStatsService {
         return Long.toString(elapsedTime);
     }
 
-    void printEvent(IndentingPrintWriter pw, Event event, boolean prettyDates) {
+    static void printEvent(IndentingPrintWriter pw, Event event, boolean prettyDates) {
         pw.printPair("time", formatDateTime(event.mTimeStamp, prettyDates));
         pw.printPair("type", eventToString(event.mEventType));
         pw.printPair("package", event.mPackage);
@@ -1087,6 +1115,10 @@ class UserUsageStatsService {
 
         if (event.mNotificationChannelId != null) {
             pw.printPair("channelId", event.mNotificationChannelId);
+        }
+
+        if ((event.mEventType == Event.USER_INTERACTION) && (event.mExtras != null)) {
+            pw.print(event.mExtras.toString());
         }
         pw.printHexPair("flags", event.mFlags);
         pw.println();
@@ -1120,7 +1152,7 @@ class UserUsageStatsService {
                         }
                         return true;
                     }
-                });
+                }, false);
 
         pw.print("Last 24 hour events (");
         if (prettyDates) {
@@ -1302,7 +1334,7 @@ class UserUsageStatsService {
         }
     }
 
-    private static String eventToString(int eventType) {
+    static String eventToString(int eventType) {
         switch (eventType) {
             case Event.NONE:
                 return "NONE";

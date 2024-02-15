@@ -16,18 +16,19 @@
 
 package com.android.wm.shell.bubbles;
 
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.content.Context;
 import android.graphics.PointF;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
 import androidx.annotation.Nullable;
+
+import com.android.internal.protolog.common.ProtoLog;
 
 /**
  * Handles {@link MotionEvent}s for bubbles that begin in the nav bar area
@@ -112,10 +113,8 @@ class BubblesNavBarMotionEventHandler {
     private boolean isInGestureRegion(MotionEvent ev) {
         // Only handles touch events beginning in navigation bar system gesture zone
         if (mPositioner.getNavBarGestureZone().contains((int) ev.getX(), (int) ev.getY())) {
-            if (DEBUG_BUBBLE_GESTURE) {
-                Log.d(TAG, "handling touch y=" + ev.getY()
-                        + " navBarGestureZone=" + mPositioner.getNavBarGestureZone());
-            }
+            ProtoLog.d(WM_SHELL_BUBBLES, "handling touch x=%d y=%d navBarGestureZone=%s",
+                    (int) ev.getX(), (int) ev.getY(), mPositioner.getNavBarGestureZone());
             return true;
         }
         return false;

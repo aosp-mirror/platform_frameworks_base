@@ -22,11 +22,13 @@ import android.annotation.UserIdInt;
 import android.content.pm.SigningDetails;
 import android.util.SparseArray;
 
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.server.pm.InstallSource;
 import com.android.server.pm.PackageKeySetData;
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.server.pm.permission.LegacyPermissionState;
 
+import java.io.File;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -35,7 +37,7 @@ import java.util.UUID;
  */
 public interface PackageStateInternal extends PackageState {
 
-    @NonNull
+    @Nullable
     AndroidPackageInternal getPkg();
 
     // TODO: Remove in favor of exposing APIs directly?
@@ -111,4 +113,12 @@ public interface PackageStateInternal extends PackageState {
      */
     @Nullable
     String getAppMetadataFilePath();
+
+    @Nullable
+    Set<File> getOldPaths();
+
+    /**
+     * @return the source of the app metadata that is currently associated with the given package.
+     */
+    int getAppMetadataSource();
 }

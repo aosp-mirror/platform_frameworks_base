@@ -26,6 +26,8 @@ import android.media.IDevicesForAttributesCallback;
 import android.media.ISoundDose;
 import android.media.ISoundDoseCallback;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
+import android.media.audiopolicy.Flags;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -41,6 +43,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -601,6 +604,38 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
+     * @return a list of AudioMixes that are registered in the audio policy manager.
+     */
+    public List<AudioMix> getRegisteredPolicyMixes() {
+        if (!Flags.audioMixTestApi()) {
+            return Collections.emptyList();
+        }
+
+        List<AudioMix> audioMixes = new ArrayList<>();
+        int result = AudioSystem.getRegisteredPolicyMixes(audioMixes);
+        if (result != AudioSystem.SUCCESS) {
+            throw new IllegalStateException(
+                    "Cannot fetch registered policy mixes. Result: " + result);
+        }
+        return Collections.unmodifiableList(audioMixes);
+    }
+
+    /**
+     * Update already {@link AudioMixingRule}-s for already registered {@link AudioMix}-es.
+     *
+     * @param mixes              - array of registered {@link AudioMix}-es to update.
+     * @param updatedMixingRules - array of {@link AudioMixingRule}-s corresponding to
+     *                           {@code mixesToUpdate} mixes. The array must be same size as
+     *                           {@code mixesToUpdate} and i-th {@link AudioMixingRule} must
+     *                           correspond to i-th {@link AudioMix} from mixesToUpdate array.
+     */
+    public int updateMixingRules(@NonNull AudioMix[] mixes,
+            @NonNull AudioMixingRule[] updatedMixingRules) {
+        invalidateRoutingCache();
+        return AudioSystem.updatePolicyMixes(mixes, updatedMixingRules);
+    }
+
+    /**
      * Same as {@link AudioSystem#setUidDeviceAffinities(int, int[], String[])}
      * @param uid
      * @param types
@@ -682,6 +717,15 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     public int clearPreferredMixerAttributes(
             @NonNull AudioAttributes attributes, int portId, int uid) {
         return AudioSystem.clearPreferredMixerAttributes(attributes, portId, uid);
+    }
+
+    /**
+     * Sets master mute state in audio flinger
+     * @param mute the mute state to set
+     * @return operation status
+     */
+    public int setMasterMute(boolean mute) {
+        return AudioSystem.setMasterMute(mute);
     }
 
     /**

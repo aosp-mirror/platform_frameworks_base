@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import libcore.util.NativeAllocationRegistry;
 
 /**
@@ -57,11 +59,21 @@ public final class MotionPredictor {
      * @param context The context for the predictions
      */
     public MotionPredictor(@NonNull Context context) {
-        mIsPredictionEnabled = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableMotionPrediction);
-        final int offsetNanos = context.getResources().getInteger(
-                com.android.internal.R.integer.config_motionPredictionOffsetNanos);
-        mPtr = nativeInitialize(offsetNanos);
+        this(
+                context.getResources().getBoolean(
+                        com.android.internal.R.bool.config_enableMotionPrediction),
+                context.getResources().getInteger(
+                        com.android.internal.R.integer.config_motionPredictionOffsetNanos));
+    }
+
+    /**
+     * Internal constructor for testing.
+     * @hide
+     */
+    @VisibleForTesting
+    public MotionPredictor(boolean isPredictionEnabled, int motionPredictionOffsetNanos) {
+        mIsPredictionEnabled = isPredictionEnabled;
+        mPtr = nativeInitialize(motionPredictionOffsetNanos);
         RegistryHolder.REGISTRY.registerNativeAllocation(this, mPtr);
     }
 

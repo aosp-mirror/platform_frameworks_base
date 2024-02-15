@@ -33,6 +33,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 
@@ -51,24 +52,22 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.notetask.NoteTaskInitializer;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.tracing.ProtoTracer;
-import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
-import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -94,8 +93,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public final class WMShell implements
         CoreStartable,
-        CommandQueue.Callbacks,
-        ProtoTraceable<SystemUiTraceProto> {
+        CommandQueue.Callbacks {
     private static final String TAG = WMShell.class.getName();
     private static final int INVALID_SYSUI_STATE_MASK =
             SYSUI_STATE_DIALOG_SHOWING
@@ -114,6 +112,7 @@ public final class WMShell implements
     private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<OneHanded> mOneHandedOptional;
     private final Optional<DesktopMode> mDesktopModeOptional;
+    private final Optional<RecentTasks> mRecentTasksOptional;
 
     private final CommandQueue mCommandQueue;
     private final ConfigurationController mConfigurationController;
@@ -122,7 +121,6 @@ public final class WMShell implements
     private final ScreenLifecycle mScreenLifecycle;
     private final SysUiState mSysUiState;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private final ProtoTracer mProtoTracer;
     private final UserTracker mUserTracker;
     private final DisplayTracker mDisplayTracker;
     private final NoteTaskInitializer mNoteTaskInitializer;
@@ -178,13 +176,13 @@ public final class WMShell implements
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<DesktopMode> desktopMode,
+            Optional<RecentTasks> recentTasks,
             CommandQueue commandQueue,
             ConfigurationController configurationController,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ScreenLifecycle screenLifecycle,
             SysUiState sysUiState,
-            ProtoTracer protoTracer,
             WakefulnessLifecycle wakefulnessLifecycle,
             UserTracker userTracker,
             DisplayTracker displayTracker,
@@ -202,8 +200,8 @@ public final class WMShell implements
         mSplitScreenOptional = splitScreenOptional;
         mOneHandedOptional = oneHandedOptional;
         mDesktopModeOptional = desktopMode;
+        mRecentTasksOptional = recentTasks;
         mWakefulnessLifecycle = wakefulnessLifecycle;
-        mProtoTracer = protoTracer;
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mNoteTaskInitializer = noteTaskInitializer;
@@ -223,12 +221,12 @@ public final class WMShell implements
         // Subscribe to user changes
         mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
 
-        mProtoTracer.add(this);
         mCommandQueue.addCallback(this);
         mPipOptional.ifPresent(this::initPip);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);
         mDesktopModeOptional.ifPresent(this::initDesktopMode);
+        mRecentTasksOptional.ifPresent(this::initRecentTasks);
 
         mNoteTaskInitializer.initialize();
     }
@@ -349,10 +347,10 @@ public final class WMShell implements
         desktopMode.addVisibleTasksListener(
                 new DesktopModeTaskRepository.VisibleTasksListener() {
                     @Override
-                    public void onVisibilityChanged(int displayId, boolean hasFreeformTasks) {
+                    public void onTasksVisibilityChanged(int displayId, int visibleTasksCount) {
                         if (displayId == Display.DEFAULT_DISPLAY) {
                             mSysUiState.setFlag(SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE,
-                                            hasFreeformTasks)
+                                            visibleTasksCount > 0)
                                     .commitUpdate(mDisplayTracker.getDefaultDisplayId());
                         }
                         // TODO(b/278084491): update sysui state for changes on other displays
@@ -360,14 +358,28 @@ public final class WMShell implements
                 }, mSysUiMainExecutor);
     }
 
+    @VisibleForTesting
+    void initRecentTasks(RecentTasks recentTasks) {
+        recentTasks.addAnimationStateListener(mSysUiMainExecutor,
+                mCommandQueue::onRecentsAnimationStateChanged);
+    }
+
     @Override
-    public void writeToProto(SystemUiTraceProto proto) {
-        // Dump to WMShell proto here
-        // TODO: Figure out how we want to synchronize while dumping to proto
+    public boolean isDumpCritical() {
+        // Dump can't be critical because the shell has to dump on the main thread for
+        // synchronization reasons, which isn't reliably fast.
+        return false;
     }
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
+        Log.d(TAG, "Dumping with args: " + String.join(", ", args));
+
+        // Strip out the SysUI "dependency" arg before sending to WMShell
+        if (args[0].equals("dependency")) {
+            args = Arrays.copyOfRange(args, 1, args.length);
+        }
+
         // Handle commands if provided
         if (mShell.handleCommand(args, pw)) {
             return;

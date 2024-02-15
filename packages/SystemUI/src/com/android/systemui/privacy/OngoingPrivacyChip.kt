@@ -15,17 +15,19 @@
 package com.android.systemui.privacy
 
 import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.util.AttributeSet
 import android.view.Gravity.CENTER_VERTICAL
 import android.view.Gravity.END
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import com.android.settingslib.Utils
-import com.android.systemui.R
-import com.android.systemui.animation.LaunchableFrameLayout
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.events.BackgroundAnimatableView
 
 class OngoingPrivacyChip @JvmOverloads constructor(
@@ -33,13 +35,16 @@ class OngoingPrivacyChip @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttrs: Int = 0,
     defStyleRes: Int = 0
-) : LaunchableFrameLayout(context, attrs, defStyleAttrs, defStyleRes), BackgroundAnimatableView {
+) : FrameLayout(context, attrs, defStyleAttrs, defStyleRes), BackgroundAnimatableView {
 
+    private var configuration: Configuration
     private var iconMargin = 0
     private var iconSize = 0
     private var iconColor = 0
 
     private val iconsContainer: LinearLayout
+    val launchableContentView
+        get() = iconsContainer
 
     var privacyList = emptyList<PrivacyItem>()
         set(value) {
@@ -54,6 +59,7 @@ class OngoingPrivacyChip @JvmOverloads constructor(
         clipChildren = true
         clipToPadding = true
         iconsContainer = requireViewById(R.id.icons_container)
+        configuration = Configuration(context.resources.configuration)
         updateResources()
     }
 
@@ -102,6 +108,17 @@ class OngoingPrivacyChip @JvmOverloads constructor(
                 R.string.ongoing_privacy_chip_content_multiple_apps, typesText)
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig != null) {
+            val diff = newConfig.diff(configuration)
+            configuration.setTo(newConfig)
+            if (diff.and(ActivityInfo.CONFIG_DENSITY.or(ActivityInfo.CONFIG_FONT_SCALE)) != 0) {
+                updateResources()
+            }
+        }
+    }
+
     private fun updateResources() {
         iconMargin = context.resources
                 .getDimensionPixelSize(R.dimen.ongoing_appops_chip_icon_margin)
@@ -110,8 +127,11 @@ class OngoingPrivacyChip @JvmOverloads constructor(
         iconColor =
                 Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.colorPrimary)
 
+        val height = context.resources
+                .getDimensionPixelSize(R.dimen.ongoing_appops_chip_height)
         val padding = context.resources
                 .getDimensionPixelSize(R.dimen.ongoing_appops_chip_side_padding)
+        iconsContainer.layoutParams.height = height
         iconsContainer.setPaddingRelative(padding, 0, padding, 0)
         iconsContainer.background = context.getDrawable(R.drawable.statusbar_privacy_chip_bg)
     }

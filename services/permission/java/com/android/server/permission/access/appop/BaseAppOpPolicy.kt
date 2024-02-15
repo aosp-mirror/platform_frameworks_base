@@ -20,15 +20,14 @@ import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.AppOpUri
+import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.SchemePolicy
 
-abstract class BaseAppOpPolicy(
-    private val persistence: BaseAppOpPersistence
-) : SchemePolicy() {
+abstract class BaseAppOpPolicy(private val persistence: BaseAppOpPersistence) : SchemePolicy() {
     override val objectScheme: String
         get() = AppOpUri.SCHEME
 
-    override fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
+    override fun BinaryXmlPullParser.parseUserState(state: MutableAccessState, userId: Int) {
         with(persistence) { this@parseUserState.parseUserState(state, userId) }
     }
 

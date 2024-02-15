@@ -33,6 +33,7 @@ import static com.android.internal.app.procstats.ProcessStats.STATE_BOUND_TOP;
 import static com.android.internal.app.procstats.ProcessStats.STATE_CACHED;
 import static com.android.internal.app.procstats.ProcessStats.STATE_COUNT;
 import static com.android.internal.app.procstats.ProcessStats.STATE_FGS;
+import static com.android.internal.app.procstats.ProcessStats.STATE_FROZEN;
 import static com.android.internal.app.procstats.ProcessStats.STATE_HEAVY_WEIGHT;
 import static com.android.internal.app.procstats.ProcessStats.STATE_HOME;
 import static com.android.internal.app.procstats.ProcessStats.STATE_IMPORTANT_BACKGROUND;
@@ -142,6 +143,7 @@ public final class ProcessState {
     private ProcessState mCommonProcess;
     private int mCurCombinedState = STATE_NOTHING;
     private long mStartTime;
+    private int mStateBeforeFrozen = STATE_NOTHING;
 
     private int mLastPssState = STATE_NOTHING;
     private long mLastPssTime;
@@ -423,6 +425,27 @@ public final class ProcessState {
     }
 
     /**
+     * Used to notify that this process was frozen.
+     */
+    public void onProcessFrozen(long now,
+            ArrayMap<String, ProcessStateHolder> pkgList) {
+        mStateBeforeFrozen = mCurCombinedState % STATE_COUNT;
+        int currentMemFactor = mCurCombinedState / STATE_COUNT;
+        int combinedState = STATE_FROZEN + (currentMemFactor * STATE_COUNT);
+        setCombinedState(combinedState, now, pkgList);
+    }
+
+    /**
+     * Used to notify that this process was unfrozen.
+     */
+    public void onProcessUnfrozen(long now,
+            ArrayMap<String, ProcessStateHolder> pkgList) {
+        int currentMemFactor = mCurCombinedState / STATE_COUNT;
+        int combinedState = mStateBeforeFrozen + (currentMemFactor * STATE_COUNT);
+        setCombinedState(combinedState, now, pkgList);
+    }
+
+    /**
      * Update the current state of the given list of processes.
      *
      * @param state Current ActivityManager.PROCESS_STATE_*
@@ -434,13 +457,20 @@ public final class ProcessState {
             ArrayMap<String, ProcessStateHolder> pkgList) {
         if (state < 0) {
             state = mNumStartedServices > 0
-                    ? (STATE_SERVICE_RESTARTING+(memFactor*STATE_COUNT)) : STATE_NOTHING;
+                    ? (STATE_SERVICE_RESTARTING + (memFactor * STATE_COUNT)) : STATE_NOTHING;
         } else {
-            state = PROCESS_STATE_TO_STATE[state] + (memFactor*STATE_COUNT);
+            state = PROCESS_STATE_TO_STATE[state] + (memFactor * STATE_COUNT);
         }
+        setCombinedState(state, now, pkgList);
+    }
 
+    /**
+     * Sets combined state on the corresponding ProcessState objects.
+     */
+    void setCombinedState(int state, long now,
+            ArrayMap<String, ProcessStateHolder> pkgList) {
         // First update the common process.
-        mCommonProcess.setCombinedState(state, now);
+        mCommonProcess.setCombinedStateIdv(state, now);
 
         // If the common process is not multi-package, there is nothing else to do.
         if (!mCommonProcess.mMultiPackage) {
@@ -449,12 +479,15 @@ public final class ProcessState {
 
         if (pkgList != null) {
             for (int ip=pkgList.size()-1; ip>=0; ip--) {
-                pullFixedProc(pkgList, ip).setCombinedState(state, now);
+                pullFixedProc(pkgList, ip).setCombinedStateIdv(state, now);
             }
         }
     }
 
-    public void setCombinedState(int state, long now) {
+    /**
+     * Sets the combined state for this individual ProcessState object.
+     */
+    void setCombinedStateIdv(int state, long now) {
         ensureNotDead();
         if (!mDead && (mCurCombinedState != state)) {
             //Slog.i(TAG, "Setting state in " + mName + "/" + mPackage + ": " + state);
@@ -545,7 +578,7 @@ public final class ProcessState {
         }
         mNumStartedServices++;
         if (mNumStartedServices == 1 && mCurCombinedState == STATE_NOTHING) {
-            setCombinedState(STATE_SERVICE_RESTARTING + (memFactor*STATE_COUNT), now);
+            setCombinedStateIdv(STATE_SERVICE_RESTARTING + (memFactor * STATE_COUNT), now);
         }
     }
 
@@ -561,7 +594,7 @@ public final class ProcessState {
         }
         mNumStartedServices--;
         if (mNumStartedServices == 0 && (mCurCombinedState %STATE_COUNT) == STATE_SERVICE_RESTARTING) {
-            setCombinedState(STATE_NOTHING, now);
+            setCombinedStateIdv(STATE_NOTHING, now);
         } else if (mNumStartedServices < 0) {
             Slog.wtfStack(TAG, "Proc started services underrun: pkg="
                     + mPackage + " uid=" + mUid + " name=" + mName);
@@ -654,18 +687,6 @@ public final class ProcessState {
             mAvgCachedKillPss = (long)( ((mAvgCachedKillPss*(double)mNumCachedKill) + avgPss)
                     / (mNumCachedKill+num) );
             mNumCachedKill += num;
-        }
-    }
-
-    public void reportCachedKill(ArrayMap<String, ProcessStateHolder> pkgList, long pss) {
-        ensureNotDead();
-        mCommonProcess.addCachedKill(1, pss, pss, pss);
-        if (!mCommonProcess.mMultiPackage) {
-            return;
-        }
-
-        for (int ip=pkgList.size()-1; ip>=0; ip--) {
-            pullFixedProc(pkgList, ip).addCachedKill(1, pss, pss, pss);
         }
     }
 
@@ -1588,7 +1609,9 @@ public final class ProcessState {
                 case STATE_CACHED:
                     cachedMs += duration;
                     break;
-                    // TODO (b/261910877) Add support for tracking frozenMs.
+                case STATE_FROZEN:
+                    frozenMs += duration;
+                    break;
             }
         }
         statsEventOutput.write(

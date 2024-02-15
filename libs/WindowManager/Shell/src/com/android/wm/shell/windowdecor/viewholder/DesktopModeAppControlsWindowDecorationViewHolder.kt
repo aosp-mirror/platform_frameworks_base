@@ -1,13 +1,25 @@
 package com.android.wm.shell.windowdecor.viewholder
 
+import android.annotation.ColorInt
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.res.ColorStateList
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
+import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.view.View
+import android.view.View.OnLongClickListener
+import android.view.WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS
+import android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.withStyledAttributes
+import com.android.internal.R.attr.materialColorOnSecondaryContainer
+import com.android.internal.R.attr.materialColorOnSurface
+import com.android.internal.R.attr.materialColorSecondaryContainer
+import com.android.internal.R.attr.materialColorSurfaceContainerHigh
+import com.android.internal.R.attr.materialColorSurfaceContainerLow
+import com.android.internal.R.attr.materialColorSurfaceDim
 import com.android.wm.shell.R
 
 /**
@@ -19,17 +31,21 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         rootView: View,
         onCaptionTouchListener: View.OnTouchListener,
         onCaptionButtonClickListener: View.OnClickListener,
+        onLongClickListener: OnLongClickListener,
         appName: CharSequence,
-        appIcon: Drawable
+        appIconBitmap: Bitmap
 ) : DesktopModeWindowDecorationViewHolder(rootView) {
 
-    private val captionView: View = rootView.findViewById(R.id.desktop_mode_caption)
-    private val captionHandle: View = rootView.findViewById(R.id.caption_handle)
-    private val openMenuButton: View = rootView.findViewById(R.id.open_menu_button)
-    private val closeWindowButton: ImageButton = rootView.findViewById(R.id.close_window)
-    private val expandMenuButton: ImageButton = rootView.findViewById(R.id.expand_menu_button)
-    private val appNameTextView: TextView = rootView.findViewById(R.id.application_name)
-    private val appIconImageView: ImageView = rootView.findViewById(R.id.application_icon)
+    private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
+    private val captionHandle: View = rootView.requireViewById(R.id.caption_handle)
+    private val openMenuButton: View = rootView.requireViewById(R.id.open_menu_button)
+    private val closeWindowButton: ImageButton = rootView.requireViewById(R.id.close_window)
+    private val expandMenuButton: ImageButton = rootView.requireViewById(R.id.expand_menu_button)
+    private val maximizeWindowButton: ImageButton = rootView.requireViewById(R.id.maximize_window)
+    private val appNameTextView: TextView = rootView.requireViewById(R.id.application_name)
+    private val appIconImageView: ImageView = rootView.requireViewById(R.id.application_icon)
+    val appNameTextWidth: Int
+        get() = appNameTextView.width
 
     init {
         captionView.setOnTouchListener(onCaptionTouchListener)
@@ -37,48 +53,108 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         openMenuButton.setOnClickListener(onCaptionButtonClickListener)
         openMenuButton.setOnTouchListener(onCaptionTouchListener)
         closeWindowButton.setOnClickListener(onCaptionButtonClickListener)
+        maximizeWindowButton.setOnClickListener(onCaptionButtonClickListener)
+        maximizeWindowButton.setOnTouchListener(onCaptionTouchListener)
+        maximizeWindowButton.onLongClickListener = onLongClickListener
         closeWindowButton.setOnTouchListener(onCaptionTouchListener)
         appNameTextView.text = appName
-        appIconImageView.setImageDrawable(appIcon)
+        appIconImageView.setImageBitmap(appIconBitmap)
     }
 
     override fun bindData(taskInfo: RunningTaskInfo) {
-
-        val captionDrawable = captionView.background as GradientDrawable
-        captionDrawable.setColor(taskInfo.taskDescription.statusBarColor)
-
-        closeWindowButton.imageTintList = ColorStateList.valueOf(
-                getCaptionCloseButtonColor(taskInfo))
-        expandMenuButton.imageTintList = ColorStateList.valueOf(
-                getCaptionExpandButtonColor(taskInfo))
-        appNameTextView.setTextColor(getCaptionAppNameTextColor(taskInfo))
+        captionView.setBackgroundColor(getCaptionBackgroundColor(taskInfo))
+        val color = getAppNameAndButtonColor(taskInfo)
+        val alpha = Color.alpha(color)
+        closeWindowButton.imageTintList = ColorStateList.valueOf(color)
+        maximizeWindowButton.imageTintList = ColorStateList.valueOf(color)
+        expandMenuButton.imageTintList = ColorStateList.valueOf(color)
+        appNameTextView.setTextColor(color)
+        appIconImageView.imageAlpha = alpha
+        maximizeWindowButton.imageAlpha = alpha
+        closeWindowButton.imageAlpha = alpha
+        expandMenuButton.imageAlpha = alpha
     }
 
-    private fun getCaptionAppNameTextColor(taskInfo: RunningTaskInfo): Int {
-        return if (shouldUseLightCaptionColors(taskInfo)) {
-            context.getColor(R.color.desktop_mode_caption_app_name_light)
-        } else {
-            context.getColor(R.color.desktop_mode_caption_app_name_dark)
+    override fun onHandleMenuOpened() {}
+
+    override fun onHandleMenuClosed() {}
+
+    @ColorInt
+    private fun getCaptionBackgroundColor(taskInfo: RunningTaskInfo): Int {
+        if (isTransparentBackgroundRequested(taskInfo)) {
+            return Color.TRANSPARENT
         }
+        val materialColorAttr: Int =
+            if (isDarkMode()) {
+                if (!taskInfo.isFocused) {
+                    materialColorSurfaceContainerHigh
+                } else {
+                    materialColorSurfaceDim
+                }
+            } else {
+                if (!taskInfo.isFocused) {
+                    materialColorSurfaceContainerLow
+                } else {
+                    materialColorSecondaryContainer
+                }
+        }
+        context.withStyledAttributes(null, intArrayOf(materialColorAttr), 0, 0) {
+            return getColor(0, 0)
+        }
+        return 0
     }
 
-    private fun getCaptionCloseButtonColor(taskInfo: RunningTaskInfo): Int {
-        return if (shouldUseLightCaptionColors(taskInfo)) {
-            context.getColor(R.color.desktop_mode_caption_close_button_light)
-        } else {
-            context.getColor(R.color.desktop_mode_caption_close_button_dark)
+    @ColorInt
+    private fun getAppNameAndButtonColor(taskInfo: RunningTaskInfo): Int {
+        val materialColorAttr = when {
+            isTransparentBackgroundRequested(taskInfo) &&
+                    isLightCaptionBar(taskInfo) -> materialColorOnSecondaryContainer
+            isTransparentBackgroundRequested(taskInfo) &&
+                    !isLightCaptionBar(taskInfo) -> materialColorOnSurface
+            isDarkMode() -> materialColorOnSurface
+            else -> materialColorOnSecondaryContainer
         }
+        val appDetailsOpacity = when {
+            isDarkMode() && !taskInfo.isFocused -> DARK_THEME_UNFOCUSED_OPACITY
+            !isDarkMode() && !taskInfo.isFocused -> LIGHT_THEME_UNFOCUSED_OPACITY
+            else -> FOCUSED_OPACITY
+        }
+        context.withStyledAttributes(null, intArrayOf(materialColorAttr), 0, 0) {
+            val color = getColor(0, 0)
+            return if (appDetailsOpacity == FOCUSED_OPACITY) {
+                color
+            } else {
+                Color.argb(
+                    appDetailsOpacity,
+                    Color.red(color),
+                    Color.green(color),
+                    Color.blue(color)
+                )
+            }
+        }
+        return 0
     }
 
-    private fun getCaptionExpandButtonColor(taskInfo: RunningTaskInfo): Int {
-        return if (shouldUseLightCaptionColors(taskInfo)) {
-            context.getColor(R.color.desktop_mode_caption_expand_button_light)
-        } else {
-            context.getColor(R.color.desktop_mode_caption_expand_button_dark)
-        }
+    private fun isDarkMode(): Boolean {
+        return context.resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK ==
+                Configuration.UI_MODE_NIGHT_YES
+    }
+
+    private fun isTransparentBackgroundRequested(taskInfo: RunningTaskInfo): Boolean {
+        val appearance = taskInfo.taskDescription?.statusBarAppearance ?: 0
+        return (appearance and APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND) != 0
+    }
+
+    private fun isLightCaptionBar(taskInfo: RunningTaskInfo): Boolean {
+        val appearance = taskInfo.taskDescription?.statusBarAppearance ?: 0
+        return (appearance and APPEARANCE_LIGHT_CAPTION_BARS) != 0
     }
 
     companion object {
         private const val TAG = "DesktopModeAppControlsWindowDecorationViewHolder"
+        private const val DARK_THEME_UNFOCUSED_OPACITY = 140 // 55%
+        private const val LIGHT_THEME_UNFOCUSED_OPACITY = 166 // 65%
+        private const val FOCUSED_OPACITY = 255
     }
 }

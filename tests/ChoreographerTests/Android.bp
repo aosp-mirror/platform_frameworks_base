@@ -34,7 +34,7 @@ android_test {
         "androidx.test.rules",
         "compatibility-device-util-axt",
         "com.google.android.material_material",
-        "truth-prebuilt",
+        "truth",
     ],
     jni_libs: [
         "libchoreographertests_jni",

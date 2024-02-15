@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import androidx.test.filters.SmallTest
+import com.android.app.animation.Interpolators
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.children
 import junit.framework.Assert.assertEquals
@@ -19,7 +20,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import com.android.app.animation.Interpolators
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -178,7 +178,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun animatesRootAndChildren() {
+    fun animatesRootAndChildren_withoutExcludedViews() {
         setUpRootWithChildren()
 
         val success = ViewHierarchyAnimator.animate(rootView)
@@ -205,6 +205,74 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         checkBounds(rootView, l = 10, t = 20, r = 200, b = 120)
         checkBounds(rootView.getChildAt(0), l = 0, t = 0, r = 95, b = 100)
         checkBounds(rootView.getChildAt(1), l = 95, t = 0, r = 190, b = 100)
+    }
+
+    @Test
+    fun animatesRootAndChildren_withExcludedViews() {
+        setUpRootWithChildren()
+
+        val success = ViewHierarchyAnimator.animate(
+            rootView,
+            excludedViews = setOf(rootView.getChildAt(0))
+        )
+        // Change all bounds.
+        rootView.measure(
+                View.MeasureSpec.makeMeasureSpec(180, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+        )
+        rootView.layout(10 /* l */, 20 /* t */, 200 /* r */, 120 /* b */)
+
+        assertTrue(success)
+        assertNotNull(rootView.getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(0).getTag(R.id.tag_animator))
+        assertNotNull(rootView.getChildAt(1).getTag(R.id.tag_animator))
+        // The initial values for the affected views should be those of the previous layout, while
+        // the excluded view should be at the final values from the beginning.
+        checkBounds(rootView, l = 0, t = 0, r = 200, b = 100)
+        checkBounds(rootView.getChildAt(0), l = 0, t = 0, r = 90, b = 100)
+        checkBounds(rootView.getChildAt(1), l = 100, t = 0, r = 200, b = 100)
+        endAnimation(rootView)
+        assertNull(rootView.getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(0).getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(1).getTag(R.id.tag_animator))
+        // The end values should be those of the latest layout.
+        checkBounds(rootView, l = 10, t = 20, r = 200, b = 120)
+        checkBounds(rootView.getChildAt(0), l = 0, t = 0, r = 90, b = 100)
+        checkBounds(rootView.getChildAt(1), l = 90, t = 0, r = 180, b = 100)
+    }
+
+    @Test
+    fun animatesRootOnly() {
+        setUpRootWithChildren()
+
+        val success = ViewHierarchyAnimator.animate(
+                rootView,
+                animateChildren = false
+        )
+        // Change all bounds.
+        rootView.measure(
+                View.MeasureSpec.makeMeasureSpec(180, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+        )
+        rootView.layout(10 /* l */, 20 /* t */, 200 /* r */, 120 /* b */)
+
+        assertTrue(success)
+        assertNotNull(rootView.getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(0).getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(1).getTag(R.id.tag_animator))
+        // The initial values for the root view should be those of the previous layout, while the
+        // children views should be at the final values from the beginning.
+        checkBounds(rootView, l = 0, t = 0, r = 200, b = 100)
+        checkBounds(rootView.getChildAt(0), l = 0, t = 0, r = 90, b = 100)
+        checkBounds(rootView.getChildAt(1), l = 90, t = 0, r = 180, b = 100)
+        endAnimation(rootView)
+        assertNull(rootView.getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(0).getTag(R.id.tag_animator))
+        assertNull(rootView.getChildAt(1).getTag(R.id.tag_animator))
+        // The end values should be those of the latest layout.
+        checkBounds(rootView, l = 10, t = 20, r = 200, b = 120)
+        checkBounds(rootView.getChildAt(0), l = 0, t = 0, r = 90, b = 100)
+        checkBounds(rootView.getChildAt(1), l = 90, t = 0, r = 180, b = 100)
     }
 
     @Test

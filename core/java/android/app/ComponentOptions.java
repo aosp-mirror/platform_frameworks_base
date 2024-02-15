@@ -34,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
 @TestApi
 // Suppressed since lint is recommending class have a suffix of Params.
 @SuppressLint("UserHandleName")
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ComponentOptions {
 
     /**

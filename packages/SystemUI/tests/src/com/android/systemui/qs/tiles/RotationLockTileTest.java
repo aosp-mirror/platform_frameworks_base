@@ -33,7 +33,7 @@ import android.testing.TestableLooper;
 import android.testing.TestableResources;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
@@ -216,7 +216,7 @@ public class RotationLockTileTest extends SysuiTestCase {
     public void testSecondaryString_rotationResolverDisabled_isEmpty() {
         mTestableResources.addOverride(com.android.internal.R.bool.config_allowRotationResolver,
                 false);
-        mLockTile = new RotationLockTile(
+        RotationLockTile otherTile = new RotationLockTile(
                 mHost,
                 mUiEventLogger,
                 mTestableLooper.getLooper(),
@@ -232,10 +232,12 @@ public class RotationLockTileTest extends SysuiTestCase {
                 new FakeSettings()
         );
 
-        mLockTile.refreshState();
+        otherTile.refreshState();
         mTestableLooper.processAllMessages();
 
-        assertEquals("", mLockTile.getState().secondaryLabel.toString());
+        assertEquals("", otherTile.getState().secondaryLabel.toString());
+
+        destroyTile(otherTile);
     }
 
     @Test
@@ -256,6 +258,12 @@ public class RotationLockTileTest extends SysuiTestCase {
         mLockTile.handleUpdateState(state, /* arg= */ null);
 
         assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_auto_rotate_icon_on));
+    }
+
+
+    private void destroyTile(QSTileImpl<?> tile) {
+        tile.destroy();
+        mTestableLooper.processAllMessages();
     }
 
     private void enableAutoRotation() {

@@ -45,6 +45,13 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
     @VisibleForTesting
     static final int STATE_WAITING_FOR_REPORT_POWER_STATUS = 1;
 
+    // State in which the action is delayed. If the action starts and
+    // {@link PowerManager#isInteractive} returns false, it could indicate the beginning of a
+    // standby process. In this scenario, the action will be removed when
+    // {@link HdmiCecLocalDeviceSource#disableDevice} is called, therefore we delay the action.
+    @VisibleForTesting
+    static final int STATE_CHECK_STANDBY_PROCESS_STARTED = 2;
+
     // The maximum number of times we send <Give Device Power Status> before we give up.
     // We wait up to RESPONSE_TIMEOUT_MS * LOOP_COUNTER_MAX = 20 seconds.
     private static final int LOOP_COUNTER_MAX = 10;
@@ -87,6 +94,22 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
     boolean start() {
         // Because only source device can create this action, it's safe to cast.
         mSource = source();
+
+        if (!mSource.mService.getPowerManager().isInteractive()) {
+            Slog.d(TAG, "PowerManager is not interactive. Delay the action to check if standby"
+                    + " started!");
+            mState = STATE_CHECK_STANDBY_PROCESS_STARTED;
+            addTimer(mState, HdmiConfig.TIMEOUT_MS);
+        } else {
+            startAction();
+        }
+
+        return true;
+    }
+
+    private void startAction() {
+        Slog.i(TAG, "Start action.");
+
         sendCommand(HdmiCecMessageBuilder.buildTextViewOn(getSourceAddress(), mTargetAddress));
 
         boolean is20TargetOnBefore = mIsCec20 && getTargetDevicePowerStatus(mSource, mTargetAddress,
@@ -116,12 +139,11 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
                     maySendActiveSource();
                 }
                 finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-                return true;
+                return;
             }
         }
         mState = STATE_WAITING_FOR_REPORT_POWER_STATUS;
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
-        return true;
     }
 
     private void setAndBroadcastActiveSource() {
@@ -174,14 +196,22 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         if (mState != state) {
             return;
         }
-        if (state == STATE_WAITING_FOR_REPORT_POWER_STATUS) {
-            if (mPowerStatusCounter++ < LOOP_COUNTER_MAX) {
-                queryDevicePowerStatus();
-                addTimer(mState, HdmiConfig.TIMEOUT_MS);
-            } else {
-                // Couldn't wake up the TV for whatever reason. Report failure.
-                finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
-            }
+        switch (state) {
+            case STATE_WAITING_FOR_REPORT_POWER_STATUS:
+                if (mPowerStatusCounter++ < LOOP_COUNTER_MAX) {
+                    queryDevicePowerStatus();
+                    addTimer(mState, HdmiConfig.TIMEOUT_MS);
+                } else {
+                    // Couldn't wake up the TV for whatever reason. Report failure.
+                    finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
+                }
+                return;
+            case STATE_CHECK_STANDBY_PROCESS_STARTED:
+                Slog.d(TAG, "Action was not removed, start the action.");
+                startAction();
+                return;
+            default:
+                return;
         }
     }
 

@@ -36,6 +36,8 @@ import android.os.IThermalService;
 import android.os.PowerManager;
 import android.os.Temperature;
 import android.provider.Settings;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -43,26 +45,23 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
 
 import com.android.settingslib.fuelgauge.Estimate;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
-import dagger.Lazy;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -93,14 +92,11 @@ public class PowerUITest extends SysuiTestCase {
     private IThermalEventListener mSkinThermalEventListener;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private CommandQueue mCommandQueue;
-    @Mock private Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-    @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private IVrManager mVrManager;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
-        when(mCentralSurfacesOptionalLazy.get()).thenReturn(Optional.of(mCentralSurfaces));
 
         createPowerUi();
         mSkinThermalEventListener = mPowerUI.new SkinThermalEventListener();
@@ -140,6 +136,23 @@ public class PowerUITest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
         verify(mMockWarnings, times(1)).showHighTemperatureWarning();
         verify(mMockWarnings, never()).dismissHighTemperatureWarning();
+    }
+
+    @Test
+    public void testSkinWarning_throttlingEmergency_butVrMode() throws Exception {
+        mPowerUI.start();
+
+        ArgumentCaptor<IVrStateCallbacks> vrCallback =
+                ArgumentCaptor.forClass(IVrStateCallbacks.class);
+        verify(mVrManager).registerListener(vrCallback.capture());
+
+        vrCallback.getValue().onVrStateChanged(true);
+        final Temperature temp = getEmergencyStatusTemp(Temperature.TYPE_SKIN, "skin2");
+        mSkinThermalEventListener.notifyThrottling(temp);
+
+        TestableLooper.get(this).processAllMessages();
+        // don't show skin high temperature warning when in VR mode
+        verify(mMockWarnings, never()).showHighTemperatureWarning();
     }
 
     @Test
@@ -683,8 +696,14 @@ public class PowerUITest extends SysuiTestCase {
 
     private void createPowerUi() {
         mPowerUI = new PowerUI(
-                mContext, mBroadcastDispatcher, mCommandQueue, mCentralSurfacesOptionalLazy,
-                mMockWarnings, mEnhancedEstimates, mWakefulnessLifecycle, mPowerManager,
+                mContext,
+                mBroadcastDispatcher,
+                mCommandQueue,
+                mVrManager,
+                mMockWarnings,
+                mEnhancedEstimates,
+                mWakefulnessLifecycle,
+                mPowerManager,
                 mUserTracker);
         mPowerUI.mThermalService = mThermalServiceMock;
     }

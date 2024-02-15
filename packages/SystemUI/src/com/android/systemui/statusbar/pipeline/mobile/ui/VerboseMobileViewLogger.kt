@@ -20,10 +20,10 @@ import android.view.View
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.pipeline.dagger.VerboseMobileViewLog
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger.Companion.getIdForLogging
-import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import javax.inject.Inject
 
 /**
@@ -38,6 +38,19 @@ class VerboseMobileViewLogger
 constructor(
     @VerboseMobileViewLog private val buffer: LogBuffer,
 ) {
+    fun logBinderReceivedVisibility(parentView: View, subId: Int, visibility: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = parentView.getIdForLogging()
+                int1 = subId
+                bool1 = visibility
+            },
+            { "Binder[subId=$int1, viewId=$str1] received visibility: $bool1" },
+        )
+    }
+
     fun logBinderReceivedSignalIcon(parentView: View, subId: Int, icon: SignalIconModel) {
         buffer.log(
             TAG,
@@ -46,7 +59,7 @@ constructor(
                 str1 = parentView.getIdForLogging()
                 int1 = subId
                 int2 = icon.level
-                bool1 = icon.showExclamationMark
+                bool1 = if (icon is SignalIconModel.Cellular) icon.showExclamationMark else false
             },
             {
                 "Binder[subId=$int1, viewId=$str1] received new signal icon: " +

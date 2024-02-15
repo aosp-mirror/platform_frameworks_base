@@ -62,7 +62,7 @@ public class CreateUserDialogControllerTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mActivity = spy(ActivityController.of(new FragmentActivity()).get());
-        mActivity.setTheme(R.style.Theme_AppCompat_DayNight);
+        mActivity.setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight);
         mUnderTest = new TestCreateUserDialogController();
         mPhotoRestrictedByBase = false;
     }
@@ -111,13 +111,13 @@ public class CreateUserDialogControllerTest {
                 mActivityStarter, true, null,
                 cancelCallback);
         dialog.show();
-        assertThat(dialog.findViewById(R.id.user_info_scroll).getVisibility()).isEqualTo(View.GONE);
+        assertThat(dialog.findViewById(R.id.user_info_editor).getVisibility()).isEqualTo(View.GONE);
         Button next = dialog.findViewById(R.id.button_ok);
         next.performClick();
         ((RadioButton) dialog.findViewById(R.id.grant_admin_yes)).setChecked(true);
-        assertThat(dialog.findViewById(R.id.user_info_scroll).getVisibility()).isEqualTo(View.GONE);
+        assertThat(dialog.findViewById(R.id.user_info_editor).getVisibility()).isEqualTo(View.GONE);
         next.performClick();
-        assertThat(dialog.findViewById(R.id.user_info_scroll).getVisibility())
+        assertThat(dialog.findViewById(R.id.user_info_editor).getVisibility())
                 .isEqualTo(View.VISIBLE);
         dialog.dismiss();
     }
@@ -212,6 +212,7 @@ public class CreateUserDialogControllerTest {
         next.performClick();
         verify(successCallback, times(1))
                 .onSuccess(expectedNewName, null, true);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
@@ -233,6 +234,7 @@ public class CreateUserDialogControllerTest {
         next.performClick();
         verify(successCallback, times(1))
                 .onSuccess(expectedNewName, null, false);
+        verifyNoInteractions(cancelCallback);
     }
 
     private class TestCreateUserDialogController extends CreateUserDialogController {

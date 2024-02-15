@@ -20,10 +20,11 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
+import static com.android.systemui.shared.Flags.shadeAllowBackGesture;
+
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.SystemProperties;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicyConstants;
 
@@ -37,13 +38,8 @@ import java.util.StringJoiner;
  * Various shared constants between Launcher and SysUI as part of quickstep
  */
 public class QuickStepContract {
-    // Fully qualified name of the Launcher activity.
-    public static final String LAUNCHER_ACTIVITY_CLASS_NAME =
-            "com.google.android.apps.nexuslauncher.NexusLauncherActivity";
 
     public static final String KEY_EXTRA_SYSUI_PROXY = "extra_sysui_proxy";
-    public static final String KEY_EXTRA_WINDOW_CORNER_RADIUS = "extra_window_corner_radius";
-    public static final String KEY_EXTRA_SUPPORTS_WINDOW_CORNERS = "extra_supports_window_corners";
     public static final String KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER = "extra_unfold_animation";
     // See ISysuiUnlockAnimationController.aidl
     public static final String KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER = "unlock_animation";
@@ -108,8 +104,6 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_BACK_DISABLED = 1 << 22;
     // The bubble stack is expanded AND the mange menu for bubbles is expanded on top of it.
     public static final int SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED = 1 << 23;
-    // The current app is in immersive mode
-    public static final int SYSUI_STATE_IMMERSIVE_MODE = 1 << 24;
     // The voice interaction session window is showing
     public static final int SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING = 1 << 25;
     // Freeform windows are showing in desktop mode
@@ -139,8 +133,7 @@ public class QuickStepContract {
             SYSUI_STATE_WAKEFULNESS_TRANSITION | SYSUI_STATE_AWAKE;
 
     // Whether the back gesture is allowed (or ignored) by the Shade
-    public static final boolean ALLOW_BACK_GESTURE_IN_SHADE = SystemProperties.getBoolean(
-            "persist.wm.debug.shade_allow_back_gesture", false);
+    public static final boolean ALLOW_BACK_GESTURE_IN_SHADE = shadeAllowBackGesture();
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -167,7 +160,6 @@ public class QuickStepContract {
             SYSUI_STATE_DEVICE_DOZING,
             SYSUI_STATE_BACK_DISABLED,
             SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
-            SYSUI_STATE_IMMERSIVE_MODE,
             SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING,
             SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE,
             SYSUI_STATE_DEVICE_DREAMING,
@@ -252,9 +244,6 @@ public class QuickStepContract {
         if ((flags & SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED) != 0) {
             str.add("bubbles_mange_menu_expanded");
         }
-        if ((flags & SYSUI_STATE_IMMERSIVE_MODE) != 0) {
-            str.add("immersive_mode");
-        }
         if ((flags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0) {
             str.add("vis_win_showing");
         }
@@ -324,7 +313,7 @@ public class QuickStepContract {
      * Returns whether the specified sysui state is such that the back gesture should be
      * disabled.
      */
-    public static boolean isBackGestureDisabled(int sysuiStateFlags) {
+    public static boolean isBackGestureDisabled(int sysuiStateFlags, boolean forTrackpad) {
         // Always allow when the bouncer/global actions/voice session is showing (even on top of
         // the keyguard)
         if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0
@@ -335,16 +324,23 @@ public class QuickStepContract {
         if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {
             sysuiStateFlags &= ~SYSUI_STATE_NAV_BAR_HIDDEN;
         }
+
+        return (sysuiStateFlags & getBackGestureDisabledMask(forTrackpad)) != 0;
+    }
+
+    private static int getBackGestureDisabledMask(boolean forTrackpad) {
         // Disable when in immersive, or the notifications are interactive
-        int disableFlags = SYSUI_STATE_NAV_BAR_HIDDEN | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+        int disableFlags = SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+        if (!forTrackpad) {
+            disableFlags |= SYSUI_STATE_NAV_BAR_HIDDEN;
+        }
 
         // EdgeBackGestureHandler ignores Back gesture when SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED.
         // To allow Shade to respond to Back, we're bypassing this check (behind a flag).
         if (!ALLOW_BACK_GESTURE_IN_SHADE) {
             disableFlags |= SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
         }
-
-        return (sysuiStateFlags & disableFlags) != 0;
+        return disableFlags;
     }
 
     /**
@@ -371,7 +367,7 @@ public class QuickStepContract {
     /**
      * Corner radius that should be used on windows in order to cover the display.
      * These values are expressed in pixels because they should not respect display or font
-     * scaling, this means that we don't have to reload them on config changes.
+     * scaling. The corner radius may change when folding/unfolding the device.
      */
     public static float getWindowCornerRadius(Context context) {
         return ScreenDecorationsUtils.getWindowCornerRadius(context);

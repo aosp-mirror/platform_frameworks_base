@@ -24,14 +24,13 @@ import android.os.PowerExemptionManager
 import android.view.View
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
-import java.util.Optional
 import javax.inject.Inject
 
 /**
@@ -45,8 +44,8 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
     private val broadcastSender: BroadcastSender,
     private val notifCollection: CommonNotifCollection,
     private val uiEventLogger: UiEventLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
+    private val nearbyMediaDevicesManager: NearbyMediaDevicesManager,
     private val audioManager: AudioManager,
     private val powerExemptionManager: PowerExemptionManager,
     private val keyGuardManager: KeyguardManager,
@@ -62,7 +61,7 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
 
         val controller = MediaOutputController(context, packageName,
                 mediaSessionManager, lbm, starter, notifCollection,
-                dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager,
+                dialogTransitionAnimator, nearbyMediaDevicesManager, audioManager,
                 powerExemptionManager, keyGuardManager, featureFlags, userTracker)
         val dialog =
                 MediaOutputBroadcastDialog(context, aboveStatusBar, broadcastSender, controller)
@@ -70,7 +69,7 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
 
         // Show the dialog.
         if (view != null) {
-            dialogLaunchAnimator.showFromView(dialog, view)
+            dialogTransitionAnimator.showFromView(dialog, view)
         } else {
             dialog.show()
         }

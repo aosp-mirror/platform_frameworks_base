@@ -48,6 +48,15 @@ public class PermissionSyncRequest extends SystemDataTransferRequest implements 
     }
 
     /** @hide */
+    @Override
+    public PermissionSyncRequest copyWithNewId(int associationId) {
+        PermissionSyncRequest newRequest = new PermissionSyncRequest(associationId);
+        newRequest.mUserId = this.mUserId;
+        newRequest.mUserConsented = this.mUserConsented;
+        return newRequest;
+    }
+
+    /** @hide */
     @NonNull
     public static final Creator<PermissionSyncRequest> CREATOR =
             new Creator<PermissionSyncRequest>() {
