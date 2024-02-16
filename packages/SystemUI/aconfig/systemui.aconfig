@@ -15,6 +15,16 @@ flag {
 }
 
 flag {
+   name: "udfps_view_performance"
+   namespace: "systemui"
+   description: "Decrease screen off blocking calls by waiting until the device is finished going to sleep before adding the udfps view."
+   bug: "225183106"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
     name: "notification_async_group_header_inflation"
     namespace: "systemui"
     description: "Inflates the notification group summary header views from the background thread."
