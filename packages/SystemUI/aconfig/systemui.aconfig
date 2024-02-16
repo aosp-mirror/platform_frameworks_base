@@ -301,6 +301,9 @@ flag {
         " central place, instead of reading resources directly. This is to take into account display"
         " cutouts and other special cases. "
    bug: "317199366"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
