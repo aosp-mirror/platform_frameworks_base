@@ -96,6 +96,7 @@ import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewConfigurator;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardClockRepository;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
@@ -354,6 +355,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     protected KeyguardClockInteractor mKeyguardClockInteractor;
     protected FakeKeyguardRepository mFakeKeyguardRepository;
+    protected FakeKeyguardClockRepository mFakeKeyguardClockRepository;
     protected KeyguardInteractor mKeyguardInteractor;
     protected ShadeAnimationInteractor mShadeAnimationInteractor;
     protected KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
@@ -399,6 +401,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 KeyguardInteractorFactory.create();
         mFakeKeyguardRepository = keyguardInteractorDeps.getRepository();
         mKeyguardBottomAreaInteractor = new KeyguardBottomAreaInteractor(mFakeKeyguardRepository);
+        mFakeKeyguardClockRepository = new FakeKeyguardClockRepository();
+        mKeyguardClockInteractor = new KeyguardClockInteractor(mFakeKeyguardClockRepository);
         mKeyguardInteractor = keyguardInteractorDeps.getKeyguardInteractor();
         mShadeRepository = new FakeShadeRepository();
         mShadeAnimationInteractor = new ShadeAnimationInteractorLegacyImpl(
