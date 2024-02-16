@@ -28,10 +28,14 @@ import com.android.credentialmanager.model.get.ActionEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.mappers.toGet
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.runtime.Composable
 import com.android.credentialmanager.CredentialSelectorUiState.Cancel
 import com.android.credentialmanager.CredentialSelectorUiState.Close
 import com.android.credentialmanager.CredentialSelectorUiState.Create
 import com.android.credentialmanager.CredentialSelectorUiState.Idle
+import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
+import com.android.credentialmanager.ktx.getIntentSenderRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,6 +50,8 @@ class CredentialSelectorViewModel @Inject constructor(
 ) : FlowEngine, ViewModel() {
     private val isPrimaryScreen = MutableStateFlow(true)
     private val shouldClose = MutableStateFlow(false)
+    private lateinit var selectedEntry: EntryInfo
+    private var isAutoSelected: Boolean = false
     val uiState: StateFlow<CredentialSelectorUiState> =
         combine(
             credentialManagerClient.requests,
@@ -106,6 +112,25 @@ class CredentialSelectorViewModel @Inject constructor(
             isAutoSelected = isAutoSelected
         )
         shouldClose.value = result
+    }
+
+    @Composable
+    override fun getEntrySelector(): (entry: EntryInfo, isAutoSelected: Boolean) -> Unit {
+        val launcher = rememberLauncherForActivityResult(
+            StartBalIntentSenderForResultContract()
+        ) {
+            sendSelectionResult(entryInfo = selectedEntry,
+                resultCode = it.resultCode,
+                resultData = it.data,
+                isAutoSelected = isAutoSelected)
+        }
+        return { selected, autoSelect ->
+            selectedEntry = selected
+            isAutoSelected = autoSelect
+            selected.getIntentSenderRequest()?.let {
+                launcher.launch(it)
+            } ?: Log.w(TAG, "Cannot parse IntentSenderRequest")
+        }
     }
 }
 

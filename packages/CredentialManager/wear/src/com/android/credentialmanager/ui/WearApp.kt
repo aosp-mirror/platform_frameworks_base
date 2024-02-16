@@ -43,6 +43,7 @@ import com.google.android.horologist.compose.navscaffold.WearNavScaffold
 import com.google.android.horologist.compose.navscaffold.composable
 import com.google.android.horologist.compose.navscaffold.scrollable
 import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.ui.screens.multiple.MultiCredentialsFoldScreen
 
 @OptIn(ExperimentalHorologistApi::class)
@@ -56,6 +57,7 @@ fun WearApp(
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
     val navHostState =
         rememberSwipeDismissableNavHostState(swipeToDismissBoxState = swipeToDismissBoxState)
+    val selectEntry = flowEngine.getEntrySelector()
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     WearNavScaffold(
@@ -111,6 +113,7 @@ fun WearApp(
                 navController = navController,
                 state = state,
                 onCloseApp = onCloseApp,
+                selectEntry = selectEntry
             )
         }
 
@@ -133,9 +136,14 @@ private fun handleGetNavigation(
     navController: NavController,
     state: CredentialSelectorUiState.Get,
     onCloseApp: () -> Unit,
+    selectEntry: (entry: EntryInfo, isAutoSelected: Boolean) -> Unit,
 ) {
     when (state) {
         is SingleEntry -> {
+            if (state.entry.isAutoSelectable) {
+                selectEntry(state.entry, true)
+                return
+            }
             when (state.entry.credentialType) {
                 CredentialType.UNKNOWN -> {
                     navController.navigateToSignInWithProviderScreen()
