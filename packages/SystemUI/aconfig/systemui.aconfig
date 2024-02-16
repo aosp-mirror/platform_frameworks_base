@@ -469,3 +469,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "register_zen_mode_content_observer_background"
+    namespace: "systemui"
+    description: "Decide whether to register zen mode content observers in the background thread."
+    bug: "324515627"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

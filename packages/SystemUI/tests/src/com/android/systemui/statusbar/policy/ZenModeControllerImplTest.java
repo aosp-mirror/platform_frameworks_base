@@ -79,6 +79,7 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
         mController = new ZenModeControllerImpl(
                 mContext,
                 Handler.createAsync(TestableLooper.get(this).getLooper()),
+                Handler.createAsync(TestableLooper.get(this).getLooper()),
                 mBroadcastDispatcher,
                 mDumpManager,
                 mGlobalSettings,
