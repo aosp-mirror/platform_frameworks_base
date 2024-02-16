@@ -1038,7 +1038,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 new Ops(pkgName, uidState));
                     }
 
-                    createSandboxUidStateIfNotExistsForAppLocked(uid, null);
+                    createSandboxUidStateIfNotExistsForAppLocked(uid);
                 }
             } else if (action.equals(ACTION_PACKAGE_REMOVED) && !intent.hasExtra(EXTRA_REPLACING)) {
                 synchronized (AppOpsService.this) {
@@ -1258,33 +1258,19 @@ public class AppOpsService extends IAppOpsService.Stub {
     void initializeUidStates() {
         UserManagerInternal umi = getUserManagerInternal();
         synchronized (this) {
-            SparseBooleanArray knownUids = new SparseBooleanArray();
-
-            for (int uid : NON_PACKAGE_UIDS) {
-                if (!mUidStates.contains(uid)) {
-                    mUidStates.put(uid, new UidState(uid));
-                }
-                knownUids.put(uid, true);
-            }
-
             int[] userIds = umi.getUserIds();
             try (PackageManagerLocal.UnfilteredSnapshot snapshot =
                          getPackageManagerLocal().withUnfilteredSnapshot()) {
                 Map<String, PackageState> packageStates = snapshot.getPackageStates();
                 for (int i = 0; i < userIds.length; i++) {
                     int userId = userIds[i];
-                    initializeUserUidStatesLocked(userId, packageStates, knownUids);
+                    initializeUserUidStatesLocked(userId, packageStates);
                 }
             }
 
-            // Remove what may have been added during persistence parsing
-            for (int i = mUidStates.size() - 1; i >= 0; i--) {
-                int uid = mUidStates.keyAt(i);
-                if (!knownUids.get(uid, false)) {
-                    mUidStates.removeAt(i);
-                }
+            for (int uid : NON_PACKAGE_UIDS) {
+                mUidStates.put(uid, new UidState(uid));
             }
-
             mUidStatesInitialized = true;
         }
     }
@@ -1293,34 +1279,26 @@ public class AppOpsService extends IAppOpsService.Stub {
         synchronized (this) {
             try (PackageManagerLocal.UnfilteredSnapshot snapshot =
                     getPackageManagerLocal().withUnfilteredSnapshot()) {
-                initializeUserUidStatesLocked(userId, snapshot.getPackageStates(), null);
+                initializeUserUidStatesLocked(userId, snapshot.getPackageStates());
             }
         }
     }
 
     private void initializeUserUidStatesLocked(int userId, Map<String,
-            PackageState> packageStates, SparseBooleanArray knownUids) {
+            PackageState> packageStates) {
         for (Map.Entry<String, PackageState> entry : packageStates.entrySet()) {
-            PackageState packageState = entry.getValue();
-            if (packageState.isApex()) {
-                continue;
-            }
-            int appId = packageState.getAppId();
+            int appId = entry.getValue().getAppId();
             String packageName = entry.getKey();
 
-            initializePackageUidStateLocked(userId, appId, packageName, knownUids);
+            initializePackageUidStateLocked(userId, appId, packageName);
         }
     }
 
     /*
       Be careful not to clear any existing data; only want to add objects that don't already exist.
      */
-    private void initializePackageUidStateLocked(int userId, int appId, String packageName,
-            SparseBooleanArray knownUids) {
+    private void initializePackageUidStateLocked(int userId, int appId, String packageName) {
         int uid = UserHandle.getUid(userId, appId);
-        if (knownUids != null) {
-            knownUids.put(uid, true);
-        }
         UidState uidState = getUidStateLocked(uid, true);
         Ops ops = uidState.pkgOps.get(packageName);
         if (ops == null) {
@@ -1338,7 +1316,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        createSandboxUidStateIfNotExistsForAppLocked(uid, knownUids);
+        createSandboxUidStateIfNotExistsForAppLocked(uid);
     }
 
     /**
@@ -4285,15 +4263,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         return uidState;
     }
 
-    private void createSandboxUidStateIfNotExistsForAppLocked(int uid,
-            SparseBooleanArray knownUids) {
-        if (UserHandle.getAppId(uid) < Process.FIRST_APPLICATION_UID) {
-            return;
-        }
+    private void createSandboxUidStateIfNotExistsForAppLocked(int uid) {
         final int sandboxUid = Process.toSdkSandboxUid(uid);
-        if (knownUids != null) {
-            knownUids.put(sandboxUid, true);
-        }
         getUidStateLocked(sandboxUid, true);
     }
 
