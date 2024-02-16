@@ -79,7 +79,7 @@ interface BaseComposeFacade {
     fun setVolumePanelActivityContent(
         activity: ComponentActivity,
         viewModel: VolumePanelViewModel,
-        onDismissAnimationFinished: () -> Unit,
+        onDismiss: () -> Unit,
     )
 
     /** Create a [View] to represent [viewModel] on screen. */

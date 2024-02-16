@@ -181,6 +181,7 @@ import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewHierarchyEncoder;
 import android.view.ViewParent;
@@ -866,6 +867,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private final boolean mUseTextPaddingForUiTranslation;
 
     private boolean mUseBoundsForWidth;
+    private boolean mShiftDrawingOffsetForStartOverhang;
     @Nullable private Paint.FontMetrics mMinimumFontMetrics;
     @Nullable private Paint.FontMetrics mLocalePreferredFontMetrics;
     private boolean mUseLocalePreferredLineHeightForMinimum;
@@ -1619,6 +1621,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextView_useBoundsForWidth:
                     mUseBoundsForWidth = a.getBoolean(attr, false);
                     hasUseBoundForWidthValue = true;
+                    break;
+                case com.android.internal.R.styleable
+                        .TextView_shiftDrawingOffsetForStartOverhang:
+                    mShiftDrawingOffsetForStartOverhang = a.getBoolean(attr, false);
                     break;
                 case com.android.internal.R.styleable
                         .TextView_useLocalePreferredLineHeightForMinimum:
@@ -4922,6 +4928,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param useBoundsForWidth true for using bounding box for width. false for using advances for
      *                          width.
      * @see #getUseBoundsForWidth()
+     * @see #setShiftDrawingOffsetForStartOverhang(boolean)
+     * @see #getShiftDrawingOffsetForStartOverhang()
      */
     @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public void setUseBoundsForWidth(boolean useBoundsForWidth) {
@@ -4939,11 +4947,60 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Returns true if using bounding box as a width, false for using advance as a width.
      *
      * @see #setUseBoundsForWidth(boolean)
+     * @see #setShiftDrawingOffsetForStartOverhang(boolean)
+     * @see #getShiftDrawingOffsetForStartOverhang()
      * @return True if using bounding box for width, false if using advance for width.
      */
     @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public boolean getUseBoundsForWidth() {
         return mUseBoundsForWidth;
+    }
+
+    /**
+     * Set true for shifting the drawing x offset for showing overhang at the start position.
+     *
+     * This flag is ignored if the {@link #getUseBoundsForWidth()} is false.
+     *
+     * If this value is false, the TextView draws text from the zero even if there is a glyph stroke
+     * in a region where the x coordinate is negative. TextView clips the stroke in the region where
+     * the X coordinate is negative unless the parents has {@link ViewGroup#getClipChildren()} to
+     * true. This is useful for aligning multiple TextViews vertically.
+     *
+     * If this value is true, the TextView draws text with shifting the x coordinate of the drawing
+     * bounding box. This prevents the clipping even if the parents doesn't have
+     * {@link ViewGroup#getClipChildren()} to true.
+     *
+     * This value is false by default.
+     *
+     * @param shiftDrawingOffsetForStartOverhang true for shifting the drawing offset for showing
+     *                                           the stroke that is in the region whre the x
+     *                                           coorinate is negative.
+     * @see #setUseBoundsForWidth(boolean)
+     * @see #getUseBoundsForWidth()
+     */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+    public void setShiftDrawingOffsetForStartOverhang(boolean shiftDrawingOffsetForStartOverhang) {
+        if (mShiftDrawingOffsetForStartOverhang != shiftDrawingOffsetForStartOverhang) {
+            mShiftDrawingOffsetForStartOverhang = shiftDrawingOffsetForStartOverhang;
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
+    }
+
+    /**
+     * Returns true if shifting the drawing x offset for start overhang.
+     *
+     * @see #setShiftDrawingOffsetForStartOverhang(boolean)
+     * @see #setUseBoundsForWidth(boolean)
+     * @see #getUseBoundsForWidth()
+     * @return True if shifting the drawing x offset for start overhang.
+     */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+    public boolean getShiftDrawingOffsetForStartOverhang() {
+        return mShiftDrawingOffsetForStartOverhang;
     }
 
     /**
@@ -11001,6 +11058,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 null,
                                 boring,
                                 mUseBoundsForWidth,
+                                mShiftDrawingOffsetForStartOverhang,
                                 getResolvedMinimumFontMetrics());
                     }
 
@@ -11028,6 +11086,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 effectiveEllipsize,
                                 boring,
                                 mUseBoundsForWidth,
+                                mShiftDrawingOffsetForStartOverhang,
                                 getResolvedMinimumFontMetrics());
                     }
                 }

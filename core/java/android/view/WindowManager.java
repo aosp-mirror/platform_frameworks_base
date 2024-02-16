@@ -1548,6 +1548,48 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI";
 
     /**
+     * Application or Activity level
+     * {@link android.content.pm.PackageManager.Property PackageManager.Property} to provide any
+     * preferences for showing all or specific Activities on small cover displays of foldable
+     * style devices.
+     *
+     * <p>The only supported value for the property is {@link #COMPAT_SMALL_COVER_SCREEN_OPT_IN}.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN"
+     *     android:value=1 <!-- COMPAT_COVER_SCREEN_OPT_IN -->/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     */
+    @FlaggedApi(Flags.FLAG_COVER_DISPLAY_OPT_IN)
+    String PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN =
+            "android.window.PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN";
+
+    /**
+     * Value applicable for the {@link #PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN} property to
+     * provide a signal to the system that an application or its specific activities explicitly
+     * opt into being displayed on small foldable device cover screens that measure at least 1.5
+     * inches for the shorter dimension and at least 2.4 inches for the longer dimension.
+     */
+    @CompatSmallScreenPolicy
+    @FlaggedApi(Flags.FLAG_COVER_DISPLAY_OPT_IN)
+    int COMPAT_SMALL_COVER_SCREEN_OPT_IN = 1;
+
+    /**
+     * @hide
+     */
+    @IntDef({
+            COMPAT_SMALL_COVER_SCREEN_OPT_IN,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface CompatSmallScreenPolicy {}
+
+
+
+    /**
      * Request for app's keyboard shortcuts to be retrieved asynchronously.
      *
      * @param receiver The callback to be triggered when the result is ready.
@@ -4397,6 +4439,7 @@ public interface WindowManager extends ViewManager {
          * For variable refresh rate project.
          */
         private boolean mFrameRateBoostOnTouch = true;
+        private boolean mIsFrameRatePowerSavingsBalanced = true;
         private static boolean sToolkitSetFrameRateReadOnlyFlagValue =
                 android.view.flags.Flags.toolkitSetFrameRateReadOnly();
 
@@ -4861,6 +4904,36 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
+         * Set the value whether frameratepowersavingsbalance is enabled for this Window.
+         * This allows device to adjust refresh rate
+         * as needed and can be useful for power saving.
+         *
+         * @param enabled Whether we should enable frameratepowersavingsbalance.
+         */
+        @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+        public void setFrameRatePowerSavingsBalanced(boolean enabled) {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                mIsFrameRatePowerSavingsBalanced = enabled;
+            }
+        }
+
+        /**
+         * Get the value whether frameratepowersavingsbalance is enabled for this Window.
+         * This allows device to adjust refresh rate
+         * as needed and can be useful for power saving.
+         * by {@link #setFrameRatePowerSavingsBalanced(boolean)}
+         *
+         * @return Whether we should enable frameratepowersavingsbalance.
+         */
+        @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+        public boolean isFrameRatePowerSavingsBalanced() {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                return mIsFrameRatePowerSavingsBalanced;
+            }
+            return true;
+        }
+
+        /**
          * <p>
          * Blurs the screen behind the window. The effect is similar to that of {@link #dimAmount},
          * but instead of dimmed, the content behind the window will be blurred (or combined with
@@ -5013,6 +5086,7 @@ public interface WindowManager extends ViewManager {
             out.writeFloat(mDesiredHdrHeadroom);
             if (sToolkitSetFrameRateReadOnlyFlagValue) {
                 out.writeBoolean(mFrameRateBoostOnTouch);
+                out.writeBoolean(mIsFrameRatePowerSavingsBalanced);
             }
         }
 
@@ -5088,6 +5162,7 @@ public interface WindowManager extends ViewManager {
             mDesiredHdrHeadroom = in.readFloat();
             if (sToolkitSetFrameRateReadOnlyFlagValue) {
                 mFrameRateBoostOnTouch = in.readBoolean();
+                mIsFrameRatePowerSavingsBalanced = in.readBoolean();
             }
         }
 
@@ -5431,6 +5506,12 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
+            if (sToolkitSetFrameRateReadOnlyFlagValue
+                    && mIsFrameRatePowerSavingsBalanced != o.mIsFrameRatePowerSavingsBalanced) {
+                mIsFrameRatePowerSavingsBalanced = o.mIsFrameRatePowerSavingsBalanced;
+                changes |= LAYOUT_CHANGED;
+            }
+
             return changes;
         }
 
@@ -5657,6 +5738,11 @@ public interface WindowManager extends ViewManager {
                 sb.append(System.lineSeparator());
                 sb.append(prefix).append("  frameRateBoostOnTouch=");
                 sb.append(mFrameRateBoostOnTouch);
+            }
+            if (sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  dvrrWindowFrameRateHint=");
+                sb.append(mIsFrameRatePowerSavingsBalanced);
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());
@@ -6115,12 +6201,15 @@ public interface WindowManager extends ViewManager {
      *                               rendering Choreographer.
      * @param receiver               The SurfaceControlInputReceiver that will receive the input
      *                               events
+     * @return Returns the {@link InputTransferToken} that can be used to transfer touch gesture
+     * to or from other windows.
      */
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
-    default void registerBatchedSurfaceControlInputReceiver(int displayId,
+    @NonNull
+    default InputTransferToken registerBatchedSurfaceControlInputReceiver(int displayId,
             @NonNull InputTransferToken hostInputTransferToken,
-            @NonNull SurfaceControl surfaceControl,
-            @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
+            @NonNull SurfaceControl surfaceControl, @NonNull Choreographer choreographer,
+            @NonNull SurfaceControlInputReceiver receiver) {
         throw new UnsupportedOperationException(
                 "registerBatchedSurfaceControlInputReceiver is not implemented");
     }
@@ -6145,9 +6234,12 @@ public interface WindowManager extends ViewManager {
      * @param looper                 The looper to use when invoking callbacks.
      * @param receiver               The SurfaceControlInputReceiver that will receive the input
      *                               events.
+     * @return Returns the {@link InputTransferToken} that can be used to transfer touch gesture
+     * to or from other windows.
      */
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
-    default void registerUnbatchedSurfaceControlInputReceiver(int displayId,
+    @NonNull
+    default InputTransferToken registerUnbatchedSurfaceControlInputReceiver(int displayId,
             @NonNull InputTransferToken hostInputTransferToken,
             @NonNull SurfaceControl surfaceControl, @NonNull Looper looper,
             @NonNull SurfaceControlInputReceiver receiver) {
@@ -6193,6 +6285,70 @@ public interface WindowManager extends ViewManager {
     default IBinder getSurfaceControlInputClientToken(@NonNull SurfaceControl surfaceControl) {
         throw new UnsupportedOperationException(
                 "getSurfaceControlInputClientToken is not implemented");
+    }
+
+    /**
+     * Transfer the currently in progress touch gesture from the transferFromToken to the
+     * transferToToken.
+     * <p><br>
+     * This requires that the fromToken and toToken are associated with each other. The association
+     * can be done different ways, depending on how the embedded window is created.
+     * <ul>
+     * <li>
+     * Creating a {@link SurfaceControlViewHost} and passing the host's
+     * {@link InputTransferToken} for
+     * {@link SurfaceControlViewHost#SurfaceControlViewHost(Context, Display, InputTransferToken)}.
+     * </li>
+     * <li>
+     * Registering a SurfaceControl for input and passing the host's token to either
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * SurfaceControl, Looper, SurfaceControlInputReceiver)}.
+     * </li>
+     * </ul>
+     * <p>
+     * The host is likely to be an {@link AttachedSurfaceControl} so the host token can be
+     * retrieved via {@link AttachedSurfaceControl#getInputTransferToken()}.
+     * <p><br>
+     * Only the window currently receiving touch is allowed to transfer the gesture so if the caller
+     * attempts to transfer touch gesture from a token that doesn't have touch, it will fail the
+     * transfer.
+     * <p><br>
+     * When the host wants to transfer touch gesture to the embedded, it can retrieve the embedded
+     * token via {@link SurfaceControlViewHost.SurfacePackage#getInputTransferToken()} or use the
+     * value returned from either
+     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Choreographer, SurfaceControlInputReceiver)} or
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * Looper, SurfaceControlInputReceiver)} and pass its own token as the transferFromToken.
+     * <p>
+     * When the embedded wants to transfer touch gesture to the host, it can pass in its own
+     * token as the transferFromToken and use the associated host's {@link InputTransferToken} as
+     * the transferToToken
+     * <p><br>
+     * When the touch is transferred, the window currently receiving touch gets an ACTION_CANCEL
+     * and does not receive any further input events for this gesture.
+     * <p>
+     * The transferred-to window receives an ACTION_DOWN event and then the remainder of the input
+     * events for this gesture. It does not receive any of the previous events of this gesture that
+     * the originating window received.
+     * <p>
+     * The transferTouchGesture API only works for the current gesture. When a new gesture
+     * arrives, input dispatcher will do a new round of hit testing. So, if the host window is
+     * still the first thing that's being touched, then it will receive the new gesture again. It
+     * will again be up to the host to transfer this new gesture to the embedded.
+     *
+     * @param transferFromToken the InputTransferToken for the currently active gesture
+     * @param transferToToken   the InputTransferToken to transfer the gesture to.
+     * @return Whether the touch stream was transferred.
+     * @see android.view.SurfaceControlViewHost.SurfacePackage#getInputTransferToken()
+     * @see AttachedSurfaceControl#getInputTransferToken()
+     */
+    @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
+    default boolean transferTouchGesture(@NonNull InputTransferToken transferFromToken,
+            @NonNull InputTransferToken transferToToken) {
+        throw new UnsupportedOperationException("transferTouchGesture is not implemented");
     }
 
     /**

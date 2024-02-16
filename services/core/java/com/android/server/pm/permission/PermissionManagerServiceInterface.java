@@ -141,11 +141,11 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      *
      * @param packageName the package name for which to get the flags
      * @param permName the permission for which to get the flags
-     * @param persistentDeviceId The device for which to get the flags
+     * @param deviceId The device for which to get the flags
      * @param userId the user for which to get permission flags
      * @return the permission flags
      */
-    int getPermissionFlags(String packageName, String permName, String persistentDeviceId,
+    int getPermissionFlags(String packageName, String permName, String deviceId,
             @UserIdInt int userId);
 
     /**
@@ -156,11 +156,11 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * @param permName The permission for which to update the flags
      * @param flagMask The flags which to replace
      * @param flagValues The flags with which to replace
-     * @param persistentDeviceId The device for which to update the permission flags
+     * @param deviceId The device for which to update the permission flags
      * @param userId The user for which to update the permission flags
      */
     void updatePermissionFlags(String packageName, String permName, int flagMask, int flagValues,
-            boolean checkAdjustPolicyFlagPermission, String persistentDeviceId,
+            boolean checkAdjustPolicyFlagPermission, String deviceId,
             @UserIdInt int userId);
 
     /**
@@ -295,12 +295,12 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      *
      * @param packageName the package to which to grant the permission
      * @param permName the permission name to grant
-     * @param persistentDeviceId the device for which to grant the permission
+     * @param deviceId the device for which to grant the permission
      * @param userId the user for which to grant the permission
      *
      * @see #revokeRuntimePermission(String, String, String, int, String)
      */
-    void grantRuntimePermission(String packageName, String permName, String persistentDeviceId,
+    void grantRuntimePermission(String packageName, String permName, String deviceId,
             @UserIdInt int userId);
 
     /**
@@ -316,13 +316,13 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      *
      * @param packageName the package from which to revoke the permission
      * @param permName the permission name to revoke
-     * @param persistentDeviceId the device for which to revoke the permission
+     * @param deviceId the device for which to revoke the permission
      * @param userId the user for which to revoke the permission
      * @param reason the reason for the revoke, or {@code null} for unspecified
      *
      * @see #grantRuntimePermission(String, String, String, int)
      */
-    void revokeRuntimePermission(String packageName, String permName, String persistentDeviceId,
+    void revokeRuntimePermission(String packageName, String permName, String deviceId,
             @UserIdInt int userId, String reason);
 
     /**
@@ -347,7 +347,7 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * @return whether you can show permission rationale UI
      */
     boolean shouldShowRequestPermissionRationale(String packageName, String permName,
-            int deviceId, @UserIdInt int userId);
+            String deviceId, @UserIdInt int userId);
 
     /**
      * Checks whether a particular permission has been revoked for a package by policy. Typically,
@@ -361,8 +361,8 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * @param userId the device for which you are checking the permission
      * @return whether the permission is restricted by policy
      */
-    boolean isPermissionRevokedByPolicy(String packageName, String permName, int deviceId,
-            @UserIdInt int userId);
+    boolean isPermissionRevokedByPolicy(String packageName, String permName,
+            String deviceId, @UserIdInt int userId);
 
     /**
      * Get set of permissions that have been split into more granular or dependent permissions.
@@ -389,11 +389,11 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      *
      * @param pkgName package name
      * @param permName permission name
-     * @param persistentDeviceId  persistent device ID
+     * @param deviceId  persistent device ID
      * @param userId user ID
      * @return permission result {@link PackageManager.PermissionResult}
      */
-    int checkPermission(String pkgName, String permName, String persistentDeviceId,
+    int checkPermission(String pkgName, String permName, String deviceId,
             @UserIdInt int userId);
 
     /**
@@ -401,23 +401,23 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      *
      * @param uid UID
      * @param permName permission name
-     * @param deviceId device ID
+     * @param deviceId persistent device ID
      * @return permission result {@link PackageManager.PermissionResult}
      */
-    int checkUidPermission(int uid, String permName, int deviceId);
+    int checkUidPermission(int uid, String permName, String deviceId);
 
     /**
      * Gets the permission states for requested package, persistent device and user.
      *
      * @param packageName name of the package you are checking against
-     * @param persistentDeviceId id of the persistent device you are checking against
+     * @param deviceId id of the persistent device you are checking against
      * @param userId id of the user for which to get permission flags
      * @return mapping of all permission states keyed by their permission names
      *
      * @hide
      */
     Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
-            @NonNull String persistentDeviceId, @UserIdInt int userId);
+            @NonNull String deviceId, @UserIdInt int userId);
 
     /**
      * Get all the package names requesting app op permissions.

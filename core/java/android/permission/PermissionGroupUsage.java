@@ -17,6 +17,7 @@
 package android.permission;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -26,8 +27,8 @@ import com.android.internal.util.DataClass;
 
 /**
  * Represents the usage of a permission group by an app. Supports package name, user, permission
- * group, whether or not the access is running or recent, whether the access is tied to a phone
- * call, and an optional special attribution tag, label and proxy label.
+ * group, persistent device Id, whether or not the access is running or recent, whether the access
+ * is tied to a phone call, and an optional special attribution tag, label and proxy label.
  *
  * @hide
  */
@@ -48,6 +49,7 @@ public final class PermissionGroupUsage implements Parcelable {
     private final @Nullable CharSequence mAttributionTag;
     private final @Nullable CharSequence mAttributionLabel;
     private final @Nullable CharSequence mProxyLabel;
+    private final @NonNull String mPersistentDeviceId;
 
 
 
@@ -79,7 +81,8 @@ public final class PermissionGroupUsage implements Parcelable {
             boolean phoneCall,
             @Nullable CharSequence attributionTag,
             @Nullable CharSequence attributionLabel,
-            @Nullable CharSequence proxyLabel) {
+            @Nullable CharSequence proxyLabel,
+            @NonNull String persistentDeviceId) {
         this.mPackageName = packageName;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPackageName);
@@ -93,6 +96,9 @@ public final class PermissionGroupUsage implements Parcelable {
         this.mAttributionTag = attributionTag;
         this.mAttributionLabel = attributionLabel;
         this.mProxyLabel = proxyLabel;
+        this.mPersistentDeviceId = persistentDeviceId;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mPersistentDeviceId);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -170,6 +176,12 @@ public final class PermissionGroupUsage implements Parcelable {
         return mProxyLabel;
     }
 
+    @DataClass.Generated.Member
+    @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+    public @NonNull String getPersistentDeviceId() {
+        return mPersistentDeviceId;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -185,7 +197,8 @@ public final class PermissionGroupUsage implements Parcelable {
                 "phoneCall = " + mPhoneCall + ", " +
                 "attributionTag = " + mAttributionTag + ", " +
                 "attributionLabel = " + mAttributionLabel + ", " +
-                "proxyLabel = " + mProxyLabel +
+                "proxyLabel = " + mProxyLabel + ", " +
+                "persistentDeviceId = " + mPersistentDeviceId +
         " }";
     }
 
@@ -210,7 +223,8 @@ public final class PermissionGroupUsage implements Parcelable {
                 && mPhoneCall == that.mPhoneCall
                 && java.util.Objects.equals(mAttributionTag, that.mAttributionTag)
                 && java.util.Objects.equals(mAttributionLabel, that.mAttributionLabel)
-                && java.util.Objects.equals(mProxyLabel, that.mProxyLabel);
+                && java.util.Objects.equals(mProxyLabel, that.mProxyLabel)
+                && java.util.Objects.equals(mPersistentDeviceId, that.mPersistentDeviceId);
     }
 
     @Override
@@ -229,6 +243,7 @@ public final class PermissionGroupUsage implements Parcelable {
         _hash = 31 * _hash + java.util.Objects.hashCode(mAttributionTag);
         _hash = 31 * _hash + java.util.Objects.hashCode(mAttributionLabel);
         _hash = 31 * _hash + java.util.Objects.hashCode(mProxyLabel);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mPersistentDeviceId);
         return _hash;
     }
 
@@ -252,6 +267,7 @@ public final class PermissionGroupUsage implements Parcelable {
         if (mAttributionTag != null) dest.writeCharSequence(mAttributionTag);
         if (mAttributionLabel != null) dest.writeCharSequence(mAttributionLabel);
         if (mProxyLabel != null) dest.writeCharSequence(mProxyLabel);
+        dest.writeString(mPersistentDeviceId);
     }
 
     @Override
@@ -275,6 +291,7 @@ public final class PermissionGroupUsage implements Parcelable {
         CharSequence attributionTag = (flg & 0x40) == 0 ? null : (CharSequence) in.readCharSequence();
         CharSequence attributionLabel = (flg & 0x80) == 0 ? null : (CharSequence) in.readCharSequence();
         CharSequence proxyLabel = (flg & 0x100) == 0 ? null : (CharSequence) in.readCharSequence();
+        String persistentDeviceId = in.readString();
 
         this.mPackageName = packageName;
         com.android.internal.util.AnnotationValidations.validate(
@@ -289,6 +306,9 @@ public final class PermissionGroupUsage implements Parcelable {
         this.mAttributionTag = attributionTag;
         this.mAttributionLabel = attributionLabel;
         this.mProxyLabel = proxyLabel;
+        this.mPersistentDeviceId = persistentDeviceId;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mPersistentDeviceId);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -308,10 +328,10 @@ public final class PermissionGroupUsage implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1645067417023L,
+            time = 1706285211875L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/permission/PermissionGroupUsage.java",
-            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final  int mUid\nprivate final  long mLastAccessTimeMillis\nprivate final @android.annotation.NonNull java.lang.String mPermissionGroupName\nprivate final  boolean mActive\nprivate final  boolean mPhoneCall\nprivate final @android.annotation.Nullable java.lang.CharSequence mAttributionTag\nprivate final @android.annotation.Nullable java.lang.CharSequence mAttributionLabel\nprivate final @android.annotation.Nullable java.lang.CharSequence mProxyLabel\nclass PermissionGroupUsage extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true, genEqualsHashCode=true, genToString=true)")
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final  int mUid\nprivate final  long mLastAccessTimeMillis\nprivate final @android.annotation.NonNull java.lang.String mPermissionGroupName\nprivate final  boolean mActive\nprivate final  boolean mPhoneCall\nprivate final @android.annotation.Nullable java.lang.CharSequence mAttributionTag\nprivate final @android.annotation.Nullable java.lang.CharSequence mAttributionLabel\nprivate final @android.annotation.Nullable java.lang.CharSequence mProxyLabel\nprivate final @android.annotation.NonNull java.lang.String mPersistentDeviceId\nclass PermissionGroupUsage extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true, genEqualsHashCode=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

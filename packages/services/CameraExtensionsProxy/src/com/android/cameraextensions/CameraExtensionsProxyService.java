@@ -1204,23 +1204,26 @@ public class CameraExtensionsProxyService extends Service {
                 List<Pair<CameraCharacteristics.Key, Object>> entries =
                         mAdvancedExtender.getAvailableCharacteristicsKeyValues();
 
-                if ((entries != null) && !entries.isEmpty()) {
-                    CameraMetadataNative ret = new CameraMetadataNative();
-                    long vendorId = mMetadataVendorIdMap.containsKey(cameraId)
-                            ? mMetadataVendorIdMap.get(cameraId) : Long.MAX_VALUE;
-                    ret.setVendorId(vendorId);
-                    int[] characteristicsKeyTags = new int[entries.size()];
-                    int i = 0;
-                    for (Pair<CameraCharacteristics.Key, Object> entry : entries) {
-                        int tag = CameraMetadataNative.getTag(entry.first.getName(), vendorId);
-                        characteristicsKeyTags[i++] = tag;
-                        ret.set(entry.first, entry.second);
-                    }
-                    ret.set(CameraCharacteristics.REQUEST_AVAILABLE_CHARACTERISTICS_KEYS,
-                            characteristicsKeyTags);
-
-                    return ret;
+                if (entries == null || entries.isEmpty()) {
+                    throw new RuntimeException("A valid set of key/value pairs are required that "
+                            + "are supported by the extension.");
                 }
+
+                CameraMetadataNative ret = new CameraMetadataNative();
+                long vendorId = mMetadataVendorIdMap.containsKey(cameraId)
+                        ? mMetadataVendorIdMap.get(cameraId) : Long.MAX_VALUE;
+                ret.setVendorId(vendorId);
+                int[] characteristicsKeyTags = new int[entries.size()];
+                int i = 0;
+                for (Pair<CameraCharacteristics.Key, Object> entry : entries) {
+                    int tag = CameraMetadataNative.getTag(entry.first.getName(), vendorId);
+                    characteristicsKeyTags[i++] = tag;
+                    ret.set(entry.first, entry.second);
+                }
+                ret.set(CameraCharacteristics.REQUEST_AVAILABLE_CHARACTERISTICS_KEYS,
+                        characteristicsKeyTags);
+
+                return ret;
             }
 
             return null;

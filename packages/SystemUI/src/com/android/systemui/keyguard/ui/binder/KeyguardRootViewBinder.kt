@@ -43,7 +43,6 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
@@ -146,7 +145,7 @@ object KeyguardRootViewBinder {
                         }
                     }
 
-                    if (KeyguardShadeMigrationNssl.isEnabled) {
+                    if (migrateClocksToBlueprint()) {
                         launch {
                             viewModel.burnInLayerVisibility.collect { visibility ->
                                 childViews[burnInLayerId]?.visibility = visibility
@@ -316,7 +315,7 @@ object KeyguardRootViewBinder {
             }
         }
 
-        if (KeyguardShadeMigrationNssl.isEnabled) {
+        if (migrateClocksToBlueprint()) {
             burnInParams.update { current ->
                 current.copy(translationY = { childViews[burnInLayerId]?.translationY })
             }
@@ -415,7 +414,9 @@ object KeyguardRootViewBinder {
         configuration: ConfigurationState,
         screenOffAnimationController: ScreenOffAnimationController,
     ) {
-        KeyguardShadeMigrationNssl.assertInLegacyMode()
+        if (migrateClocksToBlueprint()) {
+            throw IllegalStateException("should only be called in legacy code paths")
+        }
         if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return
         coroutineScope {
             val iconAppearTranslationPx =
@@ -444,7 +445,7 @@ object KeyguardRootViewBinder {
             }
         when {
             !isVisible.isAnimating -> {
-                if (!KeyguardShadeMigrationNssl.isEnabled) {
+                if (!migrateClocksToBlueprint()) {
                     translationY = 0f
                 }
                 visibility =
@@ -494,7 +495,7 @@ object KeyguardRootViewBinder {
         animatorListener: Animator.AnimatorListener,
     ) {
         if (animate) {
-            if (!KeyguardShadeMigrationNssl.isEnabled) {
+            if (!migrateClocksToBlueprint()) {
                 translationY = -iconAppearTranslation.toFloat()
             }
             alpha = 0f
@@ -502,19 +503,19 @@ object KeyguardRootViewBinder {
                 .alpha(1f)
                 .setInterpolator(Interpolators.LINEAR)
                 .setDuration(AOD_ICONS_APPEAR_DURATION)
-                .apply { if (KeyguardShadeMigrationNssl.isEnabled) animateInIconTranslation() }
+                .apply { if (migrateClocksToBlueprint()) animateInIconTranslation() }
                 .setListener(animatorListener)
                 .start()
         } else {
             alpha = 1.0f
-            if (!KeyguardShadeMigrationNssl.isEnabled) {
+            if (!migrateClocksToBlueprint()) {
                 translationY = 0f
             }
         }
     }
 
     private fun View.animateInIconTranslation() {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             animate().animateInIconTranslation().setDuration(AOD_ICONS_APPEAR_DURATION).start()
         }
     }
