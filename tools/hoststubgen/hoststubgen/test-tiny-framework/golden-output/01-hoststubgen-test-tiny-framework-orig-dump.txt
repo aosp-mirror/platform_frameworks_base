@@ -1051,6 +1051,9 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
             0      10     0  name   Ljava/lang/String;
+    MethodParameters:
+      Name                           Flags
+      <no name>                      mandated
 
   private com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex(java.lang.String, java.lang.String);
     descriptor: (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
@@ -1074,6 +1077,12 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
             0      18     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
             0      18     3 longName   Ljava/lang/String;
             0      18     4 shortName   Ljava/lang/String;
+    MethodParameters:
+      Name                           Flags
+      <no name>                      synthetic
+      <no name>                      synthetic
+      <no name>
+      <no name>
     Signature: #x                          // (Ljava/lang/String;Ljava/lang/String;)V
     RuntimeInvisibleAnnotations:
       x: #x()
@@ -1224,6 +1233,9 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
             0      10     0  name   Ljava/lang/String;
+    MethodParameters:
+      Name                           Flags
+      <no name>                      mandated
 
   private com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple();
     descriptor: (Ljava/lang/String;I)V
@@ -1239,6 +1251,10 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
             0       7     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
+    MethodParameters:
+      Name                           Flags
+      <no name>                      synthetic
+      <no name>                      synthetic
     Signature: #x                          // ()V
 
   private static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple[] $values();
@@ -2031,6 +2047,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$1 ex
         Start  Length  Slot  Name   Signature
             0      10     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$1;
             0      10     1 this$0   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
+    MethodParameters:
+      Name                           Flags
+      <no name>                      final mandated
 
   public java.lang.Integer get();
     descriptor: ()Ljava/lang/Integer;
@@ -2147,6 +2166,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$3 ex
         Start  Length  Slot  Name   Signature
             0      10     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$3;
             0      10     1 this$0   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
+    MethodParameters:
+      Name                           Flags
+      <no name>                      final mandated
 
   public java.lang.Integer get();
     descriptor: ()Ljava/lang/Integer;
@@ -2304,6 +2326,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
         Start  Length  Slot  Name   Signature
             0      15     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$InnerClass;
             0      15     1 this$0   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
+    MethodParameters:
+      Name                           Flags
+      <no name>                      final mandated
 }
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeInvisibleAnnotations:
