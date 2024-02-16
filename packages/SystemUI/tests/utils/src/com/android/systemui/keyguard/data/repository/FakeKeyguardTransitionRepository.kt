@@ -43,7 +43,7 @@ import kotlinx.coroutines.test.runCurrent
 class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitionRepository {
 
     private val _transitions =
-        MutableSharedFlow<TransitionStep>(replay = 2, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+        MutableSharedFlow<TransitionStep>(replay = 3, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val transitions: SharedFlow<TransitionStep> = _transitions
 
     init {
