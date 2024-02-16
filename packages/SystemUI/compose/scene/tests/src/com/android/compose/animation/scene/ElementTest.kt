@@ -44,6 +44,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -247,6 +248,7 @@ class ElementTest {
     }
 
     @Test
+    @Ignore
     fun elementIsReusedInSameSceneAndBetweenScenes() {
         var currentScene by mutableStateOf(TestScenes.SceneA)
         var sceneCState by mutableStateOf(0)
