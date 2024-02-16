@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -28,12 +29,15 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification.MediaStyle;
 import android.media.session.MediaSession;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.service.notification.NotificationListenerService;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.statusbar.notification.InflationException;
@@ -153,7 +157,8 @@ public final class MediaCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
-    public void inflateMediaNotificationIconsMediaEnabled() throws InflationException {
+    @DisableFlags(Flags.FLAG_NOTIFICATIONS_BACKGROUND_MEDIA_ICONS)
+    public void inflateMediaNotificationIconsMediaEnabled_old() throws InflationException {
         finishSetupWithMediaFeatureFlagEnabled(true);
 
         mListener.onEntryInit(mMediaEntry);
@@ -181,7 +186,37 @@ public final class MediaCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
-    public void inflationException() throws InflationException {
+    @EnableFlags(Flags.FLAG_NOTIFICATIONS_BACKGROUND_MEDIA_ICONS)
+    public void inflateMediaNotificationIconsMediaEnabled_new() throws InflationException {
+        finishSetupWithMediaFeatureFlagEnabled(true);
+
+        mListener.onEntryInit(mMediaEntry);
+        mListener.onEntryAdded(mMediaEntry);
+        verify(mIconManager).createIcons(eq(mMediaEntry));
+        verify(mIconManager, never()).updateIcons(eq(mMediaEntry));
+        clearInvocations(mIconManager);
+
+        mFilter.shouldFilterOut(mMediaEntry, 0);
+        verify(mIconManager, never()).createIcons(eq(mMediaEntry));
+        verify(mIconManager, never()).updateIcons(eq(mMediaEntry));
+
+        mListener.onEntryUpdated(mMediaEntry);
+        verify(mIconManager, never()).createIcons(eq(mMediaEntry));
+        verify(mIconManager).updateIcons(eq(mMediaEntry));
+
+        mListener.onEntryRemoved(mMediaEntry, NotificationListenerService.REASON_CANCEL);
+        mListener.onEntryCleanUp(mMediaEntry);
+        clearInvocations(mIconManager);
+
+        mListener.onEntryInit(mMediaEntry);
+        mListener.onEntryAdded(mMediaEntry);
+        verify(mIconManager).createIcons(eq(mMediaEntry));
+        verify(mIconManager, never()).updateIcons(eq(mMediaEntry));
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_NOTIFICATIONS_BACKGROUND_MEDIA_ICONS)
+    public void inflationException_old() throws InflationException {
         finishSetupWithMediaFeatureFlagEnabled(true);
 
         mListener.onEntryInit(mMediaEntry);
@@ -205,6 +240,31 @@ public final class MediaCoordinatorTest extends SysuiTestCase {
         doNothing().when(mIconManager).createIcons(eq(mMediaEntry));
         mFilter.shouldFilterOut(mMediaEntry, 0);
         verify(mIconManager, times(2)).createIcons(eq(mMediaEntry));
+        verify(mIconManager, never()).updateIcons(eq(mMediaEntry));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NOTIFICATIONS_BACKGROUND_MEDIA_ICONS)
+    public void inflationException_new() throws InflationException {
+        finishSetupWithMediaFeatureFlagEnabled(true);
+
+        doThrow(InflationException.class).when(mIconManager).createIcons(eq(mMediaEntry));
+
+        mListener.onEntryInit(mMediaEntry);
+        mListener.onEntryAdded(mMediaEntry);
+        verify(mIconManager).createIcons(eq(mMediaEntry));
+        verify(mIconManager, never()).updateIcons(eq(mMediaEntry));
+        clearInvocations(mIconManager);
+
+        mListener.onEntryUpdated(mMediaEntry);
+        verify(mIconManager).createIcons(eq(mMediaEntry));
+        verify(mIconManager, never()).updateIcons(eq(mMediaEntry));
+        clearInvocations(mIconManager);
+
+        doNothing().when(mIconManager).createIcons(eq(mMediaEntry));
+
+        mListener.onEntryUpdated(mMediaEntry);
+        verify(mIconManager).createIcons(eq(mMediaEntry));
         verify(mIconManager, never()).updateIcons(eq(mMediaEntry));
     }
 

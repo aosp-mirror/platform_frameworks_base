@@ -67,6 +67,16 @@ flag {
 }
 
 flag {
+    name: "notifications_background_media_icons"
+    namespace: "systemui"
+    description: "Updates icons for media notifications in the background."
+    bug: "315143160"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "nssl_falsing_fix"
     namespace: "systemui"
     description: "Minor touch changes to prevent falsing errors in NSSL"
