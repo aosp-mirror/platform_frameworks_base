@@ -137,16 +137,18 @@ public final class ComponentCaller {
      *     <li>This is not a real time check, i.e. the permissions have been computed at launch
      *     time.
      *     <li>This method will return the correct result for content URIs passed at launch time,
-     *     specifically the ones from {@link Intent#getData()}, and {@link Intent#getClipData()} in
-     *     the intent of {@code startActivity(intent)}. For others, it will throw an
-     *     {@link IllegalArgumentException}.
+     *     specifically the ones from {@link Intent#getData()}, {@link Intent#EXTRA_STREAM}, and
+     *     {@link Intent#getClipData()} in the intent of {@code startActivity(intent)}. For others,
+     *     it will throw an {@link IllegalArgumentException}.
      * </ul>
      *
      * @param uri The content uri that is being checked
      * @param modeFlags The access modes to check
      * @return {@link PackageManager#PERMISSION_GRANTED} if this activity caller is allowed to
      *         access that uri, or {@link PackageManager#PERMISSION_DENIED} if it is not
-     * @throws IllegalArgumentException if uri is a non-content URI or it wasn't passed at launch
+     * @throws IllegalArgumentException if uri is a non-content URI or it wasn't passed at launch in
+     *                                  {@link Intent#getData()}, {@link Intent#EXTRA_STREAM}, and
+     *                                  {@link Intent#getClipData()}
      * @throws SecurityException if you don't have access to uri
      *
      * @see android.content.Context#checkContentUriPermissionFull(Uri, int, int, int)
