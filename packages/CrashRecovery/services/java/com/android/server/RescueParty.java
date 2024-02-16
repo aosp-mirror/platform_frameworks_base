@@ -75,6 +75,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class RescueParty {
     @VisibleForTesting
+    static final String PROP_ENABLE_RESCUE = "persist.sys.enable_rescue";
+    @VisibleForTesting
     static final int LEVEL_NONE = 0;
     @VisibleForTesting
     static final int LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS = 1;
@@ -123,7 +125,7 @@ public class RescueParty {
 
     private static boolean isDisabled() {
         // Check if we're explicitly enabled for testing
-        if (CrashRecoveryProperties.enableRescueParty().orElse(false)) {
+        if (SystemProperties.getBoolean(PROP_ENABLE_RESCUE, false)) {
             return false;
         }
 
@@ -174,6 +176,29 @@ public class RescueParty {
 
     static boolean isRebootPropertySet() {
         return CrashRecoveryProperties.attemptingReboot().orElse(false);
+    }
+
+    protected static long getLastFactoryResetTimeMs() {
+        return CrashRecoveryProperties.lastFactoryResetTimeMs().orElse(0L);
+    }
+
+    protected static int getMaxRescueLevelAttempted() {
+        return CrashRecoveryProperties.maxRescueLevelAttempted().orElse(LEVEL_NONE);
+    }
+
+    protected static void setFactoryResetProperty(boolean value) {
+        CrashRecoveryProperties.attemptingFactoryReset(value);
+    }
+    protected static void setRebootProperty(boolean value) {
+        CrashRecoveryProperties.attemptingReboot(value);
+    }
+
+    protected static void setLastFactoryResetTimeMs(long value) {
+        CrashRecoveryProperties.lastFactoryResetTimeMs(value);
+    }
+
+    protected static void setMaxRescueLevelAttempted(int level) {
+        CrashRecoveryProperties.maxRescueLevelAttempted(level);
     }
 
     /**
@@ -432,7 +457,7 @@ public class RescueParty {
             case LEVEL_WARM_REBOOT:
                 // Request the reboot from a separate thread to avoid deadlock on PackageWatchdog
                 // when device shutting down.
-                CrashRecoveryProperties.attemptingReboot(true);
+                setRebootProperty(true);
                 runnable = () -> {
                     try {
                         PowerManager pm = context.getSystemService(PowerManager.class);
@@ -454,9 +479,9 @@ public class RescueParty {
                 if (isRebootPropertySet()) {
                     break;
                 }
-                CrashRecoveryProperties.attemptingFactoryReset(true);
+                setFactoryResetProperty(true);
                 long now = System.currentTimeMillis();
-                CrashRecoveryProperties.lastFactoryResetTimeMs(now);
+                setLastFactoryResetTimeMs(now);
                 runnable = new Runnable() {
                     @Override
                     public void run() {
@@ -515,10 +540,10 @@ public class RescueParty {
     private static void resetAllSettingsIfNecessary(Context context, int mode,
             int level) throws Exception {
         // No need to reset Settings again if they are already reset in the current level once.
-        if (CrashRecoveryProperties.maxRescueLevelAttempted().orElse(LEVEL_NONE) >= level) {
+        if (getMaxRescueLevelAttempted() >= level) {
             return;
         }
-        CrashRecoveryProperties.maxRescueLevelAttempted(level);
+        setMaxRescueLevelAttempted(level);
         // Try our best to reset all settings possible, and once finished
         // rethrow any exception that we encountered
         Exception res = null;
@@ -733,7 +758,7 @@ public class RescueParty {
          * Will return {@code false} if a factory reset was already offered recently.
          */
         private boolean shouldThrottleReboot() {
-            Long lastResetTime = CrashRecoveryProperties.lastFactoryResetTimeMs().orElse(0L);
+            Long lastResetTime = getLastFactoryResetTimeMs();
             long now = System.currentTimeMillis();
             long throttleDurationMin = SystemProperties.getLong(PROP_THROTTLE_DURATION_MIN_FLAG,
                     DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN);
