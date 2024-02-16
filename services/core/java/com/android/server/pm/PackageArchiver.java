@@ -122,6 +122,7 @@ import java.util.concurrent.CompletableFuture;
 public class PackageArchiver {
 
     private static final String TAG = "PackageArchiverService";
+    private static final boolean DEBUG = true;
 
     public static final String EXTRA_UNARCHIVE_INTENT_SENDER =
             "android.content.pm.extra.UNARCHIVE_INTENT_SENDER";
@@ -362,6 +363,10 @@ public class PackageArchiver {
                     // TODO(b/319238030) Move this into installd.
                     if (!FileUtils.deleteContentsAndDir(iconsDir)) {
                         Slog.e(TAG, "Failed to clean up archive files for " + packageName);
+                    } else {
+                        if (DEBUG) {
+                            Slog.e(TAG, "Deleted icons at " + iconsDir.getAbsolutePath());
+                        }
                     }
                 });
     }
@@ -523,6 +528,9 @@ public class PackageArchiver {
                         iconFile.getAbsolutePath()));
             }
             out.flush();
+        }
+        if (DEBUG && iconFile.exists()) {
+            Slog.i(TAG, "Stored icon at " + iconFile.getAbsolutePath());
         }
         return iconFile.toPath();
     }
@@ -1193,6 +1201,9 @@ public class PackageArchiver {
             iconsDir.mkdirs();
             if (!iconsDir.isDirectory()) {
                 throw new IOException("Unable to create directory " + iconsDir);
+            }
+            if (DEBUG) {
+                Slog.i(TAG, "Created icons directory at " + iconsDir.getAbsolutePath());
             }
         }
         SELinux.restorecon(iconsDir);
