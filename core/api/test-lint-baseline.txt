@@ -2017,6 +2017,12 @@ UnflaggedApi: android.content.AttributionSource#AttributionSource(int, int, Stri
     New API must be flagged with @FlaggedApi: constructor android.content.AttributionSource(int,int,String,String,android.os.IBinder,String[],android.content.AttributionSource)
 UnflaggedApi: android.content.AttributionSource#AttributionSource(int, int, String, String, android.os.IBinder, String[], int, android.content.AttributionSource):
     New API must be flagged with @FlaggedApi: constructor android.content.AttributionSource(int,int,String,String,android.os.IBinder,String[],int,android.content.AttributionSource)
+UnflaggedApi: android.content.Intent#EXTENDED_FLAG_FILTER_MISMATCH:
+    New API must be flagged with @FlaggedApi: field android.content.Intent.EXTENDED_FLAG_FILTER_MISMATCH
+UnflaggedApi: android.content.Intent#addExtendedFlags(int):
+    New API must be flagged with @FlaggedApi: method android.content.Intent.addExtendedFlags(int)
+UnflaggedApi: android.content.Intent#getExtendedFlags():
+    New API must be flagged with @FlaggedApi: method android.content.Intent.getExtendedFlags()
 UnflaggedApi: android.content.pm.UserInfo#isCommunalProfile():
     New API must be flagged with @FlaggedApi: method android.content.pm.UserInfo.isCommunalProfile()
 UnflaggedApi: android.content.pm.UserInfo#isPrivateProfile():

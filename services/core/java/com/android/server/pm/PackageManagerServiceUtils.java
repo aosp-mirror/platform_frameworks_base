@@ -46,7 +46,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.Intent;
@@ -200,7 +200,7 @@ public class PackageManagerServiceUtils {
      */
     @Overridable
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Disabled
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**
@@ -1246,6 +1246,9 @@ public class PackageManagerServiceUtils {
                 ActivityManagerUtils.logUnsafeIntentEvent(
                         UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH,
                         filterCallingUid, intent, resolvedType, enforce);
+                if (android.security.Flags.enforceIntentFilterMatch()) {
+                    intent.addExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
+                }
                 if (enforce) {
                     Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
                     Slog.w(TAG, "Access blocked: " + comp.getComponentName());
