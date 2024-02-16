@@ -180,6 +180,16 @@ public final class CameraExtensionCharacteristics {
             EXTENSION_HDR,
             EXTENSION_NIGHT};
 
+    /**
+     * List of synthetic CameraCharacteristics keys that are supported in the extensions.
+     */
+    private static final List<CameraCharacteristics.Key>
+            SUPPORTED_SYNTHETIC_CAMERA_CHARACTERISTICS =
+            Arrays.asList(
+                    CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES,
+                    CameraCharacteristics.REQUEST_AVAILABLE_COLOR_SPACE_PROFILES
+            );
+
     private final Context mContext;
     private final String mCameraId;
     private final Map<String, CameraCharacteristics> mCharacteristicsMap;
@@ -874,11 +884,17 @@ public final class CameraExtensionCharacteristics {
                 Class<CameraCharacteristics.Key<?>> keyTyped =
                         (Class<CameraCharacteristics.Key<?>>) key;
 
-                // Do not include synthetic keys. Including synthetic keys leads to undefined
-                // behavior. This causes inclusion of capabilities that may not be supported in
-                // camera extensions.
                 ret.addAll(chars.getAvailableKeyList(CameraCharacteristics.class, keyTyped, keys,
                         /*includeSynthetic*/ false));
+
+                // Add synthetic keys to the available key list if they are part of the supported
+                // synthetic camera characteristic key list
+                for (CameraCharacteristics.Key charKey :
+                        SUPPORTED_SYNTHETIC_CAMERA_CHARACTERISTICS) {
+                    if (chars.get(charKey) != null) {
+                        ret.add(charKey);
+                    }
+                }
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to query the extension for all available keys! Extension "
@@ -990,6 +1006,7 @@ public final class CameraExtensionCharacteristics {
                     case ImageFormat.YUV_420_888:
                     case ImageFormat.JPEG:
                     case ImageFormat.JPEG_R:
+                    case ImageFormat.YCBCR_P010:
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported format: " + format);
@@ -1021,8 +1038,9 @@ public final class CameraExtensionCharacteristics {
                     return generateJpegSupportedSizes(
                             extenders.second.getSupportedPostviewResolutions(sz),
                                     streamMap);
-                }  else if (format == ImageFormat.JPEG_R) {
-                    // Jpeg_R/UltraHDR is currently not supported in the basic extension case
+                }  else if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010) {
+                    // Jpeg_R/UltraHDR + YCBCR_P010 is currently not supported in the basic
+                    // extension case
                     return new ArrayList<>();
                 } else {
                     throw new IllegalArgumentException("Unsupported format: " + format);
@@ -1118,16 +1136,16 @@ public final class CameraExtensionCharacteristics {
      *
      * <p>Device-specific extensions currently support at most three
      * multi-frame capture surface formats. ImageFormat.JPEG will be supported by all
-     * extensions while ImageFormat.YUV_420_888 and ImageFormat.JPEG_R may or may not be
-     * supported.</p>
+     * extensions while ImageFormat.YUV_420_888, ImageFormat.JPEG_R, or ImageFormat.YCBCR_P010
+     * may or may not be supported.</p>
      *
      * @param extension the extension type
      * @param format    device-specific extension output format
      * @return non-modifiable list of available sizes or an empty list if the format is not
      * supported.
      * @throws IllegalArgumentException in case of format different from ImageFormat.JPEG,
-     *                                  ImageFormat.YUV_420_888, ImageFormat.JPEG_R; or
-     *                                  unsupported extension.
+     *                                  ImageFormat.YUV_420_888, ImageFormat.JPEG_R,
+     *                                  ImageFormat.YCBCR_P010; or unsupported extension.
      */
     public @NonNull
     List<Size> getExtensionSupportedSizes(@Extension int extension, int format) {
@@ -1151,6 +1169,7 @@ public final class CameraExtensionCharacteristics {
                         case ImageFormat.YUV_420_888:
                         case ImageFormat.JPEG:
                         case ImageFormat.JPEG_R:
+                        case ImageFormat.YCBCR_P010:
                             break;
                         default:
                             throw new IllegalArgumentException("Unsupported format: " + format);
@@ -1183,8 +1202,9 @@ public final class CameraExtensionCharacteristics {
                         } else {
                             return generateSupportedSizes(null, format, streamMap);
                         }
-                    } else if (format == ImageFormat.JPEG_R) {
-                        // Jpeg_R/UltraHDR is currently not supported in the basic extension case
+                    } else if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010) {
+                        // Jpeg_R/UltraHDR + YCBCR_P010 is currently not supported in the
+                        // basic extension case
                         return new ArrayList<>();
                     } else {
                         throw new IllegalArgumentException("Unsupported format: " + format);
@@ -1213,7 +1233,8 @@ public final class CameraExtensionCharacteristics {
      * @return the range of estimated minimal and maximal capture latency in milliseconds
      * or null if no capture latency info can be provided
      * @throws IllegalArgumentException in case of format different from {@link ImageFormat#JPEG},
-     *                                  {@link ImageFormat#YUV_420_888}, {@link ImageFormat#JPEG_R};
+     *                                  {@link ImageFormat#YUV_420_888}, {@link ImageFormat#JPEG_R}
+     *                                  {@link ImageFormat#YCBCR_P010};
      *                                  or unsupported extension.
      */
     public @Nullable Range<Long> getEstimatedCaptureLatencyRangeMillis(@Extension int extension,
@@ -1222,6 +1243,7 @@ public final class CameraExtensionCharacteristics {
             case ImageFormat.YUV_420_888:
             case ImageFormat.JPEG:
             case ImageFormat.JPEG_R:
+            case ImageFormat.YCBCR_P010:
                 //No op
                 break;
             default:
@@ -1269,8 +1291,8 @@ public final class CameraExtensionCharacteristics {
                     // specific and cannot be estimated accurately enough.
                     return  null;
                 }
-                if (format == ImageFormat.JPEG_R) {
-                    // JpegR/UltraHDR is not supported for basic extensions
+                if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010) {
+                    // JpegR/UltraHDR + YCBCR_P010 is not supported for basic extensions
                     return null;
                 }
 
