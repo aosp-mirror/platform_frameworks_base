@@ -1697,6 +1697,7 @@ package android.hardware.display {
     field public static final int SWITCHING_TYPE_WITHIN_GROUPS = 1; // 0x1
     field public static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 16384; // 0x4000
     field public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 512; // 0x200
+    field public static final int VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 64; // 0x40
   }
 
 }
@@ -1752,6 +1753,10 @@ package android.hardware.input {
   public class InputSettings {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, @FloatRange(from=0, to=1) float);
     field public static final int DEFAULT_POINTER_SPEED = 0; // 0x0
+  }
+
+  public class VirtualKeyboard implements java.io.Closeable {
+    method public int getInputDeviceId();
   }
 
 }
