@@ -37,6 +37,7 @@ aconfig_declarations_group {
         "android.credentials.flags-aconfig-java",
         "android.database.sqlite-aconfig-java",
         "android.hardware.biometrics.flags-aconfig-java",
+        "android.hardware.devicestate.feature.flags-aconfig-java",
         "android.hardware.flags-aconfig-java",
         "android.hardware.radio.flags-aconfig-java",
         "android.hardware.usb.flags-aconfig-java",
@@ -160,6 +161,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com.android.window.flags.window-aconfig-java",
     aconfig_declarations: "com.android.window.flags.window-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// DeviceStateManager
+aconfig_declarations {
+    name: "android.hardware.devicestate.feature.flags-aconfig",
+    package: "android.hardware.devicestate.feature.flags",
+    srcs: ["core/java/android/hardware/devicestate/feature/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.hardware.devicestate.feature.flags-aconfig-java",
+    aconfig_declarations: "android.hardware.devicestate.feature.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
