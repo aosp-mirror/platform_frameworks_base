@@ -72,8 +72,8 @@ public class ProtoLogViewerConfigReaderTest {
             + "}\n";
 
 
-    private ProtoLogViewerConfigReader
-            mConfig = new ProtoLogViewerConfigReader();
+    private LegacyProtoLogViewerConfigReader
+            mConfig = new LegacyProtoLogViewerConfigReader();
     private File mTestViewerConfig;
 
     @Before
