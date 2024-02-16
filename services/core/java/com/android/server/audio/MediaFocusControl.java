@@ -1090,11 +1090,14 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      *                  accessibility.
      * @param testUid ignored if flags doesn't contain AudioManager.AUDIOFOCUS_FLAG_TEST
      *                otherwise the UID being injected for testing
+     * @param permissionOverridesCheck true if permission checks guaranteed that the call should
+     *                                 go through, false otherwise (e.g. non-privileged caller)
      * @return
      */
     protected int requestAudioFocus(@NonNull AudioAttributes aa, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, @NonNull String clientId, @NonNull String callingPackageName,
-            String attributionTag, int flags, int sdk, boolean forceDuck, int testUid) {
+            String attributionTag, int flags, int sdk, boolean forceDuck, int testUid,
+            boolean permissionOverridesCheck) {
         new MediaMetrics.Item(mMetricsId)
                 .setUid(Binder.getCallingUid())
                 .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackageName)
@@ -1126,10 +1129,9 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
-        if ((flags != AudioManager.AUDIOFOCUS_FLAG_TEST)
-                // note we're using the real uid for appOp evaluation
-                && (mAppOps.noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, Binder.getCallingUid(),
-                        callingPackageName, attributionTag, null) != AppOpsManager.MODE_ALLOWED)) {
+        final int res = mAppOps.noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, Binder.getCallingUid(),
+                callingPackageName, attributionTag, null);
+        if (!permissionOverridesCheck && res != AppOpsManager.MODE_ALLOWED) {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 

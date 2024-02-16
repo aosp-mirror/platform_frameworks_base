@@ -20,6 +20,8 @@ import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricManager
+import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
+import android.hardware.biometrics.Flags.customBiometricPrompt
 import android.hardware.biometrics.PromptInfo
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
@@ -38,11 +40,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.res.R
+import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
@@ -53,6 +55,7 @@ import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.events.ANIMATING_OUT
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -145,6 +148,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        mSetFlagsRule.disableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+        mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
         displayRepository = FakeDisplayRepository()
 
         displayStateInteractor =
@@ -391,6 +396,19 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
         assertThat(container.hasCredentialView()).isTrue()
         assertThat(container.hasBiometricPrompt()).isFalse()
+    }
+
+    @Test
+    fun testShowBiometricUIWhenCustomBpEnabledAndNoSensors() {
+        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+        val container = initializeFingerprintContainer(
+                authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        )
+        waitForIdleSync()
+
+        assertThat(customBiometricPrompt()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isTrue()
+        assertThat(container.hasCredentialView()).isFalse()
     }
 
     @Test

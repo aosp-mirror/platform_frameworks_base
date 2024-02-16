@@ -118,7 +118,8 @@ public class PipTaskOrganizerTest extends ShellTestCase {
                 mPipTransitionState, mPipBoundsState, mPipDisplayLayoutState,
                 mPipBoundsAlgorithm, mMockPhonePipMenuController, mMockPipAnimationController,
                 mMockPipSurfaceTransactionHelper, mMockPipTransitionController,
-                mMockPipParamsChangedForwarder, mMockOptionalSplitScreen, mMockDisplayController,
+                mMockPipParamsChangedForwarder, mMockOptionalSplitScreen,
+                Optional.empty() /* pipPerfHintControllerOptional */, mMockDisplayController,
                 mMockPipUiEventLogger, mMockShellTaskOrganizer, mMainExecutor);
         mMainExecutor.flushAll();
         preparePipTaskOrg();

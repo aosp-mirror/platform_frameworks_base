@@ -27,7 +27,6 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.Flags.centralizedStatusBarDimensRefactor
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.LargeScreenHeaderHelper
@@ -71,7 +70,7 @@ constructor(
         mainDispatcher,
     ) {
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
         constraintSet.apply {

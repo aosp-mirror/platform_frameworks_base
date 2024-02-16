@@ -23,8 +23,8 @@ import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule.Companion.DEFAULT_WIDGETS
-import com.android.systemui.communal.shared.CommunalWidgetHost
+import com.android.systemui.communal.widgets.CommunalWidgetHost
+import com.android.systemui.communal.widgets.CommunalWidgetModule.Companion.DEFAULT_WIDGETS
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer

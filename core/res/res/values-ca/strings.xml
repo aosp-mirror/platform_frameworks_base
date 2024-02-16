@@ -667,18 +667,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"L\'empremta digital s\'ha autenticat"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Cara autenticada; prem el botó per confirmar"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"El maquinari d\'empremtes digitals no està disponible."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"No es pot configurar l\'empremta digital"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Temps d\'espera esgotat per configurar l\'empremta digital. Torna-ho a provar."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"L\'usuari ha cancel·lat l\'operació d\'empremta digital."</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Massa intents. Utilitza el bloqueig de pantalla."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Massa intents. Utilitza el bloqueig de pantalla."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"No es pot processar l\'empremta digital. Torna-ho a provar."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No s\'ha registrat cap empremta digital."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Aquest dispositiu no té sensor d\'empremtes digitals."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"El sensor està desactivat temporalment."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"No es pot utilitzar el sensor d\'empremtes digitals. Visita un proveïdor de reparacions."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Aquest dispositiu no té sensor d\'empremtes digitals"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"S\'ha premut el botó d\'engegada"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dit <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utilitza l\'empremta digital"</string>

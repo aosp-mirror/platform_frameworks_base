@@ -15011,6 +15011,27 @@ public class TelephonyManager {
     }
 
     /**
+     * Get the emergency assistance package name.
+     *
+     * @return the package name of the emergency assistance app.
+     * @throws IllegalStateException if emergency assistance is not enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @FlaggedApi(android.permission.flags.Flags.FLAG_GET_EMERGENCY_ROLE_HOLDER_API_ENABLED)
+    @NonNull
+    @SystemApi
+    public String getEmergencyAssistancePackage() {
+        if (!isEmergencyAssistanceEnabled()) {
+            throw new IllegalStateException("isEmergencyAssistanceEnabled() is false.");
+        }
+        String emergencyRole = mContext.getSystemService(RoleManager.class)
+                .getEmergencyRoleHolder(mContext.getUserId());
+        return Objects.requireNonNull(emergencyRole, "Emergency role holder must not be null");
+    }
+
+    /**
      * Get the emergency number list based on current locale, sim, default, modem and network.
      *
      * <p>In each returned list, the emergency number {@link EmergencyNumber} coming from higher

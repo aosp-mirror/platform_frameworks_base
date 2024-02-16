@@ -666,18 +666,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"လက်ဗွေကို အထောက်အထား စိစစ်ပြီးပါပြီ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ၊ အတည်ပြုရန်ကို နှိပ်ပါ"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"လက်ဗွေ စက်ပစ္စည်းမရနိုင်ပါ။"</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"လက်ဗွေကို စနစ်ထည့်သွင်း၍ မရပါ"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"လက်ဗွေစနစ်ထည့်သွင်းချိန် ကုန်သွားပါပြီ။ ထပ်စမ်းကြည့်ပါ။"</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"လက်ဗွေယူခြင်း ပယ်ဖျက်လိုက်သည်။"</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"လက်ဗွေဖြင့် အထောက်အထားစိစစ်ခြင်းကို အသုံးပြုသူက ပယ်ဖျက်ထားသည်။"</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ကြိုးပမ်းမှုအကြိမ်ရေ များလွန်းသည်။ ဖန်သားပြင်လော့ခ်ချခြင်းကို အစားထိုးသုံးပါ။"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ကြိုးပမ်းမှုအကြိမ်ရေ များလွန်းသည်။ ဖန်သားပြင်လော့ခ်ချခြင်းကို အစားထိုးသုံးပါ။"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"လက်ဗွေကို လုပ်ဆောင်နိုင်ခြင်းမရှိပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"မည်သည့် လက်ဗွေကိုမျှ ထည့်သွင်းမထားပါ။"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ဤစက်တွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ။"</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"အာရုံခံကိရိယာကို ယာယီပိတ်ထားသည်။"</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"လက်ဗွေ အာရုံခံကိရိယာကို အသုံးပြု၍ မရပါ။ ပြုပြင်ရေး ဝန်ဆောင်မှုပေးသူထံသို့ သွားပါ"</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"ဤစက်ပစ္စည်းတွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"ဖွင့်ပိတ်ခလုတ် နှိပ်ထားသည်"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"လက်ချောင်း <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"လက်ဗွေ သုံးခြင်း"</string>

@@ -673,6 +673,10 @@ public final class ZenPolicy implements Parcelable {
             mZenPolicy.mPriorityMessages = PEOPLE_TYPE_NONE;
             mZenPolicy.mPriorityCalls = PEOPLE_TYPE_NONE;
             mZenPolicy.mConversationSenders = CONVERSATION_SENDERS_NONE;
+
+            if (Flags.modesApi()) {
+                mZenPolicy.mAllowChannels = CHANNEL_POLICY_NONE;
+            }
             return this;
         }
 
