@@ -5967,14 +5967,19 @@ public class ActivityManager {
     }
 
     /**
-     * Used by {@link com.android.systemui.theme.ThemeOverlayController} to notify of color
-     * palette readiness.
+     * Used by ThemeOverlayController to notify when color
+     * palette is ready.
+     *
+     * @param userId The ID of the user where ThemeOverlayController is ready.
+     *
+     * @throws RemoteException
+     *
      * @hide
      */
     @RequiresPermission(Manifest.permission.SET_THEME_OVERLAY_CONTROLLER_READY)
-    public void setThemeOverlayReady(boolean readiness) {
+    public void setThemeOverlayReady(@UserIdInt int userId) {
         try {
-            getService().setThemeOverlayReady(readiness);
+            getService().setThemeOverlayReady(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
