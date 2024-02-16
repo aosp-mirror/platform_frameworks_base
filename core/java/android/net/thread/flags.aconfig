@@ -1,8 +1,18 @@
 package: "com.android.net.thread.flags"
 
+# This file contains aconfig flags used from platform code
+# Flags used for module APIs must be in aconfig files under each modules
+
 flag {
     name: "thread_user_restriction_enabled"
     namespace: "thread_network"
     description: "Controls whether user restriction on thread networks is enabled"
     bug: "307679182"
+}
+
+flag {
+    name: "thread_enabled_platform"
+    namespace: "thread_network"
+    description: "Controls whether the Android Thread feature is enabled"
+    bug: "301473012"
 }

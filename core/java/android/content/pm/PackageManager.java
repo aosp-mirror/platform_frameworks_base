@@ -3892,7 +3892,7 @@ public abstract class PackageManager {
      * The device is capable of communicating with other devices via
      * <a href="https://www.threadgroup.org">Thread</a> networking protocol.
      */
-    @FlaggedApi("com.android.net.thread.flags.thread_enabled")
+    @FlaggedApi(com.android.net.thread.flags.Flags.FLAG_THREAD_ENABLED_PLATFORM)
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_THREAD_NETWORK = "android.hardware.thread_network";
 
