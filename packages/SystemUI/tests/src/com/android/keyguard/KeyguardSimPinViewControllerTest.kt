@@ -49,7 +49,9 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@TestableLooper.RunWithLooper
+// collectFlow in KeyguardPinBasedInputViewController.onViewAttached calls JavaAdapter.CollectFlow,
+// which calls View.onRepeatWhenAttached, which requires being run on main thread.
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class KeyguardSimPinViewControllerTest : SysuiTestCase() {
     private lateinit var simPinView: KeyguardSimPinView
     private lateinit var underTest: KeyguardSimPinViewController

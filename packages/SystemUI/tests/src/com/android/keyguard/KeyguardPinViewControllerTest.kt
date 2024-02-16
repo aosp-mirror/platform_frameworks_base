@@ -18,6 +18,7 @@ package com.android.keyguard
 
 import android.testing.TestableLooper
 import android.view.View
+import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -59,7 +60,9 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@TestableLooper.RunWithLooper
+// collectFlow in KeyguardPinBasedInputViewController.onViewAttached calls JavaAdapter.CollectFlow,
+// which calls View.onRepeatWhenAttached, which requires being run on main thread.
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class KeyguardPinViewControllerTest : SysuiTestCase() {
 
     private lateinit var objectKeyguardPINView: KeyguardPINView
@@ -90,6 +93,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     @Mock private val mEmergencyButtonController: EmergencyButtonController? = null
     private val falsingCollector: FalsingCollector = FalsingCollectorFake()
     private val keyguardKeyboardInteractor = KeyguardKeyboardInteractor(FakeKeyboardRepository())
+    private val passwordTextViewLayoutParams =
+        ViewGroup.LayoutParams(/* width= */ 0, /* height= */ 0)
     @Mock lateinit var postureController: DevicePostureController
     @Mock lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
@@ -104,11 +109,9 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        Mockito.`when`(mockKeyguardPinView.requireViewById<View>(R.id.bouncer_message_area))
+        `when`(mockKeyguardPinView.requireViewById<View>(R.id.bouncer_message_area))
             .thenReturn(keyguardMessageArea)
-        Mockito.`when`(
-                keyguardMessageAreaControllerFactory.create(any(KeyguardMessageArea::class.java))
-            )
+        `when`(keyguardMessageAreaControllerFactory.create(any(KeyguardMessageArea::class.java)))
             .thenReturn(keyguardMessageAreaController)
         `when`(mockKeyguardPinView.passwordTextViewId).thenReturn(R.id.pinEntry)
         `when`(mockKeyguardPinView.findViewById<PasswordTextView>(R.id.pinEntry))
@@ -121,6 +124,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(mockKeyguardPinView.buttons).thenReturn(arrayOf())
         `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
         `when`(featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)).thenReturn(false)
+        `when`(passwordTextView.layoutParams).thenReturn(passwordTextViewLayoutParams)
 
         objectKeyguardPINView =
             View.inflate(mContext, R.layout.keyguard_pin_view, null)
