@@ -44,6 +44,8 @@ import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepo
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
@@ -75,6 +77,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -130,6 +133,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     @Mock
     private lateinit var lockscreenToPrimaryBouncerTransitionViewModel:
         LockscreenToPrimaryBouncerTransitionViewModel
+    @Mock
+    private lateinit var transitionInteractor: KeyguardTransitionInteractor
 
     private lateinit var underTest: KeyguardQuickAffordancesCombinedViewModel
 
@@ -145,6 +150,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
     private val intendedAlphaMutableStateFlow: MutableStateFlow<Float> = MutableStateFlow(1f)
     // the viewModel does a `map { 1 - it }` on this value, which is why it's different
     private val intendedShadeAlphaMutableStateFlow: MutableStateFlow<Float> = MutableStateFlow(0f)
+
+    private val intendedFinishedKeyguardStateFlow = MutableStateFlow(KeyguardState.LOCKSCREEN)
 
     @Before
     fun setUp() {
@@ -242,6 +249,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
 
         intendedAlphaMutableStateFlow.value = 1f
         intendedShadeAlphaMutableStateFlow.value = 0f
+        intendedFinishedKeyguardStateFlow.value = KeyguardState.LOCKSCREEN
         whenever(aodToLockscreenTransitionViewModel.shortcutsAlpha)
             .thenReturn(intendedAlphaMutableStateFlow)
         whenever(dozingToLockscreenTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
@@ -263,7 +271,9 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         whenever(lockscreenToOccludedTransitionViewModel.shortcutsAlpha).thenReturn(emptyFlow())
         whenever(lockscreenToPrimaryBouncerTransitionViewModel.shortcutsAlpha)
             .thenReturn(emptyFlow())
-        whenever(shadeInteractor.qsExpansion).thenReturn(intendedShadeAlphaMutableStateFlow)
+        whenever(shadeInteractor.anyExpansion).thenReturn(intendedShadeAlphaMutableStateFlow)
+        whenever(transitionInteractor.finishedKeyguardState)
+            .thenReturn(intendedFinishedKeyguardStateFlow)
 
         underTest =
             KeyguardQuickAffordancesCombinedViewModel(
@@ -304,7 +314,8 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 lockscreenToGoneTransitionViewModel = lockscreenToGoneTransitionViewModel,
                 lockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel,
                 lockscreenToPrimaryBouncerTransitionViewModel =
-                    lockscreenToPrimaryBouncerTransitionViewModel
+                    lockscreenToPrimaryBouncerTransitionViewModel,
+                transitionInteractor = transitionInteractor,
             )
     }
 
@@ -680,6 +691,30 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 testConfig = testConfig,
                 configKey = configKey,
             )
+        }
+
+    @Test
+    fun shadeExpansionAlpha_changes_whenOnLockscreen() =
+        testScope.runTest {
+            intendedFinishedKeyguardStateFlow.value = KeyguardState.LOCKSCREEN
+            intendedShadeAlphaMutableStateFlow.value = 0.25f
+            val underTest = collectLastValue(underTest.transitionAlpha)
+            assertEquals(0.75f, underTest())
+
+            intendedShadeAlphaMutableStateFlow.value = 0.3f
+            assertEquals(0.7f, underTest())
+        }
+
+    @Test
+    fun shadeExpansionAlpha_alwaysZero_whenNotOnLockscreen() =
+        testScope.runTest {
+            intendedFinishedKeyguardStateFlow.value = KeyguardState.GONE
+            intendedShadeAlphaMutableStateFlow.value = 0.5f
+            val underTest = collectLastValue(underTest.transitionAlpha)
+            assertEquals(0f, underTest())
+
+            intendedShadeAlphaMutableStateFlow.value = 0.25f
+            assertEquals(0f, underTest())
         }
 
     private suspend fun setUpQuickAffordanceModel(
