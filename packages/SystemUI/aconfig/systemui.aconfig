@@ -295,7 +295,7 @@ flag {
 }
 
 flag {
-   name: "centralized_status_bar_dimens_refactor"
+   name: "centralized_status_bar_height_fix"
    namespace: "systemui"
    description: "Refactors shade header and keyguard status bar to read status bar dimens from a"
         " central place, instead of reading resources directly. This is to take into account display"

@@ -20,7 +20,7 @@ package com.android.systemui.shade;
 import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
-import static com.android.systemui.Flags.centralizedStatusBarDimensRefactor;
+import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
 import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.shade.NotificationPanelViewController.COUNTER_PANEL_OPEN_QS;
@@ -453,7 +453,7 @@ public class QuickSettingsController implements Dumpable {
         mUseLargeScreenShadeHeader =
                 LargeScreenUtils.shouldUseLargeScreenShadeHeader(mPanelView.getResources());
         mLargeScreenShadeHeaderHeight =
-                centralizedStatusBarDimensRefactor()
+                centralizedStatusBarHeightFix()
                         ? mLargeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
                         : mResources.getDimensionPixelSize(
                                 R.dimen.large_screen_shade_header_height);

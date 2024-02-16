@@ -18,7 +18,7 @@ package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
-import static com.android.systemui.Flags.centralizedStatusBarDimensRefactor;
+import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -194,7 +194,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
         int topPadding = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
         if (!LargeScreenUtils.shouldUseLargeScreenShadeHeader(mContext.getResources())) {
             topPadding =
-                    centralizedStatusBarDimensRefactor()
+                    centralizedStatusBarHeightFix()
                             ? LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext)
                             : mContext.getResources()
                                     .getDimensionPixelSize(

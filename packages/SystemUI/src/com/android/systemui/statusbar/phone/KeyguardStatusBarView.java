@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.Flags.centralizedStatusBarDimensRefactor;
+import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
 import static com.android.systemui.util.Utils.getStatusBarHeaderHeightKeyguard;
 
@@ -131,7 +131,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mUserSwitcherContainer = findViewById(R.id.user_switcher_container);
         mIsPrivacyDotEnabled = mContext.getResources().getBoolean(R.bool.config_enablePrivacyDot);
         loadDimens();
-        if (!centralizedStatusBarDimensRefactor()) {
+        if (!centralizedStatusBarHeightFix()) {
             setGravity(Gravity.CENTER_VERTICAL);
         }
     }
@@ -311,7 +311,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         final int minRight = (!isLayoutRtl() && mIsPrivacyDotEnabled)
                 ? Math.max(mMinDotWidth, mPadding.right) : mPadding.right;
 
-        int top = centralizedStatusBarDimensRefactor() ? waterfallTop + mPadding.top : waterfallTop;
+        int top = centralizedStatusBarHeightFix() ? waterfallTop + mPadding.top : waterfallTop;
         setPadding(minLeft, top, minRight, 0);
     }
 
