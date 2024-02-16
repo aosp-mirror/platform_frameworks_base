@@ -34,6 +34,7 @@ import com.android.wm.shell.common.pip.LegacySizeSpecSource;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.dagger.WMShellBaseModule;
@@ -212,6 +213,7 @@ public abstract class TvPipModule {
             PipParamsChangedForwarder pipParamsChangedForwarder,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreenController> splitScreenControllerOptional,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
@@ -219,8 +221,8 @@ public abstract class TvPipModule {
                 syncTransactionQueue, pipTransitionState, tvPipBoundsState, pipDisplayLayoutState,
                 tvPipBoundsAlgorithm, tvPipMenuController, pipAnimationController,
                 pipSurfaceTransactionHelper, tvPipTransition, pipParamsChangedForwarder,
-                splitScreenControllerOptional, displayController, pipUiEventLogger,
-                shellTaskOrganizer, mainExecutor);
+                splitScreenControllerOptional, pipPerfHintControllerOptional, displayController,
+                pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 
     @WMSingleton

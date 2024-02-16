@@ -45,6 +45,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SECURITY_LOGGING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_STATUS_BAR;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA;
@@ -54,7 +55,9 @@ import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
+import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
+import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -153,6 +156,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.org.conscrypt.TrustedCertificateStore;
+import com.android.internal.os.Zygote;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -229,7 +233,6 @@ public class DevicePolicyManager {
     private final IDevicePolicyManager mService;
     private final boolean mParentInstance;
     private final DevicePolicyResourcesManager mResourcesManager;
-
 
     /** @hide */
     public DevicePolicyManager(Context context, IDevicePolicyManager service) {
@@ -4115,6 +4118,19 @@ public class DevicePolicyManager {
             }
         }
         return MTE_NOT_CONTROLLED_BY_POLICY;
+    }
+
+    /**
+     * Get the current MTE state of the device.
+     *
+     * <a href="https://source.android.com/docs/security/test/memory-safety/arm-mte">
+     * Learn more about MTE</a>
+     *
+     * @return whether MTE is currently enabled on the device.
+     */
+    @FlaggedApi(FLAG_IS_MTE_POLICY_ENFORCED)
+    public static boolean isMtePolicyEnforced() {
+        return Zygote.nativeSupportsMemoryTagging();
     }
 
     /** Indicates that content protection is not controlled by policy, allowing user to choose. */
@@ -14043,6 +14059,74 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Controls whether audit logging is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
+    public void setAuditLogEnabled(boolean enabled) {
+        throwIfParentInstance("setAuditLogEnabled");
+        try {
+            mService.setAuditLogEnabled(mContext.getPackageName(), true);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return Whether audit logging is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
+    public boolean isAuditLogEnabled() {
+        throwIfParentInstance("isAuditLogEnabled");
+        try {
+            return mService.isAuditLogEnabled(mContext.getPackageName());
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+            // unreachable
+            return false;
+        }
+    }
+
+    /**
+     * Sets audit log event callback. Only one callback per UID is active at any time, when a new
+     * callback is set, the previous one is forgotten. Should only be called when audit log policy
+     * is enforced by the caller. Disabling the policy clears the callback. Each time a new callback
+     * is set, it will first be invoked with all the audit log events available at the time.
+     *
+     * @param callback callback to invoke when new audit log events become available or {@code null}
+     *                 to clear the callback.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
+    public void setAuditLogEventCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @Nullable Consumer<List<SecurityEvent>> callback) {
+        throwIfParentInstance("setAuditLogEventCallback");
+        final IAuditLogEventsCallback wrappedCallback = callback == null
+                ? null
+                : new IAuditLogEventsCallback.Stub() {
+                    @Override
+                    public void onNewAuditLogEvents(List<SecurityEvent> events) {
+                        executor.execute(() -> callback.accept(events));
+                    }
+                };
+        try {
+            mService.setAuditLogEventsCallback(mContext.getPackageName(), wrappedCallback);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Called by device owner or profile owner of an organization-owned managed profile to retrieve
      * all new security logging entries since the last call to this API after device boots.
      *
@@ -17038,6 +17122,26 @@ public class DevicePolicyManager {
         }
         try {
             return mService.getWifiSsidPolicy(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     *
+     * Returns whether the device considers itself to be potentially stolen.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_THEFT_DETECTION)
+    @FlaggedApi(Flags.FLAG_DEVICE_THEFT_API_ENABLED)
+    public boolean isTheftDetectionTriggered() {
+        throwIfParentInstance("isTheftDetectionTriggered");
+        if (mService == null) {
+            return false;
+        }
+        try {
+            return mService.isTheftDetectionTriggered(mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

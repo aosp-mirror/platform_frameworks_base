@@ -27,6 +27,8 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyResourcesManager;
@@ -118,9 +120,52 @@ public class CrossProfileAppsTest {
     public void initUsers() throws Exception {
         when(mUserManager.isManagedProfile(PERSONAL_PROFILE.getIdentifier())).thenReturn(false);
         when(mUserManager.isManagedProfile(MANAGED_PROFILE.getIdentifier())).thenReturn(true);
+        when(mUserManager.isProfile(PERSONAL_PROFILE.getIdentifier())).thenReturn(false);
+        when(mUserManager.isProfile(MANAGED_PROFILE.getIdentifier())).thenReturn(true);
 
         mTargetProfiles = new ArrayList<>();
         when(mService.getTargetUserProfiles(MY_PACKAGE)).thenReturn(mTargetProfiles);
+    }
+
+    @Test
+    public void isProfile_managedProfile_returnsTrue() {
+        setValidTargetProfile(MANAGED_PROFILE);
+
+        boolean result = mCrossProfileApps.isProfile(MANAGED_PROFILE);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void isProfile_personalProfile_returnsFalse() {
+        setValidTargetProfile(PERSONAL_PROFILE);
+
+        boolean result = mCrossProfileApps.isProfile(PERSONAL_PROFILE);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void isManagedProfile_managedProfile_returnsTrue() {
+        setValidTargetProfile(MANAGED_PROFILE);
+
+        boolean result = mCrossProfileApps.isManagedProfile(MANAGED_PROFILE);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void isManagedProfile_personalProfile_returnsFalse() {
+        setValidTargetProfile(PERSONAL_PROFILE);
+
+        boolean result = mCrossProfileApps.isManagedProfile(PERSONAL_PROFILE);
+
+        assertFalse(result);
+    }
+
+    @Test(expected = SecurityException.class)
+    public void isManagedProfile_notValidTarget_throwsSecurityException() {
+        mCrossProfileApps.isManagedProfile(PERSONAL_PROFILE);
     }
 
     @Test

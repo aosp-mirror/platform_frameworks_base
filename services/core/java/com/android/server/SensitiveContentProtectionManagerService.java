@@ -16,10 +16,9 @@
 
 package com.android.server;
 
+import static android.permission.flags.Flags.sensitiveNotificationAppProtection;
 import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
-
 import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.server.notification.Flags.sensitiveNotificationAppProtection;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

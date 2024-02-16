@@ -92,7 +92,7 @@ public final class MediaItemInfo implements Parcelable {
                 DATA_TYPE_DEPTH,
                 DATA_TYPE_GAIN_MAP,
                 DATA_TYPE_HIGH_FRAME_RATE,
-                DATA_TYPE_CUE_POINTS,
+                DATA_TYPE_SPEED_SETTING_CUE_POINTS,
                 DATA_TYPE_GAPLESS,
                 DATA_TYPE_SPATIAL_AUDIO,
                 DATA_TYPE_HIGH_DYNAMIC_RANGE_VIDEO,
@@ -109,7 +109,10 @@ public final class MediaItemInfo implements Parcelable {
     /** The media item includes audio data. */
     public static final long DATA_TYPE_AUDIO = 1L << 2;
 
-    /** The media item includes metadata. */
+    /**
+     * The media item includes static media container metadata (for example, capture frame rate or
+     * location information).
+     */
     public static final long DATA_TYPE_METADATA = 1L << 3;
 
     /** The media item includes depth (z-distance) information. */
@@ -121,8 +124,11 @@ public final class MediaItemInfo implements Parcelable {
     /** The media item includes high frame rate video data. */
     public static final long DATA_TYPE_HIGH_FRAME_RATE = 1L << 6;
 
-    /** The media item includes time-dependent speed setting metadata. */
-    public static final long DATA_TYPE_CUE_POINTS = 1L << 7;
+    /**
+     * The media item includes time-dependent speed information (for example, slow motion cue
+     * points).
+     */
+    public static final long DATA_TYPE_SPEED_SETTING_CUE_POINTS = 1L << 7;
 
     /** The media item includes gapless audio metadata. */
     public static final long DATA_TYPE_GAPLESS = 1L << 8;

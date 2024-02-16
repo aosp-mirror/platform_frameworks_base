@@ -40,6 +40,7 @@ import android.app.ActivityThread.ActivityClientRecord;
 import android.app.Application;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
+import android.app.PictureInPictureUiState;
 import android.app.ResourcesManager;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
@@ -706,6 +707,9 @@ public class ActivityThreadTest {
         final TestActivity activity = mActivityTestRule.launchActivity(startIntent);
         final ActivityThread activityThread = activity.getActivityThread();
         final ActivityClientRecord r = getActivityClientRecord(activity);
+        if (android.app.Flags.enablePipUiStateCallbackOnEntering()) {
+            activity.mPipUiStateLatch = new CountDownLatch(1);
+        }
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             activityThread.handlePictureInPictureRequested(r);
@@ -940,6 +944,11 @@ public class ActivityThreadTest {
          * latch reaches 0.
          */
         volatile CountDownLatch mConfigLatch;
+        /**
+         * A latch used to notify tests that we're about to wait for the
+         * onPictureInPictureUiStateChanged callback.
+         */
+        volatile CountDownLatch mPipUiStateLatch;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -974,12 +983,27 @@ public class ActivityThreadTest {
             if (getIntent().getBooleanExtra(PIP_REQUESTED_OVERRIDE_ENTER, false)) {
                 enterPictureInPictureMode(new PictureInPictureParams.Builder().build());
                 mPipEntered = true;
+                // Await for onPictureInPictureUiStateChanged callback if applicable
+                if (mPipUiStateLatch != null) {
+                    try {
+                        mPipUiStateLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
                 return true;
             } else if (getIntent().getBooleanExtra(PIP_REQUESTED_OVERRIDE_SKIP, false)) {
                 mPipEnterSkipped = true;
                 return false;
             }
             return super.onPictureInPictureRequested();
+        }
+
+        @Override
+        public void onPictureInPictureUiStateChanged(PictureInPictureUiState pipState) {
+            if (mPipUiStateLatch != null && pipState.isEnteringPip()) {
+                mPipUiStateLatch.countDown();
+            }
         }
 
         boolean pipRequested() {

@@ -17,6 +17,7 @@
 package com.android.systemui.communal.ui.compose
 
 import android.content.ComponentName
+import android.os.UserHandle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
@@ -33,9 +34,10 @@ fun rememberContentListState(
     return remember(communalContent) {
         ContentListState(
             communalContent,
-            { componentName, priority ->
+            { componentName, user, priority ->
                 viewModel.onAddWidget(
                     componentName,
+                    user,
                     priority,
                     widgetConfigurator,
                 )
@@ -54,7 +56,8 @@ fun rememberContentListState(
 class ContentListState
 internal constructor(
     communalContent: List<CommunalContentModel>,
-    private val onAddWidget: (componentName: ComponentName, priority: Int) -> Unit,
+    private val onAddWidget:
+        (componentName: ComponentName, user: UserHandle, priority: Int) -> Unit,
     private val onDeleteWidget: (id: Int) -> Unit,
     private val onReorderWidgets: (widgetIdToPriorityMap: Map<Int, Int>) -> Unit,
 ) {
@@ -81,10 +84,16 @@ internal constructor(
      *
      * @param newItemComponentName name of the new widget that was dropped into the list; null if no
      *   new widget was added.
+     * @param newItemUser user profile associated with the new widget that was dropped into the
+     *   list; null if no new widget was added.
      * @param newItemIndex index at which the a new widget was dropped into the list; null if no new
      *   widget was dropped.
      */
-    fun onSaveList(newItemComponentName: ComponentName? = null, newItemIndex: Int? = null) {
+    fun onSaveList(
+        newItemComponentName: ComponentName? = null,
+        newItemUser: UserHandle? = null,
+        newItemIndex: Int? = null
+    ) {
         // filters placeholder, but, maintains the indices of the widgets as if the placeholder was
         // in the list. When persisted in DB, this leaves space for the new item (to be added) at
         // the correct priority.
@@ -100,8 +109,8 @@ internal constructor(
                 .toMap()
         // reorder and then add the new widget
         onReorderWidgets(widgetIdToPriorityMap)
-        if (newItemComponentName != null && newItemIndex != null) {
-            onAddWidget(newItemComponentName, /*priority=*/ list.size - newItemIndex)
+        if (newItemComponentName != null && newItemUser != null && newItemIndex != null) {
+            onAddWidget(newItemComponentName, newItemUser, /*priority=*/ list.size - newItemIndex)
         }
     }
 
