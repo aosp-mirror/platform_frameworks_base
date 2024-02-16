@@ -199,6 +199,16 @@ public final class CallAudioState implements Parcelable {
     }
 
     /**
+     * @return Bit mask of all routes supported by this call, won't be changed by streaming state.
+     *
+     * @hide
+     */
+    @CallAudioRoute
+    public int getRawSupportedRouteMask() {
+        return supportedRouteMask;
+    }
+
+    /**
      * @return The {@link BluetoothDevice} through which audio is being routed.
      *         Will not be {@code null} if {@link #getRoute()} returns {@link #ROUTE_BLUETOOTH}.
      */
