@@ -296,6 +296,10 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         clickObject(MEDIA_SESSION_START_RADIO_BUTTON_ID)
     }
 
+    fun setSourceRectHint() {
+        clickObject(SOURCE_RECT_HINT)
+    }
+
     fun checkWithCustomActionsCheckbox() =
         uiDevice
             .findObject(By.res(packageName, WITH_CUSTOM_ACTIONS_BUTTON_ID))
@@ -444,6 +448,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         private const val MEDIA_SESSION_START_RADIO_BUTTON_ID = "media_session_start"
         private const val ENTER_PIP_ON_USER_LEAVE_HINT = "enter_pip_on_leave_manual"
         private const val ENTER_PIP_AUTOENTER = "enter_pip_on_leave_autoenter"
+        private const val SOURCE_RECT_HINT = "set_source_rect_hint"
         // minimum number of steps to take, when animating gestures, needs to be 2
         // so that there is at least a single intermediate layer that flicker tests can check
         private const val MIN_STEPS_TO_ANIMATE = 2
