@@ -68,6 +68,22 @@ public final class VisualQueryDetectedResult implements Parcelable {
         return 15;
     }
 
+    /**
+     * Detected signal representing the arbitrary data that will make accessibility detections work.
+     *
+     * This field should only be set if the device setting for allowing accessibility data is on
+     * based on the result of {@link VisualQueryDetector#isAccessibilityDetectionEnabled()}. If the
+     * enable bit return by the method is {@code false}, it would suggest a failure to egress the
+     * {@link VisualQueryDetectedResult} object with this field set. The system server will prevent
+     * egress and invoke
+     * {@link VisualQueryDetector.Callback#onFailure(VisualQueryDetectionServiceFailure)}.
+     */
+    @Nullable
+    private final byte[] mAccessibilityDetectionData;
+    private static byte[] defaultAccessibilityDetectionData() {
+        return null;
+    }
+
     private void onConstructed() {
         Preconditions.checkArgumentInRange(mSpeakerId, 0, getMaxSpeakerId(), "speakerId");
     }
@@ -78,7 +94,10 @@ public final class VisualQueryDetectedResult implements Parcelable {
      * @hide
      */
     public Builder buildUpon() {
-        return new Builder().setPartialQuery(mPartialQuery).setSpeakerId(mSpeakerId);
+        return new Builder()
+                .setPartialQuery(mPartialQuery)
+                .setSpeakerId(mSpeakerId)
+                .setAccessibilityDetectionData(mAccessibilityDetectionData);
     }
 
 
@@ -98,11 +117,13 @@ public final class VisualQueryDetectedResult implements Parcelable {
     @DataClass.Generated.Member
     /* package-private */ VisualQueryDetectedResult(
             @NonNull String partialQuery,
-            int speakerId) {
+            int speakerId,
+            @Nullable byte[] accessibilityDetectionData) {
         this.mPartialQuery = partialQuery;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPartialQuery);
         this.mSpeakerId = speakerId;
+        this.mAccessibilityDetectionData = accessibilityDetectionData;
 
         onConstructed();
     }
@@ -125,6 +146,16 @@ public final class VisualQueryDetectedResult implements Parcelable {
         return mSpeakerId;
     }
 
+    /**
+     * Detected signal representing the data for allowing accessibility feature. This field can
+     * only be set when the secure device settings is set to true by either settings page UI or
+     * {@link VisualQueryDetector@setAccessibilityDetectionEnabled(boolean)}
+     */
+    @DataClass.Generated.Member
+    public @Nullable byte[] getAccessibilityDetectionData() {
+        return mAccessibilityDetectionData;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -133,7 +164,8 @@ public final class VisualQueryDetectedResult implements Parcelable {
 
         return "VisualQueryDetectedResult { " +
                 "partialQuery = " + mPartialQuery + ", " +
-                "speakerId = " + mSpeakerId +
+                "speakerId = " + mSpeakerId + ", " +
+                "accessibilityDetectionData = " + java.util.Arrays.toString(mAccessibilityDetectionData) +
         " }";
     }
 
@@ -151,7 +183,8 @@ public final class VisualQueryDetectedResult implements Parcelable {
         //noinspection PointlessBooleanExpression
         return true
                 && Objects.equals(mPartialQuery, that.mPartialQuery)
-                && mSpeakerId == that.mSpeakerId;
+                && mSpeakerId == that.mSpeakerId
+                && java.util.Arrays.equals(mAccessibilityDetectionData, that.mAccessibilityDetectionData);
     }
 
     @Override
@@ -163,6 +196,7 @@ public final class VisualQueryDetectedResult implements Parcelable {
         int _hash = 1;
         _hash = 31 * _hash + Objects.hashCode(mPartialQuery);
         _hash = 31 * _hash + mSpeakerId;
+        _hash = 31 * _hash + java.util.Arrays.hashCode(mAccessibilityDetectionData);
         return _hash;
     }
 
@@ -174,6 +208,7 @@ public final class VisualQueryDetectedResult implements Parcelable {
 
         dest.writeString(mPartialQuery);
         dest.writeInt(mSpeakerId);
+        dest.writeByteArray(mAccessibilityDetectionData);
     }
 
     @Override
@@ -189,11 +224,13 @@ public final class VisualQueryDetectedResult implements Parcelable {
 
         String partialQuery = in.readString();
         int speakerId = in.readInt();
+        byte[] accessibilityDetectionData = in.createByteArray();
 
         this.mPartialQuery = partialQuery;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPartialQuery);
         this.mSpeakerId = speakerId;
+        this.mAccessibilityDetectionData = accessibilityDetectionData;
 
         onConstructed();
     }
@@ -221,6 +258,7 @@ public final class VisualQueryDetectedResult implements Parcelable {
 
         private @NonNull String mPartialQuery;
         private int mSpeakerId;
+        private @Nullable byte[] mAccessibilityDetectionData;
 
         private long mBuilderFieldsSet = 0L;
 
@@ -251,10 +289,23 @@ public final class VisualQueryDetectedResult implements Parcelable {
             return this;
         }
 
+        /**
+         * Detected signal representing the data for allowing accessibility feature. This field can
+         * only be set when the secure device settings is set to true by either settings page UI or
+         * {@link VisualQueryDetector@setAccessibilityDetectionEnabled(boolean)}
+         */
+        @DataClass.Generated.Member
+        public @NonNull Builder setAccessibilityDetectionData(@NonNull byte... value) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x4;
+            mAccessibilityDetectionData = value;
+            return this;
+        }
+
         /** Builds the instance. This builder should not be touched after calling this! */
         public @NonNull VisualQueryDetectedResult build() {
             checkNotUsed();
-            mBuilderFieldsSet |= 0x4; // Mark builder used
+            mBuilderFieldsSet |= 0x8; // Mark builder used
 
             if ((mBuilderFieldsSet & 0x1) == 0) {
                 mPartialQuery = defaultPartialQuery();
@@ -262,14 +313,18 @@ public final class VisualQueryDetectedResult implements Parcelable {
             if ((mBuilderFieldsSet & 0x2) == 0) {
                 mSpeakerId = defaultSpeakerId();
             }
+            if ((mBuilderFieldsSet & 0x4) == 0) {
+                mAccessibilityDetectionData = defaultAccessibilityDetectionData();
+            }
             VisualQueryDetectedResult o = new VisualQueryDetectedResult(
                     mPartialQuery,
-                    mSpeakerId);
+                    mSpeakerId,
+                    mAccessibilityDetectionData);
             return o;
         }
 
         private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x4) != 0) {
+            if ((mBuilderFieldsSet & 0x8) != 0) {
                 throw new IllegalStateException(
                         "This Builder should not be reused. Use a new Builder instance instead");
             }
@@ -277,10 +332,10 @@ public final class VisualQueryDetectedResult implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1704949386772L,
+            time = 1707429290528L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/VisualQueryDetectedResult.java",
-            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPartialQuery\nprivate final  int mSpeakerId\nprivate static  java.lang.String defaultPartialQuery()\nprivate static  int defaultSpeakerId()\npublic static  int getMaxSpeakerId()\nprivate  void onConstructed()\npublic  android.service.voice.VisualQueryDetectedResult.Builder buildUpon()\nclass VisualQueryDetectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPartialQuery\nprivate final  int mSpeakerId\nprivate final @android.annotation.Nullable byte[] mAccessibilityDetectionData\nprivate static  java.lang.String defaultPartialQuery()\nprivate static  int defaultSpeakerId()\npublic static  int getMaxSpeakerId()\nprivate static  byte[] defaultAccessibilityDetectionData()\nprivate  void onConstructed()\npublic  android.service.voice.VisualQueryDetectedResult.Builder buildUpon()\nclass VisualQueryDetectedResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

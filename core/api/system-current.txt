@@ -13453,6 +13453,7 @@ package android.service.voice {
 
   @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public final class VisualQueryDetectedResult implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public byte[] getAccessibilityDetectionData();
     method public static int getMaxSpeakerId();
     method @NonNull public String getPartialQuery();
     method public int getSpeakerId();
@@ -13463,6 +13464,7 @@ package android.service.voice {
   public static final class VisualQueryDetectedResult.Builder {
     ctor public VisualQueryDetectedResult.Builder();
     method @NonNull public android.service.voice.VisualQueryDetectedResult build();
+    method @NonNull public android.service.voice.VisualQueryDetectedResult.Builder setAccessibilityDetectionData(@NonNull byte...);
     method @NonNull public android.service.voice.VisualQueryDetectedResult.Builder setPartialQuery(@NonNull String);
     method @NonNull public android.service.voice.VisualQueryDetectedResult.Builder setSpeakerId(int);
   }
@@ -13500,7 +13502,10 @@ package android.service.voice {
   }
 
   public class VisualQueryDetector {
+    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public void clearAccessibilityDetectionEnabledListener();
     method public void destroy();
+    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public boolean isAccessibilityDetectionEnabled();
+    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public void setAccessibilityDetectionEnabledListener(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(allOf={android.Manifest.permission.CAMERA, android.Manifest.permission.RECORD_AUDIO}) public boolean startRecognition();
     method @RequiresPermission(allOf={android.Manifest.permission.CAMERA, android.Manifest.permission.RECORD_AUDIO}) public boolean stopRecognition();
     method public void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);
