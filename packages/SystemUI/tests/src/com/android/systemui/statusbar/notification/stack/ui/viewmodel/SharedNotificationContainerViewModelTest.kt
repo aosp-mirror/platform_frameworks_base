@@ -21,7 +21,7 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR
+import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
@@ -134,7 +134,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun validatePaddingTopInSplitShade_refactorFlagOff_usesLargeHeaderResource() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
             whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
                 .thenReturn(true)
@@ -153,7 +153,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun validatePaddingTopInSplitShade_refactorFlagOn_usesLargeHeaderHelper() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
             whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
                 .thenReturn(true)
@@ -210,7 +210,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun validateMarginTopWithLargeScreenHeader_refactorFlagOff_usesResource() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
             val headerResourceHeight = 50
             val headerHelperHeight = 100
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
@@ -229,7 +229,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun validateMarginTopWithLargeScreenHeader_refactorFlagOn_usesHelper() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
             val headerResourceHeight = 50
             val headerHelperHeight = 100
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
@@ -449,7 +449,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun boundsOnLockscreenInSplitShade_refactorFlagOff_usesLargeHeaderResource() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
             val bounds by collectLastValue(underTest.bounds)
 
             // When in split shade
@@ -478,7 +478,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun boundsOnLockscreenInSplitShade_refactorFlagOn_usesLargeHeaderHelper() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
             val bounds by collectLastValue(underTest.bounds)
 
             // When in split shade

@@ -26,7 +26,7 @@ import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR
+import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.fragments.FragmentService
@@ -162,7 +162,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testLargeScreen_updateResources_refactorFlagOff_splitShadeHeightIsSet_basedOnResource() {
-        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         val helperHeight = 30
         val resourceHeight = 20
         whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(helperHeight)
@@ -183,7 +183,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testLargeScreen_updateResources_refactorFlagOn_splitShadeHeightIsSet_basedOnHelper() {
-        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         val helperHeight = 30
         val resourceHeight = 20
         whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(helperHeight)
@@ -425,7 +425,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testLargeScreenLayout_refactorFlagOff_qsAndNotifsTopMarginIsOfHeaderResourceHeight() {
-        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         setLargeScreen()
         val largeScreenHeaderHelperHeight = 200
         val largeScreenHeaderResourceHeight = 100
@@ -445,7 +445,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testLargeScreenLayout_refactorFlagOn_qsAndNotifsTopMarginIsOfHeaderHelperHeight() {
-        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         setLargeScreen()
         val largeScreenHeaderHelperHeight = 200
         val largeScreenHeaderResourceHeight = 100
