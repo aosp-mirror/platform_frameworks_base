@@ -18,21 +18,23 @@ package com.android.server.accessibility;
 
 import static com.android.server.accessibility.AbstractAccessibilityServiceConnection.DISPLAY_TYPE_DEFAULT;
 import static com.android.server.accessibility.AccessibilityWindowManagerWithAccessibilityWindowTest.DisplayIdMatcher.displayId;
+import static com.android.server.accessibility.AccessibilityWindowManagerWithAccessibilityWindowTest.WindowIdMatcher.windowId;
 import static com.android.server.accessibility.AccessibilityWindowManagerWithAccessibilityWindowTest.WindowChangesMatcher.a11yWindowChanges;
-import static com.android.server.accessibility.AccessibilityWindowManagerWithAccessibilityWindowTest.WindowIdMatcher.a11yWindowId;
+import static com.android.server.accessibility.AccessibilityWindowManagerWithAccessibilityWindowTest.EventWindowIdMatcher.eventWindowId;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -350,6 +352,88 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
     }
 
     @Test
+    public void onWindowsChanged_shouldNotReportNonTouchableWindow() {
+        final AccessibilityWindow window = mWindows.get(Display.DEFAULT_DISPLAY).get(0);
+        when(window.isTouchable()).thenReturn(false);
+        final int windowId = mA11yWindowManager.findWindowIdLocked(
+                USER_SYSTEM_ID, window.getWindowInfo().token);
+
+        onAccessibilityWindowsChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
+
+        final List<AccessibilityWindowInfo> a11yWindows =
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
+        assertThat(a11yWindows, not(hasItem(windowId(windowId))));
+    }
+
+    @Test
+    public void onWindowsChanged_shouldReportFocusedNonTouchableWindow() {
+        final AccessibilityWindow window = mWindows.get(Display.DEFAULT_DISPLAY).get(
+                DEFAULT_FOCUSED_INDEX);
+        when(window.isTouchable()).thenReturn(false);
+        final int windowId = mA11yWindowManager.findWindowIdLocked(
+                USER_SYSTEM_ID, window.getWindowInfo().token);
+
+        onAccessibilityWindowsChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
+
+        final List<AccessibilityWindowInfo> a11yWindows =
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
+        assertThat(a11yWindows, hasItem(windowId(windowId)));
+    }
+
+    @Test
+    public void onWindowsChanged_trustedFocusedNonTouchableWindow_shouldNotHideWindowsBelow() {
+        // Make the focused trusted un-touchable window fullscreen.
+        final AccessibilityWindow window = mWindows.get(Display.DEFAULT_DISPLAY).get(
+                DEFAULT_FOCUSED_INDEX);
+        setRegionForMockAccessibilityWindow(window, new Region(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
+        when(window.isTouchable()).thenReturn(false);
+        when(window.isTrustedOverlay()).thenReturn(true);
+
+        onAccessibilityWindowsChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
+
+        final List<AccessibilityWindowInfo> a11yWindows =
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
+        assertThat(a11yWindows, hasSize(NUM_OF_WINDOWS));
+    }
+
+    @Test
+    public void onWindowsChanged_accessibilityOverlay_shouldNotHideWindowsBelow() {
+        // Make the a11y overlay window fullscreen.
+        final AccessibilityWindow window = mWindows.get(Display.DEFAULT_DISPLAY).get(0);
+        setRegionForMockAccessibilityWindow(window, new Region(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
+        when(window.getType()).thenReturn(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
+
+        onAccessibilityWindowsChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
+
+        final List<AccessibilityWindowInfo> a11yWindows =
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
+        assertThat(a11yWindows, hasSize(NUM_OF_WINDOWS));
+    }
+
+    @Test
+    public void onWindowsChanged_shouldReportFocusedWindowEvenIfOccluded() {
+        // Make the front window fullscreen.
+        final AccessibilityWindow frontWindow = mWindows.get(Display.DEFAULT_DISPLAY).get(0);
+        setRegionForMockAccessibilityWindow(frontWindow,
+                new Region(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT));
+        final int frontWindowId = mA11yWindowManager.findWindowIdLocked(
+                USER_SYSTEM_ID, frontWindow.getWindowInfo().token);
+
+        final AccessibilityWindow focusedWindow = mWindows.get(Display.DEFAULT_DISPLAY).get(
+                DEFAULT_FOCUSED_INDEX);
+        final int focusedWindowId = mA11yWindowManager.findWindowIdLocked(
+                USER_SYSTEM_ID, focusedWindow.getWindowInfo().token);
+
+        onAccessibilityWindowsChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
+
+        final List<AccessibilityWindowInfo> a11yWindows =
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
+        assertThat(a11yWindows, hasSize(2));
+        assertThat(a11yWindows.get(0), windowId(frontWindowId));
+        assertThat(a11yWindows.get(1), windowId(focusedWindowId));
+    }
+
+    @Test
     public void onWindowsChangedAndForceSend_shouldUpdateWindows() {
         assertNotEquals("new title",
                 toString(mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY)
@@ -631,11 +715,11 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
                 .sendAccessibilityEventForCurrentUserLocked(captor.capture());
         assertThat(captor.getAllValues().get(0),
                 allOf(displayId(Display.DEFAULT_DISPLAY),
-                        a11yWindowId(currentActiveWindowId),
+                        eventWindowId(currentActiveWindowId),
                         a11yWindowChanges(AccessibilityEvent.WINDOWS_CHANGE_ACTIVE)));
         assertThat(captor.getAllValues().get(1),
                 allOf(displayId(Display.DEFAULT_DISPLAY),
-                        a11yWindowId(eventWindowId),
+                        eventWindowId(eventWindowId),
                         a11yWindowChanges(AccessibilityEvent.WINDOWS_CHANGE_ACTIVE)));
     }
 
@@ -661,7 +745,7 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
                 .sendAccessibilityEventForCurrentUserLocked(captor.capture());
         assertThat(captor.getAllValues().get(0),
                 allOf(displayId(Display.DEFAULT_DISPLAY),
-                        a11yWindowId(eventWindowId),
+                        eventWindowId(eventWindowId),
                         a11yWindowChanges(
                                 AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED)));
     }
@@ -710,12 +794,12 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
                 .sendAccessibilityEventForCurrentUserLocked(captor.capture());
         assertThat(captor.getAllValues().get(0),
                 allOf(displayId(initialDisplayId),
-                        a11yWindowId(initialWindowId),
+                        eventWindowId(initialWindowId),
                         a11yWindowChanges(
                                 AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED)));
         assertThat(captor.getAllValues().get(1),
                 allOf(displayId(eventDisplayId),
-                        a11yWindowId(eventWindowId),
+                        eventWindowId(eventWindowId),
                         a11yWindowChanges(
                                 AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED)));
     }
@@ -771,11 +855,11 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
                 .sendAccessibilityEventForCurrentUserLocked(captor.capture());
         assertThat(captor.getAllValues().get(0),
                 allOf(displayId(Display.DEFAULT_DISPLAY),
-                        a11yWindowId(eventWindowId),
+                        eventWindowId(eventWindowId),
                         a11yWindowChanges(AccessibilityEvent.WINDOWS_CHANGE_ACTIVE)));
         assertThat(captor.getAllValues().get(1),
                 allOf(displayId(Display.DEFAULT_DISPLAY),
-                        a11yWindowId(currentActiveWindowId),
+                        eventWindowId(currentActiveWindowId),
                         a11yWindowChanges(AccessibilityEvent.WINDOWS_CHANGE_ACTIVE)));
     }
 
@@ -979,7 +1063,7 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
                 .sendAccessibilityEventForCurrentUserLocked(captor.capture());
         assertThat(captor.getAllValues().get(0),
                 allOf(displayId(Display.DEFAULT_DISPLAY),
-                        a11yWindowId(windowId),
+                        eventWindowId(windowId),
                         a11yWindowChanges(AccessibilityEvent.WINDOWS_CHANGE_REMOVED)));
     }
 
@@ -1001,7 +1085,7 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
                 .sendAccessibilityEventForCurrentUserLocked(captor.capture());
         assertThat(captor.getAllValues().get(0),
                 allOf(displayId(Display.DEFAULT_DISPLAY),
-                        a11yWindowId(windowId),
+                        eventWindowId(windowId),
                         a11yWindowChanges(AccessibilityEvent.WINDOWS_CHANGE_ADDED)));
     }
 
@@ -1019,7 +1103,7 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
                 .sendAccessibilityEventForCurrentUserLocked(captor.capture());
         assertThat(captor.getAllValues().get(0),
                 allOf(displayId(Display.DEFAULT_DISPLAY),
-                        a11yWindowId(windowId),
+                        eventWindowId(windowId),
                         a11yWindowChanges(AccessibilityEvent.WINDOWS_CHANGE_TITLE)));
     }
 
@@ -1173,8 +1257,6 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
 
     private AccessibilityWindow createMockAccessibilityWindow(IWindow windowToken, int displayId) {
         final WindowInfo windowInfo = WindowInfo.obtain();
-        // TODO(b/325341171): add tests with various kinds of windows such as
-        //  changing window types, touchable or not, trusted or not, etc.
         windowInfo.type = WindowManager.LayoutParams.TYPE_APPLICATION;
         windowInfo.token = windowToken.asBinder();
 
@@ -1235,16 +1317,16 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
         }
     }
 
-    static class WindowIdMatcher extends TypeSafeMatcher<AccessibilityEvent> {
+    static class EventWindowIdMatcher extends TypeSafeMatcher<AccessibilityEvent> {
         private int mWindowId;
 
-        WindowIdMatcher(int windowId) {
+        EventWindowIdMatcher(int windowId) {
             super();
             mWindowId = windowId;
         }
 
-        static WindowIdMatcher a11yWindowId(int windowId) {
-            return new WindowIdMatcher(windowId);
+        static EventWindowIdMatcher eventWindowId(int windowId) {
+            return new EventWindowIdMatcher(windowId);
         }
 
         @Override
@@ -1278,6 +1360,29 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
         @Override
         public void describeTo(Description description) {
             description.appendText("Matching to window changes " + mWindowChanges);
+        }
+    }
+
+    static class WindowIdMatcher extends TypeSafeMatcher<AccessibilityWindowInfo> {
+        private final int mWindowId;
+
+        WindowIdMatcher(int windowId) {
+            super();
+            mWindowId = windowId;
+        }
+
+        static WindowIdMatcher windowId(int windowId) {
+            return new WindowIdMatcher(windowId);
+        }
+
+        @Override
+        protected boolean matchesSafely(AccessibilityWindowInfo window) {
+            return window.getId() == mWindowId;
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("Matching to windowId " + mWindowId);
         }
     }
 }
