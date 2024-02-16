@@ -24235,7 +24235,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setMaxPolicyStorageLimit(String callerPackageName, int storageLimit) {
-        if (!devicePolicySizeTrackingEnabled()) {
+        if (!devicePolicySizeTrackingEnabled() || true) {
             return;
         }
         CallerIdentity caller = getCallerIdentity(callerPackageName);
@@ -24247,7 +24247,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public int getMaxPolicyStorageLimit(String callerPackageName) {
-        if (!devicePolicySizeTrackingEnabled()) {
+        if (!devicePolicySizeTrackingEnabled() || true) {
             return -1;
         }
         CallerIdentity caller = getCallerIdentity(callerPackageName);
