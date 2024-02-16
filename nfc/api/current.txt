@@ -228,14 +228,10 @@ package android.nfc.cardemulation {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onDeactivated(int);
     method public abstract byte[] processCommandApdu(byte[], android.os.Bundle);
-    method @FlaggedApi("android.nfc.nfc_read_polling_loop") public void processPollingFrames(@NonNull java.util.List<android.os.Bundle>);
+    method @FlaggedApi("android.nfc.nfc_read_polling_loop") public void processPollingFrames(@NonNull java.util.List<android.nfc.cardemulation.PollingFrame>);
     method public final void sendResponseApdu(byte[]);
     field public static final int DEACTIVATION_DESELECTED = 1; // 0x1
     field public static final int DEACTIVATION_LINK_LOSS = 0; // 0x0
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String KEY_POLLING_LOOP_DATA = "android.nfc.cardemulation.DATA";
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String KEY_POLLING_LOOP_GAIN = "android.nfc.cardemulation.GAIN";
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String KEY_POLLING_LOOP_TIMESTAMP = "android.nfc.cardemulation.TIMESTAMP";
-    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String KEY_POLLING_LOOP_TYPE = "android.nfc.cardemulation.TYPE";
     field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_A = 65; // 0x0041 'A'
     field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_B = 66; // 0x0042 'B'
     field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_F = 70; // 0x0046 'F'
@@ -272,6 +268,17 @@ package android.nfc.cardemulation {
     ctor public OffHostApduService();
     field public static final String SERVICE_INTERFACE = "android.nfc.cardemulation.action.OFF_HOST_APDU_SERVICE";
     field public static final String SERVICE_META_DATA = "android.nfc.cardemulation.off_host_apdu_service";
+  }
+
+  @FlaggedApi("android.nfc.nfc_read_polling_loop") public final class PollingFrame implements android.os.Parcelable {
+    ctor public PollingFrame(char, @Nullable byte[], int, int);
+    method public int describeContents();
+    method @NonNull public byte[] getData();
+    method public int getGain();
+    method public int getTimestamp();
+    method public char getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.PollingFrame> CREATOR;
   }
 
 }

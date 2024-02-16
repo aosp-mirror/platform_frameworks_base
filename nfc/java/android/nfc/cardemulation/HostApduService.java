@@ -245,7 +245,9 @@ public abstract class HostApduService extends Service {
 
     /**
      * KEY_POLLING_LOOP_TYPE is the Bundle key for the type of
-     * polling loop frame in the Bundle passed to {@link #processPollingFrames(List)}
+     * polling loop frame in the Bundle included in MSG_POLLING_LOOP.
+     *
+     * @hide
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
     public static final String KEY_POLLING_LOOP_TYPE = "android.nfc.cardemulation.TYPE";
@@ -300,24 +302,27 @@ public abstract class HostApduService extends Service {
 
     /**
      * KEY_POLLING_LOOP_DATA is the Bundle key for the raw data of captured from
-     * the polling loop frame in the Bundle passed to {@link #processPollingFrames(List)}
-     * when the frame type isn't recognized.
+     * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
+     *
+     * @hide
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
     public static final String KEY_POLLING_LOOP_DATA = "android.nfc.cardemulation.DATA";
 
     /**
      * KEY_POLLING_LOOP_GAIN is the Bundle key for the field strength of
-     * the polling loop frame in the Bundle passed to {@link #processPollingFrames(List)}
-     * when the frame type isn't recognized.
+     * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
+     *
+     * @hide
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
     public static final String KEY_POLLING_LOOP_GAIN = "android.nfc.cardemulation.GAIN";
 
     /**
      * KEY_POLLING_LOOP_TIMESTAMP is the Bundle key for the timestamp of
-     * the polling loop frame in the Bundle passed to {@link #processPollingFrames(List)}
-     * when the frame type isn't recognized.
+     * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
+     *
+     * @hide
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
     public static final String KEY_POLLING_LOOP_TIMESTAMP = "android.nfc.cardemulation.TIMESTAMP";
@@ -407,7 +412,12 @@ public abstract class HostApduService extends Service {
                     ArrayList<Bundle> frames =
                             msg.getData().getParcelableArrayList(KEY_POLLING_LOOP_FRAMES_BUNDLE,
                             Bundle.class);
-                    processPollingFrames(frames);
+                    ArrayList<PollingFrame> pollingFrames =
+                            new ArrayList<PollingFrame>(frames.size());
+                    for (Bundle frame : frames) {
+                        pollingFrames.add(new PollingFrame(frame));
+                    }
+                    processPollingFrames(pollingFrames);
                     break;
             default:
                 super.handleMessage(msg);
@@ -482,7 +492,7 @@ public abstract class HostApduService extends Service {
      * @param frame A description of the polling frame.
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public void processPollingFrames(@NonNull List<Bundle> frame) {
+    public void processPollingFrames(@NonNull List<PollingFrame> frame) {
     }
 
     /**
