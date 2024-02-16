@@ -49,8 +49,13 @@ public class RemoteComposeBuffer {
         this.mRemoteComposeState = remoteComposeState;
     }
 
-    public void reset() {
-        mBuffer.reset();
+    /**
+     * Reset the internal buffers
+     *
+     * @param expectedSize provided hint for the main buffer size
+     */
+    public void reset(int expectedSize) {
+        mBuffer.reset(expectedSize);
         mRemoteComposeState.reset();
     }
 
@@ -288,8 +293,7 @@ public class RemoteComposeBuffer {
     public static void read(InputStream fd, RemoteComposeBuffer buffer) {
         try {
             byte[] bytes = readAllBytes(fd);
-            buffer.reset();
-            buffer.mBuffer.resize(bytes.length);
+            buffer.reset(bytes.length);
             System.arraycopy(bytes, 0, buffer.mBuffer.mBuffer, 0, bytes.length);
             buffer.mBuffer.mSize = bytes.length;
         } catch (Exception e) {
