@@ -53,8 +53,11 @@ import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
+import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
+import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED;
+import static android.app.admin.flags.Flags.FLAG_PERMISSION_MIGRATION_FOR_ZERO_TRUST_API_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
@@ -90,7 +93,6 @@ import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
 import android.app.admin.SecurityLog.SecurityEvent;
-import android.app.admin.flags.Flags;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -153,10 +155,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.net.NetworkUtilsInternal;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.org.conscrypt.TrustedCertificateStore;
-import com.android.internal.os.Zygote;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -2879,7 +2881,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
+    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
     public static final int STATUS_HEADLESS_ONLY_SYSTEM_USER = 17;
 
     /**
@@ -13447,7 +13449,7 @@ public class DevicePolicyManager {
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_QUERY_SYSTEM_UPDATES, conditional = true)
     @SuppressLint("RequiresPermission")
-    @FlaggedApi(Flags.FLAG_PERMISSION_MIGRATION_FOR_ZERO_TRUST_API_ENABLED)
+    @FlaggedApi(FLAG_PERMISSION_MIGRATION_FOR_ZERO_TRUST_API_ENABLED)
     public @Nullable SystemUpdateInfo getPendingSystemUpdate(@Nullable ComponentName admin) {
         throwIfParentInstance("getPendingSystemUpdate");
         try {
@@ -16608,7 +16610,7 @@ public class DevicePolicyManager {
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     @SuppressLint("RequiresPermission")
-    @FlaggedApi(Flags.FLAG_PERMISSION_MIGRATION_FOR_ZERO_TRUST_API_ENABLED)
+    @FlaggedApi(FLAG_PERMISSION_MIGRATION_FOR_ZERO_TRUST_API_ENABLED)
     @NonNull public String getEnrollmentSpecificId() {
         throwIfParentInstance("getEnrollmentSpecificId");
         if (mService == null) {
@@ -17134,7 +17136,7 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_THEFT_DETECTION)
-    @FlaggedApi(Flags.FLAG_DEVICE_THEFT_API_ENABLED)
+    @FlaggedApi(FLAG_DEVICE_THEFT_API_ENABLED)
     public boolean isTheftDetectionTriggered() {
         throwIfParentInstance("isTheftDetectionTriggered");
         if (mService == null) {

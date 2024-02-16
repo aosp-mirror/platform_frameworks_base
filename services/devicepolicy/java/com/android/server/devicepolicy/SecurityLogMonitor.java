@@ -16,8 +16,6 @@
 
 package com.android.server.devicepolicy;
 
-import static android.app.admin.flags.Flags.securityLogV2Enabled;
-
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
@@ -25,6 +23,7 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.IAuditLogEventsCallback;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.admin.flags.Flags;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
@@ -468,11 +467,11 @@ class SecurityLogMonitor implements Runnable {
             assignLogId(event);
         }
 
-        if (!securityLogV2Enabled() || mLegacyLogEnabled) {
+        if (!Flags.securityLogV2Enabled() || mLegacyLogEnabled) {
             addToLegacyBufferLocked(dedupedLogs);
         }
 
-        if (securityLogV2Enabled() && mAuditLogEnabled) {
+        if (Flags.securityLogV2Enabled() && mAuditLogEnabled) {
             addAuditLogEventsLocked(dedupedLogs);
         }
     }
@@ -549,7 +548,7 @@ class SecurityLogMonitor implements Runnable {
                 saveLastEvents(newLogs);
                 newLogs.clear();
 
-                if (!securityLogV2Enabled() || mLegacyLogEnabled) {
+                if (!Flags.securityLogV2Enabled() || mLegacyLogEnabled) {
                     notifyDeviceOwnerOrProfileOwnerIfNeeded(force);
                 }
             } catch (IOException e) {
