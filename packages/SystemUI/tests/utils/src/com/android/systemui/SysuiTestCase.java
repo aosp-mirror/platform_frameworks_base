@@ -46,6 +46,7 @@ import androidx.core.animation.AndroidXAnimatorIsolationRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.broadcast.FakeBroadcastDispatcher;
 import com.android.systemui.flags.SceneContainerRule;
 
@@ -170,6 +171,7 @@ public abstract class SysuiTestCase {
 
     @Before
     public void SysuiSetup() throws Exception {
+        ProtoLog.REQUIRE_PROTOLOGTOOL = false;
         mSysuiDependency = new SysuiTestDependency(mContext, shouldFailOnLeakedReceiver());
         mDependency = mSysuiDependency.install();
         // TODO(b/292141694): build out Ravenwood support for Instrumentation

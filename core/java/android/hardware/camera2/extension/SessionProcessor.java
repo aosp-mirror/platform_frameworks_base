@@ -18,8 +18,10 @@ package android.hardware.camera2.extension;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraExtensionUtils.HandlerExecutor;
@@ -132,13 +134,14 @@ public abstract class SessionProcessor {
          * This method is called instead of
          * {@link #onCaptureProcessStarted} when the camera device failed
          * to produce the required input for the device-specific
-         * extension. The cause could be a failed camera capture request,
-         * a failed capture result or dropped camera frame.
+         * extension. The callback allows clients to be notified
+         * about failure reason.
          *
          * @param captureSequenceId id of the current capture sequence
+         * @param failure           The capture failure reason
          */
         @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-        void onCaptureFailed(int captureSequenceId);
+        void onCaptureFailed(int captureSequenceId, @CaptureFailure.FailureReason int failure);
 
         /**
          * This method is called independently of the others in the
@@ -474,9 +477,9 @@ public abstract class SessionProcessor {
         }
 
         @Override
-        public void onCaptureFailed(int captureSequenceId) {
+        public void onCaptureFailed(int captureSequenceId, int failure) {
             try {
-                mCaptureCallback.onCaptureFailed(captureSequenceId);
+                mCaptureCallback.onCaptureProcessFailed(captureSequenceId, failure);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to notify capture failure start due to remote exception!");
             }

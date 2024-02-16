@@ -20,6 +20,7 @@ import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 
 object VolumePanelComponents {
 
+    const val MEDIA_OUTPUT: VolumePanelComponentKey = "media_output"
     const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
     const val CAPTIONING: VolumePanelComponentKey = "captioning"
 }

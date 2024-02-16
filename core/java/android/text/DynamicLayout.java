@@ -25,6 +25,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -317,6 +318,35 @@ public class DynamicLayout extends Layout {
         }
 
         /**
+         * Set true for shifting the drawing x offset for showing overhang at the start position.
+         *
+         * This flag is ignored if the {@link #getUseBoundsForWidth()} is false.
+         *
+         * If this value is false, the Layout draws text from the zero even if there is a glyph
+         * stroke in a region where the x coordinate is negative.
+         *
+         * If this value is true, the Layout draws text with shifting the x coordinate of the
+         * drawing bounding box.
+         *
+         * This value is false by default.
+         *
+         * @param shiftDrawingOffsetForStartOverhang true for shifting the drawing offset for
+         *                                          showing the stroke that is in the region where
+         *                                          the x coordinate is negative.
+         * @see #setUseBoundsForWidth(boolean)
+         * @see #getUseBoundsForWidth()
+         */
+        @NonNull
+        // The corresponding getter is getShiftDrawingOffsetForStartOverhang()
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+        public Builder setShiftDrawingOffsetForStartOverhang(
+                boolean shiftDrawingOffsetForStartOverhang) {
+            mShiftDrawingOffsetForStartOverhang = shiftDrawingOffsetForStartOverhang;
+            return this;
+        }
+
+        /**
          * Set the minimum font metrics used for line spacing.
          *
          * <p>
@@ -386,6 +416,7 @@ public class DynamicLayout extends Layout {
         private int mEllipsizedWidth;
         private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
         private boolean mUseBoundsForWidth;
+        private boolean mShiftDrawingOffsetForStartOverhang;
         private @Nullable Paint.FontMetrics mMinimumFontMetrics;
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
@@ -462,7 +493,8 @@ public class DynamicLayout extends Layout {
                 false /* fallbackLineSpacing */, ellipsizedWidth, ellipsize,
                 Integer.MAX_VALUE /* maxLines */, breakStrategy, hyphenationFrequency,
                 null /* leftIndents */, null /* rightIndents */, justificationMode,
-                lineBreakConfig, false /* useBoundsForWidth */, null /* minimumFontMetrics */);
+                lineBreakConfig, false /* useBoundsForWidth */, false,
+                null /* minimumFontMetrics */);
 
         final Builder b = Builder.obtain(base, paint, width)
                 .setAlignment(align)
@@ -488,7 +520,8 @@ public class DynamicLayout extends Layout {
                 b.mIncludePad, b.mFallbackLineSpacing, b.mEllipsizedWidth, b.mEllipsize,
                 Integer.MAX_VALUE /* maxLines */, b.mBreakStrategy, b.mHyphenationFrequency,
                 null /* leftIndents */, null /* rightIndents */, b.mJustificationMode,
-                b.mLineBreakConfig, b.mUseBoundsForWidth, b.mMinimumFontMetrics);
+                b.mLineBreakConfig, b.mUseBoundsForWidth, b.mShiftDrawingOffsetForStartOverhang,
+                b.mMinimumFontMetrics);
 
         mDisplay = b.mDisplay;
         mIncludePad = b.mIncludePad;
@@ -516,6 +549,7 @@ public class DynamicLayout extends Layout {
         mBase = b.mBase;
         mFallbackLineSpacing = b.mFallbackLineSpacing;
         mUseBoundsForWidth = b.mUseBoundsForWidth;
+        mShiftDrawingOffsetForStartOverhang = b.mShiftDrawingOffsetForStartOverhang;
         mMinimumFontMetrics = b.mMinimumFontMetrics;
         if (b.mEllipsize != null) {
             mInts = new PackedIntVector(COLUMNS_ELLIPSIZE);
@@ -713,6 +747,7 @@ public class DynamicLayout extends Layout {
                 .setAddLastLineLineSpacing(!islast)
                 .setIncludePad(false)
                 .setUseBoundsForWidth(mUseBoundsForWidth)
+                .setShiftDrawingOffsetForStartOverhang(mShiftDrawingOffsetForStartOverhang)
                 .setMinimumFontMetrics(mMinimumFontMetrics)
                 .setCalculateBounds(true);
 
@@ -1392,6 +1427,7 @@ public class DynamicLayout extends Layout {
     private Rect mTempRect = new Rect();
 
     private boolean mUseBoundsForWidth;
+    private boolean mShiftDrawingOffsetForStartOverhang;
     @Nullable Paint.FontMetrics mMinimumFontMetrics;
 
     @UnsupportedAppUsage

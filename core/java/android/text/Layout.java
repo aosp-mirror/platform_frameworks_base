@@ -44,6 +44,7 @@ import android.text.style.LineBackgroundSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.ReplacementSpan;
 import android.text.style.TabStopSpan;
+import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -299,7 +300,7 @@ public abstract class Layout {
         this(text, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
                 spacingMult, spacingAdd, false, false, 0, null, Integer.MAX_VALUE,
                 BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null, null,
-                JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE, false, null);
+                JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE, false, false, null);
     }
 
     /**
@@ -349,6 +350,7 @@ public abstract class Layout {
             int justificationMode,
             LineBreakConfig lineBreakConfig,
             boolean useBoundsForWidth,
+            boolean shiftDrawingOffsetForStartOverhang,
             Paint.FontMetrics minimumFontMetrics
     ) {
 
@@ -384,6 +386,7 @@ public abstract class Layout {
         mJustificationMode = justificationMode;
         mLineBreakConfig = lineBreakConfig;
         mUseBoundsForWidth = useBoundsForWidth;
+        mShiftDrawingOffsetForStartOverhang = shiftDrawingOffsetForStartOverhang;
         mMinimumFontMetrics = minimumFontMetrics;
     }
 
@@ -465,7 +468,7 @@ public abstract class Layout {
             @Nullable Paint selectionPaint,
             int cursorOffsetVertical) {
         float leftShift = 0;
-        if (mUseBoundsForWidth) {
+        if (mUseBoundsForWidth && mShiftDrawingOffsetForStartOverhang) {
             RectF drawingRect = computeDrawingBoundingBox();
             if (drawingRect.left < 0) {
                 leftShift = -drawingRect.left;
@@ -3414,6 +3417,7 @@ public abstract class Layout {
     private int mJustificationMode;
     private LineBreakConfig mLineBreakConfig;
     private boolean mUseBoundsForWidth;
+    private boolean mShiftDrawingOffsetForStartOverhang;
     private @Nullable Paint.FontMetrics mMinimumFontMetrics;
 
     private TextLine.LineInfo mLineInfo = null;
@@ -3873,6 +3877,35 @@ public abstract class Layout {
         }
 
         /**
+         * Set true for shifting the drawing x offset for showing overhang at the start position.
+         *
+         * This flag is ignored if the {@link #getUseBoundsForWidth()} is false.
+         *
+         * If this value is false, the Layout draws text from the zero even if there is a glyph
+         * stroke in a region where the x coordinate is negative.
+         *
+         * If this value is true, the Layout draws text with shifting the x coordinate of the
+         * drawing bounding box.
+         *
+         * This value is false by default.
+         *
+         * @param shiftDrawingOffsetForStartOverhang true for shifting the drawing offset for
+         *                                          showing the stroke that is in the region where
+         *                                          the x coordinate is negative.
+         * @see #setUseBoundsForWidth(boolean)
+         * @see #getUseBoundsForWidth()
+         */
+        @NonNull
+        // The corresponding getter is getShiftDrawingOffsetForStartOverhang()
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+        public Builder setShiftDrawingOffsetForStartOverhang(
+                boolean shiftDrawingOffsetForStartOverhang) {
+            mShiftDrawingOffsetForStartOverhang = shiftDrawingOffsetForStartOverhang;
+            return this;
+        }
+
+        /**
          * Set the minimum font metrics used for line spacing.
          *
          * <p>
@@ -3948,6 +3981,7 @@ public abstract class Layout {
                         .setJustificationMode(mJustificationMode)
                         .setLineBreakConfig(mLineBreakConfig)
                         .setUseBoundsForWidth(mUseBoundsForWidth)
+                        .setShiftDrawingOffsetForStartOverhang(mShiftDrawingOffsetForStartOverhang)
                         .build();
             } else {
                 return new BoringLayout(
@@ -3955,7 +3989,7 @@ public abstract class Layout {
                         mIncludePad, mFallbackLineSpacing, mEllipsizedWidth, mEllipsize, mMaxLines,
                         mBreakStrategy, mHyphenationFrequency, mLeftIndents, mRightIndents,
                         mJustificationMode, mLineBreakConfig, metrics, mUseBoundsForWidth,
-                        mMinimumFontMetrics);
+                        mShiftDrawingOffsetForStartOverhang, mMinimumFontMetrics);
             }
         }
 
@@ -3980,6 +4014,7 @@ public abstract class Layout {
         private int mJustificationMode = JUSTIFICATION_MODE_NONE;
         private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
         private boolean mUseBoundsForWidth;
+        private boolean mShiftDrawingOffsetForStartOverhang;
         private Paint.FontMetrics mMinimumFontMetrics;
     }
 
@@ -4291,6 +4326,20 @@ public abstract class Layout {
     @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public boolean getUseBoundsForWidth() {
         return mUseBoundsForWidth;
+    }
+
+    /**
+     * Returns true if shifting drawing offset for start overhang.
+     *
+     * @return True if shifting drawing offset for start overhang.
+     * @see android.widget.TextView#setShiftDrawingOffsetForStartOverhang(boolean)
+     * @see TextView#getShiftDrawingOffsetForStartOverhang()
+     * @see StaticLayout.Builder#setShiftDrawingOffsetForStartOverhang(boolean)
+     * @see DynamicLayout.Builder#setShiftDrawingOffsetForStartOverhang(boolean)
+     */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
+    public boolean getShiftDrawingOffsetForStartOverhang() {
+        return mShiftDrawingOffsetForStartOverhang;
     }
 
     /**

@@ -30,7 +30,6 @@ import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.fragments.FragmentService
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener
 import com.android.systemui.plugins.qs.QS
@@ -100,7 +99,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeSystemClock = FakeSystemClock()
         delayableExecutor = FakeExecutor(fakeSystemClock)
-        mSetFlagsRule.enableFlags(KeyguardShadeMigrationNssl.FLAG_NAME)
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         mContext.ensureTestableResources()
         whenever(view.context).thenReturn(mContext)
         whenever(view.resources).thenReturn(mContext.resources)

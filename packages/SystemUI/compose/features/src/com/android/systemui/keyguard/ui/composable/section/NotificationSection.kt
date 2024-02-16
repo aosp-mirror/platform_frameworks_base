@@ -21,10 +21,10 @@ import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.notifications.ui.composable.NotificationStack
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.stack.AmbientState
@@ -59,37 +59,38 @@ constructor(
 ) {
 
     init {
-        if (!KeyguardShadeMigrationNssl.isUnexpectedlyInLegacyMode()) {
-            // This scene container section moves the NSSL to the SharedNotificationContainer.
-            // This also requires that SharedNotificationContainer gets moved to the
-            // SceneWindowRootView by the SceneWindowRootViewBinder. Prior to Scene Container,
-            // but when the KeyguardShadeMigrationNssl flag is enabled, NSSL is moved into this
-            // container by the NotificationStackScrollLayoutSection.
-            // Ensure stackScrollLayout is a child of sharedNotificationContainer.
+        if (!migrateClocksToBlueprint()) {
+            throw IllegalStateException("this requires migrateClocksToBlueprint()")
+        }
+        // This scene container section moves the NSSL to the SharedNotificationContainer.
+        // This also requires that SharedNotificationContainer gets moved to the
+        // SceneWindowRootView by the SceneWindowRootViewBinder. Prior to Scene Container,
+        // but when the KeyguardShadeMigrationNssl flag is enabled, NSSL is moved into this
+        // container by the NotificationStackScrollLayoutSection.
+        // Ensure stackScrollLayout is a child of sharedNotificationContainer.
 
-            if (stackScrollLayout.parent != sharedNotificationContainer) {
-                (stackScrollLayout.parent as? ViewGroup)?.removeView(stackScrollLayout)
-                sharedNotificationContainer.addNotificationStackScrollLayout(stackScrollLayout)
-            }
+        if (stackScrollLayout.parent != sharedNotificationContainer) {
+            (stackScrollLayout.parent as? ViewGroup)?.removeView(stackScrollLayout)
+            sharedNotificationContainer.addNotificationStackScrollLayout(stackScrollLayout)
+        }
 
-            SharedNotificationContainerBinder.bind(
+        SharedNotificationContainerBinder.bind(
+            sharedNotificationContainer,
+            sharedNotificationContainerViewModel,
+            sceneContainerFlags,
+            controller,
+            notificationStackSizeCalculator,
+            mainDispatcher,
+        )
+
+        if (sceneContainerFlags.flexiNotifsEnabled()) {
+            NotificationStackAppearanceViewBinder.bind(
+                context,
                 sharedNotificationContainer,
-                sharedNotificationContainerViewModel,
-                sceneContainerFlags,
+                notificationStackAppearanceViewModel,
+                ambientState,
                 controller,
-                notificationStackSizeCalculator,
-                mainDispatcher,
             )
-
-            if (sceneContainerFlags.flexiNotifsEnabled()) {
-                NotificationStackAppearanceViewBinder.bind(
-                    context,
-                    sharedNotificationContainer,
-                    notificationStackAppearanceViewModel,
-                    ambientState,
-                    controller,
-                )
-            }
         }
     }
 

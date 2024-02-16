@@ -35,10 +35,10 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import javax.inject.Inject
 
-/**
- * Factory to create [MediaOutputDialog] objects.
- */
-open class MediaOutputDialogFactory @Inject constructor(
+/** Factory to create [MediaOutputDialog] objects. */
+open class MediaOutputDialogFactory
+@Inject
+constructor(
     private val context: Context,
     private val mediaSessionManager: MediaSessionManager,
     private val lbm: LocalBluetoothManager?,
@@ -55,46 +55,93 @@ open class MediaOutputDialogFactory @Inject constructor(
     private val userTracker: UserTracker
 ) {
     companion object {
-        private const val INTERACTION_JANK_TAG = "media_output"
+        const val INTERACTION_JANK_TAG = "media_output"
         var mediaOutputDialog: MediaOutputDialog? = null
     }
 
     /** Creates a [MediaOutputDialog] for the given package. */
     open fun create(packageName: String, aboveStatusBar: Boolean, view: View? = null) {
-        create(packageName, aboveStatusBar, view, includePlaybackAndAppMetadata = true)
+        createWithController(
+            packageName,
+            aboveStatusBar,
+            controller =
+                view?.let {
+                    DialogTransitionAnimator.Controller.fromView(
+                        it,
+                        DialogCuj(
+                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                            INTERACTION_JANK_TAG
+                        )
+                    )
+                },
+        )
     }
 
-    open fun createDialogForSystemRouting() {
-        create(packageName = null, aboveStatusBar = false, includePlaybackAndAppMetadata = false)
+    /** Creates a [MediaOutputDialog] for the given package. */
+    open fun createWithController(
+        packageName: String,
+        aboveStatusBar: Boolean,
+        controller: DialogTransitionAnimator.Controller?,
+    ) {
+        create(
+            packageName,
+            aboveStatusBar,
+            dialogTransitionAnimatorController = controller,
+            includePlaybackAndAppMetadata = true
+        )
+    }
+
+    open fun createDialogForSystemRouting(controller: DialogTransitionAnimator.Controller? = null) {
+        create(
+            packageName = null,
+            aboveStatusBar = false,
+            dialogTransitionAnimatorController = null,
+            includePlaybackAndAppMetadata = false
+        )
     }
 
     private fun create(
-            packageName: String?,
-            aboveStatusBar: Boolean,
-            view: View? = null,
-            includePlaybackAndAppMetadata: Boolean = true
+        packageName: String?,
+        aboveStatusBar: Boolean,
+        dialogTransitionAnimatorController: DialogTransitionAnimator.Controller?,
+        includePlaybackAndAppMetadata: Boolean = true
     ) {
         // Dismiss the previous dialog, if any.
         mediaOutputDialog?.dismiss()
 
-        val controller = MediaOutputController(
-            context, packageName,
-            mediaSessionManager, lbm, starter, notifCollection,
-            dialogTransitionAnimator, nearbyMediaDevicesManager, audioManager,
-            powerExemptionManager, keyGuardManager, featureFlags, userTracker)
+        val controller =
+            MediaOutputController(
+                context,
+                packageName,
+                mediaSessionManager,
+                lbm,
+                starter,
+                notifCollection,
+                dialogTransitionAnimator,
+                nearbyMediaDevicesManager,
+                audioManager,
+                powerExemptionManager,
+                keyGuardManager,
+                featureFlags,
+                userTracker
+            )
         val dialog =
-            MediaOutputDialog(context, aboveStatusBar, broadcastSender, controller,
-                    dialogTransitionAnimator, uiEventLogger, includePlaybackAndAppMetadata)
+            MediaOutputDialog(
+                context,
+                aboveStatusBar,
+                broadcastSender,
+                controller,
+                dialogTransitionAnimator,
+                uiEventLogger,
+                includePlaybackAndAppMetadata
+            )
         mediaOutputDialog = dialog
 
         // Show the dialog.
-        if (view != null) {
-            dialogTransitionAnimator.showFromView(
-                dialog, view,
-                cuj = DialogCuj(
-                    InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                    INTERACTION_JANK_TAG
-                )
+        if (dialogTransitionAnimatorController != null) {
+            dialogTransitionAnimator.show(
+                dialog,
+                dialogTransitionAnimatorController,
             )
         } else {
             dialog.show()

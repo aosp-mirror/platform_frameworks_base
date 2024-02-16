@@ -141,6 +141,13 @@ final class PolicyDefinition<V> {
             PolicyEnforcerCallbacks::enforceSecurityLogging,
             new BooleanPolicySerializer());
 
+    static PolicyDefinition<Boolean> AUDIT_LOGGING = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.AUDIT_LOGGING_POLICY),
+            TRUE_MORE_RESTRICTIVE,
+            POLICY_FLAG_GLOBAL_ONLY_POLICY,
+            PolicyEnforcerCallbacks::enforceAuditLogging,
+            new BooleanPolicySerializer());
+
     static PolicyDefinition<LockTaskPolicy> LOCK_TASK = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyIdentifiers.LOCK_TASK_POLICY),
             new TopPriority<>(List.of(
@@ -365,6 +372,8 @@ final class PolicyDefinition<V> {
                 GENERIC_PERMISSION_GRANT);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.SECURITY_LOGGING_POLICY,
                 SECURITY_LOGGING);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUDIT_LOGGING_POLICY,
+                AUDIT_LOGGING);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.LOCK_TASK_POLICY, LOCK_TASK);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY,
                 USER_CONTROLLED_DISABLED_PACKAGES);

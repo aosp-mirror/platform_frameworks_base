@@ -70,3 +70,11 @@ flag {
     description: "Refines embedded activity back navigation behavior"
     bug: "293642394"
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "cover_display_opt_in"
+    description: "Properties to allow apps and activities to opt-in to cover display rendering"
+    bug: "312530526"
+    is_fixed_read_only: true
+}

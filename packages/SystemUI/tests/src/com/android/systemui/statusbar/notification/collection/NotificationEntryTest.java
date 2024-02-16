@@ -50,8 +50,8 @@ import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -277,6 +277,66 @@ public class NotificationEntryTest extends SysuiTestCase {
 
         assertFalse(mEntry.isDemoted());
         assertTrue(mEntry.isStickyAndNotDemoted());
+    }
+
+    @Test
+    public void testIsNotificationVisibilityPrivate_true() {
+        assertTrue(mEntry.isNotificationVisibilityPrivate());
+    }
+
+    @Test
+    public void testIsNotificationVisibilityPrivate_visibilityPublic_false() {
+        Notification.Builder notification = new Notification.Builder(mContext, "")
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text");
+
+        NotificationEntry entry = new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_NAME)
+                .setOpPkg(TEST_PACKAGE_NAME)
+                .setUid(TEST_UID)
+                .setChannel(mChannel)
+                .setId(mId++)
+                .setNotification(notification.build())
+                .setUser(new UserHandle(ActivityManager.getCurrentUser()))
+                .build();
+
+        assertFalse(entry.isNotificationVisibilityPrivate());
+    }
+
+    @Test
+    public void testIsChannelVisibilityPrivate_true() {
+        assertTrue(mEntry.isChannelVisibilityPrivate());
+    }
+
+    @Test
+    public void testIsChannelVisibilityPrivate_visibilityPublic_false() {
+        NotificationChannel channel =
+                new NotificationChannel("id", "name", NotificationChannel.USER_LOCKED_IMPORTANCE);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        StatusBarNotification sbn = new SbnBuilder().build();
+        Ranking ranking = new RankingBuilder()
+                .setChannel(channel)
+                .setKey(sbn.getKey())
+                .build();
+        NotificationEntry entry =
+                new NotificationEntry(sbn, ranking, mClock.uptimeMillis());
+
+        assertFalse(entry.isChannelVisibilityPrivate());
+    }
+
+    @Test
+    public void testIsChannelVisibilityPrivate_entryHasNoChannel_false() {
+        StatusBarNotification sbn = new SbnBuilder().build();
+        Ranking ranking = new RankingBuilder()
+                .setChannel(null)
+                .setKey(sbn.getKey())
+                .build();
+        NotificationEntry entry =
+                new NotificationEntry(sbn, ranking, mClock.uptimeMillis());
+
+        assertFalse(entry.isChannelVisibilityPrivate());
     }
 
     @Test
