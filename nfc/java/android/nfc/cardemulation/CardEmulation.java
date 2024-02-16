@@ -359,9 +359,14 @@ public final class CardEmulation {
     }
 
     /**
-     * Register a polling loop filter for a HostApduService.
-     * @param service The HostApduService to register the filter for.
-     * @param pollingLoopFilter The filter to register.
+     * Register a polling loop filter (PLF) for a HostApduService. The PLF can be sequence of an
+     * even number of hexadecimal numbers (0-9, A-F or a-f). When non-standard polling loop frame
+     * matches this sequence exactly, it may be delivered to
+     * {@link HostApduService#processPollingFrames(List)}  if this service is currently
+     * preferred or there are no other services registered for this filter.
+     * @param service The HostApduService to register the filter for
+     * @param pollingLoopFilter The filter to register
+     * @return true if the filter was registered, false otherwise
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public boolean registerPollingLoopFilterForService(@NonNull ComponentName service,
