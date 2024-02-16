@@ -17,12 +17,17 @@
 package android.nfc.cardemulation;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * Polling Frames represent data about individual frames of an NFC polling loop. These frames will
@@ -33,14 +38,109 @@ import android.os.Parcelable;
  */
 @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
 public final class PollingFrame implements Parcelable{
-    private char mType;
-    private byte[] mData;
-    private int mGain;
-    private int mTimestamp;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "POLLING_LOOP_TYPE_"}, value = { POLLING_LOOP_TYPE_A, POLLING_LOOP_TYPE_B,
+            POLLING_LOOP_TYPE_F, POLLING_LOOP_TYPE_OFF, POLLING_LOOP_TYPE_ON })
+    @Retention(RetentionPolicy.SOURCE)
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public @interface PollingFrameType {}
+
+    /**
+     * POLLING_LOOP_TYPE_A is the value associated with the key
+     * POLLING_LOOP_TYPE  in the Bundle passed to {@link HostApduService#processPollingFrames(List)}
+     * when the polling loop is for NFC-A.
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final int POLLING_LOOP_TYPE_A = 'A';
+
+    /**
+     * POLLING_LOOP_TYPE_B is the value associated with the key
+     * POLLING_LOOP_TYPE  in the Bundle passed to {@link HostApduService#processPollingFrames(List)}
+     * when the polling loop is for NFC-B.
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final int POLLING_LOOP_TYPE_B = 'B';
+
+    /**
+     * POLLING_LOOP_TYPE_F is the value associated with the key
+     * POLLING_LOOP_TYPE  in the Bundle passed to {@link HostApduService#processPollingFrames(List)}
+     * when the polling loop is for NFC-F.
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final int POLLING_LOOP_TYPE_F = 'F';
+
+    /**
+     * POLLING_LOOP_TYPE_ON is the value associated with the key
+     * POLLING_LOOP_TYPE  in the Bundle passed to {@link HostApduService#processPollingFrames(List)}
+     * when the polling loop turns on.
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final int POLLING_LOOP_TYPE_ON = 'O';
+
+    /**
+     * POLLING_LOOP_TYPE_OFF is the value associated with the key
+     * POLLING_LOOP_TYPE  in the Bundle passed to {@link HostApduService#processPollingFrames(List)}
+     * when the polling loop turns off.
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final int POLLING_LOOP_TYPE_OFF = 'X';
+
+    /**
+     * POLLING_LOOP_TYPE_UNKNOWN is the value associated with the key
+     * POLLING_LOOP_TYPE  in the Bundle passed to {@link HostApduService#processPollingFrames(List)}
+     * when the polling loop frame isn't recognized.
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final int POLLING_LOOP_TYPE_UNKNOWN = 'U';
+
+    /**
+     * KEY_POLLING_LOOP_TYPE is the Bundle key for the type of
+     * polling loop frame in the Bundle included in MSG_POLLING_LOOP.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final String KEY_POLLING_LOOP_TYPE = "android.nfc.cardemulation.TYPE";
+
+    /**
+     * KEY_POLLING_LOOP_DATA is the Bundle key for the raw data of captured from
+     * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final String KEY_POLLING_LOOP_DATA = "android.nfc.cardemulation.DATA";
+
+    /**
+     * KEY_POLLING_LOOP_GAIN is the Bundle key for the field strength of
+     * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final String KEY_POLLING_LOOP_GAIN = "android.nfc.cardemulation.GAIN";
+
+    /**
+     * KEY_POLLING_LOOP_TIMESTAMP is the Bundle key for the timestamp of
+     * the polling loop frame in the Bundle included in MSG_POLLING_LOOP.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final String KEY_POLLING_LOOP_TIMESTAMP = "android.nfc.cardemulation.TIMESTAMP";
+
+
+    @PollingFrameType
+    private final int mType;
+    private final byte[] mData;
+    private final int mGain;
+    private final int mTimestamp;
 
     public static final @NonNull Parcelable.Creator<PollingFrame> CREATOR =
-            new Parcelable.Creator<PollingFrame>() {
-
+            new Parcelable.Creator<>() {
                 @Override
                 public PollingFrame createFromParcel(Parcel source) {
                     return new PollingFrame(source.readBundle());
@@ -48,47 +148,38 @@ public final class PollingFrame implements Parcelable{
 
                 @Override
                 public PollingFrame[] newArray(int size) {
-                    return new PollingFrame[0];
+                    return new PollingFrame[size];
                 }
             };
 
     PollingFrame(Bundle frame) {
-        mType = frame.getChar(HostApduService.KEY_POLLING_LOOP_TYPE);
-        mData = frame.getByteArray(HostApduService.KEY_POLLING_LOOP_DATA);
-        if (mData == null) {
-            mData = new byte[0];
-        }
-        mGain = frame.getByte(HostApduService.KEY_POLLING_LOOP_GAIN);
-        mTimestamp = frame.getInt(HostApduService.KEY_POLLING_LOOP_TIMESTAMP);
+        mType = frame.getInt(KEY_POLLING_LOOP_TYPE);
+        byte[] data = frame.getByteArray(KEY_POLLING_LOOP_DATA);
+        mData = (data == null) ? new byte[0] : data;
+        mGain = frame.getByte(KEY_POLLING_LOOP_GAIN);
+        mTimestamp = frame.getInt(KEY_POLLING_LOOP_TIMESTAMP);
     }
 
-    public PollingFrame(char type, @Nullable byte[] data, int gain, int timestamp) {
+    public PollingFrame(@PollingFrameType int type, @Nullable byte[] data,
+            int gain, int timestamp) {
         mType = type;
         mData = data == null ? new byte[0] : data;
         mGain = gain;
         mTimestamp = timestamp;
     }
 
-    private PollingFrame(Parcel source) {
-        mType = (char) source.readInt();
-        source.readByteArray(mData);
-        mGain = source.readInt();
-        mTimestamp = source.readInt();
-    }
-
     /**
      * Returns the type of frame for this polling loop frame.
-     *
      * The possible return values are:
      * <ul>
-     *   <li>{@link HostApduService#POLLING_LOOP_TYPE_ON}</li>
-     *   <li>{@link HostApduService#POLLING_LOOP_TYPE_OFF}</li>
-     *   <li>{@link HostApduService#POLLING_LOOP_TYPE_A}</li>
-     *   <li>{@link HostApduService#POLLING_LOOP_TYPE_B}</li>
-     *   <li>{@link HostApduService#POLLING_LOOP_TYPE_F}</li>
+     *   <li>{@link POLLING_LOOP_TYPE_ON}</li>
+     *   <li>{@link POLLING_LOOP_TYPE_OFF}</li>
+     *   <li>{@link POLLING_LOOP_TYPE_A}</li>
+     *   <li>{@link POLLING_LOOP_TYPE_B}</li>
+     *   <li>{@link POLLING_LOOP_TYPE_F}</li>
      * </ul>
      */
-    public char getType() {
+    public @PollingFrameType int getType() {
         return mType;
     }
 
@@ -134,10 +225,10 @@ public final class PollingFrame implements Parcelable{
      */
     public Bundle toBundle() {
         Bundle frame = new Bundle();
-        frame.putInt(HostApduService.KEY_POLLING_LOOP_TYPE, getType());
-        frame.putByte(HostApduService.KEY_POLLING_LOOP_GAIN, (byte) getGain());
-        frame.putByteArray(HostApduService.KEY_POLLING_LOOP_DATA, getData());
-        frame.putInt(HostApduService.KEY_POLLING_LOOP_TIMESTAMP, getTimestamp());
+        frame.putInt(KEY_POLLING_LOOP_TYPE, getType());
+        frame.putByte(KEY_POLLING_LOOP_GAIN, (byte) getGain());
+        frame.putByteArray(KEY_POLLING_LOOP_DATA, getData());
+        frame.putInt(KEY_POLLING_LOOP_TIMESTAMP, getTimestamp());
         return frame;
     }
 }
