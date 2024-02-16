@@ -1452,6 +1452,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return false;
         }
 
+        if (!mService.mAmInternal.isThemeOverlayReady(userId)) {
+            Slog.d(TAG, "ThemeHomeDelay: Home launch was deferred.");
+            return false;
+        }
+
         // Updates the home component of the intent.
         homeIntent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
         homeIntent.setFlags(homeIntent.getFlags() | FLAG_ACTIVITY_NEW_TASK);
