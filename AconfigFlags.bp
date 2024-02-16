@@ -1021,6 +1021,11 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+cc_aconfig_library {
+    name: "android.tracing.flags_c_lib",
+    aconfig_declarations: "android.tracing.flags-aconfig",
+}
+
 // App Widgets
 aconfig_declarations {
     name: "android.appwidget.flags-aconfig",
