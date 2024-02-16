@@ -113,7 +113,6 @@ class UnlockKeyguardToSplitScreen(override val flicker: LegacyFlickerTest) :
                             subject.name.contains(primaryApp.toLayerName()) && subject.isVisible
                         }
                         .mapNotNull { primaryApp -> primaryApp.layer.visibleRegion }
-                        .toTypedArray()
 
                 val primaryAppRegionArea = RegionSubject(primaryAppRegions, it.timestamp)
                 it.visibleRegion(secondaryApp).notOverlaps(primaryAppRegionArea.region)

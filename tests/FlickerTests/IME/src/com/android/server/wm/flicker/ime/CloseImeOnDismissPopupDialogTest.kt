@@ -85,7 +85,6 @@ class CloseImeOnDismissPopupDialogTest(flicker: LegacyFlickerTest) : BaseTest(fl
                     val visibleAreas =
                         imeSnapshotLayers
                             .mapNotNull { imeSnapshotLayer -> imeSnapshotLayer.layer.visibleRegion }
-                            .toTypedArray()
                     val imeVisibleRegion = RegionSubject(visibleAreas, timestamp)
                     val appVisibleRegion = it.visibleRegion(imeTestApp)
                     if (imeVisibleRegion.region.isNotEmpty) {
