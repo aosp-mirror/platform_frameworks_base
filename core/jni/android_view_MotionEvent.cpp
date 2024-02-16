@@ -84,23 +84,9 @@ static void android_view_MotionEvent_setNativePtr(JNIEnv* env, jobject eventObj,
 }
 
 jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent& event) {
-    jobject eventObj = env->CallStaticObjectMethod(gMotionEventClassInfo.clazz,
-            gMotionEventClassInfo.obtain);
-    if (env->ExceptionCheck() || !eventObj) {
-        ALOGE("An exception occurred while obtaining a motion event.");
-        LOGE_EX(env);
-        env->ExceptionClear();
-        return NULL;
-    }
-
-    MotionEvent* destEvent = android_view_MotionEvent_getNativePtr(env, eventObj);
-    if (!destEvent) {
-        destEvent = new MotionEvent();
-        android_view_MotionEvent_setNativePtr(env, eventObj, destEvent);
-    }
-
+    std::unique_ptr<MotionEvent> destEvent = std::make_unique<MotionEvent>();
     destEvent->copyFrom(&event, true);
-    return eventObj;
+    return android_view_MotionEvent_obtainFromNative(env, std::move(destEvent));
 }
 
 jobject android_view_MotionEvent_obtainFromNative(JNIEnv* env, std::unique_ptr<MotionEvent> event) {
