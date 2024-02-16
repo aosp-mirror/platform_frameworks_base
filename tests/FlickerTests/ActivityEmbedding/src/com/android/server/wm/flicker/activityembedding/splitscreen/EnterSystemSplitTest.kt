@@ -16,9 +16,9 @@
 
 package com.android.server.wm.flicker.activityembedding.splitscreen
 
+import android.graphics.Rect
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.tools.datatypes.Rect
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -32,6 +32,7 @@ import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import com.android.wm.shell.flicker.utils.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.utils.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.utils.splitScreenDividerBecomesVisible
+import kotlin.math.abs
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test
@@ -135,19 +136,25 @@ class EnterSystemSplitTest(flicker: LegacyFlickerTest) : ActivityEmbeddingTestBa
                 .plus(systemDivider.region)
                 .coversExactly(startDisplayBounds)
             check { "ActivityEmbeddingSplitHeight" }
-                .that(leftAELayerRegion.region.height)
-                .isEqual(rightAELayerRegion.region.height)
+                .that(leftAELayerRegion.region.bounds.height())
+                .isEqual(rightAELayerRegion.region.bounds.height())
             check { "SystemSplitHeight" }
-                .that(rightAELayerRegion.region.height)
-                .isEqual(secondaryAppLayerRegion.region.height)
+                .that(rightAELayerRegion.region.bounds.height())
+                .isEqual(secondaryAppLayerRegion.region.bounds.height())
             // TODO(b/292283182): Remove this special case handling.
             check { "ActivityEmbeddingSplitWidth" }
-                .that(Math.abs(leftAELayerRegion.region.width - rightAELayerRegion.region.width))
+                .that(
+                    abs(
+                        leftAELayerRegion.region.bounds.width() -
+                            rightAELayerRegion.region.bounds.width()
+                    )
+                )
                 .isLower(2)
             check { "SystemSplitWidth" }
                 .that(
-                    Math.abs(
-                        secondaryAppLayerRegion.region.width - 2 * rightAELayerRegion.region.width
+                    abs(
+                        secondaryAppLayerRegion.region.bounds.width() -
+                            2 * rightAELayerRegion.region.bounds.width()
                     )
                 )
                 .isLower(2)
@@ -167,18 +174,24 @@ class EnterSystemSplitTest(flicker: LegacyFlickerTest) : ActivityEmbeddingTestBa
             val secondaryAppLayerRegion =
                 visibleRegion(ActivityOptions.SplitScreen.Primary.COMPONENT.toFlickerComponent())
             check { "ActivityEmbeddingSplitHeight" }
-                .that(leftAEWindowRegion.region.height)
-                .isEqual(rightAEWindowRegion.region.height)
+                .that(leftAEWindowRegion.region.bounds.height())
+                .isEqual(rightAEWindowRegion.region.bounds.height())
             check { "SystemSplitHeight" }
-                .that(rightAEWindowRegion.region.height)
-                .isEqual(secondaryAppLayerRegion.region.height)
+                .that(rightAEWindowRegion.region.bounds.height())
+                .isEqual(secondaryAppLayerRegion.region.bounds.height())
             check { "ActivityEmbeddingSplitWidth" }
-                .that(Math.abs(leftAEWindowRegion.region.width - rightAEWindowRegion.region.width))
+                .that(
+                    abs(
+                        leftAEWindowRegion.region.bounds.width() -
+                            rightAEWindowRegion.region.bounds.width()
+                    )
+                )
                 .isLower(2)
             check { "SystemSplitWidth" }
                 .that(
-                    Math.abs(
-                        secondaryAppLayerRegion.region.width - 2 * rightAEWindowRegion.region.width
+                    abs(
+                        secondaryAppLayerRegion.region.bounds.width() -
+                            2 * rightAEWindowRegion.region.bounds.width()
                     )
                 )
                 .isLower(2)
@@ -190,7 +203,7 @@ class EnterSystemSplitTest(flicker: LegacyFlickerTest) : ActivityEmbeddingTestBa
 
     companion object {
         /** {@inheritDoc} */
-        private var startDisplayBounds = Rect.EMPTY
+        private var startDisplayBounds = Rect()
         /**
          * Creates the test configurations.
          *

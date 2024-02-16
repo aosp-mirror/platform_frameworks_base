@@ -19,13 +19,13 @@ package com.android.wm.shell.flicker.pip.apps
 import android.Manifest
 import android.platform.test.annotations.Postsubmit
 import android.tools.Rotation
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.NetflixAppHelper
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.helpers.WindowUtils
+import android.tools.traces.component.ComponentNameMatcher
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import org.junit.Assume
