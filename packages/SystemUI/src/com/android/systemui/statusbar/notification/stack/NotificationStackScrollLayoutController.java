@@ -1039,6 +1039,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mView.setTranslationY(translationY);
     }
 
+    /** Set view x-translation */
+    public void setTranslationX(float translationX) {
+        mView.setTranslationX(translationX);
+    }
+
     public int indexOfChild(View view) {
         return mView.indexOfChild(view);
     }

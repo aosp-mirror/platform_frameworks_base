@@ -38,6 +38,7 @@ import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -380,6 +381,7 @@ constructor(
                     KeyguardState.AOD -> TO_AOD_DURATION
                     KeyguardState.DOZING -> TO_DOZING_DURATION
                     KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> TO_DREAMING_HOSTED_DURATION
+                    KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -395,6 +397,6 @@ constructor(
         val TO_AOD_DURATION = 500.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION
         val TO_GONE_DURATION = DEFAULT_DURATION
-        val TO_GLANCEABLE_HUB_DURATION = DEFAULT_DURATION
+        val TO_GLANCEABLE_HUB_DURATION = 1.seconds
     }
 }

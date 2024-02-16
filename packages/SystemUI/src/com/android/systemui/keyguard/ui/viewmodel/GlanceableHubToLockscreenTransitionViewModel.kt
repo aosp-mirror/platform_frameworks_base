@@ -16,13 +16,22 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.app.animation.Interpolators.EMPHASIZED
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.FromGlanceableHubTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.FromGlanceableHubTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.StateToValue
+import com.android.systemui.res.R
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /**
  * Breaks down GLANCEABLE_HUB->LOCKSCREEN transition into discrete steps for corresponding views to
@@ -33,32 +42,43 @@ import kotlinx.coroutines.flow.Flow
 class GlanceableHubToLockscreenTransitionViewModel
 @Inject
 constructor(
+    configurationInteractor: ConfigurationInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     private val transitionAnimation =
         animationFlow.setup(
-            duration = FromGlanceableHubTransitionInteractor.TO_LOCKSCREEN_DURATION,
+            duration = TO_LOCKSCREEN_DURATION,
             from = KeyguardState.GLANCEABLE_HUB,
             to = KeyguardState.LOCKSCREEN,
         )
 
-    // TODO(b/315205222): implement full animation spec instead of just a simple fade.
     val keyguardAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
-            duration = FromGlanceableHubTransitionInteractor.TO_LOCKSCREEN_DURATION,
-            onStep = { it },
-            onFinish = { 1f },
-            onCancel = { 0f },
-            name = "GLANCEABLE_HUB->LOCKSCREEN: keyguardAlpha",
-        )
+        transitionAnimation
+            .sharedFlow(
+                duration = 167.milliseconds,
+                startTime = 167.milliseconds,
+                onStep = { it },
+                onFinish = { 1f },
+                onCancel = { 0f },
+                name = "GLANCEABLE_HUB->LOCKSCREEN: keyguardAlpha",
+            )
+            .onStart { emit(0f) }
 
-    // TODO(b/315205216): implement full animation spec instead of just a simple fade.
-    val notificationAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
-            duration = FromGlanceableHubTransitionInteractor.TO_LOCKSCREEN_DURATION,
-            onStep = { it },
-            onFinish = { 1f },
-            onCancel = { 0f },
-            name = "GLANCEABLE_HUB->LOCKSCREEN: notificationAlpha",
-        )
+    val keyguardTranslationX: Flow<StateToValue> =
+        configurationInteractor
+            .dimensionPixelSize(R.dimen.hub_to_lockscreen_transition_lockscreen_translation_x)
+            .flatMapLatest { translatePx: Int ->
+                transitionAnimation.sharedFlowWithState(
+                    duration = TO_LOCKSCREEN_DURATION,
+                    onStep = { value -> -translatePx + value * translatePx },
+                    interpolator = EMPHASIZED,
+                    onCancel = { -translatePx.toFloat() },
+                    name = "GLANCEABLE_HUB->LOCKSCREEN: keyguardTranslationX"
+                )
+            }
+
+    val notificationAlpha: Flow<Float> = keyguardAlpha
+
+    val notificationTranslationX: Flow<Float> =
+        keyguardTranslationX.map { it.value }.filterNotNull()
 }

@@ -1,6 +1,7 @@
 package com.android.systemui.communal.ui.compose
 
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -12,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.FixedSizeEdgeDetector
+import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
@@ -21,6 +23,7 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.animation.scene.updateSceneTransitionLayoutState
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
@@ -31,16 +34,25 @@ import kotlinx.coroutines.flow.transform
 
 object Communal {
     object Elements {
+        val Scrim = ElementKey("Scrim", scenePicker = LowestZIndexScenePicker)
         val Content = ElementKey("CommunalContent")
     }
 }
 
 val sceneTransitions = transitions {
-    from(TransitionSceneKey.Blank, to = TransitionSceneKey.Communal) {
-        spec = tween(durationMillis = 500)
-
+    to(TransitionSceneKey.Communal) {
+        spec = tween(durationMillis = 1000)
         translate(Communal.Elements.Content, Edge.Right)
-        fade(Communal.Elements.Content)
+        timestampRange(startMillis = 167, endMillis = 334) {
+            fade(Communal.Elements.Scrim)
+            fade(Communal.Elements.Content)
+        }
+    }
+    to(TransitionSceneKey.Blank) {
+        spec = tween(durationMillis = 1000)
+        translate(Communal.Elements.Content, Edge.Right)
+        timestampRange(endMillis = 167) { fade(Communal.Elements.Content) }
+        timestampRange(startMillis = 167, endMillis = 334) { fade(Communal.Elements.Scrim) }
     }
 }
 
@@ -111,6 +123,12 @@ private fun SceneScope.CommunalScene(
     viewModel: BaseCommunalViewModel,
     modifier: Modifier = Modifier,
 ) {
+    Box(
+        modifier =
+            Modifier.element(Communal.Elements.Scrim)
+                .fillMaxSize()
+                .background(LocalAndroidColorScheme.current.outlineVariant),
+    )
     Box(modifier.element(Communal.Elements.Content)) { CommunalHub(viewModel = viewModel) }
 }
 
