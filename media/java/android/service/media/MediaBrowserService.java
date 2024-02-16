@@ -111,7 +111,7 @@ public abstract class MediaBrowserService extends Service {
      * All the info about a connection.
      */
     private static class ConnectionRecord implements IBinder.DeathRecipient {
-        public final MediaBrowserService service;
+        public final ServiceState serviceState;
         public final String pkg;
         public final int pid;
         public final int uid;
@@ -121,9 +121,14 @@ public abstract class MediaBrowserService extends Service {
         public final HashMap<String, List<Pair<IBinder, Bundle>>> subscriptions = new HashMap<>();
 
         ConnectionRecord(
-                MediaBrowserService service, String pkg, int pid, int uid, Bundle rootHints,
-                IMediaBrowserServiceCallbacks callbacks, BrowserRoot root) {
-            this.service = service;
+                ServiceState serviceState,
+                String pkg,
+                int pid,
+                int uid,
+                Bundle rootHints,
+                IMediaBrowserServiceCallbacks callbacks,
+                BrowserRoot root) {
+            this.serviceState = serviceState;
             this.pkg = pkg;
             this.pid = pid;
             this.uid = uid;
@@ -134,12 +139,8 @@ public abstract class MediaBrowserService extends Service {
 
         @Override
         public void binderDied() {
-            service.mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    service.mServiceState.mConnections.remove(callbacks.asBinder());
-                }
-            });
+            serviceState.postOnHandler(
+                    () -> serviceState.mConnections.remove(callbacks.asBinder()));
         }
     }
 
@@ -706,7 +707,7 @@ public abstract class MediaBrowserService extends Service {
             // in onGetRoot().
             mCurConnection =
                     new ConnectionRecord(
-                            /* service= */ MediaBrowserService.this,
+                            /* serviceState= */ this,
                             pkg,
                             pid,
                             uid,
@@ -728,7 +729,7 @@ public abstract class MediaBrowserService extends Service {
                 try {
                     ConnectionRecord connection =
                             new ConnectionRecord(
-                                    /* service= */ MediaBrowserService.this,
+                                    /* serviceState= */ this,
                                     pkg,
                                     pid,
                                     uid,
