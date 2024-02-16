@@ -166,7 +166,6 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
-import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemServiceManager;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.pm.PackageList;
@@ -1050,69 +1049,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return;
                 }
 
-                ArrayMap<String, String> dstAttributionTags = new ArrayMap<>();
-                ArraySet<String> attributionTags = new ArraySet<>();
-                attributionTags.add(null);
-                if (pkg.getAttributions() != null) {
-                    int numAttributions = pkg.getAttributions().size();
-                    for (int attributionNum = 0; attributionNum < numAttributions;
-                            attributionNum++) {
-                        ParsedAttribution attribution = pkg.getAttributions().get(attributionNum);
-                        attributionTags.add(attribution.getTag());
-
-                        int numInheritFrom = attribution.getInheritFrom().size();
-                        for (int inheritFromNum = 0; inheritFromNum < numInheritFrom;
-                                inheritFromNum++) {
-                            dstAttributionTags.put(attribution.getInheritFrom().get(inheritFromNum),
-                                    attribution.getTag());
-                        }
-                    }
-                }
-
                 synchronized (AppOpsService.this) {
-                    UidState uidState = mUidStates.get(uid);
-                    if (uidState == null) {
-                        return;
-                    }
-
-                    Ops ops = uidState.pkgOps.get(pkgName);
-                    if (ops == null) {
-                        return;
-                    }
-
-                    // Reset cached package properties to re-initialize when needed
-                    ops.bypass = null;
-                    ops.knownAttributionTags.clear();
-
-                    // Merge data collected for removed attributions into their successor
-                    // attributions
-                    int numOps = ops.size();
-                    for (int opNum = 0; opNum < numOps; opNum++) {
-                        Op op = ops.valueAt(opNum);
-                        for (int deviceIndex = op.mDeviceAttributedOps.size() - 1; deviceIndex >= 0;
-                                deviceIndex--) {
-                            ArrayMap<String, AttributedOp> attributedOps =
-                                    op.mDeviceAttributedOps.valueAt(deviceIndex);
-                            for (int tagIndex = attributedOps.size() - 1; tagIndex >= 0;
-                                    tagIndex--) {
-                                String tag = attributedOps.keyAt(tagIndex);
-                                if (attributionTags.contains(tag)) {
-                                    // attribution still exist after upgrade
-                                    continue;
-                                }
-
-                                String newAttributionTag = dstAttributionTags.get(tag);
-
-                                AttributedOp newAttributedOp = op.getOrCreateAttribution(op,
-                                        newAttributionTag,
-                                        op.mDeviceAttributedOps.keyAt(deviceIndex));
-                                newAttributedOp.add(attributedOps.get(tag));
-                                attributedOps.remove(tag);
-
-                                scheduleFastWriteLocked();
-                            }
-                        }
-                    }
+                    refreshAttributionsLocked(pkg, uid);
                 }
             }
         }
@@ -1135,41 +1073,6 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         mContext.registerReceiverAsUser(mOnPackageUpdatedReceiver, UserHandle.ALL,
                 packageUpdateFilter, null, null);
-
-        synchronized (this) {
-            for (int uidNum = mUidStates.size() - 1; uidNum >= 0; uidNum--) {
-                int uid = mUidStates.keyAt(uidNum);
-                UidState uidState = mUidStates.valueAt(uidNum);
-
-                String[] pkgsInUid = getPackagesForUid(uidState.uid);
-                if (ArrayUtils.isEmpty(pkgsInUid) && uid >= Process.FIRST_APPLICATION_UID) {
-                    uidState.clear();
-                    mUidStates.removeAt(uidNum);
-                    scheduleFastWriteLocked();
-                    continue;
-                }
-
-                ArrayMap<String, Ops> pkgs = uidState.pkgOps;
-
-                int numPkgs = pkgs.size();
-                for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
-                    String pkg = pkgs.keyAt(pkgNum);
-
-                    String action;
-                    if (!ArrayUtils.contains(pkgsInUid, pkg)) {
-                        action = ACTION_PACKAGE_REMOVED;
-                    } else {
-                        action = Intent.ACTION_PACKAGE_REPLACED;
-                    }
-
-                    SystemServerInitThreadPool.submit(
-                            () -> mOnPackageUpdatedReceiver.onReceive(mContext, new Intent(action)
-                                    .setData(Uri.fromParts("package", pkg, null))
-                                    .putExtra(Intent.EXTRA_UID, uid)),
-                            "Update app-ops uidState in case package " + pkg + " changed");
-                }
-            }
-        }
 
         prepareInternalCallbacks();
 
@@ -1275,17 +1178,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                     int userId = userIds[i];
                     initializeUserUidStatesLocked(userId, packageStates, knownUids);
                 }
-            }
 
-            // Remove what may have been added during persistence parsing
-            for (int i = mUidStates.size() - 1; i >= 0; i--) {
-                int uid = mUidStates.keyAt(i);
-                if (!knownUids.get(uid, false)) {
-                    mUidStates.removeAt(i);
-                }
+                trimUidStatesLocked(knownUids, packageStates);
+                mUidStatesInitialized = true;
             }
-
-            mUidStatesInitialized = true;
         }
     }
 
@@ -1339,6 +1235,104 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         createSandboxUidStateIfNotExistsForAppLocked(uid, knownUids);
+    }
+
+    private void trimUidStatesLocked(SparseBooleanArray knownUids,
+            Map<String, PackageState> packageStates) {
+        synchronized (this) {
+            // Remove what may have been added during persistence parsing
+            for (int uidIdx = mUidStates.size() - 1; uidIdx >= 0; uidIdx--) {
+                int uid = mUidStates.keyAt(uidIdx);
+                if (knownUids.get(uid, false)) {
+                    if (uid >= Process.FIRST_APPLICATION_UID) {
+                        ArrayMap<String, Ops> pkgOps = mUidStates.valueAt(uidIdx).pkgOps;
+                        for (int pkgIdx = pkgOps.size() - 1; pkgIdx >= 0; pkgIdx--) {
+                            String pkgName = pkgOps.keyAt(pkgIdx);
+                            if (!packageStates.containsKey(pkgName)) {
+                                pkgOps.removeAt(pkgIdx);
+                                continue;
+                            }
+                            AndroidPackage pkg = packageStates.get(pkgName).getAndroidPackage();
+                            if (pkg != null) {
+                                refreshAttributionsLocked(pkg, uid);
+                            }
+                        }
+                        if (pkgOps.isEmpty()) {
+                            mUidStates.removeAt(uidIdx);
+                        }
+                    }
+                } else {
+                    mUidStates.removeAt(uidIdx);
+                }
+            }
+        }
+    }
+
+    @GuardedBy("this")
+    private void refreshAttributionsLocked(AndroidPackage pkg, int uid) {
+        String pkgName = pkg.getPackageName();
+        ArrayMap<String, String> dstAttributionTags = new ArrayMap<>();
+        ArraySet<String> attributionTags = new ArraySet<>();
+        attributionTags.add(null);
+        if (pkg.getAttributions() != null) {
+            int numAttributions = pkg.getAttributions().size();
+            for (int attributionNum = 0; attributionNum < numAttributions;
+                    attributionNum++) {
+                ParsedAttribution attribution = pkg.getAttributions().get(attributionNum);
+                attributionTags.add(attribution.getTag());
+
+                int numInheritFrom = attribution.getInheritFrom().size();
+                for (int inheritFromNum = 0; inheritFromNum < numInheritFrom;
+                        inheritFromNum++) {
+                    dstAttributionTags.put(attribution.getInheritFrom().get(inheritFromNum),
+                            attribution.getTag());
+                }
+            }
+        }
+
+        UidState uidState = mUidStates.get(uid);
+        if (uidState == null) {
+            return;
+        }
+
+        Ops ops = uidState.pkgOps.get(pkgName);
+        if (ops == null) {
+            return;
+        }
+
+        // Reset cached package properties to re-initialize when needed
+        ops.bypass = null;
+        ops.knownAttributionTags.clear();
+
+        // Merge data collected for removed attributions into their successor
+        // attributions
+        int numOps = ops.size();
+        for (int opNum = 0; opNum < numOps; opNum++) {
+            Op op = ops.valueAt(opNum);
+            for (int deviceIndex = op.mDeviceAttributedOps.size() - 1; deviceIndex >= 0;
+                    deviceIndex--) {
+                ArrayMap<String, AttributedOp> attributedOps =
+                        op.mDeviceAttributedOps.valueAt(deviceIndex);
+                for (int tagIndex = attributedOps.size() - 1; tagIndex >= 0;
+                        tagIndex--) {
+                    String tag = attributedOps.keyAt(tagIndex);
+                    if (attributionTags.contains(tag)) {
+                        // attribution still exist after upgrade
+                        continue;
+                    }
+
+                    String newAttributionTag = dstAttributionTags.get(tag);
+
+                    AttributedOp newAttributedOp = op.getOrCreateAttribution(op,
+                            newAttributionTag,
+                            op.mDeviceAttributedOps.keyAt(deviceIndex));
+                    newAttributedOp.add(attributedOps.get(tag));
+                    attributedOps.remove(tag);
+
+                    scheduleFastWriteLocked();
+                }
+            }
+        }
     }
 
     /**
