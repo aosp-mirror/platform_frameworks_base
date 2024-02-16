@@ -85,6 +85,7 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
 
     private final SystemInterface mSystemInterface;
     private final Context mContext;
+    private final WebViewProviderInfo mDefaultProvider;
 
     private long mMinimumVersionCode = -1;
 
@@ -105,6 +106,16 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
     WebViewUpdateServiceImpl2(Context context, SystemInterface systemInterface) {
         mContext = context;
         mSystemInterface = systemInterface;
+        WebViewProviderInfo[] webviewProviders = getWebViewPackages();
+        for (WebViewProviderInfo provider : webviewProviders) {
+            if (provider.availableByDefault) {
+                mDefaultProvider = provider;
+                break;
+            }
+        }
+        // This should be unreachable because the config parser enforces that there is at least one
+        // availableByDefault provider.
+        throw new AndroidRuntimeException("No available by default WebView Provider.");
     }
 
     @Override
@@ -163,11 +174,10 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         if (mCurrentWebViewPackage == null) {
             return true;
         }
-        WebViewProviderInfo defaultProvider = getDefaultWebViewPackage();
-        if (mCurrentWebViewPackage.packageName.equals(defaultProvider.packageName)) {
+        if (mCurrentWebViewPackage.packageName.equals(mDefaultProvider.packageName)) {
             List<UserPackage> userPackages =
                     mSystemInterface.getPackageInfoForProviderAllUsers(
-                            mContext, defaultProvider);
+                            mContext, mDefaultProvider);
             return !isInstalledAndEnabledForAllUsers(userPackages);
         } else {
             return false;
@@ -200,13 +210,12 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
                 // default package for all users in case it was disabled, even if we already did the
                 // one-time migration before. If this actually changes the state, we will see the
                 // PackageManager broadcast shortly and try again.
-                WebViewProviderInfo defaultProvider = getDefaultWebViewPackage();
                 Slog.w(
                         TAG,
                         "No provider available for all users, trying to enable "
-                                + defaultProvider.packageName);
+                                + mDefaultProvider.packageName);
                 mSystemInterface.enablePackageForAllUsers(
-                        mContext, defaultProvider.packageName, true);
+                        mContext, mDefaultProvider.packageName, true);
             }
 
         } catch (Throwable t) {
@@ -398,15 +407,7 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
      */
     @Override
     public WebViewProviderInfo getDefaultWebViewPackage() {
-        WebViewProviderInfo[] webviewProviders = getWebViewPackages();
-        for (WebViewProviderInfo provider : webviewProviders) {
-            if (provider.availableByDefault) {
-                return provider;
-            }
-        }
-        // This should be unreachable because the config parser enforces that there is at least one
-        // availableByDefault provider.
-        throw new AndroidRuntimeException("No available by default WebView Provider.");
+        return mDefaultProvider;
     }
 
     private static class ProviderAndPackageInfo {
@@ -467,14 +468,13 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
 
         // User did not choose, or the choice failed; return the default provider even if it is not
         // installed or enabled for all users.
-        WebViewProviderInfo defaultProvider = getDefaultWebViewPackage();
         try {
-            PackageInfo packageInfo = mSystemInterface.getPackageInfoForProvider(defaultProvider);
-            if (validityResult(defaultProvider, packageInfo) == VALIDITY_OK) {
+            PackageInfo packageInfo = mSystemInterface.getPackageInfoForProvider(mDefaultProvider);
+            if (validityResult(mDefaultProvider, packageInfo) == VALIDITY_OK) {
                 return packageInfo;
             }
         } catch (NameNotFoundException e) {
-            Slog.w(TAG, "Default WebView package (" + defaultProvider.packageName + ") not found");
+            Slog.w(TAG, "Default WebView package (" + mDefaultProvider.packageName + ") not found");
         }
 
         // This should never happen during normal operation (only with modified system images).
