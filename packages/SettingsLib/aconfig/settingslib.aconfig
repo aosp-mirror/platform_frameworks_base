@@ -44,3 +44,10 @@ flag {
   description: "Gates whether to enable LE audio private broadcast sharing via QR code"
   bug: "308368124"
 }
+
+flag {
+  name: "enable_hide_exclusively_managed_bluetooth_device"
+  namespace: "dck_framework"
+  description: "Hide exclusively managed Bluetooth devices in BT settings menu."
+  bug: "324475542"
+}
