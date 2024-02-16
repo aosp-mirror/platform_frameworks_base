@@ -1128,6 +1128,30 @@ public class Canvas extends BaseCanvas {
         return false;
     }
 
+    /**
+     * Intersect the current clip with the specified shader.
+     * The shader will be treated as an alpha mask, taking the intersection of the two.
+     *
+     * @param shader The shader to intersect with the current clip
+     */
+    @FlaggedApi(Flags.FLAG_CLIP_SHADER)
+    public void clipShader(@NonNull Shader shader) {
+        nClipShader(mNativeCanvasWrapper, shader.getNativeInstance(),
+                Region.Op.INTERSECT.nativeInt);
+    }
+
+    /**
+     * Set the clip to the difference of the current clip and the shader.
+     * The shader will be treated as an alpha mask, taking the difference of the two.
+     *
+     * @param shader The shader to intersect with the current clip
+     */
+    @FlaggedApi(Flags.FLAG_CLIP_SHADER)
+    public void clipOutShader(@NonNull Shader shader) {
+        nClipShader(mNativeCanvasWrapper, shader.getNativeInstance(),
+                Region.Op.DIFFERENCE.nativeInt);
+    }
+
     public @Nullable DrawFilter getDrawFilter() {
         return mDrawFilter;
     }
@@ -1471,6 +1495,8 @@ public class Canvas extends BaseCanvas {
             float left, float top, float right, float bottom, int regionOp);
     @CriticalNative
     private static native boolean nClipPath(long nativeCanvas, long nativePath, int regionOp);
+    @CriticalNative
+    private static native void nClipShader(long nativeCanvas, long nativeShader, int regionOp);
     @CriticalNative
     private static native void nSetDrawFilter(long nativeCanvas, long nativeFilter);
     @CriticalNative

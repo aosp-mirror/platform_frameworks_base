@@ -20,10 +20,12 @@ import static android.media.Utils.intersectSortedDistinctRanges;
 import static android.media.Utils.sortDistinctRanges;
 import static android.media.codec.Flags.FLAG_DYNAMIC_COLOR_ASPECTS;
 import static android.media.codec.Flags.FLAG_HLG_EDITING;
+import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
 import static android.media.codec.Flags.FLAG_NULL_OUTPUT_SURFACE;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,6 +42,8 @@ import android.util.Range;
 import android.util.Rational;
 import android.util.Size;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1806,6 +1810,55 @@ public final class MediaCodecInfo {
             // KEY_IS_ADTS:      required feature for all AAC decoders
             return true;
         }
+    }
+
+    /** @hide */
+    @IntDef(prefix = {"SECURITY_MODEL_"}, value = {
+        SECURITY_MODEL_SANDBOXED,
+        SECURITY_MODEL_MEMORY_SAFE,
+        SECURITY_MODEL_TRUSTED_CONTENT_ONLY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SecurityModel {}
+
+    /**
+     * In this model the codec is running in a sandboxed process. Even if a
+     * malicious content was fed to the codecs in this model, the impact will
+     * be contained in the sandboxed process.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    public static final int SECURITY_MODEL_SANDBOXED = 0;
+    /**
+     * In this model the codec is not running in a sandboxed process, but
+     * written in a memory-safe way. It typically means that the software
+     * implementation of the codec is written in a memory-safe language such
+     * as Rust.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    public static final int SECURITY_MODEL_MEMORY_SAFE = 1;
+    /**
+     * In this model the codec is suitable only for trusted content where
+     * the input can be verified to be well-formed and no malicious actor
+     * can alter it. For example, codecs in this model are not suitable
+     * for arbitrary media downloaded from the internet or present in a user
+     * directory. On the other hand, they could be suitable for media encoded
+     * in the backend that the app developer wholly controls.
+     * <p>
+     * Codecs with this security model is not included in
+     * {@link MediaCodecList#REGULAR_CODECS}, but included in
+     * {@link MediaCodecList#ALL_CODECS}.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    public static final int SECURITY_MODEL_TRUSTED_CONTENT_ONLY = 2;
+
+    /**
+     * Query the security model of the codec.
+     */
+    @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
+    @SecurityModel
+    public int getSecurityModel() {
+        // TODO b/297922713 --- detect security model of out-of-sandbox codecs
+        return SECURITY_MODEL_SANDBOXED;
     }
 
     /**

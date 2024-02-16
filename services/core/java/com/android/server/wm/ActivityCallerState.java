@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.os.Process.INVALID_UID;
+
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -51,6 +53,9 @@ final class ActivityCallerState {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityCallerState" : TAG_ATM;
 
     // XML tags for CallerInfo
+    private static final String ATTR_CALLER_UID = "caller_uid";
+    private static final String ATTR_CALLER_PACKAGE = "caller_package";
+    private static final String ATTR_CALLER_IS_SHARE_ENABLED = "caller_is_share_enabled";
     private static final String TAG_READABLE_CONTENT_URI = "readable_content_uri";
     private static final String TAG_WRITABLE_CONTENT_URI = "writable_content_uri";
     private static final String TAG_INACCESSIBLE_CONTENT_URI = "inaccessible_content_uri";
@@ -71,12 +76,33 @@ final class ActivityCallerState {
         return mCallerTokenInfoMap.getOrDefault(callerToken, null);
     }
 
+    boolean hasCaller(IBinder callerToken) {
+        return getCallerInfoOrNull(callerToken) != null;
+    }
+
+    int getUid(IBinder callerToken) {
+        CallerInfo callerInfo = getCallerInfoOrNull(callerToken);
+        return callerInfo != null ? callerInfo.mUid : INVALID_UID;
+    }
+
+    String getPackage(IBinder callerToken) {
+        CallerInfo callerInfo = getCallerInfoOrNull(callerToken);
+        return callerInfo != null ? callerInfo.mPackageName : null;
+    }
+
+    boolean isShareIdentityEnabled(IBinder callerToken) {
+        CallerInfo callerInfo = getCallerInfoOrNull(callerToken);
+        return callerInfo != null ? callerInfo.mIsShareIdentityEnabled : false;
+    }
+
     void add(IBinder callerToken, CallerInfo callerInfo) {
         mCallerTokenInfoMap.put(callerToken, callerInfo);
     }
 
-    void computeCallerInfo(IBinder callerToken, Intent intent, int callerUid) {
-        final CallerInfo callerInfo = new CallerInfo();
+    void computeCallerInfo(IBinder callerToken, Intent intent, int callerUid,
+            String callerPackageName, boolean isCallerShareIdentityEnabled) {
+        final CallerInfo callerInfo = new CallerInfo(callerUid, callerPackageName,
+                isCallerShareIdentityEnabled);
         mCallerTokenInfoMap.put(callerToken, callerInfo);
 
         final ArraySet<Uri> contentUris = getContentUrisFromIntent(intent);
@@ -180,12 +206,26 @@ final class ActivityCallerState {
     }
 
     public static final class CallerInfo {
+        final int mUid;
+        final String mPackageName;
+        final boolean mIsShareIdentityEnabled;
         final ArraySet<GrantUri> mReadableContentUris = new ArraySet<>();
         final ArraySet<GrantUri> mWritableContentUris = new ArraySet<>();
         final ArraySet<GrantUri> mInaccessibleContentUris = new ArraySet<>();
 
+        CallerInfo(int uid, String packageName, boolean isShareIdentityEnabled) {
+            mUid = uid;
+            mPackageName = packageName;
+            mIsShareIdentityEnabled = isShareIdentityEnabled;
+        }
+
         public void saveToXml(TypedXmlSerializer out)
                 throws IOException, XmlPullParserException {
+            out.attributeInt(null, ATTR_CALLER_UID, mUid);
+            if (mPackageName != null) {
+                out.attribute(null, ATTR_CALLER_PACKAGE, mPackageName);
+            }
+            out.attributeBoolean(null, ATTR_CALLER_IS_SHARE_ENABLED, mIsShareIdentityEnabled);
             for (int i = mReadableContentUris.size() - 1; i >= 0; i--) {
                 saveGrantUriToXml(out, mReadableContentUris.valueAt(i), TAG_READABLE_CONTENT_URI);
             }
@@ -202,7 +242,12 @@ final class ActivityCallerState {
 
         public static CallerInfo restoreFromXml(TypedXmlPullParser in)
                 throws IOException, XmlPullParserException {
-            CallerInfo callerInfo = new CallerInfo();
+            int uid = in.getAttributeInt(null, ATTR_CALLER_UID, 0);
+            String packageName = in.getAttributeValue(null, ATTR_CALLER_PACKAGE);
+            boolean isShareIdentityEnabled = in.getAttributeBoolean(null,
+                    ATTR_CALLER_IS_SHARE_ENABLED, false);
+
+            CallerInfo callerInfo = new CallerInfo(uid, packageName, isShareIdentityEnabled);
             final int outerDepth = in.getDepth();
             int event;
             while (((event = in.next()) != END_DOCUMENT)

@@ -1043,6 +1043,15 @@ public abstract class WindowManagerInternal {
     /**
      * Clears apps added to collection of apps in which screen capture should be disabled.
      *
+     * @param packageInfos set of {@link PackageInfo} whose windows should be unblocked
+     *                     from capture.
+     */
+    public abstract void removeBlockScreenCaptureForApps(
+            @NonNull ArraySet<PackageInfo> packageInfos);
+
+    /**
+     * Clears all apps added to collection of apps in which screen capture should be disabled.
+     *
      * <p> This clears and resets any existing set or added applications from
      * * {@link #addBlockScreenCaptureForApps(ArraySet)}
      */

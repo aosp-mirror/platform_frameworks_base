@@ -3852,7 +3852,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // the other jobs that will use this network.
                     if (DEBUG) {
                         Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: piggybacking "
-                                + batchedJobs.size() + " jobs on " + network
+                                + (batchedJobs.size() - unbatchedJobCount) + " jobs on " + network
                                 + " because of unbatched job");
                     }
                     jobsToRun.addAll(batchedJobs);
@@ -3892,8 +3892,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // Some job is going to use the CPU anyway. Might as well run all the other
                     // CPU-only jobs.
                     if (DEBUG) {
+                        final Integer unbatchedJobCountObj = mUnbatchedJobCount.get(null);
+                        final int unbatchedJobCount =
+                                unbatchedJobCountObj == null ? 0 : unbatchedJobCountObj;
                         Slog.d(TAG, "maybeQueueReadyJobsForExecutionLocked: piggybacking "
-                                + batchedNonNetworkedJobs.size() + " non-network jobs");
+                                + (batchedNonNetworkedJobs.size() - unbatchedJobCount)
+                                + " non-network jobs");
                     }
                     jobsToRun.addAll(batchedNonNetworkedJobs);
                 } else if (batchedNonNetworkedJobs.size() >= minReadyCount) {

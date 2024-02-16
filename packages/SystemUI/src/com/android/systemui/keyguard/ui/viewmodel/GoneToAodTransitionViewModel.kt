@@ -53,7 +53,6 @@ constructor(
         return transitionAnimation.sharedFlowWithState(
             startTime = 600.milliseconds,
             duration = 500.milliseconds,
-            onStart = { translatePx },
             onStep = { translatePx + it * -translatePx },
             onFinish = { 0f },
             onCancel = { 0f },
@@ -66,7 +65,6 @@ constructor(
         transitionAnimation.sharedFlow(
             startTime = 700.milliseconds,
             duration = 400.milliseconds,
-            onStart = { 0f },
             onStep = { it },
             onFinish = { 1f },
             onCancel = { 1f },

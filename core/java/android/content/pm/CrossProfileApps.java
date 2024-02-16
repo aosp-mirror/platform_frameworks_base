@@ -19,7 +19,9 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_PERSONAL_LABEL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_WORK_LABEL;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
+import static android.app.admin.flags.Flags.FLAG_ALLOW_QUERYING_PROFILE_TYPE;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -312,6 +314,41 @@ public class CrossProfileApps {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+
+    /**
+     * Checks if the specified user is a profile, i.e. not the parent user.
+     *
+     * @param userHandle The UserHandle of the target profile, must be one of the users returned by
+     *        {@link #getTargetUserProfiles()}, otherwise a {@link SecurityException} will
+     *        be thrown.
+     * @return whether the specified user is a profile.
+     */
+    @FlaggedApi(FLAG_ALLOW_QUERYING_PROFILE_TYPE)
+    public boolean isProfile(@NonNull UserHandle userHandle) {
+        // Note that this is not a security check, but rather a check for correct use.
+        // The actual security check is performed by UserManager.
+        verifyCanAccessUser(userHandle);
+
+        return mUserManager.isProfile(userHandle.getIdentifier());
+    }
+
+    /**
+     * Checks if the specified user is a managed profile.
+     *
+     * @param userHandle The UserHandle of the target profile, must be one of the users returned by
+     *        {@link #getTargetUserProfiles()}, otherwise a {@link SecurityException} will
+     *        be thrown.
+     * @return whether the specified user is a managed profile.
+     */
+    @FlaggedApi(FLAG_ALLOW_QUERYING_PROFILE_TYPE)
+    public boolean isManagedProfile(@NonNull UserHandle userHandle) {
+        // Note that this is not a security check, but rather a check for correct use.
+        // The actual security check is performed by UserManager.
+        verifyCanAccessUser(userHandle);
+
+        return mUserManager.isManagedProfile(userHandle.getIdentifier());
     }
 
     /**
@@ -677,6 +714,11 @@ public class CrossProfileApps {
         }
     }
 
+    /**
+     * A validation method to check that the methods in this class are only being applied to user
+     * handles returned by {@link #getTargetUserProfiles()}. As this is run client-side for
+     * input validation purposes, this should never replace a real security check service-side.
+     */
     private void verifyCanAccessUser(UserHandle userHandle) {
         if (!getTargetUserProfiles().contains(userHandle)) {
             throw new SecurityException("Not allowed to access " + userHandle);

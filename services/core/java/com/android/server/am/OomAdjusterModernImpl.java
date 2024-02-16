@@ -722,14 +722,8 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         performNewUpdateOomAdjLSP(oomAdjReason, topApp, targetProcesses, activeUids,
                 fullUpdate, now, UNKNOWN_ADJ);
 
-        if (fullUpdate) {
-            assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
-        } else {
-            activeProcesses.clear();
-            activeProcesses.addAll(targetProcesses);
-            assignCachedAdjIfNecessary(activeProcesses);
-            activeProcesses.clear();
-        }
+        // TODO: b/319163103 - optimize cache adj assignment to not require the whole lru list.
+        assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
         postUpdateOomAdjInnerLSP(oomAdjReason, activeUids, now, nowElapsed, oldTime);
         targetProcesses.clear();
 
@@ -996,10 +990,10 @@ public class OomAdjusterModernImpl extends OomAdjuster {
                             && service.mState.getMaxAdj() < FOREGROUND_APP_ADJ)
                     || (service.mState.getCurAdj() <= FOREGROUND_APP_ADJ
                             && service.mState.getCurrentSchedulingGroup() > SCHED_GROUP_BACKGROUND
-                            && service.mState.getCurProcState() <= PROCESS_STATE_TOP)) {
+                            && service.mState.getCurProcState() <= PROCESS_STATE_TOP)
+                    || (service.isSdkSandbox && cr.binding.attributedClient != null)) {
                 continue;
             }
-
 
             computeServiceHostOomAdjLSP(cr, service, app, now, topApp, fullUpdate, false, false,
                     oomAdjReason, cachedAdj, false, false);

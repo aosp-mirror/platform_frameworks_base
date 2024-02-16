@@ -162,4 +162,5 @@ interface IAppOpsService {
             int attributionFlags, int attributionChainId);
     void finishOperationForDevice(IBinder clientId, int code, int uid, String packageName,
             @nullable String attributionTag, int virtualDeviceId);
+   List<AppOpsManager.PackageOps> getPackagesForOpsForDevice(in int[] ops, String persistentDeviceId);
 }

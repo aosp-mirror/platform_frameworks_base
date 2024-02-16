@@ -53,6 +53,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.plugins.FalsingManager
@@ -98,6 +99,7 @@ constructor(
     private val falsingManager: FalsingManager,
     private val aodAlphaViewModel: AodAlphaViewModel,
     private val keyguardClockViewModel: KeyguardClockViewModel,
+    private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val lockscreenContentViewModel: LockscreenContentViewModel,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
     private val keyguardBlueprintViewBinder: KeyguardBlueprintViewBinder,
@@ -148,6 +150,7 @@ constructor(
                     keyguardRootView,
                     keyguardBlueprintViewModel,
                     keyguardClockViewModel,
+                    smartspaceViewModel,
                 )
             }
         }

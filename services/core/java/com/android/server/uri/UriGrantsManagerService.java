@@ -65,6 +65,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -630,16 +631,24 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
         if (intent == null) {
             return null;
         }
-        Uri data = intent.getData();
-        ClipData clip = intent.getClipData();
-        if (data == null && clip == null) {
-            return null;
-        }
+
         // Default userId for uris in the intent (if they don't specify it themselves)
         int contentUserHint = intent.getContentUserHint();
         if (contentUserHint == UserHandle.USER_CURRENT) {
             contentUserHint = UserHandle.getUserId(callingUid);
         }
+
+        if (android.security.Flags.contentUriPermissionApis()) {
+            enforceRequireContentUriPermissionFromCallerOnIntentExtraStream(intent, contentUserHint,
+                    mode, callingUid, requireContentUriPermissionFromCaller);
+        }
+
+        Uri data = intent.getData();
+        ClipData clip = intent.getClipData();
+        if (data == null && clip == null) {
+            return null;
+        }
+
         int targetUid;
         if (needed != null) {
             targetUid = needed.targetUid;
@@ -730,6 +739,37 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
             throw new SecurityException("You can't launch this activity because you don't have the"
                     + " required " + ActivityInfo.requiredContentUriPermissionToShortString(
                             requireContentUriPermissionFromCaller) + " access to " + grantUri.uri);
+        }
+    }
+
+    private void enforceRequireContentUriPermissionFromCallerOnIntentExtraStream(Intent intent,
+            int contentUserHint, int mode, int callingUid,
+            @RequiredContentUriPermission Integer requireContentUriPermissionFromCaller) {
+        try {
+            final Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri.class);
+            if (uri != null) {
+                final GrantUri grantUri = GrantUri.resolve(contentUserHint, uri, mode);
+                enforceRequireContentUriPermissionFromCaller(
+                        requireContentUriPermissionFromCaller, grantUri, callingUid);
+            }
+        } catch (BadParcelableException e) {
+            Slog.w(TAG, "Failed to unparcel an URI in EXTRA_STREAM, skipping"
+                    + " requireContentUriPermissionFromCaller: " + e);
+        }
+
+        try {
+            final ArrayList<Uri> uris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM,
+                    Uri.class);
+            if (uris != null) {
+                for (int i = uris.size() - 1; i >= 0; i--) {
+                    final GrantUri grantUri = GrantUri.resolve(contentUserHint, uris.get(i), mode);
+                    enforceRequireContentUriPermissionFromCaller(
+                            requireContentUriPermissionFromCaller, grantUri, callingUid);
+                }
+            }
+        } catch (BadParcelableException e) {
+            Slog.w(TAG, "Failed to unparcel an ArrayList of URIs in EXTRA_STREAM, skipping"
+                    + " requireContentUriPermissionFromCaller: " + e);
         }
     }
 
