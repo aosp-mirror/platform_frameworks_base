@@ -207,7 +207,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Test
     fun testDragDownHelperCalledWhenDraggingDown() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
+            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
             whenever(dragDownHelper.isDraggingDown).thenReturn(true)
             val now = SystemClock.elapsedRealtime()
             val ev = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, 0f, 0f, 0 /* meta */)
