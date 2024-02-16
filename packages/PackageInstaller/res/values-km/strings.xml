@@ -113,8 +113,7 @@
     <string name="unarchive_body_text" msgid="8244155079861708964">"កម្មវិធីនេះនឹងចាប់ផ្ដើមទាញយកនៅផ្ទៃខាងក្រោយ"</string>
     <string name="restore" msgid="8460854736328970444">"ស្ដារ"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"អ្នកគ្មាន​អ៊ីនធឺណិត​ទេ"</string>
-    <!-- no translation found for unarchive_error_offline_body (2256042209364094099) -->
-    <skip />
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"ដើម្បីស្ដារកម្មវិធីនេះ សូមពិនិត្យមើលការតភ្ជាប់អ៊ីនធឺណិតរបស់អ្នក រួចព្យាយាមម្ដងទៀត"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"មានអ្វីមួយខុសប្រក្រតី"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"មានបញ្ហាក្នុងការព្យាយាមស្ដារកម្មវិធីនេះ"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"ទំហំផ្ទុក​មិន​គ្រប់គ្រាន់"</string>

@@ -881,7 +881,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mTaskSupervisor.onSystemReady();
             mActivityClientController.onSystemReady();
             // TODO(b/258792202) Cleanup once ASM is ready to launch
-            ActivitySecurityModelFeatureFlags.initialize(mContext.getMainExecutor(), pm);
+            ActivitySecurityModelFeatureFlags.initialize(mContext.getMainExecutor());
             mGrammaticalManagerInternal = LocalServices.getService(
                     GrammaticalInflectionManagerInternal.class);
         }
@@ -6334,7 +6334,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final NeededUriGrants dataGrants = collectGrants(data, r);
 
             synchronized (mGlobalLock) {
-                r.sendResult(callingUid, resultWho, requestCode, resultCode, data, dataGrants);
+                r.sendResult(callingUid, resultWho, requestCode, resultCode, data, new Binder(),
+                        dataGrants);
             }
         }
 

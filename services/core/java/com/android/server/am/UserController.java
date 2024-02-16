@@ -97,6 +97,7 @@ import android.os.IProgressListener;
 import android.os.IRemoteCallback;
 import android.os.IUserManager;
 import android.os.Message;
+import android.os.PowerManagerInternal;
 import android.os.PowerWhitelistManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -1934,9 +1935,12 @@ class UserController implements Handler.Callback {
     }
 
     /**
-     * Start user, if its not already running, and bring it to foreground.
+     * Start user, if it's not already running, and bring it to foreground.
      */
     void startUserInForeground(@UserIdInt int targetUserId) {
+        if (android.multiuser.Flags.setPowerModeDuringUserSwitch()) {
+            mInjector.setPerformancePowerMode(true);
+        }
         boolean success = startUser(targetUserId, USER_START_MODE_FOREGROUND);
         if (!success) {
             mInjector.getWindowManager().setSwitchingUser(false);
@@ -2146,6 +2150,9 @@ class UserController implements Handler.Callback {
     }
 
     private void endUserSwitch() {
+        if (android.multiuser.Flags.setPowerModeDuringUserSwitch()) {
+            mInjector.setPerformancePowerMode(false);
+        }
         final int nextUserId;
         synchronized (mLock) {
             nextUserId = ObjectUtils.getOrElse(mPendingTargetUserIds.poll(), UserHandle.USER_NULL);
@@ -3535,6 +3542,7 @@ class UserController implements Handler.Callback {
         private final ActivityManagerService mService;
         private UserManagerService mUserManager;
         private UserManagerInternal mUserManagerInternal;
+        private PowerManagerInternal mPowerManagerInternal;
         private Handler mHandler;
         private final Object mUserSwitchingDialogLock = new Object();
         @GuardedBy("mUserSwitchingDialogLock")
@@ -3634,6 +3642,13 @@ class UserController implements Handler.Callback {
                 mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
             }
             return mUserManagerInternal;
+        }
+
+        PowerManagerInternal getPowerManagerInternal() {
+            if (mPowerManagerInternal == null) {
+                mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+            }
+            return mPowerManagerInternal;
         }
 
         KeyguardManager getKeyguardManager() {
@@ -3827,6 +3842,12 @@ class UserController implements Handler.Callback {
 
         void onUserStarting(@UserIdInt int userId) {
             getSystemServiceManager().onUserStarting(TimingsTraceAndSlog.newAsyncLog(), userId);
+        }
+
+        void setPerformancePowerMode(boolean enabled) {
+            Slogf.i(TAG, "Setting power mode MODE_FIXED_PERFORMANCE to " + enabled);
+            getPowerManagerInternal().setPowerMode(
+                    PowerManagerInternal.MODE_FIXED_PERFORMANCE, enabled);
         }
 
         void onSystemUserVisibilityChanged(boolean visible) {

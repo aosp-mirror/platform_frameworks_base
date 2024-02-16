@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.mediaoutput.domain.model
 
 import android.media.session.MediaSession
+import android.media.session.PlaybackState
 
 /** Represents media playing on the connected device. */
 sealed interface MediaDeviceSession {
@@ -26,6 +27,7 @@ sealed interface MediaDeviceSession {
         val appLabel: CharSequence,
         val packageName: String,
         val sessionToken: MediaSession.Token,
+        val playbackState: PlaybackState?,
     ) : MediaDeviceSession
 
     /** Media is not playing. */

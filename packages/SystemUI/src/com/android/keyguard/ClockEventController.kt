@@ -43,7 +43,6 @@ import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags.REGION_SAMPLING
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.core.Logger
@@ -316,7 +315,7 @@ constructor(
         object : KeyguardUpdateMonitorCallback() {
             override fun onKeyguardVisibilityChanged(visible: Boolean) {
                 isKeyguardVisible = visible
-                if (!KeyguardShadeMigrationNssl.isEnabled) {
+                if (!migrateClocksToBlueprint()) {
                     if (!isKeyguardVisible) {
                         clock?.run {
                             smallClock.animations.doze(if (isDozing) 1f else 0f)
@@ -410,7 +409,7 @@ constructor(
             parent.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     listenForDozing(this)
-                    if (KeyguardShadeMigrationNssl.isEnabled) {
+                    if (migrateClocksToBlueprint()) {
                         listenForDozeAmountTransition(this)
                         listenForAnyStateToAodTransition(this)
                     } else {

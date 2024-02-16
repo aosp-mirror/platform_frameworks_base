@@ -839,14 +839,15 @@ public final class WindowManagerGlobal {
         mTrustedPresentationListener.removeListener(listener);
     }
 
-    void registerBatchedSurfaceControlInputReceiver(int displayId,
+    InputTransferToken registerBatchedSurfaceControlInputReceiver(int displayId,
             @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
         IBinder clientToken = new Binder();
+        InputTransferToken inputTransferToken = new InputTransferToken();
         InputChannel inputChannel = new InputChannel();
         try {
             WindowManagerGlobal.getWindowSession().grantInputChannel(displayId, surfaceControl,
-                    clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null, null,
+                    clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null, inputTransferToken,
                     surfaceControl.getName(), inputChannel);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create input channel", e);
@@ -865,16 +866,18 @@ public final class WindowManagerGlobal {
                                 }
                             }));
         }
+        return inputTransferToken;
     }
 
-    void registerUnbatchedSurfaceControlInputReceiver(int displayId,
+    InputTransferToken registerUnbatchedSurfaceControlInputReceiver(int displayId,
             @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
         IBinder clientToken = new Binder();
+        InputTransferToken inputTransferToken = new InputTransferToken();
         InputChannel inputChannel = new InputChannel();
         try {
             WindowManagerGlobal.getWindowSession().grantInputChannel(displayId, surfaceControl,
-                    clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null, null,
+                    clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null, inputTransferToken,
                     surfaceControl.getName(), inputChannel);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create input channel", e);
@@ -892,6 +895,7 @@ public final class WindowManagerGlobal {
                                 }
                             }));
         }
+        return inputTransferToken;
     }
 
     void unregisterSurfaceControlInputReceiver(SurfaceControl surfaceControl) {
@@ -928,6 +932,17 @@ public final class WindowManagerGlobal {
             return null;
         }
         return surfaceControlInputReceiverInfo.mClientToken;
+    }
+
+    boolean transferTouchGesture(InputTransferToken transferFromToken,
+            InputTransferToken transferToToken) {
+        try {
+            return getWindowManagerService().transferTouchGesture(transferFromToken,
+                    transferToToken);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return false;
     }
 
     private final class TrustedPresentationListener extends

@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Cerrar"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Expandir"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Configuración"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Introducir pantalla dividida"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menú"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menú de pantalla en pantalla"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> está en modo de Pantalla en pantalla"</string>

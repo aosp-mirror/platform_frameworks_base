@@ -102,12 +102,12 @@ object ComposeFacade : BaseComposeFacade {
     override fun setVolumePanelActivityContent(
         activity: ComponentActivity,
         viewModel: VolumePanelViewModel,
-        onDismissAnimationFinished: () -> Unit,
+        onDismiss: () -> Unit,
     ) {
         activity.setContent {
             VolumePanelRoot(
                 viewModel = viewModel,
-                onDismissAnimationFinished = onDismissAnimationFinished,
+                onDismiss = onDismiss,
             )
         }
     }
