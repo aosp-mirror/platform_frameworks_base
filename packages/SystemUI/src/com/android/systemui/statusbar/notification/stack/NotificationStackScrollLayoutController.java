@@ -96,6 +96,7 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -177,6 +178,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final ConfigurationController mConfigurationController;
     private final ZenModeController mZenModeController;
     private final MetricsLogger mMetricsLogger;
+    private final ColorUpdateLogger mColorUpdateLogger;
 
     private final DumpManager mDumpManager;
     private final FalsingCollector mFalsingCollector;
@@ -239,6 +241,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             new View.OnAttachStateChangeListener() {
                 @Override
                 public void onViewAttachedToWindow(View v) {
+                    mColorUpdateLogger.logTriggerEvent("NSSLC.onViewAttachedToWindow()");
                     mConfigurationController.addCallback(mConfigurationListener);
                     if (!FooterViewRefactor.isEnabled()) {
                         mZenModeController.addCallback(mZenModeControllerCallback);
@@ -254,6 +257,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
                 @Override
                 public void onViewDetachedFromWindow(View v) {
+                    mColorUpdateLogger.logTriggerEvent("NSSLC.onViewDetachedFromWindow()");
                     mConfigurationController.removeCallback(mConfigurationListener);
                     if (!FooterViewRefactor.isEnabled()) {
                         mZenModeController.removeCallback(mZenModeControllerCallback);
@@ -332,12 +336,16 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
         @Override
         public void onUiModeChanged() {
+            mColorUpdateLogger.logTriggerEvent("NSSLC.onUiModeChanged()",
+                    "mode=" + mConfigurationController.getNightModeName());
             mView.updateBgColor();
             mView.updateDecorViews();
         }
 
         @Override
         public void onThemeChanged() {
+            mColorUpdateLogger.logTriggerEvent("NSSLC.onThemeChanged()",
+                    "mode=" + mConfigurationController.getNightModeName());
             mView.updateCornerRadius();
             mView.updateBgColor();
             mView.updateDecorViews();
@@ -719,6 +727,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             ZenModeController zenModeController,
             NotificationLockscreenUserManager lockscreenUserManager,
             MetricsLogger metricsLogger,
+            ColorUpdateLogger colorUpdateLogger,
             DumpManager dumpManager,
             FalsingCollector falsingCollector,
             FalsingManager falsingManager,
@@ -773,6 +782,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mZenModeController = zenModeController;
         mLockscreenUserManager = lockscreenUserManager;
         mMetricsLogger = metricsLogger;
+        mColorUpdateLogger = colorUpdateLogger;
         mDumpManager = dumpManager;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mFalsingCollector = falsingCollector;
