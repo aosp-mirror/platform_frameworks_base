@@ -16,6 +16,7 @@
 
 package android.service.ondeviceintelligence;
 
+import static android.app.ondeviceintelligence.OnDeviceIntelligenceManager.AUGMENT_REQUEST_CONTENT_BUNDLE_KEY;
 import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE;
 
 import android.annotation.CallbackExecutor;
@@ -23,6 +24,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.ondeviceintelligence.Content;
@@ -30,14 +32,18 @@ import android.app.ondeviceintelligence.Feature;
 import android.app.ondeviceintelligence.IProcessingSignal;
 import android.app.ondeviceintelligence.IResponseCallback;
 import android.app.ondeviceintelligence.IStreamingResponseCallback;
-import android.app.ondeviceintelligence.ITokenCountCallback;
+import android.app.ondeviceintelligence.ITokenInfoCallback;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
 import android.app.ondeviceintelligence.ProcessingSignal;
-import android.app.ondeviceintelligence.StreamingResponseReceiver;
+import android.app.ondeviceintelligence.ProcessingOutcomeReceiver;
+import android.app.ondeviceintelligence.StreamedProcessingOutcomeReceiver;
+import android.app.ondeviceintelligence.TokenInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
@@ -75,8 +81,8 @@ import java.util.function.Consumer;
  *
  * <pre>
  * {@literal
- * <service android:name=".SampleTrustedInferenceService"
- *          android:permission="android.permission.BIND_ONDEVICE_TRUSTED_INFERENCE_SERVICE"
+ * <service android:name=".SampleSandboxedInferenceService"
+ *          android:permission="android.permission.BIND_ONDEVICE_SANDBOXED_INFERENCE_SERVICE"
  *          android:isolatedProcess="true">
  * </service>}
  * </pre>
@@ -85,18 +91,18 @@ import java.util.function.Consumer;
  */
 @SystemApi
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
-public abstract class OnDeviceTrustedInferenceService extends Service {
-    private static final String TAG = OnDeviceTrustedInferenceService.class.getSimpleName();
+public abstract class OnDeviceSandboxedInferenceService extends Service {
+    private static final String TAG = OnDeviceSandboxedInferenceService.class.getSimpleName();
 
     /**
      * The {@link Intent} that must be declared as handled by the service. To be supported, the
      * service must also require the
-     * {@link android.Manifest.permission#BIND_ON_DEVICE_TRUSTED_INFERENCE_SERVICE}
+     * {@link android.Manifest.permission#BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE}
      * permission so that other applications can not abuse it.
      */
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE =
-            "android.service.ondeviceintelligence.OnDeviceTrustedInferenceService";
+            "android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService";
 
     private IRemoteStorageService mRemoteStorageService;
 
@@ -107,7 +113,7 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
-            return new IOnDeviceTrustedInferenceService.Stub() {
+            return new IOnDeviceSandboxedInferenceService.Stub() {
                 @Override
                 public void registerRemoteStorageService(IRemoteStorageService storageService) {
                     Objects.requireNonNull(storageService);
@@ -115,50 +121,48 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
                 }
 
                 @Override
-                public void requestTokenCount(Feature feature, Content request,
+                public void requestTokenInfo(int callerUid, Feature feature, Content request,
                         ICancellationSignal cancellationSignal,
-                        ITokenCountCallback tokenCountCallback) {
+                        ITokenInfoCallback tokenInfoCallback) {
                     Objects.requireNonNull(feature);
-                    Objects.requireNonNull(tokenCountCallback);
-                    OnDeviceTrustedInferenceService.this.onCountTokens(feature,
+                    Objects.requireNonNull(tokenInfoCallback);
+                    OnDeviceSandboxedInferenceService.this.onTokenInfoRequest(callerUid,
+                            feature,
                             request,
                             CancellationSignal.fromTransport(cancellationSignal),
-                            wrapTokenCountCallback(tokenCountCallback));
+                            wrapTokenInfoCallback(tokenInfoCallback));
                 }
 
                 @Override
-                public void processRequestStreaming(Feature feature, Content request,
+                public void processRequestStreaming(int callerUid, Feature feature, Content request,
                         int requestType, ICancellationSignal cancellationSignal,
                         IProcessingSignal processingSignal,
                         IStreamingResponseCallback callback) {
                     Objects.requireNonNull(feature);
-                    Objects.requireNonNull(request);
                     Objects.requireNonNull(callback);
 
-                    OnDeviceTrustedInferenceService.this.onProcessRequestStreaming(feature,
+                    OnDeviceSandboxedInferenceService.this.onProcessRequestStreaming(callerUid,
+                            feature,
                             request,
                             requestType,
                             CancellationSignal.fromTransport(cancellationSignal),
                             ProcessingSignal.fromTransport(processingSignal),
-                            wrapStreamingResponseCallback(callback)
-                    );
+                            wrapStreamingResponseCallback(callback));
                 }
 
                 @Override
-                public void processRequest(Feature feature, Content request,
+                public void processRequest(int callerUid, Feature feature, Content request,
                         int requestType, ICancellationSignal cancellationSignal,
                         IProcessingSignal processingSignal,
                         IResponseCallback callback) {
                     Objects.requireNonNull(feature);
-                    Objects.requireNonNull(request);
                     Objects.requireNonNull(callback);
 
-
-                    OnDeviceTrustedInferenceService.this.onProcessRequest(feature, request,
-                            requestType, CancellationSignal.fromTransport(cancellationSignal),
+                    OnDeviceSandboxedInferenceService.this.onProcessRequest(callerUid, feature,
+                            request, requestType,
+                            CancellationSignal.fromTransport(cancellationSignal),
                             ProcessingSignal.fromTransport(processingSignal),
-                            wrapResponseCallback(callback)
-                    );
+                            wrapResponseCallback(callback));
                 }
 
                 @Override
@@ -167,7 +171,7 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
                     Objects.requireNonNull(processingState);
                     Objects.requireNonNull(callback);
 
-                    OnDeviceTrustedInferenceService.this.onUpdateProcessingState(processingState,
+                    OnDeviceSandboxedInferenceService.this.onUpdateProcessingState(processingState,
                             wrapOutcomeReceiver(callback)
                     );
                 }
@@ -178,35 +182,37 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
     }
 
     /**
-     * Invoked when caller  wants to obtain a count of number of tokens present in the passed in
-     * Request associated with the provided feature.
+     * Invoked when caller  wants to obtain token info related to the payload in the passed
+     * content, associated with the provided feature.
      * The expectation from the implementation is that when processing is complete, it
-     * should provide the token count in the {@link OutcomeReceiver#onResult}.
+     * should provide the token info in the {@link OutcomeReceiver#onResult}.
      *
+     * @param callerUid          UID of the caller that initiated this call chain.
      * @param feature            feature which is associated with the request.
      * @param request            request that requires processing.
      * @param cancellationSignal Cancellation Signal to receive cancellation events from client and
      *                           configure a listener to.
-     * @param callback           callback to populate failure and full response for the provided
+     * @param callback           callback to populate failure or the token info for the provided
      *                           request.
      */
     @NonNull
-    public abstract void onCountTokens(
-            @NonNull Feature feature,
+    public abstract void onTokenInfoRequest(
+            int callerUid, @NonNull Feature feature,
             @NonNull Content request,
             @Nullable CancellationSignal cancellationSignal,
-            @NonNull OutcomeReceiver<Long,
+            @NonNull OutcomeReceiver<TokenInfo,
                     OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> callback);
 
     /**
      * Invoked when caller provides a request for a particular feature to be processed in a
      * streaming manner. The expectation from the implementation is that when processing the
      * request,
-     * it periodically populates the {@link StreamingResponseReceiver#onNewContent} to continuously
+     * it periodically populates the {@link StreamedProcessingOutcomeReceiver#onNewContent} to continuously
      * provide partial Content results for the caller to utilize. Optionally the implementation can
-     * provide the complete response in the {@link StreamingResponseReceiver#onResult} upon
+     * provide the complete response in the {@link StreamedProcessingOutcomeReceiver#onResult} upon
      * processing completion.
      *
+     * @param callerUid          UID of the caller that initiated this call chain.
      * @param feature            feature which is associated with the request.
      * @param request            request that requires processing.
      * @param requestType        identifier representing the type of request.
@@ -218,13 +224,12 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
      */
     @NonNull
     public abstract void onProcessRequestStreaming(
-            @NonNull Feature feature,
-            @NonNull Content request,
+            int callerUid, @NonNull Feature feature,
+            @Nullable Content request,
             @OnDeviceIntelligenceManager.RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
-            @NonNull StreamingResponseReceiver<Content, Content,
-                    OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> callback);
+            @NonNull StreamedProcessingOutcomeReceiver callback);
 
     /**
      * Invoked when caller provides a request for a particular feature to be processed in one shot
@@ -233,6 +238,7 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
      * should
      * provide the complete response in the {@link OutcomeReceiver#onResult}.
      *
+     * @param callerUid          UID of the caller that initiated this call chain.
      * @param feature            feature which is associated with the request.
      * @param request            request that requires processing.
      * @param requestType        identifier representing the type of request.
@@ -244,13 +250,12 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
      */
     @NonNull
     public abstract void onProcessRequest(
-            @NonNull Feature feature,
-            @NonNull Content request,
+            int callerUid, @NonNull Feature feature,
+            @Nullable Content request,
             @OnDeviceIntelligenceManager.RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
-            @NonNull OutcomeReceiver<Content,
-                    OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> callback);
+            @NonNull ProcessingOutcomeReceiver callback);
 
 
     /**
@@ -335,6 +340,26 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
         }
     }
 
+
+    /**
+     * Returns the {@link Executor} to use for incoming IPC from request sender into your service
+     * implementation. For e.g. see
+     * {@link ProcessingOutcomeReceiver#onDataAugmentRequest(Content,
+     * Consumer)} where we use the executor to populate the consumer.
+     * <p>
+     * Override this method in your {@link OnDeviceSandboxedInferenceService} implementation to
+     * provide the executor you want to use for incoming IPC.
+     *
+     * @return the {@link Executor} to use for incoming IPC from {@link OnDeviceIntelligenceManager}
+     * to {@link OnDeviceSandboxedInferenceService}.
+     */
+    @SuppressLint("OnNameExpected")
+    @NonNull
+    public Executor getCallbackExecutor() {
+        return new HandlerExecutor(Handler.createAsync(getMainLooper()));
+    }
+
+
     private RemoteCallback wrapResultReceiverAsReadOnly(
             @NonNull Consumer<Map<String, FileInputStream>> resultConsumer,
             @NonNull Executor executor) {
@@ -355,10 +380,9 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
         });
     }
 
-    private OutcomeReceiver<Content,
-            OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> wrapResponseCallback(
+    private ProcessingOutcomeReceiver wrapResponseCallback(
             IResponseCallback callback) {
-        return new OutcomeReceiver<>() {
+        return new ProcessingOutcomeReceiver() {
             @Override
             public void onResult(@androidx.annotation.NonNull Content response) {
                 try {
@@ -378,13 +402,23 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
                     Slog.e(TAG, "Error sending result: " + e);
                 }
             }
+
+            @Override
+            public void onDataAugmentRequest(@NonNull Content content,
+                    @NonNull Consumer<Content> contentCallback) {
+                try {
+                    callback.onDataAugmentRequest(content, wrapRemoteCallback(contentCallback));
+
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error sending augment request: " + e);
+                }
+            }
         };
     }
 
-    private StreamingResponseReceiver<Content, Content,
-            OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> wrapStreamingResponseCallback(
+    private StreamedProcessingOutcomeReceiver wrapStreamingResponseCallback(
             IStreamingResponseCallback callback) {
-        return new StreamingResponseReceiver<>() {
+        return new StreamedProcessingOutcomeReceiver() {
             @Override
             public void onNewContent(@androidx.annotation.NonNull Content content) {
                 try {
@@ -413,17 +447,43 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
                     Slog.e(TAG, "Error sending result: " + e);
                 }
             }
+
+            @Override
+            public void onDataAugmentRequest(@NonNull Content content,
+                    @NonNull Consumer<Content> contentCallback) {
+                try {
+                    callback.onDataAugmentRequest(content, wrapRemoteCallback(contentCallback));
+
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error sending augment request: " + e);
+                }
+            }
         };
     }
 
-    private OutcomeReceiver<Long,
-            OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> wrapTokenCountCallback(
-            ITokenCountCallback tokenCountCallback) {
+    private RemoteCallback wrapRemoteCallback(
+            @androidx.annotation.NonNull Consumer<Content> contentCallback) {
+        return new RemoteCallback(
+                result -> {
+                    if (result != null) {
+                        getCallbackExecutor().execute(() -> contentCallback.accept(
+                                result.getParcelable(AUGMENT_REQUEST_CONTENT_BUNDLE_KEY,
+                                        Content.class)));
+                    } else {
+                        getCallbackExecutor().execute(
+                                () -> contentCallback.accept(null));
+                    }
+                });
+    }
+
+    private OutcomeReceiver<TokenInfo,
+            OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> wrapTokenInfoCallback(
+            ITokenInfoCallback tokenInfoCallback) {
         return new OutcomeReceiver<>() {
             @Override
-            public void onResult(Long tokenCount) {
+            public void onResult(TokenInfo tokenInfo) {
                 try {
-                    tokenCountCallback.onSuccess(tokenCount);
+                    tokenInfoCallback.onSuccess(tokenInfo);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error sending result: " + e);
                 }
@@ -433,7 +493,7 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
             public void onError(
                     OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException exception) {
                 try {
-                    tokenCountCallback.onFailure(exception.getErrorCode(), exception.getMessage(),
+                    tokenInfoCallback.onFailure(exception.getErrorCode(), exception.getMessage(),
                             exception.getErrorParams());
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error sending failure: " + e);

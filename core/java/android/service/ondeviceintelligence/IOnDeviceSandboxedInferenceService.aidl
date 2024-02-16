@@ -18,7 +18,7 @@ package android.service.ondeviceintelligence;
 
 import android.app.ondeviceintelligence.IStreamingResponseCallback;
 import android.app.ondeviceintelligence.IResponseCallback;
-import android.app.ondeviceintelligence.ITokenCountCallback;
+import android.app.ondeviceintelligence.ITokenInfoCallback;
 import android.app.ondeviceintelligence.IProcessingSignal;
 import android.app.ondeviceintelligence.Content;
 import android.app.ondeviceintelligence.Feature;
@@ -29,18 +29,18 @@ import android.service.ondeviceintelligence.IRemoteStorageService;
 import android.service.ondeviceintelligence.IProcessingUpdateStatusCallback;
 
 /**
- * Interface for a concrete implementation to provide on device trusted inference.
+ * Interface for a concrete implementation to provide on-device sandboxed inference.
  *
  * @hide
  */
-oneway interface IOnDeviceTrustedInferenceService {
+oneway interface IOnDeviceSandboxedInferenceService {
     void registerRemoteStorageService(in IRemoteStorageService storageService);
-    void requestTokenCount(in Feature feature, in Content request, in ICancellationSignal cancellationSignal,
-                            in ITokenCountCallback tokenCountCallback);
-    void processRequest(in Feature feature, in Content request, in int requestType,
+    void requestTokenInfo(int callerUid, in Feature feature, in Content request, in ICancellationSignal cancellationSignal,
+                            in ITokenInfoCallback tokenInfoCallback);
+    void processRequest(int callerUid, in Feature feature, in Content request, in int requestType,
                         in ICancellationSignal cancellationSignal, in IProcessingSignal processingSignal,
                         in IResponseCallback callback);
-    void processRequestStreaming(in Feature feature, in Content request, in int requestType,
+    void processRequestStreaming(int callerUid, in Feature feature, in Content request, in int requestType,
                                 in ICancellationSignal cancellationSignal, in IProcessingSignal processingSignal,
                                 in IStreamingResponseCallback callback);
     void updateProcessingState(in Bundle processingState,

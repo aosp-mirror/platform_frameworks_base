@@ -21,23 +21,19 @@ import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.os.OutcomeReceiver;
 
 /**
  * Streaming variant of outcome receiver to populate response while processing a given request,
- * possibly in
- * chunks to provide a async processing behaviour to the caller.
+ * possibly in chunks to provide a async processing behaviour to the caller.
  *
  * @hide
  */
 @SystemApi
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
-public interface StreamingResponseReceiver<R, T, E extends Throwable> extends
-        OutcomeReceiver<R, E> {
+public interface StreamedProcessingOutcomeReceiver extends ProcessingOutcomeReceiver {
     /**
-     * Callback to be invoked when a part of the response i.e. some {@link Content} is already
-     * processed and
-     * needs to be passed onto the caller.
+     * Callback that would be invoked when a part of the response i.e. some {@link Content} is
+     * already processed and needs to be passed onto the caller.
      */
-    void onNewContent(@NonNull T content);
+    void onNewContent(@NonNull Content content);
 }

@@ -26,8 +26,10 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
@@ -36,6 +38,8 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 
 import androidx.annotation.IntDef;
+
+import com.android.internal.R;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -60,7 +64,16 @@ import java.util.function.LongConsumer;
 @SystemService(Context.ON_DEVICE_INTELLIGENCE_SERVICE)
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
 public class OnDeviceIntelligenceManager {
+    /**
+     * @hide
+     */
     public static final String API_VERSION_BUNDLE_KEY = "ApiVersionBundleKey";
+
+    /**
+     * @hide
+     */
+    public static final String AUGMENT_REQUEST_CONTENT_BUNDLE_KEY =
+            "AugmentRequestContentBundleKey";
     private final Context mContext;
     private final IOnDeviceIntelligenceManager mService;
 
@@ -82,8 +95,6 @@ public class OnDeviceIntelligenceManager {
     public void getVersion(
             @NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull LongConsumer versionConsumer) {
-        // TODO explore modifying this method into getServicePackageDetails and return both
-        //  version and package name of the remote service implementing this.
         try {
             RemoteCallback callback = new RemoteCallback(result -> {
                 if (result == null) {
@@ -98,6 +109,23 @@ public class OnDeviceIntelligenceManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+
+    /**
+     * Get package name configured for providing the remote implementation for this system service.
+     */
+    @Nullable
+    @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
+    public String getRemoteServicePackageName() {
+        String serviceConfigValue = mContext.getResources().getString(
+                R.string.config_defaultOnDeviceSandboxedInferenceService);
+        ComponentName componentName = ComponentName.unflattenFromString(serviceConfigValue);
+        if (componentName != null) {
+            return componentName.getPackageName();
+        }
+
+        return null;
     }
 
     /**
@@ -273,29 +301,29 @@ public class OnDeviceIntelligenceManager {
     }
 
     /**
-     * The methods computes the token-count for a given request payload using the provided Feature
-     * details.
+     * The methods computes the token related information for a given request payload using the
+     * provided {@link Feature}.
      *
      * @param feature            feature associated with the request.
      * @param request            request that contains the content data and associated params.
-     * @param outcomeReceiver    callback to populate the token count or exception in case of
+     * @param outcomeReceiver    callback to populate the token info or exception in case of
      *                           failure.
      * @param cancellationSignal signal to invoke cancellation on the operation in the remote
      *                           implementation.
      * @param callbackExecutor   executor to run the callback on.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
-    public void requestTokenCount(@NonNull Feature feature, @NonNull Content request,
+    public void requestTokenInfo(@NonNull Feature feature, @NonNull Content request,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull OutcomeReceiver<Long,
+            @NonNull OutcomeReceiver<TokenInfo,
                     OnDeviceIntelligenceManagerException> outcomeReceiver) {
         try {
-            ITokenCountCallback callback = new ITokenCountCallback.Stub() {
+            ITokenInfoCallback callback = new ITokenInfoCallback.Stub() {
                 @Override
-                public void onSuccess(long tokenCount) {
+                public void onSuccess(TokenInfo tokenInfo) {
                     Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
-                            () -> outcomeReceiver.onResult(tokenCount)));
+                            () -> outcomeReceiver.onResult(tokenInfo)));
                 }
 
                 @Override
@@ -314,7 +342,7 @@ public class OnDeviceIntelligenceManager {
                 cancellationSignal.setRemote(transport);
             }
 
-            mService.requestTokenCount(feature, request, transport, callback);
+            mService.requestTokenInfo(feature, request, transport, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -328,33 +356,31 @@ public class OnDeviceIntelligenceManager {
      * was a
      * failure.
      *
-     * @param feature                 feature associated with the request.
-     * @param request                 request that contains the Content data and
-     *                                associated params.
-     * @param requestType             type of request being sent for processing the content.
-     * @param responseOutcomeReceiver callback to populate the response content and
-     *                                associated
-     *                                params.
-     * @param processingSignal        signal to invoke custom actions in the
-     *                                remote implementation.
-     * @param cancellationSignal      signal to invoke cancellation or
-     * @param callbackExecutor        executor to run the callback on.
+     * @param feature            feature associated with the request.
+     * @param request            request that contains the Content data and
+     *                           associated params.
+     * @param requestType        type of request being sent for processing the content.
+     * @param cancellationSignal signal to invoke cancellation.
+     * @param processingSignal   signal to send custom signals in the
+     *                           remote implementation.
+     * @param callbackExecutor   executor to run the callback on.
+     * @param responseCallback   callback to populate the response content and
+     *                           associated params.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
 
-    public void processRequest(@NonNull Feature feature, @NonNull Content request,
+    public void processRequest(@NonNull Feature feature, @Nullable Content request,
             @RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
             @NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull OutcomeReceiver<Content,
-                    OnDeviceIntelligenceManagerProcessingException> responseOutcomeReceiver) {
+            @NonNull ProcessingOutcomeReceiver responseCallback) {
         try {
             IResponseCallback callback = new IResponseCallback.Stub() {
                 @Override
                 public void onSuccess(Content result) {
                     Binder.withCleanCallingIdentity(() -> {
-                        callbackExecutor.execute(() -> responseOutcomeReceiver.onResult(result));
+                        callbackExecutor.execute(() -> responseCallback.onResult(result));
                     });
                 }
 
@@ -362,11 +388,23 @@ public class OnDeviceIntelligenceManager {
                 public void onFailure(int errorCode, String errorMessage,
                         PersistableBundle errorParams) {
                     Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
-                            () -> responseOutcomeReceiver.onError(
+                            () -> responseCallback.onError(
                                     new OnDeviceIntelligenceManagerProcessingException(
                                             errorCode, errorMessage, errorParams))));
                 }
+
+                @Override
+                public void onDataAugmentRequest(@NonNull Content content,
+                        @NonNull RemoteCallback contentCallback) {
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                            () -> responseCallback.onDataAugmentRequest(content, result -> {
+                                Bundle bundle = new Bundle();
+                                bundle.putParcelable(AUGMENT_REQUEST_CONTENT_BUNDLE_KEY, result);
+                                callbackExecutor.execute(() -> contentCallback.sendResult(bundle));
+                            })));
+                }
             };
+
 
             IProcessingSignal transport = null;
             if (processingSignal != null) {
@@ -389,46 +427,48 @@ public class OnDeviceIntelligenceManager {
     }
 
     /**
-     * Variation of {@link #processRequest} that asynchronously processes a request in a streaming
+     * Variation of {@link #processRequest} that asynchronously processes a request in a
+     * streaming
      * fashion, where new content is pushed to caller in chunks via the
-     * {@link StreamingResponseReceiver#onNewContent}. After the streaming is complete,
-     * the service should call {@link StreamingResponseReceiver#onResult} and can optionally
-     * populate the complete {@link Response}'s Content as part of the callback when the final
-     * {@link Response} contains an enhanced aggregation of the Contents already streamed.
+     * {@link StreamedProcessingOutcomeReceiver#onNewContent}. After the streaming is complete,
+     * the service should call {@link StreamedProcessingOutcomeReceiver#onResult} and can optionally
+     * populate the complete the full response {@link Content} as part of the callback in cases
+     * when the final response contains an enhanced aggregation of the Contents already
+     * streamed.
      *
      * @param feature                   feature associated with the request.
      * @param request                   request that contains the Content data and associated
      *                                  params.
      * @param requestType               type of request being sent for processing the content.
-     * @param processingSignal          signal to invoke  other custom actions in the
+     * @param cancellationSignal        signal to invoke cancellation.
+     * @param processingSignal          signal to send custom signals in the
      *                                  remote implementation.
-     * @param cancellationSignal        signal to invoke cancellation
-     * @param streamingResponseReceiver streaming callback to populate the response content and
+     * @param streamingResponseCallback streaming callback to populate the response content and
      *                                  associated params.
      * @param callbackExecutor          executor to run the callback on.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
-    public void processRequestStreaming(@NonNull Feature feature, @NonNull Content request,
+    public void processRequestStreaming(@NonNull Feature feature, @Nullable Content request,
             @RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
             @NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull StreamingResponseReceiver<Content, Content,
-                    OnDeviceIntelligenceManagerProcessingException> streamingResponseReceiver) {
+            @NonNull StreamedProcessingOutcomeReceiver streamingResponseCallback) {
         try {
             IStreamingResponseCallback callback = new IStreamingResponseCallback.Stub() {
                 @Override
                 public void onNewContent(Content result) {
                     Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(
-                                () -> streamingResponseReceiver.onNewContent(result));
+                                () -> streamingResponseCallback.onNewContent(result));
                     });
                 }
 
                 @Override
                 public void onSuccess(Content result) {
                     Binder.withCleanCallingIdentity(() -> {
-                        callbackExecutor.execute(() -> streamingResponseReceiver.onResult(result));
+                        callbackExecutor.execute(
+                                () -> streamingResponseCallback.onResult(result));
                     });
                 }
 
@@ -437,10 +477,25 @@ public class OnDeviceIntelligenceManager {
                         PersistableBundle errorParams) {
                     Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(
-                                () -> streamingResponseReceiver.onError(
+                                () -> streamingResponseCallback.onError(
                                         new OnDeviceIntelligenceManagerProcessingException(
                                                 errorCode, errorMessage, errorParams)));
                     });
+                }
+
+
+                @Override
+                public void onDataAugmentRequest(@NonNull Content content,
+                        @NonNull RemoteCallback contentCallback) {
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                            () -> streamingResponseCallback.onDataAugmentRequest(content,
+                                    contentResponse -> {
+                                        Bundle bundle = new Bundle();
+                                        bundle.putParcelable(AUGMENT_REQUEST_CONTENT_BUNDLE_KEY,
+                                                contentResponse);
+                                        callbackExecutor.execute(
+                                                () -> contentCallback.sendResult(bundle));
+                                    })));
                 }
             };
 
@@ -468,7 +523,8 @@ public class OnDeviceIntelligenceManager {
     public static final int REQUEST_TYPE_INFERENCE = 0;
 
     /**
-     * Prepares the remote implementation environment for e.g.loading inference runtime etc.which
+     * Prepares the remote implementation environment for e.g.loading inference runtime etc
+     * .which
      * are time consuming beforehand to remove overhead and allow quick processing of requests
      * thereof.
      */
@@ -485,7 +541,8 @@ public class OnDeviceIntelligenceManager {
             REQUEST_TYPE_PREPARE,
             REQUEST_TYPE_EMBEDDINGS
     }, open = true)
-    @Target({ElementType.TYPE_USE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
+    @Target({ElementType.TYPE_USE, ElementType.METHOD, ElementType.PARAMETER,
+            ElementType.FIELD})
     @Retention(RetentionPolicy.SOURCE)
     public @interface RequestType {
     }
@@ -501,17 +558,32 @@ public class OnDeviceIntelligenceManager {
          */
         public static final int ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE = 1000;
 
+        /**
+         * Error code to be used for on device intelligence manager failures.
+         *
+         * @hide
+         */
+        @IntDef(
+                value = {
+                        ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE
+                }, open = true)
+        @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+        @interface OnDeviceIntelligenceManagerErrorCode {
+        }
+
         private final int mErrorCode;
         private final PersistableBundle errorParams;
 
-        public OnDeviceIntelligenceManagerException(int errorCode, @NonNull String errorMessage,
+        public OnDeviceIntelligenceManagerException(
+                @OnDeviceIntelligenceManagerErrorCode int errorCode, @NonNull String errorMessage,
                 @NonNull PersistableBundle errorParams) {
             super(errorMessage);
             this.mErrorCode = errorCode;
             this.errorParams = errorParams;
         }
 
-        public OnDeviceIntelligenceManagerException(int errorCode,
+        public OnDeviceIntelligenceManagerException(
+                @OnDeviceIntelligenceManagerErrorCode int errorCode,
                 @NonNull PersistableBundle errorParams) {
             this.mErrorCode = errorCode;
             this.errorParams = errorParams;
@@ -573,11 +645,15 @@ public class OnDeviceIntelligenceManager {
         /** Inference suspended so that higher-priority inference can run. */
         public static final int PROCESSING_ERROR_SUSPENDED = 13;
 
-        /** Underlying processing encountered an internal error, like a violated precondition. */
+        /**
+         * Underlying processing encountered an internal error, like a violated precondition
+         * .
+         */
         public static final int PROCESSING_ERROR_INTERNAL = 14;
 
         /**
-         * The processing was not able to be passed on to the remote implementation, as the service
+         * The processing was not able to be passed on to the remote implementation, as the
+         * service
          * was unavailable.
          */
         public static final int PROCESSING_ERROR_SERVICE_UNAVAILABLE = 15;

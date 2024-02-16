@@ -22,18 +22,18 @@ import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.service.ondeviceintelligence.IOnDeviceTrustedInferenceService;
-import android.service.ondeviceintelligence.OnDeviceTrustedInferenceService;
+import android.service.ondeviceintelligence.IOnDeviceSandboxedInferenceService;
+import android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService;
 
 import com.android.internal.infra.ServiceConnector;
 
 
 /**
- * Manages the connection to the remote on-device trusted inference service. Also, handles unbinding
+ * Manages the connection to the remote on-device sand boxed inference service. Also, handles unbinding
  * logic set by the service implementation via a SecureSettings flag.
  */
-public class RemoteOnDeviceTrustedInferenceService extends
-        ServiceConnector.Impl<IOnDeviceTrustedInferenceService> {
+public class RemoteOnDeviceSandboxedInferenceService extends
+        ServiceConnector.Impl<IOnDeviceSandboxedInferenceService> {
     /**
      * Creates an instance of {@link ServiceConnector}
      *
@@ -43,12 +43,12 @@ public class RemoteOnDeviceTrustedInferenceService extends
      *                {@link Context#unbindService unbinding}
      * @param userId  to be used for {@link Context#bindServiceAsUser binding}
      */
-    RemoteOnDeviceTrustedInferenceService(Context context, ComponentName serviceName,
+    RemoteOnDeviceSandboxedInferenceService(Context context, ComponentName serviceName,
             int userId) {
         super(context, new Intent(
-                        OnDeviceTrustedInferenceService.SERVICE_INTERFACE).setComponent(serviceName),
+                        OnDeviceSandboxedInferenceService.SERVICE_INTERFACE).setComponent(serviceName),
                 BIND_FOREGROUND_SERVICE | BIND_INCLUDE_CAPABILITIES, userId,
-                IOnDeviceTrustedInferenceService.Stub::asInterface);
+                IOnDeviceSandboxedInferenceService.Stub::asInterface);
 
         // Bind right away
         connect();

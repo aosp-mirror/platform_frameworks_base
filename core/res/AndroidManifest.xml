@@ -7955,12 +7955,12 @@
         android:protectionLevel="signature|privileged" />
 
 
-    <!-- @SystemApi Allows an app to bind the on-device trusted service.
+    <!-- @SystemApi Allows an app to bind the on-device sandboxed service.
              <p>Protection level: signature|privileged
              @hide
          @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence")
         -->
-    <permission android:name="android.permission.BIND_ON_DEVICE_TRUSTED_SERVICE"
+    <permission android:name="android.permission.BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE"
         android:protectionLevel="signature"/>
 
 
