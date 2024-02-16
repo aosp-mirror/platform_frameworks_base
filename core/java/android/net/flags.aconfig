@@ -17,3 +17,9 @@ flag {
     bug: "307898240"
 }
 
+flag {
+  name: "register_nsd_offload_engine"
+  namespace: "android_core_networking"
+  description: "Flag for registerOffloadEngine API in NsdManager"
+  bug: "294777050"
+}
