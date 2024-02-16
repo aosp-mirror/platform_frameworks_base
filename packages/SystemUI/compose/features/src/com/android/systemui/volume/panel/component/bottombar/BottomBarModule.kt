@@ -32,7 +32,7 @@ interface BottomBarModule {
     @Binds
     @IntoMap
     @StringKey(VolumePanelComponents.BOTTOM_BAR)
-    fun bindMediaVolumeSliderComponent(component: BottomBarComponent): VolumePanelUiComponent
+    fun bindVolumePanelUiComponent(component: BottomBarComponent): VolumePanelUiComponent
 
     @Binds
     @IntoMap

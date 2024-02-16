@@ -45,7 +45,6 @@ import com.android.wm.shell.displayareahelper.DisplayAreaHelper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import java.lang.IllegalArgumentException
 import java.util.Optional
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -71,7 +70,7 @@ constructor(
     private val displayTracker: DisplayTracker,
     @Background private val applicationScope: CoroutineScope,
     @Main private val executor: Executor,
-    @Assisted private val displaySelector: Sequence<DisplayInfo>.() -> DisplayInfo?,
+    @Assisted private val displaySelector: List<DisplayInfo>.() -> DisplayInfo?,
     @Assisted private val lightRevealEffectFactory: (rotation: Int) -> LightRevealEffect,
     @Assisted private val overlayContainerName: String
 ) {
@@ -84,13 +83,11 @@ constructor(
     private var scrimView: LightRevealScrim? = null
 
     private val rotationWatcher = RotationWatcher()
-    private val internalDisplayInfos: Sequence<DisplayInfo>
-        get() =
-            displayManager
-                .getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
-                .asSequence()
-                .map { DisplayInfo().apply { it.getDisplayInfo(this) } }
-                .filter { it.type == Display.TYPE_INTERNAL }
+    private val internalDisplayInfos: List<DisplayInfo> =
+        displayManager
+            .getDisplays(DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)
+            .map { DisplayInfo().apply { it.getDisplayInfo(this) } }
+            .filter { it.type == Display.TYPE_INTERNAL }
 
     var isTouchBlocked: Boolean = false
         set(value) {
@@ -252,7 +249,7 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            displaySelector: Sequence<DisplayInfo>.() -> DisplayInfo?,
+            displaySelector: List<DisplayInfo>.() -> DisplayInfo?,
             effectFactory: (rotation: Int) -> LightRevealEffect,
             overlayContainerName: String
         ): FullscreenLightRevealAnimationController

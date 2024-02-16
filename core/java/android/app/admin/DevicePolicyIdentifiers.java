@@ -20,6 +20,7 @@ import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.admin.flags.Flags;
 import android.os.UserManager;
@@ -51,6 +52,15 @@ public final class DevicePolicyIdentifiers {
      */
     @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     public static final String SECURITY_LOGGING_POLICY = "securityLogging";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setAuditLogEnabled}.
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    @SystemApi
+    public static final String AUDIT_LOGGING_POLICY = "auditLogging";
 
     /**
      * String identifier for {@link DevicePolicyManager#setLockTaskPackages}.

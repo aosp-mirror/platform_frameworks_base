@@ -39,4 +39,9 @@ public abstract class PipTouchGesture {
     public boolean onUp(PipTouchState touchState) {
         return false;
     }
+
+    /**
+     * Cleans up the high performance hint session if needed.
+     */
+    public void cleanUpHighPerfSessionMaybe() {}
 }

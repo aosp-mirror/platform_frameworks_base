@@ -649,6 +649,74 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testTotalSilence_consolidatedPolicyDisallowsAll() {
+        // Start with zen mode off just to make sure global/manual mode isn't doing anything.
+        mZenModeHelper.mZenMode = ZEN_MODE_OFF;
+
+        // Create a zen rule that calls for total silence via zen mode, but does not specify any
+        // particular policy. This confirms that the application of the policy is based only on the
+        // actual zen mode setting.
+        AutomaticZenRule azr = new AutomaticZenRule.Builder("OriginalName", CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_NONE)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
+                azr, UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "reason", Process.SYSTEM_UID);
+
+        // Enable rule
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(azr.getConditionId(), "", STATE_TRUE),
+                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI,
+                Process.SYSTEM_UID);
+
+        // Confirm that the consolidated policy doesn't allow anything
+        NotificationManager.Policy policy = mZenModeHelper.getConsolidatedNotificationPolicy();
+        assertThat(policy.allowAlarms()).isFalse();
+        assertThat(policy.allowMedia()).isFalse();
+        assertThat(policy.allowCalls()).isFalse();
+        assertThat(policy.allowMessages()).isFalse();
+        assertThat(policy.allowConversations()).isFalse();
+        assertThat(policy.allowEvents()).isFalse();
+        assertThat(policy.allowReminders()).isFalse();
+        assertThat(policy.allowRepeatCallers()).isFalse();
+        assertThat(policy.allowPriorityChannels()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testAlarmsOnly_consolidatedPolicyOnlyAllowsAlarmsAndMedia() {
+        // Start with zen mode off just to make sure global/manual mode isn't doing anything.
+        mZenModeHelper.mZenMode = ZEN_MODE_OFF;
+
+        // Create a zen rule that calls for alarms only via zen mode, but does not specify any
+        // particular policy. This confirms that the application of the policy is based only on the
+        // actual zen mode setting.
+        AutomaticZenRule azr = new AutomaticZenRule.Builder("OriginalName", CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
+                azr, UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "reason", Process.SYSTEM_UID);
+
+        // Enable rule
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(azr.getConditionId(), "", STATE_TRUE),
+                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI,
+                Process.SYSTEM_UID);
+
+        // Confirm that the consolidated policy allows only alarms and media and nothing else
+        NotificationManager.Policy policy = mZenModeHelper.getConsolidatedNotificationPolicy();
+        assertThat(policy.allowAlarms()).isTrue();
+        assertThat(policy.allowMedia()).isTrue();
+        assertThat(policy.allowCalls()).isFalse();
+        assertThat(policy.allowMessages()).isFalse();
+        assertThat(policy.allowConversations()).isFalse();
+        assertThat(policy.allowEvents()).isFalse();
+        assertThat(policy.allowReminders()).isFalse();
+        assertThat(policy.allowRepeatCallers()).isFalse();
+        assertThat(policy.allowPriorityChannels()).isFalse();
+    }
+
+    @Test
     public void testZenUpgradeNotification() {
         /**
          * Commit a485ec65b5ba947d69158ad90905abf3310655cf disabled DND status change

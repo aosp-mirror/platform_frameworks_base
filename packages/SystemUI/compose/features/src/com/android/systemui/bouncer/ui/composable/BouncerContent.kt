@@ -557,13 +557,18 @@ private fun StatusMessage(
         targetState = message,
         label = "Bouncer message",
         animationSpec = if (message.isUpdateAnimated) tween() else snap(),
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
     ) {
-        Text(
-            text = it.text,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyLarge,
-        )
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = it.text,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
     }
 }
 

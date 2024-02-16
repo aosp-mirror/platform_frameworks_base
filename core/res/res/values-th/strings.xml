@@ -514,8 +514,8 @@
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"แอปนี้ถ่ายภาพและวิดีโอด้วยกล้องได้ทุกเมื่อ"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"อนุญาตให้แอปพลิเคชันหรือบริการเข้าถึงกล้องของระบบเพื่อถ่ายภาพและวิดีโอ"</string>
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"แอปของระบบหรือที่ได้รับสิทธิ์นี้จะถ่ายภาพและบันทึกวิดีโอโดยใช้กล้องของระบบได้ทุกเมื่อ แอปต้องมีสิทธิ์ android.permission.CAMERA ด้วย"</string>
-    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"อนุญาตให้แอปพลิเคชันหรือบริการได้รับโค้ดเรียกกลับเมื่อมีการเปิดหรือปิดอุปกรณ์กล้อง"</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"แอปนี้จะได้รับโค้ดเรียกกลับเมื่อมีการปิดหรือเปิดอุปกรณ์กล้อง (โดยแอปพลิเคชันที่เปิด)"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"อนุญาตให้แอปพลิเคชันหรือบริการได้รับ Callback เมื่อมีการเปิดหรือปิดอุปกรณ์กล้อง"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"แอปนี้จะได้รับ Callback เมื่อมีการปิดหรือเปิดอุปกรณ์กล้อง (โดยแอปพลิเคชันที่เปิด)"</string>
     <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"อนุญาตให้แอปพลิเคชันหรือบริการเข้าถึงกล้องในฐานะผู้ใช้ระบบแบบไม่มีส่วนหัว"</string>
     <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"แอปนี้เข้าถึงกล้องในฐานะผู้ใช้ระบบแบบไม่มีส่วนหัว"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ควบคุมการสั่นเตือน"</string>
@@ -666,18 +666,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ตรวจสอบสิทธิ์ลายนิ้วมือแล้ว"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ตรวจสอบสิทธิ์ใบหน้าแล้ว"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ตรวจสอบสิทธิ์ใบหน้าแล้ว โปรดกดยืนยัน"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ฮาร์ดแวร์ลายนิ้วมือไม่พร้อมใช้งาน"</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ตั้งค่าลายนิ้วมือไม่ได้"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"การตั้งค่าลายนิ้วมือหมดเวลา โปรดลองอีกครั้ง"</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"ยกเลิกการทำงานของลายนิ้วมือ"</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ผู้ใช้ยกเลิกการทำงานของลายนิ้วมือ"</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ลองหลายครั้งเกินไป ใช้การล็อกหน้าจอแทน"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ลองหลายครั้งเกินไป ใช้การล็อกหน้าจอแทน"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ประมวลผลลายนิ้วมือไม่ได้ โปรดลองอีกครั้ง"</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ไม่มีลายนิ้วมือที่ลงทะเบียน"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"อุปกรณ์นี้ไม่มีเซ็นเซอร์ลายนิ้วมือ"</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ปิดใช้เซ็นเซอร์ชั่วคราวแล้ว"</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"ใช้เซ็นเซอร์ลายนิ้วมือไม่ได้ โปรดติดต่อผู้ให้บริการซ่อม"</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"อุปกรณ์นี้ไม่มีเซ็นเซอร์ลายนิ้วมือ"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"กดปุ่มเปิด/ปิดแล้ว"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"นิ้วมือ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ใช้ลายนิ้วมือ"</string>

@@ -221,10 +221,15 @@ public class SensitiveNotificationProtectionControllerImpl
         // Exempt foreground service notifications from protection in effort to keep screen share
         // stop actions easily accessible
         StatusBarNotification sbn = entry.getSbn();
-        if (sbn.getNotification().isFgsOrUij()) {
-            return !sbn.getPackageName().equals(projection.getPackageName());
+        if (sbn.getNotification().isFgsOrUij()
+                && sbn.getPackageName().equals(projection.getPackageName())) {
+            return false;
         }
 
-        return true;
+        // Only protect/redact notifications if the developer has not explicitly set notification
+        // visibility as public and users has not adjusted default channel visibility to private
+        boolean notificationRequestsRedaction = entry.isNotificationVisibilityPrivate();
+        boolean userForcesRedaction = entry.isChannelVisibilityPrivate();
+        return notificationRequestsRedaction || userForcesRedaction;
     }
 }

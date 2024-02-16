@@ -5629,7 +5629,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     // The preferred frame rate of the view that is mainly used for
     // touch boosting, view velocity handling, and TextureView.
-    private float mPreferredFrameRate = Float.NaN;
+    private float mPreferredFrameRate = REQUESTED_FRAME_RATE_CATEGORY_DEFAULT;
 
     private int mInfrequentUpdateCount = 0;
     private long mLastUpdateTimeMillis = 0;
@@ -5638,7 +5638,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private int mLastFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
 
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
-    public static final float REQUESTED_FRAME_RATE_CATEGORY_DEFAULT = 0;
+    public static final float REQUESTED_FRAME_RATE_CATEGORY_DEFAULT = Float.NaN;
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public static final float REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE = -1;
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
@@ -33457,7 +33457,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS) {
             return FRAME_RATE_CATEGORY_NORMAL;
         }
-
         return mLastFrameRateCategory;
     }
 

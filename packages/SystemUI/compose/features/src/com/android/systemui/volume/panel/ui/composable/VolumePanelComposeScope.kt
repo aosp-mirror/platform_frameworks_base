@@ -16,17 +16,21 @@
 
 package com.android.systemui.volume.panel.ui.composable
 
+import android.content.res.Configuration
 import android.content.res.Configuration.Orientation
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelState
 
 class VolumePanelComposeScope(private val state: VolumePanelState) {
 
-    /**
-     * Layout orientation of the panel. It doesn't necessarily aligns with the device orientation,
-     * because in some cases we want to show bigger version of a portrait orientation when the
-     * device is in landscape.
-     */
+    /** Layout orientation of the panel. This aligns with the device orientation. */
     @Orientation
     val orientation: Int
         get() = state.orientation
+
+    /** Is true when Volume Panel is using wide-screen layout and false the otherwise. */
+    val isWideScreen: Boolean
+        get() = state.isWideScreen
 }
+
+val VolumePanelComposeScope.isPortrait: Boolean
+    get() = orientation == Configuration.ORIENTATION_PORTRAIT

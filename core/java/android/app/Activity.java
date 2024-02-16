@@ -844,7 +844,32 @@ public class Activity extends ContextThemeWrapper
     private IBinder mToken;
     private IBinder mAssistToken;
     private IBinder mShareableActivityToken;
+
+    /** Initial caller of the activity. Can be retrieved from {@link #getInitialCaller} */
     private ComponentCaller mInitialCaller;
+    /**
+     * Caller associated with the Intent from {@link #getIntent}. Can be retrieved from
+     * {@link #getCaller}.
+     *
+     * <p>The value of this field depends on how the activity set its intent:
+     * - If via {@link #setIntent(Intent)}, the caller will be {@code null}.
+     * - If via {@link #setIntent(Intent, ComponentCaller)}, the caller will be set to the passed
+     *   caller.
+     */
+    private ComponentCaller mCaller;
+    /**
+     * Caller associated with an Intent within {@link #onNewIntent} and {@link #onActivityResult}.
+     * Can be retrieved from either of these methods:
+     * - {@link #getCurrentCaller}
+     * - By overriding {@link #onNewIntent(Intent, ComponentCaller)} and getting the second argument
+     * - By overriding {@link #onActivityResult(int, int, Intent, ComponentCaller)} and getting the
+     * fourth argument
+     *
+     * <p>The value of this field will be {@code null} outside of {@link #onNewIntent} and
+     * {@link #onActivityResult}.
+     */
+    private ComponentCaller mCurrentCaller;
+
     @UnsupportedAppUsage
     private int mIdent;
     @UnsupportedAppUsage
@@ -1117,23 +1142,71 @@ public class Activity extends ContextThemeWrapper
 
     private static native String getDlWarning();
 
-    /** Return the intent that started this activity. */
+    /**
+     * Returns the intent that started this activity.
+     *
+     * <p>To keep the Intent instance for future use, call {@link #setIntent(Intent)}, and use
+     * this method to retrieve it.
+     */
     public Intent getIntent() {
         return mIntent;
     }
 
     /**
-     * Change the intent returned by {@link #getIntent}.  This holds a
-     * reference to the given intent; it does not copy it.  Often used in
-     * conjunction with {@link #onNewIntent}.
+     * Changes the intent returned by {@link #getIntent}. This holds a
+     * reference to the given intent; it does not copy it. Often used in
+     * conjunction with {@link #onNewIntent(Intent)}.
      *
-     * @param newIntent The new Intent object to return from getIntent
+     * @param newIntent The new Intent object to return from {@link #getIntent}
      *
      * @see #getIntent
-     * @see #onNewIntent
+     * @see #onNewIntent(Intent)
      */
     public void setIntent(Intent newIntent) {
+        internalSetIntent(newIntent, /* newCaller */ null);
+    }
+
+    /**
+     * Returns the ComponentCaller instance of the app that launched this activity with the intent
+     * from {@link #getIntent()}. To keep the value of the ComponentCaller instance for new intents,
+     * call {@link #setIntent(Intent, ComponentCaller)} instead of {@link #setIntent(Intent)}.
+     *
+     * @return {@link ComponentCaller} instance corresponding to the intent from
+     *         {@link #getIntent()}, or {@code null} if the activity was not launched with that
+     *         intent
+     *
+     * @see ComponentCaller
+     * @see #getIntent
+     * @see #setIntent(Intent, ComponentCaller)
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    public @Nullable ComponentCaller getCaller() {
+        return mCaller;
+    }
+
+    /**
+     * Changes the intent returned by {@link #getIntent}, and ComponentCaller returned by
+     * {@link #getCaller}. This holds references to the given intent, and ComponentCaller; it does
+     * not copy them. Often used in conjunction with {@link #onNewIntent(Intent)}. To retrieve the
+     * caller from {@link #onNewIntent(Intent)}, use {@link #getCurrentCaller}, otherwise override
+     * {@link #onNewIntent(Intent, ComponentCaller)}.
+     *
+     * @param newIntent The new Intent object to return from {@link #getIntent}
+     * @param newCaller The new {@link ComponentCaller} object to return from
+     *                  {@link #getCaller}
+     *
+     * @see #getIntent
+     * @see #onNewIntent(Intent, ComponentCaller)
+     * @see #getCaller
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    public void setIntent(@Nullable Intent newIntent, @Nullable ComponentCaller newCaller) {
+        internalSetIntent(newIntent, newCaller);
+    }
+
+    private void internalSetIntent(Intent newIntent, ComponentCaller newCaller) {
         mIntent = newIntent;
+        mCaller = newCaller;
     }
 
     /**
@@ -2284,15 +2357,39 @@ public class Activity extends ContextThemeWrapper
      * sometime later when activity becomes active again.
      *
      * <p>Note that {@link #getIntent} still returns the original Intent.  You
-     * can use {@link #setIntent} to update it to this new Intent.
+     * can use {@link #setIntent(Intent)} to update it to this new Intent.
      *
-     * @param intent The new intent that was started for the activity.
+     * @param intent The new intent that was used to start the activity
      *
      * @see #getIntent
-     * @see #setIntent
+     * @see #setIntent(Intent)
      * @see #onResume
      */
     protected void onNewIntent(Intent intent) {
+    }
+
+    /**
+     * Same as {@link #onNewIntent(Intent)}, but with an extra parameter for the ComponentCaller
+     * instance associated with the app that sent the intent.
+     *
+     * <p>If you want to retrieve the caller without overriding this method, call
+     * {@link #getCurrentCaller} inside your existing {@link #onNewIntent(Intent)}.
+     *
+     * <p>Note that you should only override one {@link #onNewIntent} method.
+     *
+     * @param intent The new intent that was used to start the activity
+     * @param caller The {@link ComponentCaller} instance associated with the app that sent the
+     *               intent
+     *
+     * @see ComponentCaller
+     * @see #onNewIntent(Intent)
+     * @see #getCurrentCaller
+     * @see #setIntent(Intent, ComponentCaller)
+     * @see #getCaller
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    public void onNewIntent(@NonNull Intent intent, @NonNull ComponentCaller caller) {
+        onNewIntent(intent);
     }
 
     /**
@@ -7044,6 +7141,37 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Returns the ComponentCaller instance of the app that re-launched this activity with a new
+     * intent via {@link #onNewIntent} or {@link #onActivityResult}.
+     *
+     * <p>Note that this method only works within the {@link #onNewIntent} and
+     * {@link #onActivityResult} methods. If you call this method outside {@link #onNewIntent} and
+     * {@link #onActivityResult}, it will throw an {@link IllegalStateException}.
+     *
+     * <p>You can also retrieve the caller if you override
+     * {@link #onNewIntent(Intent, ComponentCaller)} or
+     * {@link #onActivityResult(int, int, Intent, ComponentCaller)}.
+     *
+     * <p>To keep the ComponentCaller instance for future use, call
+     * {@link #setIntent(Intent, ComponentCaller)}, and use {@link #getCaller} to retrieve it.
+     *
+     * @return {@link ComponentCaller} instance
+     * @throws IllegalStateException if the caller is {@code null}, indicating the method was called
+     *                               outside {@link #onNewIntent}
+     * @see ComponentCaller
+     * @see #setIntent(Intent, ComponentCaller)
+     * @see #getCaller
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    public @NonNull ComponentCaller getCurrentCaller() {
+        if (mCurrentCaller == null) {
+            throw new IllegalStateException("The caller is null because #getCurrentCaller should be"
+                    + " called within #onNewIntent method");
+        }
+        return mCurrentCaller;
+    }
+
+    /**
      * Control whether this activity's main window is visible.  This is intended
      * only for the special case of an activity that is not going to show a
      * UI itself, but can't just finish prior to onResume() because it needs
@@ -7300,6 +7428,31 @@ public class Activity extends ContextThemeWrapper
      * @see #setResult(int)
      */
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    }
+
+    /**
+     * Same as {@link #onActivityResult(int, int, Intent)}, but with an extra parameter for the
+     * ComponentCaller instance associated with the app that sent the result.
+     *
+     * <p>If you want to retrieve the caller without overriding this method, call
+     * {@link #getCurrentCaller} inside your existing {@link #onActivityResult(int, int, Intent)}.
+     *
+     * <p>Note that you should only override one {@link #onActivityResult} method.
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode The integer result code returned by the child activity
+     *                   through its setResult().
+     * @param data An Intent, which can return result data to the caller
+     *               (various data can be attached to Intent "extras").
+     * @param caller The {@link ComponentCaller} instance associated with the app that sent the
+     *               intent.
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    public void onActivityResult(int requestCode, int resultCode, @NonNull Intent data,
+            @NonNull ComponentCaller caller) {
+        onActivityResult(requestCode, resultCode, data);
     }
 
     /**
@@ -8740,6 +8893,7 @@ public class Activity extends ContextThemeWrapper
 
         if (android.security.Flags.contentUriPermissionApis()) {
             mInitialCaller = new ComponentCaller(getActivityToken(), initialCallerInfoAccessToken);
+            mCaller = mInitialCaller;
         }
     }
 
@@ -8812,6 +8966,16 @@ public class Activity extends ContextThemeWrapper
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performNewIntent");
         mCanEnterPictureInPicture = true;
         onNewIntent(intent);
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    final void performNewIntent(@NonNull Intent intent, @NonNull ComponentCaller caller) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performNewIntent");
+        mCanEnterPictureInPicture = true;
+        mCurrentCaller = caller;
+        onNewIntent(intent, caller);
+        mCurrentCaller = null;
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
@@ -9135,15 +9299,36 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    void dispatchActivityResult(String who, int requestCode, int resultCode, Intent data,
+            ComponentCaller caller, String reason) {
+        internalDispatchActivityResult(who, requestCode, resultCode, data, caller, reason);
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void dispatchActivityResult(String who, int requestCode, int resultCode, Intent data,
             String reason) {
+        if (android.security.Flags.contentUriPermissionApis()) {
+            internalDispatchActivityResult(who, requestCode, resultCode, data,
+                    new ComponentCaller(getActivityToken(), /* callerToken */ null), reason);
+        } else {
+            internalDispatchActivityResult(who, requestCode, resultCode, data, null, reason);
+        }
+    }
+
+    private void internalDispatchActivityResult(String who, int requestCode, int resultCode,
+            Intent data, ComponentCaller caller, String reason) {
         if (false) Log.v(
             TAG, "Dispatching result: who=" + who + ", reqCode=" + requestCode
             + ", resCode=" + resultCode + ", data=" + data);
         mFragments.noteStateNotSaved();
         if (who == null) {
-            onActivityResult(requestCode, resultCode, data);
+            if (android.security.Flags.contentUriPermissionApis()) {
+                mCurrentCaller = caller;
+                onActivityResult(requestCode, resultCode, data, caller);
+                mCurrentCaller = null;
+            } else {
+                onActivityResult(requestCode, resultCode, data);
+            }
         } else if (who.startsWith(REQUEST_PERMISSIONS_WHO_PREFIX)) {
             who = who.substring(REQUEST_PERMISSIONS_WHO_PREFIX.length());
             if (TextUtils.isEmpty(who)) {

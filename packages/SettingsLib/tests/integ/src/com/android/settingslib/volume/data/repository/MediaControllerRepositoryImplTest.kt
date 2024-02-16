@@ -116,7 +116,7 @@ class MediaControllerRepositoryImplTest {
                     )
                 )
             var mediaController: MediaController? = null
-            underTest.activeMediaController
+            underTest.activeLocalMediaController
                 .onEach { mediaController = it }
                 .launchIn(backgroundScope)
             runCurrent()
@@ -141,7 +141,7 @@ class MediaControllerRepositoryImplTest {
                     )
                 )
             var mediaController: MediaController? = null
-            underTest.activeMediaController
+            underTest.activeLocalMediaController
                 .onEach { mediaController = it }
                 .launchIn(backgroundScope)
             runCurrent()

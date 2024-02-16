@@ -241,6 +241,9 @@ constructor(
     /**
      * When the lockscreen can be dismissed, emit an alpha value as the user swipes up. This is
      * useful just before the code commits to moving to GONE.
+     *
+     * This uses legacyShadeExpansion to process swipe up events. In the future, the touch input
+     * signal should be sent directly to transitions.
      */
     val dismissAlpha: Flow<Float?> =
         combine(

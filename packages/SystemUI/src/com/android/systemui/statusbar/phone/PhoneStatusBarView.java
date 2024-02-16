@@ -38,9 +38,9 @@ import android.widget.LinearLayout;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
@@ -67,6 +67,8 @@ public class PhoneStatusBarView extends FrameLayout {
     private int mStatusBarHeight;
     @Nullable
     private Gefingerpoken mTouchEventHandler;
+    private int mDensity;
+    private float mFontScale;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -167,13 +169,23 @@ public class PhoneStatusBarView extends FrameLayout {
             mDisplayCutout = getRootWindowInsets().getDisplayCutout();
         }
 
-        final Rect newSize = mContext.getResources().getConfiguration().windowConfiguration
-                .getMaxBounds();
+        Configuration newConfiguration = mContext.getResources().getConfiguration();
+        final Rect newSize = newConfiguration.windowConfiguration.getMaxBounds();
         if (!Objects.equals(newSize, mDisplaySize)) {
             changed = true;
             mDisplaySize = newSize;
         }
 
+        int density = newConfiguration.densityDpi;
+        if (density != mDensity) {
+            changed = true;
+            mDensity = density;
+        }
+        float fontScale = newConfiguration.fontScale;
+        if (fontScale != mFontScale) {
+            changed = true;
+            mFontScale = fontScale;
+        }
         return changed;
     }
 
