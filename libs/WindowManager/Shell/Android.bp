@@ -205,6 +205,8 @@ android_robolectric_test {
     srcs: [
         "multivalentTests/src/**/*.kt",
     ],
+    // TODO(b/323188766): Include BubbleStackViewTest once the robolectric issue is fixed.
+    exclude_srcs: ["multivalentTests/src/com/android/wm/shell/bubbles/BubbleStackViewTest.kt"],
     static_libs: [
         "junit",
         "androidx.test.runner",
