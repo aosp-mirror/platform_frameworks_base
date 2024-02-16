@@ -62,36 +62,23 @@ class NotificationContentDescriptionTest : SysuiTestCase() {
         assertThat(description).isEqualTo(createDescriptionText(n, ""))
     }
 
-    @Test
-    fun nullNotification_descriptionIsAppName() {
-        val description = contentDescForNotification(context, null)
-        assertThat(description).isEqualTo(createDescriptionText(null, ""))
-    }
-
     private fun createNotification(
         title: String? = null,
         text: String? = null,
         ticker: String? = null
     ): Notification =
-        Notification.Builder(context)
+        Notification.Builder(context, "channel")
             .setContentTitle(title)
             .setContentText(text)
             .setTicker(ticker)
             .build()
 
     private fun getTestAppName(): String {
-        return getAppName(createNotification("", "", ""))
+        return createNotification("", "", "").loadHeaderAppName(mContext)
     }
 
-    private fun getAppName(n: Notification?) =
-        n?.let {
-            val builder = Notification.Builder.recoverBuilder(context, it)
-            builder.loadHeaderAppName()
-        }
-            ?: ""
-
     private fun createDescriptionText(n: Notification?, desc: String?): String {
-        val appName = getAppName(n)
+        val appName = n?.loadHeaderAppName(mContext)
         return context.getString(R.string.accessibility_desc_notification_icon, appName, desc)
     }
 }
