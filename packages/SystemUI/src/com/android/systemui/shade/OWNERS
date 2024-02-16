@@ -1,7 +1,7 @@
 justinweir@google.com
 syeonlee@google.com
 
-per-file *Notification* = set noparent
+# per-file *Notification* = set noparent
 per-file *Notification* = file:../statusbar/notification/OWNERS
 
 per-file NotificationsQuickSettingsContainer.java = kozynski@google.com, asc@google.com

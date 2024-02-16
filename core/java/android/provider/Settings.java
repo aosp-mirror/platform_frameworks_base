@@ -5652,8 +5652,10 @@ public final class Settings {
          *   +7 = fastest
          * @hide
          */
+        @SuppressLint({"NoSettingsProvider", "UnflaggedApi"}) // TestApi without associated feature.
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         @Readable
+        @TestApi
         public static final String POINTER_SPEED = "pointer_speed";
 
         /**

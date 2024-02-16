@@ -1,4 +1,4 @@
-set noparent
+# set noparent
 
 ogunwale@google.com
 jjaggi@google.com
@@ -16,5 +16,5 @@ lihongyu@google.com
 mariiasand@google.com
 rgl@google.com
 
-per-file BackgroundActivityStartController.java = set noparent
+# per-file BackgroundActivityStartController.java = set noparent
 per-file BackgroundActivityStartController.java = brufino@google.com, ogunwale@google.com, louischang@google.com, lus@google.com, rickywai@google.com
