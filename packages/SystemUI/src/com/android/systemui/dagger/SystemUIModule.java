@@ -126,6 +126,7 @@ import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.PolicyModule;
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.dagger.SmartRepliesInflationModule;
 import com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule;
@@ -358,6 +359,7 @@ public abstract class SystemUIModule {
             VisualInterruptionDecisionProvider visualInterruptionDecisionProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
+            SensitiveNotificationProtectionController sensitiveNotificationProtectionController,
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
@@ -376,6 +378,7 @@ public abstract class SystemUIModule {
                 visualInterruptionDecisionProvider,
                 zenModeController,
                 notifUserManager,
+                sensitiveNotificationProtectionController,
                 notifCollection,
                 notifPipeline,
                 sysUiState,

@@ -25,6 +25,7 @@ import static android.service.notification.NotificationListenerService.REASON_GR
 import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import static com.android.server.notification.Flags.screenshareNotificationHiding;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -69,6 +70,7 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleEntry;
@@ -102,6 +104,7 @@ public class BubblesManager {
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final VisualInterruptionDecisionProvider mVisualInterruptionDecisionProvider;
     private final NotificationLockscreenUserManager mNotifUserManager;
+    private final SensitiveNotificationProtectionController mSensitiveNotifProtectionController;
     private final CommonNotifCollection mCommonNotifCollection;
     private final NotifPipeline mNotifPipeline;
     private final NotifPipelineFlags mNotifPipelineFlags;
@@ -111,6 +114,7 @@ public class BubblesManager {
     // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
     private final List<NotifCallback> mCallbacks = new ArrayList<>();
     private final StatusBarWindowCallback mStatusBarWindowCallback;
+    private final Runnable mSensitiveStateChangedListener;
     private boolean mPanelExpanded;
 
     /**
@@ -130,6 +134,7 @@ public class BubblesManager {
             VisualInterruptionDecisionProvider visualInterruptionDecisionProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
+            SensitiveNotificationProtectionController sensitiveNotificationProtectionController,
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
@@ -149,6 +154,7 @@ public class BubblesManager {
                     visualInterruptionDecisionProvider,
                     zenModeController,
                     notifUserManager,
+                    sensitiveNotificationProtectionController,
                     notifCollection,
                     notifPipeline,
                     sysUiState,
@@ -173,6 +179,7 @@ public class BubblesManager {
             VisualInterruptionDecisionProvider visualInterruptionDecisionProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
+            SensitiveNotificationProtectionController sensitiveNotificationProtectionController,
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
@@ -188,6 +195,7 @@ public class BubblesManager {
         mVisibilityProvider = visibilityProvider;
         mVisualInterruptionDecisionProvider = visualInterruptionDecisionProvider;
         mNotifUserManager = notifUserManager;
+        mSensitiveNotifProtectionController = sensitiveNotificationProtectionController;
         mCommonNotifCollection = notifCollection;
         mNotifPipeline = notifPipeline;
         mNotifPipelineFlags = notifPipelineFlags;
@@ -250,6 +258,22 @@ public class BubblesManager {
                     }
                 };
         notificationShadeWindowController.registerCallback(mStatusBarWindowCallback);
+
+        mSensitiveStateChangedListener = new Runnable() {
+            @Override
+            public void run() {
+                if (!screenshareNotificationHiding()) {
+                    return;
+                }
+                bubbles.onSensitiveNotificationProtectionStateChanged(
+                        mSensitiveNotifProtectionController.isSensitiveStateActive());
+            }
+        };
+
+        if (screenshareNotificationHiding()) {
+            mSensitiveNotifProtectionController
+                    .registerSensitiveStateListener(mSensitiveStateChangedListener);
+        }
 
         mSysuiProxy = new Bubbles.SysuiProxy() {
             @Override
