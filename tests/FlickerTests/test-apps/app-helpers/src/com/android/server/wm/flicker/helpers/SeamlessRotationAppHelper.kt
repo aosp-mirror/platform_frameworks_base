@@ -17,9 +17,9 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
-import android.tools.device.traces.parsers.toFlickerComponent
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.parsers.toFlickerComponent
 import com.android.server.wm.flicker.testapp.ActivityOptions
 
 class SeamlessRotationAppHelper

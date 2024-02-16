@@ -19,7 +19,7 @@ package com.android.server.wm.flicker.helpers
 import android.app.Instrumentation
 import android.content.ComponentName
 import android.provider.Settings
-import android.tools.device.helpers.FIND_TIMEOUT
+import android.tools.helpers.FIND_TIMEOUT
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until

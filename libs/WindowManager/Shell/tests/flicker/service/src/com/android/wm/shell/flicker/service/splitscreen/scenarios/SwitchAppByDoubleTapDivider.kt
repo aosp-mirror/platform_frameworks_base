@@ -18,11 +18,11 @@ package com.android.wm.shell.flicker.service.splitscreen.scenarios
 
 import android.app.Instrumentation
 import android.graphics.Point
-import android.tools.common.NavBar
-import android.tools.common.Rotation
-import android.tools.device.AndroidLoggerSetupRule
-import android.tools.device.helpers.WindowUtils
-import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.NavBar
+import android.tools.Rotation
+import android.tools.AndroidLoggerSetupRule
+import android.tools.helpers.WindowUtils
+import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation

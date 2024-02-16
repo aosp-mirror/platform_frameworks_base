@@ -16,7 +16,7 @@
 
 package com.android.server.wm.flicker.notification
 
-import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.traces.component.ComponentNameMatcher
 
 object Consts {
     val IMAGE_WALLPAPER = ComponentNameMatcher("", "com.android.systemui.wallpapers.ImageWallpaper")
