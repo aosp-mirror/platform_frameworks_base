@@ -105,7 +105,6 @@ public final class ApduServiceInfo implements Parcelable {
      */
     private final HashMap<String, AidGroup> mDynamicAidGroups;
 
-    private final ArrayList<String> mPollingLoopFilters;
 
     private final Map<String, Boolean> mAutoTransact;
 
@@ -181,7 +180,6 @@ public final class ApduServiceInfo implements Parcelable {
         this.mDescription = description;
         this.mStaticAidGroups = new HashMap<String, AidGroup>();
         this.mDynamicAidGroups = new HashMap<String, AidGroup>();
-        this.mPollingLoopFilters = new ArrayList<String>();
         this.mAutoTransact = new HashMap<String, Boolean>();
         this.mOffHostName = offHost;
         this.mStaticOffHostName = staticOffHost;
@@ -302,7 +300,6 @@ public final class ApduServiceInfo implements Parcelable {
 
             mStaticAidGroups = new HashMap<String, AidGroup>();
             mDynamicAidGroups = new HashMap<String, AidGroup>();
-            mPollingLoopFilters = new ArrayList<String>();
             mAutoTransact = new HashMap<String, Boolean>();
             mOnHost = onHost;
 
@@ -393,7 +390,6 @@ public final class ApduServiceInfo implements Parcelable {
                     String plf =
                             a.getString(com.android.internal.R.styleable.PollingLoopFilter_name)
                             .toUpperCase(Locale.ROOT);
-                    mPollingLoopFilters.add(plf);
                     boolean autoTransact = a.getBoolean(
                             com.android.internal.R.styleable.PollingLoopFilter_autoTransact,
                             false);
@@ -461,7 +457,7 @@ public final class ApduServiceInfo implements Parcelable {
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     @NonNull
     public List<String> getPollingLoopFilters() {
-        return mPollingLoopFilters;
+        return new ArrayList<>(mAutoTransact.keySet());
     }
 
     /**
@@ -672,12 +668,15 @@ public final class ApduServiceInfo implements Parcelable {
 
     /**
      * Add a Polling Loop Filter. Custom NFC polling frames that match this filter will be
-     * delivered to {@link HostApduService#processPollingFrames(List)}.
-     * @param pollingLoopFilter this polling loop filter to add.
+     * delivered to {@link HostApduService#processPollingFrames(List)}. Adding a key with this or
+     * {@link  ApduServiceInfo#addPollingLoopFilterToAutoTransact(String)} multiple times will
+     * cause the value to be overwritten each time.
+     * @param pollingLoopFilter the polling loop filter to add, must be a  valide hexadecimal string
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void addPollingLoopFilter(@NonNull String pollingLoopFilter) {
-        mPollingLoopFilters.add(pollingLoopFilter.toUpperCase(Locale.ROOT));
+        mAutoTransact.put(pollingLoopFilter.toUpperCase(Locale.ROOT), false);
+
     }
 
     /**
@@ -685,13 +684,14 @@ public final class ApduServiceInfo implements Parcelable {
      * device to exit observe mode, just as if
      * {@link android.nfc.NfcAdapter#setTransactionAllowed(boolean)} had been called with true,
      * allowing transactions to proceed. The matching frame will also be delivered to
-     * {@link HostApduService#processPollingFrames(List)}.
+     * {@link HostApduService#processPollingFrames(List)}. Adding a key with this or
+     * {@link  ApduServiceInfo#addPollingLoopFilter(String)} multiple times will
+     * cause the value to be overwritten each time.
      *
-     * @param pollingLoopFilter this polling loop filter to add.
+     * @param pollingLoopFilter the polling loop filter to add, must be a  valide hexadecimal string
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void addPollingLoopFilterToAutoTransact(@NonNull String pollingLoopFilter) {
-        mPollingLoopFilters.add(pollingLoopFilter.toUpperCase(Locale.ROOT));
         mAutoTransact.put(pollingLoopFilter.toUpperCase(Locale.ROOT), true);
     }
 
@@ -702,7 +702,7 @@ public final class ApduServiceInfo implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void removePollingLoopFilter(@NonNull String pollingLoopFilter) {
-        mPollingLoopFilters.remove(pollingLoopFilter.toUpperCase(Locale.ROOT));
+        mAutoTransact.remove(pollingLoopFilter.toUpperCase(Locale.ROOT));
     }
 
     /**
