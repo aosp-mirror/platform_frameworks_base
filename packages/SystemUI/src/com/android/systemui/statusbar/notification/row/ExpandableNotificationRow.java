@@ -218,6 +218,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mShowingPublic;
     private boolean mSensitive;
     private boolean mSensitiveHiddenInGeneral;
+    private boolean mShowPublicExpander = true;
     private boolean mShowingPublicInitialized;
     private boolean mHideSensitiveForIntrinsicHeight;
     private float mHeaderVisibleAmount = DEFAULT_HEADER_VISIBLE_AMOUNT;
@@ -599,8 +600,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mNotificationParent.updateChildrenAppearance();
         }
         onAttachedChildrenCountChanged();
-        // The public layouts expand button is always visible
-        mPublicLayout.updateExpandButtons(true);
+        mPublicLayout.updateExpandButtons(mShowPublicExpander);
         updateLimits();
         updateShelfIconColor();
         if (mUpdateSelfBackgroundOnUpdate) {
@@ -2834,6 +2834,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (intrinsicBefore != intrinsicAfter) {
             boolean needsAnimation = mFeatureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
             notifyHeightChanged(needsAnimation);
+        }
+    }
+
+    /** Sets whether this notification row should show the notification expander or not */
+    public void setPublicExpanderVisible(boolean showPublicExpander) {
+        if (mShowPublicExpander != showPublicExpander) {
+            mShowPublicExpander = showPublicExpander;
+            mPublicLayout.updateExpandButtons(mShowPublicExpander);
         }
     }
 
