@@ -185,7 +185,7 @@ public class AnimationUtils {
     @FlaggedApi(FLAG_EXPECTED_PRESENTATION_TIME_READ_ONLY)
     public static long getExpectedPresentationTimeNanos() {
         if (!sExpectedPresentationTimeFlagValue) {
-            return SystemClock.uptimeMillis();
+            return SystemClock.uptimeMillis() * TimeUtils.NANOS_PER_MS;
         }
 
         AnimationState state = sAnimationState.get();

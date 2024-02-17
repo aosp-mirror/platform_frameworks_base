@@ -36,6 +36,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.LockIconViewController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthController;
@@ -45,7 +46,7 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.ShadeLockscreenInteractor;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -91,7 +92,8 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    @Mock private ShadeViewController mShadeViewController;
+    @Mock private ShadeLockscreenInteractor mShadeLockscreenInteractor;
+    @Mock private LockIconViewController mLockIconViewController;
     @Mock private View mAmbientIndicationContainer;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private AuthController mAuthController;
@@ -109,13 +111,12 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 () -> mBiometricUnlockController, () -> mAssistManager, mDozeScrimController,
                 mKeyguardUpdateMonitor, mPulseExpansionHandler, mNotificationShadeWindowController,
                 mNotificationWakeUpCoordinator, mAuthController, mNotificationIconAreaController,
-                mDozeInteractor);
+                mShadeLockscreenInteractor, mDozeInteractor);
 
         mDozeServiceHost.initialize(
                 mCentralSurfaces,
                 mStatusBarKeyguardViewManager,
                 mNotificationShadeWindowViewController,
-                mShadeViewController,
                 mAmbientIndicationContainer);
     }
 

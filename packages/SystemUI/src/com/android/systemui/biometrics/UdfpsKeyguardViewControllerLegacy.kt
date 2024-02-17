@@ -378,7 +378,7 @@ open class UdfpsKeyguardViewControllerLegacy(
         }
     }
 
-    override fun onViewDetached() {
+    public override fun onViewDetached() {
         super.onViewDetached()
         alternateBouncerInteractor.setAlternateBouncerUIAvailable(false, uniqueIdentifier)
         faceDetectRunning = false

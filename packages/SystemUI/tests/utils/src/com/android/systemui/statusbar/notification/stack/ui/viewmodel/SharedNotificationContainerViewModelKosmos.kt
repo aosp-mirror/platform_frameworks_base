@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.ui.viewmodel.aodToLockscreenTransitionViewM
 import com.android.systemui.keyguard.ui.viewmodel.dozingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.dreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.goneToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.goneToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.goneToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenToDreamingTransitionViewModel
@@ -41,7 +42,9 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.sharedNotificationContainerViewModel by Fixture {
     SharedNotificationContainerViewModel(
         interactor = sharedNotificationContainerInteractor,
@@ -54,6 +57,7 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
         dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
         dreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel,
+        goneToAodTransitionViewModel = goneToAodTransitionViewModel,
         goneToDozingTransitionViewModel = goneToDozingTransitionViewModel,
         goneToDreamingTransitionViewModel = goneToDreamingTransitionViewModel,
         glanceableHubToLockscreenTransitionViewModel = glanceableHubToLockscreenTransitionViewModel,

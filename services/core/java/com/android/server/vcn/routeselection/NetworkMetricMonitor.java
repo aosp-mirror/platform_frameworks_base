@@ -138,10 +138,10 @@ public abstract class NetworkMetricMonitor implements AutoCloseable {
         }
 
         /** Poll an IpSecTransformState */
-        public void getIpSecTransformState(
+        public void requestIpSecTransformState(
                 @NonNull Executor executor,
                 @NonNull OutcomeReceiver<IpSecTransformState, RuntimeException> callback) {
-            ipSecTransform.getIpSecTransformState(executor, callback);
+            ipSecTransform.requestIpSecTransformState(executor, callback);
         }
 
         /** Close this instance and release the underlying resources */

@@ -122,32 +122,31 @@ constructor(
                     qsFullScreen,
                     isRemoteInputActive,
                     isShadeClosed ->
-                    // A pair of (visible, canAnimate)
                     when {
-                        !hasNotifications -> Pair(false, true)
+                        !hasNotifications -> VisibilityChange.HIDE_WITH_ANIMATION
                         // Hide the footer until the user setup is complete, to prevent access
                         // to settings (b/193149550).
-                        !isUserSetUp -> Pair(false, true)
+                        !isUserSetUp -> VisibilityChange.HIDE_WITH_ANIMATION
                         // Do not show the footer if the lockscreen is visible (incl. AOD),
                         // except if the shade is opened on top. See also b/219680200.
                         // Do not animate, as that makes the footer appear briefly when
                         // transitioning between the shade and keyguard.
-                        isShowingOnLockscreen -> Pair(false, false)
+                        isShowingOnLockscreen -> VisibilityChange.HIDE_WITHOUT_ANIMATION
                         // Do not show the footer if quick settings are fully expanded (except
                         // for the foldable split shade view). See b/201427195 && b/222699879.
-                        qsExpansion == 1f && qsFullScreen -> Pair(false, true)
+                        qsExpansion == 1f && qsFullScreen -> VisibilityChange.HIDE_WITH_ANIMATION
                         // Hide the footer if remote input is active (i.e. user is replying to a
                         // notification). See b/75984847.
-                        isRemoteInputActive -> Pair(false, true)
+                        isRemoteInputActive -> VisibilityChange.HIDE_WITH_ANIMATION
                         // Never show the footer if the shade is collapsed (e.g. when HUNing).
-                        isShadeClosed -> Pair(false, false)
-                        else -> Pair(true, true)
+                        isShadeClosed -> VisibilityChange.HIDE_WITHOUT_ANIMATION
+                        else -> VisibilityChange.SHOW_WITH_ANIMATION
                     }
                 }
                 .distinctUntilChanged(
                     // Equivalent unless visibility changes
-                    areEquivalent = { a: Pair<Boolean, Boolean>, b: Pair<Boolean, Boolean> ->
-                        a.first == b.first
+                    areEquivalent = { a: VisibilityChange, b: VisibilityChange ->
+                        a.visible == b.visible
                     }
                 )
                 // Should we animate the visibility change?
@@ -160,15 +159,22 @@ constructor(
                             ::Pair
                         )
                         .onStart { emit(Pair(false, false)) }
-                ) { (visible, canAnimate), (isShadeFullyExpanded, animationsEnabled) ->
+                ) { visibilityChange, (isShadeFullyExpanded, animationsEnabled) ->
                     // Animate if the shade is interactive, but NOT on the lockscreen. Having
                     // animations enabled while on the lockscreen makes the footer appear briefly
                     // when transitioning between the shade and keyguard.
-                    val shouldAnimate = isShadeFullyExpanded && animationsEnabled && canAnimate
-                    AnimatableEvent(visible, shouldAnimate)
+                    val shouldAnimate =
+                        isShadeFullyExpanded && animationsEnabled && visibilityChange.canAnimate
+                    AnimatableEvent(visibilityChange.visible, shouldAnimate)
                 }
                 .toAnimatedValueFlow()
         }
+    }
+
+    enum class VisibilityChange(val visible: Boolean, val canAnimate: Boolean) {
+        HIDE_WITHOUT_ANIMATION(visible = false, canAnimate = false),
+        HIDE_WITH_ANIMATION(visible = false, canAnimate = true),
+        SHOW_WITH_ANIMATION(visible = true, canAnimate = true)
     }
 
     private val isShowingOnLockscreen: Flow<Boolean> by lazy {

@@ -91,6 +91,7 @@ import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.internal.app.IVisualQueryRecognitionStatusListener;
 import com.android.internal.app.IVoiceActionCheckCallback;
+import com.android.internal.app.IVoiceInteractionAccessibilitySettingsListener;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
@@ -2178,6 +2179,44 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
         }
+
+        public boolean getAccessibilityDetectionEnabled() {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "registerAccessibilityDetectionSettingsListener called without"
+                            + " running voice interaction service");
+                    return false;
+                }
+                return mImpl.getAccessibilityDetectionEnabled();
+            }
+        }
+
+        @Override
+        public void registerAccessibilityDetectionSettingsListener(
+                IVoiceInteractionAccessibilitySettingsListener listener) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "registerAccessibilityDetectionSettingsListener called without"
+                            + " running voice interaction service");
+                    return;
+                }
+                mImpl.registerAccessibilityDetectionSettingsListenerLocked(listener);
+            }
+        }
+
+        @Override
+        public void unregisterAccessibilityDetectionSettingsListener(
+                IVoiceInteractionAccessibilitySettingsListener listener) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "unregisterAccessibilityDetectionSettingsListener called "
+                            + "without running voice interaction service");
+                    return;
+                }
+                mImpl.unregisterAccessibilityDetectionSettingsListenerLocked(listener);
+            }
+        }
+
 
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

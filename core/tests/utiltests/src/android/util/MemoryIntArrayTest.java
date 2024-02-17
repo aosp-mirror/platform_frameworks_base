@@ -123,7 +123,7 @@ public class MemoryIntArrayTest {
             parcel.recycle();
 
             assertNotNull("Should marshall file descriptor", secondArray);
-
+            assertEquals("Marshalled size must be three", 3, secondArray.size());
             assertEquals("First element should be 1", 1, secondArray.get(0));
             assertEquals("First element should be 2", 2, secondArray.get(1));
             assertEquals("First element should be 3", 3, secondArray.get(2));

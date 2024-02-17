@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip;
+package com.android.wm.shell.common.pip;
 
 /**
  * Listener interface that Launcher attaches to SystemUI to get Pip animation callbacks.

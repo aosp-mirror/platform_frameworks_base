@@ -127,7 +127,7 @@ constructor(
                             }
                             with(notificationSection) {
                                 val splitShadeTopMargin: Dp =
-                                    if (Flags.centralizedStatusBarDimensRefactor()) {
+                                    if (Flags.centralizedStatusBarHeightFix()) {
                                         largeScreenHeaderHelper.getLargeScreenHeaderHeight().dp
                                     } else {
                                         dimensionResource(

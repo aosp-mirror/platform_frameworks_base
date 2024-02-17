@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 /** Empty implementation of ShadeViewController for variants with no shade. */
 class ShadeViewControllerEmptyImpl @Inject constructor() :
-    ShadeViewController, ShadeBackActionInteractor {
+    ShadeViewController, ShadeBackActionInteractor, ShadeLockscreenInteractor {
     override fun expand(animate: Boolean) {}
     override fun expandToQs() {}
     override fun expandToNotifications() {}
@@ -70,9 +70,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override fun updateTouchableRegion() {}
     override fun addOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener) {}
     override fun removeOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener) {}
-    override fun postToView(action: Runnable): Boolean {
-        return false
-    }
     override fun transitionToExpandedShade(delay: Long) {}
 
     override fun resetViewGroupFade() {}

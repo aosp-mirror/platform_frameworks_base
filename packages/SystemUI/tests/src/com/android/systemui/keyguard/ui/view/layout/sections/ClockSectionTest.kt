@@ -67,12 +67,15 @@ class ClockSectionTest : SysuiTestCase() {
         context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
             Utils.getStatusBarHeaderHeightKeyguard(context)
 
-    private val LARGE_CLOCK_TOP =
+    private val LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE =
         context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +
             context.resources.getDimensionPixelSize(
                 com.android.systemui.customization.R.dimen.small_clock_padding_top
             ) +
-            context.resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset) +
+            context.resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
+
+    private val LARGE_CLOCK_TOP =
+        LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE +
             SMART_SPACE_DATE_WEATHER_HEIGHT +
             ENHANCED_SMART_SPACE_HEIGHT
 
@@ -81,36 +84,30 @@ class ClockSectionTest : SysuiTestCase() {
             com.android.systemui.customization.R.dimen.small_clock_height
         )
 
+    private var DIMENSION_BY_IDENTIFIER_NAME: List<Pair<String, Int>> = listOf()
+
     @Before
     fun setup() {
+        DIMENSION_BY_IDENTIFIER_NAME =
+            listOf(
+                "date_weather_view_height" to SMART_SPACE_DATE_WEATHER_HEIGHT,
+                "enhanced_smartspace_height" to ENHANCED_SMART_SPACE_HEIGHT,
+            )
+
         MockitoAnnotations.initMocks(this)
         val remoteResources = mock<Resources>()
-        whenever(
-                remoteResources.getIdentifier(
-                    anyString(),
-                    eq("dimen"),
-                    anyString(),
-                )
-            )
-            .then { invocation ->
-                val name = invocation.arguments[0] as String
-                val index = DIMENSION_BY_IDENTIFIER_NAME.indexOfFirst { (key, _) -> key == name }
-                if (index == -1) {
-                    error(
-                        "No entry for a dimension named \"$name\", please add it to the list above."
-                    )
-                }
-                index
-            }
-        whenever(
-                remoteResources.getDimensionPixelSize(
-                    anyInt(),
-                )
-            )
-            .then { invocation ->
-                val id = invocation.arguments[0] as Int
-                DIMENSION_BY_IDENTIFIER_NAME[id].second
-            }
+        whenever(remoteResources.getIdentifier(anyString(), eq("dimen"), anyString())).then {
+            invocation ->
+            val name = invocation.arguments[0] as String
+            val index = DIMENSION_BY_IDENTIFIER_NAME.indexOfFirst { (key, _) -> key == name }
+            // increment index so that the not-found sentinel value lines up w/ what is
+            // returned by getIdentifier when a resource is not found
+            index + 1
+        }
+        whenever(remoteResources.getDimensionPixelSize(anyInt())).then { invocation ->
+            val id = invocation.arguments[0] as Int
+            DIMENSION_BY_IDENTIFIER_NAME[id - 1].second
+        }
         val packageManager = mock<PackageManager>()
         whenever(packageManager.getResourcesForApplication(anyString())).thenReturn(remoteResources)
         mContext.setMockPackageManager(packageManager)
@@ -152,6 +149,36 @@ class ClockSectionTest : SysuiTestCase() {
         underTest.applyDefaultConstraints(cs)
 
         val expectedLargeClockTopMargin = LARGE_CLOCK_TOP
+        assertLargeClockTop(cs, expectedLargeClockTopMargin)
+
+        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
+        assertSmallClockTop(cs, expectedSmallClockTopMargin)
+    }
+
+    @Test
+    fun testApplyDefaultConstraints_LargeClock_MissingSmartspace_SplitShade() {
+        DIMENSION_BY_IDENTIFIER_NAME = listOf() // Remove Smartspace from mock
+        setLargeClock(true)
+        setSplitShade(true)
+        val cs = ConstraintSet()
+        underTest.applyDefaultConstraints(cs)
+
+        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE
+        assertLargeClockTop(cs, expectedLargeClockTopMargin)
+
+        val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_SPLIT_SHADE
+        assertSmallClockTop(cs, expectedSmallClockTopMargin)
+    }
+
+    @Test
+    fun testApplyDefaultConstraints_LargeClock_MissingSmartspace_NonSplitShade() {
+        DIMENSION_BY_IDENTIFIER_NAME = listOf() // Remove Smartspace from mock
+        setLargeClock(true)
+        setSplitShade(false)
+        val cs = ConstraintSet()
+        underTest.applyDefaultConstraints(cs)
+
+        val expectedLargeClockTopMargin = LARGE_CLOCK_TOP_WITHOUT_SMARTSPACE
         assertLargeClockTop(cs, expectedLargeClockTopMargin)
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
@@ -249,10 +276,5 @@ class ClockSectionTest : SysuiTestCase() {
     companion object {
         private val SMART_SPACE_DATE_WEATHER_HEIGHT = 10
         private val ENHANCED_SMART_SPACE_HEIGHT = 11
-        private val DIMENSION_BY_IDENTIFIER_NAME =
-            listOf(
-                "date_weather_view_height" to SMART_SPACE_DATE_WEATHER_HEIGHT,
-                "enhanced_smartspace_height" to ENHANCED_SMART_SPACE_HEIGHT,
-            )
     }
 }

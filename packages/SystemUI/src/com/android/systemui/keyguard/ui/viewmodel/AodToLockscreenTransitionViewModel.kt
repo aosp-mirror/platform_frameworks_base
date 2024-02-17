@@ -64,25 +64,20 @@ constructor(
 
     /** Ensure alpha is set to be visible */
     fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
-        var startAlpha: Float? = null
+        var startAlpha = 1f
         return transitionAnimation.sharedFlow(
             duration = 500.milliseconds,
-            onStep = {
-                if (startAlpha == null) {
-                    startAlpha = viewState.alpha()
-                }
-                MathUtils.lerp(startAlpha!!, 1f, it)
-            },
-            onFinish = {
-                startAlpha = null
-                1f
-            },
-            onCancel = {
-                startAlpha = null
-                1f
-            },
+            onStart = { startAlpha = viewState.alpha() },
+            onStep = { MathUtils.lerp(startAlpha, 1f, it) },
         )
     }
+
+    val notificationAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 500.milliseconds,
+            onStep = { it },
+            onCancel = { 1f },
+        )
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(

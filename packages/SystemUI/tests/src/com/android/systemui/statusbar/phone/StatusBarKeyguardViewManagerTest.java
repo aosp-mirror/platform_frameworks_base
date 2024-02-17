@@ -90,8 +90,7 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionStateManager;
-import com.android.systemui.shade.ShadeViewController;
-import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.shade.ShadeLockscreenInteractor;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -125,7 +124,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private LockPatternUtils mLockPatternUtils;
     @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private ViewGroup mContainer;
-    @Mock private ShadeViewController mShadeViewController;
+    @Mock private ShadeLockscreenInteractor mShadeLockscreenInteractor;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -206,7 +205,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(DockManager.class),
                         mNotificationShadeWindowController,
                         mKeyguardStateController,
-                        mock(NotificationMediaManager.class),
                         mKeyguardMessageAreaFactory,
                         Optional.of(mSysUiUnfoldComponent),
                         () -> mShadeController,
@@ -234,7 +232,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 .thenReturn(mOnBackInvokedDispatcher);
         mStatusBarKeyguardViewManager.registerCentralSurfaces(
                 mCentralSurfaces,
-                mShadeViewController,
+                mShadeLockscreenInteractor,
                 new ShadeExpansionStateManager(),
                 mBiometricUnlockController,
                 mNotificationContainer,
@@ -715,7 +713,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mock(DockManager.class),
                         mock(NotificationShadeWindowController.class),
                         mKeyguardStateController,
-                        mock(NotificationMediaManager.class),
                         mKeyguardMessageAreaFactory,
                         Optional.of(mSysUiUnfoldComponent),
                         () -> mShadeController,

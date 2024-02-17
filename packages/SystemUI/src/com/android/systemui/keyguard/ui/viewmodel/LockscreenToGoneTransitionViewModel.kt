@@ -55,23 +55,13 @@ constructor(
         )
 
     fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
-        var startAlpha: Float? = null
+        var startAlpha = 1f
         return transitionAnimation.sharedFlow(
             duration = 200.milliseconds,
-            onStep = {
-                if (startAlpha == null) {
-                    startAlpha = viewState.alpha()
-                }
-                MathUtils.lerp(startAlpha!!, 0f, it)
-            },
-            onFinish = {
-                startAlpha = null
-                0f
-            },
-            onCancel = {
-                startAlpha = null
-                1f
-            },
+            onStart = { startAlpha = viewState.alpha() },
+            onStep = { MathUtils.lerp(startAlpha, 0f, it) },
+            onFinish = { 0f },
+            onCancel = { 1f },
         )
     }
 

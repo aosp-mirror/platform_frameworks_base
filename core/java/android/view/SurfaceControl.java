@@ -224,6 +224,8 @@ public final class SurfaceControl implements Parcelable {
             @DataSpace.NamedDataSpace int dataSpace);
     private static native void nativeSetExtendedRangeBrightness(long transactionObj,
             long nativeObject, float currentBufferRatio, float desiredRatio);
+    private static native void nativeSetDesiredHdrHeadroom(long transactionObj,
+            long nativeObject, float desiredRatio);
 
     private static native void nativeSetCachingHint(long transactionObj,
             long nativeObject, int cachingHint);
@@ -4144,6 +4146,50 @@ public final class SurfaceControl implements Parcelable {
             }
             nativeSetExtendedRangeBrightness(mNativeObject, sc.mNativeObject, currentBufferRatio,
                     desiredRatio);
+            return this;
+        }
+
+        /**
+         * Sets the desired hdr headroom for the layer.
+         *
+         * <p>Prefer using this API over {@link #setExtendedRangeBrightness} for formats that
+         *. conform to HDR video standards like HLG or HDR10 which do not communicate a HDR/SDR
+         * ratio as part of generating the buffer.
+         *
+         * @param sc The layer whose desired hdr headroom is being specified
+         *
+         * @param desiredRatio The desired hdr/sdr ratio. This can be used to communicate the max
+         *                     desired brightness range. This is similar to the "max luminance"
+         *                     value in other HDR metadata formats, but represented as a ratio of
+         *                     the target SDR whitepoint to the max display brightness. The system
+         *                     may not be able to, or may choose not to, deliver the
+         *                     requested range.
+         *
+         *                     <p>Default value is 0.0f and indicates that the system will choose
+         *                     the best headroom for this surface control's content. Typically,
+         *                     this means that HLG/PQ encoded content will be displayed with some
+         *                     HDR headroom greater than 1.0.
+         *
+         *                     <p>When called after {@link #setExtendedRangeBrightness}, the
+         *                     desiredHeadroom will override the desiredRatio provided by
+         *                     {@link #setExtendedRangeBrightness}. Conversely, when called
+         *                     before {@link #setExtendedRangeBrightness}, the desiredRatio provided
+         *                     by {@link #setExtendedRangeBrightness} will override the
+         *                     desiredHeadroom.
+         *
+         *                     <p>Must be finite && >= 1.0f or 0.0f.
+         * @return this
+         * @see #setExtendedRangeBrightness
+         **/
+        @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+        public @NonNull Transaction setDesiredHdrHeadroom(@NonNull SurfaceControl sc,
+                @FloatRange(from = 0.0f) float desiredRatio) {
+            checkPreconditions(sc);
+            if (!Float.isFinite(desiredRatio) || (desiredRatio != 0 && desiredRatio < 1.0f)) {
+                throw new IllegalArgumentException(
+                        "desiredRatio must be finite && >= 1.0f or 0; got " + desiredRatio);
+            }
+            nativeSetDesiredHdrHeadroom(mNativeObject, sc.mNativeObject, desiredRatio);
             return this;
         }
 

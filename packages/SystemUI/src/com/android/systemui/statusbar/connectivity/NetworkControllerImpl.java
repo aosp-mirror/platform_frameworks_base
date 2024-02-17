@@ -61,7 +61,6 @@ import com.android.settingslib.mobile.MobileStatusTracker.SubscriptionDefaults;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -72,7 +71,8 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.log.dagger.StatusBarNetworkControllerLog;
-import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
+import com.android.systemui.qs.tiles.dialog.InternetDialogManager;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -82,8 +82,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.CarrierConfigTracker;
-
-import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -99,6 +97,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import dalvik.annotation.optimization.NeverCompile;
 import kotlin.Unit;
 
 /** Platform implementation of the network controller. **/
@@ -201,7 +200,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private boolean mUserSetup;
     private boolean mSimDetected;
     private boolean mForceCellularValidated;
-    private InternetDialogFactory mInternetDialogFactory;
+    private InternetDialogManager mInternetDialogManager;
     private Handler mMainHandler;
 
     private ConfigurationController.ConfigurationListener mConfigurationListener =
@@ -245,7 +244,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             WifiStatusTrackerFactory trackerFactory,
             MobileSignalControllerFactory mobileFactory,
             @Main Handler handler,
-            InternetDialogFactory internetDialogFactory,
+            InternetDialogManager internetDialogManager,
             DumpManager dumpManager,
             @StatusBarNetworkControllerLog LogBuffer logBuffer) {
         this(context, connectivityManager,
@@ -272,7 +271,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 dumpManager,
                 logBuffer);
         mReceiverHandler.post(mRegisterListeners);
-        mInternetDialogFactory = internetDialogFactory;
+        mInternetDialogManager = internetDialogManager;
     }
 
     @VisibleForTesting
@@ -829,7 +828,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mReceiverHandler.post(this::handleConfigurationChanged);
                 break;
             case Settings.Panel.ACTION_INTERNET_CONNECTIVITY:
-                mMainHandler.post(() -> mInternetDialogFactory.create(true,
+                mMainHandler.post(() -> mInternetDialogManager.create(true,
                         mAccessPoints.canConfigMobileData(), mAccessPoints.canConfigWifi(),
                         null /* view */));
                 break;

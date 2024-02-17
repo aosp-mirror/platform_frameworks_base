@@ -17,6 +17,7 @@
 package com.android.server.webkit;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -179,4 +180,7 @@ public class TestSystemImpl implements SystemInterface {
     public boolean isMultiProcessDefaultEnabled() {
         return mMultiProcessDefault;
     }
+
+    @Override
+    public void pinWebviewIfRequired(ApplicationInfo appInfo) {}
 }

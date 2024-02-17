@@ -20,6 +20,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import static com.android.media.flags.Flags.FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES;
 import static com.android.media.flags.Flags.FLAG_ENABLE_CROSS_USER_ROUTING_IN_MEDIA_ROUTER2;
 import static com.android.media.flags.Flags.FLAG_ENABLE_GET_TRANSFERABLE_ROUTES;
+import static com.android.media.flags.Flags.FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL;
 import static com.android.media.flags.Flags.FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2;
 import static com.android.media.flags.Flags.FLAG_ENABLE_SCREEN_OFF_SCANNING;
 
@@ -989,17 +990,24 @@ public final class MediaRouter2 {
     }
 
     /**
-     * Requests a volume change for the route asynchronously.
-     * It may have no effect if the route is currently not selected.
+     * Sets the volume for a specific route.
      *
-     * <p>This will be no-op for non-system media routers.
+     * <p>The call may have no effect if the route is currently not selected.
+     *
+     * <p>This method is only supported by {@link #getInstance(Context, String) proxy MediaRouter2
+     * instances}. Use {@link RoutingController#setVolume(int) RoutingController#setVolume(int)}
+     * instead for {@link #getInstance(Context) local MediaRouter2 instances}.</p>
      *
      * @param volume The new volume value between 0 and {@link MediaRoute2Info#getVolumeMax}.
-     * @see #getInstance(Context, String)
-     * @hide
+     * @throws UnsupportedOperationException If called on a {@link #getInstance(Context) local
+     * router instance}.
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    @FlaggedApi(FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL)
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.MEDIA_CONTENT_CONTROL,
+                Manifest.permission.MEDIA_ROUTING_CONTROL
+            })
     public void setRouteVolume(@NonNull MediaRoute2Info route, int volume) {
         Objects.requireNonNull(route, "route must not be null");
 
@@ -3464,10 +3472,11 @@ public final class MediaRouter2 {
             return result;
         }
 
-        /** No-op. Local routers cannot modify the volume of specific routes. */
+        /** Local routers cannot modify the volume of specific routes. */
         @Override
         public void setRouteVolume(MediaRoute2Info route, int volume) {
-            // Do nothing.
+            throw new UnsupportedOperationException(
+                    "setRouteVolume is only supported by proxy routers. See javadoc.");
             // If this API needs to be public, use IMediaRouterService#setRouteVolumeWithRouter2()
         }
 

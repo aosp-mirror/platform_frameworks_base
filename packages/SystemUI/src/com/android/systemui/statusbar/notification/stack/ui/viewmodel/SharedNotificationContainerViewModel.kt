@@ -45,6 +45,7 @@ import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.DozingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.GoneToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel
@@ -98,6 +99,7 @@ constructor(
     private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
+    private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
     private val goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
     private val goneToDreamingTransitionViewModel: GoneToDreamingTransitionViewModel,
     private val lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
@@ -304,9 +306,10 @@ constructor(
         val alphaTransitions =
             merge(
                 alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
-                aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
+                aodToLockscreenTransitionViewModel.notificationAlpha,
                 dozingToLockscreenTransitionViewModel.lockscreenAlpha,
                 dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
+                goneToAodTransitionViewModel.notificationAlpha,
                 goneToDreamingTransitionViewModel.lockscreenAlpha,
                 goneToDozingTransitionViewModel.lockscreenAlpha,
                 lockscreenToDreamingTransitionViewModel.lockscreenAlpha,

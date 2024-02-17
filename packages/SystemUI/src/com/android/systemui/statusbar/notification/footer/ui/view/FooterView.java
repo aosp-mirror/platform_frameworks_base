@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.footer.ui.view;
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 
 import static com.android.systemui.Flags.notificationBackgroundTintOptimization;
+import static com.android.systemui.util.ColorUtilKt.hexColorString;
 
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
@@ -40,11 +41,13 @@ import androidx.annotation.NonNull;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.row.FooterViewButton;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
+import com.android.systemui.util.DrawableDumpKt;
 import com.android.systemui.util.DumpUtilsKt;
 
 import java.io.PrintWriter;
@@ -239,6 +242,10 @@ public class FooterView extends StackScrollerDecorView {
 
     @Override
     protected void onFinishInflate() {
+        ColorUpdateLogger colorUpdateLogger = ColorUpdateLogger.getInstance();
+        if (colorUpdateLogger != null) {
+            colorUpdateLogger.logTriggerEvent("Footer.onFinishInflate()");
+        }
         super.onFinishInflate();
         mClearAllButton = (FooterViewButton) findSecondaryView();
         mManageOrHistoryButton = findViewById(R.id.manage_text);
@@ -348,6 +355,10 @@ public class FooterView extends StackScrollerDecorView {
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
+        ColorUpdateLogger colorUpdateLogger = ColorUpdateLogger.getInstance();
+        if (colorUpdateLogger != null) {
+            colorUpdateLogger.logTriggerEvent("Footer.onConfigurationChanged()");
+        }
         super.onConfigurationChanged(newConfig);
         updateColors();
         if (!FooterViewRefactor.isEnabled()) {
@@ -365,14 +376,17 @@ public class FooterView extends StackScrollerDecorView {
                 com.android.internal.R.attr.materialColorOnSurface);
         final Drawable clearAllBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
         final Drawable manageBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
+        final @ColorInt int scHigh;
         if (!notificationBackgroundTintOptimization()) {
-            final @ColorInt int scHigh = Utils.getColorAttrDefaultColor(mContext,
+            scHigh = Utils.getColorAttrDefaultColor(mContext,
                     com.android.internal.R.attr.materialColorSurfaceContainerHigh);
             if (scHigh != 0) {
                 final ColorFilter bgColorFilter = new PorterDuffColorFilter(scHigh, SRC_ATOP);
                 clearAllBg.setColorFilter(bgColorFilter);
                 manageBg.setColorFilter(bgColorFilter);
             }
+        } else {
+            scHigh = 0;
         }
         mClearAllButton.setBackground(clearAllBg);
         mClearAllButton.setTextColor(onSurface);
@@ -380,6 +394,13 @@ public class FooterView extends StackScrollerDecorView {
         mManageOrHistoryButton.setTextColor(onSurface);
         mSeenNotifsFooterTextView.setTextColor(onSurface);
         mSeenNotifsFooterTextView.setCompoundDrawableTintList(ColorStateList.valueOf(onSurface));
+        ColorUpdateLogger colorUpdateLogger = ColorUpdateLogger.getInstance();
+        if (colorUpdateLogger != null) {
+            colorUpdateLogger.logEvent("Footer.updateColors()",
+                    "textColor(onSurface)=" + hexColorString(onSurface)
+                            + " backgroundTint(surfaceContainerHigh)=" + hexColorString(scHigh)
+                            + " background=" + DrawableDumpKt.dumpToString(manageBg));
+        }
     }
 
     private void updateResources() {

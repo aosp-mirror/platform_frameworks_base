@@ -26,6 +26,8 @@ package android.nfc {
     method @FlaggedApi("android.nfc.nfc_vendor_cmd") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void unregisterNfcVendorNciCallback(@NonNull android.nfc.NfcAdapter.NfcVendorNciCallback);
     method @FlaggedApi("android.nfc.enable_nfc_charging") public void unregisterWlcStateListener(@NonNull android.nfc.NfcAdapter.WlcStateListener);
     field @FlaggedApi("android.nfc.enable_nfc_mainline") public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC = "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
+    field @FlaggedApi("android.nfc.enable_nfc_mainline") @RequiresPermission(android.Manifest.permission.SHOW_CUSTOMIZED_RESOLVER) public static final String ACTION_SHOW_NFC_RESOLVER = "android.nfc.action.SHOW_NFC_RESOLVER";
+    field @FlaggedApi("android.nfc.enable_nfc_mainline") public static final String EXTRA_RESOLVE_INFOS = "android.nfc.extra.RESOLVE_INFOS";
     field @FlaggedApi("android.nfc.nfc_vendor_cmd") public static final int MESSAGE_TYPE_COMMAND = 1; // 0x1
     field @FlaggedApi("android.nfc.nfc_vendor_cmd") public static final int SEND_VENDOR_NCI_STATUS_FAILED = 3; // 0x3
     field @FlaggedApi("android.nfc.nfc_vendor_cmd") public static final int SEND_VENDOR_NCI_STATUS_MESSAGE_CORRUPTED = 2; // 0x2

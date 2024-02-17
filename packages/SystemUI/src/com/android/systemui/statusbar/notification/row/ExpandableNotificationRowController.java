@@ -41,6 +41,7 @@ import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
@@ -86,6 +87,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final SystemClock mClock;
     private final String mAppName;
     private final String mNotificationKey;
+    private final ColorUpdateLogger mColorUpdateLogger;
     private final KeyguardBypassController mKeyguardBypassController;
     private final GroupMembershipManager mGroupMembershipManager;
     private final GroupExpansionManager mGroupExpansionManager;
@@ -200,6 +202,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
             ActivatableNotificationViewController activatableNotificationViewController,
             RemoteInputViewSubcomponent.Factory rivSubcomponentFactory,
             MetricsLogger metricsLogger,
+            ColorUpdateLogger colorUpdateLogger,
             NotificationRowLogger logBufferLogger,
             NotificationChildrenContainerLogger childrenContainerLogger,
             NotificationListContainer listContainer,
@@ -256,6 +259,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mDragController = dragController;
         mMetricsLogger = metricsLogger;
         mChildrenContainerLogger = childrenContainerLogger;
+        mColorUpdateLogger = colorUpdateLogger;
         mLogBufferLogger = logBufferLogger;
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
@@ -290,6 +294,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mDismissibilityProvider,
                 mMetricsLogger,
                 mChildrenContainerLogger,
+                mColorUpdateLogger,
                 mSmartReplyConstants,
                 mSmartReplyController,
                 mFeatureFlags,
