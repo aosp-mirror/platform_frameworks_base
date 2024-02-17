@@ -22,8 +22,9 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.Flags.FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT;
-import static android.hardware.biometrics.Flags.FLAG_GET_OP_ID_CRYPTO_OBJECT;
 import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
+import static android.hardware.biometrics.Flags.FLAG_GET_OP_ID_CRYPTO_OBJECT;
+import static android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.DrawableRes;
@@ -497,6 +498,28 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @RequiresPermission(anyOf = {TEST_BIOMETRIC, USE_BIOMETRIC_INTERNAL})
         public Builder setAllowBackgroundAuthentication(boolean allow) {
             mPromptInfo.setAllowBackgroundAuthentication(allow);
+            return this;
+        }
+
+        /**
+         * Remove {@link Builder#setAllowBackgroundAuthentication(boolean)} once
+         * FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE is enabled.
+         *
+         * @param allow If true, allows authentication when the calling package is not in the
+         *              foreground. This is set to false by default.
+         * @param useParentProfileForDeviceCredential If true, uses parent profile for device
+         *                                            credential IME request
+         * @return This builder
+         * @hide
+         */
+        @FlaggedApi(FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE)
+        @TestApi
+        @NonNull
+        @RequiresPermission(anyOf = {TEST_BIOMETRIC, USE_BIOMETRIC_INTERNAL})
+        public Builder setAllowBackgroundAuthentication(boolean allow,
+                boolean useParentProfileForDeviceCredential) {
+            mPromptInfo.setAllowBackgroundAuthentication(allow);
+            mPromptInfo.setUseParentProfileForDeviceCredential(useParentProfileForDeviceCredential);
             return this;
         }
 

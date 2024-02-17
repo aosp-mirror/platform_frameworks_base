@@ -75,20 +75,32 @@ constructor(
                     PromptKind.Pin ->
                         BiometricPromptRequest.Credential.Pin(
                             info = promptInfo,
-                            userInfo = userInfo(userId),
+                            userInfo =
+                                userInfo(
+                                    userId,
+                                    promptInfo.shouldUseParentProfileForDeviceCredential()
+                                ),
                             operationInfo = operationInfo(challenge)
                         )
                     PromptKind.Pattern ->
                         BiometricPromptRequest.Credential.Pattern(
                             info = promptInfo,
-                            userInfo = userInfo(userId),
+                            userInfo =
+                                userInfo(
+                                    userId,
+                                    promptInfo.shouldUseParentProfileForDeviceCredential()
+                                ),
                             operationInfo = operationInfo(challenge),
                             stealthMode = credentialInteractor.isStealthModeActive(userId)
                         )
                     PromptKind.Password ->
                         BiometricPromptRequest.Credential.Password(
                             info = promptInfo,
-                            userInfo = userInfo(userId),
+                            userInfo =
+                                userInfo(
+                                    userId,
+                                    promptInfo.shouldUseParentProfileForDeviceCredential()
+                                ),
                             operationInfo = operationInfo(challenge)
                         )
                     else -> null
@@ -96,10 +108,17 @@ constructor(
             }
             .distinctUntilChanged()
 
-    private fun userInfo(userId: Int): BiometricUserInfo =
+    private fun userInfo(
+        userId: Int,
+        useParentProfileForDeviceCredential: Boolean
+    ): BiometricUserInfo =
         BiometricUserInfo(
             userId = userId,
-            deviceCredentialOwnerId = credentialInteractor.getCredentialOwnerOrSelfId(userId)
+            deviceCredentialOwnerId = credentialInteractor.getCredentialOwnerOrSelfId(userId),
+            userIdForPasswordEntry =
+                if (useParentProfileForDeviceCredential)
+                    credentialInteractor.getParentProfileIdOrSelfId(userId)
+                else credentialInteractor.getCredentialOwnerOrSelfId(userId),
         )
 
     private fun operationInfo(challenge: Long): BiometricOperationInfo =
