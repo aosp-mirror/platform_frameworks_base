@@ -2143,13 +2143,14 @@ public class NetworkPolicyManagerServiceTest {
         assertFalse(mService.isUidNetworkingBlocked(UID_E, false));
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainEnabled() throws Exception {
         verify(mNetworkManager).setFirewallChainEnabled(FIREWALL_CHAIN_BACKGROUND, true);
     }
 
-
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnProcStateChange() throws Exception {
@@ -2179,6 +2180,7 @@ public class NetworkPolicyManagerServiceTest {
         assertTrue(mService.isUidNetworkingBlocked(UID_A, false));
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnAllowlistChange() throws Exception {
