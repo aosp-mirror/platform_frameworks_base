@@ -55,6 +55,7 @@ public class PromptInfo implements Parcelable {
     private boolean mIgnoreEnrollmentState;
     private boolean mIsForLegacyFingerprintManager = false;
     private boolean mShowEmergencyCallButton = false;
+    private boolean mUseParentProfileForDeviceCredential = false;
 
     public PromptInfo() {
 
@@ -85,6 +86,7 @@ public class PromptInfo implements Parcelable {
         mIgnoreEnrollmentState = in.readBoolean();
         mIsForLegacyFingerprintManager = in.readBoolean();
         mShowEmergencyCallButton = in.readBoolean();
+        mUseParentProfileForDeviceCredential = in.readBoolean();
     }
 
     public static final Creator<PromptInfo> CREATOR = new Creator<PromptInfo>() {
@@ -129,6 +131,7 @@ public class PromptInfo implements Parcelable {
         dest.writeBoolean(mIgnoreEnrollmentState);
         dest.writeBoolean(mIsForLegacyFingerprintManager);
         dest.writeBoolean(mShowEmergencyCallButton);
+        dest.writeBoolean(mUseParentProfileForDeviceCredential);
     }
 
     // LINT.IfChange
@@ -180,6 +183,13 @@ public class PromptInfo implements Parcelable {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns if parent profile needs to be used for device credential.
+     */
+    public boolean shouldUseParentProfileForDeviceCredential() {
+        return mUseParentProfileForDeviceCredential;
     }
     // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/BiometricPrompt.java)
 
@@ -279,6 +289,11 @@ public class PromptInfo implements Parcelable {
 
     public void setShowEmergencyCallButton(boolean showEmergencyCallButton) {
         mShowEmergencyCallButton = showEmergencyCallButton;
+    }
+
+    public void setUseParentProfileForDeviceCredential(
+            boolean useParentProfileForDeviceCredential) {
+        mUseParentProfileForDeviceCredential = useParentProfileForDeviceCredential;
     }
 
     // Getters

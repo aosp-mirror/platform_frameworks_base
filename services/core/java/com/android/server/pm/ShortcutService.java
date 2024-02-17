@@ -70,6 +70,7 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Icon;
+import android.multiuser.Flags;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -2830,6 +2831,26 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
+    @VisibleForTesting
+    boolean areShortcutsSupportedOnHomeScreen(@UserIdInt int userId) {
+        if (!android.os.Flags.allowPrivateProfile() || !Flags.disablePrivateSpaceItemsOnHome()) {
+            return true;
+        }
+        final long start = getStatStartTime();
+        final long token = injectClearCallingIdentity();
+        boolean isSupported;
+        try {
+            synchronized (mLock) {
+                isSupported = !mUserManagerInternal.getUserProperties(userId)
+                        .areItemsRestrictedOnHomeScreen();
+            }
+        } finally {
+            injectRestoreCallingIdentity(token);
+            logDurationStat(Stats.GET_DEFAULT_LAUNCHER, start);
+        }
+        return isSupported;
+    }
+
     @Nullable
     String getDefaultLauncher(@UserIdInt int userId) {
         final long start = getStatStartTime();
@@ -3658,6 +3679,10 @@ public class ShortcutService extends IShortcutService.Stub {
                 @NonNull String callingPackage, int callingPid, int callingUid) {
             return ShortcutService.this.hasShortcutHostPermission(callingPackage, launcherUserId,
                     callingPid, callingUid);
+        }
+
+        public boolean areShortcutsSupportedOnHomeScreen(@UserIdInt int userId) {
+            return ShortcutService.this.areShortcutsSupportedOnHomeScreen(userId);
         }
 
         @Override

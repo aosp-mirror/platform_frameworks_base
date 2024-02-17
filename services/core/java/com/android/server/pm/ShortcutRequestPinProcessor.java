@@ -416,6 +416,10 @@ class ShortcutRequestPinProcessor {
     @VisibleForTesting
     Pair<ComponentName, Integer> getRequestPinConfirmationActivity(
             int callingUserId, int requestType) {
+        // Pinning is not supported for user-profiles with items restricted on home screen.
+        if (!mService.areShortcutsSupportedOnHomeScreen(callingUserId)) {
+            return null;
+        }
         // Find the default launcher.
         final int launcherUserId = mService.getParentOrSelfUserId(callingUserId);
         final String defaultLauncher = mService.getDefaultLauncher(launcherUserId);

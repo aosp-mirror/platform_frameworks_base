@@ -30,6 +30,7 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -43,6 +44,7 @@ import com.android.server.uri.GrantUri;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.WeakHashMap;
 
 /**
@@ -143,8 +145,8 @@ final class ActivityCallerState {
         final boolean writeMet = callerInfo.mWritableContentUris.contains(grantUri);
 
         if (!readMet && !writeMet) {
-            throw new IllegalArgumentException("The supplied URI wasn't passed at launch: "
-                    + grantUri.uri.toSafeString());
+            throw new IllegalArgumentException("The supplied URI wasn't passed at launch in"
+                    + " #getData, #EXTRA_STREAM, nor #getClipData: " + grantUri.uri.toSafeString());
         }
 
         final boolean checkRead = (modeFlags & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0;
@@ -184,6 +186,18 @@ final class ActivityCallerState {
         // getData
         addUriIfContentUri(intent.getData(), uris);
 
+        // EXTRA_STREAM
+        if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+            final ArrayList<Uri> streams = tryToUnparcelArrayListExtraStreamsUri(intent);
+            if (streams == null) {
+                addUriIfContentUri(tryToUnparcelExtraStreamUri(intent), uris);
+            } else {
+                for (int i = streams.size() - 1; i >= 0; i--) {
+                    addUriIfContentUri(streams.get(i), uris);
+                }
+            }
+        }
+
         final ClipData clipData = intent.getClipData();
         if (clipData == null) return uris;
 
@@ -197,6 +211,33 @@ final class ActivityCallerState {
             uris.addAll(getContentUrisFromIntent(item.getIntent()));
         }
         return uris;
+    }
+
+    private static Uri tryToUnparcelExtraStreamUri(Intent intent) {
+        try {
+            return intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri.class);
+        } catch (BadParcelableException e) {
+            // Even though the system "defuses" all the parsed Bundles, i.e. suppresses and logs
+            // instances of {@link BadParcelableException}, we still want to be on the safer side
+            // and catch the exception to ensure no breakages happen. If the unparcel fails, the
+            // item is still preserved with the underlying parcel.
+            Slog.w(TAG, "Failed to unparcel an URI in EXTRA_STREAM, returning null: " + e);
+            return null;
+        }
+    }
+
+    private static ArrayList<Uri> tryToUnparcelArrayListExtraStreamsUri(Intent intent) {
+        try {
+            return intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri.class);
+        } catch (BadParcelableException e) {
+            // Even though the system "defuses" all the parsed Bundles, i.e. suppresses and logs
+            // instances of {@link BadParcelableException}, we still want to be on the safer side
+            // and catch the exception to ensure no breakages happen. If the unparcel fails, the
+            // item is still preserved with the underlying parcel.
+            Slog.w(TAG, "Failed to unparcel an ArrayList of URIs in EXTRA_STREAM, returning null: "
+                    + e);
+            return null;
+        }
     }
 
     private static void addUriIfContentUri(Uri uri, ArraySet<Uri> uris) {
