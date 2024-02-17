@@ -99,6 +99,7 @@ import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationTransitionAnimatorController;
@@ -122,6 +123,7 @@ import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.DumpUtilsKt;
 
 import com.google.errorprone.annotations.CompileTimeConstant;
@@ -805,8 +807,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateBackgroundDimming();
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            if (child instanceof ActivatableNotificationView) {
-                ((ActivatableNotificationView) child).updateBackgroundColors();
+            if (child instanceof ActivatableNotificationView activatableView) {
+                activatableView.updateBackgroundColors();
             }
         }
     }
@@ -4594,6 +4596,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mContext, com.android.internal.R.attr.materialColorOnSurface);
         final @ColorInt int onSurfaceVariant = Utils.getColorAttrDefaultColor(
                 mContext, com.android.internal.R.attr.materialColorOnSurfaceVariant);
+
+        ColorUpdateLogger colorUpdateLogger = ColorUpdateLogger.getInstance();
+        if (colorUpdateLogger != null) {
+            colorUpdateLogger.logEvent("NSSL.updateDecorViews()",
+                    "onSurface=" + ColorUtilKt.hexColorString(onSurface)
+                            + " onSurfaceVariant=" + ColorUtilKt.hexColorString(onSurfaceVariant));
+        }
 
         mSectionsManager.setHeaderForegroundColors(onSurface, onSurfaceVariant);
 

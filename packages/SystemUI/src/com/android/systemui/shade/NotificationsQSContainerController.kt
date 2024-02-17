@@ -27,7 +27,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.lifecycle.lifecycleScope
-import com.android.systemui.Flags.centralizedStatusBarDimensRefactor
+import com.android.systemui.Flags.centralizedStatusBarHeightFix
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -183,7 +183,7 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     private fun calculateLargeShadeHeaderHeight(): Int {
-        return if (centralizedStatusBarDimensRefactor()) {
+        return if (centralizedStatusBarHeightFix()) {
             largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
         } else {
             resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)

@@ -107,11 +107,15 @@ public abstract class MediaBrowserService extends Service {
 
     private final ServiceState mServiceState = new ServiceState();
 
+    // Holds the connection record associated with the currently executing callback operation, if
+    // any. See getCurrentBrowserInfo for an example. Must only be accessed on mHandler.
+    @Nullable private ConnectionRecord mCurrentConnectionOnHandler;
+
     /**
      * All the info about a connection.
      */
     private static class ConnectionRecord implements IBinder.DeathRecipient {
-        public final MediaBrowserService service;
+        public final ServiceState serviceState;
         public final String pkg;
         public final int pid;
         public final int uid;
@@ -121,9 +125,14 @@ public abstract class MediaBrowserService extends Service {
         public final HashMap<String, List<Pair<IBinder, Bundle>>> subscriptions = new HashMap<>();
 
         ConnectionRecord(
-                MediaBrowserService service, String pkg, int pid, int uid, Bundle rootHints,
-                IMediaBrowserServiceCallbacks callbacks, BrowserRoot root) {
-            this.service = service;
+                ServiceState serviceState,
+                String pkg,
+                int pid,
+                int uid,
+                Bundle rootHints,
+                IMediaBrowserServiceCallbacks callbacks,
+                BrowserRoot root) {
+            this.serviceState = serviceState;
             this.pkg = pkg;
             this.pid = pid;
             this.uid = uid;
@@ -134,12 +143,8 @@ public abstract class MediaBrowserService extends Service {
 
         @Override
         public void binderDied() {
-            service.mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    service.mServiceState.mConnections.remove(callbacks.asBinder());
-                }
-            });
+            serviceState.postOnHandler(
+                    () -> serviceState.mConnections.remove(callbacks.asBinder()));
         }
     }
 
@@ -461,12 +466,12 @@ public abstract class MediaBrowserService extends Service {
      * @see MediaBrowserService.BrowserRoot#EXTRA_SUGGESTED
      */
     public final Bundle getBrowserRootHints() {
-        ConnectionRecord curConnection = mServiceState.mCurConnection;
-        if (curConnection == null) {
+        ConnectionRecord currentConnection = mCurrentConnectionOnHandler;
+        if (currentConnection == null) {
             throw new IllegalStateException("This should be called inside of onGetRoot or"
                     + " onLoadChildren or onLoadItem methods");
         }
-        return curConnection.rootHints == null ? null : new Bundle(curConnection.rootHints);
+        return currentConnection.rootHints == null ? null : new Bundle(currentConnection.rootHints);
     }
 
     /**
@@ -477,12 +482,13 @@ public abstract class MediaBrowserService extends Service {
      * @see MediaSessionManager#isTrustedForMediaControl(RemoteUserInfo)
      */
     public final RemoteUserInfo getCurrentBrowserInfo() {
-        ConnectionRecord curConnection = mServiceState.mCurConnection;
-        if (curConnection == null) {
+        ConnectionRecord currentConnection = mCurrentConnectionOnHandler;
+        if (currentConnection == null) {
             throw new IllegalStateException("This should be called inside of onGetRoot or"
                     + " onLoadChildren or onLoadItem methods");
         }
-        return new RemoteUserInfo(curConnection.pkg, curConnection.pid, curConnection.uid);
+        return new RemoteUserInfo(
+                currentConnection.pkg, currentConnection.pid, currentConnection.uid);
     }
 
     /**
@@ -621,7 +627,6 @@ public abstract class MediaBrowserService extends Service {
 
         // Fields accessed from mHandler only.
         @NonNull private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap<>();
-        @Nullable private ConnectionRecord mCurConnection;
 
         public void postOnHandler(Runnable runnable) {
             mHandler.post(runnable);
@@ -704,9 +709,9 @@ public abstract class MediaBrowserService extends Service {
 
             // Temporarily sets a placeholder ConnectionRecord to make getCurrentBrowserInfo() work
             // in onGetRoot().
-            mCurConnection =
+            mCurrentConnectionOnHandler =
                     new ConnectionRecord(
-                            /* service= */ MediaBrowserService.this,
+                            /* serviceState= */ this,
                             pkg,
                             pid,
                             uid,
@@ -714,7 +719,7 @@ public abstract class MediaBrowserService extends Service {
                             callbacks,
                             /* root= */ null);
             BrowserRoot root = onGetRoot(pkg, uid, rootHints);
-            mCurConnection = null;
+            mCurrentConnectionOnHandler = null;
 
             // If they didn't return something, don't allow this client.
             if (root == null) {
@@ -728,7 +733,7 @@ public abstract class MediaBrowserService extends Service {
                 try {
                     ConnectionRecord connection =
                             new ConnectionRecord(
-                                    /* service= */ MediaBrowserService.this,
+                                    /* serviceState= */ this,
                                     pkg,
                                     pid,
                                     uid,
@@ -830,13 +835,13 @@ public abstract class MediaBrowserService extends Service {
                         }
                     };
 
-            mCurConnection = connection;
+            mCurrentConnectionOnHandler = connection;
             if (options == null) {
                 onLoadChildren(parentId, result);
             } else {
                 onLoadChildren(parentId, result, options);
             }
-            mCurConnection = null;
+            mCurrentConnectionOnHandler = null;
 
             if (!result.isDone()) {
                 throw new IllegalStateException(
@@ -885,9 +890,9 @@ public abstract class MediaBrowserService extends Service {
                         }
                     };
 
-            mCurConnection = connection;
+            mCurrentConnectionOnHandler = connection;
             onLoadItem(itemId, result);
-            mCurConnection = null;
+            mCurrentConnectionOnHandler = null;
 
             if (!result.isDone()) {
                 throw new IllegalStateException(

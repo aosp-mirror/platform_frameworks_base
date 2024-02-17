@@ -225,7 +225,7 @@ final class DevicePolicyEngine {
 
         synchronized (mLock) {
             PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
-            if (devicePolicySizeTrackingEnabled()) {
+            if (devicePolicySizeTrackingEnabled() && false) {
                 if (!handleAdminPolicySizeLimit(localPolicyState, enforcingAdmin, value,
                         policyDefinition, userId)) {
                     return;
@@ -350,7 +350,7 @@ final class DevicePolicyEngine {
             }
             PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
 
-            if (devicePolicySizeTrackingEnabled()) {
+            if (devicePolicySizeTrackingEnabled() && false) {
                 decreasePolicySizeForAdmin(localPolicyState, enforcingAdmin);
             }
 
@@ -496,7 +496,7 @@ final class DevicePolicyEngine {
 
         synchronized (mLock) {
             PolicyState<V> globalPolicyState = getGlobalPolicyStateLocked(policyDefinition);
-            if (devicePolicySizeTrackingEnabled()) {
+            if (devicePolicySizeTrackingEnabled() && false) {
                 if (!handleAdminPolicySizeLimit(globalPolicyState, enforcingAdmin, value,
                         policyDefinition, UserHandle.USER_ALL)) {
                     return;
@@ -568,7 +568,7 @@ final class DevicePolicyEngine {
         synchronized (mLock) {
             PolicyState<V> policyState = getGlobalPolicyStateLocked(policyDefinition);
 
-            if (devicePolicySizeTrackingEnabled()) {
+            if (devicePolicySizeTrackingEnabled() && false) {
                 decreasePolicySizeForAdmin(policyState, enforcingAdmin);
             }
 
@@ -1892,7 +1892,7 @@ final class DevicePolicyEngine {
 
         private void writeEnforcingAdminSizeInner(TypedXmlSerializer serializer)
                 throws IOException {
-            if (devicePolicySizeTrackingEnabled()) {
+            if (devicePolicySizeTrackingEnabled() && false) {
                 if (mAdminPolicySize != null) {
                     for (int i = 0; i < mAdminPolicySize.size(); i++) {
                         int userId = mAdminPolicySize.keyAt(i);
@@ -1916,7 +1916,7 @@ final class DevicePolicyEngine {
 
         private void writeMaxPolicySizeInner(TypedXmlSerializer serializer)
                 throws IOException {
-            if (!devicePolicySizeTrackingEnabled()) {
+            if (!devicePolicySizeTrackingEnabled() || true) {
                 return;
             }
             serializer.startTag(/* namespace= */ null, TAG_MAX_POLICY_SIZE_LIMIT);
@@ -2081,7 +2081,7 @@ final class DevicePolicyEngine {
 
         private void readMaxPolicySizeInner(TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException {
-            if (!devicePolicySizeTrackingEnabled()) {
+            if (!devicePolicySizeTrackingEnabled() || true) {
                 return;
             }
             mPolicySizeLimit = parser.getAttributeInt(/* namespace= */ null, ATTR_POLICY_SUM_SIZE);

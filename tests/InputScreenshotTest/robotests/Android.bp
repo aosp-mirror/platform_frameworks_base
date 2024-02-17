@@ -1,4 +1,5 @@
 package {
+    default_team: "trendy_team_input_framework",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 

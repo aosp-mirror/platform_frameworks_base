@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-package android.service.voice;
+package com.android.systemui.communal.data.model
 
-parcelable HotwordTrainingAudio;
+import android.appwidget.AppWidgetProviderInfo
+
+/**
+ * The widget categories to display on communal hub (where categories is a bitfield with values that
+ * match those in {@link AppWidgetProviderInfo}).
+ */
+@JvmInline
+value class CommunalWidgetCategories(
+    // The default is keyguard widgets.
+    val categories: Int = AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
+) {
+    fun contains(category: Int) = (categories and category) == category
+}

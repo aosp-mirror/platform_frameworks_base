@@ -184,11 +184,11 @@
 
   <staging-public-group type="dimen" first-id="0x01b90000">
     <!-- System corner radius baseline sizes. Used by Material styling of rounded corner shapes-->
-    <public name="system_corner_radius_xsmall" />
-    <public name="system_corner_radius_small" />
-    <public name="system_corner_radius_medium" />
-    <public name="system_corner_radius_large" />
-    <public name="system_corner_radius_xlarge" />
+    <public name="removed_system_corner_radius_xsmall" />
+    <public name="removed_system_corner_radius_small" />
+    <public name="removed_system_corner_radius_medium" />
+    <public name="removed_system_corner_radius_large" />
+    <public name="removed_system_corner_radius_xlarge" />
   </staging-public-group>
 
   <staging-public-group type="color" first-id="0x01b80000">

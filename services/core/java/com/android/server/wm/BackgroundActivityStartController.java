@@ -726,9 +726,8 @@ public class BackgroundActivityStartController {
             // Allowed before V by creator
             if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG, "With Android 15 BAL hardening this activity start may be blocked"
-                                + " if the PI creator upgrades target_sdk to 35+! "
-                                + " (missing opt in by PI creator)! "
-                                + state.dump());
+                        + " if the PI creator upgrades target_sdk to 35+! "
+                        + " (missing opt in by PI creator)!" + state.dump());
                 showBalRiskToast();
                 return allowBasedOnCaller(state);
             }
@@ -737,17 +736,15 @@ public class BackgroundActivityStartController {
             // Allowed before U by sender
             if (state.mBalAllowedByPiSender.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG, "With Android 14 BAL hardening this activity start will be blocked"
-                                + " if the PI sender upgrades target_sdk to 34+! "
-                                + " (missing opt in by PI sender)! "
-                                + state.dump());
+                        + " if the PI sender upgrades target_sdk to 34+! "
+                        + " (missing opt in by PI sender)!" + state.dump());
                 showBalRiskToast();
                 return allowBasedOnRealCaller(state);
             }
         }
         // caller or real caller could start the activity, but would need to explicitly opt in
         if (callerCanAllow || realCallerCanAllow) {
-            Slog.wtf(TAG, "Without BAL hardening this activity start would be allowed "
-                            + state.dump());
+            Slog.w(TAG, "Without BAL hardening this activity start would be allowed");
         }
         // neither the caller not the realCaller can allow or have explicitly opted out
         return abortLaunch(state);
@@ -770,7 +767,7 @@ public class BackgroundActivityStartController {
     }
 
     private BalVerdict abortLaunch(BalState state) {
-        Slog.w(TAG, "Background activity launch blocked! "
+        Slog.wtf(TAG, "Background activity launch blocked! "
                 + state.dump());
         showBalBlockedToast();
         return statsLog(BalVerdict.BLOCK, state);

@@ -15834,11 +15834,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void enforceLoggingPolicy(
-            boolean securityLoggingEnabled, boolean auditLoggingEnabled) {
+            boolean securityLogEnabled, boolean auditLogEnabled) {
         Slogf.i(LOG_TAG, "Enforcing logging policy, security: %b audit: %b",
-                securityLoggingEnabled, auditLoggingEnabled);
-        SecurityLog.setLoggingEnabledProperty(securityLoggingEnabled || auditLoggingEnabled);
-        setLoggingConfiguration(securityLoggingEnabled, auditLoggingEnabled);
+                securityLogEnabled, auditLogEnabled);
+        mInjector.securityLogSetLoggingEnabledProperty(securityLogEnabled || auditLogEnabled);
+        setLoggingConfiguration(securityLogEnabled, auditLogEnabled);
     }
 
     private void setLoggingConfiguration(
@@ -24235,7 +24235,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setMaxPolicyStorageLimit(String callerPackageName, int storageLimit) {
-        if (!devicePolicySizeTrackingEnabled()) {
+        if (!devicePolicySizeTrackingEnabled() || true) {
             return;
         }
         CallerIdentity caller = getCallerIdentity(callerPackageName);
@@ -24247,7 +24247,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public int getMaxPolicyStorageLimit(String callerPackageName) {
-        if (!devicePolicySizeTrackingEnabled()) {
+        if (!devicePolicySizeTrackingEnabled() || true) {
             return -1;
         }
         CallerIdentity caller = getCallerIdentity(callerPackageName);

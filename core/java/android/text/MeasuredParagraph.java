@@ -237,10 +237,13 @@ public class MeasuredParagraph {
             // Easy case: If the line instance only contains single directionality run, no need
             // to reorder visually.
             if (bidi.getRunCount() == 1) {
-                if ((bidi.getParaLevel() & 0x01) == 1) {
+                if (bidi.getRunLevel(0) == 1) {
                     return Layout.DIRS_ALL_RIGHT_TO_LEFT;
-                } else {
+                } else if (bidi.getRunLevel(0) == 0) {
                     return Layout.DIRS_ALL_LEFT_TO_RIGHT;
+                } else {
+                    return new Directions(new int[] {
+                            0, bidi.getRunLevel(0) << Layout.RUN_LEVEL_SHIFT | (end - start)});
                 }
             }
 

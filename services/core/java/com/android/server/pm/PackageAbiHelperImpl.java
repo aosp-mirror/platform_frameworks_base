@@ -53,7 +53,8 @@ import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 final class PackageAbiHelperImpl implements PackageAbiHelper {
 
@@ -314,7 +315,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
     @NonNull
     private static String[] getNativelySupportedAbis(@NonNull String[] supportedAbis) {
-        Set<String> nativelySupportedAbis = new ArraySet<>();
+        List<String> nativelySupportedAbis = new ArrayList<>();
         for (int i = 0; i < supportedAbis.length; i++) {
             final String currentAbi = supportedAbis[i];
             // In presence of a native bridge this means the Abi is emulated.

@@ -1434,6 +1434,31 @@ public class TelecomManager {
     }
 
     /**
+     * This API will return all {@link PhoneAccount}s registered via
+     * {@link TelecomManager#registerPhoneAccount(PhoneAccount)}. If a {@link PhoneAccount} appears
+     * to be missing from the list, Telecom has either unregistered the {@link PhoneAccount}
+     * or the caller registered the {@link PhoneAccount} under a different user and does not
+     * have the {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
+     *
+     * @return all the {@link PhoneAccount}s registered by the caller.
+     */
+    @SuppressLint("RequiresPermission")
+    @FlaggedApi(Flags.FLAG_GET_REGISTERED_PHONE_ACCOUNTS)
+    public @NonNull List<PhoneAccount> getRegisteredPhoneAccounts() {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.getRegisteredPhoneAccounts(
+                        mContext.getOpPackageName(),
+                        mContext.getAttributionTag()).getList();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        throw new IllegalStateException("Telecom is not available");
+    }
+
+    /**
      * Returns a list of {@link PhoneAccountHandle}s including those which have not been enabled
      * by the user.
      *

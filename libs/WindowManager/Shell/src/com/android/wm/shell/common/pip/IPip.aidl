@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip;
+package com.android.wm.shell.common.pip;
 
 import android.app.PictureInPictureParams;
 import android.view.SurfaceControl;
@@ -22,7 +22,7 @@ import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 
-import com.android.wm.shell.pip.IPipAnimationListener;
+import com.android.wm.shell.common.pip.IPipAnimationListener;
 
 /**
  * Interface that is exposed to remote callers to manipulate the Pip feature.

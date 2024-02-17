@@ -29,6 +29,13 @@ flag {
 }
 
 flag {
+    name: "notification_color_update_logger"
+    namespace: "systemui"
+    description: "Enabled debug logging and dumping of notification color updates."
+    bug: "294347738"
+}
+
+flag {
     name: "notifications_footer_view_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the footer view in the notification shade "
@@ -64,6 +71,16 @@ flag {
     description: "Replaces NotifLiveDataStore with ActiveNotificationListRepository, and updates consumers. "
         "Should not bring any behavior changes."
     bug: "308623704"
+}
+
+flag {
+    name: "notifications_background_media_icons"
+    namespace: "systemui"
+    description: "Updates icons for media notifications in the background."
+    bug: "315143160"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -295,12 +312,15 @@ flag {
 }
 
 flag {
-   name: "centralized_status_bar_dimens_refactor"
+   name: "centralized_status_bar_height_fix"
    namespace: "systemui"
    description: "Refactors shade header and keyguard status bar to read status bar dimens from a"
         " central place, instead of reading resources directly. This is to take into account display"
         " cutouts and other special cases. "
    bug: "317199366"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -449,4 +469,3 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
-

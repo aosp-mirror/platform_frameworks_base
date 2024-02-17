@@ -50,6 +50,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.LaunchAdjacentController;
+import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
@@ -320,6 +321,12 @@ public abstract class WMShellBaseModule {
         final PerfHintController perfHintController =
                 new PerfHintController(context, shellInit, shellCommandHandler, rootTdaOrganizer);
         return Optional.of(perfHintController.getHinter());
+    }
+
+    @WMSingleton
+    @Provides
+    static MultiInstanceHelper provideMultiInstanceHelper(Context context) {
+        return new MultiInstanceHelper(context, context.getPackageManager());
     }
 
     //

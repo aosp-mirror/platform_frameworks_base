@@ -28,6 +28,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.AppOpsManager;
 import android.companion.CompanionDeviceService;
 import android.content.ComponentName;
 import android.content.Context;
@@ -221,5 +222,16 @@ public final class PackageUtils {
         }
 
         return requestingPackageSignatureAllowlisted;
+    }
+
+    /**
+     * Check if restricted settings is enabled for a side-loaded app.
+     */
+    public static boolean isRestrictedSettingsAllowed(
+            Context context, String packageName, int uid) {
+        final int mode = context.getSystemService(AppOpsManager.class).noteOpNoThrow(
+                AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS, uid,
+                packageName, /* attributionTag= */ null, /* message= */ null);
+        return mode == AppOpsManager.MODE_ALLOWED;
     }
 }

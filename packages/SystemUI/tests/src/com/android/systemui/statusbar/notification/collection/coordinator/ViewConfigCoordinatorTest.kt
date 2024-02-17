@@ -23,6 +23,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener
+import com.android.systemui.statusbar.notification.ColorUpdateLogger
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -57,6 +58,7 @@ class ViewConfigCoordinatorTest : SysuiTestCase() {
     private val lockscreenUserManager: NotificationLockscreenUserManager = mock()
     private val gutsManager: NotificationGutsManager = mock()
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor = mock()
+    private val colorUpdateLogger: ColorUpdateLogger = mock()
 
     @Before
     fun setUp() {
@@ -66,7 +68,9 @@ class ViewConfigCoordinatorTest : SysuiTestCase() {
             configurationController,
             lockscreenUserManager,
             gutsManager,
-            keyguardUpdateMonitor)
+            keyguardUpdateMonitor,
+            colorUpdateLogger,
+        )
         coordinator.attach(pipeline)
         userChangedListener = withArgCaptor {
             verify(lockscreenUserManager).addUserChangedListener(capture())

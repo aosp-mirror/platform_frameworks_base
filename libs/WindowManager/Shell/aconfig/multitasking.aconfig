@@ -64,3 +64,10 @@ flag {
     description: "Enables the new bubble bar UI for tablets"
     bug: "286246694"
 }
+
+flag {
+    name: "enable_bubbles_long_press_nav_handle"
+    namespace: "multitasking"
+    description: "Enables long-press action for nav handle when a bubble is expanded"
+    bug: "324910035"
+}

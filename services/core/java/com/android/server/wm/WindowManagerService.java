@@ -101,7 +101,6 @@ import static android.window.WindowProviderService.isWindowProviderService;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_EMBEDDED_WINDOWS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
@@ -9057,14 +9056,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean transferTouchGesture(InputTransferToken transferFromToken,
-            InputTransferToken transferToToken) {
-        if (transferFromToken == null || transferToToken == null) {
-            ProtoLog.e(WM_DEBUG_EMBEDDED_WINDOWS,
-                    "transferTouchGesture failed because args transferFromToken or "
-                            + "transferToToken is null");
-            return false;
-        }
+    public boolean transferTouchGesture(@NonNull InputTransferToken transferFromToken,
+            @NonNull InputTransferToken transferToToken) {
+        Objects.requireNonNull(transferFromToken);
+        Objects.requireNonNull(transferToToken);
 
         final long identity = Binder.clearCallingIdentity();
         boolean didTransfer;

@@ -815,7 +815,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                 ? () -> {}
                 : () -> {
                     Log.d(TAG, "ThemeHomeDelay: ThemeOverlayController ready");
-                    mActivityManager.setThemeOverlayReady(true);
+                    mActivityManager.setThemeOverlayReady(currentUser);
                 };
 
         if (colorSchemeIsApplied(managedProfiles)) {

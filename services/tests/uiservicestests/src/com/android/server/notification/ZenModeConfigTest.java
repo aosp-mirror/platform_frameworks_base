@@ -625,6 +625,21 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testRuleXml_customInterruptionFilter() throws Exception {
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        rule.zenMode = Settings.Global.ZEN_MODE_ALARMS;
+        rule.conditionId = Uri.parse("condition://android/blah");
+        assertThat(Condition.isValidId(rule.conditionId, ZenModeConfig.SYSTEM_AUTHORITY)).isTrue();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeRuleXml(rule, baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ZenModeConfig.ZenRule fromXml = readRuleXml(bais);
+
+        assertEquals(rule.zenMode, fromXml.zenMode);
+    }
+
+    @Test
     public void testZenPolicyXml_allUnset() throws Exception {
         ZenPolicy policy = new ZenPolicy.Builder().build();
 

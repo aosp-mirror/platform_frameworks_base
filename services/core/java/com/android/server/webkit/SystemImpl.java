@@ -21,6 +21,7 @@ import static android.webkit.Flags.updateServiceV2;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -39,11 +40,14 @@ import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewZygote;
 
 import com.android.internal.util.XmlUtils;
+import com.android.server.LocalServices;
+import com.android.server.PinnerService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -60,6 +64,7 @@ public class SystemImpl implements SystemInterface {
     private static final String TAG_AVAILABILITY = "availableByDefault";
     private static final String TAG_SIGNATURE = "signature";
     private static final String TAG_FALLBACK = "isFallback";
+    private static final String PIN_GROUP = "webview";
     private final WebViewProviderInfo[] mWebViewProviderPackages;
 
     // Initialization-on-demand holder idiom for getting the WebView provider packages once and
@@ -275,6 +280,36 @@ public class SystemImpl implements SystemInterface {
     public boolean isMultiProcessDefaultEnabled() {
         // Multiprocess is enabled by default for all devices.
         return true;
+    }
+
+    @Override
+    public void pinWebviewIfRequired(ApplicationInfo appInfo) {
+        PinnerService pinnerService = LocalServices.getService(PinnerService.class);
+        int webviewPinQuota = pinnerService.getWebviewPinQuota();
+        if (webviewPinQuota <= 0) {
+            return;
+        }
+
+        pinnerService.unpinGroup(PIN_GROUP);
+
+        ArrayList<String> apksToPin = new ArrayList<>();
+        boolean pinSharedFirst = appInfo.metaData.getBoolean("PIN_SHARED_LIBS_FIRST", true);
+        for (String sharedLib : appInfo.sharedLibraryFiles) {
+            apksToPin.add(sharedLib);
+        }
+        apksToPin.add(appInfo.sourceDir);
+        if (!pinSharedFirst) {
+            // We want to prioritize pinning of the native library that is most likely used by apps
+            // which in some build flavors live in the main apk and as a shared library for others.
+            Collections.reverse(apksToPin);
+        }
+        for (String apk : apksToPin) {
+            if (webviewPinQuota <= 0) {
+                break;
+            }
+            int bytesPinned = pinnerService.pinFile(apk, webviewPinQuota, appInfo, PIN_GROUP);
+            webviewPinQuota -= bytesPinned;
+        }
     }
 
     // flags declaring we want extra info from the package manager for webview providers

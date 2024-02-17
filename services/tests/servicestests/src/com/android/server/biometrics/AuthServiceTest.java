@@ -60,8 +60,10 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.iris.IIrisService;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -127,6 +129,8 @@ public class AuthServiceTest {
     AppOpsManager mAppOpsManager;
     @Mock
     private VirtualDeviceManagerInternal mVdmInternal;
+    @Mock
+    private BiometricHandlerProvider mBiometricHandlerProvider;
     @Captor
     private ArgumentCaptor<List<FingerprintSensorPropertiesInternal>> mFingerprintPropsCaptor;
     @Captor
@@ -135,6 +139,9 @@ public class AuthServiceTest {
     private ArgumentCaptor<FaceSensorConfigurations> mFaceSensorConfigurationsCaptor;
     @Captor
     private ArgumentCaptor<List<FaceSensorPropertiesInternal>> mFacePropsCaptor;
+
+    private final TestLooper mFingerprintLooper = new TestLooper();
+    private final TestLooper mFaceLooper = new TestLooper();
 
     @Before
     public void setUp() {
@@ -167,6 +174,11 @@ public class AuthServiceTest {
         when(mInjector.getIrisService()).thenReturn(mIrisService);
         when(mInjector.getAppOps(any())).thenReturn(mAppOpsManager);
         when(mInjector.isHidlDisabled(any())).thenReturn(false);
+        when(mInjector.getBiometricHandlerProvider()).thenReturn(mBiometricHandlerProvider);
+        when(mBiometricHandlerProvider.getFingerprintHandler()).thenReturn(
+                new Handler(mFingerprintLooper.getLooper()));
+        when(mBiometricHandlerProvider.getFaceHandler()).thenReturn(
+                new Handler(mFaceLooper.getLooper()));
 
         setInternalAndTestBiometricPermissions(mContext, false /* hasPermission */);
     }
@@ -249,6 +261,9 @@ public class AuthServiceTest {
 
         mAuthService = new AuthService(mContext, mInjector);
         mAuthService.onStart();
+
+        mFingerprintLooper.dispatchAll();
+        mFaceLooper.dispatchAll();
 
         verify(mFingerprintService).registerAuthenticatorsLegacy(
                 mFingerprintSensorConfigurationsCaptor.capture());
