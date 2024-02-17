@@ -43,9 +43,10 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
             GlobalSettings globalSettings,
             SystemClock systemClock,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            AvalancheController avalancheController) {
         super(context, logger, mockExecutorHandler(executor), globalSettings, systemClock,
-                executor, accessibilityManagerWrapper, uiEventLogger);
+                executor, accessibilityManagerWrapper, uiEventLogger, avalancheController);
 
         mTouchAcceptanceDelay = BaseHeadsUpManagerTest.TEST_TOUCH_ACCEPTANCE_TIME;
         mMinimumDisplayTime = BaseHeadsUpManagerTest.TEST_MINIMUM_DISPLAY_TIME;
