@@ -25,7 +25,7 @@ value class AudioStream(val value: Int) {
         require(value in supportedStreamTypes) { "Unsupported stream=$value" }
     }
 
-    private companion object {
+    companion object {
         val supportedStreamTypes =
             setOf(
                 AudioManager.STREAM_VOICE_CALL,

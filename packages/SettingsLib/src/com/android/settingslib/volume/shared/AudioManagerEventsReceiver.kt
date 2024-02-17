@@ -54,6 +54,7 @@ class AudioManagerEventsReceiverImpl(
                 AudioManager.VOLUME_CHANGED_ACTION,
                 AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION,
                 AudioManager.STREAM_DEVICES_CHANGED_ACTION,
+                AudioManager.ACTION_VOLUME_CHANGED,
             )
 
     override val events: SharedFlow<AudioManagerEvent> =

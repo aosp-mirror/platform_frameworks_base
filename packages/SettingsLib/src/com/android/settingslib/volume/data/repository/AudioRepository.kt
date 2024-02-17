@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,10 +65,10 @@ interface AudioRepository {
     val communicationDevice: StateFlow<AudioDeviceInfo?>
 
     /** State of the [AudioStream]. */
-    suspend fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel>
+    fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel>
 
-    /** Current state of the [AudioStream]. */
-    suspend fun getCurrentAudioStream(audioStream: AudioStream): AudioStreamModel
+    /** Returns the last audible volume before stream was muted. */
+    suspend fun getLastAudibleVolume(audioStream: AudioStream): Int
 
     suspend fun setVolume(audioStream: AudioStream, volume: Int)
 
@@ -122,7 +123,7 @@ class AudioRepositoryImpl(
                     audioManager.communicationDevice,
                 )
 
-    override suspend fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> {
+    override fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> {
         return audioManagerEventsReceiver.events
             .filter {
                 if (it is StreamAudioManagerEvent) {
@@ -132,20 +133,24 @@ class AudioRepositoryImpl(
                 }
             }
             .map { getCurrentAudioStream(audioStream) }
+            .onStart { emit(getCurrentAudioStream(audioStream)) }
             .flowOn(backgroundCoroutineContext)
     }
 
-    override suspend fun getCurrentAudioStream(audioStream: AudioStream): AudioStreamModel {
+    private fun getCurrentAudioStream(audioStream: AudioStream): AudioStreamModel {
+        return AudioStreamModel(
+            audioStream = audioStream,
+            minVolume = getMinVolume(audioStream),
+            maxVolume = audioManager.getStreamMaxVolume(audioStream.value),
+            volume = audioManager.getStreamVolume(audioStream.value),
+            isAffectedByRingerMode = audioManager.isStreamAffectedByRingerMode(audioStream.value),
+            isMuted = audioManager.isStreamMute(audioStream.value),
+        )
+    }
+
+    override suspend fun getLastAudibleVolume(audioStream: AudioStream): Int {
         return withContext(backgroundCoroutineContext) {
-            AudioStreamModel(
-                audioStream = audioStream,
-                minVolume = getMinVolume(audioStream),
-                maxVolume = audioManager.getStreamMaxVolume(audioStream.value),
-                volume = audioManager.getStreamVolume(audioStream.value),
-                isAffectedByRingerMode =
-                    audioManager.isStreamAffectedByRingerMode(audioStream.value),
-                isMuted = audioManager.isStreamMute(audioStream.value)
-            )
+            audioManager.getLastAudibleStreamVolume(audioStream.value)
         }
     }
 

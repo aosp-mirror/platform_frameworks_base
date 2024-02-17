@@ -181,24 +181,6 @@ class AudioRepositoryTest {
     }
 
     @Test
-    fun adjustingVolume_currentModeIsUpToDate() {
-        testScope.runTest {
-            val audioStream = AudioStream(AudioManager.STREAM_SYSTEM)
-            var streamModel: AudioStreamModel? = null
-            underTest
-                .getAudioStream(audioStream)
-                .onEach { streamModel = it }
-                .launchIn(backgroundScope)
-            runCurrent()
-
-            underTest.setVolume(audioStream, 50)
-            runCurrent()
-
-            assertThat(underTest.getCurrentAudioStream(audioStream)).isEqualTo(streamModel)
-        }
-    }
-
-    @Test
     fun muteStream_mutesTheStream() {
         testScope.runTest {
             val audioStream = AudioStream(AudioManager.STREAM_SYSTEM)
