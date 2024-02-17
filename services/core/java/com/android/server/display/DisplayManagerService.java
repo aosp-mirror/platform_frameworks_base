@@ -464,10 +464,11 @@ public final class DisplayManagerService extends SystemService {
     // May be used outside of the lock but only on the handler thread.
     private final ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<CallbackRecord>();
 
-    // Pending callback records indexed by calling process uid.
+    // Pending callback records indexed by calling process uid and pid.
     // Must be used outside of the lock mSyncRoot and should be selflocked.
     @GuardedBy("mPendingCallbackSelfLocked")
-    public final SparseArray<PendingCallback> mPendingCallbackSelfLocked = new SparseArray<>();
+    public final SparseArray<SparseArray<PendingCallback>> mPendingCallbackSelfLocked =
+            new SparseArray<>();
 
     // Temporary viewports, used when sending new viewport information to the
     // input system.  May be used outside of the lock but only on the handler thread.
@@ -1011,8 +1012,8 @@ public final class DisplayManagerService extends SystemService {
                 }
 
                 // Do we care about this uid?
-                PendingCallback pendingCallback = mPendingCallbackSelfLocked.get(uid);
-                if (pendingCallback == null) {
+                SparseArray<PendingCallback> pendingCallbacks = mPendingCallbackSelfLocked.get(uid);
+                if (pendingCallbacks == null) {
                     return;
                 }
 
@@ -1020,7 +1021,12 @@ public final class DisplayManagerService extends SystemService {
                 if (DEBUG) {
                     Slog.d(TAG, "Uid " + uid + " becomes " + importance);
                 }
-                pendingCallback.sendPendingDisplayEvent();
+                for (int i = 0; i < pendingCallbacks.size(); i++) {
+                    PendingCallback pendingCallback = pendingCallbacks.valueAt(i);
+                    if (pendingCallback != null) {
+                        pendingCallback.sendPendingDisplayEvent();
+                    }
+                }
                 mPendingCallbackSelfLocked.delete(uid);
             }
         }
@@ -3193,16 +3199,23 @@ public final class DisplayManagerService extends SystemService {
         for (int i = 0; i < mTempCallbacks.size(); i++) {
             CallbackRecord callbackRecord = mTempCallbacks.get(i);
             final int uid = callbackRecord.mUid;
+            final int pid = callbackRecord.mPid;
             if (isUidCached(uid)) {
                 // For cached apps, save the pending event until it becomes non-cached
                 synchronized (mPendingCallbackSelfLocked) {
-                    PendingCallback pendingCallback = mPendingCallbackSelfLocked.get(uid);
+                    SparseArray<PendingCallback> pendingCallbacks = mPendingCallbackSelfLocked.get(
+                            uid);
                     if (extraLogging(callbackRecord.mPackageName)) {
-                        Slog.i(TAG,
-                                "Uid is cached: " + uid + ", pendingCallback: " + pendingCallback);
+                        Slog.i(TAG, "Uid is cached: " + uid
+                                + ", pendingCallbacks: " + pendingCallbacks);
                     }
+                    if (pendingCallbacks == null) {
+                        pendingCallbacks = new SparseArray<>();
+                        mPendingCallbackSelfLocked.put(uid, pendingCallbacks);
+                    }
+                    PendingCallback pendingCallback = pendingCallbacks.get(pid);
                     if (pendingCallback == null) {
-                        mPendingCallbackSelfLocked.put(uid,
+                        pendingCallbacks.put(pid,
                                 new PendingCallback(callbackRecord, displayId, event));
                     } else {
                         pendingCallback.addDisplayEvent(displayId, event);
