@@ -42,7 +42,6 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,7 +111,7 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
     BrailleDisplayConnection(@NonNull Object lock,
             @NonNull AccessibilityServiceConnection serviceConnection) {
         this.mLock = Objects.requireNonNull(lock);
-        this.mScanner = getDefaultNativeScanner(getDefaultNativeInterface());
+        this.mScanner = getDefaultNativeScanner(new DefaultNativeInterface());
         this.mServiceConnection = Objects.requireNonNull(serviceConnection);
     }
 
@@ -128,7 +127,7 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
      */
     @VisibleForTesting
     interface BrailleDisplayScanner {
-        Collection<Path> getHidrawNodePaths();
+        Collection<Path> getHidrawNodePaths(@NonNull Path directory);
 
         byte[] getDeviceReportDescriptor(@NonNull Path path);
 
@@ -158,8 +157,9 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
         Objects.requireNonNull(expectedUniqueId);
         this.mController = Objects.requireNonNull(controller);
 
+        final Path devicePath = Path.of("/dev");
         final List<Pair<File, byte[]>> result = new ArrayList<>();
-        final Collection<Path> hidrawNodePaths = mScanner.getHidrawNodePaths();
+        final Collection<Path> hidrawNodePaths = mScanner.getHidrawNodePaths(devicePath);
         if (hidrawNodePaths == null) {
             Slog.w(LOG_TAG, "Unable to access the HIDRAW node directory");
             sendConnectionErrorLocked(FLAG_ERROR_CANNOT_ACCESS);
@@ -285,6 +285,9 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
         if (buffer.length > IBinder.getSuggestedMaxIpcSizeBytes()) {
             Slog.e(LOG_TAG, "Requested write of size " + buffer.length
                     + " which is larger than maximum " + IBinder.getSuggestedMaxIpcSizeBytes());
+            // The caller only got here by bypassing the AccessibilityService-side check with
+            // reflection, so disconnect this connection to prevent further attempts.
+            disconnect();
             return;
         }
         synchronized (mLock) {
@@ -292,7 +295,7 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
             if (mOutputThread == null) {
                 try {
                     mOutputStream = new FileOutputStream(mHidrawNode);
-                } catch (FileNotFoundException e) {
+                } catch (Exception e) {
                     Slog.e(LOG_TAG, "Unable to create write stream", e);
                     disconnect();
                     return;
@@ -387,14 +390,13 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
     BrailleDisplayScanner getDefaultNativeScanner(@NonNull NativeInterface nativeInterface) {
         Objects.requireNonNull(nativeInterface);
         return new BrailleDisplayScanner() {
-            private static final Path DEVICE_DIR = Path.of("/dev");
             private static final String HIDRAW_DEVICE_GLOB = "hidraw*";
 
             @Override
-            public Collection<Path> getHidrawNodePaths() {
+            public Collection<Path> getHidrawNodePaths(@NonNull Path directory) {
                 final List<Path> result = new ArrayList<>();
                 try (DirectoryStream<Path> hidrawNodePaths = Files.newDirectoryStream(
-                        DEVICE_DIR, HIDRAW_DEVICE_GLOB)) {
+                        directory, HIDRAW_DEVICE_GLOB)) {
                     for (Path path : hidrawNodePaths) {
                         result.add(path);
                     }
@@ -458,8 +460,8 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
         synchronized (mLock) {
             mScanner = new BrailleDisplayScanner() {
                 @Override
-                public Collection<Path> getHidrawNodePaths() {
-                    return brailleDisplayMap.keySet();
+                public Collection<Path> getHidrawNodePaths(@NonNull Path directory) {
+                    return brailleDisplayMap.isEmpty() ? null : brailleDisplayMap.keySet();
                 }
 
                 @Override
@@ -490,38 +492,56 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
      */
     @VisibleForTesting
     interface NativeInterface {
+        /**
+         * Returns the HIDRAW descriptor size for the file descriptor.
+         *
+         * @return the result of ioctl(HIDIOCGRDESCSIZE), or -1 if the ioctl fails.
+         */
         int getHidrawDescSize(int fd);
 
+        /**
+         * Returns the HIDRAW descriptor for the file descriptor.
+         *
+         * @return the result of ioctl(HIDIOCGRDESC), or null if the ioctl fails.
+         */
         byte[] getHidrawDesc(int fd, int descSize);
 
+        /**
+         * Returns the HIDRAW unique identifier for the file descriptor.
+         *
+         * @return the result of ioctl(HIDIOCGRAWUNIQ), or null if the ioctl fails.
+         */
         String getHidrawUniq(int fd);
 
+        /**
+         * Returns the HIDRAW bus type for the file descriptor.
+         *
+         * @return the result of ioctl(HIDIOCGRAWINFO).bustype, or -1 if the ioctl fails.
+         */
         int getHidrawBusType(int fd);
     }
 
     /** Native interface that actually calls native HIDRAW ioctls. */
-    private NativeInterface getDefaultNativeInterface() {
-        return new NativeInterface() {
-            @Override
-            public int getHidrawDescSize(int fd) {
-                return nativeGetHidrawDescSize(fd);
-            }
+    private class DefaultNativeInterface implements NativeInterface {
+        @Override
+        public int getHidrawDescSize(int fd) {
+            return nativeGetHidrawDescSize(fd);
+        }
 
-            @Override
-            public byte[] getHidrawDesc(int fd, int descSize) {
-                return nativeGetHidrawDesc(fd, descSize);
-            }
+        @Override
+        public byte[] getHidrawDesc(int fd, int descSize) {
+            return nativeGetHidrawDesc(fd, descSize);
+        }
 
-            @Override
-            public String getHidrawUniq(int fd) {
-                return nativeGetHidrawUniq(fd);
-            }
+        @Override
+        public String getHidrawUniq(int fd) {
+            return nativeGetHidrawUniq(fd);
+        }
 
-            @Override
-            public int getHidrawBusType(int fd) {
-                return nativeGetHidrawBusType(fd);
-            }
-        };
+        @Override
+        public int getHidrawBusType(int fd) {
+            return nativeGetHidrawBusType(fd);
+        }
     }
 
     private native int nativeGetHidrawDescSize(int fd);
