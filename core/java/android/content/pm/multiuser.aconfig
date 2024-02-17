@@ -156,3 +156,10 @@ flag {
     description: "Set power mode during a user switch."
     bug: "325249845"
 }
+
+flag {
+    name: "disable_private_space_items_on_home"
+    namespace: "profile_experiences"
+    description: "Disables adding items belonging to Private Space on Home Screen manually as well as automatically"
+    bug: "287975131"
+}

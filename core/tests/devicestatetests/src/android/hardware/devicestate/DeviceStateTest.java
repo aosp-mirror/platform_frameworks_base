@@ -57,19 +57,15 @@ public final class DeviceStateTest {
 
     @Test
     public void testConstruct_tooLargeIdentifier() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final DeviceState state = new DeviceState(
-                    MAXIMUM_DEVICE_STATE_IDENTIFIER + 1 /* identifier */,
-                    null /* name */, 0 /* flags */);
-        });
+        assertThrows(IllegalArgumentException.class,
+                () -> new DeviceState(MAXIMUM_DEVICE_STATE_IDENTIFIER + 1 /* identifier */,
+                        null /* name */, 0 /* flags */));
     }
 
     @Test
     public void testConstruct_tooSmallIdentifier() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final DeviceState state = new DeviceState(
-                    MINIMUM_DEVICE_STATE_IDENTIFIER - 1 /* identifier */,
-                    null /* name */, 0 /* flags */);
-        });
+        assertThrows(IllegalArgumentException.class,
+                () -> new DeviceState(MINIMUM_DEVICE_STATE_IDENTIFIER - 1 /* identifier */,
+                        null /* name */, 0 /* flags */));
     }
 }
