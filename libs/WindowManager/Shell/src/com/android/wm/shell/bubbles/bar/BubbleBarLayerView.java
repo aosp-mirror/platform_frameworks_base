@@ -231,6 +231,7 @@ public class BubbleBarLayerView extends FrameLayout
             // Touch delegate for the menu
             BubbleBarHandleView view = mExpandedView.getHandleView();
             view.getBoundsOnScreen(mHandleTouchBounds);
+            // Move top value up to ensure touch target is large enough
             mHandleTouchBounds.top -= mPositioner.getBubblePaddingTop();
             mHandleTouchDelegate = new TouchDelegate(mHandleTouchBounds,
                     mExpandedView.getHandleView());
