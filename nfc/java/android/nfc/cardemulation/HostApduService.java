@@ -470,7 +470,7 @@ public abstract class HostApduService extends Service {
     }
 
     /**
-     * This method is called when a polling frame has been received from a
+     * This method is called when polling frames have been received from a
      * remote device. If the device is in observe mode, the service should
      * call {@link NfcAdapter#allowTransaction()} once it is ready to proceed
      * with the transaction. If the device is not in observe mode, the service

@@ -93,6 +93,12 @@ interface ITelecomService {
     PhoneAccount getPhoneAccount(in PhoneAccountHandle account, String callingPackage);
 
     /**
+     * @see TelecomManager#getPhoneAccount
+     */
+    ParceledListSlice<PhoneAccount> getRegisteredPhoneAccounts(String callingPackage,
+            String callingFeatureId);
+
+    /**
      * @see TelecomManager#getAllPhoneAccountsCount
      */
     int getAllPhoneAccountsCount();

@@ -69,6 +69,8 @@ package android {
     field public static final String BIND_MUSIC_RECOGNITION_SERVICE = "android.permission.BIND_MUSIC_RECOGNITION_SERVICE";
     field public static final String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
     field public static final String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String BIND_ON_DEVICE_INTELLIGENCE_SERVICE = "android.permission.BIND_ON_DEVICE_INTELLIGENCE_SERVICE";
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String BIND_ON_DEVICE_TRUSTED_SERVICE = "android.permission.BIND_ON_DEVICE_TRUSTED_SERVICE";
     field public static final String BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE = "android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE";
     field public static final String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
     field public static final String BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE = "android.permission.BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE";
@@ -367,7 +369,7 @@ package android {
     field public static final String SET_VOLUME_KEY_LONG_PRESS_LISTENER = "android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER";
     field public static final String SET_WALLPAPER_COMPONENT = "android.permission.SET_WALLPAPER_COMPONENT";
     field public static final String SET_WALLPAPER_DIM_AMOUNT = "android.permission.SET_WALLPAPER_DIM_AMOUNT";
-    field @FlaggedApi("android.service.chooser.support_nfc_resolver") public static final String SHOW_CUSTOMIZED_RESOLVER = "android.permission.SHOW_CUSTOMIZED_RESOLVER";
+    field @FlaggedApi("android.nfc.enable_nfc_mainline") public static final String SHOW_CUSTOMIZED_RESOLVER = "android.permission.SHOW_CUSTOMIZED_RESOLVER";
     field public static final String SHOW_KEYGUARD_MESSAGE = "android.permission.SHOW_KEYGUARD_MESSAGE";
     field public static final String SHUTDOWN = "android.permission.SHUTDOWN";
     field public static final String SIGNAL_REBOOT_READINESS = "android.permission.SIGNAL_REBOOT_READINESS";
@@ -386,7 +388,7 @@ package android {
     field public static final String SYSTEM_APPLICATION_OVERLAY = "android.permission.SYSTEM_APPLICATION_OVERLAY";
     field public static final String SYSTEM_CAMERA = "android.permission.SYSTEM_CAMERA";
     field public static final String TETHER_PRIVILEGED = "android.permission.TETHER_PRIVILEGED";
-    field @FlaggedApi("com.android.net.thread.flags.thread_enabled") public static final String THREAD_NETWORK_PRIVILEGED = "android.permission.THREAD_NETWORK_PRIVILEGED";
+    field @FlaggedApi("com.android.net.thread.flags.thread_enabled_platform") public static final String THREAD_NETWORK_PRIVILEGED = "android.permission.THREAD_NETWORK_PRIVILEGED";
     field public static final String TIS_EXTENSION_INTERFACE = "android.permission.TIS_EXTENSION_INTERFACE";
     field public static final String TOGGLE_AUTOMOTIVE_PROJECTION = "android.permission.TOGGLE_AUTOMOTIVE_PROJECTION";
     field public static final String TRIGGER_LOST_MODE = "android.permission.TRIGGER_LOST_MODE";
@@ -403,6 +405,7 @@ package android {
     field public static final String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
     field @FlaggedApi("android.hardware.biometrics.face_background_authentication") public static final String USE_BACKGROUND_FACE_AUTHENTICATION = "android.permission.USE_BACKGROUND_FACE_AUTHENTICATION";
     field public static final String USE_COLORIZED_NOTIFICATIONS = "android.permission.USE_COLORIZED_NOTIFICATIONS";
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String USE_ON_DEVICE_INTELLIGENCE = "android.permission.USE_ON_DEVICE_INTELLIGENCE";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
     field public static final String UWB_PRIVILEGED = "android.permission.UWB_PRIVILEGED";
     field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";
@@ -3651,7 +3654,7 @@ package android.content {
     field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final String TETHERING_SERVICE = "tethering";
-    field @FlaggedApi("com.android.net.thread.flags.thread_enabled") public static final String THREAD_NETWORK_SERVICE = "thread_network";
+    field @FlaggedApi("com.android.net.thread.flags.thread_enabled_platform") public static final String THREAD_NETWORK_SERVICE = "thread_network";
     field public static final String TIME_MANAGER_SERVICE = "time_manager";
     field public static final String TRANSLATION_MANAGER_SERVICE = "translation";
     field public static final String UI_TRANSLATION_SERVICE = "ui_translation";
@@ -4827,7 +4830,7 @@ package android.hardware.camera2.extension {
   }
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public static interface SessionProcessor.CaptureCallback {
-    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureCompleted(long, int, @NonNull android.hardware.camera2.CaptureResult);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureCompleted(long, int, @NonNull java.util.Map<android.hardware.camera2.CaptureResult.Key,java.lang.Object>);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureFailed(int, int);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureProcessStarted(int);
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureSequenceAborted(int);
@@ -4847,6 +4850,39 @@ package android.hardware.camera2.params {
     field public static final int ROTATION_180 = 2; // 0x2
     field public static final int ROTATION_270 = 3; // 0x3
     field public static final int ROTATION_90 = 1; // 0x1
+  }
+
+}
+
+package android.hardware.devicestate {
+
+  @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceState {
+    method @IntRange(from=0x0) public int getIdentifier();
+    method @NonNull public String getName();
+    method public boolean hasProperties(@NonNull int...);
+    method public boolean hasProperty(int);
+    field public static final int PROPERTY_EMULATED_ONLY = 10; // 0xa
+    field public static final int PROPERTY_EXTENDED_DEVICE_STATE_EXTERNAL_DISPLAY = 15; // 0xf
+    field public static final int PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT = 17; // 0x11
+    field public static final int PROPERTY_FEATURE_REAR_DISPLAY = 16; // 0x10
+    field public static final int PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY = 12; // 0xc
+    field public static final int PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY = 11; // 0xb
+    field public static final int PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED = 1; // 0x1
+    field public static final int PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN = 2; // 0x2
+    field public static final int PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN = 3; // 0x3
+    field public static final int PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP = 13; // 0xd
+    field public static final int PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE = 14; // 0xe
+  }
+
+  @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceStateManager {
+    method @NonNull public java.util.List<android.hardware.devicestate.DeviceState> getSupportedDeviceStates();
+    method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
+    method public void unregisterCallback(@NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
+  }
+
+  public static interface DeviceStateManager.DeviceStateCallback {
+    method public default void onDeviceStateChanged(@NonNull android.hardware.devicestate.DeviceState);
+    method public default void onSupportedStatesChanged(@NonNull java.util.List<android.hardware.devicestate.DeviceState>);
   }
 
 }
@@ -7125,7 +7161,6 @@ package android.media {
   public final class MediaRouter2 {
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getAllRoutes();
     method @Nullable public String getClientPackageName();
-    method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void setRouteVolume(@NonNull android.media.MediaRoute2Info, int);
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void startScan();
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void stopScan();
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void transfer(@NonNull android.media.MediaRouter2.RoutingController, @NonNull android.media.MediaRoute2Info);
@@ -12329,14 +12364,6 @@ package android.service.carrier {
 
 }
 
-package android.service.chooser {
-
-  @FlaggedApi("android.service.chooser.support_nfc_resolver") public class CustomChoosers {
-    method @FlaggedApi("android.service.chooser.support_nfc_resolver") @NonNull public static android.content.Intent createNfcResolverIntent(@NonNull android.content.Intent, @Nullable CharSequence, @NonNull java.util.List<android.content.pm.ResolveInfo>);
-  }
-
-}
-
 package android.service.cloudsearch {
 
   public abstract class CloudSearchService extends android.app.Service {
@@ -13390,43 +13417,6 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordRejectedResult.Builder setConfidenceLevel(int);
   }
 
-  @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public final class HotwordTrainingAudio implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public android.media.AudioFormat getAudioFormat();
-    method @NonNull public int getAudioType();
-    method @NonNull public byte[] getHotwordAudio();
-    method public int getHotwordOffsetMillis();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordTrainingAudio> CREATOR;
-    field public static final int HOTWORD_OFFSET_UNSET = -1; // 0xffffffff
-  }
-
-  @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final class HotwordTrainingAudio.Builder {
-    ctor public HotwordTrainingAudio.Builder(@NonNull byte[], @NonNull android.media.AudioFormat);
-    method @NonNull public android.service.voice.HotwordTrainingAudio build();
-    method @NonNull public android.service.voice.HotwordTrainingAudio.Builder setAudioFormat(@NonNull android.media.AudioFormat);
-    method @NonNull public android.service.voice.HotwordTrainingAudio.Builder setAudioType(@NonNull int);
-    method @NonNull public android.service.voice.HotwordTrainingAudio.Builder setHotwordAudio(@NonNull byte[]);
-    method @NonNull public android.service.voice.HotwordTrainingAudio.Builder setHotwordOffsetMillis(int);
-  }
-
-  @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public final class HotwordTrainingData implements android.os.Parcelable {
-    method public int describeContents();
-    method public static int getMaxTrainingDataBytes();
-    method public int getTimeoutStage();
-    method @NonNull public java.util.List<android.service.voice.HotwordTrainingAudio> getTrainingAudioList();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordTrainingData> CREATOR;
-  }
-
-  @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final class HotwordTrainingData.Builder {
-    ctor public HotwordTrainingData.Builder();
-    method @NonNull public android.service.voice.HotwordTrainingData.Builder addTrainingAudio(@NonNull android.service.voice.HotwordTrainingAudio);
-    method @NonNull public android.service.voice.HotwordTrainingData build();
-    method @NonNull public android.service.voice.HotwordTrainingData.Builder setTimeoutStage(int);
-    method @NonNull public android.service.voice.HotwordTrainingData.Builder setTrainingAudioList(@NonNull java.util.List<android.service.voice.HotwordTrainingAudio>);
-  }
-
   public interface SandboxedDetectionInitializer {
     method public static int getMaxCustomInitializationStatus();
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
@@ -13466,6 +13456,7 @@ package android.service.voice {
 
   @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public final class VisualQueryDetectedResult implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public byte[] getAccessibilityDetectionData();
     method public static int getMaxSpeakerId();
     method @NonNull public String getPartialQuery();
     method public int getSpeakerId();
@@ -13476,6 +13467,7 @@ package android.service.voice {
   public static final class VisualQueryDetectedResult.Builder {
     ctor public VisualQueryDetectedResult.Builder();
     method @NonNull public android.service.voice.VisualQueryDetectedResult build();
+    method @NonNull public android.service.voice.VisualQueryDetectedResult.Builder setAccessibilityDetectionData(@NonNull byte...);
     method @NonNull public android.service.voice.VisualQueryDetectedResult.Builder setPartialQuery(@NonNull String);
     method @NonNull public android.service.voice.VisualQueryDetectedResult.Builder setSpeakerId(int);
   }
@@ -13513,7 +13505,10 @@ package android.service.voice {
   }
 
   public class VisualQueryDetector {
+    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public void clearAccessibilityDetectionEnabledListener();
     method public void destroy();
+    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public boolean isAccessibilityDetectionEnabled();
+    method @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public void setAccessibilityDetectionEnabledListener(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission(allOf={android.Manifest.permission.CAMERA, android.Manifest.permission.RECORD_AUDIO}) public boolean startRecognition();
     method @RequiresPermission(allOf={android.Manifest.permission.CAMERA, android.Manifest.permission.RECORD_AUDIO}) public boolean stopRecognition();
     method public void updateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory);

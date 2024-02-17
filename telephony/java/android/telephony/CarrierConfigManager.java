@@ -3844,13 +3844,27 @@ public class CarrierConfigManager {
      * and if the 5G state changes to neither 'connected' not 'not_restricted_rrc_idle', the icon
      * will change to reflect the true state.
      *
+     * The value can be overridden by {@link #KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT}
      * @hide
      */
     public static final String KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING =
             "5g_icon_display_secondary_grace_period_string";
 
     /**
-     * Whether device reset all of NR timers when device camped on a network that haven't 5G
+     * The secondary grace periods in seconds to use if NR advanced icon was shown due to connecting
+     * to bands specified in {@link #KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY}.
+     *
+     * The default value is 0, meaning the original value in
+     * {@link #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING} is used. Otherwise, it overrides
+     * the value in {@link #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING}.
+     *
+     * @hide
+     */
+    public static final String KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT =
+            "nr_advanced_bands_secondary_timer_seconds_int";
+
+    /**
+     * Whether device resets all of NR timers when device camped on a network that haven't 5G
      * capability and RRC currently in IDLE state.
      *
      * The default value is false;
@@ -3859,6 +3873,30 @@ public class CarrierConfigManager {
      */
     public static final String KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL =
             "nr_timers_reset_if_non_endc_and_rrc_idle_bool";
+
+    /**
+     * Whether device resets all of NR timers when device is in a voice call and QOS is established.
+     * The default value is false;
+     *
+     * @see #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING
+     * @see #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING
+     *
+     * @hide
+     */
+    public static final String KEY_NR_TIMERS_RESET_ON_VOICE_QOS_BOOL =
+            "nr_timers_reset_on_voice_qos_bool";
+
+    /**
+     * Whether device resets all of NR timers when the PLMN changes.
+     * The default value is false;
+     *
+     * @see #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING
+     * @see #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING
+     *
+     * @hide
+     */
+    public static final String KEY_NR_TIMERS_RESET_ON_PLMN_CHANGE_BOOL =
+            "nr_timers_reset_on_plmn_change_bool";
 
     /**
      * A list of additional NR advanced band would map to
@@ -10688,7 +10726,10 @@ public class CarrierConfigManager {
                         + "not_restricted_rrc_con:5G");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING, "");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
+        sDefaults.putInt(KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT, 0);
         sDefaults.putBoolean(KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL, false);
+        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_VOICE_QOS_BOOL, false);
+        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_PLMN_CHANGE_BOOL, false);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putIntArray(KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY, new int[0]);

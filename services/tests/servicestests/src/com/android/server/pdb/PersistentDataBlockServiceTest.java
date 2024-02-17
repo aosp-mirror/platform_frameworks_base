@@ -17,12 +17,17 @@
 package com.android.server.pdb;
 
 import static com.android.server.pdb.PersistentDataBlockService.DIGEST_SIZE_BYTES;
+import static com.android.server.pdb.PersistentDataBlockService.FRP_CREDENTIAL_RESERVED_SIZE;
+import static com.android.server.pdb.PersistentDataBlockService.FRP_SECRET_MAGIC;
 import static com.android.server.pdb.PersistentDataBlockService.FRP_SECRET_SIZE;
+import static com.android.server.pdb.PersistentDataBlockService.HEADER_SIZE;
 import static com.android.server.pdb.PersistentDataBlockService.MAX_DATA_BLOCK_SIZE;
 import static com.android.server.pdb.PersistentDataBlockService.MAX_FRP_CREDENTIAL_HANDLE_SIZE;
 import static com.android.server.pdb.PersistentDataBlockService.MAX_TEST_MODE_DATA_SIZE;
+import static com.android.server.pdb.PersistentDataBlockService.TEST_MODE_RESERVED_SIZE;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -36,6 +41,7 @@ import static org.mockito.Mockito.when;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -63,6 +69,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 @RunWith(JUnitParamsRunner.class)
 public class PersistentDataBlockServiceTest {
@@ -393,6 +400,68 @@ public class PersistentDataBlockServiceTest {
         // size does not check digest.
         tamperWithMagic();
         assertThat(mInterface.getDataBlockSize()).isEqualTo(0);
+    }
+
+    @Test
+    @Parameters({"false", "true"})
+    public void testPartitionFormat(boolean frpEnabled) throws Exception {
+        setUp(frpEnabled);
+
+        /*
+         * 1. Fill the PDB with a specific value, so we can check regions that weren't touched
+         *    by formatting
+         */
+        FileChannel channel = FileChannel.open(mDataBlockFile.toPath(), StandardOpenOption.WRITE,
+                StandardOpenOption.TRUNCATE_EXISTING);
+        byte[] bufArray = new byte[(int) mPdbService.getBlockDeviceSize()];
+        Arrays.fill(bufArray, (byte) 0x7f);
+        ByteBuffer buf = ByteBuffer.wrap(bufArray);
+        channel.write(buf);
+        channel.close();
+
+        /*
+         * 2. Format it.
+         */
+        mPdbService.formatPartitionLocked(true);
+
+        /*
+         * 3. Check it.
+         */
+        channel = FileChannel.open(mDataBlockFile.toPath(), StandardOpenOption.READ);
+
+        // 3a. Skip the digest and header
+        channel.position(channel.position() + DIGEST_SIZE_BYTES + HEADER_SIZE);
+
+        // 3b. Check the FRP data segment
+        assertContains("FRP data", readData(channel, mPdbService.getMaximumFrpDataSize()).array(),
+                (byte) 0);
+
+        if (frpEnabled) {
+            // 3c. The FRP secret magic & value
+            assertThat(mPdbService.getFrpSecretMagicOffset()).isEqualTo(channel.position());
+            assertThat(readData(channel, FRP_SECRET_MAGIC.length).array()).isEqualTo(
+                    FRP_SECRET_MAGIC);
+
+            assertThat(mPdbService.getFrpSecretDataOffset()).isEqualTo(channel.position());
+            assertContains("FRP secret", readData(channel, FRP_SECRET_SIZE).array(), (byte) 0);
+        }
+
+        // 3d. The test mode data (unmodified by formatPartitionLocked()).
+        assertThat(mPdbService.getTestHarnessModeDataOffset()).isEqualTo(channel.position());
+        assertContains("Test data", readData(channel, TEST_MODE_RESERVED_SIZE).array(),
+                (byte) 0x7f);
+
+        // 3e. The FRP credential segment
+        assertThat(mPdbService.getFrpCredentialDataOffset()).isEqualTo(channel.position());
+        assertContains("FRP credential", readData(channel, FRP_CREDENTIAL_RESERVED_SIZE).array(),
+                (byte) 0);
+
+        // 3f. OEM unlock byte.
+        assertThat(mPdbService.getOemUnlockDataOffset()).isEqualTo(channel.position());
+        assertThat(new byte[]{1}).isEqualTo(readData(channel, 1).array());
+
+        // 3g. EOF
+        assertThat(channel.position()).isEqualTo(channel.size());
     }
 
     @Test
@@ -985,6 +1054,22 @@ public class PersistentDataBlockServiceTest {
             var buffer = ByteBuffer.allocate(size);
             assertThat(ch.read(buffer, position)).isGreaterThan(0);
             return buffer;
+        }
+    }
+
+    @NonNull
+    private static ByteBuffer readData(FileChannel channel, int length) throws IOException {
+        ByteBuffer buf = ByteBuffer.allocate(length);
+        assertThat(channel.read(buf)).isEqualTo(length);
+        buf.flip();
+        assertThat(buf.limit()).isEqualTo(length);
+        return buf;
+    }
+
+    private static void assertContains(String sectionName, byte[] buf, byte expected) {
+        for (int i = 0; i < buf.length; i++) {
+            assertWithMessage(sectionName + " is incorrect at offset " + i)
+                    .that(buf[i]).isEqualTo(expected);
         }
     }
 }

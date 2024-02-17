@@ -192,7 +192,7 @@ public interface AttachedSurfaceControl {
      * {@link WindowManager#registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
      * SurfaceControl, Looper, SurfaceControlInputReceiver)}
      *
-     * @return The SurfaceControlViewHost link token.
+     * @return The {@link InputTransferToken} for the {@link AttachedSurfaceControl}
      * @throws IllegalStateException if the {@link AttachedSurfaceControl} was created with no
      * registered input
      */

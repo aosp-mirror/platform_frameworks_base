@@ -159,6 +159,15 @@ class ConfigurationControllerImpl @Inject constructor(
     override fun isLayoutRtl(): Boolean {
         return layoutDirection == LAYOUT_DIRECTION_RTL
     }
+
+    override fun getNightModeName(): String {
+        return when (uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_YES -> "night"
+            Configuration.UI_MODE_NIGHT_NO -> "day"
+            Configuration.UI_MODE_NIGHT_UNDEFINED -> "undefined"
+            else -> "err"
+        }
+    }
 }
 
 // This could be done with a Collection.filter and Collection.forEach, but Collection.filter

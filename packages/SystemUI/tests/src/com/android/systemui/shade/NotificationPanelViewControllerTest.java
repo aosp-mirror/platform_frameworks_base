@@ -203,6 +203,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(5);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(5);
     }
 
     @Test
@@ -214,6 +218,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
                 /* ambientPadding= */ 0);
 
         when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }
@@ -229,6 +237,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
     }
 
     @Test
@@ -242,6 +254,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(2);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(2);
     }
 
     @Test
@@ -253,6 +269,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
                 /* ambientPadding= */ 0);
 
         when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }

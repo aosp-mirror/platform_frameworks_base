@@ -38,4 +38,9 @@ public class FakeConfigurationController
     public boolean isLayoutRtl() {
         return false;
     }
+
+    @Override
+    public String getNightModeName() {
+        return "undefined";
+    }
 }

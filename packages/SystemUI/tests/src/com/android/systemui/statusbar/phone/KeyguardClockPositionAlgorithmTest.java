@@ -298,7 +298,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
 
     @Test
     public void notifPaddingMakesUpToFullMarginInSplitShade_refactorFlagOff_usesResource() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR);
+        mSetFlagsRule.disableFlags(Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX);
         int keyguardSplitShadeTopMargin = 100;
         int largeScreenHeaderHeightResource = 70;
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
@@ -317,7 +317,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
 
     @Test
     public void notifPaddingMakesUpToFullMarginInSplitShade_refactorFlagOn_usesHelper() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX);
         int keyguardSplitShadeTopMargin = 100;
         int largeScreenHeaderHeightHelper = 50;
         int largeScreenHeaderHeightResource = 70;

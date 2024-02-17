@@ -18,7 +18,7 @@
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import android.content.Context
-import com.android.systemui.Flags.centralizedStatusBarDimensRefactor
+import com.android.systemui.Flags.centralizedStatusBarHeightFix
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
@@ -76,7 +76,7 @@ constructor(
                             getDimensionPixelSize(R.dimen.notification_panel_margin_bottom),
                         marginTop = getDimensionPixelSize(R.dimen.notification_panel_margin_top),
                         marginTopLargeScreen =
-                            if (centralizedStatusBarDimensRefactor()) {
+                            if (centralizedStatusBarHeightFix()) {
                                 largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
                             } else {
                                 getDimensionPixelSize(R.dimen.large_screen_shade_header_height)

@@ -16,6 +16,7 @@
 
 package android.nfc;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -35,6 +36,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
@@ -483,6 +485,25 @@ public final class NfcAdapter {
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC =
             "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
+
+    /**
+     * Intent action to start a NFC resolver activity in a customized share session with list of
+     * {@link ResolveInfo}.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @RequiresPermission(Manifest.permission.SHOW_CUSTOMIZED_RESOLVER)
+    public static final String ACTION_SHOW_NFC_RESOLVER = "android.nfc.action.SHOW_NFC_RESOLVER";
+
+    /**
+     * "Extras" key for an ArrayList of {@link ResolveInfo} records which are to be shown as the
+     * targets in the customized share session.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public static final String EXTRA_RESOLVE_INFOS = "android.nfc.extra.RESOLVE_INFOS";
 
     /**
      * The requested app is correctly added to the Tag intent app preference.

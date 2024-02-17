@@ -813,9 +813,9 @@ public class ZenModeConfig implements Parcelable {
         rt.enabler = parser.getAttributeValue(null, RULE_ATT_ENABLER);
         rt.condition = readConditionXml(parser);
 
-        // all default rules and user created rules updated to zenMode important interruptions
-        if (rt.zenMode != Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+        if (!Flags.modesApi() && rt.zenMode != Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
                 && Condition.isValidId(rt.conditionId, SYSTEM_AUTHORITY)) {
+            // all default rules and user created rules updated to zenMode important interruptions
             Slog.i(TAG, "Updating zenMode of automatic rule " + rt.name);
             rt.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         }

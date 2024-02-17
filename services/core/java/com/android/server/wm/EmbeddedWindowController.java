@@ -178,8 +178,8 @@ class EmbeddedWindowController {
         return true;
     }
 
-    boolean transferToHost(InputTransferToken embeddedWindowToken,
-            WindowState transferToHostWindowState) {
+    boolean transferToHost(@NonNull InputTransferToken embeddedWindowToken,
+            @NonNull WindowState transferToHostWindowState) {
         EmbeddedWindow ew = getByInputTransferToken(embeddedWindowToken);
         if (!isValidTouchGestureParams(transferToHostWindowState, ew)) {
             return false;
@@ -188,7 +188,8 @@ class EmbeddedWindowController {
                 transferToHostWindowState.mInputChannelToken);
     }
 
-    boolean transferToEmbedded(WindowState hostWindowState, InputTransferToken transferToToken) {
+    boolean transferToEmbedded(WindowState hostWindowState,
+            @NonNull InputTransferToken transferToToken) {
         final EmbeddedWindowController.EmbeddedWindow ew = getByInputTransferToken(transferToToken);
         if (!isValidTouchGestureParams(hostWindowState, ew)) {
             return false;

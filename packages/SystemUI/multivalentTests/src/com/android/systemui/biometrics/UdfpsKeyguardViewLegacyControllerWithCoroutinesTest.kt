@@ -210,6 +210,32 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
         }
 
     @Test
+    fun shouldHandleTouchesOnDetach() =
+        testScope.runTest {
+            val shouldHandleTouches by collectLastValue(mUdfpsOverlayInteractor.shouldHandleTouches)
+
+            // GIVEN view is attached + on the keyguard
+            mController.onViewAttached()
+            captureStatusBarStateListeners()
+            sendStatusBarStateChanged(StatusBarState.KEYGUARD)
+            whenever(mView.setPauseAuth(true)).thenReturn(true)
+            whenever(mView.unpausedAlpha).thenReturn(0)
+
+            // WHEN panelViewExpansion changes to expanded
+            val job = mController.listenForBouncerExpansion(this)
+            keyguardBouncerRepository.setPrimaryShow(true)
+            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
+            runCurrent()
+
+            mController.onViewDetached()
+
+            // THEN UDFPS auth is paused and should not handle touches
+            assertThat(mController.shouldPauseAuth()).isTrue()
+            assertThat(shouldHandleTouches!!).isFalse()
+
+            job.cancel()
+        }
+    @Test
     fun fadeFromDialogSuggestedAlpha() =
         testScope.runTest {
             // GIVEN view is attached and status bar expansion is 1f

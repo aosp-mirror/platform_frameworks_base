@@ -18,8 +18,8 @@ package com.android.server.policy;
 
 import static android.hardware.SensorManager.SENSOR_DELAY_FASTEST;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
-import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
-import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER;
+import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.TYPE_EXTERNAL;
 
@@ -478,7 +478,8 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
         }
 
         public static DeviceStateConfiguration createConfig(
-                @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier,
+                @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
+                        MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier,
                 @NonNull String name,
                 @DeviceState.DeviceStateFlags int flags,
                 @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate
@@ -488,7 +489,8 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
         }
 
         public static DeviceStateConfiguration createConfig(
-                @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier,
+                @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
+                        MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier,
                 @NonNull String name,
                 @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate
         ) {
@@ -498,7 +500,8 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
 
         /** Create a configuration with availability predicate **/
         public static DeviceStateConfiguration createConfig(
-                @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier,
+                @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
+                        MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier,
                 @NonNull String name,
                 @DeviceState.DeviceStateFlags int flags,
                 @NonNull Predicate<FoldableDeviceStateProvider> activeStatePredicate,
@@ -543,7 +546,8 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
          * @return device state configuration
          */
         public static DeviceStateConfiguration createTentModeClosedState(
-                @IntRange(from = MINIMUM_DEVICE_STATE, to = MAXIMUM_DEVICE_STATE) int identifier,
+                @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
+                        MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier,
                 @NonNull String name,
                 @DeviceState.DeviceStateFlags int flags,
                 int minClosedAngleDegrees,

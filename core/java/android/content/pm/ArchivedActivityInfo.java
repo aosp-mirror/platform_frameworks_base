@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Slog;
 
 import com.android.internal.util.DataClass;
 
@@ -39,6 +40,7 @@ import java.util.Objects;
 @DataClass(genBuilder = false, genConstructor = false, genSetters = true)
 @FlaggedApi(Flags.FLAG_ARCHIVING)
 public final class ArchivedActivityInfo {
+    private static final String TAG = "ArchivedActivityInfo";
     /** The label for the activity. */
     private @NonNull CharSequence mLabel;
     /** The component name of this activity. */
@@ -138,7 +140,8 @@ public final class ArchivedActivityInfo {
                 bitmap.getByteCount())) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
             return baos.toByteArray();
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to compress bitmap", e);
             return null;
         }
     }
@@ -240,10 +243,10 @@ public final class ArchivedActivityInfo {
     }
 
     @DataClass.Generated(
-            time = 1705615445673L,
+            time = 1708042076897L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/ArchivedActivityInfo.java",
-            inputSignatures = "private @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate @android.annotation.NonNull android.content.ComponentName mComponentName\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mIcon\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mMonochromeIcon\n @android.annotation.NonNull android.content.pm.ArchivedActivityParcel getParcel()\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable)\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable,int)\npublic static  byte[] bytesFromBitmap(android.graphics.Bitmap)\nprivate static  android.graphics.drawable.Drawable drawableFromCompressedBitmap(byte[])\nclass ArchivedActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=false, genConstructor=false, genSetters=true)")
+            inputSignatures = "private static final  java.lang.String TAG\nprivate @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate @android.annotation.NonNull android.content.ComponentName mComponentName\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mIcon\nprivate @android.annotation.Nullable android.graphics.drawable.Drawable mMonochromeIcon\n @android.annotation.NonNull android.content.pm.ArchivedActivityParcel getParcel()\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable)\npublic static  android.graphics.Bitmap drawableToBitmap(android.graphics.drawable.Drawable,int)\npublic static  byte[] bytesFromBitmap(android.graphics.Bitmap)\nprivate static  android.graphics.drawable.Drawable drawableFromCompressedBitmap(byte[])\nclass ArchivedActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=false, genConstructor=false, genSetters=true)")
     @Deprecated
     private void __metadata() {}
 

@@ -554,11 +554,14 @@ interface IActivityManager {
     void bootAnimationComplete();
 
     /**
-     * Used by {@link com.android.systemui.theme.ThemeOverlayController} to notify of color
-     * palette readiness.
+     * Used by {@link com.android.systemui.theme.ThemeOverlayController} to notify when color
+     * palette is ready.
+     *
+     * @param userId The ID of the user where ThemeOverlayController is ready.
+     *
      * @throws RemoteException
      */
-    void setThemeOverlayReady(boolean readiness);
+    void setThemeOverlayReady(int userId);
 
     @UnsupportedAppUsage
     void registerTaskStackListener(in ITaskStackListener listener);

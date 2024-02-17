@@ -293,6 +293,7 @@ public class SurfaceControlViewHost {
         /**
          * Gets an {@link InputTransferToken} which can be used to request focus on the embedded
          * surface or to transfer touch gesture to the embedded surface.
+         *
          * @return the InputTransferToken associated with {@link SurfacePackage} or {@code null} if
          * the embedded hasn't set up its view or doesn't have input.
          * @see WindowManager#transferTouchGesture(InputTransferToken, InputTransferToken)

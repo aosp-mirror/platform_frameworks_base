@@ -99,12 +99,6 @@ public class SplitScreenUtils {
         return taskInfo != null ? taskInfo.userId : -1;
     }
 
-    /** Returns true if package names and user ids match. */
-    public static boolean samePackage(String packageName1, String packageName2,
-            int userId1, int userId2) {
-        return (packageName1 != null && packageName1.equals(packageName2)) && (userId1 == userId2);
-    }
-
     /** Generates a common log message for split screen failures */
     public static String splitFailureMessage(String caller, String reason) {
         return "(" + caller + ") Splitscreen aborted: " + reason;
@@ -142,29 +136,5 @@ public class SplitScreenUtils {
         } else {
             return isLandscape;
         }
-    }
-
-    /** Returns the component from a PendingIntent */
-    @Nullable
-    public static ComponentName getComponent(@Nullable PendingIntent pendingIntent) {
-        if (pendingIntent == null || pendingIntent.getIntent() == null) {
-            return null;
-        }
-        return pendingIntent.getIntent().getComponent();
-    }
-
-    /** Returns the component from a shortcut */
-    @Nullable
-    public static ComponentName getShortcutComponent(@NonNull String packageName, String shortcutId,
-            @NonNull UserHandle user, @NonNull LauncherApps launcherApps) {
-        LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
-        query.setPackage(packageName);
-        query.setShortcutIds(Arrays.asList(shortcutId));
-        query.setQueryFlags(FLAG_MATCH_ALL_KINDS_WITH_ALL_PINNED);
-        List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(query, user);
-        ShortcutInfo info = shortcuts != null && shortcuts.size() > 0
-                ? shortcuts.get(0)
-                : null;
-        return info != null ? info.getActivity() : null;
     }
 }

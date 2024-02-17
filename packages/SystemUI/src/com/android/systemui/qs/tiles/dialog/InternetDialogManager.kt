@@ -15,64 +15,49 @@
  */
 package com.android.systemui.qs.tiles.dialog
 
-import android.content.Context
-import android.os.Handler
 import android.util.Log
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.statusbar.policy.KeyguardStateController
-import java.util.concurrent.Executor
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
 
 private const val TAG = "InternetDialogFactory"
 private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 
 /**
- * Factory to create [InternetDialog] objects.
+ * Factory to create [InternetDialogDelegate] objects.
  */
 @SysUISingleton
-class InternetDialogFactory @Inject constructor(
-    @Main private val handler: Handler,
-    @Background private val executor: Executor,
-    private val internetDialogController: InternetDialogController,
-    private val context: Context,
-    private val uiEventLogger: UiEventLogger,
+class InternetDialogManager @Inject constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
-    private val keyguardStateController: KeyguardStateController
+    private val dialogFactory: InternetDialogDelegate.Factory
 ) {
     companion object {
         private const val INTERACTION_JANK_TAG = "internet"
-        var internetDialog: InternetDialog? = null
+        var dialog: SystemUIDialog? = null
     }
 
-    /** Creates a [InternetDialog]. The dialog will be animated from [view] if it is not null. */
+    /** Creates a [InternetDialogDelegate]. The dialog will be animated from [view] if it is not null. */
     fun create(
         aboveStatusBar: Boolean,
         canConfigMobileData: Boolean,
         canConfigWifi: Boolean,
         view: View?
     ) {
-        if (internetDialog != null) {
+        if (dialog != null) {
             if (DEBUG) {
                 Log.d(TAG, "InternetDialog is showing, do not create it twice.")
             }
             return
         } else {
-            internetDialog = InternetDialog(
-                context, this, internetDialogController,
-                canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger,
-                    dialogTransitionAnimator, handler,
-                executor, keyguardStateController
-            )
+            dialog = dialogFactory.create(
+                    aboveStatusBar, canConfigMobileData, canConfigWifi).createDialog()
             if (view != null) {
                 dialogTransitionAnimator.showFromView(
-                    internetDialog!!, view,
+                        dialog!!, view,
                     animateBackgroundBoundsChange = true,
                     cuj = DialogCuj(
                         InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
@@ -80,7 +65,7 @@ class InternetDialogFactory @Inject constructor(
                     )
                 )
             } else {
-                internetDialog?.show()
+                dialog!!.show()
             }
         }
     }
@@ -89,6 +74,6 @@ class InternetDialogFactory @Inject constructor(
         if (DEBUG) {
             Log.d(TAG, "destroyDialog")
         }
-        internetDialog = null
+        dialog = null
     }
 }

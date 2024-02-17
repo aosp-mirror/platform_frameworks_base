@@ -122,6 +122,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
@@ -906,7 +907,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardBypassController = bypassController;
         mUpdateMonitor = keyguardUpdateMonitor;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
-        lockscreenShadeTransitionController.setShadeViewController(this);
         shadeTransitionController.setShadeViewController(this);
         dynamicPrivacyController.addListener(this::onDynamicPrivacyChanged);
         quickSettingsController.setExpansionHeightListener(this::onQsSetExpansionHeightCalled);
@@ -1826,7 +1826,14 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     /** Returns space between top of lock icon and bottom of NotificationStackScrollLayout. */
     private float getLockIconPadding() {
         float lockIconPadding = 0f;
-        if (mLockIconViewController.getTop() != 0f) {
+        if (DeviceEntryUdfpsRefactor.isEnabled()) {
+            View deviceEntryIconView = mKeyguardViewConfigurator.getKeyguardRootView()
+                    .findViewById(R.id.device_entry_icon_view);
+            if (deviceEntryIconView != null) {
+                lockIconPadding = mNotificationStackScrollLayoutController.getBottom()
+                    - deviceEntryIconView.getTop();
+            }
+        } else if (mLockIconViewController.getTop() != 0f) {
             lockIconPadding = mNotificationStackScrollLayoutController.getBottom()
                     - mLockIconViewController.getTop();
         }
@@ -4156,8 +4163,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mFixedDuration = NO_FIXED_DURATION;
     }
 
-    @Override
-    public boolean postToView(Runnable action) {
+    boolean postToView(Runnable action) {
         return mView.post(action);
     }
 

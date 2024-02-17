@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.bubbles.bar;
 
+import static android.view.View.ALPHA;
 import static android.view.View.SCALE_X;
 import static android.view.View.SCALE_Y;
 import static android.view.View.TRANSLATION_X;
@@ -69,6 +70,7 @@ public class BubbleBarAnimationHelper {
     private static final float EXPANDED_VIEW_IN_TARGET_SCALE = 0.2f;
     private static final float EXPANDED_VIEW_DRAG_SCALE = 0.4f;
     private static final float DISMISS_VIEW_SCALE = 1.25f;
+    private static final int HANDLE_ALPHA_ANIMATION_DURATION = 100;
 
     /** Spring config for the expanded view scale-in animation. */
     private final PhysicsAnimator.SpringConfig mScaleInSpringConfig =
@@ -248,15 +250,22 @@ public class BubbleBarAnimationHelper {
             return;
         }
         setDragPivot(bbev);
-        AnimatorSet animatorSet = new AnimatorSet();
         // Corner radius gets scaled, apply the reverse scale to ensure we have the desired radius
         final float cornerRadius = bbev.getDraggedCornerRadius() / EXPANDED_VIEW_DRAG_SCALE;
-        animatorSet.playTogether(
+
+        AnimatorSet contentAnim = new AnimatorSet();
+        contentAnim.playTogether(
                 ObjectAnimator.ofFloat(bbev, SCALE_X, EXPANDED_VIEW_DRAG_SCALE),
                 ObjectAnimator.ofFloat(bbev, SCALE_Y, EXPANDED_VIEW_DRAG_SCALE),
                 ObjectAnimator.ofFloat(bbev, CORNER_RADIUS, cornerRadius)
         );
-        animatorSet.setDuration(EXPANDED_VIEW_DRAG_ANIMATION_DURATION).setInterpolator(EMPHASIZED);
+        contentAnim.setDuration(EXPANDED_VIEW_DRAG_ANIMATION_DURATION).setInterpolator(EMPHASIZED);
+
+        ObjectAnimator handleAnim = ObjectAnimator.ofFloat(bbev.getHandleView(), ALPHA, 0f)
+                .setDuration(HANDLE_ALPHA_ANIMATION_DURATION);
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(contentAnim, handleAnim);
         animatorSet.addListener(new DragAnimatorListenerAdapter(bbev));
         startNewDragAnimation(animatorSet);
     }
@@ -297,15 +306,21 @@ public class BubbleBarAnimationHelper {
         }
         Point restPoint = getExpandedViewRestPosition(getExpandedViewSize());
 
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(
+        AnimatorSet contentAnim = new AnimatorSet();
+        contentAnim.playTogether(
                 ObjectAnimator.ofFloat(bbev, X, restPoint.x),
                 ObjectAnimator.ofFloat(bbev, Y, restPoint.y),
                 ObjectAnimator.ofFloat(bbev, SCALE_X, 1f),
                 ObjectAnimator.ofFloat(bbev, SCALE_Y, 1f),
                 ObjectAnimator.ofFloat(bbev, CORNER_RADIUS, bbev.getRestingCornerRadius())
         );
-        animatorSet.setDuration(EXPANDED_VIEW_ANIMATE_TO_REST_DURATION).setInterpolator(EMPHASIZED);
+        contentAnim.setDuration(EXPANDED_VIEW_ANIMATE_TO_REST_DURATION).setInterpolator(EMPHASIZED);
+
+        ObjectAnimator handleAlphaAnim = ObjectAnimator.ofFloat(bbev.getHandleView(), ALPHA, 1f)
+                .setDuration(HANDLE_ALPHA_ANIMATION_DURATION);
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(contentAnim, handleAlphaAnim);
         animatorSet.addListener(new DragAnimatorListenerAdapter(bbev) {
             @Override
             public void onAnimationEnd(Animator animation) {
