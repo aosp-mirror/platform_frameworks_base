@@ -2413,6 +2413,16 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         AppWidgetProviderInfo info = createPartialProviderInfo(providerId, ri, existing);
+
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.disablePrivateSpaceItemsOnHome()) {
+            // Do not add widget providers for profiles with items restricted on home screen.
+            if (mUserManager
+                    .getUserProperties(info.getProfile()).areItemsRestrictedOnHomeScreen()) {
+                return false;
+            }
+        }
+
         if (info != null) {
             if (existing != null) {
                 if (existing.zombie && !mSafeMode) {

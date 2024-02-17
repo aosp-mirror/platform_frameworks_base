@@ -45,6 +45,8 @@ import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
+import android.multiuser.Flags;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -361,14 +363,13 @@ public final class BroadcastHelper {
         final UserInfo parent = ums.getProfileParent(userId);
         final int launcherUserId = (parent != null) ? parent.id : userId;
         final ComponentName launcherComponent = snapshot.getDefaultHomeActivity(launcherUserId);
-        if (launcherComponent != null) {
+        if (launcherComponent != null && canLauncherAccessProfile(launcherComponent, userId)) {
             Intent launcherIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
                     .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
                     .putExtra(Intent.EXTRA_USER, UserHandle.of(userId))
                     .setPackage(launcherComponent.getPackageName());
             mContext.sendBroadcastAsUser(launcherIntent, UserHandle.of(launcherUserId));
         }
-        // TODO(b/122900055) Change/Remove this and replace with new permission role.
         if (appPredictionServicePackage != null) {
             Intent predictorIntent = new Intent(PackageInstaller.ACTION_SESSION_COMMITTED)
                     .putExtra(PackageInstaller.EXTRA_SESSION, sessionInfo)
@@ -376,6 +377,36 @@ public final class BroadcastHelper {
                     .setPackage(appPredictionServicePackage);
             mContext.sendBroadcastAsUser(predictorIntent, UserHandle.of(launcherUserId));
         }
+    }
+
+    /**
+     * A Profile is accessible to launcher in question if:
+     * - It's not hidden for API visibility.
+     * - Hidden, but launcher application has either
+     *      {@link Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL} or
+     *      {@link Manifest.permission.ACCESS_HIDDEN_PROFILES}
+     *   granted.
+     */
+    boolean canLauncherAccessProfile(ComponentName launcherComponent, int userId) {
+        if (android.os.Flags.allowPrivateProfile()
+                && Flags.enablePermissionToAccessHiddenProfiles()) {
+            if (mUmInternal.getUserProperties(userId).getProfileApiVisibility()
+                    != UserProperties.PROFILE_API_VISIBILITY_HIDDEN) {
+                return true;
+            }
+            if (mContext.getPackageManager().checkPermission(
+                            Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL,
+                            launcherComponent.getPackageName())
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+            // TODO(b/122900055) Change/Remove this and replace with new permission role.
+            return mContext.getPackageManager().checkPermission(
+                            Manifest.permission.ACCESS_HIDDEN_PROFILES,
+                            launcherComponent.getPackageName())
+                        == PackageManager.PERMISSION_GRANTED;
+        }
+        return true;
     }
 
     void sendPreferredActivityChangedBroadcast(int userId) {
