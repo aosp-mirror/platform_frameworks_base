@@ -69,6 +69,8 @@ package android {
     field public static final String BIND_MUSIC_RECOGNITION_SERVICE = "android.permission.BIND_MUSIC_RECOGNITION_SERVICE";
     field public static final String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
     field public static final String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String BIND_ON_DEVICE_INTELLIGENCE_SERVICE = "android.permission.BIND_ON_DEVICE_INTELLIGENCE_SERVICE";
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String BIND_ON_DEVICE_TRUSTED_SERVICE = "android.permission.BIND_ON_DEVICE_TRUSTED_SERVICE";
     field public static final String BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE = "android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE";
     field public static final String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
     field public static final String BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE = "android.permission.BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE";
@@ -403,6 +405,7 @@ package android {
     field public static final String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
     field @FlaggedApi("android.hardware.biometrics.face_background_authentication") public static final String USE_BACKGROUND_FACE_AUTHENTICATION = "android.permission.USE_BACKGROUND_FACE_AUTHENTICATION";
     field public static final String USE_COLORIZED_NOTIFICATIONS = "android.permission.USE_COLORIZED_NOTIFICATIONS";
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String USE_ON_DEVICE_INTELLIGENCE = "android.permission.USE_ON_DEVICE_INTELLIGENCE";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
     field public static final String UWB_PRIVILEGED = "android.permission.UWB_PRIVILEGED";
     field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";

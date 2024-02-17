@@ -329,8 +329,9 @@ public class GrammaticalInflectionService extends SystemService {
 
     private void checkCallerIsSystem() {
         int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID && callingUid != Process.SHELL_UID) {
-            throw new SecurityException("Caller is not system and shell.");
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.SHELL_UID
+                && callingUid != Process.ROOT_UID) {
+            throw new SecurityException("Caller is not system, shell and root.");
         }
     }
 
