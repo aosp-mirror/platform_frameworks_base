@@ -237,9 +237,9 @@ public class BackgroundActivityStartController {
         private final boolean mCallingUidHasAnyVisibleWindow;
         private final @ActivityManager.ProcessState int mCallingUidProcState;
         private final boolean mIsCallingUidPersistentSystemProcess;
-        private final BackgroundStartPrivileges mBalAllowedByPiSender;
-        private final BackgroundStartPrivileges mBalAllowedByPiCreatorWithHardening;
-        private final BackgroundStartPrivileges mBalAllowedByPiCreator;
+        final BackgroundStartPrivileges mBalAllowedByPiSender;
+        final BackgroundStartPrivileges mBalAllowedByPiCreatorWithHardening;
+        final BackgroundStartPrivileges mBalAllowedByPiCreator;
         private final String mRealCallingPackage;
         private final int mRealCallingUid;
         private final int mRealCallingPid;
@@ -253,12 +253,12 @@ public class BackgroundActivityStartController {
         private final WindowProcessController mRealCallerApp;
         private final boolean mIsCallForResult;
         private final ActivityOptions mCheckedOptions;
-        private final String mAutoOptInReason;
+        final String mAutoOptInReason;
         private final boolean mAutoOptInCaller;
         private BalVerdict mResultForCaller;
         private BalVerdict mResultForRealCaller;
 
-        private BalState(int callingUid, int callingPid, final String callingPackage,
+        @VisibleForTesting BalState(int callingUid, int callingPid, final String callingPackage,
                  int realCallingUid, int realCallingPid,
                  WindowProcessController callerApp,
                  PendingIntentRecord originatingPendingIntent,
@@ -425,7 +425,7 @@ public class BackgroundActivityStartController {
             return mRealCallingUid != NO_PROCESS_UID;
         }
 
-        private boolean isPendingIntent() {
+        boolean isPendingIntent() {
             return mOriginatingPendingIntent != null && hasRealCaller();
         }
 
@@ -536,6 +536,11 @@ public class BackgroundActivityStartController {
         public boolean realCallerExplicitOptInOrOut() {
             return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
                     != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+        }
+
+        @Override
+        public String toString() {
+            return dump();
         }
     }
 
@@ -986,7 +991,7 @@ public class BackgroundActivityStartController {
      * String, int, boolean, boolean, boolean, long, long, long)} for details on the
      * exceptions.
      */
-    private BalVerdict checkProcessAllowsBal(WindowProcessController app,
+    @VisibleForTesting BalVerdict checkProcessAllowsBal(WindowProcessController app,
             BalState state) {
         if (app == null) {
             return BalVerdict.BLOCK;
