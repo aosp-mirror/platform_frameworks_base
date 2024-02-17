@@ -119,7 +119,7 @@ public class LegacyNotificationIconAreaControllerImplTest extends SysuiTestCase 
 
     @Test
     public void testAppearResetsTranslation() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL);
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
         mController.setupAodIcons(mAodIcons);
         when(mDozeParameters.shouldControlScreenOff()).thenReturn(false);
         mController.appearAodIcons();
