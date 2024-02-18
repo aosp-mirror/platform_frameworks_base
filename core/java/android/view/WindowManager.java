@@ -93,8 +93,12 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.ActivityTaskManager;
+import android.app.ActivityThread;
 import android.app.KeyguardManager;
 import android.app.Presentation;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -1416,23 +1420,71 @@ public interface WindowManager extends ViewManager {
     public static final String PARCEL_KEY_SHORTCUTS_ARRAY = "shortcuts_array";
 
     /**
-     * Whether the device supports the WindowManager Extensions.
-     * OEMs can enable this by having their device config to inherit window_extensions.mk, such as:
+     * Whether the WindowManager Extensions - Activity Embedding feature should be guarded by
+     * the app's target SDK on Android 15.
+     *
+     * WindowManager Extensions are only required for foldable and large screen before Android 15,
+     * so we want to guard the Activity Embedding feature since it can have app compat impact on
+     * devices with a compact size display.
+     *
+     * <p>If {@code true}, the feature is only enabled if the app's target SDK is Android 15 or
+     * above.
+     *
+     * <p>If {@code false}, the feature is enabled for all apps.
+     *
+     * <p>The default value is {@code true}. OEMs can set to {@code false} by having their device
+     * config to inherit window_extensions.mk. This is also required for large screen devices.
      * <pre>
      * $(call inherit-product, $(SRC_TARGET_DIR)/product/window_extensions.mk)
      * </pre>
+     *
      * @hide
      */
-    boolean WINDOW_EXTENSIONS_ENABLED =
+    boolean ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15 = SystemProperties.getBoolean(
+            "persist.wm.extensions.activity_embedding_guard_with_android_15", true);
+
+    /**
+     * For devices with {@link #ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15} as {@code true},
+     * the Activity Embedding feature is enabled if the app's target SDK is Android 15+.
+     *
+     * @see #ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    long ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15 = 306666082L;
+
+    /**
+     * Whether the device contains the WindowManager Extensions shared library.
+     * This is enabled for all devices through window_extensions_base.mk, but can be dropped if the
+     * device doesn't support multi window.
+     *
+     * <p>Note: Large screen devices must also inherit window_extensions.mk to enable the Activity
+     * Embedding feature by default for all apps.
+     *
+     * @see #ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15
+     * @hide
+     */
+    boolean HAS_WINDOW_EXTENSIONS_ON_DEVICE =
             SystemProperties.getBoolean("persist.wm.extensions.enabled", false);
 
     /**
-     * @see #WINDOW_EXTENSIONS_ENABLED
+     * Whether the WindowManager Extensions are enabled.
+     * If {@code false}, the WM Jetpack will report most of its features as disabled.
+     * @see #HAS_WINDOW_EXTENSIONS_ON_DEVICE
      * @hide
      */
     @TestApi
     static boolean hasWindowExtensionsEnabled() {
-        return WINDOW_EXTENSIONS_ENABLED;
+        return HAS_WINDOW_EXTENSIONS_ON_DEVICE
+                && ActivityTaskManager.supportsMultiWindow(ActivityThread.currentApplication())
+                // Since enableWmExtensionsForAllFlag, HAS_WINDOW_EXTENSIONS_ON_DEVICE is now true
+                // on all devices by default as a build file property.
+                // Until finishing flag ramp up, only return true when
+                // ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15 is false, which is set per device by
+                // OEMs.
+                && (Flags.enableWmExtensionsForAllFlag()
+                || !ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15);
     }
 
     /**

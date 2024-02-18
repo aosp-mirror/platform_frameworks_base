@@ -400,7 +400,7 @@ public class ZygoteInit {
         // WindowManager Extensions is an optional shared library that is required for WindowManager
         // Jetpack to fully function. Since it is a widely used library, preload it to improve apps
         // startup performance.
-        if (WindowManager.hasWindowExtensionsEnabled()) {
+        if (WindowManager.HAS_WINDOW_EXTENSIONS_ON_DEVICE) {
             final String systemExtFrameworkPath =
                     new File(Environment.getSystemExtDirectory(), "framework").getPath();
             libs.add(new SharedLibraryInfo(
