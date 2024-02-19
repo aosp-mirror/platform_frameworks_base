@@ -1191,6 +1191,7 @@ final class AccessibilityController {
                 private boolean mShown;
                 private boolean mLastSurfaceShown;
                 private int mAlpha;
+                private int mPreviousAlpha;
 
                 private volatile boolean mInvalidated;
 
@@ -1326,6 +1327,7 @@ final class AccessibilityController {
                     // using WindowManagerGlobalLock. Grab copies of these values before
                     // drawing on the canvas so that drawing can be performed outside of the lock.
                     int alpha;
+                    boolean redrawBounds;
                     Rect drawingRect = null;
                     Region drawingBounds = null;
                     synchronized (mService.mGlobalLock) {
@@ -1343,7 +1345,13 @@ final class AccessibilityController {
                         mInvalidated = false;
 
                         alpha = mAlpha;
-                        if (alpha > 0) {
+                        // For b/325863281, we should ensure the drawn border path is cleared when
+                        // alpha = 0. Therefore, we cache the last used alpha when drawing as
+                        // mPreviousAlpha and check it here. If mPreviousAlpha > 0, which means
+                        // the border is showing now, then we should still redraw the clear path
+                        // on the canvas so the border is cleared.
+                        redrawBounds = mAlpha > 0 || mPreviousAlpha > 0;
+                        if (redrawBounds) {
                             drawingBounds = new Region(mBounds);
                             // Empty dirty rectangle means unspecified.
                             if (mDirtyRect.isEmpty()) {
@@ -1360,7 +1368,7 @@ final class AccessibilityController {
 
                     final boolean showSurface;
                     // Draw without holding WindowManagerGlobalLock.
-                    if (alpha > 0) {
+                    if (redrawBounds) {
                         Canvas canvas = null;
                         try {
                             canvas = mSurface.lockCanvas(drawingRect);
@@ -1374,10 +1382,10 @@ final class AccessibilityController {
                         mPaint.setAlpha(alpha);
                         canvas.drawPath(drawingBounds.getBoundaryPath(), mPaint);
                         mSurface.unlockCanvasAndPost(canvas);
-                        showSurface = true;
-                    } else {
-                        showSurface = false;
+                        mPreviousAlpha = alpha;
                     }
+
+                    showSurface = alpha > 0;
 
                     if (showSurface && !mLastSurfaceShown) {
                         mTransaction.show(mSurfaceControl).apply();
