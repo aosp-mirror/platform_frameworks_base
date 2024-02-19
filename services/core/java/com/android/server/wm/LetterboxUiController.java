@@ -52,7 +52,6 @@ import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_FULLSCREEN
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_SPLIT_SCREEN;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
@@ -1369,23 +1368,25 @@ final class LetterboxUiController {
      *
      * <p>Conditions that needs to be met:
      * <ul>
-     *   <li>Activity is portrait-only.
-     *   <li>Fullscreen window in landscape device orientation.
+     *   <li>Windowing mode is fullscreen.
      *   <li>Horizontal Reachability is enabled.
-     *   <li>Activity fills parent vertically.
+     *   <li>First top opaque activity fills parent vertically, but not horizontally.
      * </ul>
      */
     private boolean isHorizontalReachabilityEnabled(Configuration parentConfiguration) {
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
+        final Rect opaqueActivityBounds = hasInheritedLetterboxBehavior()
+                ? mFirstOpaqueActivityBeneath.getScreenResolvedBounds()
+                : mActivityRecord.getScreenResolvedBounds();
         return mLetterboxConfiguration.getIsHorizontalReachabilityEnabled()
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
-                && (parentConfiguration.orientation == ORIENTATION_LANDSCAPE
-                        && mActivityRecord.getOrientationForReachability() == ORIENTATION_PORTRAIT)
                 // Check whether the activity fills the parent vertically.
                 && parentConfiguration.windowConfiguration.getAppBounds().height()
-                        <= mActivityRecord.getScreenResolvedBounds().height();
+                        <= opaqueActivityBounds.height()
+                && parentConfiguration.windowConfiguration.getAppBounds().width()
+                        > opaqueActivityBounds.width();
     }
 
     @VisibleForTesting
@@ -1402,23 +1403,25 @@ final class LetterboxUiController {
      *
      * <p>Conditions that needs to be met:
      * <ul>
-     *   <li>Activity is landscape-only.
-     *   <li>Fullscreen window in portrait device orientation.
+     *   <li>Windowing mode is fullscreen.
      *   <li>Vertical Reachability is enabled.
-     *   <li>Activity fills parent horizontally.
+     *   <li>First top opaque activity fills parent horizontally but not vertically.
      * </ul>
      */
     private boolean isVerticalReachabilityEnabled(Configuration parentConfiguration) {
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
+        final Rect opaqueActivityBounds = hasInheritedLetterboxBehavior()
+                ? mFirstOpaqueActivityBeneath.getScreenResolvedBounds()
+                : mActivityRecord.getScreenResolvedBounds();
         return mLetterboxConfiguration.getIsVerticalReachabilityEnabled()
                 && parentConfiguration.windowConfiguration.getWindowingMode()
                         == WINDOWING_MODE_FULLSCREEN
-                && (parentConfiguration.orientation == ORIENTATION_PORTRAIT
-                        && mActivityRecord.getOrientationForReachability() == ORIENTATION_LANDSCAPE)
                 // Check whether the activity fills the parent horizontally.
-                && parentConfiguration.windowConfiguration.getBounds().width()
-                        == mActivityRecord.getScreenResolvedBounds().width();
+                && parentConfiguration.windowConfiguration.getAppBounds().width()
+                        <= opaqueActivityBounds.width()
+                && parentConfiguration.windowConfiguration.getAppBounds().height()
+                        > opaqueActivityBounds.height();
     }
 
     @VisibleForTesting
