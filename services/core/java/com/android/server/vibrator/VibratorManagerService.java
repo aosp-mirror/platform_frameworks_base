@@ -2220,9 +2220,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             // only cancel background vibrations.
             IBinder deathBinder = commonOptions.background ? VibratorManagerService.this
                     : mShellCallbacksToken;
-            HalVibration vib = vibrateWithPermissionCheck(Binder.getCallingUid(),
-                    Context.DEVICE_ID_DEFAULT, SHELL_PACKAGE_NAME, combined, attrs,
-                    commonOptions.description, deathBinder);
+            int uid = Binder.getCallingUid();
+            // Resolve the package name for the client based on the process UID, to cover cases like
+            // rooted shell clients using ROOT_UID.
+            String resolvedPackageName = AppOpsManager.resolvePackageName(uid, SHELL_PACKAGE_NAME);
+            HalVibration vib = vibrateWithPermissionCheck(uid, Context.DEVICE_ID_DEFAULT,
+                    resolvedPackageName, combined, attrs, commonOptions.description, deathBinder);
             maybeWaitOnVibration(vib, commonOptions);
         }
 
