@@ -39,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 
 import static org.junit.Assert.assertEquals;
@@ -386,6 +387,24 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 info.logicalDensityDpi, info.physicalXDpi, info.physicalYDpi);
         assertTrue(displayPolicy.shouldKeepCurrentDecorInsets());
         // The current insets are restored from cache directly.
+        assertEquals(prevConfigFrame, displayPolicy.getDecorInsetsInfo(info.rotation,
+                info.logicalWidth, info.logicalHeight).mConfigFrame);
+
+        // If screen is not fully turned on, then the cache should be preserved.
+        displayPolicy.screenTurnedOff();
+        final TransitionController transitionController = mDisplayContent.mTransitionController;
+        spyOn(transitionController);
+        doReturn(true).when(transitionController).isCollecting();
+        doReturn(Integer.MAX_VALUE).when(transitionController).getCollectingTransitionId();
+        // Make CachedDecorInsets.canPreserve return false.
+        displayPolicy.physicalDisplayUpdated();
+        assertFalse(displayPolicy.shouldKeepCurrentDecorInsets());
+        displayPolicy.getDecorInsetsInfo(info.rotation, info.logicalWidth, info.logicalHeight)
+                .mConfigFrame.offset(1, 1);
+        // Even if CachedDecorInsets.canPreserve returns false, the cache won't be cleared.
+        displayPolicy.updateDecorInsetsInfo();
+        // Successful to restore from cache.
+        displayPolicy.updateCachedDecorInsets();
         assertEquals(prevConfigFrame, displayPolicy.getDecorInsetsInfo(info.rotation,
                 info.logicalWidth, info.logicalHeight).mConfigFrame);
     }
