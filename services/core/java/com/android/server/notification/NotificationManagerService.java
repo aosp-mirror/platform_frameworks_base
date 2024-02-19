@@ -5721,6 +5721,14 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        @Condition.State
+        public int getAutomaticZenRuleState(@NonNull String id) {
+            Objects.requireNonNull(id, "id is null");
+            enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRuleState");
+            return mZenModeHelper.getAutomaticZenRuleState(id);
+        }
+
+        @Override
         public void setAutomaticZenRuleState(String id, Condition condition) {
             Objects.requireNonNull(id, "id is null");
             Objects.requireNonNull(condition, "Condition is null");

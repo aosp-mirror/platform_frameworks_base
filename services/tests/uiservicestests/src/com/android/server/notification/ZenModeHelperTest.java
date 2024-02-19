@@ -5316,11 +5316,53 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ZenRule rule = new ZenRule();
         rule.pkg = pkg;
         rule.creationTime = createdAt.toEpochMilli();
+        rule.enabled = true;
         rule.deletionInstant = deletedAt;
         // Plus stuff so that isValidAutomaticRule() passes
         rule.name = "A rule from " + pkg + " created on " + createdAt;
         rule.conditionId = Uri.parse(rule.name);
         return rule;
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void getAutomaticZenRuleState_ownedRule_returnsRuleState() {
+        String id = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
+                new AutomaticZenRule.Builder("Rule", CONDITION_ID)
+                        .setConfigurationActivity(
+                                new ComponentName(mContext.getPackageName(), "Blah"))
+                        .build(),
+                UPDATE_ORIGIN_APP, "reasons", CUSTOM_PKG_UID);
+
+        // Null condition -> STATE_FALSE
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(id)).isEqualTo(Condition.STATE_FALSE);
+
+        mZenModeHelper.setAutomaticZenRuleState(id, CONDITION_TRUE, UPDATE_ORIGIN_APP,
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(id)).isEqualTo(Condition.STATE_TRUE);
+
+        mZenModeHelper.setAutomaticZenRuleState(id, CONDITION_FALSE, UPDATE_ORIGIN_APP,
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(id)).isEqualTo(Condition.STATE_FALSE);
+
+        mZenModeHelper.removeAutomaticZenRule(id, UPDATE_ORIGIN_APP, "", CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(id)).isEqualTo(Condition.STATE_UNKNOWN);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void getAutomaticZenRuleState_notOwnedRule_returnsStateUnknown() {
+        // Assume existence of a system-owned rule that is currently ACTIVE.
+        ZenRule systemRule = newZenRule("android", Instant.now(), null);
+        systemRule.zenMode = ZEN_MODE_ALARMS;
+        systemRule.condition = new Condition(systemRule.conditionId, "on", Condition.STATE_TRUE);
+        ZenModeConfig config = mZenModeHelper.mConfig.copy();
+        config.automaticRules.put("systemRule", systemRule);
+        mZenModeHelper.setConfig(config, null, UPDATE_ORIGIN_INIT, "", Process.SYSTEM_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_ALARMS);
+
+        assertThat(mZenModeHelper.getAutomaticZenRuleState("systemRule")).isEqualTo(
+                Condition.STATE_UNKNOWN);
     }
 
     @Test
