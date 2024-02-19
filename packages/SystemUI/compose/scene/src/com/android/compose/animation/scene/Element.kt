@@ -29,13 +29,17 @@ import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.layout.IntermediateMeasureScope
+import androidx.compose.ui.layout.ApproachLayoutModifierNode
+import androidx.compose.ui.layout.ApproachMeasureScope
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.Placeable
-import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
@@ -91,23 +95,7 @@ internal fun Modifier.element(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     key: ElementKey,
-): Modifier {
-    return this.then(ElementModifier(layoutImpl, scene, key))
-        // TODO(b/311132415): Move this into ElementNode once we can create a delegate
-        // IntermediateLayoutModifierNode.
-        .intermediateLayout { measurable, constraints ->
-            // TODO(b/311132415): No need to fetch the element and sceneState from the map anymore
-            // once this is merged into ElementNode.
-            val element = layoutImpl.elements.getValue(key)
-            val sceneState = element.sceneStates.getValue(scene.key)
-
-            val placeable = measure(layoutImpl, scene, element, sceneState, measurable, constraints)
-            layout(placeable.width, placeable.height) {
-                place(layoutImpl, scene, element, sceneState, placeable, placementScope = this)
-            }
-        }
-        .testTag(key.testTag)
-}
+): Modifier = this.then(ElementModifier(layoutImpl, scene, key)).testTag(key.testTag)
 
 /**
  * An element associated to [ElementNode]. Note that this element does not support updates as its
@@ -129,7 +117,7 @@ internal class ElementNode(
     private var layoutImpl: SceneTransitionLayoutImpl,
     private var scene: Scene,
     private var key: ElementKey,
-) : Modifier.Node(), DrawModifierNode {
+) : Modifier.Node(), DrawModifierNode, ApproachLayoutModifierNode {
     private var _element: Element? = null
     private val element: Element
         get() = _element!!
@@ -195,6 +183,31 @@ internal class ElementNode(
 
         addNodeToSceneState()
         maybePruneMaps(layoutImpl, prevElement, prevSceneState)
+    }
+
+    override fun isMeasurementApproachComplete(lookaheadSize: IntSize): Boolean {
+        // TODO(b/324191441): Investigate whether making this check more complex (checking if this
+        // element is shared or transformed) would lead to better performance.
+        return layoutImpl.state.currentTransition == null
+    }
+
+    override fun Placeable.PlacementScope.isPlacementApproachComplete(
+        lookaheadCoordinates: LayoutCoordinates
+    ): Boolean {
+        // TODO(b/324191441): Investigate whether making this check more complex (checking if this
+        // element is shared or transformed) would lead to better performance.
+        return layoutImpl.state.currentTransition == null
+    }
+
+    @ExperimentalComposeUiApi
+    override fun ApproachMeasureScope.approachMeasure(
+        measurable: Measurable,
+        constraints: Constraints,
+    ): MeasureResult {
+        val placeable = measure(layoutImpl, scene, element, sceneState, measurable, constraints)
+        return layout(placeable.width, placeable.height) {
+            place(layoutImpl, scene, element, sceneState, placeable, placementScope = this)
+        }
     }
 
     override fun ContentDrawScope.draw() {
@@ -368,7 +381,7 @@ private fun elementAlpha(
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
-private fun IntermediateMeasureScope.measure(
+private fun ApproachMeasureScope.measure(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
@@ -431,7 +444,7 @@ private fun getDrawScale(
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
-private fun IntermediateMeasureScope.place(
+private fun ApproachMeasureScope.place(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
@@ -439,6 +452,8 @@ private fun IntermediateMeasureScope.place(
     placeable: Placeable,
     placementScope: Placeable.PlacementScope,
 ) {
+    this as LookaheadScope
+
     with(placementScope) {
         // Update the offset (relative to the SceneTransitionLayout) this element has in this scene
         // when idle.
