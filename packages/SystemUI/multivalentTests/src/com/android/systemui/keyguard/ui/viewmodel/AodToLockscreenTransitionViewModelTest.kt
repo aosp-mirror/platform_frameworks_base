@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,6 +43,7 @@ class AodToLockscreenTransitionViewModelTest : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
     val repository = kosmos.fakeKeyguardTransitionRepository
+    val shadeRepository = kosmos.fakeShadeRepository
     val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
     val underTest = kosmos.aodToLockscreenTransitionViewModel
 
@@ -56,6 +58,38 @@ class AodToLockscreenTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(0.6f))
             repository.sendTransitionStep(step(1f))
             deviceEntryParentViewAlpha.forEach { assertThat(it).isEqualTo(1f) }
+        }
+
+    @Test
+    fun notificationAlpha_whenShadeIsExpanded_equalsOne() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.notificationAlpha)
+
+            shadeRepository.setQsExpansion(0.5f)
+            runCurrent()
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(alpha).isEqualTo(1f)
+            repository.sendTransitionStep(step(0.5f))
+            assertThat(alpha).isEqualTo(1f)
+            repository.sendTransitionStep(step(1f))
+            assertThat(alpha).isEqualTo(1f)
+        }
+
+    @Test
+    fun notificationAlpha_whenShadeIsNotExpanded_usesTransitionValue() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.notificationAlpha)
+
+            shadeRepository.setQsExpansion(0f)
+            runCurrent()
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(alpha).isEqualTo(0f)
+            repository.sendTransitionStep(step(0.5f))
+            assertThat(alpha).isEqualTo(0.5f)
+            repository.sendTransitionStep(step(1f))
+            assertThat(alpha).isEqualTo(1f)
         }
 
     @Test
