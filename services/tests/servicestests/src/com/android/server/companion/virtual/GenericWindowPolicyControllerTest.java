@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.WindowConfiguration;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.VirtualDeviceManager;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -712,6 +713,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -732,6 +734,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -753,6 +756,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -774,6 +778,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ Collections.singleton(blockedComponent),
@@ -795,6 +800,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ false,
                 /* activityPolicyExemptions= */ Collections.singleton(allowedComponent),
@@ -816,6 +822,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -837,6 +844,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -858,6 +866,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
@@ -880,6 +889,7 @@ public class GenericWindowPolicyControllerTest {
         return new GenericWindowPolicyController(
                 0,
                 0,
+                AttributionSource.myAttributionSource(),
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
