@@ -158,7 +158,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     @Override
     public void showNotification(@NonNull NotificationEntry entry) {
         mLogger.logShowNotification(entry);
-        addEntry(entry);
+
+        // Add new entry and begin managing it
+        HeadsUpEntry headsUpEntry = createHeadsUpEntry();
+        headsUpEntry.setEntry(entry);
+        mHeadsUpEntryMap.put(entry.getKey(), headsUpEntry);
+        onEntryAdded(headsUpEntry);
+        entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        entry.setIsHeadsUpEntry(true);
+
         updateNotification(entry.getKey(), true /* shouldHeadsUpAgain */);
         entry.setInterruption();
     }
@@ -316,19 +324,6 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
 
     public @InflationFlag int getContentFlag() {
         return FLAG_CONTENT_VIEW_HEADS_UP;
-    }
-
-    /**
-     * Add a new entry and begin managing it.
-     * @param entry the entry to add
-     */
-    protected final void addEntry(@NonNull NotificationEntry entry) {
-        HeadsUpEntry headsUpEntry = createHeadsUpEntry();
-        headsUpEntry.setEntry(entry);
-        mHeadsUpEntryMap.put(entry.getKey(), headsUpEntry);
-        onEntryAdded(headsUpEntry);
-        entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-        entry.setIsHeadsUpEntry(true);
     }
 
     /**
