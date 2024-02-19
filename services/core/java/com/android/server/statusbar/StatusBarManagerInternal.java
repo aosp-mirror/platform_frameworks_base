@@ -255,4 +255,9 @@ public interface StatusBarManagerInternal {
      * @param tile the ComponentName of the {@link android.service.quicksettings.TileService}
      */
     void removeQsTile(ComponentName tile);
+
+    /**
+     * Called when requested to enter desktop from an app.
+     */
+    void enterDesktop(int displayId);
 }

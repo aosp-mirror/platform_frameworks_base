@@ -47,4 +47,8 @@ public interface DesktopMode {
     default void addDesktopGestureExclusionRegionListener(Consumer<Region> listener,
             Executor callbackExecutor) { }
 
+
+    /** Called when requested to go to desktop mode from the current focused app. */
+    void enterDesktop(int displayId);
+
 }

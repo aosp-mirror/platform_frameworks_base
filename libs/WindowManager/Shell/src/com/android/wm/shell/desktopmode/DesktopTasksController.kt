@@ -21,6 +21,7 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
+import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
@@ -238,6 +239,43 @@ class DesktopTasksController(
     /** Get number of tasks that are marked as visible */
     fun getVisibleTaskCount(displayId: Int): Int {
         return desktopModeTaskRepository.getVisibleTaskCount(displayId)
+    }
+
+    /** Enter desktop by using the focused task in given `displayId` */
+    fun enterDesktop(displayId: Int) {
+        val allFocusedTasks =
+            shellTaskOrganizer.getRunningTasks(displayId).filter { taskInfo ->
+                taskInfo.isFocused &&
+                        (taskInfo.windowingMode == WINDOWING_MODE_FULLSCREEN ||
+                                taskInfo.windowingMode == WINDOWING_MODE_MULTI_WINDOW) &&
+                        taskInfo.activityType != ACTIVITY_TYPE_HOME
+            }
+        if (allFocusedTasks.isNotEmpty()) {
+            when (allFocusedTasks.size) {
+                2 -> {
+                    // Split-screen case where there are two focused tasks, then we find the child
+                    // task to move to desktop.
+                    val splitFocusedTask = findChildFocusedTask(allFocusedTasks)
+                    moveToDesktop(splitFocusedTask)
+                }
+                1 -> {
+                    // Fullscreen case where we move the current focused task.
+                    moveToDesktop(allFocusedTasks[0].taskId)
+                }
+                else -> {
+                    KtProtoLog.v(
+                        WM_SHELL_DESKTOP_MODE,
+                        "DesktopTasksController: Cannot enter desktop expected less " +
+                                "than 3 focused tasks but found " + allFocusedTasks.size
+                    )
+                }
+            }
+        }
+    }
+
+    private fun findChildFocusedTask(allFocusedTasks: List<RunningTaskInfo>): RunningTaskInfo {
+        if (allFocusedTasks[0].taskId == allFocusedTasks[1].parentTaskId) return allFocusedTasks[1]
+        return allFocusedTasks[0]
     }
 
     /** Move a task with given `taskId` to desktop */
@@ -1010,6 +1048,12 @@ class DesktopTasksController(
         ) {
             mainExecutor.execute {
                 this@DesktopTasksController.setTaskRegionListener(listener, callbackExecutor)
+            }
+        }
+
+        override fun enterDesktop(displayId: Int) {
+            mainExecutor.execute {
+                this@DesktopTasksController.enterDesktop(displayId)
             }
         }
     }
