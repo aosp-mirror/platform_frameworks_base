@@ -5554,7 +5554,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Saves the current activity manager state and includes the saved state in the next dump of
      * activity manager.
      */
-    void saveANRState(String reason) {
+    void saveANRState(ActivityRecord activity, String reason) {
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new FastPrintWriter(sw, false, 1024);
         pw.println("  ANR time: " + DateFormat.getDateTimeInstance().format(new Date()));
@@ -5562,14 +5562,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             pw.println("  Reason: " + reason);
         }
         pw.println();
-        getActivityStartController().dump(pw, "  ", null);
-        pw.println();
+        if (activity != null) {
+            final Task rootTask = activity.getRootTask();
+            if (rootTask != null) {
+                rootTask.forAllTaskFragments(
+                        tf -> tf.dumpInner("  ", pw, true /* dumpAll */, null /* dumpPackage */));
+                pw.println();
+            }
+            mActivityStartController.dump(pw, "  ", activity.packageName);
+            if (mActivityStartController.getLastStartActivity() != activity) {
+                activity.dump(pw, "  ", true /* dumpAll */);
+            }
+        }
+        ActivityTaskSupervisor.printThisActivity(pw, mRootWindowContainer.getTopResumedActivity(),
+                null /* dumpPackage */, INVALID_DISPLAY, true /* needSep */,
+                "  ResumedActivity: ", /* header= */ null /* header */);
+        mLockTaskController.dump(pw, "  ");
+        mKeyguardController.dump(pw, "  ");
         pw.println("-------------------------------------------------------------------"
                 + "------------");
-        dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,
-                true /* dumpAll */, false /* dumpClient */, null /* dumpPackage */,
-                INVALID_DISPLAY, "" /* header */);
-        pw.println();
         pw.close();
 
         mLastANRState = sw.toString();
