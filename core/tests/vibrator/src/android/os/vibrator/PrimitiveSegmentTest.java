@@ -129,6 +129,27 @@ public class PrimitiveSegmentTest {
     }
 
     @Test
+    public void testScaleLinearly() {
+        PrimitiveSegment initial = new PrimitiveSegment(
+                VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 0);
+
+        assertEquals(1f, initial.scaleLinearly(1).getScale(), TOLERANCE);
+        assertEquals(0.5f, initial.scaleLinearly(0.5f).getScale(), TOLERANCE);
+        assertEquals(1f, initial.scaleLinearly(1.5f).getScale(), TOLERANCE);
+        assertEquals(0.8f, initial.scaleLinearly(0.8f).getScale(), TOLERANCE);
+        // Restores back to the exact original value since this is a linear scaling.
+        assertEquals(1f, initial.scaleLinearly(0.8f).scaleLinearly(1.25f).getScale(), TOLERANCE);
+
+        initial = new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_CLICK, 0, 0);
+
+        assertEquals(0f, initial.scaleLinearly(1).getScale(), TOLERANCE);
+        assertEquals(0f, initial.scaleLinearly(0.5f).getScale(), TOLERANCE);
+        assertEquals(0f, initial.scaleLinearly(1.5f).getScale(), TOLERANCE);
+        assertEquals(0f, initial.scaleLinearly(1.5f).scaleLinearly(2 / 3f).getScale(), TOLERANCE);
+        assertEquals(0f, initial.scaleLinearly(0.8f).scaleLinearly(1.25f).getScale(), TOLERANCE);
+    }
+
+    @Test
     public void testDuration() {
         assertEquals(-1, new PrimitiveSegment(
                 VibrationEffect.Composition.PRIMITIVE_NOOP, 1, 10).getDuration());

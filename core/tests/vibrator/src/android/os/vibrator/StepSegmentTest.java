@@ -141,6 +141,37 @@ public class StepSegmentTest {
     }
 
     @Test
+    public void testScaleLinearly_fullAmplitude() {
+        StepSegment initial = new StepSegment(1f, 0, 0);
+
+        assertEquals(1f, initial.scaleLinearly(1).getAmplitude(), TOLERANCE);
+        assertEquals(0.5f, initial.scaleLinearly(0.5f).getAmplitude(), TOLERANCE);
+        assertEquals(1f, initial.scaleLinearly(1.5f).getAmplitude(), TOLERANCE);
+        assertEquals(0.8f, initial.scaleLinearly(0.8f).getAmplitude(), TOLERANCE);
+        // Restores back to the exact original value since this is a linear scaling.
+        assertEquals(1f, initial.scaleLinearly(0.8f).scaleLinearly(1.25f).getAmplitude(),
+                TOLERANCE);
+
+        initial = new StepSegment(0, 0, 0);
+
+        assertEquals(0f, initial.scaleLinearly(1).getAmplitude(), TOLERANCE);
+        assertEquals(0f, initial.scaleLinearly(0.5f).getAmplitude(), TOLERANCE);
+        assertEquals(0f, initial.scaleLinearly(1.5f).getAmplitude(), TOLERANCE);
+    }
+
+    @Test
+    public void testScaleLinearly_defaultAmplitude() {
+        StepSegment initial = new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE, 0, 0);
+
+        assertEquals(VibrationEffect.DEFAULT_AMPLITUDE, initial.scaleLinearly(1).getAmplitude(),
+                TOLERANCE);
+        assertEquals(VibrationEffect.DEFAULT_AMPLITUDE, initial.scaleLinearly(0.5f).getAmplitude(),
+                TOLERANCE);
+        assertEquals(VibrationEffect.DEFAULT_AMPLITUDE, initial.scaleLinearly(1.5f).getAmplitude(),
+                TOLERANCE);
+    }
+
+    @Test
     public void testDuration() {
         assertEquals(5, new StepSegment(0, 0, 5).getDuration());
     }
