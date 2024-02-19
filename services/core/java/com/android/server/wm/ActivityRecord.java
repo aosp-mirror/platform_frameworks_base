@@ -1846,20 +1846,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLetterboxUiController.onMovedToDisplay(mDisplayContent.getDisplayId());
     }
 
-    void layoutLetterbox(WindowState winHint) {
-        mLetterboxUiController.layoutLetterbox(winHint);
+    void layoutLetterboxIfNeeded(WindowState winHint) {
+        mLetterboxUiController.layoutLetterboxIfNeeded(winHint);
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {
         return mLetterboxUiController.hasWallpaperBackgroundForLetterbox();
     }
 
-    void updateLetterboxSurface(WindowState winHint, Transaction t) {
-        mLetterboxUiController.updateLetterboxSurface(winHint, t);
+    void updateLetterboxSurfaceIfNeeded(WindowState winHint, Transaction t) {
+        mLetterboxUiController.updateLetterboxSurfaceIfNeeded(winHint, t);
     }
 
-    void updateLetterboxSurface(WindowState winHint) {
-        mLetterboxUiController.updateLetterboxSurface(winHint);
+    void updateLetterboxSurfaceIfNeeded(WindowState winHint) {
+        mLetterboxUiController.updateLetterboxSurfaceIfNeeded(winHint);
     }
 
     /** Gets the letterbox insets. The insets will be empty if there is no letterbox. */
@@ -4546,7 +4546,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         super.removeChild(child);
         checkKeyguardFlagsChanged();
-        updateLetterboxSurface(child);
+        updateLetterboxSurfaceIfNeeded(child);
     }
 
     void setAppLayoutChanges(int changes, String reason) {
@@ -6036,7 +6036,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (destroyedSomething) {
             final DisplayContent dc = getDisplayContent();
             dc.assignWindowLayers(true /*setLayoutNeeded*/);
-            updateLetterboxSurface(null);
+            updateLetterboxSurfaceIfNeeded(null);
         }
     }
 
@@ -7688,7 +7688,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         if (mNeedsLetterboxedAnimation) {
-            updateLetterboxSurface(findMainWindow(), t);
+            updateLetterboxSurfaceIfNeeded(findMainWindow(), t);
             mNeedsAnimationBoundsLayer = true;
         }
 
@@ -7856,7 +7856,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mNeedsAnimationBoundsLayer = false;
         if (mNeedsLetterboxedAnimation) {
             mNeedsLetterboxedAnimation = false;
-            updateLetterboxSurface(findMainWindow(), t);
+            updateLetterboxSurfaceIfNeeded(findMainWindow(), t);
         }
 
         if (mAnimatingActivityRegistry != null) {
