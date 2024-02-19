@@ -42,6 +42,7 @@ import static android.content.pm.PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
+import static android.os.Process.INVALID_PID;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -1648,11 +1649,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * @return Returns true if the given task was found and removed.
      */
     boolean removeTaskById(int taskId, boolean killProcess, boolean removeFromRecents,
-            String reason, int callingUid) {
+            String reason, int callingUid, int callingPid) {
         final Task task =
                 mRootWindowContainer.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
         if (task != null) {
-            removeTask(task, killProcess, removeFromRecents, reason, callingUid, null);
+            removeTask(task, killProcess, removeFromRecents, reason, callingUid, callingPid, null);
             return true;
         }
         Slog.w(TAG, "Request to remove task ignored for non-existent task " + taskId);
@@ -1660,11 +1661,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     void removeTask(Task task, boolean killProcess, boolean removeFromRecents, String reason) {
-        removeTask(task, killProcess, removeFromRecents, reason, SYSTEM_UID, null);
+        removeTask(task, killProcess, removeFromRecents, reason, SYSTEM_UID, INVALID_PID, null);
     }
 
     void removeTask(Task task, boolean killProcess, boolean removeFromRecents, String reason,
-            int callingUid, String callerActivityClassName) {
+            int callingUid, int callingPid, String callerActivityClassName) {
         if (task.mInRemoveTask) {
             // Prevent recursion.
             return;
@@ -1701,8 +1702,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             if (task.isPersistable) {
                 mService.notifyTaskPersisterLocked(null, true);
             }
-            mBalController
-                    .checkActivityAllowedToClearTask(task, callingUid, callerActivityClassName);
+            mBalController.checkActivityAllowedToClearTask(
+                            task, callingUid, callingPid, callerActivityClassName);
         } finally {
             task.mInRemoveTask = false;
         }
@@ -1870,7 +1871,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Task was trimmed from the recent tasks list -- remove the active task record as well
             // since the user won't really be able to go back to it
             removeTaskById(task.mTaskId, killProcess, false /* removeFromRecents */,
-                    "recent-task-trimmed", SYSTEM_UID);
+                    "recent-task-trimmed", SYSTEM_UID, INVALID_PID);
         }
         task.removedFromRecents();
     }

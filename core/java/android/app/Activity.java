@@ -9591,9 +9591,9 @@ public class Activity extends ContextThemeWrapper
      * Specifies whether the activities below this one in the task can also start other activities
      * or finish the task.
      * <p>
-     * Starting from Target SDK Level {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, apps
-     * are blocked from starting new activities or finishing their task unless the top activity of
-     * such task belong to the same UID for security reasons.
+     * Starting from Target SDK Level {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, apps
+     * may be blocked from starting new activities or finishing their task unless the top activity
+     * of such task belong to the same UID for security reasons.
      * <p>
      * Setting this flag to {@code true} will allow the launching app to ignore the restriction if
      * this activity is on top. Apps matching the UID of this activity are always exempt.
