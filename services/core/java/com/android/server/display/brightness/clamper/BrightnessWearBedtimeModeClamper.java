@@ -64,7 +64,7 @@ public class BrightnessWearBedtimeModeClamper extends
     @NonNull
     @Override
     Type getType() {
-        return Type.BEDTIME_MODE;
+        return Type.WEAR_BEDTIME_MODE;
     }
 
     @Override
