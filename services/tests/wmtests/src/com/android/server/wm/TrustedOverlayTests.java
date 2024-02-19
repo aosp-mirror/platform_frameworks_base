@@ -40,8 +40,10 @@ import android.view.WindowManager;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.wm.utils.CommonUtils;
 import com.android.window.flags.Flags;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -75,6 +77,11 @@ public class TrustedOverlayTests {
         mActivityRule.getScenario().onActivity(activity -> {
             mActivity = activity;
         });
+    }
+
+    @After
+    public void tearDown() {
+        CommonUtils.waitUntilActivityRemoved(mActivity);
     }
 
     @RequiresFlagsDisabled(Flags.FLAG_SURFACE_TRUSTED_OVERLAY)
