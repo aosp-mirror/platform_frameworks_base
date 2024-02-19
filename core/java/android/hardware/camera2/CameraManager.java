@@ -627,7 +627,8 @@ public final class CameraManager {
                 CameraMetadataNative physicalCameraInfo =
                         cameraService.getCameraCharacteristics(physicalCameraId,
                                 mContext.getApplicationInfo().targetSdkVersion,
-                                /*overrideToPortrait*/ false, DEVICE_ID_DEFAULT,
+                                /*rotationOverride*/ ICameraService.ROTATION_OVERRIDE_NONE,
+                                DEVICE_ID_DEFAULT,
                                 DEVICE_POLICY_DEFAULT);
                 StreamConfiguration[] configs = physicalCameraInfo.get(
                         CameraCharacteristics.
@@ -699,7 +700,16 @@ public final class CameraManager {
     @NonNull
     public CameraCharacteristics getCameraCharacteristics(@NonNull String cameraId,
             boolean overrideToPortrait) throws CameraAccessException {
-        CameraCharacteristics characteristics;
+        return getCameraCharacteristics(cameraId,
+                overrideToPortrait
+                        ? ICameraService.ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT
+                        : ICameraService.ROTATION_OVERRIDE_NONE);
+    }
+
+    @NonNull
+    private CameraCharacteristics getCameraCharacteristics(@NonNull String cameraId,
+            int rotationOverride) throws CameraAccessException {
+        CameraCharacteristics characteristics = null;
         if (CameraManagerGlobal.sCameraServiceDisabled) {
             throw new IllegalArgumentException("No cameras available on device");
         }
@@ -711,7 +721,7 @@ public final class CameraManager {
             }
             try {
                 CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId,
-                        mContext.getApplicationInfo().targetSdkVersion, overrideToPortrait,
+                        mContext.getApplicationInfo().targetSdkVersion, rotationOverride,
                         mContext.getDeviceId(), getDevicePolicyFromContext(mContext));
                 characteristics = prepareCameraCharacteristics(cameraId, info, cameraService);
             } catch (ServiceSpecificException e) {
@@ -926,7 +936,7 @@ public final class CameraManager {
      */
     private CameraDevice openCameraDeviceUserAsync(String cameraId,
             CameraDevice.StateCallback callback, Executor executor, final int uid,
-            final int oomScoreOffset, boolean overrideToPortrait) throws CameraAccessException {
+            final int oomScoreOffset, int rotationOverride) throws CameraAccessException {
         CameraCharacteristics characteristics = getCameraCharacteristics(cameraId);
         CameraDevice device = null;
         Map<String, CameraCharacteristics> physicalIdsToChars =
@@ -961,7 +971,7 @@ public final class CameraManager {
                 cameraUser = cameraService.connectDevice(callbacks, cameraId,
                     mContext.getOpPackageName(), mContext.getAttributionTag(), uid,
                     oomScoreOffset, mContext.getApplicationInfo().targetSdkVersion,
-                    overrideToPortrait, mContext.getDeviceId(),
+                        rotationOverride, mContext.getDeviceId(),
                         getDevicePolicyFromContext(mContext));
             } catch (ServiceSpecificException e) {
                 if (e.errorCode == ICameraService.ERROR_DEPRECATED_HAL) {
@@ -1126,7 +1136,10 @@ public final class CameraManager {
             @Nullable Handler handler,
             @NonNull final CameraDevice.StateCallback callback) throws CameraAccessException {
         openCameraForUid(cameraId, callback, CameraDeviceImpl.checkAndWrapHandler(handler),
-                         USE_CALLING_UID, /*oomScoreOffset*/0, overrideToPortrait);
+                         USE_CALLING_UID, /*oomScoreOffset*/0,
+                         overrideToPortrait
+                                 ? ICameraService.ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT
+                                 : ICameraService.ROTATION_OVERRIDE_NONE);
     }
 
     /**
@@ -1239,8 +1252,11 @@ public final class CameraManager {
             throw new IllegalArgumentException(
                     "oomScoreOffset < 0, cannot increase priority of camera client");
         }
+        final int rotationOverride = shouldOverrideToPortrait(mContext)
+                ? ICameraService.ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT
+                : ICameraService.ROTATION_OVERRIDE_NONE;
         openCameraForUid(cameraId, callback, executor, USE_CALLING_UID, oomScoreOffset,
-                shouldOverrideToPortrait(mContext));
+                rotationOverride);
     }
 
     /**
@@ -1258,11 +1274,14 @@ public final class CameraManager {
      *             Must be USE_CALLING_UID unless the caller is a trusted service.
      * @param oomScoreOffset
      *             The minimum oom score that cameraservice must see for this client.
+     * @param rotationOverride
+     *             The type of rotation override (none, override_to_portrait, rotation_only)
+     *             that should be followed for this camera id connection
      * @hide
      */
     public void openCameraForUid(@NonNull String cameraId,
             @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
-            int clientUid, int oomScoreOffset, boolean overrideToPortrait)
+            int clientUid, int oomScoreOffset, int rotationOverride)
             throws CameraAccessException {
 
         if (cameraId == null) {
@@ -1275,7 +1294,7 @@ public final class CameraManager {
         }
 
         openCameraDeviceUserAsync(cameraId, callback, executor, clientUid, oomScoreOffset,
-                overrideToPortrait);
+                rotationOverride);
     }
 
     /**
@@ -1296,8 +1315,12 @@ public final class CameraManager {
     public void openCameraForUid(@NonNull String cameraId,
             @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
             int clientUid) throws CameraAccessException {
+        final int rotationOverride = shouldOverrideToPortrait(mContext)
+                ? ICameraService.ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT
+                : ICameraService.ROTATION_OVERRIDE_NONE;
+
         openCameraForUid(cameraId, callback, executor, clientUid, /*oomScoreOffset*/0,
-                shouldOverrideToPortrait(mContext));
+                rotationOverride);
     }
 
     /**
