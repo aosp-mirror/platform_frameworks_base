@@ -390,6 +390,7 @@
   <java-symbol type="string" name="config_sensorUseStartedActivity_hwToggle" />
   <java-symbol type="string" name="config_sensorStateChangedActivity" />
   <java-symbol type="string" name="config_hdmiCecSetMenuLanguageActivity" />
+  <java-symbol type="string" name="config_hdmiCecActiveSourceLostActivity" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks_lowRam" />
   <java-symbol type="integer" name="config_maxNumVisibleRecentTasks_lowRam" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks" />

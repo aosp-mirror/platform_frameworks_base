@@ -3344,6 +3344,11 @@
         com.android.systemui/com.android.systemui.tv.hdmi.HdmiCecSetMenuLanguageActivity
     </string>
 
+    <!-- Component name of the activity used to inform user that their device lost Active Source
+      status and will go to standby if there is no interaction. -->
+    <string name="config_hdmiCecActiveSourceLostActivity"
+    >com.android.systemui/com.android.systemui.tv.hdmi.HdmiCecActiveSourceLostActivity</string>
+
     <!-- Name of the dialog that is used to request the user's consent for a Platform VPN -->
     <string name="config_platformVpnConfirmDialogComponent" translatable="false"
             >com.android.vpndialogs/com.android.vpndialogs.PlatformVpnConfirmDialog</string>

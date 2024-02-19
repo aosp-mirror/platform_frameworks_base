@@ -4205,10 +4205,12 @@ public class HdmiControlService extends SystemService {
         // playback will claim active source. Otherwise audio system will.
         if (deviceType == HdmiDeviceInfo.DEVICE_PLAYBACK) {
             HdmiCecLocalDevicePlayback playback = playback();
+            playback.dismissUiOnActiveSourceStatusRecovered();
             playback.setActiveSource(playback.getDeviceInfo().getLogicalAddress(), physicalAddress,
                     caller);
             playback.wakeUpIfActiveSource();
             playback.maySendActiveSource(source);
+            playback.mDelayedStandbyOnActiveSourceLostHandler.removeCallbacksAndMessages(null);
         }
 
         if (deviceType == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
