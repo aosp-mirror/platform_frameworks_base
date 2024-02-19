@@ -7986,7 +7986,7 @@
         @hide
       -->
     <permission android:name="android.permission.GET_APP_METADATA"
-                android:protectionLevel="signature|installer" />
+                android:protectionLevel="signature|installer|verifier" />
 
     <!-- @hide @SystemApi Allows an application to stage HealthConnect's remote data so that
          HealthConnect can later integrate it. -->
