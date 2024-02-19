@@ -62,7 +62,7 @@ constructor(
         userManager.getCredentialOwnerProfile(userId)
 
     override fun getParentProfileIdOrSelfId(userId: Int): Int =
-        userManager.getProfileParent(userId).id
+        userManager.getProfileParent(userId)?.id ?: userManager.getCredentialOwnerProfile(userId)
 
     override fun verifyCredential(
         request: BiometricPromptRequest.Credential,
