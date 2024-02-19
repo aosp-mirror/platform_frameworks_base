@@ -41,7 +41,7 @@ import java.util.List;
 
     NoOpInfoMediaManager(
             Context context,
-            String packageName,
+            @NonNull String packageName,
             Notification notification,
             LocalBluetoothManager localBluetoothManager) {
         super(context, packageName, notification, localBluetoothManager);
