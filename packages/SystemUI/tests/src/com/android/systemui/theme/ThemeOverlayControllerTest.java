@@ -985,7 +985,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         FabricatedOverlay neutrals = overlays[1];
         FabricatedOverlay dynamic = overlays[2];
 
-        final int colorsPerPalette = 12;
+        final int colorsPerPalette = 13;
 
         // Color resources were added for all 3 accent palettes
         verify(accents, times(colorsPerPalette * 3))
