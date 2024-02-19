@@ -317,7 +317,7 @@ flag {
    description: "Refactors shade header and keyguard status bar to read status bar dimens from a"
         " central place, instead of reading resources directly. This is to take into account display"
         " cutouts and other special cases. "
-   bug: "317199366"
+   bug: "317016114"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
