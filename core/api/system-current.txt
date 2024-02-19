@@ -2193,6 +2193,138 @@ package android.app.job {
 
 }
 
+package android.app.ondeviceintelligence {
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class Content implements android.os.Parcelable {
+    ctor public Content(@NonNull android.os.Bundle);
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getData();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ondeviceintelligence.Content> CREATOR;
+  }
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public interface DownloadCallback {
+    method public void onDownloadCompleted(@NonNull android.os.PersistableBundle);
+    method public void onDownloadFailed(int, @Nullable String, @NonNull android.os.PersistableBundle);
+    method public default void onDownloadProgress(long);
+    method public default void onDownloadStarted(long);
+    field public static final int DOWNLOAD_FAILURE_STATUS_DOWNLOADING = 3; // 0x3
+    field public static final int DOWNLOAD_FAILURE_STATUS_NETWORK_FAILURE = 2; // 0x2
+    field public static final int DOWNLOAD_FAILURE_STATUS_NOT_ENOUGH_DISK_SPACE = 1; // 0x1
+    field public static final int DOWNLOAD_FAILURE_STATUS_UNAVAILABLE = 4; // 0x4
+    field public static final int DOWNLOAD_FAILURE_STATUS_UNKNOWN = 0; // 0x0
+  }
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class Feature implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.os.PersistableBundle getFeatureParams();
+    method public int getId();
+    method @Nullable public String getModelName();
+    method @Nullable public String getName();
+    method public int getType();
+    method public int getVariant();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ondeviceintelligence.Feature> CREATOR;
+  }
+
+  public static final class Feature.Builder {
+    ctor public Feature.Builder(int, int, int, @NonNull android.os.PersistableBundle);
+    method @NonNull public android.app.ondeviceintelligence.Feature build();
+    method @NonNull public android.app.ondeviceintelligence.Feature.Builder setFeatureParams(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.app.ondeviceintelligence.Feature.Builder setId(int);
+    method @NonNull public android.app.ondeviceintelligence.Feature.Builder setModelName(@NonNull String);
+    method @NonNull public android.app.ondeviceintelligence.Feature.Builder setName(@NonNull String);
+    method @NonNull public android.app.ondeviceintelligence.Feature.Builder setType(int);
+    method @NonNull public android.app.ondeviceintelligence.Feature.Builder setVariant(int);
+  }
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class FeatureDetails implements android.os.Parcelable {
+    ctor public FeatureDetails(@android.app.ondeviceintelligence.FeatureDetails.Status int, @NonNull android.os.PersistableBundle);
+    ctor public FeatureDetails(@android.app.ondeviceintelligence.FeatureDetails.Status int);
+    method public int describeContents();
+    method @NonNull public android.os.PersistableBundle getFeatureDetailParams();
+    method @android.app.ondeviceintelligence.FeatureDetails.Status public int getStatus();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ondeviceintelligence.FeatureDetails> CREATOR;
+    field public static final int FEATURE_STATUS_AVAILABLE = 3; // 0x3
+    field public static final int FEATURE_STATUS_DOWNLOADABLE = 1; // 0x1
+    field public static final int FEATURE_STATUS_DOWNLOADING = 2; // 0x2
+    field public static final int FEATURE_STATUS_SERVICE_UNAVAILABLE = 4; // 0x4
+    field public static final int FEATURE_STATUS_UNAVAILABLE = 0; // 0x0
+  }
+
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE_USE, java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.PARAMETER, java.lang.annotation.ElementType.FIELD}) public static @interface FeatureDetails.Status {
+  }
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class FilePart implements android.os.Parcelable {
+    ctor public FilePart(@NonNull String, @NonNull android.os.PersistableBundle, @NonNull String) throws java.io.FileNotFoundException;
+    ctor public FilePart(@NonNull String, @NonNull android.os.PersistableBundle, @NonNull java.io.FileInputStream) throws java.io.IOException;
+    method public int describeContents();
+    method @NonNull public java.io.FileInputStream getFileInputStream();
+    method @NonNull public String getFilePartKey();
+    method @NonNull public android.os.PersistableBundle getFilePartParams();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ondeviceintelligence.FilePart> CREATOR;
+  }
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public class OnDeviceIntelligenceManager {
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getFeature(int, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.Feature,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getFeatureDetails(@NonNull android.app.ondeviceintelligence.Feature, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.FeatureDetails,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getVersion(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.LongConsumer);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void listFeatures(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.util.List<android.app.ondeviceintelligence.Feature>,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void processRequest(@NonNull android.app.ondeviceintelligence.Feature, @NonNull android.app.ondeviceintelligence.Content, int, @Nullable android.os.CancellationSignal, @Nullable android.app.ondeviceintelligence.ProcessingSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.Content,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException>);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void processRequestStreaming(@NonNull android.app.ondeviceintelligence.Feature, @NonNull android.app.ondeviceintelligence.Content, int, @Nullable android.os.CancellationSignal, @Nullable android.app.ondeviceintelligence.ProcessingSignal, @NonNull java.util.concurrent.Executor, @NonNull android.app.ondeviceintelligence.StreamingResponseReceiver<android.app.ondeviceintelligence.Content,android.app.ondeviceintelligence.Content,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException>);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void requestFeatureDownload(@NonNull android.app.ondeviceintelligence.Feature, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.app.ondeviceintelligence.DownloadCallback);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void requestTokenCount(@NonNull android.app.ondeviceintelligence.Feature, @NonNull android.app.ondeviceintelligence.Content, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Long,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
+    field public static final int REQUEST_TYPE_EMBEDDINGS = 2; // 0x2
+    field public static final int REQUEST_TYPE_INFERENCE = 0; // 0x0
+    field public static final int REQUEST_TYPE_PREPARE = 1; // 0x1
+  }
+
+  public static class OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException extends java.lang.Exception {
+    ctor public OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException(int, @NonNull String, @NonNull android.os.PersistableBundle);
+    ctor public OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException(int, @NonNull android.os.PersistableBundle);
+    method public int getErrorCode();
+    method @NonNull public android.os.PersistableBundle getErrorParams();
+    field public static final int ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE = 1000; // 0x3e8
+  }
+
+  public static class OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException extends android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException {
+    ctor public OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException(int, @NonNull String, @NonNull android.os.PersistableBundle);
+    ctor public OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException(int, @NonNull android.os.PersistableBundle);
+    field public static final int PROCESSING_ERROR_BAD_DATA = 2; // 0x2
+    field public static final int PROCESSING_ERROR_BAD_REQUEST = 3; // 0x3
+    field public static final int PROCESSING_ERROR_BUSY = 9; // 0x9
+    field public static final int PROCESSING_ERROR_CANCELLED = 7; // 0x7
+    field public static final int PROCESSING_ERROR_COMPUTE_ERROR = 5; // 0x5
+    field public static final int PROCESSING_ERROR_INTERNAL = 14; // 0xe
+    field public static final int PROCESSING_ERROR_IPC_ERROR = 6; // 0x6
+    field public static final int PROCESSING_ERROR_NOT_AVAILABLE = 8; // 0x8
+    field public static final int PROCESSING_ERROR_REQUEST_NOT_SAFE = 4; // 0x4
+    field public static final int PROCESSING_ERROR_REQUEST_TOO_LARGE = 12; // 0xc
+    field public static final int PROCESSING_ERROR_RESPONSE_NOT_SAFE = 11; // 0xb
+    field public static final int PROCESSING_ERROR_SAFETY_ERROR = 10; // 0xa
+    field public static final int PROCESSING_ERROR_SERVICE_UNAVAILABLE = 15; // 0xf
+    field public static final int PROCESSING_ERROR_SUSPENDED = 13; // 0xd
+    field public static final int PROCESSING_ERROR_UNKNOWN = 1; // 0x1
+  }
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class ProcessingSignal {
+    ctor public ProcessingSignal();
+    method public void sendSignal(@NonNull android.os.PersistableBundle);
+    method public void setOnProcessingSignalCallback(@NonNull java.util.concurrent.Executor, @Nullable android.app.ondeviceintelligence.ProcessingSignal.OnProcessingSignalCallback);
+  }
+
+  public static interface ProcessingSignal.OnProcessingSignalCallback {
+    method public void onSignalReceived(@NonNull android.os.PersistableBundle);
+  }
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public interface StreamingResponseReceiver<R, T, E extends java.lang.Throwable> extends android.os.OutcomeReceiver<R,E> {
+    method public void onNewContent(@NonNull T);
+  }
+
+}
+
 package android.app.people {
 
   public final class PeopleManager {
@@ -3640,6 +3772,7 @@ package android.content {
     field public static final String NETD_SERVICE = "netd";
     field @Deprecated public static final String NETWORK_SCORE_SERVICE = "network_score";
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String ON_DEVICE_INTELLIGENCE_SERVICE = "on_device_intelligence";
     field public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
     field public static final String PERMISSION_SERVICE = "permission";
     field public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
