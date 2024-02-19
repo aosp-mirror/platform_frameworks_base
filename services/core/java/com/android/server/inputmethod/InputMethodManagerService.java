@@ -1539,7 +1539,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onStart() {
             mService.publishLocalService();
-            publishBinderService(Context.INPUT_METHOD_SERVICE, mService, false /*allowIsolated*/,
+            IInputMethodManager.Stub service;
+            if (Flags.useZeroJankProxy()) {
+                service = new ZeroJankProxy(mService.mHandler::post, mService);
+            } else {
+                service = mService;
+            }
+            publishBinderService(Context.INPUT_METHOD_SERVICE, service, false /*allowIsolated*/,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
         }
 
@@ -2216,6 +2222,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Nullable
+    ClientState getClientState(IInputMethodClient client) {
+        synchronized (ImfLock.class) {
+            return mClientController.getClient(client.asBinder());
+        }
+    }
+
+    // TODO(b/314150112): Move this to ClientController.
     @GuardedBy("ImfLock.class")
     void unbindCurrentClientLocked(@UnbindReason int unbindClientReason) {
         if (mCurClient != null) {
@@ -3739,6 +3753,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
                 windowToken, cs.mUid, cs.mPid, cs.mSelfReportedDisplayId);
         return imeClientFocus == WindowManagerInternal.ImeClientFocusResult.HAS_IME_FOCUS;
+    }
+
+    //TODO(b/293640003): merge with startInputOrWindowGainedFocus once Flags.useZeroJankProxy()
+    // is enabled.
+    @Override
+    public void startInputOrWindowGainedFocusAsync(
+            @StartInputReason int startInputReason, IInputMethodClient client, IBinder windowToken,
+            @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
+            int windowFlags, @Nullable EditorInfo editorInfo,
+            IRemoteInputConnection inputConnection,
+            IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
+            int unverifiedTargetSdkVersion, @UserIdInt int userId,
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq) {
+        // implemented by ZeroJankProxy
     }
 
     @NonNull

@@ -69,6 +69,8 @@ interface IInputMethodManager {
     boolean hideSoftInput(in IInputMethodClient client, @nullable IBinder windowToken,
             in @nullable ImeTracker.Token statsToken, int flags,
             in @nullable ResultReceiver resultReceiver, int reason);
+
+    // TODO(b/293640003): Remove method once Flags.useZeroJankProxy() is enabled.
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'editorInfo' is non-null then also does startInput.
     // @NonNull
@@ -84,6 +86,21 @@ interface IInputMethodManager {
             in @nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, int userId,
             in ImeOnBackInvokedDispatcher imeDispatcher);
+
+    // If windowToken is null, this just does startInput().  Otherwise this reports that a window
+    // has gained focus, and if 'editorInfo' is non-null then also does startInput.
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
+    void startInputOrWindowGainedFocusAsync(
+            /* @StartInputReason */ int startInputReason,
+            in IInputMethodClient client, in @nullable IBinder windowToken,
+            /* @StartInputFlags */ int startInputFlags,
+            /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
+            /* @android.view.WindowManager.LayoutParams.Flags */ int windowFlags,
+            in @nullable EditorInfo editorInfo, in @nullable IRemoteInputConnection inputConnection,
+            in @nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
+            int unverifiedTargetSdkVersion, int userId,
+            in ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
@@ -156,6 +173,7 @@ interface IInputMethodManager {
                 in String delegatePackageName,
                 in String delegatorPackageName);
 
+    // TODO(b/293640003): introduce a new API method to provide async way to return boolean.
     /** Accepts and starts a stylus handwriting session for the delegate view **/
     boolean acceptStylusHandwritingDelegation(in IInputMethodClient client, in int userId,
             in String delegatePackageName, in String delegatorPackageName, int flags);
