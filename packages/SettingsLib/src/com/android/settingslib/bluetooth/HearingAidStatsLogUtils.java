@@ -19,8 +19,6 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.icu.text.SimpleDateFormat;
-import android.icu.util.TimeZone;
 import android.util.Log;
 
 import androidx.annotation.IntDef;
@@ -31,12 +29,14 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /** Utils class to report hearing aid metrics to statsd */
@@ -55,13 +55,13 @@ public final class HearingAidStatsLogUtils {
     private static final String BT_HEARING_USER_CATEGORY = "bt_hearing_user_category";
 
     private static final String HISTORY_RECORD_DELIMITER = ",";
-    private static final String CATEGORY_HEARING_AIDS = "A11yHearingAidsUser";
-    private static final String CATEGORY_NEW_HEARING_AIDS = "A11yNewHearingAidsUser";
-    private static final String CATEGORY_HEARING_DEVICES = "A11yHearingDevicesUser";
-    private static final String CATEGORY_NEW_HEARING_DEVICES = "A11yNewHearingDevicesUser";
+    static final String CATEGORY_HEARING_AIDS = "A11yHearingAidsUser";
+    static final String CATEGORY_NEW_HEARING_AIDS = "A11yNewHearingAidsUser";
+    static final String CATEGORY_HEARING_DEVICES = "A11yHearingDevicesUser";
+    static final String CATEGORY_NEW_HEARING_DEVICES = "A11yNewHearingDevicesUser";
 
-    private static final long PAIRED_HISTORY_EXPIRED_TIME = TimeUnit.DAYS.toMillis(30);
-    private static final long CONNECTED_HISTORY_EXPIRED_TIME = TimeUnit.DAYS.toMillis(7);
+    static final int PAIRED_HISTORY_EXPIRED_DAY = 30;
+    static final int CONNECTED_HISTORY_EXPIRED_DAY = 7;
     private static final int VALID_PAIRED_EVENT_COUNT = 1;
     private static final int VALID_CONNECTED_EVENT_COUNT = 7;
 
@@ -263,7 +263,7 @@ public final class HearingAidStatsLogUtils {
             }
             return;
         }
-        if (history.peekLast() != null && isSameDay(history.peekLast(), timestamp)) {
+        if (history.peekLast() != null && isSameDay(timestamp, history.peekLast())) {
             if (DEBUG) {
                 Log.w(TAG, "Skip this record, it's same day record");
             }
@@ -282,25 +282,25 @@ public final class HearingAidStatsLogUtils {
                 || BT_HEARING_DEVICES_PAIRED_HISTORY.equals(spName)) {
             LinkedList<Long> history = convertToHistoryList(
                     getSharedPreferences(context).getString(spName, ""));
-            removeRecordsBeforeTime(history, PAIRED_HISTORY_EXPIRED_TIME);
+            removeRecordsBeforeDay(history, PAIRED_HISTORY_EXPIRED_DAY);
             return history;
         } else if (BT_HEARING_AIDS_CONNECTED_HISTORY.equals(spName)
                 || BT_HEARING_DEVICES_CONNECTED_HISTORY.equals(spName)) {
             LinkedList<Long> history = convertToHistoryList(
                     getSharedPreferences(context).getString(spName, ""));
-            removeRecordsBeforeTime(history, CONNECTED_HISTORY_EXPIRED_TIME);
+            removeRecordsBeforeDay(history, CONNECTED_HISTORY_EXPIRED_DAY);
             return history;
         }
         return null;
     }
 
-    private static void removeRecordsBeforeTime(LinkedList<Long> history, long time) {
-        if (history == null) {
+    private static void removeRecordsBeforeDay(LinkedList<Long> history, int day) {
+        if (history == null || history.isEmpty()) {
             return;
         }
-        Long currentTime = System.currentTimeMillis();
+        long currentTime = System.currentTimeMillis();
         while (history.peekFirst() != null
-                && currentTime - history.peekFirst() > time) {
+                && dayDifference(currentTime, history.peekFirst()) >= day) {
             history.poll();
         }
     }
@@ -331,11 +331,13 @@ public final class HearingAidStatsLogUtils {
      * @return {@code true} if two timestamps are on the same day
      */
     private static boolean isSameDay(long t1, long t2) {
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
-        sdf.setTimeZone(TimeZone.getDefault());
-        String dateString1 = sdf.format(t1);
-        String dateString2 = sdf.format(t2);
-        return dateString1.equals(dateString2);
+        return dayDifference(t1, t2) == 0;
+    }
+    private static long dayDifference(long t1, long t2) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        LocalDate date1 = Instant.ofEpochMilli(t1).atZone(zoneId).toLocalDate();
+        LocalDate date2 = Instant.ofEpochMilli(t2).atZone(zoneId).toLocalDate();
+        return Math.abs(ChronoUnit.DAYS.between(date1, date2));
     }
 
     private static SharedPreferences getSharedPreferences(Context context) {
