@@ -68,7 +68,7 @@ aconfig_declarations_group {
         "com.android.input.flags-aconfig-java",
         "com.android.internal.foldables.flags-aconfig-java",
         "com.android.media.flags.bettertogether-aconfig-java",
-        "com.android.net.thread.flags-aconfig-java",
+        "com.android.net.thread.platform.flags-aconfig-java",
         "com.android.server.flags.pinner-aconfig-java",
         "com.android.text.flags-aconfig-java",
         "com.android.window.flags.window-aconfig-java",
@@ -685,8 +685,8 @@ aconfig_declarations {
 
 // Thread network
 aconfig_declarations {
-    name: "com.android.net.thread.flags-aconfig",
-    package: "com.android.net.thread.flags",
+    name: "com.android.net.thread.platform.flags-aconfig",
+    package: "com.android.net.thread.platform.flags",
     srcs: ["core/java/android/net/thread/flags.aconfig"],
 }
 
@@ -698,8 +698,8 @@ java_aconfig_library {
 }
 
 java_aconfig_library {
-    name: "com.android.net.thread.flags-aconfig-java",
-    aconfig_declarations: "com.android.net.thread.flags-aconfig",
+    name: "com.android.net.thread.platform.flags-aconfig-java",
+    aconfig_declarations: "com.android.net.thread.platform.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

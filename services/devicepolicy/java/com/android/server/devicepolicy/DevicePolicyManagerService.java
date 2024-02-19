@@ -485,7 +485,6 @@ import com.android.internal.widget.PasswordValidationError;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.net.module.util.ProxyUtils;
-import com.android.net.thread.flags.Flags;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
@@ -13347,7 +13346,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 UserManager.DISALLOW_SMS, new String[]{MANAGE_DEVICE_POLICY_SMS});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS, new String[]{MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS});
-        if (Flags.threadUserRestrictionEnabled()) {
+        if (com.android.net.thread.platform.flags.Flags.threadUserRestrictionEnabled()) {
             USER_RESTRICTION_PERMISSIONS.put(
                     UserManager.DISALLOW_THREAD_NETWORK,
                     new String[]{MANAGE_DEVICE_POLICY_THREAD_NETWORK});
