@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.communalHub
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -44,6 +45,7 @@ constructor(
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
+    private val glanceableHubTransitions: GlanceableHubTransitions,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DREAMING,
@@ -57,6 +59,17 @@ constructor(
         listenForDreamingToGone()
         listenForDreamingToAodOrDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
+        listenForDreamingToGlanceableHub()
+    }
+
+    private fun listenForDreamingToGlanceableHub() {
+        if (!communalHub()) return
+        glanceableHubTransitions.listenForGlanceableHubTransition(
+            transitionName = "listenForDreamingToGlanceableHub",
+            transitionOwnerName = TAG,
+            fromState = KeyguardState.DREAMING,
+            toState = KeyguardState.GLANCEABLE_HUB,
+        )
     }
 
     fun startToLockscreenTransition() {

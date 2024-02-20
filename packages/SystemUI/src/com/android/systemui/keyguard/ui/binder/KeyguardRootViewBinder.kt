@@ -43,6 +43,7 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
@@ -101,6 +102,10 @@ object KeyguardRootViewBinder {
         val burnInLayerId = R.id.burn_in_layer
         val aodNotificationIconContainerId = R.id.aod_notification_icon_container
         val largeClockId = R.id.lockscreen_clock_view_large
+        val indicationArea = R.id.keyguard_indication_area
+        val startButton = R.id.start_button
+        val endButton = R.id.end_button
+        val lockIcon = R.id.lock_icon_view
 
         if (keyguardBottomAreaRefactor()) {
             view.setOnTouchListener { _, event ->
@@ -200,10 +205,29 @@ object KeyguardRootViewBinder {
                         launch {
                             burnInParams
                                 .flatMapLatest { params -> viewModel.translationX(params) }
-                                .collect { x ->
-                                    childViews[burnInLayerId]?.translationX = x
-                                    childViews[largeClockId]?.translationX = x
-                                    childViews[aodNotificationIconContainerId]?.translationX = x
+                                .collect { state ->
+                                    val px = state.value ?: return@collect
+                                    when {
+                                        state.isToOrFrom(KeyguardState.AOD) -> {
+                                            childViews[largeClockId]?.translationX = px
+                                            childViews[burnInLayerId]?.translationX = px
+                                            childViews[aodNotificationIconContainerId]
+                                                ?.translationX = px
+                                        }
+                                        state.isToOrFrom(KeyguardState.GLANCEABLE_HUB) -> {
+                                            for ((key, childView) in childViews.entries) {
+                                                when (key) {
+                                                    indicationArea,
+                                                    startButton,
+                                                    endButton,
+                                                    lockIcon -> {
+                                                        // Do not move these views
+                                                    }
+                                                    else -> childView.translationX = px
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                         }
 

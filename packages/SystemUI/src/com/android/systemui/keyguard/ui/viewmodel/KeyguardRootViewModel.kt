@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
+import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
@@ -165,8 +166,12 @@ constructor(
         return aodBurnInViewModel.translationY(params)
     }
 
-    fun translationX(params: BurnInParameters): Flow<Float> {
-        return aodBurnInViewModel.translationX(params)
+    fun translationX(params: BurnInParameters): Flow<StateToValue> {
+        return merge(
+            aodBurnInViewModel.translationX(params).map { StateToValue(to = AOD, value = it) },
+            lockscreenToGlanceableHubTransitionViewModel.keyguardTranslationX,
+            glanceableHubToLockscreenTransitionViewModel.keyguardTranslationX,
+        )
     }
 
     fun scale(params: BurnInParameters): Flow<BurnInScaleViewModel> {

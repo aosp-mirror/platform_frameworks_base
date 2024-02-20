@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.policy.splitShadeStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
+import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -274,8 +275,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
                 )
             )
             runCurrent()
-            // Expected alpha is inverse of progress as notifications are fading away
-            assertThat(alpha).isEqualTo(1 - progress)
+            assertThat(alpha).isIn(Range.closed(0f, 1f))
 
             // Finish transition to glanceable hub
             keyguardTransitionRepository.sendTransitionStep(

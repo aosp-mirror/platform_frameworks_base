@@ -363,14 +363,9 @@ constructor(
                 lockscreenToGlanceableHubRunning,
                 glanceableHubToLockscreenRunning,
                 merge(
-                        lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
-                        glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
-                    )
-                    .onStart {
-                        // Transition flows don't emit a value on start, kick things off so the
-                        // combine starts.
-                        emit(1f)
-                    }
+                    lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
+                    glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
+                )
             ) { lockscreenToGlanceableHubRunning, glanceableHubToLockscreenRunning, alpha ->
                 if (isOnGlanceableHubWithoutShade) {
                     // Notifications should not be visible on the glanceable hub.
@@ -407,6 +402,16 @@ constructor(
             }
         }
     }
+
+    /**
+     * The container may need to be translated in the x direction as the keyguard fades out, such as
+     * when swiping open the glanceable hub from the lockscreen.
+     */
+    val translationX: Flow<Float> =
+        merge(
+            lockscreenToGlanceableHubTransitionViewModel.notificationTranslationX,
+            glanceableHubToLockscreenTransitionViewModel.notificationTranslationX,
+        )
 
     /**
      * When on keyguard, there is limited space to display notifications so calculate how many could

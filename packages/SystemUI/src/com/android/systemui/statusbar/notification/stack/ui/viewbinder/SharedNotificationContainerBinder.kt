@@ -144,6 +144,8 @@ object SharedNotificationContainerBinder {
                             .collect { y -> controller.setTranslationY(y) }
                     }
 
+                    launch { viewModel.translationX.collect { x -> controller.translationX = x } }
+
                     if (!sceneContainerFlags.isEnabled()) {
                         launch {
                             viewModel.expansionAlpha(viewState).collect {

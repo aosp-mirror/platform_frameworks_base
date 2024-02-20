@@ -52,20 +52,18 @@ constructor(
      * externally. The progress is used for both transitions caused by user touch input or by
      * programmatic changes.
      */
-    fun listenForLockscreenAndHubTransition(
+    fun listenForGlanceableHubTransition(
         transitionName: String,
         transitionOwnerName: String,
-        toScene: CommunalSceneKey
+        fromState: KeyguardState,
+        toState: KeyguardState,
     ) {
-        val fromState: KeyguardState
-        val toState: KeyguardState
-        if (toScene == CommunalSceneKey.Blank) {
-            fromState = KeyguardState.GLANCEABLE_HUB
-            toState = KeyguardState.LOCKSCREEN
-        } else {
-            fromState = KeyguardState.LOCKSCREEN
-            toState = KeyguardState.GLANCEABLE_HUB
-        }
+        val toScene =
+            if (toState == KeyguardState.GLANCEABLE_HUB) {
+                CommunalSceneKey.Communal
+            } else {
+                CommunalSceneKey.Blank
+            }
         var transitionId: UUID? = null
         scope.launch("$transitionOwnerName#$transitionName") {
             communalInteractor
