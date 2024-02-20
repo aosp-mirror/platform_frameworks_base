@@ -371,7 +371,6 @@ class UserTrackerImplTest : SysuiTestCase() {
 
         val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
         verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
-        captor.value.onBeforeUserSwitching(newID)
         captor.value.onUserSwitching(newID, userSwitchingReply)
 
         assertThat(callback.calledOnUserChanging).isEqualTo(0)
