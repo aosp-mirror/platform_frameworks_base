@@ -712,7 +712,7 @@ public class SystemConfigTest {
             android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
     public void getEnhancedConfirmationTrustedInstallers_returnsTrustedInstallers()
             throws IOException {
-        String pkgName = "com.example.app";
+        String packageName = "com.example.app";
         String certificateDigestStr = "E9:7A:BC:2C:D1:CA:8D:58:6A:57:0B:8C:F8:60:AA:D2:"
                 + "8D:13:30:2A:FB:C9:00:2C:5D:53:B2:6C:09:A4:85:A0";
 
@@ -720,7 +720,7 @@ public class SystemConfigTest {
                 .toByteArray();
         String contents = "<config>"
                 + "<" + "enhanced-confirmation-trusted-installer" + " "
-                + "package=\"" + pkgName + "\""
+                + "package=\"" + packageName + "\""
                 + " sha256-cert-digest=\"" + certificateDigestStr + "\""
                 + "/>"
                 + "</config>";
@@ -734,10 +734,10 @@ public class SystemConfigTest {
 
         assertThat(actualTrustedInstallers.size()).isEqualTo(1);
         SignedPackage actual = actualTrustedInstallers.stream().findFirst().orElseThrow();
-        SignedPackage expected = new SignedPackage(pkgName, certificateDigest);
+        SignedPackage expected = new SignedPackage(packageName, certificateDigest);
 
         assertThat(actual.getCertificateDigest()).isEqualTo(expected.getCertificateDigest());
-        assertThat(actual.getPkgName()).isEqualTo(expected.getPkgName());
+        assertThat(actual.getPackageName()).isEqualTo(expected.getPackageName());
         assertThat(actual).isEqualTo(expected);
     }
 
