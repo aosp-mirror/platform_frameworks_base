@@ -321,6 +321,22 @@ public final class InputMethodManager {
     };
 
     /**
+     * A runnable that reports {@link InputConnection} opened event for calls to
+     * {@link IInputMethodManagerGlobalInvoker#startInputOrWindowGainedFocusAsync}.
+     */
+    private abstract static class ReportInputConnectionOpenedRunner implements Runnable {
+        /**
+         * Sequence number to track startInput requests to
+         * {@link IInputMethodManagerGlobalInvoker#startInputOrWindowGainedFocusAsync}
+         */
+        int mSequenceNum;
+        ReportInputConnectionOpenedRunner(int sequenceNum) {
+            this.mSequenceNum = sequenceNum;
+        }
+    }
+    private ReportInputConnectionOpenedRunner mReportInputConnectionOpenedRunner;
+
+    /**
      * Ensures that {@link #sInstance} becomes non-{@code null} for application that have directly
      * or indirectly relied on {@link #sInstance} via reflection or something like that.
      *
@@ -691,6 +707,7 @@ public final class InputMethodManager {
     private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
     private static final int MSG_SET_INTERACTIVE = 13;
     private static final int MSG_ON_SHOW_REQUESTED = 31;
+    private static final int MSG_START_INPUT_RESULT = 40;
 
     /**
      * Calling this will invalidate Local stylus handwriting availability Cache which
@@ -1045,7 +1062,7 @@ public final class InputMethodManager {
                     return;
                 }
                 case MSG_BIND: {
-                    final InputBindResult res = (InputBindResult)msg.obj;
+                    final InputBindResult res = (InputBindResult) msg.obj;
                     if (DEBUG) {
                         Log.i(TAG, "handleMessage: MSG_BIND " + res.sequence + "," + res.id);
                     }
@@ -1069,6 +1086,60 @@ public final class InputMethodManager {
                         mCurId = res.id; // for @UnsupportedAppUsage
                     }
                     startInputInner(StartInputReason.BOUND_TO_IMMS, null, 0, 0, 0);
+                    return;
+                }
+
+                case MSG_START_INPUT_RESULT: {
+                    final InputBindResult res = (InputBindResult) msg.obj;
+                    final int startInputSeq = msg.arg1;
+                    if (res == null) {
+                        // IMMS logs .wtf already.
+                        return;
+                    }
+                    if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
+                    synchronized (mH) {
+                        if (res.id != null) {
+                            updateInputChannelLocked(res.channel);
+                            mCurMethod = res.method; // for @UnsupportedAppUsage
+                            mCurBindState = new BindState(res);
+                            mAccessibilityInputMethodSession.clear();
+                            if (res.accessibilitySessions != null) {
+                                for (int i = 0; i < res.accessibilitySessions.size(); i++) {
+                                    IAccessibilityInputMethodSessionInvoker wrapper =
+                                            IAccessibilityInputMethodSessionInvoker.createOrNull(
+                                                    res.accessibilitySessions.valueAt(i));
+                                    if (wrapper != null) {
+                                        mAccessibilityInputMethodSession.append(
+                                                res.accessibilitySessions.keyAt(i), wrapper);
+                                    }
+                                }
+                            }
+                            mCurId = res.id; // for @UnsupportedAppUsage
+                        } else if (res.channel != null && res.channel != mCurChannel) {
+                            res.channel.dispose();
+                        }
+                        switch (res.result) {
+                            case InputBindResult.ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
+                                mRestartOnNextWindowFocus = true;
+                                mServedView = null;
+                                break;
+                        }
+                        if (mCompletions != null) {
+                            if (isImeSessionAvailableLocked()) {
+                                mCurBindState.mImeSession.displayCompletions(mCompletions);
+                            }
+                        }
+
+                        if (res != null
+                                && res.method != null
+                                && mServedView != null
+                                && mReportInputConnectionOpenedRunner != null
+                                && mReportInputConnectionOpenedRunner.mSequenceNum
+                                        == startInputSeq) {
+                            mReportInputConnectionOpenedRunner.run();
+                        }
+                        mReportInputConnectionOpenedRunner = null;
+                    }
                     return;
                 }
                 case MSG_UNBIND: {
@@ -1319,6 +1390,12 @@ public final class InputMethodManager {
         @Override
         public void onBindMethod(InputBindResult res) {
             mH.obtainMessage(MSG_BIND, res).sendToTarget();
+        }
+
+        @Override
+        public void onStartInputResult(InputBindResult res, int startInputSeq) {
+            mH.obtainMessage(MSG_START_INPUT_RESULT, startInputSeq, -1 /* unused */, res)
+                    .sendToTarget();
         }
 
         @Override
@@ -2010,6 +2087,7 @@ public final class InputMethodManager {
             mServedConnecting = false;
             clearConnectionLocked();
         }
+        mReportInputConnectionOpenedRunner = null;
         // Clear the back callbacks held by the ime dispatcher to avoid memory leaks.
         mImeDispatcher.clear();
     }
@@ -3080,14 +3158,52 @@ public final class InputMethodManager {
             final int targetUserId = editorInfo.targetInputMethodUser != null
                     ? editorInfo.targetInputMethodUser.getIdentifier() : UserHandle.myUserId();
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMM.startInputOrWindowGainedFocus");
-            res = IInputMethodManagerGlobalInvoker.startInputOrWindowGainedFocus(
-                    startInputReason, mClient, windowGainingFocus, startInputFlags,
-                    softInputMode, windowFlags, editorInfo, servedInputConnection,
-                    servedInputConnection == null ? null
-                            : servedInputConnection.asIRemoteAccessibilityInputConnection(),
-                    view.getContext().getApplicationInfo().targetSdkVersion, targetUserId,
-                    mImeDispatcher);
+
+            int startInputSeq = -1;
+            if (Flags.useZeroJankProxy()) {
+                // async result delivered via MSG_START_INPUT_RESULT.
+                startInputSeq = IInputMethodManagerGlobalInvoker.startInputOrWindowGainedFocusAsync(
+                        startInputReason, mClient, windowGainingFocus, startInputFlags,
+                        softInputMode, windowFlags, editorInfo, servedInputConnection,
+                        servedInputConnection == null ? null
+                                : servedInputConnection.asIRemoteAccessibilityInputConnection(),
+                        view.getContext().getApplicationInfo().targetSdkVersion, targetUserId,
+                        mImeDispatcher);
+            } else {
+                res = IInputMethodManagerGlobalInvoker.startInputOrWindowGainedFocus(
+                        startInputReason, mClient, windowGainingFocus, startInputFlags,
+                        softInputMode, windowFlags, editorInfo, servedInputConnection,
+                        servedInputConnection == null ? null
+                                : servedInputConnection.asIRemoteAccessibilityInputConnection(),
+                        view.getContext().getApplicationInfo().targetSdkVersion, targetUserId,
+                        mImeDispatcher);
+            }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            if (Flags.useZeroJankProxy()) {
+                // Create a runnable for delayed notification to the app that the InputConnection is
+                // initialized and ready for use.
+                if (ic != null) {
+                    final int seqId = startInputSeq;
+                    mReportInputConnectionOpenedRunner =
+                            new ReportInputConnectionOpenedRunner(startInputSeq) {
+                                @Override
+                                public void run() {
+                                    if (DEBUG) {
+                                        Log.v(TAG, "Calling View.onInputConnectionOpened: view= "
+                                                + view
+                                                + ", ic=" + ic + ", editorInfo=" + editorInfo
+                                                + ", handler="
+                                                + icHandler + ", startInputSeq=" + seqId);
+                                    }
+                                    reportInputConnectionOpened(ic, editorInfo, icHandler, view);
+                                }
+                            };
+                } else {
+                    mReportInputConnectionOpenedRunner = null;
+                }
+                return true;
+            }
+
             if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
             if (res == null) {
                 Log.wtf(TAG, "startInputOrWindowGainedFocus must not return"
@@ -3118,6 +3234,7 @@ public final class InputMethodManager {
             } else if (res.channel != null && res.channel != mCurChannel) {
                 res.channel.dispose();
             }
+
             switch (res.result) {
                 case InputBindResult.ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
                     mRestartOnNextWindowFocus = true;

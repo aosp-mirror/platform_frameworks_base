@@ -354,21 +354,18 @@ public class PackageArchiver {
                 ps.setArchiveState(/* archiveState= */ null, userId);
             }
         }
-        mPm.mBackgroundHandler.post(
-                () -> {
-                    File iconsDir = getIconsDir(packageName, userId);
-                    if (!iconsDir.exists()) {
-                        return;
-                    }
-                    // TODO(b/319238030) Move this into installd.
-                    if (!FileUtils.deleteContentsAndDir(iconsDir)) {
-                        Slog.e(TAG, "Failed to clean up archive files for " + packageName);
-                    } else {
-                        if (DEBUG) {
-                            Slog.e(TAG, "Deleted icons at " + iconsDir.getAbsolutePath());
-                        }
-                    }
-                });
+        File iconsDir = getIconsDir(packageName, userId);
+        if (!iconsDir.exists()) {
+            return;
+        }
+        // TODO(b/319238030) Move this into installd.
+        if (!FileUtils.deleteContentsAndDir(iconsDir)) {
+            Slog.e(TAG, "Failed to clean up archive files for " + packageName);
+        } else {
+            if (DEBUG) {
+                Slog.e(TAG, "Deleted icons at " + iconsDir.getAbsolutePath());
+            }
+        }
     }
 
     @Nullable

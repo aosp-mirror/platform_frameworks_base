@@ -356,6 +356,12 @@ public final class WMShell implements
                         // TODO(b/278084491): update sysui state for changes on other displays
                     }
                 }, mSysUiMainExecutor);
+        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
+            @Override
+            public void enterDesktop(int displayId) {
+                desktopMode.enterDesktop(displayId);
+            }
+        });
     }
 
     @VisibleForTesting

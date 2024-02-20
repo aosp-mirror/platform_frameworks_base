@@ -17,7 +17,7 @@
 package com.android.server;
 
 import static android.app.Flags.modesApi;
-import static android.app.Flags.enableNightModeCache;
+import static android.app.Flags.enableNightModeBinderCache;
 import static android.app.UiModeManager.ContrastUtils.CONTRAST_DEFAULT_VALUE;
 import static android.app.UiModeManager.DEFAULT_PRIORITY;
 import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
@@ -148,7 +148,7 @@ final class UiModeManagerService extends SystemService {
         @Override
         public void set(int mode) {
             mNightModeValue = mode;
-            if (enableNightModeCache()) {
+            if (enableNightModeBinderCache()) {
                 UiModeManager.invalidateNightModeCache();
             }
         }

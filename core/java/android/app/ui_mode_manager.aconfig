@@ -1,8 +1,11 @@
 package: "android.app"
 
 flag {
-     namespace: "system_performance"
-     name: "enable_night_mode_cache"
+     namespace: "systemui"
+     name: "enable_night_mode_binder_cache"
      description: "Enables the use of binder caching for system night mode."
      bug: "255999432"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
 }

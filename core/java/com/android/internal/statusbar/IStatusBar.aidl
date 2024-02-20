@@ -376,4 +376,10 @@ oneway interface IStatusBar
      * @param packageName of the session for which the output switcher is shown.
      */
     void showMediaOutputSwitcher(String packageName);
+
+    /** Enters desktop mode.
+    *
+    * @param displayId the id of the current display.
+    */
+    void enterDesktop(int displayId);
 }
