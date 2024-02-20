@@ -27,6 +27,7 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HexFormat;
 import java.util.List;
 
 /**
@@ -230,5 +231,13 @@ public final class PollingFrame implements Parcelable{
         frame.putByteArray(KEY_POLLING_LOOP_DATA, getData());
         frame.putInt(KEY_POLLING_LOOP_TIMESTAMP, getTimestamp());
         return frame;
+    }
+
+    @Override
+    public String toString() {
+        return "PollingFrame { Type: " + (char) getType()
+                + ", gain: " + getGain()
+                + ", timestamp: " + Integer.toUnsignedString(getTimestamp())
+                + ", data: [" + HexFormat.ofDelimiter(" ").formatHex(getData()) + "] }";
     }
 }
