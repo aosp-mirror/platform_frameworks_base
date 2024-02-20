@@ -3063,6 +3063,14 @@ package android.service.autofill.augmented {
 
 }
 
+package android.service.chooser {
+
+  @FlaggedApi("android.service.chooser.enable_chooser_result") public final class ChooserResult implements android.os.Parcelable {
+    ctor public ChooserResult(int, @Nullable android.content.ComponentName, boolean);
+  }
+
+}
+
 package android.service.dreams {
 
   public abstract class DreamOverlayService extends android.app.Service {
