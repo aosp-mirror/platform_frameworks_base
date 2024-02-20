@@ -127,7 +127,7 @@ public class WearableSensingManager {
 
     /**
      * The value of the status code that indicates an error occurred in the encrypted channel backed
-     * by the provided connection. See {@link #provideWearableConnection(ParcelFileDescriptor,
+     * by the provided connection. See {@link #provideConnection(ParcelFileDescriptor,
      * Executor, Consumer)}.
      */
     @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
@@ -223,13 +223,13 @@ public class WearableSensingManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
-    public void provideWearableConnection(
+    public void provideConnection(
             @NonNull ParcelFileDescriptor wearableConnection,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull @StatusCode Consumer<Integer> statusConsumer) {
         try {
             RemoteCallback callback = createStatusCallback(executor, statusConsumer);
-            mService.provideWearableConnection(wearableConnection, callback);
+            mService.provideConnection(wearableConnection, callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

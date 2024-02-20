@@ -399,9 +399,9 @@ public class WearableSensingManagerService extends
     private final class WearableSensingManagerInternal extends IWearableSensingManager.Stub {
 
         @Override
-        public void provideWearableConnection(
+        public void provideConnection(
                 ParcelFileDescriptor wearableConnection, RemoteCallback callback) {
-            Slog.i(TAG, "WearableSensingManagerInternal provideWearableConnection.");
+            Slog.i(TAG, "WearableSensingManagerInternal provideConnection.");
             Objects.requireNonNull(wearableConnection);
             Objects.requireNonNull(callback);
             mContext.enforceCallingOrSelfPermission(
@@ -413,7 +413,7 @@ public class WearableSensingManagerService extends
                 return;
             }
             callPerUserServiceIfExist(
-                    service -> service.onProvideWearableConnection(wearableConnection, callback),
+                    service -> service.onProvideConnection(wearableConnection, callback),
                     callback);
         }
 
