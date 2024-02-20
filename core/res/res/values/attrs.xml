@@ -8988,6 +8988,14 @@
         <!-- Whether to show clock and other complications such as weather in the overlay. Default
              to true. Note that the overlay on dreams is currently only supported on tablets. -->
         <attr name="showClockAndComplications" format="boolean" />
+
+        <!-- Dream Category to determine the type of dream. Default to default.
+        @hide -->
+        <attr name="dreamCategory" format="integer">
+            <flag name="none" value="0x0" />
+            <flag name="low_light" value="0x1" />
+            <flag name="home_panel" value="0x2" />
+        </attr>
     </declare-styleable>
 
     <!--  Use <code>trust-agent</code> as the root tag of the XML resource that

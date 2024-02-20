@@ -16,4 +16,5 @@
 <dream xmlns:android="http://schemas.android.com/apk/res/android"
        android:showClockAndComplications="false"
        android:previewImage="@drawable/homecontrols_sq"
+       android:dreamCategory="home_panel"
     />
