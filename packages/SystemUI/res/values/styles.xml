@@ -953,8 +953,11 @@
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
-    <style name="Theme.VolumePanelActivity"
-        parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
+    <style name="Theme.VolumePanelActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>

@@ -17,8 +17,6 @@
 package com.android.systemui.volume.panel.component.mediaoutput.domain
 
 import android.media.AudioManager
-import android.media.session.MediaSession
-import android.media.session.PlaybackState
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -26,14 +24,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.volume.audioModeInteractor
 import com.android.systemui.volume.audioRepository
-import com.android.systemui.volume.localMediaRepository
-import com.android.systemui.volume.mediaController
-import com.android.systemui.volume.mediaControllerRepository
-import com.android.systemui.volume.mediaOutputInteractor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -54,23 +46,14 @@ class MediaOutputAvailabilityCriteriaTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        with(kosmos) {
-            whenever(mediaController.packageName).thenReturn("test.pkg")
-            whenever(mediaController.sessionToken).thenReturn(MediaSession.Token(0, mock {}))
-            whenever(mediaController.playbackState).thenReturn(PlaybackState.Builder().build())
-
-            mediaControllerRepository.setActiveLocalMediaController(mediaController)
-
-            underTest = MediaOutputAvailabilityCriteria(mediaOutputInteractor, audioModeInteractor)
-        }
+        underTest = MediaOutputAvailabilityCriteria(kosmos.audioModeInteractor)
     }
 
     @Test
-    fun notInCallAndHasDevices_isAvailable_true() {
+    fun notInCall_isAvailable_true() {
         with(kosmos) {
             testScope.runTest {
                 audioRepository.setMode(AudioManager.MODE_NORMAL)
-                localMediaRepository.updateMediaDevices(listOf(mock {}))
 
                 val isAvailable by collectLastValue(underTest.isAvailable())
                 runCurrent()
@@ -79,27 +62,12 @@ class MediaOutputAvailabilityCriteriaTest : SysuiTestCase() {
             }
         }
     }
+
     @Test
-    fun inCallAndHasDevices_isAvailable_false() {
+    fun inCall_isAvailable_false() {
         with(kosmos) {
             testScope.runTest {
                 audioRepository.setMode(AudioManager.MODE_IN_CALL)
-                localMediaRepository.updateMediaDevices(listOf(mock {}))
-
-                val isAvailable by collectLastValue(underTest.isAvailable())
-                runCurrent()
-
-                assertThat(isAvailable).isFalse()
-            }
-        }
-    }
-
-    @Test
-    fun notInCallAndHasDevices_isAvailable_false() {
-        with(kosmos) {
-            testScope.runTest {
-                audioRepository.setMode(AudioManager.MODE_NORMAL)
-                localMediaRepository.updateMediaDevices(emptyList())
 
                 val isAvailable by collectLastValue(underTest.isAvailable())
                 runCurrent()
