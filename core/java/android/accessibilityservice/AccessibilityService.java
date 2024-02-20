@@ -81,7 +81,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -853,7 +852,6 @@ public abstract class AccessibilityService extends Service {
     private final SparseArray<AccessibilityButtonController> mAccessibilityButtonControllers =
             new SparseArray<>(0);
     private BrailleDisplayController mBrailleDisplayController;
-    private BrailleDisplayController mTestBrailleDisplayController;
 
     private int mGestureStatusCallbackSequence;
 
@@ -3650,46 +3648,10 @@ public abstract class AccessibilityService extends Service {
     public BrailleDisplayController getBrailleDisplayController() {
         BrailleDisplayController.checkApiFlagIsEnabled();
         synchronized (mLock) {
-            if (mTestBrailleDisplayController != null) {
-                return mTestBrailleDisplayController;
-            }
-
             if (mBrailleDisplayController == null) {
                 mBrailleDisplayController = new BrailleDisplayControllerImpl(this, mLock);
             }
             return mBrailleDisplayController;
-        }
-    }
-
-    /**
-     * Set the {@link BrailleDisplayController} implementation that will be returned by
-     * {@link #getBrailleDisplayController}, to allow this accessibility service to test its
-     * interaction with BrailleDisplayController without requiring a real Braille display.
-     *
-     * <p>For full test fidelity, ensure that this test-only implementation follows the same
-     * behavior specified in the documentation for {@link BrailleDisplayController}, including
-     * thrown exceptions.
-     *
-     * @param controller A test-only implementation of {@link BrailleDisplayController}.
-     */
-    @FlaggedApi(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
-    public void setTestBrailleDisplayController(@NonNull BrailleDisplayController controller) {
-        BrailleDisplayController.checkApiFlagIsEnabled();
-        Objects.requireNonNull(controller);
-        synchronized (mLock) {
-            mTestBrailleDisplayController = controller;
-        }
-    }
-
-    /**
-     * Clears the {@link BrailleDisplayController} previously set by
-     * {@link #setTestBrailleDisplayController}.
-     */
-    @FlaggedApi(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
-    public void clearTestBrailleDisplayController() {
-        BrailleDisplayController.checkApiFlagIsEnabled();
-        synchronized (mLock) {
-            mTestBrailleDisplayController = null;
         }
     }
 }
