@@ -342,8 +342,6 @@ class CreateFlowUtils {
             defaultProviderIdPreferredByApp: String?,
             defaultProviderIdsSetByUser: Set<String>,
             requestDisplayInfo: RequestDisplayInfo,
-            isOnPasskeyIntroStateAlready: Boolean,
-            isPasskeyFirstUse: Boolean,
         ): CreateCredentialUiState? {
             var remoteEntry: RemoteInfo? = null
             var remoteEntryProvider: EnabledProviderInfo? = null
@@ -392,11 +390,8 @@ class CreateFlowUtils {
             val defaultProvider = defaultProviderPreferredByApp ?: defaultProviderSetByUser
             val initialScreenState = toCreateScreenState(
                 createOptionSize = createOptionsPairs.size,
-                isOnPasskeyIntroStateAlready = isOnPasskeyIntroStateAlready,
-                requestDisplayInfo = requestDisplayInfo,
                 remoteEntry = remoteEntry,
-                isPasskeyFirstUse = isPasskeyFirstUse
-            ) ?: return null
+            )
             val sortedCreateOptionsPairs = createOptionsPairs.sortedWith(
                 compareByDescending { it.first.lastUsedTime }
             )
@@ -419,15 +414,9 @@ class CreateFlowUtils {
 
         fun toCreateScreenState(
             createOptionSize: Int,
-            isOnPasskeyIntroStateAlready: Boolean,
-            requestDisplayInfo: RequestDisplayInfo,
             remoteEntry: RemoteInfo?,
-            isPasskeyFirstUse: Boolean,
-        ): CreateScreenState? {
-            return if (isPasskeyFirstUse && requestDisplayInfo.type == CredentialType.PASSKEY &&
-                !isOnPasskeyIntroStateAlready) {
-                CreateScreenState.PASSKEY_INTRO
-            } else if (createOptionSize == 0 && remoteEntry != null) {
+        ): CreateScreenState {
+            return if (createOptionSize == 0 && remoteEntry != null) {
                 CreateScreenState.EXTERNAL_ONLY_SELECTION
             } else {
                 CreateScreenState.CREATION_OPTION_SELECTION
