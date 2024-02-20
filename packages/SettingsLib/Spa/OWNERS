@@ -1,4 +1,4 @@
-set noparent
+include platform/frameworks/base:/packages/SettingsLib/OWNERS
 
 chaohuiw@google.com
 hanxu@google.com
