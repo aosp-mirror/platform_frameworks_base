@@ -2228,6 +2228,11 @@
     <!-- Tuner string -->
     <!-- Tuner string -->
 
+    <!-- Message shown during shutdown when Find My Device with Dead Battery Finder is active  [CHAR LIMIT=300] -->
+    <string name="finder_active">You can locate this phone with Find My Device even when powered off</string>
+    <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. [CHAR LIMIT=60] -->
+    <string name="shutdown_progress">Shutting down\u2026</string>
+
     <!-- Text help link for care instructions for overheating devices [CHAR LIMIT=40] -->
     <string name="thermal_shutdown_dialog_help_text">See care steps</string>
     <!-- URL for care instructions for overheating devices -->
