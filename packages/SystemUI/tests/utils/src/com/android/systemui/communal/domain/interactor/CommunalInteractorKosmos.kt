@@ -60,9 +60,11 @@ suspend fun Kosmos.setCommunalAvailable(available: Boolean) {
     fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, available)
     if (available) {
         fakeUserRepository.asMainUser()
-        with(fakeKeyguardRepository) {
-            setIsEncryptedOrLockdown(false)
-            setKeyguardShowing(true)
-        }
+    } else {
+        fakeUserRepository.asDefaultUser()
+    }
+    with(fakeKeyguardRepository) {
+        setIsEncryptedOrLockdown(!available)
+        setKeyguardShowing(available)
     }
 }

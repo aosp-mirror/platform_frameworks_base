@@ -24,8 +24,10 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
@@ -508,6 +510,10 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Test
     fun testCommunalLocation() =
         testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
             communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
             runCurrent()
             verify(mediaCarouselController)

@@ -34,7 +34,7 @@ abstract class BaseCommunalViewModel(
     private val communalInteractor: CommunalInteractor,
     val mediaHost: MediaHost,
 ) {
-    val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
+    val currentScene: Flow<CommunalSceneKey> = communalInteractor.desiredScene
 
     /** Whether widgets are currently being re-ordered. */
     open val reorderingWidgets: StateFlow<Boolean> = MutableStateFlow(false)

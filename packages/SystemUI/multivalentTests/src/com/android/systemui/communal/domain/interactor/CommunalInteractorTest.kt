@@ -455,6 +455,9 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun listensToSceneChange() =
         testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
             var desiredScene = collectLastValue(underTest.desiredScene)
             runCurrent()
             assertThat(desiredScene()).isEqualTo(CommunalSceneKey.Blank)
@@ -476,6 +479,30 @@ class CommunalInteractorTest : SysuiTestCase() {
             val desiredScene = collectLastValue(communalRepository.desiredScene)
             runCurrent()
             assertThat(desiredScene()).isEqualTo(targetScene)
+        }
+
+    @Test
+    fun desiredScene_communalNotAvailable_returnsBlank() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            val desiredScene by collectLastValue(underTest.desiredScene)
+
+            underTest.onSceneChanged(CommunalSceneKey.Communal)
+            assertThat(desiredScene).isEqualTo(CommunalSceneKey.Communal)
+
+            kosmos.setCommunalAvailable(false)
+            runCurrent()
+
+            // Scene returns blank when communal is not available.
+            assertThat(desiredScene).isEqualTo(CommunalSceneKey.Blank)
+
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            // After re-enabling, scene goes back to Communal.
+            assertThat(desiredScene).isEqualTo(CommunalSceneKey.Communal)
         }
 
     @Test
@@ -604,8 +631,28 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun isCommunalShowing() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            var isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
+            runCurrent()
+            assertThat(isCommunalShowing()).isEqualTo(false)
+
+            underTest.onSceneChanged(CommunalSceneKey.Communal)
+
+            isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
+            runCurrent()
+            assertThat(isCommunalShowing()).isEqualTo(true)
+        }
+
+    @Test
     fun isCommunalShowing_whenSceneContainerDisabled() =
         testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
             // Verify default is false
             val isCommunalShowing by collectLastValue(underTest.isCommunalShowing)
             runCurrent()
