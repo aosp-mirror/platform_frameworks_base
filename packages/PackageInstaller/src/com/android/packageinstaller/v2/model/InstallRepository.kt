@@ -25,6 +25,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.Flags
 import android.content.pm.PackageInfo
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionInfo
@@ -362,7 +363,7 @@ class InstallRepository(private val context: Context) {
         params.setPermissionState(
             Manifest.permission.USE_FULL_SCREEN_INTENT, SessionParams.PERMISSION_STATE_DENIED
         )
-        if (pfd != null) {
+        if (pfd != null && Flags.readInstallInfo()) {
             try {
                 val installInfo = packageInstaller.readInstallInfo(pfd, debugPathName, 0)
                 params.setAppPackageName(installInfo.packageName)
@@ -425,7 +426,8 @@ class InstallRepository(private val context: Context) {
 
         if (PackageInstaller.ACTION_CONFIRM_INSTALL == intent.action) {
             val info = packageInstaller.getSessionInfo(sessionId)
-            val resolvedPath = info?.resolvedBaseApkPath
+            val resolvedPath =
+                    if (Flags.getResolvedApkPath()) info?.resolvedBaseApkPath else null
             if (info == null || !info.isSealed || resolvedPath == null) {
                 Log.w(LOG_TAG, "Session $sessionId in funky state; ignoring")
                 return InstallAborted(ABORT_REASON_INTERNAL_ERROR)
