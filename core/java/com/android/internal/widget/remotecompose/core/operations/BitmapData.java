@@ -33,7 +33,7 @@ public class BitmapData implements Operation {
     int mImageWidth;
     int mImageHeight;
     byte[] mBitmap;
-    public static final int MAX_IMAGE_DIMENSION = 6000;
+    public static final int MAX_IMAGE_DIMENSION = 8000;
 
     public static final Companion COMPANION = new Companion();
 
