@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.toast.ToastModule;
 import com.android.systemui.unfold.SysUIUnfoldStartableModule;
 import com.android.systemui.unfold.UnfoldTransitionModule;
+import com.android.systemui.util.kotlin.SysUICoroutinesModule;
 import com.android.systemui.volume.dagger.VolumeModule;
 import com.android.systemui.wallpapers.dagger.WallpaperModule;
 
@@ -117,6 +118,7 @@ import javax.inject.Named;
         ShadeModule.class,
         StartCentralSurfacesModule.class,
         SceneContainerFrameworkModule.class,
+        SysUICoroutinesModule.class,
         SysUIUnfoldStartableModule.class,
         UnfoldTransitionModule.Startables.class,
         ToastModule.class,

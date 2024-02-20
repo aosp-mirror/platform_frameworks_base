@@ -53,6 +53,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -102,6 +103,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
+import kotlin.coroutines.CoroutineContext;
+import kotlinx.coroutines.test.TestScope;
+
 /**
  * A helper class to create {@link ExpandableNotificationRow} (for both individual and group
  * notifications).
@@ -140,6 +144,10 @@ public class NotificationTestHelper {
     private final FakeFeatureFlags mFeatureFlags;
     private final SystemClock mSystemClock;
     private final RowInflaterTaskLogger mRowInflaterTaskLogger;
+    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final CoroutineContext mBgCoroutineContext =
+            mTestScope.getBackgroundScope().getCoroutineContext();
+    private final CoroutineContext mMainCoroutineContext = mTestScope.getCoroutineContext();
 
     public NotificationTestHelper(
             Context context,
@@ -169,7 +177,10 @@ public class NotificationTestHelper {
         mIconManager = new IconManager(
                 mock(CommonNotifCollection.class),
                 mock(LauncherApps.class),
-                new IconBuilder(mContext));
+                new IconBuilder(mContext),
+                mTestScope,
+                mBgCoroutineContext,
+                mMainCoroutineContext);
 
         NotificationContentInflater contentBinder = new NotificationContentInflater(
                 mock(NotifRemoteViewCache.class),
