@@ -230,18 +230,12 @@ constructor(
         val currentAllowMediaPlayerOnLockScreen = allowMediaPlayerOnLockScreen
         val useSplitShade = useSplitShade
         val shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade()
-
         visible =
             isMediaHostVisible &&
                 isBypassNotEnabled &&
                 keyguardOrUserSwitcher &&
                 currentAllowMediaPlayerOnLockScreen &&
                 shouldBeVisibleForSplitShade
-        if (visible) {
-            showMediaPlayer()
-        } else {
-            hideMediaPlayer()
-        }
         logger.logRefreshMediaPosition(
             reason = reason,
             visible = visible,
@@ -251,8 +245,17 @@ constructor(
             mediaHostVisible = isMediaHostVisible,
             bypassNotEnabled = isBypassNotEnabled,
             currentAllowMediaPlayerOnLockScreen = currentAllowMediaPlayerOnLockScreen,
-            shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade
+            shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade,
         )
+        val currActiveContainer = activeContainer
+
+        logger.logActiveMediaContainer("before refreshMediaPosition", currActiveContainer)
+        if (visible) {
+            showMediaPlayer()
+        } else {
+            hideMediaPlayer()
+        }
+        logger.logActiveMediaContainer("after refreshMediaPosition", currActiveContainer)
 
         lastUsedStatusBarState = currentState
     }
@@ -325,4 +328,7 @@ constructor(
             }
         }
     }
+
+    private val activeContainer: ViewGroup? =
+        if (useSplitShade) splitShadeContainer else singlePaneContainer
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.controls.ui
 
+import android.view.ViewGroup
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.KeyguardMediaControllerLog
@@ -36,8 +37,8 @@ constructor(@KeyguardMediaControllerLog private val logBuffer: LogBuffer) {
         mediaHostVisible: Boolean,
         bypassNotEnabled: Boolean,
         currentAllowMediaPlayerOnLockScreen: Boolean,
-        shouldBeVisibleForSplitShade: Boolean
-    ) =
+        shouldBeVisibleForSplitShade: Boolean,
+    ) {
         logBuffer.log(
             TAG,
             DEBUG,
@@ -63,6 +64,19 @@ constructor(@KeyguardMediaControllerLog private val logBuffer: LogBuffer) {
                     "shouldBeVisibleForSplitShade=$str3)"
             }
         )
+    }
+
+    fun logActiveMediaContainer(reason: String, activeContainer: ViewGroup?) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = reason
+                str2 = activeContainer.toString()
+            },
+            { "activeMediaContainerVisibility(reason=$str1, activeContainer=$str2)" }
+        )
+    }
 
     private companion object {
         private const val TAG = "KeyguardMediaControllerLog"
