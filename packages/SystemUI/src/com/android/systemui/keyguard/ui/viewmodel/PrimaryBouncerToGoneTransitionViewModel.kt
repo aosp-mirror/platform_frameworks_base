@@ -108,6 +108,7 @@ constructor(
                     0f
                 }
             },
+            onFinish = { 0f },
         )
     }
 

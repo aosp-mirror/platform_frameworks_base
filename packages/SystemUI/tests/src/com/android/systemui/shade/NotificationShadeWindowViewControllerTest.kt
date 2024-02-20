@@ -450,7 +450,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
         mSetFlagsRule.enableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 
-        // THEN touch should NOT be intercepted by NotificationShade
+        // THEN touch should be intercepted by NotificationShade
         assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()
     }
 
@@ -469,7 +469,35 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
         mSetFlagsRule.enableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 
-        // THEN touch should NOT be intercepted by NotificationShade
+        // THEN touch should be intercepted by NotificationShade
+        assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()
+    }
+
+    @Test
+    fun shouldInterceptTouchEvent_dozingAndPulsing_touchIntercepted() {
+        // GIVEN dozing
+        whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
+        // AND pulsing
+        whenever(dozeServiceHost.isPulsing()).thenReturn(true)
+        // AND status bar doesn't want it
+        whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
+            .thenReturn(false)
+        // AND shade is not fully expanded
+        whenever(notificationPanelViewController.isFullyExpanded()).thenReturn(false)
+        // AND the lock icon does NOT want the touch
+        whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT)).thenReturn(false)
+        // AND quick settings controller DOES want it
+        whenever(quickSettingsController.shouldQuickSettingsIntercept(any(), any(), any()))
+            .thenReturn(true)
+        // AND bouncer is not showing
+        whenever(centralSurfaces.isBouncerShowing()).thenReturn(false)
+        // AND panel view controller wants it
+        whenever(notificationPanelViewController.handleExternalInterceptTouch(DOWN_EVENT))
+            .thenReturn(true)
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+
+        // THEN touch should be intercepted by NotificationShade
         assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()
     }
 

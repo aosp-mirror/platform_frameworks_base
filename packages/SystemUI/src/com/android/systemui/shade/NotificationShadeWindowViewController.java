@@ -511,6 +511,12 @@ public class NotificationShadeWindowViewController implements Dumpable {
                             return true;
                         }
                     }
+                } else if (migrateClocksToBlueprint()) {
+                    // This final check handles swipes on HUNs and when Pulsing
+                    if (!bouncerShowing && didNotificationPanelInterceptEvent(ev)) {
+                        mShadeLogger.d("NSWVC: intercepted for HUN/PULSING");
+                        return true;
+                    }
                 }
                 return false;
             }
