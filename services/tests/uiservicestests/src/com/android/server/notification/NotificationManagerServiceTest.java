@@ -286,7 +286,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -13442,7 +13441,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @Ignore("b/324348078")
     public void cancelNotificationsFromListener_rapidClear_old_cancelOne() throws RemoteException {
         mSetFlagsRule.enableFlags(android.view.contentprotection.flags.Flags
                 .FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED);
@@ -13528,7 +13526,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @Ignore("b/324348078")
     public void cancelNotificationsFromListener_rapidClear_old_cancelAll() throws RemoteException {
         mSetFlagsRule.enableFlags(android.view.contentprotection.flags.Flags
                 .FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED);
