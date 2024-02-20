@@ -4101,6 +4101,13 @@
     <!-- How close vibration request should be when they're aggregated for dumpsys, in ms. -->
     <integer name="config_previousVibrationsDumpAggregationTimeMillisLimit">1000</integer>
 
+    <!-- How long history of vibration control service should be kept for the dumpsys. -->
+    <integer name="config_vibratorControlServiceDumpSizeLimit">50</integer>
+
+    <!-- How close requests to vibration control service should be when they're aggregated for
+         dumpsys, in ms. -->
+    <integer name="config_vibratorControlServiceDumpAggregationTimeMillisLimit">60000</integer>
+
     <!-- The default vibration strength, must be between 1 and 255 inclusive. -->
     <integer name="config_defaultVibrationAmplitude">255</integer>
 
