@@ -315,7 +315,7 @@
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accéder aux contenus musicaux et audio sur votre appareil"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Photos et vidéos"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accéder aux photos et aux vidéos sur votre appareil"</string>
-    <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microphone"</string>
+    <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micro"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder aux données d\'activité physique"</string>
