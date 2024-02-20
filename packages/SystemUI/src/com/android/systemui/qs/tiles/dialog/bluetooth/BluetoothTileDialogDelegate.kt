@@ -32,6 +32,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Switch
 import android.widget.TextView
+import androidx.annotation.StringRes
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -204,12 +205,17 @@ internal constructor(
         getAutoOnToggleView(dialog).visibility = uiProperties.autoOnToggleVisibility
     }
 
-    internal fun onBluetoothAutoOnUpdated(dialog: SystemUIDialog, isEnabled: Boolean) {
+    internal fun onBluetoothAutoOnUpdated(
+        dialog: SystemUIDialog,
+        isEnabled: Boolean,
+        @StringRes infoResId: Int
+    ) {
         getAutoOnToggle(dialog).apply {
             isChecked = isEnabled
             setEnabled(true)
             alpha = ENABLED_ALPHA
         }
+        getAutoOnToggleInfoTextView(dialog).text = context.getString(infoResId)
     }
 
     private fun setupToggle(dialog: SystemUIDialog) {
@@ -262,6 +268,10 @@ internal constructor(
 
     private fun getAutoOnToggleView(dialog: SystemUIDialog): View {
         return dialog.requireViewById(R.id.bluetooth_auto_on_toggle_layout)
+    }
+
+    private fun getAutoOnToggleInfoTextView(dialog: SystemUIDialog): TextView {
+        return dialog.requireViewById(R.id.bluetooth_auto_on_toggle_info_text)
     }
 
     private fun getProgressBarAnimation(dialog: SystemUIDialog): ProgressBar {
