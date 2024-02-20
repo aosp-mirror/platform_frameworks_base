@@ -3509,6 +3509,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
+                    StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+                    if (statusbar != null) {
+                        statusbar.enterDesktop(event.getDisplayId());
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.DESKTOP_MODE);
+                        return true;
+                    }
+                }
+                break;
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 if (firstDown && event.isMetaPressed()) {
                     if (event.isCtrlPressed()) {
