@@ -20,6 +20,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -855,7 +856,8 @@ public abstract class DomainSelectionService extends Service {
      *
      * @return an {@link Executor} used to execute methods called remotely by the framework.
      */
-    public @NonNull Executor onCreateExecutor() {
+    @SuppressLint("OnNameExpected")
+    public @NonNull Executor getCreateExecutor() {
         return Runnable::run;
     }
 
@@ -869,7 +871,7 @@ public abstract class DomainSelectionService extends Service {
     public final @NonNull Executor getCachedExecutor() {
         synchronized (mExecutorLock) {
             if (mExecutor == null) {
-                Executor e = onCreateExecutor();
+                Executor e = getCreateExecutor();
                 mExecutor = (e != null) ? e : Runnable::run;
             }
             return mExecutor;

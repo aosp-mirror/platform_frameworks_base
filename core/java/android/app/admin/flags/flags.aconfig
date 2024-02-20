@@ -92,6 +92,13 @@ flag {
 }
 
 flag {
+    name: "allow_querying_profile_type"
+    namespace: "enterprise"
+    description: "Public APIs to query if a user is a profile and what kind of profile type it is."
+    bug: "323001115"
+}
+
+flag {
   name: "quiet_mode_credential_bug_fix"
   namespace: "enterprise"
   description: "Guards a bugfix that ends the credential input flow if the managed user has not stopped."
@@ -131,4 +138,11 @@ flag {
   namespace: "enterprise"
   description: "Add Headless DO support."
   bug: "289515470"
+}
+
+flag {
+  name: "is_mte_policy_enforced"
+  namespace: "enterprise"
+  description: "Allow to query whether MTE is enabled or not to check for compliance for enterprise policy"
+  bug: "322777918"
 }

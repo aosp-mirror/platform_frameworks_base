@@ -39,6 +39,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
+import com.android.internal.app.IVoiceInteractionAccessibilitySettingsListener;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.infra.AndroidFuture;
 
@@ -61,6 +62,8 @@ import java.util.function.Consumer;
 public class VisualQueryDetector {
     private static final String TAG = VisualQueryDetector.class.getSimpleName();
     private static final boolean DEBUG = false;
+    private static final int SETTINGS_DISABLE_BIT = 0;
+    private static final int SETTINGS_ENABLE_BIT = 1;
 
     private final Callback mCallback;
     private final Executor mExecutor;
@@ -68,6 +71,8 @@ public class VisualQueryDetector {
     private final IVoiceInteractionManagerService mManagerService;
     private final VisualQueryDetectorInitializationDelegate mInitializationDelegate;
     private final String mAttributionTag;
+    // Used to manage the internal mapping of exposed listener API and internal aidl impl
+    private AccessibilityDetectionEnabledListenerWrapper mActiveAccessibilityListenerWrapper = null;
 
     VisualQueryDetector(
             IVoiceInteractionManagerService managerService,
@@ -171,6 +176,108 @@ public class VisualQueryDetector {
         }
         synchronized (mInitializationDelegate.getLock()) {
             mInitializationDelegate.destroy();
+        }
+    }
+
+    /**
+     * Gets the binary value that controls the egress of accessibility data from
+     * {@link VisualQueryDetectedResult#setAccessibilityDetectionData(byte[])} is enabled.
+     *
+     * @return boolean value denoting if the setting is on. Default is {@code false}.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+    public boolean isAccessibilityDetectionEnabled() {
+        Slog.d(TAG, "Fetching accessibility setting");
+        synchronized (mInitializationDelegate.getLock()) {
+            try {
+                return mManagerService.getAccessibilityDetectionEnabled();
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Sets a listener subscribing to the value of the system setting that controls the egress of
+     * accessibility data from
+     * {@link VisualQueryDetectedResult#setAccessibilityDetectionData(byte[])} is enabled.
+     *
+     * Only one listener can be set at a time. The listener set must be unset with
+     * {@link clearAccessibilityDetectionEnabledListener(Consumer<Boolean>)}
+     * in order to set a new listener. Otherwise, this method will throw a
+     * {@link IllegalStateException}.
+     *
+     * @param listener Listener of type {@code Consumer<Boolean>} to subscribe to the value update.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+    public void setAccessibilityDetectionEnabledListener(@NonNull Consumer<Boolean> listener) {
+        Slog.d(TAG, "Registering Accessibility settings listener.");
+        synchronized (mInitializationDelegate.getLock()) {
+            try {
+                if (mActiveAccessibilityListenerWrapper != null) {
+                    Slog.e(TAG, "Fail to register accessibility setting listener: "
+                            + "already registered and not unregistered.");
+                    throw new IllegalStateException(
+                            "Cannot register listener with listeners already set.");
+                }
+                mActiveAccessibilityListenerWrapper =
+                        new AccessibilityDetectionEnabledListenerWrapper(listener);
+                mManagerService.registerAccessibilityDetectionSettingsListener(
+                        mActiveAccessibilityListenerWrapper);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Clear the listener that has been set with
+     * {@link setAccessibilityDetectionEnabledListener(Consumer<Boolean>)} such that when the value
+     * of the setting that controls the egress of accessibility data is changed the listener gets
+     * notified.
+     *
+     * If there is not listener that has been registered, the call to this method will lead to a
+     * {@link IllegalStateException}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ALLOW_COMPLEX_RESULTS_EGRESS_FROM_VQDS)
+    public void clearAccessibilityDetectionEnabledListener() {
+        Slog.d(TAG, "Unregistering Accessibility settings listener.");
+        synchronized (mInitializationDelegate.getLock()) {
+            try {
+                if (mActiveAccessibilityListenerWrapper == null) {
+                    Slog.e(TAG, "Not able to remove the listener: listener does not exist.");
+                    throw new IllegalStateException("Cannot clear listener since it is not set.");
+                }
+                mManagerService.unregisterAccessibilityDetectionSettingsListener(
+                        mActiveAccessibilityListenerWrapper);
+                mActiveAccessibilityListenerWrapper = null;
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+
+    private final class AccessibilityDetectionEnabledListenerWrapper
+            extends IVoiceInteractionAccessibilitySettingsListener.Stub {
+
+        private Consumer<Boolean> mListener;
+
+        AccessibilityDetectionEnabledListenerWrapper(Consumer<Boolean> listener) {
+            mListener = listener;
+        }
+
+        @Override
+        public void onAccessibilityDetectionChanged(boolean enabled) {
+            mListener.accept(enabled);
         }
     }
 

@@ -2305,6 +2305,8 @@ public class AppProfiler {
                                     }
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
                                 }
+                                EventLogTags.writeAmCpu(st.pid, st.uid, st.baseName,
+                                        st.rel_uptime, st.rel_utime, st.rel_stime);
                             }
                         }
 

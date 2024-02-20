@@ -261,6 +261,23 @@ static jboolean clipPath(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong pat
     return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
+static void clipShader(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong shaderHandle,
+                       jint opHandle) {
+    SkRegion::Op rgnOp = static_cast<SkRegion::Op>(opHandle);
+    sk_sp<SkShader> shader = sk_ref_sp(reinterpret_cast<SkShader*>(shaderHandle));
+    switch (rgnOp) {
+        case SkRegion::Op::kIntersect_Op:
+        case SkRegion::Op::kDifference_Op:
+            get_canvas(canvasHandle)->clipShader(shader, static_cast<SkClipOp>(rgnOp));
+            break;
+        default:
+            ALOGW("Ignoring unsupported clip operation %d", opHandle);
+            SkRect clipBounds;  // ignored
+            get_canvas(canvasHandle)->getClipBounds(&clipBounds);
+            break;
+    }
+}
+
 static void drawColor(JNIEnv* env, jobject, jlong canvasHandle, jint color, jint modeHandle) {
     SkBlendMode mode = static_cast<SkBlendMode>(modeHandle);
     get_canvas(canvasHandle)->drawColor(color, mode);
@@ -797,6 +814,7 @@ static const JNINativeMethod gMethods[] = {
         {"nQuickReject", "(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
         {"nClipRect", "(JFFFFI)Z", (void*)CanvasJNI::clipRect},
         {"nClipPath", "(JJI)Z", (void*)CanvasJNI::clipPath},
+        {"nClipShader", "(JJI)V", (void*)CanvasJNI::clipShader},
         {"nSetDrawFilter", "(JJ)V", (void*)CanvasJNI::setPaintFilter},
 };
 

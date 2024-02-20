@@ -1242,7 +1242,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mStageDirInUse, mDestroyed, mFds.size(), mBridges.size(), mFinalStatus,
                     mFinalMessage, params, mParentSessionId, getChildSessionIdsLocked(),
                     mSessionApplied, mSessionFailed, mSessionReady, mSessionErrorCode,
-                    mSessionErrorMessage, mPreapprovalDetails, mPreVerifiedDomains);
+                    mSessionErrorMessage, mPreapprovalDetails, mPreVerifiedDomains, mPackageName);
         }
     }
 

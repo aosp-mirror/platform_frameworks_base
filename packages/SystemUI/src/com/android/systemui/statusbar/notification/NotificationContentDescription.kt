@@ -26,11 +26,11 @@ import com.android.systemui.res.R
 
 /** Returns accessibility content description for a given notification. */
 @MainThread
-fun contentDescForNotification(c: Context, n: Notification?): CharSequence {
-    val appName = n?.loadHeaderAppName(c) ?: ""
-    val title = n?.extras?.getCharSequence(Notification.EXTRA_TITLE)
-    val text = n?.extras?.getCharSequence(Notification.EXTRA_TEXT)
-    val ticker = n?.tickerText
+fun contentDescForNotification(c: Context, n: Notification): CharSequence {
+    val appName = n.loadHeaderAppName(c) ?: ""
+    val title = n.extras?.getCharSequence(Notification.EXTRA_TITLE)
+    val text = n.extras?.getCharSequence(Notification.EXTRA_TEXT)
+    val ticker = n.tickerText
 
     // Some apps just put the app name into the title
     val titleOrText = if (TextUtils.equals(title, appName)) text else title

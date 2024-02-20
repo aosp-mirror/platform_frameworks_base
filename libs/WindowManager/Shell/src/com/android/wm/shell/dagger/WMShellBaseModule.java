@@ -50,6 +50,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.LaunchAdjacentController;
+import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
@@ -66,6 +67,7 @@ import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.SizeSpecSource;
@@ -321,6 +323,12 @@ public abstract class WMShellBaseModule {
         return Optional.of(perfHintController.getHinter());
     }
 
+    @WMSingleton
+    @Provides
+    static MultiInstanceHelper provideMultiInstanceHelper(Context context) {
+        return new MultiInstanceHelper(context, context.getPackageManager());
+    }
+
     //
     // Back animation
     //
@@ -392,6 +400,20 @@ public abstract class WMShellBaseModule {
     static SizeSpecSource provideSizeSpecSource(Context context,
             PipDisplayLayoutState pipDisplayLayoutState) {
         return new PhoneSizeSpecSource(context, pipDisplayLayoutState);
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<PipPerfHintController> providePipPerfHintController(
+            PipDisplayLayoutState pipDisplayLayoutState,
+            @ShellMainThread ShellExecutor mainExecutor,
+            Optional<SystemPerformanceHinter> systemPerformanceHinterOptional) {
+        if (systemPerformanceHinterOptional.isPresent()) {
+            return Optional.of(new PipPerfHintController(pipDisplayLayoutState, mainExecutor,
+                    systemPerformanceHinterOptional.get()));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @WMSingleton

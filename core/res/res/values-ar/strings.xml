@@ -670,18 +670,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"تم مصادقة بصمة الإصبع"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"تمّت مصادقة الوجه"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"تمّت مصادقة الوجه، يُرجى الضغط على \"تأكيد\"."</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"جهاز بصمة الإصبع غير متاح."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"يتعذّر إعداد بصمة الإصبع."</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"انتهت مهلة إعداد بصمة الإصبع. يُرجى إعادة المحاولة."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"تم إلغاء تشغيل بصمة الإصبع."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"تم إلغاء تشغيل بصمة الإصبع بواسطة المستخدم."</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"تم إجراء عدد كبير جدًا من المحاولات. عليك استخدام قفل الشاشة بدلاً من ذلك."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"تم إجراء عدد كبير جدًا من المحاولات. عليك استخدام قفل الشاشة بدلاً من ذلك."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"تتعذّر معالجة بصمة الإصبع. يُرجى إعادة المحاولة."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"ليست هناك بصمات إصبع مسجَّلة."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"لا يحتوي هذا الجهاز على مستشعِر بصمات إصبع."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"تم إيقاف جهاز الاستشعار مؤقتًا."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"لا يمكن استخدام أداة استشعار بصمة الإصبع. يُرجى التواصل مع مقدِّم خدمات إصلاح."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"لا يحتوي هذا الجهاز على جهاز استشعار بصمات الأصابع."</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"تم الضغط على زر التشغيل"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"الإصبع <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"استخدام بصمة الإصبع"</string>

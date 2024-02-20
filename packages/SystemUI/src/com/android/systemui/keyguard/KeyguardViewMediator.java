@@ -30,6 +30,7 @@ import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BA
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_OCCLUSION;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_UNLOCK_ANIMATION;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -152,7 +153,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.ShadeLockscreenInteractor;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -920,15 +921,17 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
             } else if ((strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
+            } else if (any && ((strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0
+                    || mUpdateMonitor.isFingerprintLockedOut())) {
+                return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
+            } else if ((strongAuth & SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_ADAPTIVE_AUTH_REQUEST;
             } else if (trustAgentsEnabled
                     && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
             } else if (trustAgentsEnabled
                     && (strongAuth & SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED;
-            } else if (any && ((strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0
-                    || mUpdateMonitor.isFingerprintLockedOut())) {
-                return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
             } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
             } else if (any && (strongAuth
@@ -3526,14 +3529,14 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      * @return the View Controller for the Keyguard View this class is mediating.
      */
     public KeyguardViewController registerCentralSurfaces(CentralSurfaces centralSurfaces,
-            ShadeViewController panelView,
+            ShadeLockscreenInteractor shadeLockscreenInteractor,
             @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer, KeyguardBypassController bypassController) {
         mCentralSurfaces = centralSurfaces;
         mKeyguardViewControllerLazy.get().registerCentralSurfaces(
                 centralSurfaces,
-                panelView,
+                shadeLockscreenInteractor,
                 shadeExpansionStateManager,
                 biometricUnlockController,
                 notificationContainer,

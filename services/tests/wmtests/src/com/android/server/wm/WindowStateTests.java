@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.Surface.ROTATION_0;
@@ -55,7 +56,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.notification.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_WAITING_FOR_DRAW;
@@ -1422,6 +1422,25 @@ public class WindowStateTests extends WindowTestsBase {
 
         assertTrue(window1.isSecureLocked());
         assertFalse(window2.isSecureLocked());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION)
+    public void testIsSecureLocked_sensitiveContentBlockOrClearScreenCaptureForApp() {
+        String testPackage = "test";
+        int ownerId = 20;
+        final WindowState window = createWindow(null, TYPE_APPLICATION, "window", ownerId);
+        window.mAttrs.packageName = testPackage;
+        assertFalse(window.isSecureLocked());
+
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+        mWm.mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedPackages);
+        assertTrue(window.isSecureLocked());
+
+        mWm.mSensitiveContentPackages.removeBlockScreenCaptureForApps(blockedPackages);
+        assertFalse(window.isSecureLocked());
     }
 
     private static class TestImeTargetChangeListener implements ImeTargetChangeListener {

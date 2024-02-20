@@ -1920,7 +1920,7 @@ public class UserManager {
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
-    @FlaggedApi("com.android.net.thread.flags.thread_user_restriction_enabled")
+    @FlaggedApi(com.android.net.thread.flags.Flags.FLAG_THREAD_USER_RESTRICTION_ENABLED)
     public static final String DISALLOW_THREAD_NETWORK = "no_thread_network";
 
     /**
@@ -3258,7 +3258,11 @@ public class UserManager {
         return isProfile(mUserId);
     }
 
-    private boolean isProfile(@UserIdInt int userId) {
+    /**
+     * Returns whether the specified user is a profile.
+     * @hide
+     */
+    public boolean isProfile(@UserIdInt int userId) {
         final String profileType = getProfileType(userId);
         return profileType != null && !profileType.equals("");
     }

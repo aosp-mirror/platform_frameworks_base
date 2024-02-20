@@ -96,9 +96,37 @@ flag {
 }
 
 flag {
+  name: "sensitive_notification_app_protection"
+  namespace: "permissions"
+  description: "This flag controls the sensitive notification app protections while screen sharing"
+  bug: "312784351"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+}
+
+flag {
     name: "device_aware_permissions_enabled"
     is_fixed_read_only: true
     namespace: "permissions"
     description: "When the flag is off no permissions can be device aware"
     bug: "274852670"
+}
+
+flag {
+     name: "get_emergency_role_holder_api_enabled"
+     is_fixed_read_only: true
+     namespace: "permissions"
+     description: "Enables the getEmergencyRoleHolder API."
+     bug: "323157319"
+}
+
+flag {
+    name: "new_permission_gid_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enable new permission GID implementation"
+    bug: "325137277"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

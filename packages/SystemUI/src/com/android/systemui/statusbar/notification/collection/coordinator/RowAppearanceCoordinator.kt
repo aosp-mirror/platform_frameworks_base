@@ -76,6 +76,6 @@ class RowAppearanceCoordinator @Inject internal constructor(
         // Show/hide the feedback icon
         controller.setFeedbackIcon(mAssistantFeedbackController.getFeedbackIcon(entry))
         // Show the "alerted" bell icon
-        controller.setLastAudiblyAlertedMs(entry.lastAudiblyAlertedMs)
+        controller.setLastAudibleMs(entry.lastAudiblyAlertedMs)
     }
 }

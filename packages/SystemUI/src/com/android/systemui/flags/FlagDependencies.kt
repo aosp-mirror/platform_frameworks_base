@@ -29,7 +29,6 @@ import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW
 import com.android.systemui.keyguard.shared.ComposeLockscreen
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
@@ -52,15 +51,11 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         FooterViewRefactor.token dependsOn NotificationIconContainerRefactor.token
         NotificationAvalancheSuppression.token dependsOn VisualInterruptionRefactor.token
 
-        // Internal keyguard dependencies
-        KeyguardShadeMigrationNssl.token dependsOn keyguardBottomAreaRefactor
-
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }
         SceneContainerFlag.getMainStaticFlag() dependsOn MIGRATE_KEYGUARD_STATUS_BAR_VIEW
 
         // ComposeLockscreen dependencies
-        ComposeLockscreen.token dependsOn KeyguardShadeMigrationNssl.token
         ComposeLockscreen.token dependsOn keyguardBottomAreaRefactor
         ComposeLockscreen.token dependsOn migrateClocksToBlueprint
     }

@@ -16,12 +16,13 @@
 
 package android.app.admin;
 
+import static android.app.admin.flags.Flags.FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.admin.flags.Flags;
 import android.os.UserManager;
 
 import java.util.Objects;
@@ -51,6 +52,15 @@ public final class DevicePolicyIdentifiers {
      */
     @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     public static final String SECURITY_LOGGING_POLICY = "securityLogging";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setAuditLogEnabled}.
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    @SystemApi
+    public static final String AUDIT_LOGGING_POLICY = "auditLogging";
 
     /**
      * String identifier for {@link DevicePolicyManager#setLockTaskPackages}.
@@ -178,13 +188,13 @@ public final class DevicePolicyIdentifiers {
     /**
      * String identifier for {@link DevicePolicyManager#setUsbDataSignalingEnabled}.
      */
-    @FlaggedApi(Flags.FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
+    @FlaggedApi(FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
     public static final String USB_DATA_SIGNALING_POLICY = "usbDataSignaling";
 
     /**
      * String identifier for {@link DevicePolicyManager#setRequiredPasswordComplexity}.
      */
-    @FlaggedApi(Flags.FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
+    @FlaggedApi(FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
     public static final String PASSWORD_COMPLEXITY_POLICY = "passwordComplexity";
 
     /**

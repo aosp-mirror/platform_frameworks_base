@@ -1,6 +1,13 @@
 package: "android.location.flags"
 
 flag {
+    name: "new_geocoder"
+    namespace: "location"
+    description: "Flag for new Geocoder APIs"
+    bug: "229872126"
+}
+
+flag {
     name: "location_bypass"
     namespace: "location"
     description: "Enable location bypass appops behavior"

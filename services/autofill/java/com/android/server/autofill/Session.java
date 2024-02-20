@@ -5108,12 +5108,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         }
                     }
                 } else if (resultCode == FAILURE_CREDMAN_SELECTOR) {
-                    GetCredentialException exception =  resultData.getParcelable(
-                            CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION,
-                            GetCredentialException.class);
-                    Slog.d(TAG, "Credman bottom sheet from pinned "
-                            + "entry failed with: + " + exception.getType() + " , "
-                            + exception.getMessage());
+                    String[] exception =  resultData.getStringArray(
+                            CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION);
+                    if (exception != null && exception.length >= 2) {
+                        Slog.w(TAG, "Credman bottom sheet from pinned "
+                                + "entry failed with: + " + exception[0] + " , "
+                                + exception[1]);
+                    }
                 } else {
                     Slog.d(TAG, "Unknown resultCode from credential "
                             + "manager bottom sheet: " + resultCode);

@@ -370,11 +370,6 @@ interface IWindowSession {
      */
     boolean cancelDraw(IWindow window);
 
-    boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow);
-
-    boolean transferHostTouchGestureToEmbedded(IWindow hostWindow,
-        in InputTransferToken transferTouchToken);
-
     /**
      * Moves the focus to the adjacent window if there is one in the given direction. This can only
      * move the focus to the window in the same leaf task.

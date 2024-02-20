@@ -34,4 +34,5 @@ oneway interface ICallControl {
     void requestCallEndpointChange(in CallEndpoint callEndpoint, in ResultReceiver callback);
     void setMuteState(boolean isMuted, in ResultReceiver callback);
     void sendEvent(String callId, String event, in Bundle extras);
+    void requestVideoState(int videoState, String callId, in ResultReceiver callback);
 }

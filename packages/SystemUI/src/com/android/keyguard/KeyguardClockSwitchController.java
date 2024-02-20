@@ -47,7 +47,6 @@ import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
@@ -349,7 +348,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     int getNotificationIconAreaHeight() {
-        if (KeyguardShadeMigrationNssl.isEnabled()) {
+        if (migrateClocksToBlueprint()) {
             return 0;
         } else if (NotificationIconContainerRefactor.isEnabled()) {
             return mAodIconContainer != null ? mAodIconContainer.getHeight() : 0;
@@ -597,7 +596,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateAodIcons() {
-        if (!KeyguardShadeMigrationNssl.isEnabled()) {
+        if (!migrateClocksToBlueprint()) {
             NotificationIconContainer nic = (NotificationIconContainer)
                     mView.findViewById(
                             com.android.systemui.res.R.id.left_aligned_notification_icon_container);

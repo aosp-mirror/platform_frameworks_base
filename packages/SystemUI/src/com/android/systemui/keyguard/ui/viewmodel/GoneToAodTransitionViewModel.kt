@@ -53,23 +53,27 @@ constructor(
         return transitionAnimation.sharedFlowWithState(
             startTime = 600.milliseconds,
             duration = 500.milliseconds,
-            onStart = { translatePx },
             onStep = { translatePx + it * -translatePx },
             onFinish = { 0f },
-            onCancel = { 0f },
             interpolator = EMPHASIZED_DECELERATE,
         )
     }
+
+    val notificationAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStep = { 1f - it },
+            // Needs to be 1f in order for HUNs to appear on AOD
+            onFinish = { 1f },
+        )
 
     /** alpha animation upon entering AOD */
     val enterFromTopAnimationAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             startTime = 700.milliseconds,
             duration = 400.milliseconds,
-            onStart = { 0f },
             onStep = { it },
             onFinish = { 1f },
-            onCancel = { 1f },
         )
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)

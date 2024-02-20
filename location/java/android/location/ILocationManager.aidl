@@ -19,13 +19,11 @@ package android.location;
 import android.app.PendingIntent;
 import android.location.Address;
 import android.location.Criteria;
-import android.location.GeocoderParams;
 import android.location.Geofence;
 import android.location.GnssAntennaInfo;
 import android.location.GnssCapabilities;
 import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementRequest;
-import android.location.IGeocodeListener;
 import android.location.IGnssAntennaInfoListener;
 import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
@@ -37,8 +35,11 @@ import android.location.LastLocationRequest;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.location.LocationTime;
+import android.location.provider.ForwardGeocodeRequest;
+import android.location.provider.IGeocodeCallback;
 import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
+import android.location.provider.ReverseGeocodeRequest;
 import android.os.Bundle;
 import android.os.ICancellationSignal;
 import android.os.PackageTagsList;
@@ -68,13 +69,9 @@ interface ILocationManager
     void requestGeofence(in Geofence geofence, in PendingIntent intent, String packageName, String attributionTag);
     void removeGeofence(in PendingIntent intent);
 
-    boolean geocoderIsPresent();
-    void getFromLocation(double latitude, double longitude, int maxResults,
-        in GeocoderParams params, in IGeocodeListener listener);
-    void getFromLocationName(String locationName,
-        double lowerLeftLatitude, double lowerLeftLongitude,
-        double upperRightLatitude, double upperRightLongitude, int maxResults,
-        in GeocoderParams params, in IGeocodeListener listener);
+    boolean isGeocodeAvailable();
+    void reverseGeocode(in ReverseGeocodeRequest request, in IGeocodeCallback callback);
+    void forwardGeocode(in ForwardGeocodeRequest request, in IGeocodeCallback callback);
 
     GnssCapabilities getGnssCapabilities();
     int getGnssYearOfHardware();

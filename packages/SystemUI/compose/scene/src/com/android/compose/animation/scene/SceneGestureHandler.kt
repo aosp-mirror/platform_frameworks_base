@@ -348,6 +348,8 @@ internal class SceneGestureHandler(
             // Compute the destination scene (and therefore offset) to settle in.
             val offset = swipeTransition.dragOffset
             val distance = swipeTransition.distance
+            var targetScene: Scene
+            var targetOffset: Float
             if (
                 shouldCommitSwipe(
                     offset,
@@ -356,12 +358,24 @@ internal class SceneGestureHandler(
                     wasCommitted = swipeTransition._currentScene == toScene,
                 )
             ) {
-                // Animate to the next scene
-                animateTo(targetScene = toScene, targetOffset = distance)
+                targetScene = toScene
+                targetOffset = distance
             } else {
-                // Animate to the initial scene
-                animateTo(targetScene = fromScene, targetOffset = 0f)
+                targetScene = fromScene
+                targetOffset = 0f
             }
+
+            if (
+                targetScene != swipeTransition._currentScene &&
+                    !layoutState.canChangeScene(targetScene.key)
+            ) {
+                // We wanted to change to a new scene but we are not allowed to, so we animate back
+                // to the current scene.
+                targetScene = swipeTransition._currentScene
+                targetOffset = if (targetScene == fromScene) 0f else distance
+            }
+
+            animateTo(targetScene = targetScene, targetOffset = targetOffset)
         } else {
             // We are doing an overscroll animation between scenes. In this case, we can also start
             // from the idle position.

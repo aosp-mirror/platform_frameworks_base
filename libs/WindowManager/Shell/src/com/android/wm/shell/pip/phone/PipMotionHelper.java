@@ -42,6 +42,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -50,6 +51,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -83,6 +85,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     /** Coordinator instance for resolving conflicts with other floating content. */
     private FloatingContentCoordinator mFloatingContentCoordinator;
+
+    @Nullable private final PipPerfHintController mPipPerfHintController;
+    @Nullable private PipPerfHintController.PipHighPerfSession mPipHighPerfSession;
 
     /**
      * PhysicsAnimator instance for animating {@link PipBoundsState#getMotionBoundsState()}
@@ -169,13 +174,15 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     public PipMotionHelper(Context context, @NonNull PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer, PhonePipMenuController menuController,
             PipSnapAlgorithm snapAlgorithm, PipTransitionController pipTransitionController,
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            Optional<PipPerfHintController> pipPerfHintControllerOptional) {
         mContext = context;
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipBoundsState = pipBoundsState;
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFloatingContentCoordinator = floatingContentCoordinator;
+        mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
         pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
         mResizePipUpdateListener = (target, values) -> {
             if (mPipBoundsState.getMotionBoundsState().isInMotion()) {
@@ -386,6 +393,16 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         movetoTarget(velX, velY, postBoundsUpdateCallback, true /* isStash */);
     }
 
+    private void onHighPerfSessionTimeout(PipPerfHintController.PipHighPerfSession session) {}
+
+    private void cleanUpHighPerfSessionMaybe() {
+        if (mPipHighPerfSession != null) {
+            // Close the high perf session once pointer interactions are over;
+            mPipHighPerfSession.close();
+            mPipHighPerfSession = null;
+        }
+    }
+
     private void movetoTarget(
             float velocityX,
             float velocityY,
@@ -591,6 +608,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 (int) toY + getBounds().height()));
 
         if (!mTemporaryBoundsPhysicsAnimator.isRunning()) {
+            if (mPipPerfHintController != null) {
+                // Start a high perf session with a timeout callback.
+                mPipHighPerfSession = mPipPerfHintController.startSession(
+                        this::onHighPerfSessionTimeout, "startBoundsAnimator");
+            }
             if (postBoundsUpdateCallback != null) {
                 mTemporaryBoundsPhysicsAnimator
                         .addUpdateListener(mResizePipUpdateListener)
@@ -633,6 +655,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mPipBoundsState.getMotionBoundsState().onPhysicsAnimationEnded();
         mSpringingToTouch = false;
         mDismissalPending = false;
+        cleanUpHighPerfSessionMaybe();
     }
 
     /**

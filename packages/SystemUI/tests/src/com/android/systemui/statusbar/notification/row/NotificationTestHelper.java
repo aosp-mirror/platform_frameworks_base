@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -607,6 +608,7 @@ public class NotificationTestHelper {
                 mDismissibilityProvider,
                 mock(MetricsLogger.class),
                 new NotificationChildrenContainerLogger(logcatLogBuffer()),
+                mock(ColorUpdateLogger.class),
                 mock(SmartReplyConstants.class),
                 mock(SmartReplyController.class),
                 mFeatureFlags,

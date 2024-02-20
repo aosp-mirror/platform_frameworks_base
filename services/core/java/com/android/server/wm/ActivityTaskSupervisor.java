@@ -1118,7 +1118,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 || actionRestriction == ACTIVITY_RESTRICTION_PERMISSION) {
             if (resultRecord != null) {
                 resultRecord.sendResult(INVALID_UID, resultWho, requestCode,
-                        Activity.RESULT_CANCELED, null /* data */, null /* dataGrants */);
+                        Activity.RESULT_CANCELED, null /* data */, null /* callerToken */,
+                        null /* dataGrants */);
             }
             final String msg;
             if (actionRestriction == ACTIVITY_RESTRICTION_PERMISSION) {

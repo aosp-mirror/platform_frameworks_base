@@ -35,6 +35,7 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.plugins.clocks.ClockFaceConfig;
 import com.android.systemui.plugins.clocks.ClockTickRate;
 import com.android.systemui.shared.clocks.ClockRegistry;
@@ -50,6 +51,8 @@ import org.mockito.verification.VerificationMode;
 public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchControllerBaseTest {
     @Test
     public void testInit_viewAlreadyAttached() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         mController.init();
 
         verifyAttachment(times(1));
@@ -57,6 +60,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testInit_viewNotYetAttached() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         ArgumentCaptor<View.OnAttachStateChangeListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
 
@@ -73,12 +78,16 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testInitSubControllers() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         mController.init();
         verify(mKeyguardSliceViewController).init();
     }
 
     @Test
     public void testInit_viewDetached() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         ArgumentCaptor<View.OnAttachStateChangeListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener.class);
         mController.init();
@@ -92,6 +101,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testPluginPassesStatusBarState() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         ArgumentCaptor<ClockRegistry.ClockChangeListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(ClockRegistry.ClockChangeListener.class);
 
@@ -105,6 +116,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testSmartspaceEnabledRemovesKeyguardStatusArea() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         when(mSmartspaceController.isEnabled()).thenReturn(true);
         mController.init();
 
@@ -113,6 +126,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void onLocaleListChangedRebuildsSmartspaceView() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         when(mSmartspaceController.isEnabled()).thenReturn(true);
         mController.init();
 
@@ -123,6 +138,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void onLocaleListChanged_rebuildsSmartspaceViews_whenDecouplingEnabled() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         when(mSmartspaceController.isEnabled()).thenReturn(true);
         when(mSmartspaceController.isDateWeatherDecoupled()).thenReturn(true);
         mController.init();
@@ -136,6 +153,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testSmartspaceDisabledShowsKeyguardStatusArea() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         when(mSmartspaceController.isEnabled()).thenReturn(false);
         mController.init();
 
@@ -144,6 +163,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testRefresh() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         mController.refresh();
 
         verify(mSmartspaceController).requestSmartspaceUpdate();
@@ -151,6 +172,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testChangeToDoubleLineClockSetsSmallClock() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         when(mSecureSettings.getIntForUser(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1,
                 UserHandle.USER_CURRENT))
                 .thenReturn(0);
@@ -174,11 +197,15 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testGetClock_ForwardsToClock() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         assertEquals(mClockController, mController.getClock());
     }
 
     @Test
     public void testGetLargeClockBottom_returnsExpectedValue() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         when(mLargeClockFrame.getVisibility()).thenReturn(View.VISIBLE);
         when(mLargeClockFrame.getHeight()).thenReturn(100);
         when(mSmallClockFrame.getHeight()).thenReturn(50);
@@ -191,6 +218,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testGetSmallLargeClockBottom_returnsExpectedValue() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         when(mLargeClockFrame.getVisibility()).thenReturn(View.GONE);
         when(mLargeClockFrame.getHeight()).thenReturn(100);
         when(mSmallClockFrame.getHeight()).thenReturn(50);
@@ -203,12 +232,16 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testGetClockBottom_nullClock_returnsZero() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         when(mClockEventController.getClock()).thenReturn(null);
         assertEquals(0, mController.getClockBottom(10));
     }
 
     @Test
     public void testChangeLockscreenWeatherEnabledSetsWeatherViewVisible() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         when(mSmartspaceController.isWeatherEnabled()).thenReturn(true);
         ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
@@ -227,6 +260,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testChangeClockDateWeatherEnabled_SetsDateWeatherViewVisibility() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         ArgumentCaptor<ClockRegistry.ClockChangeListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(ClockRegistry.ClockChangeListener.class);
         when(mSmartspaceController.isEnabled()).thenReturn(true);
@@ -249,11 +284,15 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testGetClock_nullClock_returnsNull() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         when(mClockEventController.getClock()).thenReturn(null);
         assertNull(mController.getClock());
     }
 
     private void verifyAttachment(VerificationMode times) {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         verify(mClockRegistry, times).registerClockChangeListener(
                 any(ClockRegistry.ClockChangeListener.class));
         verify(mClockEventController, times).registerListeners(mView);
@@ -261,6 +300,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testSplitShadeEnabledSetToSmartspaceController() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         mController.setSplitShadeEnabled(true);
         verify(mSmartspaceController, times(1)).setSplitShadeEnabled(true);
         verify(mSmartspaceController, times(0)).setSplitShadeEnabled(false);
@@ -268,6 +309,8 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
 
     @Test
     public void testSplitShadeDisabledSetToSmartspaceController() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+
         mController.setSplitShadeEnabled(false);
         verify(mSmartspaceController, times(1)).setSplitShadeEnabled(false);
         verify(mSmartspaceController, times(0)).setSplitShadeEnabled(true);

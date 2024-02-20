@@ -27,11 +27,11 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.lifecycle.lifecycleScope
-import com.android.systemui.Flags.centralizedStatusBarDimensRefactor
+import com.android.systemui.Flags.centralizedStatusBarHeightFix
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.fragments.FragmentService
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.plugins.qs.QS
@@ -183,7 +183,7 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     private fun calculateLargeShadeHeaderHeight(): Int {
-        return if (centralizedStatusBarDimensRefactor()) {
+        return if (centralizedStatusBarHeightFix()) {
             largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
         } else {
             resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
@@ -284,7 +284,7 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     private fun setNotificationsConstraints(constraintSet: ConstraintSet) {
-        if (KeyguardShadeMigrationNssl.isEnabled) {
+        if (migrateClocksToBlueprint()) {
             return
         }
         val startConstraintId = if (splitShadeEnabled) R.id.qs_edge_guideline else PARENT_ID

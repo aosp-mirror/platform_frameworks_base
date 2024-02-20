@@ -22,8 +22,8 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.Flags.migrateClocksToBlueprint
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -33,11 +33,12 @@ class AodBurnInSection
 @Inject
 constructor(
     private val context: Context,
+    private val rootView: KeyguardRootView,
     private val clockViewModel: KeyguardClockViewModel,
 ) : KeyguardSection() {
     private lateinit var burnInLayer: AodBurnInLayer
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
 
@@ -47,6 +48,7 @@ constructor(
         burnInLayer =
             AodBurnInLayer(context).apply {
                 id = R.id.burn_in_layer
+                registerListener(rootView)
                 addView(emptyView)
                 if (!migrateClocksToBlueprint()) {
                     val statusView =
@@ -58,21 +60,20 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
-        if (migrateClocksToBlueprint()) {
-            clockViewModel.burnInLayer = burnInLayer
-        }
+        clockViewModel.burnInLayer = burnInLayer
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!KeyguardShadeMigrationNssl.isEnabled) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
+        burnInLayer.unregisterListener(rootView)
         constraintLayout.removeView(R.id.burn_in_layer)
     }
 }

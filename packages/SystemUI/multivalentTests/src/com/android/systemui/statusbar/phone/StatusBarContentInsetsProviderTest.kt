@@ -86,7 +86,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
 
         var isRtl = false
         var targetRotation = ROTATION_NONE
-        var bounds = calculateInsetsForRotationWithRotatedResources(
+        var bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 null,
@@ -97,29 +98,33 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         var chipBounds = getPrivacyChipBoundingRectForInsets(bounds, dotWidth, chipWidth, isRtl)
-        /* 1080 - 20 (rounded corner) - 30 (chip),
-        *  0 (sb top)
-        *  1080 - 20 (rounded corner) + 10 ( dot),
-        *  100 (sb height portrait)
-        */
+        /*
+         *  1080 - 20 (rounded corner) - 30 (chip),
+         *  0 (sb top)
+         *  1080 - 20 (rounded corner) + 10 ( dot),
+         *  100 (sb height portrait)
+         */
         var expected = Rect(1030, 0, 1070, 100)
         assertRects(expected, chipBounds, currentRotation, targetRotation)
         isRtl = true
         chipBounds = getPrivacyChipBoundingRectForInsets(bounds, dotWidth, chipWidth, isRtl)
-        /* 0 + 20 (rounded corner) - 10 (dot),
-        *  0 (sb top)
-        *  0 + 20 (rounded corner) + 30 (chip),
-        *  100 (sb height portrait)
-        */
+        /*
+         *  0 + 20 (rounded corner) - 10 (dot),
+         *  0 (sb top)
+         *  0 + 20 (rounded corner) + 30 (chip),
+         *  100 (sb height portrait)
+         */
         expected = Rect(10, 0, 50, 100)
         assertRects(expected, chipBounds, currentRotation, targetRotation)
 
         isRtl = false
         targetRotation = ROTATION_LANDSCAPE
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -130,23 +135,26 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         chipBounds = getPrivacyChipBoundingRectForInsets(bounds, dotWidth, chipWidth, isRtl)
-        /* 2160 - 20 (rounded corner) - 30 (chip),
-        *  0 (sb top)
-        *  2160 - 20 (rounded corner) + 10 ( dot),
-        *  60 (sb height landscape)
-        */
+        /*
+         *  2160 - 20 (rounded corner) - 30 (chip),
+         *  0 (sb top)
+         *  2160 - 20 (rounded corner) + 10 ( dot),
+         *  60 (sb height landscape)
+         */
         expected = Rect(2110, 0, 2150, 60)
         assertRects(expected, chipBounds, currentRotation, targetRotation)
         isRtl = true
         chipBounds = getPrivacyChipBoundingRectForInsets(bounds, dotWidth, chipWidth, isRtl)
-        /* 0 + 20 (rounded corner) - 10 (dot),
-        *  0 (sb top)
-        *  0 + 20 (rounded corner) + 30 (chip),
-        *  60 (sb height landscape)
-        */
+        /*
+         *  0 + 20 (rounded corner) - 10 (dot),
+         *  0 (sb top)
+         *  0 + 20 (rounded corner) + 30 (chip),
+         *  60 (sb height landscape)
+         */
         expected = Rect(10, 0, 50, 60)
         assertRects(expected, chipBounds, currentRotation, targetRotation)
     }
@@ -157,10 +165,10 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         val dotWidth = 10
         val isRtl = false
         val contentRect =
-                Rect(/* left = */ 0, /* top = */ 10, /* right = */ 1000, /* bottom = */ 100)
+            Rect(/* left = */ 0, /* top = */ 10, /* right = */ 1000, /* bottom = */ 100)
 
         val chipBounds =
-                getPrivacyChipBoundingRectForInsets(contentRect, dotWidth, chipWidth, isRtl)
+            getPrivacyChipBoundingRectForInsets(contentRect, dotWidth, chipWidth, isRtl)
 
         assertThat(chipBounds.top).isEqualTo(contentRect.top)
     }
@@ -184,12 +192,11 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         // THEN rotations which share a short side should use the greater value between rounded
         // corner padding and the display cutout's size
         var targetRotation = ROTATION_NONE
-        var expectedBounds = Rect(dcBounds.right,
-                0,
-                screenBounds.right - minRightPadding,
-                sbHeightPortrait)
+        var expectedBounds =
+            Rect(dcBounds.right, 0, screenBounds.right - minRightPadding, sbHeightPortrait)
 
-        var bounds = calculateInsetsForRotationWithRotatedResources(
+        var bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -200,17 +207,17 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         targetRotation = ROTATION_LANDSCAPE
-        expectedBounds = Rect(dcBounds.height(),
-                0,
-                screenBounds.height() - minRightPadding,
-                sbHeightLandscape)
+        expectedBounds =
+            Rect(dcBounds.height(), 0, screenBounds.height() - minRightPadding, sbHeightLandscape)
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -221,19 +228,19 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         // THEN the side that does NOT share a short side with the display cutout ignores the
         // display cutout bounds
         targetRotation = ROTATION_UPSIDE_DOWN
-        expectedBounds = Rect(minLeftPadding,
-                0,
-                screenBounds.width() - minRightPadding,
-                sbHeightPortrait)
+        expectedBounds =
+            Rect(minLeftPadding, 0, screenBounds.width() - minRightPadding, sbHeightPortrait)
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -244,18 +251,23 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         // Phone in portrait, seascape (rot_270) bounds
         targetRotation = ROTATION_SEASCAPE
-        expectedBounds = Rect(minLeftPadding,
+        expectedBounds =
+            Rect(
+                minLeftPadding,
                 0,
                 screenBounds.height() - dcBounds.height() - dotWidth,
-                sbHeightLandscape)
+                sbHeightLandscape
+            )
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -266,7 +278,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
     }
@@ -292,12 +305,11 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         // THEN rotations which share a short side should use the greater value between rounded
         // corner padding, the display cutout's size, and the camera protections' size.
         var targetRotation = ROTATION_NONE
-        var expectedBounds = Rect(protectionBounds.right,
-                0,
-                screenBounds.right - minRightPadding,
-                sbHeightPortrait)
+        var expectedBounds =
+            Rect(protectionBounds.right, 0, screenBounds.right - minRightPadding, sbHeightPortrait)
 
-        var bounds = calculateInsetsForRotationWithRotatedResources(
+        var bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -308,17 +320,22 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         targetRotation = ROTATION_LANDSCAPE
-        expectedBounds = Rect(protectionBounds.bottom,
+        expectedBounds =
+            Rect(
+                protectionBounds.bottom,
                 0,
                 screenBounds.height() - minRightPadding,
-                sbHeightLandscape)
+                sbHeightLandscape
+            )
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -329,19 +346,19 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         // THEN the side that does NOT share a short side with the display cutout ignores the
         // display cutout bounds
         targetRotation = ROTATION_UPSIDE_DOWN
-        expectedBounds = Rect(minLeftPadding,
-                0,
-                screenBounds.width() - minRightPadding,
-                sbHeightPortrait)
+        expectedBounds =
+            Rect(minLeftPadding, 0, screenBounds.width() - minRightPadding, sbHeightPortrait)
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -352,18 +369,23 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         // Phone in portrait, seascape (rot_270) bounds
         targetRotation = ROTATION_SEASCAPE
-        expectedBounds = Rect(minLeftPadding,
+        expectedBounds =
+            Rect(
+                minLeftPadding,
                 0,
                 screenBounds.height() - protectionBounds.bottom - dotWidth,
-                sbHeightLandscape)
+                sbHeightLandscape
+            )
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -374,7 +396,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
     }
@@ -428,7 +451,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 bottom = sbHeightPortrait
             )
 
-        var bounds = calculateInsetsForRotationWithRotatedResources(
+        var bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -439,7 +463,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
@@ -453,7 +478,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 bottom = sbHeightLandscape
             )
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -464,7 +490,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
@@ -478,7 +505,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 bottom = sbHeightPortrait
             )
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -489,7 +517,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
@@ -503,7 +532,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 bottom = sbHeightLandscape
             )
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -514,7 +544,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
     }
@@ -541,7 +572,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         var expectedBounds =
             Rect(minLeftPadding, 0, protectionBounds.left - dotWidth, sbHeightPortrait)
 
-        var bounds = calculateInsetsForRotationWithRotatedResources(
+        var bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -552,17 +584,22 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         targetRotation = ROTATION_LANDSCAPE
-        expectedBounds = Rect(protectionBounds.bottom,
+        expectedBounds =
+            Rect(
+                protectionBounds.bottom,
                 0,
                 screenBounds.height() - minRightPadding,
-                sbHeightLandscape)
+                sbHeightLandscape
+            )
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -573,19 +610,19 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         // THEN the side that does NOT share a short side with the display cutout ignores the
         // display cutout bounds
         targetRotation = ROTATION_UPSIDE_DOWN
-        expectedBounds = Rect(minLeftPadding,
-                0,
-                screenBounds.width() - minRightPadding,
-                sbHeightPortrait)
+        expectedBounds =
+            Rect(minLeftPadding, 0, screenBounds.width() - minRightPadding, sbHeightPortrait)
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -596,18 +633,23 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         // Phone in portrait, seascape (rot_270) bounds
         targetRotation = ROTATION_SEASCAPE
-        expectedBounds = Rect(minLeftPadding,
+        expectedBounds =
+            Rect(
+                minLeftPadding,
                 0,
                 screenBounds.height() - protectionBounds.bottom - dotWidth,
-                sbHeightLandscape)
+                sbHeightLandscape
+            )
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -618,7 +660,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
     }
@@ -627,7 +670,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
     fun calculateInsetsForRotationWithRotatedResources_bottomAlignedMarginDisabled_noTopInset() {
         setNoCutout()
 
-        val bounds = calculateInsetsForRotationWithRotatedResources(
+        val bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation = ROTATION_NONE,
                 targetRotation = ROTATION_NONE,
                 sysUICutout = sysUICutout,
@@ -638,7 +682,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl = false,
                 dotWidth = 10,
                 bottomAlignedMargin = BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight = 15)
+                statusBarContentHeight = 15
+            )
 
         assertThat(bounds.top).isEqualTo(0)
     }
@@ -647,7 +692,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
     fun calculateInsetsForRotationWithRotatedResources_bottomAlignedMargin_topBasedOnMargin() {
         whenever(dc.boundingRects).thenReturn(emptyList())
 
-        val bounds = calculateInsetsForRotationWithRotatedResources(
+        val bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation = ROTATION_NONE,
                 targetRotation = ROTATION_NONE,
                 sysUICutout = sysUICutout,
@@ -658,7 +704,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl = false,
                 dotWidth = 10,
                 bottomAlignedMargin = 5,
-                statusBarContentHeight = 15)
+                statusBarContentHeight = 15
+            )
 
         // Content in the status bar is centered vertically. To achieve the bottom margin we want,
         // we need to "shrink" the height of the status bar until the centered content has the
@@ -694,12 +741,11 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         // THEN only the landscape/seascape rotations should avoid the cutout area because of the
         // potential letterboxing
         var targetRotation = ROTATION_NONE
-        var expectedBounds = Rect(minLeftPadding,
-                0,
-                screenBounds.right - minRightPadding,
-                sbHeightPortrait)
+        var expectedBounds =
+            Rect(minLeftPadding, 0, screenBounds.right - minRightPadding, sbHeightPortrait)
 
-        var bounds = calculateInsetsForRotationWithRotatedResources(
+        var bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout = sysUICutout,
@@ -710,17 +756,17 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         targetRotation = ROTATION_LANDSCAPE
-        expectedBounds = Rect(dcBounds.height(),
-                0,
-                screenBounds.height() - minRightPadding,
-                sbHeightLandscape)
+        expectedBounds =
+            Rect(dcBounds.height(), 0, screenBounds.height() - minRightPadding, sbHeightLandscape)
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout = sysUICutout,
@@ -731,17 +777,17 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         targetRotation = ROTATION_UPSIDE_DOWN
-        expectedBounds = Rect(minLeftPadding,
-                0,
-                screenBounds.right - minRightPadding,
-                sbHeightPortrait)
+        expectedBounds =
+            Rect(minLeftPadding, 0, screenBounds.right - minRightPadding, sbHeightPortrait)
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout = sysUICutout,
@@ -752,17 +798,22 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         targetRotation = ROTATION_SEASCAPE
-        expectedBounds = Rect(minLeftPadding,
+        expectedBounds =
+            Rect(
+                minLeftPadding,
                 0,
                 screenBounds.height() - dcBounds.height() - dotWidth,
-                sbHeightLandscape)
+                sbHeightLandscape
+            )
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout = sysUICutout,
@@ -773,7 +824,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
     }
@@ -793,12 +845,11 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
 
         // THEN content insets should only use rounded corner padding
         var targetRotation = ROTATION_NONE
-        var expectedBounds = Rect(minLeftPadding,
-                0,
-                screenBounds.right - minRightPadding,
-                sbHeightPortrait)
+        var expectedBounds =
+            Rect(minLeftPadding, 0, screenBounds.right - minRightPadding, sbHeightPortrait)
 
-        var bounds = calculateInsetsForRotationWithRotatedResources(
+        var bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 null, /* no cutout */
@@ -809,16 +860,16 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         targetRotation = ROTATION_LANDSCAPE
-        expectedBounds = Rect(minLeftPadding,
-                0,
-                screenBounds.height() - minRightPadding,
-                sbHeightLandscape)
+        expectedBounds =
+            Rect(minLeftPadding, 0, screenBounds.height() - minRightPadding, sbHeightLandscape)
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 null, /* no cutout */
@@ -829,16 +880,16 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         targetRotation = ROTATION_UPSIDE_DOWN
-        expectedBounds = Rect(minLeftPadding,
-                0,
-                screenBounds.width() - minRightPadding,
-                sbHeightPortrait)
+        expectedBounds =
+            Rect(minLeftPadding, 0, screenBounds.width() - minRightPadding, sbHeightPortrait)
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 null, /* no cutout */
@@ -849,16 +900,16 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
 
         targetRotation = ROTATION_LANDSCAPE
-        expectedBounds = Rect(minLeftPadding,
-                0,
-                screenBounds.height() - minRightPadding,
-                sbHeightLandscape)
+        expectedBounds =
+            Rect(minLeftPadding, 0, screenBounds.height() - minRightPadding, sbHeightLandscape)
 
-        bounds = calculateInsetsForRotationWithRotatedResources(
+        bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 null, /* no cutout */
@@ -869,7 +920,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
     }
 
@@ -891,12 +943,11 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
 
         // THEN left should be set to the display cutout width, and right should use the minRight
         val targetRotation = ROTATION_NONE
-        val expectedBounds = Rect(dcBounds.right,
-                0,
-                screenBounds.right - minRightPadding,
-                sbHeightPortrait)
+        val expectedBounds =
+            Rect(dcBounds.right, 0, screenBounds.right - minRightPadding, sbHeightPortrait)
 
-        val bounds = calculateInsetsForRotationWithRotatedResources(
+        val bounds =
+            calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
                 sysUICutout,
@@ -907,7 +958,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
                 isRtl,
                 dotWidth,
                 BOTTOM_ALIGNED_MARGIN_NONE,
-                statusBarContentHeight)
+                statusBarContentHeight
+            )
 
         assertRects(expectedBounds, bounds, currentRotation, targetRotation)
     }
@@ -915,8 +967,14 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
     @Test
     fun testDisplayChanged_returnsUpdatedInsets() {
         // GIVEN: get insets on the first display and switch to the second display
-        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
-            mock<DumpManager>(), mock<CommandRegistry>(), mock<SysUICutoutProvider>())
+        val provider =
+            StatusBarContentInsetsProvider(
+                contextMock,
+                configurationController,
+                mock<DumpManager>(),
+                mock<CommandRegistry>(),
+                mock<SysUICutoutProvider>()
+            )
 
         configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 1080, 2160))
         val firstDisplayInsets = provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
@@ -934,12 +992,17 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
     fun testDisplayChangedAndReturnedBack_returnsTheSameInsets() {
         // GIVEN: get insets on the first display, switch to the second display,
         // get insets and switch back
-        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
-            mock<DumpManager>(), mock<CommandRegistry>(), mock<SysUICutoutProvider>())
+        val provider =
+            StatusBarContentInsetsProvider(
+                contextMock,
+                configurationController,
+                mock<DumpManager>(),
+                mock<CommandRegistry>(),
+                mock<SysUICutoutProvider>()
+            )
 
         configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 1080, 2160))
-        val firstDisplayInsetsFirstCall = provider
-            .getStatusBarContentAreaForRotation(ROTATION_NONE)
+        val firstDisplayInsetsFirstCall = provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
 
         configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 800, 600))
         provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
@@ -947,8 +1010,8 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 1080, 2160))
 
         // WHEN: get insets on the first display again
-        val firstDisplayInsetsSecondCall = provider
-            .getStatusBarContentAreaForRotation(ROTATION_NONE)
+        val firstDisplayInsetsSecondCall =
+            provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
 
         // THEN: insets for the first and second calls for the first display are the same
         assertThat(firstDisplayInsetsFirstCall).isEqualTo(firstDisplayInsetsSecondCall)
@@ -960,15 +1023,22 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         // Start out with an existing configuration with bounds
         configuration.windowConfiguration.setMaxBounds(0, 0, 100, 100)
         configurationController.onConfigurationChanged(configuration)
-        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
-                mock<DumpManager>(), mock<CommandRegistry>(), mock<SysUICutoutProvider>())
-        val listener = object : StatusBarContentInsetsChangedListener {
-            var triggered = false
+        val provider =
+            StatusBarContentInsetsProvider(
+                contextMock,
+                configurationController,
+                mock<DumpManager>(),
+                mock<CommandRegistry>(),
+                mock<SysUICutoutProvider>()
+            )
+        val listener =
+            object : StatusBarContentInsetsChangedListener {
+                var triggered = false
 
-            override fun onStatusBarContentInsetsChanged() {
-                triggered = true
+                override fun onStatusBarContentInsetsChanged() {
+                    triggered = true
+                }
             }
-        }
         provider.addCallback(listener)
 
         // WHEN the config is updated with new bounds
@@ -982,15 +1052,22 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
     @Test
     fun onDensityOrFontScaleChanged_listenerNotified() {
         configuration.densityDpi = 12
-        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
-                mock<DumpManager>(), mock<CommandRegistry>(), mock<SysUICutoutProvider>())
-        val listener = object : StatusBarContentInsetsChangedListener {
-            var triggered = false
+        val provider =
+            StatusBarContentInsetsProvider(
+                contextMock,
+                configurationController,
+                mock<DumpManager>(),
+                mock<CommandRegistry>(),
+                mock<SysUICutoutProvider>()
+            )
+        val listener =
+            object : StatusBarContentInsetsChangedListener {
+                var triggered = false
 
-            override fun onStatusBarContentInsetsChanged() {
-                triggered = true
+                override fun onStatusBarContentInsetsChanged() {
+                    triggered = true
+                }
             }
-        }
         provider.addCallback(listener)
 
         // WHEN the config is updated
@@ -1003,15 +1080,22 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
 
     @Test
     fun onThemeChanged_listenerNotified() {
-        val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
-                mock<DumpManager>(), mock<CommandRegistry>(), mock<SysUICutoutProvider>())
-        val listener = object : StatusBarContentInsetsChangedListener {
-            var triggered = false
+        val provider =
+            StatusBarContentInsetsProvider(
+                contextMock,
+                configurationController,
+                mock<DumpManager>(),
+                mock<CommandRegistry>(),
+                mock<SysUICutoutProvider>()
+            )
+        val listener =
+            object : StatusBarContentInsetsChangedListener {
+                var triggered = false
 
-            override fun onStatusBarContentInsetsChanged() {
-                triggered = true
+                override fun onStatusBarContentInsetsChanged() {
+                    triggered = true
+                }
             }
-        }
         provider.addCallback(listener)
 
         configurationController.notifyThemeChanged()
@@ -1027,7 +1111,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         @Rotation targetRotation: Int
     ) {
         assertTrue(
-                "Rects must match. currentRotation=${RotationUtils.toString(currentRotation)}" +
+            "Rects must match. currentRotation=${RotationUtils.toString(currentRotation)}" +
                 " targetRotation=${RotationUtils.toString(targetRotation)}" +
                 " expected=$expected actual=$actual",
             expected.equals(actual)

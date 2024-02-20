@@ -17,10 +17,10 @@ import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.systemui.DejankUtils
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealScrim
@@ -286,7 +286,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 // up, with unpredictable consequences.
                 if (!powerManager.isInteractive(Display.DEFAULT_DISPLAY) &&
                         shouldAnimateInKeyguard) {
-                    if (!KeyguardShadeMigrationNssl.isEnabled) {
+                    if (!migrateClocksToBlueprint()) {
                         // Tracking this state should no longer be relevant, as the isInteractive
                         // check covers it
                         aodUiAnimationPlaying = true

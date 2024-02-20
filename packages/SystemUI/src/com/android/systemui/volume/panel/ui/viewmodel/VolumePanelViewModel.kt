@@ -21,6 +21,7 @@ import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onConfigChanged
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent
@@ -72,7 +73,11 @@ class VolumePanelViewModel(
                     .distinctUntilChanged(),
                 mutablePanelVisibility,
             ) { configuration, isVisible ->
-                VolumePanelState(orientation = configuration.orientation, isVisible = isVisible)
+                VolumePanelState(
+                    orientation = configuration.orientation,
+                    isVisible = isVisible,
+                    isWideScreen = !resources.getBoolean(R.bool.config_edgeToEdgeBottomSheetDialog),
+                )
             }
             .stateIn(
                 scope,
@@ -80,6 +85,7 @@ class VolumePanelViewModel(
                 VolumePanelState(
                     orientation = resources.configuration.orientation,
                     isVisible = mutablePanelVisibility.value,
+                    isWideScreen = !resources.getBoolean(R.bool.config_edgeToEdgeBottomSheetDialog)
                 ),
             )
     val componentsLayout: Flow<ComponentsLayout> =

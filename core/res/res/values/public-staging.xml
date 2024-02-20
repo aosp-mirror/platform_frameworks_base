@@ -159,6 +159,14 @@
     <public name="contentSensitivity" />
     <!-- @FlaggedApi("android.view.inputmethod.connectionless_handwriting") -->
     <public name="supportsConnectionlessStylusHandwriting" />
+    <!-- @FlaggedApi("android.nfc.Flags.FLAG_OBSERVE_MODE") -->
+    <public name="defaultToObserveMode"/>
+    <!-- @FlaggedApi("android.security.asm_restrictions_enabled") -->
+    <public name="allowCrossUidActivitySwitchFromBelow"/>
+    <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+    <public name="shiftDrawingOffsetForStartOverhang" />
+    <!-- @FlaggedApi("android.view.flags.toolkit_set_frame_rate_read_only") -->
+    <public name="windowIsFrameRatePowerSavingsBalanced"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">
@@ -176,11 +184,11 @@
 
   <staging-public-group type="dimen" first-id="0x01b90000">
     <!-- System corner radius baseline sizes. Used by Material styling of rounded corner shapes-->
-    <public name="system_corner_radius_xsmall" />
-    <public name="system_corner_radius_small" />
-    <public name="system_corner_radius_medium" />
-    <public name="system_corner_radius_large" />
-    <public name="system_corner_radius_xlarge" />
+    <public name="removed_system_corner_radius_xsmall" />
+    <public name="removed_system_corner_radius_small" />
+    <public name="removed_system_corner_radius_medium" />
+    <public name="removed_system_corner_radius_large" />
+    <public name="removed_system_corner_radius_xlarge" />
   </staging-public-group>
 
   <staging-public-group type="color" first-id="0x01b80000">

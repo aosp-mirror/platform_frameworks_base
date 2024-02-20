@@ -707,7 +707,9 @@ public final class CompanionDeviceManager {
      * Only components from the same {@link ComponentName#getPackageName package} as the calling app
      * are allowed.
      *
-     * Your app must have an association with a device before calling this API
+     * Your app must have an association with a device before calling this API.
+     *
+     * Side-loaded apps must allow restricted settings before requesting notification access.
      *
      * <p>Calling this API requires a uses-feature
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
@@ -721,6 +723,9 @@ public final class CompanionDeviceManager {
             IntentSender intentSender = mService
                     .requestNotificationAccess(component, mContext.getUserId())
                     .getIntentSender();
+            if (intentSender == null) {
+                return;
+            }
             mContext.startIntentSender(intentSender, null, 0, 0, 0,
                     ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
                             ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle());

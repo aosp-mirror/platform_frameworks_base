@@ -18,16 +18,17 @@ package com.android.server.wm;
 
 import android.app.ResultInfo;
 import android.content.Intent;
+import android.os.IBinder;
 
 /**
  * Pending result information to send back to an activity.
  */
 final class ActivityResult extends ResultInfo {
     final ActivityRecord mFrom;
-    
+
     public ActivityResult(ActivityRecord from, String resultWho,
-            int requestCode, int resultCode, Intent data) {
-        super(resultWho, requestCode, resultCode, data);
+            int requestCode, int resultCode, Intent data, IBinder callerToken) {
+        super(resultWho, requestCode, resultCode, data, callerToken);
         mFrom = from;
     }
 }

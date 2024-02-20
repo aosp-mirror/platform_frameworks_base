@@ -67,6 +67,11 @@ public interface KeyguardSecurityView {
     int PROMPT_REASON_TRUSTAGENT_EXPIRED = 8;
 
     /**
+     * Some auth is required because adaptive auth has determined risk
+     */
+    int PROMPT_REASON_ADAPTIVE_AUTH_REQUEST = 9;
+
+    /**
      * Strong auth is required because the device has just booted because of an automatic
      * mainline update.
      */

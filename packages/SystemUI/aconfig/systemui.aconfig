@@ -29,6 +29,13 @@ flag {
 }
 
 flag {
+    name: "notification_color_update_logger"
+    namespace: "systemui"
+    description: "Enabled debug logging and dumping of notification color updates."
+    bug: "294347738"
+}
+
+flag {
     name: "notifications_footer_view_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the footer view in the notification shade "
@@ -64,6 +71,16 @@ flag {
     description: "Replaces NotifLiveDataStore with ActiveNotificationListRepository, and updates consumers. "
         "Should not bring any behavior changes."
     bug: "308623704"
+}
+
+flag {
+    name: "notifications_background_media_icons"
+    namespace: "systemui"
+    description: "Updates icons for media notifications in the background."
+    bug: "315143160"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -295,12 +312,15 @@ flag {
 }
 
 flag {
-   name: "centralized_status_bar_dimens_refactor"
+   name: "centralized_status_bar_height_fix"
    namespace: "systemui"
    description: "Refactors shade header and keyguard status bar to read status bar dimens from a"
         " central place, instead of reading resources directly. This is to take into account display"
         " cutouts and other special cases. "
-   bug: "317199366"
+   bug: "317016114"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -431,6 +451,16 @@ flag {
 }
 
 flag {
+    name: "slice_manager_binder_call_background"
+    namespace: "systemui"
+    description: "Move the ISliceManager#getPinnedSpecs binder call to the background thread."
+    bug: "322745650"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
    name: "register_new_wallet_card_in_background"
    namespace: "systemui"
    description: "Decide whether the call to registerNewWalletCards method should be issued on background thread."
@@ -450,3 +480,12 @@ flag {
     }
 }
 
+flag {
+    name: "register_zen_mode_content_observer_background"
+    namespace: "systemui"
+    description: "Decide whether to register zen mode content observers in the background thread."
+    bug: "324515627"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

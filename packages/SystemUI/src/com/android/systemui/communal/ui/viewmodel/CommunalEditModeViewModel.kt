@@ -18,6 +18,7 @@ package com.android.systemui.communal.ui.viewmodel
 
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.dagger.SysUISingleton
@@ -40,6 +41,7 @@ class CommunalEditModeViewModel
 @Inject
 constructor(
     private val communalInteractor: CommunalInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     private val uiEventLogger: UiEventLogger,
     @CommunalLog logBuffer: LogBuffer,
@@ -83,6 +85,10 @@ constructor(
         _reorderingWidgets.value = false
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_CANCEL)
     }
+
+    /** Returns the widget categories to show on communal hub. */
+    val getCommunalWidgetCategories: Int
+        get() = communalSettingsInteractor.communalWidgetCategories.value
 
     /** Sets whether edit mode is currently open */
     fun setEditModeOpen(isOpen: Boolean) = communalInteractor.setEditModeOpen(isOpen)

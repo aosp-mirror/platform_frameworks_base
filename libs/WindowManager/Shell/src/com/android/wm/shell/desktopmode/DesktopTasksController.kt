@@ -21,6 +21,7 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
+import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
@@ -62,7 +63,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.splitscreen.SplitScreenController
-import com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_ENTER_DESKTOP
+import com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DESKTOP_MODE
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
@@ -240,6 +241,43 @@ class DesktopTasksController(
         return desktopModeTaskRepository.getVisibleTaskCount(displayId)
     }
 
+    /** Enter desktop by using the focused task in given `displayId` */
+    fun enterDesktop(displayId: Int) {
+        val allFocusedTasks =
+            shellTaskOrganizer.getRunningTasks(displayId).filter { taskInfo ->
+                taskInfo.isFocused &&
+                        (taskInfo.windowingMode == WINDOWING_MODE_FULLSCREEN ||
+                                taskInfo.windowingMode == WINDOWING_MODE_MULTI_WINDOW) &&
+                        taskInfo.activityType != ACTIVITY_TYPE_HOME
+            }
+        if (allFocusedTasks.isNotEmpty()) {
+            when (allFocusedTasks.size) {
+                2 -> {
+                    // Split-screen case where there are two focused tasks, then we find the child
+                    // task to move to desktop.
+                    val splitFocusedTask = findChildFocusedTask(allFocusedTasks)
+                    moveToDesktop(splitFocusedTask)
+                }
+                1 -> {
+                    // Fullscreen case where we move the current focused task.
+                    moveToDesktop(allFocusedTasks[0].taskId)
+                }
+                else -> {
+                    KtProtoLog.v(
+                        WM_SHELL_DESKTOP_MODE,
+                        "DesktopTasksController: Cannot enter desktop expected less " +
+                                "than 3 focused tasks but found " + allFocusedTasks.size
+                    )
+                }
+            }
+        }
+    }
+
+    private fun findChildFocusedTask(allFocusedTasks: List<RunningTaskInfo>): RunningTaskInfo {
+        if (allFocusedTasks[0].taskId == allFocusedTasks[1].parentTaskId) return allFocusedTasks[1]
+        return allFocusedTasks[0]
+    }
+
     /** Move a task with given `taskId` to desktop */
     fun moveToDesktop(
             taskId: Int,
@@ -355,7 +393,7 @@ class DesktopTasksController(
             splitScreenController.prepareExitSplitScreen(
                     wct,
                     splitScreenController.getStageOfTask(taskInfo.taskId),
-                    EXIT_REASON_ENTER_DESKTOP
+                    EXIT_REASON_DESKTOP_MODE
             )
             getOtherSplitTask(taskInfo.taskId)?.let { otherTaskInfo ->
                 wct.removeTask(otherTaskInfo.token)
@@ -919,19 +957,13 @@ class DesktopTasksController(
         }
         if (inputCoordinate.x <= transitionAreaWidth) {
             releaseVisualIndicator()
-            val wct = WindowContainerTransaction()
-            addMoveToSplitChanges(wct, taskInfo)
-            splitScreenController.requestEnterSplitSelect(taskInfo, wct,
-                SPLIT_POSITION_TOP_OR_LEFT, taskBounds)
+            snapToHalfScreen(taskInfo, SnapPosition.LEFT)
             return
         }
         if (inputCoordinate.x >= (displayController.getDisplayLayout(taskInfo.displayId)?.width()
             ?.minus(transitionAreaWidth) ?: return)) {
             releaseVisualIndicator()
-            val wct = WindowContainerTransaction()
-            addMoveToSplitChanges(wct, taskInfo)
-            splitScreenController.requestEnterSplitSelect(taskInfo, wct,
-                SPLIT_POSITION_BOTTOM_OR_RIGHT, taskBounds)
+            snapToHalfScreen(taskInfo, SnapPosition.RIGHT)
             return
         }
         // A freeform drag-move ended, remove the indicator immediately.
@@ -1016,6 +1048,12 @@ class DesktopTasksController(
         ) {
             mainExecutor.execute {
                 this@DesktopTasksController.setTaskRegionListener(listener, callbackExecutor)
+            }
+        }
+
+        override fun enterDesktop(displayId: Int) {
+            mainExecutor.execute {
+                this@DesktopTasksController.enterDesktop(displayId)
             }
         }
     }

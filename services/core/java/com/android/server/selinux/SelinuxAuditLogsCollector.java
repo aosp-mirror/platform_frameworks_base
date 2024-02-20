@@ -88,7 +88,7 @@ class SelinuxAuditLogsCollector {
             if (eventTime.isAfter(latestTimestamp)) {
                 latestTimestamp = eventTime;
             }
-            if (eventTime.isBefore(mLastWrite)) {
+            if (eventTime.compareTo(mLastWrite) <= 0) {
                 continue;
             }
             Object eventData = event.getData();

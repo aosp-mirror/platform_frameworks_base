@@ -34,6 +34,7 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.InputDevice;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RoundedCorner;
@@ -335,7 +336,15 @@ public class FocusEventDebugView extends RelativeLayout {
 
         final int unicodeChar = event.getUnicodeChar();
         if (unicodeChar != 0) {
-            return new String(Character.toChars(unicodeChar));
+            if ((unicodeChar & KeyCharacterMap.COMBINING_ACCENT) != 0) {
+                // Show combining character
+                final int combiningChar = KeyCharacterMap.getCombiningChar(
+                        unicodeChar & KeyCharacterMap.COMBINING_ACCENT_MASK);
+                // Return the Unicode dotted circle as part of the label as it is used is used to
+                // illustrate the effect of a combining marks
+                return "\u25cc" + String.valueOf((char) combiningChar);
+            }
+            return String.valueOf((char) unicodeChar);
         }
 
         final var label = KeyEvent.keyCodeToString(event.getKeyCode());

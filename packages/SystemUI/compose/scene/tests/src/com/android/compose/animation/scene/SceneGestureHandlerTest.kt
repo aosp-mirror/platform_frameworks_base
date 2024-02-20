@@ -51,8 +51,13 @@ class SceneGestureHandlerTest {
     private class TestGestureScope(
         private val testScope: MonotonicClockTestScope,
     ) {
+        var canChangeScene: (SceneKey) -> Boolean = { true }
         private val layoutState =
-            MutableSceneTransitionLayoutStateImpl(SceneA, EmptyTestTransitions)
+            MutableSceneTransitionLayoutStateImpl(
+                SceneA,
+                EmptyTestTransitions,
+                canChangeScene = { canChangeScene(it) },
+            )
 
         val mutableUserActionsA = mutableMapOf(Swipe.Up to SceneB, Swipe.Down to SceneC)
         val mutableUserActionsB = mutableMapOf(Swipe.Up to SceneC, Swipe.Down to SceneA)
@@ -889,5 +894,42 @@ class SceneGestureHandlerTest {
             isUserInputOngoing = true,
         )
         assertThat(transitionState).isNotSameInstanceAs(firstTransition)
+    }
+
+    @Test
+    fun blockTransition() = runGestureTest {
+        assertIdle(SceneA)
+
+        // Swipe up to scene B.
+        onDragStarted(overSlop = up(0.1f))
+        assertTransition(currentScene = SceneA, fromScene = SceneA, toScene = SceneB)
+
+        // Block the transition when the user release their finger.
+        canChangeScene = { false }
+        onDragStopped(velocity = -velocityThreshold)
+        advanceUntilIdle()
+        assertIdle(SceneA)
+    }
+
+    @Test
+    fun blockInterceptedTransition() = runGestureTest {
+        assertIdle(SceneA)
+
+        // Swipe up to B.
+        onDragStarted(overSlop = up(0.1f))
+        assertTransition(currentScene = SceneA, fromScene = SceneA, toScene = SceneB)
+        onDragStopped(velocity = -velocityThreshold)
+        assertTransition(currentScene = SceneB, fromScene = SceneA, toScene = SceneB)
+
+        // Intercept the transition and swipe down back to scene A.
+        assertThat(sceneGestureHandler.shouldImmediatelyIntercept(startedPosition = null)).isTrue()
+        onDragStartedImmediately()
+
+        // Block the transition when the user release their finger.
+        canChangeScene = { false }
+        onDragStopped(velocity = velocityThreshold)
+
+        advanceUntilIdle()
+        assertIdle(SceneB)
     }
 }

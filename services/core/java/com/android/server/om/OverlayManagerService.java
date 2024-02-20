@@ -1143,10 +1143,9 @@ public final class OverlayManagerService extends SystemService {
     };
 
     private static final class PackageManagerHelperImpl implements PackageManagerHelper {
-        private static final class PackageStateUsers {
+        private static class PackageStateUsers {
             private PackageState mPackageState;
-            private Boolean mDefinesOverlayable = null;
-            private final ArraySet<Integer> mInstalledUsers = new ArraySet<>();
+            private final Set<Integer> mInstalledUsers = new ArraySet<>();
             private PackageStateUsers(@NonNull PackageState packageState) {
                 this.mPackageState = packageState;
             }
@@ -1196,11 +1195,13 @@ public final class OverlayManagerService extends SystemService {
             return userPackages;
         }
 
-        private PackageStateUsers getRawPackageStateForUser(@NonNull final String packageName,
+        @Override
+        @Nullable
+        public PackageState getPackageStateForUser(@NonNull final String packageName,
                 final int userId) {
             final PackageStateUsers pkg = mCache.get(packageName);
             if (pkg != null && pkg.mInstalledUsers.contains(userId)) {
-                return pkg;
+                return pkg.mPackageState;
             }
             try {
                 if (!mPackageManager.isPackageAvailable(packageName, userId)) {
@@ -1214,14 +1215,8 @@ public final class OverlayManagerService extends SystemService {
             return addPackageUser(packageName, userId);
         }
 
-        @Override
-        public PackageState getPackageStateForUser(@NonNull final String packageName,
-                final int userId) {
-            final PackageStateUsers pkg = getRawPackageStateForUser(packageName, userId);
-            return pkg != null ? pkg.mPackageState : null;
-        }
-
-        private PackageStateUsers addPackageUser(@NonNull final String packageName,
+        @NonNull
+        private PackageState addPackageUser(@NonNull final String packageName,
                 final int user) {
             final PackageState pkg = mPackageManagerInternal.getPackageStateInternal(packageName);
             if (pkg == null) {
@@ -1233,19 +1228,19 @@ public final class OverlayManagerService extends SystemService {
         }
 
         @NonNull
-        private PackageStateUsers addPackageUser(@NonNull final PackageState pkg,
+        private PackageState addPackageUser(@NonNull final PackageState pkg,
                 final int user) {
             PackageStateUsers pkgUsers = mCache.get(pkg.getPackageName());
             if (pkgUsers == null) {
                 pkgUsers = new PackageStateUsers(pkg);
                 mCache.put(pkg.getPackageName(), pkgUsers);
-            } else if (pkgUsers.mPackageState != pkg) {
+            } else {
                 pkgUsers.mPackageState = pkg;
-                pkgUsers.mDefinesOverlayable = null;
             }
             pkgUsers.mInstalledUsers.add(user);
-            return pkgUsers;
+            return pkgUsers.mPackageState;
         }
+
 
         @NonNull
         private void removePackageUser(@NonNull final String packageName, final int user) {
@@ -1264,15 +1259,15 @@ public final class OverlayManagerService extends SystemService {
             }
         }
 
+        @Nullable
         public PackageState onPackageAdded(@NonNull final String packageName, final int userId) {
-            final var pu = addPackageUser(packageName, userId);
-            return pu != null ? pu.mPackageState : null;
+            return addPackageUser(packageName, userId);
         }
 
+        @Nullable
         public PackageState onPackageUpdated(@NonNull final String packageName,
                 final int userId) {
-            final var pu = addPackageUser(packageName, userId);
-            return pu != null ? pu.mPackageState : null;
+            return addPackageUser(packageName, userId);
         }
 
         public void onPackageRemoved(@NonNull final String packageName, final int userId) {
@@ -1312,30 +1307,22 @@ public final class OverlayManagerService extends SystemService {
             return (pkgs.length == 0) ? null : pkgs[0];
         }
 
+        @Nullable
         @Override
         public OverlayableInfo getOverlayableForTarget(@NonNull String packageName,
                 @NonNull String targetOverlayableName, int userId)
                 throws IOException {
-            final var psu = getRawPackageStateForUser(packageName, userId);
-            final var pkg = (psu == null || psu.mPackageState == null)
-                    ? null : psu.mPackageState.getAndroidPackage();
+            var packageState = getPackageStateForUser(packageName, userId);
+            var pkg = packageState == null ? null : packageState.getAndroidPackage();
             if (pkg == null) {
                 throw new IOException("Unable to get target package");
-            }
-
-            if (Boolean.FALSE.equals(psu.mDefinesOverlayable)) {
-                return null;
             }
 
             ApkAssets apkAssets = null;
             try {
                 apkAssets = ApkAssets.loadFromPath(pkg.getSplits().get(0).getPath(),
                         ApkAssets.PROPERTY_ONLY_OVERLAYABLES);
-                if (psu.mDefinesOverlayable == null) {
-                    psu.mDefinesOverlayable = apkAssets.definesOverlayable();
-                }
-                return Boolean.FALSE.equals(psu.mDefinesOverlayable)
-                        ? null : apkAssets.getOverlayableInfo(targetOverlayableName);
+                return apkAssets.getOverlayableInfo(targetOverlayableName);
             } finally {
                 if (apkAssets != null) {
                     try {
@@ -1349,29 +1336,24 @@ public final class OverlayManagerService extends SystemService {
         @Override
         public boolean doesTargetDefineOverlayable(String targetPackageName, int userId)
                 throws IOException {
-            final var psu = getRawPackageStateForUser(targetPackageName, userId);
-            var pkg = (psu == null || psu.mPackageState == null)
-                    ? null : psu.mPackageState.getAndroidPackage();
+            var packageState = getPackageStateForUser(targetPackageName, userId);
+            var pkg = packageState == null ? null : packageState.getAndroidPackage();
             if (pkg == null) {
                 throw new IOException("Unable to get target package");
             }
 
-            if (psu.mDefinesOverlayable == null) {
-                ApkAssets apkAssets = null;
-                try {
-                    apkAssets = ApkAssets.loadFromPath(pkg.getSplits().get(0).getPath(),
-                            ApkAssets.PROPERTY_ONLY_OVERLAYABLES);
-                    psu.mDefinesOverlayable = apkAssets.definesOverlayable();
-                } finally {
-                    if (apkAssets != null) {
-                        try {
-                            apkAssets.close();
-                        } catch (Throwable ignored) {
-                        }
+            ApkAssets apkAssets = null;
+            try {
+                apkAssets = ApkAssets.loadFromPath(pkg.getSplits().get(0).getPath());
+                return apkAssets.definesOverlayable();
+            } finally {
+                if (apkAssets != null) {
+                    try {
+                        apkAssets.close();
+                    } catch (Throwable ignored) {
                     }
                 }
             }
-            return psu.mDefinesOverlayable;
         }
 
         @Override

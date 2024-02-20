@@ -40,6 +40,12 @@ abstract class ShadeEmptyImplModule {
 
     @Binds
     @SysUISingleton
+    abstract fun bindsShadeLockscreenInteractor(
+        slsi: ShadeViewControllerEmptyImpl
+    ): ShadeLockscreenInteractor
+
+    @Binds
+    @SysUISingleton
     abstract fun bindsShadeController(sc: ShadeControllerEmptyImpl): ShadeController
 
     @Binds

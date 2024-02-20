@@ -113,8 +113,7 @@
     <string name="unarchive_body_text" msgid="8244155079861708964">"यो एप ब्याकग्राउन्डमा डाउनलोड हुन थाल्ने छ"</string>
     <string name="restore" msgid="8460854736328970444">"रिस्टोर गर्नुहोस्"</string>
     <string name="unarchive_error_offline_title" msgid="4021785324565678605">"तपाईंको डिभाइस अफलाइन छ"</string>
-    <!-- no translation found for unarchive_error_offline_body (2256042209364094099) -->
-    <skip />
+    <string name="unarchive_error_offline_body" msgid="2256042209364094099">"यो एप रिस्टोर गर्न आफ्नो इन्टरनेट कनेक्सन जाँच्नुहोस् र फेरि प्रयास गर्नुहोस्।"</string>
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"कुनै समस्या आयो"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"यो एप रिस्टोर गर्ने क्रममा कुनै समस्या आयो"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"पर्याप्त खाली ठाउँ छैन"</string>

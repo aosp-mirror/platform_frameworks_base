@@ -20,7 +20,8 @@ package com.android.systemui.shade;
 import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
-import static com.android.systemui.Flags.centralizedStatusBarDimensRefactor;
+import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.shade.NotificationPanelViewController.COUNTER_PANEL_OPEN_QS;
 import static com.android.systemui.shade.NotificationPanelViewController.FLING_COLLAPSE;
@@ -70,7 +71,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentHostManager;
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -453,7 +453,7 @@ public class QuickSettingsController implements Dumpable {
         mUseLargeScreenShadeHeader =
                 LargeScreenUtils.shouldUseLargeScreenShadeHeader(mPanelView.getResources());
         mLargeScreenShadeHeaderHeight =
-                centralizedStatusBarDimensRefactor()
+                centralizedStatusBarHeightFix()
                         ? mLargeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
                         : mResources.getDimensionPixelSize(
                                 R.dimen.large_screen_shade_header_height);
@@ -1782,7 +1782,7 @@ public class QuickSettingsController implements Dumpable {
                     // Dragging down on the lockscreen statusbar should prohibit other interactions
                     // immediately, otherwise we'll wait on the touchslop. This is to allow
                     // dragging down to expanded quick settings directly on the lockscreen.
-                    if (!KeyguardShadeMigrationNssl.isEnabled()) {
+                    if (!migrateClocksToBlueprint()) {
                         mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
                     }
                 }
@@ -1827,7 +1827,7 @@ public class QuickSettingsController implements Dumpable {
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(
                         mInitialTouchX, mInitialTouchY, h)) {
-                    if (!KeyguardShadeMigrationNssl.isEnabled()) {
+                    if (!migrateClocksToBlueprint()) {
                         mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
                     }
                     mShadeLog.onQsInterceptMoveQsTrackingEnabled(h);

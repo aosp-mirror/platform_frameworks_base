@@ -57,6 +57,7 @@ constructor(
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!migrateClocksToBlueprint()) return
+        if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         smartspaceView = smartspaceController.buildAndConnectView(constraintLayout)
         weatherView = smartspaceController.buildAndConnectWeatherView(constraintLayout)
         dateView = smartspaceController.buildAndConnectDateView(constraintLayout)
@@ -83,6 +84,7 @@ constructor(
 
     override fun bindData(constraintLayout: ConstraintLayout) {
         if (!migrateClocksToBlueprint()) return
+        if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         KeyguardSmartspaceViewBinder.bind(
             constraintLayout,
             keyguardClockViewModel,
@@ -93,6 +95,7 @@ constructor(
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
         if (!migrateClocksToBlueprint()) return
+        if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         val horizontalPaddingStart =
             context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
                 context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
@@ -189,6 +192,7 @@ constructor(
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
         if (!migrateClocksToBlueprint()) return
+        if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         listOf(smartspaceView, dateView, weatherView).forEach {
             it?.let {
                 if (it.parent == constraintLayout) {

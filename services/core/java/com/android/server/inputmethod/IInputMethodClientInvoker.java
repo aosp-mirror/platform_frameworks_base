@@ -117,6 +117,30 @@ final class IInputMethodClientInvoker {
     }
 
     @AnyThread
+    void onStartInputResult(@NonNull InputBindResult res, int startInputSeq) {
+        if (mIsProxy) {
+            onStartInputResultInternal(res, startInputSeq);
+        } else {
+            mHandler.post(() -> onStartInputResultInternal(res, startInputSeq));
+        }
+    }
+
+    @AnyThread
+    private void onStartInputResultInternal(@NonNull InputBindResult res, int startInputSeq) {
+        try {
+            mTarget.onStartInputResult(res, startInputSeq);
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        } finally {
+            // Dispose the channel if the input method is not local to this process
+            // because the remote proxy will get its own copy when unparceled.
+            if (res.channel != null && mIsProxy) {
+                res.channel.dispose();
+            }
+        }
+    }
+
+    @AnyThread
     void onBindAccessibilityService(@NonNull InputBindResult res, int id) {
         if (mIsProxy) {
             onBindAccessibilityServiceInternal(res, id);

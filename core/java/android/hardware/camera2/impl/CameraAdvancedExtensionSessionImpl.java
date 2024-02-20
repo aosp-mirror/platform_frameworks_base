@@ -66,6 +66,8 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 
+import com.android.internal.camera.flags.Flags;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -775,6 +777,22 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                                 CameraAdvancedExtensionSessionImpl.this, mClientRequest));
             } finally {
                 Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public void onCaptureProcessFailed(int captureSequenceId, int captureFailureReason) {
+            if (Flags.concertMode()) {
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    mClientExecutor.execute(
+                            () -> mClientCallbacks.onCaptureFailed(
+                                     CameraAdvancedExtensionSessionImpl.this, mClientRequest,
+                                    captureFailureReason
+                            ));
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
 

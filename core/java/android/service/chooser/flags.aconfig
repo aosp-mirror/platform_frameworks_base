@@ -15,13 +15,6 @@ flag {
 }
 
 flag {
-  name: "support_nfc_resolver"
-  namespace: "systemui"
-  description: "This flag controls the new NFC 'resolver' activity"
-  bug: "268089816"
-}
-
-flag {
   name: "chooser_payload_toggling"
   namespace: "intentresolver"
   description: "This flag controls content toggling in Chooser"

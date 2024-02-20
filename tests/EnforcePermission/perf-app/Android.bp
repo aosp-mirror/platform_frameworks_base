@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_responsible_apis",
     default_applicable_licenses: ["frameworks_base_license"],
 }
 

@@ -725,8 +725,8 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_FAST_HDR_TRANSITIONS)
     public void testDisplayBrightnessHdr_SkipAnimationOnHdrAppearance() {
+        when(mDisplayManagerFlagsMock.isFastHdrTransitionsEnabled()).thenReturn(true);
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
@@ -757,12 +757,12 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
 
         verify(mHolder.animator).animateTo(eq(hdrBrightness), eq(sdrBrightness),
-                eq(BRIGHTNESS_RAMP_RATE_MINIMUM), eq(false));
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE), eq(false));
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_FAST_HDR_TRANSITIONS)
     public void testDisplayBrightnessHdr_SkipAnimationOnHdrRemoval() {
+        when(mDisplayManagerFlagsMock.isFastHdrTransitionsEnabled()).thenReturn(true);
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
@@ -797,7 +797,7 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
 
         verify(mHolder.animator).animateTo(eq(sdrBrightness), eq(sdrBrightness),
-                eq(BRIGHTNESS_RAMP_RATE_MINIMUM), eq(false));
+                eq(BRIGHTNESS_RAMP_RATE_FAST_DECREASE), eq(false));
     }
 
     @Test

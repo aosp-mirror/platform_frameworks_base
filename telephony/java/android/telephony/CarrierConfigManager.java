@@ -3844,13 +3844,27 @@ public class CarrierConfigManager {
      * and if the 5G state changes to neither 'connected' not 'not_restricted_rrc_idle', the icon
      * will change to reflect the true state.
      *
+     * The value can be overridden by {@link #KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT}
      * @hide
      */
     public static final String KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING =
             "5g_icon_display_secondary_grace_period_string";
 
     /**
-     * Whether device reset all of NR timers when device camped on a network that haven't 5G
+     * The secondary grace periods in seconds to use if NR advanced icon was shown due to connecting
+     * to bands specified in {@link #KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY}.
+     *
+     * The default value is 0, meaning the original value in
+     * {@link #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING} is used. Otherwise, it overrides
+     * the value in {@link #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING}.
+     *
+     * @hide
+     */
+    public static final String KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT =
+            "nr_advanced_bands_secondary_timer_seconds_int";
+
+    /**
+     * Whether device resets all of NR timers when device camped on a network that haven't 5G
      * capability and RRC currently in IDLE state.
      *
      * The default value is false;
@@ -3859,6 +3873,30 @@ public class CarrierConfigManager {
      */
     public static final String KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL =
             "nr_timers_reset_if_non_endc_and_rrc_idle_bool";
+
+    /**
+     * Whether device resets all of NR timers when device is in a voice call and QOS is established.
+     * The default value is false;
+     *
+     * @see #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING
+     * @see #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING
+     *
+     * @hide
+     */
+    public static final String KEY_NR_TIMERS_RESET_ON_VOICE_QOS_BOOL =
+            "nr_timers_reset_on_voice_qos_bool";
+
+    /**
+     * Whether device resets all of NR timers when the PLMN changes.
+     * The default value is false;
+     *
+     * @see #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING
+     * @see #KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING
+     *
+     * @hide
+     */
+    public static final String KEY_NR_TIMERS_RESET_ON_PLMN_CHANGE_BOOL =
+            "nr_timers_reset_on_plmn_change_bool";
 
     /**
      * A list of additional NR advanced band would map to
@@ -4765,12 +4803,51 @@ public class CarrierConfigManager {
          */
         public static final String KEY_FCM_SENDER_ID_STRING = KEY_PREFIX + "fcm_sender_id_string";
 
+        /**
+         * Indicates the supported protocol version in the parameter entitlement_version.
+         * The default value is 2. The possible value is 2 and 8.
+         *
+         * Reference: GSMA TS.43-v8 section 2.5 Protocol version control and
+         * Table 3. GET Parameters for Entitlement Configuration in section 2.3
+         * HTTP GET method Parameters.
+         * @hide
+         */
+        public static final String KEY_ENTITLEMENT_VERSION_INT =
+                KEY_PREFIX + "entitlement_version_int";
+
+        /**
+         * Controls the service entitlement status when receiving the VERS characteristic
+         * with both version and validity set to -1 or -2.
+         * If {@code true}, default service entitlement status is enabled.
+         * If {@code false}, default service entitlement status is disabled.
+         *
+         * Reference: GSMA TS.14-v8 section 2.1, overview
+         * @hide
+         */
+        public static final String KEY_DEFAULT_SERVICE_ENTITLEMENT_STATUS_BOOL =
+                KEY_PREFIX + "default_service_entitlement_status_bool";
+
+        /**
+         * Indicates if UE can skip service entitlement check when the user turns on Wi-Fi Calling.
+         * UE still shows Wi-Fi Calling emergency address update web view when the user clicks
+         * "Update Emergency Address" on the WiFi calling setting.
+         *
+         * Note: this is effective only if the {@link #KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING}
+         * is set to this app.
+         * @hide
+         */
+        public static final String KEY_SKIP_WFC_ACTIVATION_BOOL =
+                KEY_PREFIX + "skip_wfc_activation_bool";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putString(KEY_ENTITLEMENT_SERVER_URL_STRING, "");
             defaults.putString(KEY_FCM_SENDER_ID_STRING, "");
             defaults.putBoolean(KEY_SHOW_VOWIFI_WEBVIEW_BOOL, false);
             defaults.putBoolean(KEY_IMS_PROVISIONING_BOOL, false);
+            defaults.putBoolean(KEY_DEFAULT_SERVICE_ENTITLEMENT_STATUS_BOOL, false);
+            defaults.putBoolean(KEY_SKIP_WFC_ACTIVATION_BOOL, false);
+            defaults.putInt(KEY_ENTITLEMENT_VERSION_INT, 2);
             return defaults;
         }
     }
@@ -10688,7 +10765,10 @@ public class CarrierConfigManager {
                         + "not_restricted_rrc_con:5G");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING, "");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
+        sDefaults.putInt(KEY_NR_ADVANCED_BANDS_SECONDARY_TIMER_SECONDS_INT, 0);
         sDefaults.putBoolean(KEY_NR_TIMERS_RESET_IF_NON_ENDC_AND_RRC_IDLE_BOOL, false);
+        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_VOICE_QOS_BOOL, false);
+        sDefaults.putBoolean(KEY_NR_TIMERS_RESET_ON_PLMN_CHANGE_BOOL, false);
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putIntArray(KEY_ADDITIONAL_NR_ADVANCED_BANDS_INT_ARRAY, new int[0]);

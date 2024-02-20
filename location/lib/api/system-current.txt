@@ -1,4 +1,21 @@
 // Signature format: 2.0
+package android.location {
+
+  @Deprecated public class GeocoderParams implements android.os.Parcelable {
+    ctor @Deprecated public GeocoderParams(android.content.Context);
+    ctor @Deprecated public GeocoderParams(android.content.Context, java.util.Locale);
+    ctor @Deprecated public GeocoderParams(int, String, @Nullable String, java.util.Locale);
+    method @Deprecated public int describeContents();
+    method @Deprecated @Nullable public String getClientAttributionTag();
+    method @Deprecated @NonNull public String getClientPackage();
+    method @Deprecated public int getClientUid();
+    method @Deprecated @NonNull public java.util.Locale getLocale();
+    method @Deprecated public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.location.GeocoderParams> CREATOR;
+  }
+
+}
+
 package com.android.location.provider {
 
   @Deprecated public final class FusedLocationHardware {
@@ -23,6 +40,13 @@ package com.android.location.provider {
     method @Deprecated public void onDiagnosticDataAvailable(String);
     method @Deprecated public void onLocationAvailable(android.location.Location[]);
     method @Deprecated public void onStatusChanged(int);
+  }
+
+  @Deprecated public abstract class GeocodeProvider {
+    ctor @Deprecated public GeocodeProvider();
+    method @Deprecated public android.os.IBinder getBinder();
+    method @Deprecated public abstract String onGetFromLocation(double, double, int, android.location.GeocoderParams, java.util.List<android.location.Address>);
+    method @Deprecated public abstract String onGetFromLocationName(String, double, double, double, double, int, android.location.GeocoderParams, java.util.List<android.location.Address>);
   }
 
   @Deprecated public class GmsFusedBatchOptions {

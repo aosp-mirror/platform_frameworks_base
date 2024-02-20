@@ -90,7 +90,9 @@ interface IActivityClientController {
     ComponentName getCallingActivity(in IBinder token);
     String getCallingPackage(in IBinder token);
     int getLaunchedFromUid(in IBinder token);
+    int getActivityCallerUid(in IBinder activityToken, in IBinder callerToken);
     String getLaunchedFromPackage(in IBinder token);
+    String getActivityCallerPackage(in IBinder activityToken, in IBinder callerToken);
 
     int checkActivityCallerContentUriPermission(in IBinder activityToken, in IBinder callerToken,
             in Uri uri, int modeFlags, int userId);

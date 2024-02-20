@@ -37,23 +37,8 @@ interface ShadeViewController {
     /** Animates to an expanded shade with QS expanded. If the shade starts expanded, expands QS. */
     fun expandToQs()
 
-    /**
-     * Expand shade so that notifications are visible. Non-split shade: just expanding shade or
-     * collapsing QS when they're expanded. Split shade: only expanding shade, notifications are
-     * always visible
-     *
-     * Called when `adb shell cmd statusbar expand-notifications` is executed.
-     */
-    fun expandToNotifications()
-
     /** Returns whether the shade is expanding or collapsing itself or quick settings. */
     val isExpandingOrCollapsing: Boolean
-
-    /**
-     * Returns whether the shade height is greater than zero (i.e. partially or fully expanded),
-     * there is a HUN, the shade is animating, or the shade is instantly expanding.
-     */
-    val isExpanded: Boolean
 
     /**
      * Returns whether the shade height is greater than zero or the shade is expecting a synthesized
@@ -101,12 +86,6 @@ interface ShadeViewController {
     /** Returns whether status bar icons should be hidden when the shade is expanded. */
     fun shouldHideStatusBarIconsWhenExpanded(): Boolean
 
-    /**
-     * Do not let the user drag the shade up and down for the current touch session. This is
-     * necessary to avoid shade expansion while/after the bouncer is dismissed.
-     */
-    fun blockExpansionForCurrentTouch()
-
     /** Sets a listener to be notified when touch tracking begins. */
     fun setTrackingStartedListener(trackingStartedListener: TrackingStartedListener)
 
@@ -119,15 +98,6 @@ interface ShadeViewController {
 
     /** If the latency tracker is enabled, begins tracking expand latency. */
     fun startExpandLatencyTracking()
-
-    /** Called before animating Keyguard dismissal, i.e. the animation dismissing the bouncer. */
-    fun startBouncerPreHideAnimation()
-
-    /** Called once every minute while dozing. */
-    fun dozeTimeTick()
-
-    /** Close guts, notification menus, and QS. Set scroll and overscroll to 0. */
-    fun resetViews(animate: Boolean)
 
     /** Returns the StatusBarState. */
     val barState: Int
@@ -144,9 +114,6 @@ interface ShadeViewController {
      * @see .setAlpha
      */
     fun setAlphaChangeAnimationEndAction(r: Runnable)
-
-    /** Sets whether the screen has temporarily woken up to display notifications. */
-    fun setPulsing(pulsing: Boolean)
 
     /** Sets Qs ScrimEnabled and updates QS state. */
     fun setQsScrimEnabled(qsScrimEnabled: Boolean)
@@ -165,32 +132,6 @@ interface ShadeViewController {
 
     /** Removes a global layout listener. */
     fun removeOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener)
-
-    /** Posts the given runnable to the view. */
-    fun postToView(action: Runnable): Boolean
-
-    // ******* Begin Keyguard Section *********
-    /** Animate to expanded shade after a delay in ms. Used for lockscreen to shade transition. */
-    fun transitionToExpandedShade(delay: Long)
-
-    /** @see ViewGroupFadeHelper.reset */
-    fun resetViewGroupFade()
-
-    /**
-     * Set the alpha and translationY of the keyguard elements which only show on the lockscreen,
-     * but not in shade locked / shade. This is used when dragging down to the full shade.
-     */
-    fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int)
-
-    /** Sets the overstretch amount in raw pixels when dragging down. */
-    fun setOverStretchAmount(amount: Float)
-
-    /**
-     * Sets the alpha value to be set on the keyguard status bar.
-     *
-     * @param alpha value between 0 and 1. -1 if the value is to be reset.
-     */
-    fun setKeyguardStatusBarAlpha(alpha: Float)
 
     /**
      * Reconfigures the shade to show the AOD UI (clock, smartspace, etc). This is called by the
@@ -250,8 +191,6 @@ interface ShadeViewController {
      * @param[constant] One of [android.view.HapticFeedbackConstants]
      */
     fun performHapticFeedback(constant: Int)
-
-    // ******* End Keyguard Section *********
 
     /** Returns the ShadeHeadsUpTracker. */
     val shadeHeadsUpTracker: ShadeHeadsUpTracker

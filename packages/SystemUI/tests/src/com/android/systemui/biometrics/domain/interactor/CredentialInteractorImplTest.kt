@@ -89,6 +89,16 @@ class CredentialInteractorImplTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun testParentProfile() {
+        for (value in listOf(12, 8, 4)) {
+            whenever(userManager.getProfileParent(eq(USER_ID)))
+                .thenReturn(UserInfo(value, "test", 0))
+
+            assertThat(interactor.getParentProfileIdOrSelfId(USER_ID)).isEqualTo(value)
+        }
+    }
+
     @Test fun pinCredentialWhenGood() = pinCredential(goodCredential())
 
     @Test fun pinCredentialWhenBad() = pinCredential(badCredential())

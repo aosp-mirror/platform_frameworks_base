@@ -299,6 +299,26 @@ public class ActivityClient {
         }
     }
 
+    /** Returns the uid of the app that launched the activity. */
+    public int getActivityCallerUid(IBinder activityToken, IBinder callerToken) {
+        try {
+            return getActivityClientController().getActivityCallerUid(activityToken,
+                    callerToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Returns the package of the app that launched the activity. */
+    public String getActivityCallerPackage(IBinder activityToken, IBinder callerToken) {
+        try {
+            return getActivityClientController().getActivityCallerPackage(activityToken,
+                    callerToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** Checks if the app that launched the activity has access to the URI. */
     public int checkActivityCallerContentUriPermission(IBinder activityToken, IBinder callerToken,
             Uri uri, int modeFlags) {

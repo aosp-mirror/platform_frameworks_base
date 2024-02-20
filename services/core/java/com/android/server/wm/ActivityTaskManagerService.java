@@ -881,7 +881,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mTaskSupervisor.onSystemReady();
             mActivityClientController.onSystemReady();
             // TODO(b/258792202) Cleanup once ASM is ready to launch
-            ActivitySecurityModelFeatureFlags.initialize(mContext.getMainExecutor(), pm);
+            ActivitySecurityModelFeatureFlags.initialize(mContext.getMainExecutor());
             mGrammaticalManagerInternal = LocalServices.getService(
                     GrammaticalInflectionManagerInternal.class);
         }
@@ -3524,10 +3524,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                hasRestrictedWindow = displayContent.forAllWindows(windowState -> {
-                    return windowState.isOnScreen() && UserManager.isUserTypePrivateProfile(
-                            getUserManager().getProfileType(windowState.mShowUserId));
-                }, true /* traverseTopToBottom */);
+                hasRestrictedWindow = displayContent.forAllWindows(
+                        windowState -> windowState.isOnScreen() && (
+                                UserManager.isUserTypePrivateProfile(
+                                        getUserManager().getProfileType(windowState.mShowUserId))
+                                        || hasUserRestriction(
+                                        UserManager.DISALLOW_ASSIST_CONTENT,
+                                        windowState.mShowUserId)), true /* traverseTopToBottom */);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -6334,7 +6337,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final NeededUriGrants dataGrants = collectGrants(data, r);
 
             synchronized (mGlobalLock) {
-                r.sendResult(callingUid, resultWho, requestCode, resultCode, data, dataGrants);
+                r.sendResult(callingUid, resultWho, requestCode, resultCode, data, new Binder(),
+                        dataGrants);
             }
         }
 

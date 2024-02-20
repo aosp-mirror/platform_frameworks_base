@@ -1702,6 +1702,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         Objects.requireNonNull(installerPackageName);
         Objects.requireNonNull(userHandle);
 
+        Slog.i(TAG,
+                TextUtils.formatSimple("Requested archived install of package %s for user %s.",
+                        archivedPackageParcel.packageName,
+                        userHandle.getIdentifier()));
         final int callingUid = Binder.getCallingUid();
         final int userId = userHandle.getIdentifier();
         final Computer snapshot = mPm.snapshotComputer();
@@ -1737,6 +1741,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 session.addFile(LOCATION_DATA_APP, "base", 0 /*lengthBytes*/,
                         metadata.toByteArray(), null /*signature*/);
                 session.commit(statusReceiver, false /*forTransfer*/);
+                Slog.i(TAG, TextUtils.formatSimple("Installed archived app %s.",
+                        archivedPackageParcel.packageName));
             } catch (IOException e) {
                 throw ExceptionUtils.wrap(e);
             } finally {

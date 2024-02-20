@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.Intra
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import javax.inject.Inject
 import kotlin.math.max
@@ -84,6 +85,7 @@ constructor(
         constraintLayout: ConstraintLayout,
         viewModel: KeyguardBlueprintViewModel,
         clockViewModel: KeyguardClockViewModel,
+        smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) {
         constraintLayout.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -108,10 +110,18 @@ constructor(
                             ) {
                                 BaseBlueprintTransition(clockViewModel)
                                     .addTransition(
-                                        IntraBlueprintTransition(Config.DEFAULT, clockViewModel)
+                                        IntraBlueprintTransition(
+                                            Config.DEFAULT,
+                                            clockViewModel,
+                                            smartspaceViewModel
+                                        )
                                     )
                             } else {
-                                IntraBlueprintTransition(Config.DEFAULT, clockViewModel)
+                                IntraBlueprintTransition(
+                                    Config.DEFAULT,
+                                    clockViewModel,
+                                    smartspaceViewModel
+                                )
                             }
 
                         runTransition(constraintLayout, transition, Config.DEFAULT) {
@@ -136,7 +146,11 @@ constructor(
 
                         runTransition(
                             constraintLayout,
-                            IntraBlueprintTransition(transition, clockViewModel),
+                            IntraBlueprintTransition(
+                                transition,
+                                clockViewModel,
+                                smartspaceViewModel
+                            ),
                             transition,
                         ) {
                             cs.applyTo(constraintLayout)

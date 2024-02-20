@@ -136,6 +136,14 @@ final class PolicyEnforcerCallbacks {
         return true;
     }
 
+    static boolean enforceAuditLogging(
+            @Nullable Boolean value, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        final var dpmi = LocalServices.getService(DevicePolicyManagerInternal.class);
+        dpmi.enforceAuditLoggingPolicy(Boolean.TRUE.equals(value));
+        return true;
+    }
+
     static boolean setLockTask(
             @Nullable LockTaskPolicy policy, @NonNull Context context, int userId) {
         List<String> packages = Collections.emptyList();

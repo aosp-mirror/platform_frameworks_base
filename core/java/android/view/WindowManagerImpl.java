@@ -533,33 +533,53 @@ public final class WindowManagerImpl implements WindowManager {
         mGlobal.unregisterTrustedPresentationListener(listener);
     }
 
+    @NonNull
     @Override
-    public void registerBatchedSurfaceControlInputReceiver(int displayId,
+    public InputTransferToken registerBatchedSurfaceControlInputReceiver(int displayId,
             @NonNull InputTransferToken hostInputTransferToken,
             @NonNull SurfaceControl surfaceControl, @NonNull Choreographer choreographer,
             @NonNull SurfaceControlInputReceiver receiver) {
-        mGlobal.registerBatchedSurfaceControlInputReceiver(displayId, hostInputTransferToken,
+        Objects.requireNonNull(hostInputTransferToken);
+        Objects.requireNonNull(surfaceControl);
+        Objects.requireNonNull(choreographer);
+        Objects.requireNonNull(receiver);
+        return mGlobal.registerBatchedSurfaceControlInputReceiver(displayId, hostInputTransferToken,
                 surfaceControl, choreographer, receiver);
     }
 
+    @NonNull
     @Override
-    public void registerUnbatchedSurfaceControlInputReceiver(int displayId,
+    public InputTransferToken registerUnbatchedSurfaceControlInputReceiver(int displayId,
             @NonNull InputTransferToken hostInputTransferToken,
             @NonNull SurfaceControl surfaceControl, @NonNull Looper looper,
             @NonNull SurfaceControlInputReceiver receiver) {
-        mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId, hostInputTransferToken,
-                surfaceControl, looper, receiver);
+        Objects.requireNonNull(hostInputTransferToken);
+        Objects.requireNonNull(surfaceControl);
+        Objects.requireNonNull(looper);
+        Objects.requireNonNull(receiver);
+        return mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId,
+                hostInputTransferToken, surfaceControl, looper, receiver);
     }
 
     @Override
     public void unregisterSurfaceControlInputReceiver(@NonNull SurfaceControl surfaceControl) {
+        Objects.requireNonNull(surfaceControl);
         mGlobal.unregisterSurfaceControlInputReceiver(surfaceControl);
     }
 
     @Override
     @Nullable
     public IBinder getSurfaceControlInputClientToken(@NonNull SurfaceControl surfaceControl) {
+        Objects.requireNonNull(surfaceControl);
         return mGlobal.getSurfaceControlInputClientToken(surfaceControl);
+    }
+
+    @Override
+    public boolean transferTouchGesture(@NonNull InputTransferToken transferFromToken,
+            @NonNull InputTransferToken transferToToken) {
+        Objects.requireNonNull(transferFromToken);
+        Objects.requireNonNull(transferToToken);
+        return mGlobal.transferTouchGesture(transferFromToken, transferToToken);
     }
 
     @Override

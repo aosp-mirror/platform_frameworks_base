@@ -20,6 +20,7 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
 import android.app.admin.devicePolicyManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.UserInfo
 import android.platform.test.annotations.DisableFlags
@@ -134,6 +135,29 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
                     DisabledReason.DISABLED_REASON_DEVICE_POLICY,
                     DisabledReason.DISABLED_REASON_USER_SETTING,
                 )
+        }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun hubShowsWidgetCategoriesSetByUser() =
+        testScope.runTest {
+            kosmos.fakeSettings.putIntForUser(
+                CommunalSettingsRepositoryImpl.GLANCEABLE_HUB_CONTENT_SETTING,
+                AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
+                PRIMARY_USER.id
+            )
+            val setting by collectLastValue(underTest.getWidgetCategories(PRIMARY_USER))
+            assertThat(setting?.categories)
+                .isEqualTo(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
+        }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun hubShowsKeyguardWidgetsByDefault() =
+        testScope.runTest {
+            val setting by collectLastValue(underTest.getWidgetCategories(PRIMARY_USER))
+            assertThat(setting?.categories)
+                .isEqualTo(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
         }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {

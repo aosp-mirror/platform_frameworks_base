@@ -88,7 +88,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mActivated;
 
     private Interpolator mCurrentAppearInterpolator;
-    NotificationBackgroundView mBackgroundNormal;
+    protected NotificationBackgroundView mBackgroundNormal;
     private float mAnimationTranslationY;
     private boolean mDrawingAppearAnimation;
     private ValueAnimator mAppearAnimator;
@@ -140,6 +140,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         updateColors();
         initBackground();
         updateBackgroundTint();
+    }
+
+    protected int getNormalBgColor() {
+        return mNormalColor;
     }
 
     /**

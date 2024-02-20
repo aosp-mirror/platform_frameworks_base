@@ -16,21 +16,23 @@
 
 package com.android.settingslib.volume.data.repository
 
+import android.content.Intent
 import android.media.AudioManager
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.headsetAudioModeChanges
+import com.android.settingslib.media.session.activeMediaChanges
 import com.android.settingslib.volume.shared.AudioManagerIntentsReceiver
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
@@ -38,7 +40,7 @@ import kotlinx.coroutines.flow.stateIn
 interface MediaControllerRepository {
 
     /** Current [MediaController]. Null is emitted when there is no active [MediaController]. */
-    val activeMediaController: StateFlow<MediaController?>
+    val activeLocalMediaController: StateFlow<MediaController?>
 }
 
 class MediaControllerRepositoryImpl(
@@ -53,26 +55,28 @@ class MediaControllerRepositoryImpl(
         audioManagerIntentsReceiver.intents.filter {
             AudioManager.STREAM_DEVICES_CHANGED_ACTION == it.action
         }
-    override val activeMediaController: StateFlow<MediaController?> =
-        buildList {
-                localBluetoothManager?.headsetAudioModeChanges?.let { add(it) }
-                add(devicesChanges)
+
+    override val activeLocalMediaController: StateFlow<MediaController?> =
+        combine(
+                mediaSessionManager.activeMediaChanges.onStart {
+                    emit(mediaSessionManager.getActiveSessions(null))
+                },
+                localBluetoothManager?.headsetAudioModeChanges?.onStart { emit(Unit) }
+                    ?: flowOf(null),
+                devicesChanges.onStart { emit(Intent()) },
+            ) { controllers, _, _ ->
+                controllers?.let(::findLocalMediaController)
             }
-            .merge()
-            .onStart { emit(Unit) }
-            .map { getActiveLocalMediaController() }
             .flowOn(backgroundContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), null)
 
-    private fun getActiveLocalMediaController(): MediaController? {
+    private fun findLocalMediaController(
+        controllers: Collection<MediaController>,
+    ): MediaController? {
         var localController: MediaController? = null
         val remoteMediaSessionLists: MutableList<String> = ArrayList()
-        for (controller in mediaSessionManager.getActiveSessions(null)) {
+        for (controller in controllers) {
             val playbackInfo: MediaController.PlaybackInfo = controller.playbackInfo ?: continue
-            val playbackState = controller.playbackState ?: continue
-            if (inactivePlaybackStates.contains(playbackState.state)) {
-                continue
-            }
             when (playbackInfo.playbackType) {
                 MediaController.PlaybackInfo.PLAYBACK_TYPE_REMOTE -> {
                     if (localController?.packageName.equals(controller.packageName)) {

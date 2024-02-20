@@ -329,8 +329,9 @@ public class GrammaticalInflectionService extends SystemService {
 
     private void checkCallerIsSystem() {
         int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SYSTEM_UID && callingUid != Process.SHELL_UID) {
-            throw new SecurityException("Caller is not system and shell.");
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.SHELL_UID
+                && callingUid != Process.ROOT_UID) {
+            throw new SecurityException("Caller is not system, shell and root.");
         }
     }
 
@@ -354,12 +355,11 @@ public class GrammaticalInflectionService extends SystemService {
             final File file = getGrammaticalGenderFile(userId);
             synchronized (mLock) {
                 if (!file.exists()) {
-                    Log.d(TAG, "User " + userId + "doesn't have the grammatical gender file.");
+                    Log.d(TAG, "User " + userId + " doesn't have the grammatical gender file.");
                     return;
                 }
                 if (mGrammaticalGenderCache.indexOfKey(userId) < 0) {
-                    try {
-                        InputStream in = new FileInputStream(file);
+                    try (FileInputStream in = new FileInputStream(file)) {
                         final TypedXmlPullParser parser = Xml.resolvePullParser(in);
                         mGrammaticalGenderCache.put(userId, getGrammaticalGenderFromXml(parser));
                     } catch (IOException | XmlPullParserException e) {

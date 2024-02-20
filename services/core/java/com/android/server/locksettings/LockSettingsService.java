@@ -18,6 +18,7 @@ package com.android.server.locksettings;
 
 import static android.security.Flags.reportPrimaryAuthAttempts;
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
+import static android.Manifest.permission.CONFIGURE_FACTORY_RESET_PROTECTION;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS;
 import static android.Manifest.permission.SET_INITIAL_LOCK;
@@ -27,6 +28,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRY
 import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_TITLE;
 import static android.content.Context.KEYGUARD_SERVICE;
+import static android.content.Intent.ACTION_MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTOR_CHANGED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
@@ -1201,8 +1203,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         final boolean inSetupWizard = Settings.Secure.getIntForUser(cr,
                 Settings.Secure.USER_SETUP_COMPLETE, 0, mainUserId) == 0;
-        final boolean secureFrp = Settings.Global.getInt(cr,
-                Settings.Global.SECURE_FRP_MODE, 0) == 1;
+        final boolean secureFrp = android.security.Flags.frpEnforcement()
+                ? mStorage.isFactoryResetProtectionActive()
+                : (Settings.Global.getInt(cr, Settings.Global.SECURE_FRP_MODE, 0) == 1);
 
         if (inSetupWizard && secureFrp) {
             throw new SecurityException("Cannot change credential in SUW while factory reset"
@@ -2332,8 +2335,13 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         synchronized (mSpManager) {
             if (isSpecialUserId(userId)) {
-                return mSpManager.verifySpecialUserCredential(userId, getGateKeeperService(),
+                response = mSpManager.verifySpecialUserCredential(userId, getGateKeeperService(),
                         credential, progressCallback);
+                if (android.security.Flags.frpEnforcement() && response.isMatched()
+                        && userId == USER_FRP) {
+                    mStorage.deactivateFactoryResetProtectionWithoutSecret();
+                }
+                return response;
             }
 
             long protectorId = getCurrentLskfBasedProtectorId(userId);
@@ -3054,6 +3062,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         setCurrentLskfBasedProtectorId(newProtectorId, userId);
         LockPatternUtils.invalidateCredentialTypeCache();
         synchronizeUnifiedChallengeForProfiles(userId, profilePasswords);
+        sendMainUserCredentialChangedNotificationIfNeeded(userId);
 
         setUserPasswordMetrics(credential, userId);
         mUnifiedProfilePasswordCache.removePassword(userId);
@@ -3069,6 +3078,24 @@ public class LockSettingsService extends ILockSettings.Stub {
         mSpManager.destroyLskfBasedProtector(oldProtectorId, userId);
         Slogf.i(TAG, "Successfully changed lockscreen credential of user %d", userId);
         return newProtectorId;
+    }
+
+    private void sendMainUserCredentialChangedNotificationIfNeeded(int userId) {
+        if (!android.security.Flags.frpEnforcement()) {
+            return;
+        }
+
+        if (userId != mInjector.getUserManagerInternal().getMainUserId()) {
+            return;
+        }
+
+        sendBroadcast(new Intent(ACTION_MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTOR_CHANGED),
+                UserHandle.of(userId), CONFIGURE_FACTORY_RESET_PROTECTION);
+    }
+
+    @VisibleForTesting
+    void sendBroadcast(Intent intent, UserHandle userHandle, String permission) {
+        mContext.sendBroadcastAsUser(intent, userHandle, permission, /* options */ null);
     }
 
     private void removeBiometricsForUser(int userId) {

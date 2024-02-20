@@ -667,18 +667,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Se ha autenticado la huella digital"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Se ha autenticado la cara, pulsa para confirmar"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"El hardware de huella digital no está disponible."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"No se puede configurar la huella digital"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Tiempo de espera para configurar la huella digital agotado. Inténtalo de nuevo."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Se ha cancelado la operación de huella digital."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"El usuario ha cancelado la operación de huella digital."</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Demasiados intentos. Usa el bloqueo de pantalla."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Demasiados intentos. Usa el bloqueo de pantalla."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"No se puede procesar la huella digital. Inténtalo de nuevo."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"No se ha registrado ninguna huella digital."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Este dispositivo no tiene sensor de huellas digitales."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"El sensor está inhabilitado en estos momentos."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"No se puede usar el sensor de huellas digitales. Visita un proveedor de reparaciones."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"El dispositivo no tiene ningún sensor de huellas digitales"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Se ha pulsado el botón de encendido"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar huella digital"</string>

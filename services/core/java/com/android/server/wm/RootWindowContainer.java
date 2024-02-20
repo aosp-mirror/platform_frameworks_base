@@ -612,10 +612,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void refreshSecureSurfaceState() {
-        forAllWindows((w) -> {
-            if (w.mHasSurface) {
-                w.setSecureLocked(w.isSecureLocked());
-            }
+        forAllWindows(w -> {
+            w.setSecureLocked(w.isSecureLocked());
         }, true /* traverseTopToBottom */);
     }
 
@@ -1454,7 +1452,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return false;
         }
 
-        if (enableHomeDelay() && !mService.mAmInternal.getThemeOverlayReadiness()) {
+        if (enableHomeDelay() && !mService.mAmInternal.isThemeOverlayReady(userId)) {
             Slog.d(TAG, "ThemeHomeDelay: Home launch was deferred.");
             return false;
         }

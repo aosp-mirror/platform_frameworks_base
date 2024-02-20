@@ -998,6 +998,23 @@ public final class NotificationEntry extends ListEntry {
         return style == null ? "nostyle" : style.getSimpleName();
     }
 
+    /**
+     * Return {@code true} if notification's visibility is {@link Notification.VISIBILITY_PRIVATE}
+     */
+    public boolean isNotificationVisibilityPrivate() {
+        return getSbn().getNotification().visibility == Notification.VISIBILITY_PRIVATE;
+    }
+
+    /**
+     * Return {@code true} if notification's channel lockscreen visibility is
+     * {@link Notification.VISIBILITY_PRIVATE}
+     */
+    public boolean isChannelVisibilityPrivate() {
+        return getRanking().getChannel() != null
+                && getRanking().getChannel().getLockscreenVisibility()
+                == Notification.VISIBILITY_PRIVATE;
+    }
+
     /** Information about a suggestion that is being edited. */
     public static class EditedSuggestionInfo {
 

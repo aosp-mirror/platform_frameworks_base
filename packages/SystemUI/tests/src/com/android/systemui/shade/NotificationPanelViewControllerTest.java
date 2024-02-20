@@ -57,7 +57,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.DejankUtils;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
@@ -204,6 +203,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(5);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(5);
     }
 
     @Test
@@ -215,6 +218,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
                 /* ambientPadding= */ 0);
 
         when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }
@@ -230,6 +237,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
     }
 
     @Test
@@ -243,6 +254,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(2);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(2);
     }
 
     @Test
@@ -254,6 +269,10 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
                 /* ambientPadding= */ 0);
 
         when(mNotificationStackScrollLayoutController.getShelfHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
                 .isEqualTo(0);
     }
@@ -363,7 +382,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void onInterceptTouchEvent_nsslMigrationOff_userActivity() {
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL);
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
 
         mTouchHandler.onInterceptTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
@@ -374,7 +393,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void onInterceptTouchEvent_nsslMigrationOn_userActivity_not_called() {
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL);
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
 
         mTouchHandler.onInterceptTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
@@ -1125,7 +1144,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void nsslFlagEnabled_allowOnlyExternalTouches() {
-        mSetFlagsRule.enableFlags(KeyguardShadeMigrationNssl.FLAG_NAME);
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
 
         // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);

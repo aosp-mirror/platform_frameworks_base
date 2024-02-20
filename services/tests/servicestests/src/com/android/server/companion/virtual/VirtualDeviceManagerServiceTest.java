@@ -389,7 +389,8 @@ public class VirtualDeviceManagerServiceTest {
         final InputController.DeviceCreationThreadVerifier threadVerifier = () -> true;
         mInputController = new InputController(mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
-                mContext.getSystemService(WindowManager.class), threadVerifier);
+                mContext.getSystemService(WindowManager.class),
+                AttributionSource.myAttributionSource(), threadVerifier);
         mCameraAccessController =
                 new CameraAccessController(mContext, mLocalService, mCameraAccessBlockedCallback);
 

@@ -2518,6 +2518,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
             if (D.BUG) Log.d(TAG, "onStartTrackingTouch"+ " " + mRow.stream);
+            Events.writeEvent(Events.EVENT_SLIDER_TOUCH_TRACKING, /* startedTracking= */true);
             if (mRow.mHapticPlugin != null) {
                 mRow.mHapticPlugin.onStartTrackingTouch(seekBar);
             }
@@ -2528,6 +2529,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
             if (D.BUG) Log.d(TAG, "onStopTrackingTouch"+ " " + mRow.stream);
+            Events.writeEvent(Events.EVENT_SLIDER_TOUCH_TRACKING, /* startedTracking= */false);
             if (mRow.mHapticPlugin != null) {
                 mRow.mHapticPlugin.onStopTrackingTouch(seekBar);
             }

@@ -666,18 +666,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"వేలిముద్ర ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ముఖం ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ముఖం ప్రమాణీకరించబడింది, దయచేసి ధృవీకరించును నొక్కండి"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"వేలిముద్ర హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"వేలిముద్రను సెటప్ చేయడం సాధ్యం కాదు"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"వేలిముద్ర సెటప్ సమయం ముగిసింది. మళ్లీ ట్రై చేయండి."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"వేలిముద్ర యాక్టివిటీ రద్దయింది."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"వేలిముద్ర చర్యని వినియోగదారు రద్దు చేశారు."</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఉపయోగించండి."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఉపయోగించండి."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"వేలిముద్రను ప్రాసెస్ చేయడం సాధ్యపడదు. మళ్లీ ట్రై చేయండి."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"వేలిముద్రలు నమోదు చేయబడలేదు."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ ఎంపిక లేదు."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు. రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి"</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ లేదు"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Power button pressed"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>వ వేలు"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"వేలిముద్రను ఉపయోగించండి"</string>

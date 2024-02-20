@@ -17,6 +17,7 @@
 package com.android.systemui.communal.ui.viewmodel
 
 import android.content.ComponentName
+import android.os.UserHandle
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalSceneKey
@@ -62,10 +63,11 @@ abstract class BaseCommunalViewModel(
      */
     open fun onAddWidget(
         componentName: ComponentName,
+        user: UserHandle,
         priority: Int,
         configurator: WidgetConfigurator? = null
     ) {
-        communalInteractor.addWidget(componentName, priority, configurator)
+        communalInteractor.addWidget(componentName, user, priority, configurator)
     }
 
     /** A list of all the communal content to be displayed in the communal hub. */

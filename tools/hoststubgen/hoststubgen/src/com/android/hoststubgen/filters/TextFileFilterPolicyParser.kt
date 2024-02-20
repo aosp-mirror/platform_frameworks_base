@@ -58,7 +58,8 @@ fun createFilterFromTextPolicyFile(
         ): OutputFilter {
     log.i("Loading offloaded annotations from $filename ...")
     log.withIndent {
-        val imf = InMemoryOutputFilter(classes, fallback)
+        val subclassFilter = SubclassFilter(classes, fallback)
+        val imf = InMemoryOutputFilter(classes, subclassFilter)
 
         var lineNo = 0
 
@@ -94,6 +95,10 @@ fun createFilterFromTextPolicyFile(
                             }
                             className = fields[1]
 
+                            // superClass is set when the class name starts with a "*".
+                            val superClass = resolveExtendingClass(className)
+
+                            // :aidl, etc?
                             val classType = resolveSpecialClass(className)
 
                             if (fields[2].startsWith("!")) {
@@ -124,8 +129,14 @@ fun createFilterFromTextPolicyFile(
                                 when (classType) {
                                     SpecialClass.NotSpecial -> {
                                         // TODO: Duplicate check, etc
-                                        imf.setPolicyForClass(
-                                                className, policy.withReason(FILTER_REASON))
+                                        if (superClass == null) {
+                                            imf.setPolicyForClass(
+                                                className, policy.withReason(FILTER_REASON)
+                                            )
+                                        } else {
+                                            subclassFilter.addPolicy(superClass,
+                                                policy.withReason("extends $superClass"))
+                                        }
                                     }
                                     SpecialClass.Aidl -> {
                                         if (aidlPolicy != null) {
@@ -241,6 +252,13 @@ private fun resolveSpecialClass(className: String): SpecialClass {
         ":sysprops" -> return SpecialClass.Sysprops
     }
     throw ParseException("Invalid special class name \"$className\"")
+}
+
+private fun resolveExtendingClass(className: String): String? {
+    if (!className.startsWith("*")) {
+        return null
+    }
+    return className.substring(1)
 }
 
 private fun parsePolicy(s: String): FilterPolicy {

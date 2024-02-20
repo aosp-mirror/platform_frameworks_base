@@ -666,18 +666,24 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечатокот е проверен"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Лицето е проверено"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Лицето е проверено, притиснете го копчето „Потврди“"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Хардверот за отпечатоци не е достапен."</string>
+    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
+    <skip />
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Не може да се постави отпечаток"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Времето за поставување отпечаток истече. Обидете се повторно."</string>
-    <string name="fingerprint_error_canceled" msgid="540026881380070750">"Операцијата со отпечаток се откажа."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Корисникот ја откажа потврдата со отпечаток."</string>
+    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Премногу обиди. Користете заклучување екран."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Премногу обиди. Користете заклучување екран."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Не може да се обработи отпечатокот од прст. Обидете се повторно."</string>
-    <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Не се запишани отпечатоци."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Уредов нема сензор за отпечатоци."</string>
-    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Сензорот е привремено оневозможен."</string>
-    <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Не може да се користи сензорот за отпечатоци. Однесете го на поправка"</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
+    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Уредов нема сензор за отпечатоци"</string>
+    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
+    <skip />
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Притиснато е копчето за вклучување"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Прст <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Користи отпечаток"</string>

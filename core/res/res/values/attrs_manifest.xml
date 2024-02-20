@@ -1919,6 +1919,12 @@
              try to load its code when launching components.  The default is true
              for normal behavior. -->
         <attr name="hasCode" format="boolean" />
+        <!-- Specifies if activities can be launched on top of this application by activities from
+             other applications in the same task. If set to false, activity launches which would
+             replace this application with another when in the user's view will be blocked.
+             The default is true. -->
+        <!-- @FlaggedApi("android.security.asm_restrictions_enabled") -->
+        <attr name="allowCrossUidActivitySwitchFromBelow" format="boolean" />
         <attr name="persistent" />
         <attr name="persistentWhenFeatureAvailable" />
         <attr name="requiredForAllUsers" />
@@ -3289,7 +3295,8 @@
              {@link java.lang.SecurityException}.
 
              <p> Note that the enforcement works for content URIs inside
-             {@link android.content.Intent#getData} and {@link android.content.Intent#getClipData}.
+             {@link android.content.Intent#getData}, {@link android.content.Intent#EXTRA_STREAM},
+             and {@link android.content.Intent#getClipData}.
              @FlaggedApi("android.security.content_uri_permission_apis") -->
         <attr name="requireContentUriPermissionFromCaller" format="string">
             <!-- Default, no specific permissions are required. -->

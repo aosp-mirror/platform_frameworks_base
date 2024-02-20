@@ -5358,9 +5358,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pw.println(sdf.format(date));
 
             if (pus.getArchiveState() != null) {
+                final ArchiveState archiveState = pus.getArchiveState();
                 pw.print("      archiveTime=");
-                date.setTime(pus.getArchiveState().getArchiveTimeMillis());
+                date.setTime(archiveState.getArchiveTimeMillis());
                 pw.println(sdf.format(date));
+                pw.print("      unarchiveInstallerTitle=");
+                pw.println(archiveState.getInstallerTitle());
+                for (ArchiveState.ArchiveActivityInfo activity : archiveState.getActivityInfos()) {
+                    pw.print("        archiveActivityInfo=");
+                    pw.println(activity.toString());
+                }
             }
 
             pw.print("      uninstallReason=");
@@ -5474,10 +5481,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         pw.print(prefix); pw.print("      "); pw.println(cmp.valueAt(i));
                     }
                 }
-            }
-            ArchiveState archiveState = userState.getArchiveState();
-            if (archiveState != null) {
-                pw.print(archiveState.toString());
             }
         }
     }

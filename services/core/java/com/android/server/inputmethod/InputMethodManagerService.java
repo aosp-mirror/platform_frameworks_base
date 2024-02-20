@@ -1539,7 +1539,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onStart() {
             mService.publishLocalService();
-            publishBinderService(Context.INPUT_METHOD_SERVICE, mService, false /*allowIsolated*/,
+            IInputMethodManager.Stub service;
+            if (Flags.useZeroJankProxy()) {
+                service = new ZeroJankProxy(mService.mHandler::post, mService);
+            } else {
+                service = mService;
+            }
+            publishBinderService(Context.INPUT_METHOD_SERVICE, service, false /*allowIsolated*/,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
         }
 
@@ -2216,6 +2222,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Nullable
+    ClientState getClientState(IInputMethodClient client) {
+        synchronized (ImfLock.class) {
+            return mClientController.getClient(client.asBinder());
+        }
+    }
+
+    // TODO(b/314150112): Move this to ClientController.
     @GuardedBy("ImfLock.class")
     void unbindCurrentClientLocked(@UnbindReason int unbindClientReason) {
         if (mCurClient != null) {
@@ -2901,16 +2915,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     void clearClientSessionsLocked() {
         if (getCurMethodLocked() != null) {
-            // TODO(b/322816970): Replace this with lambda.
-            mClientController.forAllClients(new Consumer<ClientState>() {
-
-                @GuardedBy("ImfLock.class")
-                @Override
-                public void accept(ClientState c) {
-                    clearClientSessionLocked(c);
-                    clearClientSessionForAccessibilityLocked(c);
-                }
-            });
+            // TODO(b/324907325): Remove the suppress warnings once b/324907325 is fixed.
+            @SuppressWarnings("GuardedBy") Consumer<ClientState> clearClientSession = c -> {
+                clearClientSessionLocked(c);
+                clearClientSessionForAccessibilityLocked(c);
+            };
+            mClientController.forAllClients(clearClientSession);
 
             finishSessionLocked(mEnabledSession);
             for (int i = 0; i < mEnabledAccessibilitySessions.size(); i++) {
@@ -3743,6 +3753,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
                 windowToken, cs.mUid, cs.mPid, cs.mSelfReportedDisplayId);
         return imeClientFocus == WindowManagerInternal.ImeClientFocusResult.HAS_IME_FOCUS;
+    }
+
+    //TODO(b/293640003): merge with startInputOrWindowGainedFocus once Flags.useZeroJankProxy()
+    // is enabled.
+    @Override
+    public void startInputOrWindowGainedFocusAsync(
+            @StartInputReason int startInputReason, IInputMethodClient client, IBinder windowToken,
+            @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
+            int windowFlags, @Nullable EditorInfo editorInfo,
+            IRemoteInputConnection inputConnection,
+            IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
+            int unverifiedTargetSdkVersion, @UserIdInt int userId,
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq) {
+        // implemented by ZeroJankProxy
     }
 
     @NonNull
@@ -4653,15 +4677,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         super.startImeTrace_enforcePermission();
         ImeTracing.getInstance().startTrace(null /* printwriter */);
         synchronized (ImfLock.class) {
-            // TODO(b/322816970): Replace this with lambda.
-            mClientController.forAllClients(new Consumer<ClientState>() {
-
-                @GuardedBy("ImfLock.class")
-                @Override
-                public void accept(ClientState c) {
-                    c.mClient.setImeTraceEnabled(true /* enabled */);
-                }
-            });
+            mClientController.forAllClients(c -> c.mClient.setImeTraceEnabled(true /* enabled */));
         }
     }
 
@@ -4673,15 +4689,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         ImeTracing.getInstance().stopTrace(null /* printwriter */);
         synchronized (ImfLock.class) {
-            // TODO(b/322816970): Replace this with lambda.
-            mClientController.forAllClients(new Consumer<ClientState>() {
-
-                @GuardedBy("ImfLock.class")
-                @Override
-                public void accept(ClientState c) {
-                    c.mClient.setImeTraceEnabled(false /* enabled */);
-                }
-            });
+            mClientController.forAllClients(c -> c.mClient.setImeTraceEnabled(false /* enabled */));
         }
     }
 
@@ -5916,15 +5924,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // We only have sessions when we bound to an input method. Remove this session
                 // from all clients.
                 if (getCurMethodLocked() != null) {
-                    // TODO(b/322816970): Replace this with lambda.
-                    mClientController.forAllClients(new Consumer<ClientState>() {
+                    // TODO(b/324907325): Remove the suppress warnings once b/324907325 is fixed.
+                    @SuppressWarnings("GuardedBy") Consumer<ClientState> clearClientSession =
+                            c -> clearClientSessionForAccessibilityLocked(c,
+                                    accessibilityConnectionId);
+                    mClientController.forAllClients(clearClientSession);
 
-                        @GuardedBy("ImfLock.class")
-                        @Override
-                        public void accept(ClientState c) {
-                            clearClientSessionForAccessibilityLocked(c, accessibilityConnectionId);
-                        }
-                    });
                     AccessibilitySessionState session = mEnabledAccessibilitySessions.get(
                             accessibilityConnectionId);
                     if (session != null) {
@@ -6126,24 +6131,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             // Dump ClientController#mClients
             p.println("  ClientStates:");
-            // TODO(b/322816970): Replace this with lambda.
-            mClientController.forAllClients(new Consumer<ClientState>() {
+            // TODO(b/324907325): Remove the suppress warnings once b/324907325 is fixed.
+            @SuppressWarnings("GuardedBy") Consumer<ClientState> clientControllerDump = c -> {
+                p.println("  " + c + ":");
+                p.println("    client=" + c.mClient);
+                p.println("    fallbackInputConnection="
+                        + c.mFallbackInputConnection);
+                p.println("    sessionRequested="
+                        + c.mSessionRequested);
+                p.println(
+                        "    sessionRequestedForAccessibility="
+                                + c.mSessionRequestedForAccessibility);
+                p.println("    curSession=" + c.mCurSession);
+            };
+            mClientController.forAllClients(clientControllerDump);
 
-                @GuardedBy("ImfLock.class")
-                @Override
-                public void accept(ClientState c) {
-                    p.println("  " + c + ":");
-                    p.println("    client=" + c.mClient);
-                    p.println("    fallbackInputConnection="
-                            + c.mFallbackInputConnection);
-                    p.println("    sessionRequested="
-                            + c.mSessionRequested);
-                    p.println(
-                            "    sessionRequestedForAccessibility="
-                                    + c.mSessionRequestedForAccessibility);
-                    p.println("    curSession=" + c.mCurSession);
-                }
-            });
             p.println("  mCurMethodId=" + getSelectedMethodIdLocked());
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + getSequenceNumberLocked());

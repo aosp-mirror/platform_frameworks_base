@@ -27,6 +27,8 @@ import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
+import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -1020,6 +1022,11 @@ public final class ViewRootImpl implements ViewParent,
     // Used to check if there is a message in the message queue
     // for idleness handling.
     private boolean mHasIdledMessage = false;
+    // Used to allow developers to opt out Toolkit dVRR feature.
+    // This feature allows device to adjust refresh rate
+    // as needed and can be useful for power saving.
+    // Should not enable the dVRR feature if the value is false.
+    private boolean mIsFrameRatePowerSavingsBalanced = true;
     // time for touch boost period.
     private static final int FRAME_RATE_TOUCH_BOOST_TIME = 3000;
     // time for checking idle status periodically.
@@ -1029,6 +1036,15 @@ public final class ViewRootImpl implements ViewParent,
     // time for evaluating the interval between current time and
     // the time when frame rate was set previously.
     private static final int FRAME_RATE_SETTING_REEVALUATE_TIME = 100;
+
+    /*
+     * The variables below are used to update frame rate category
+     */
+    private static final int FRAME_RATE_CATEGORY_COUNT = 5;
+    private int mFrameRateCategoryHighCount = 0;
+    private int mFrameRateCategoryHighHintCount = 0;
+    private int mFrameRateCategoryNormalCount = 0;
+    private int mFrameRateCategoryLowCount = 0;
 
     /*
      * the variables below are used to determine whther a dVRR feature should be enabled
@@ -2522,8 +2538,10 @@ public final class ViewRootImpl implements ViewParent,
         // Set the frame rate selection strategy to FRAME_RATE_SELECTION_STRATEGY_SELF
         // This strategy ensures that the frame rate specifications do not cascade down to
         // the descendant layers. This is particularly important for applications like Chrome,
-        // where child surfaces should adhere to default behavior instead of no preference
-        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+        // where child surfaces should adhere to default behavior instead of no preference.
+        // This issue only happens when ViewRootImpl calls setFrameRateCategory. This is
+        // no longer needed if the dVRR feature is disabled.
+        if (shouldEnableDvrr()) {
             try {
                 mFrameRateTransaction.setFrameRateSelectionStrategy(sc,
                         sc.FRAME_RATE_SELECTION_STRATEGY_SELF).applyAsyncUnsafe();
@@ -3247,7 +3265,7 @@ public final class ViewRootImpl implements ViewParent,
                 destroyHardwareResources();
             }
 
-            if (sToolkitSetFrameRateReadOnlyFlagValue && viewVisibility == View.VISIBLE) {
+            if (shouldEnableDvrr() && viewVisibility == View.VISIBLE) {
                 // Boost frame rate when the viewVisibility becomes true.
                 // This is mainly for lanuchers that lanuch new windows.
                 boostFrameRate(FRAME_RATE_TOUCH_BOOST_TIME);
@@ -3962,7 +3980,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
 
-            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            if (shouldEnableDvrr()) {
                 // Boost the frame rate when the ViewRootImpl first becomes available.
                 boostFrameRate(FRAME_RATE_TOUCH_BOOST_TIME);
             }
@@ -4084,7 +4102,14 @@ public final class ViewRootImpl implements ViewParent,
         // when the values are applicable.
         setPreferredFrameRate(mPreferredFrameRate);
         setPreferredFrameRateCategory(mPreferredFrameRateCategory);
+        mFrameRateCategoryHighCount = mFrameRateCategoryHighCount > 0
+                ? mFrameRateCategoryHighCount - 1 : mFrameRateCategoryHighCount;
+        mFrameRateCategoryNormalCount = mFrameRateCategoryNormalCount > 0
+                ? mFrameRateCategoryNormalCount - 1 : mFrameRateCategoryNormalCount;
+        mFrameRateCategoryLowCount = mFrameRateCategoryLowCount > 0
+                ? mFrameRateCategoryLowCount - 1 : mFrameRateCategoryLowCount;
         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+        mPreferredFrameRate = -1;
     }
 
     private void createSyncIfNeeded() {
@@ -5169,7 +5194,10 @@ public final class ViewRootImpl implements ViewParent,
 
         // Force recalculation of transparent regions
         if (accessibilityFocusDirty) {
-            requestLayout();
+            final Rect bounds = mAttachInfo.mTmpInvalRect;
+            if (getAccessibilityFocusedRect(bounds)) {
+                requestLayout();
+            }
         }
 
         mAttachInfo.mDrawingTime =
@@ -12296,7 +12324,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         try {
-            if (mLastPreferredFrameRate != preferredFrameRate) {
+            if (mLastPreferredFrameRate != preferredFrameRate
+                    && preferredFrameRate >= 0) {
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                     Trace.traceBegin(
                             Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRate "
@@ -12321,12 +12350,12 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldSetFrameRateCategory() {
         // use toolkitSetFrameRate flag to gate the change
-        return  mSurface.isValid() && sToolkitSetFrameRateReadOnlyFlagValue;
+        return  mSurface.isValid() && shouldEnableDvrr();
     }
 
     private boolean shouldSetFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
-        return sToolkitSetFrameRateReadOnlyFlagValue;
+        return mSurface.isValid() && mPreferredFrameRate > 0 && shouldEnableDvrr();
     }
 
     private boolean shouldTouchBoost(int motionEventAction, int windowType) {
@@ -12335,7 +12364,7 @@ public final class ViewRootImpl implements ViewParent,
                 || motionEventAction == MotionEvent.ACTION_UP;
         boolean undesiredType = windowType == TYPE_INPUT_METHOD && mShouldSuppressBoostOnTyping;
         // use toolkitSetFrameRate flag to gate the change
-        return desiredAction && !undesiredType && sToolkitSetFrameRateReadOnlyFlagValue
+        return desiredAction && !undesiredType && shouldEnableDvrr()
                 && getFrameRateBoostOnTouchEnabled();
     }
 
@@ -12346,7 +12375,25 @@ public final class ViewRootImpl implements ViewParent,
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     public void votePreferredFrameRateCategory(int frameRateCategory) {
-        mPreferredFrameRateCategory = Math.max(mPreferredFrameRateCategory, frameRateCategory);
+        if (frameRateCategory == FRAME_RATE_CATEGORY_HIGH) {
+            mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
+        } else if (frameRateCategory == FRAME_RATE_CATEGORY_HIGH_HINT) {
+            mFrameRateCategoryHighHintCount = FRAME_RATE_CATEGORY_COUNT;
+        } else if (frameRateCategory == FRAME_RATE_CATEGORY_NORMAL) {
+            mFrameRateCategoryNormalCount = FRAME_RATE_CATEGORY_COUNT;
+        } else if (frameRateCategory == FRAME_RATE_CATEGORY_LOW) {
+            mFrameRateCategoryLowCount = FRAME_RATE_CATEGORY_COUNT;
+        }
+
+        if (mFrameRateCategoryHighCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
+        } else if (mFrameRateCategoryHighHintCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH_HINT;
+        } else if (mFrameRateCategoryNormalCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NORMAL;
+        } else if (mFrameRateCategoryLowCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_LOW;
+        }
         mHasInvalidation = true;
     }
 
@@ -12368,13 +12415,7 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        if (mPreferredFrameRate == 0) {
-            mPreferredFrameRate = frameRate;
-        } else if (frameRate > 60 || mPreferredFrameRate > 60) {
-            mPreferredFrameRate = Math.max(mPreferredFrameRate, frameRate);
-        } else if (mPreferredFrameRate != frameRate) {
-            mPreferredFrameRate = 60;
-        }
+        mPreferredFrameRate = Math.max(mPreferredFrameRate, frameRate);
 
         mHasInvalidation = true;
         mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
@@ -12403,7 +12444,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     @VisibleForTesting
     public float getPreferredFrameRate() {
-        return mPreferredFrameRate;
+        return mPreferredFrameRate >= 0 ? mPreferredFrameRate : mLastPreferredFrameRate;
     }
 
     /**
@@ -12431,19 +12472,6 @@ public final class ViewRootImpl implements ViewParent,
                 boostTimeOut);
     }
 
-    @Override
-    public boolean transferHostTouchGestureToEmbedded(
-            @NonNull SurfaceControlViewHost.SurfacePackage surfacePackage) {
-        final IWindowSession realWm = WindowManagerGlobal.getWindowSession();
-        try {
-            return realWm.transferHostTouchGestureToEmbedded(mWindow,
-                    surfacePackage.getInputTransferToken());
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        }
-        return false;
-    }
-
     /**
      * Set the default back key callback for windowless window, to forward the back key event
      * to host app.
@@ -12457,5 +12485,28 @@ public final class ViewRootImpl implements ViewParent,
         if (!Trace.isEnabled()) return;
         // Record the largest view of percentage to the display size.
         mLargestChildPercentage = Math.max(percentage, mLargestChildPercentage);
+    }
+
+    /**
+     * Get the value of mIsFrameRatePowerSavingsBalanced
+     * Can be used to checked if toolkit dVRR feature is enabled. The default value is true.
+     */
+    @VisibleForTesting
+    public boolean isFrameRatePowerSavingsBalanced() {
+        return mIsFrameRatePowerSavingsBalanced;
+    }
+
+    /**
+     * Set the value of mIsFrameRatePowerSavingsBalanced
+     * Can be used to checked if toolkit dVRR feature is enabled.
+     */
+    public void setFrameRatePowerSavingsBalanced(boolean enabled) {
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            mIsFrameRatePowerSavingsBalanced = enabled;
+        }
+    }
+
+    private boolean shouldEnableDvrr() {
+        return sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced;
     }
 }

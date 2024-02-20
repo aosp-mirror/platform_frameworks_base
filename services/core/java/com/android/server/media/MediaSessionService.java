@@ -151,7 +151,9 @@ public class MediaSessionService extends SystemService implements Monitor {
     private boolean mHasFeatureLeanback;
     private ActivityManagerInternal mActivityManagerInternal;
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
-    private final Set<Integer> mUserEngagingSessions = new HashSet<>();
+
+    /* Maps uid with all user engaging session tokens associated to it */
+    private final SparseArray<Set<MediaSession.Token>> mUserEngagingSessions = new SparseArray<>();
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
@@ -615,32 +617,34 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private void reportMediaInteractionEvent(MediaSessionRecordImpl record, boolean userEngaged) {
-           if (!android.app.usage.Flags.userInteractionTypeApi()) {
-                return;
-            }
+        if (!android.app.usage.Flags.userInteractionTypeApi()
+                || !(record instanceof MediaSessionRecord)) {
+            return;
+        }
 
-            String packageName = record.getPackageName();
-            int sessionUid = record.getUid();
-            String actionToLog = null;
-            if (userEngaged) {
-                if (!mUserEngagingSessions.contains(sessionUid)) {
-                    actionToLog = "start";
-                }
-                mUserEngagingSessions.add(sessionUid);
-            } else {
-                if (mUserEngagingSessions.contains(sessionUid)) {
-                    actionToLog = "stop";
-                }
+        String packageName = record.getPackageName();
+        int sessionUid = record.getUid();
+        MediaSession.Token token = ((MediaSessionRecord) record).getSessionToken();
+        if (userEngaged) {
+            if (!mUserEngagingSessions.contains(sessionUid)) {
+                mUserEngagingSessions.put(sessionUid, new HashSet<>());
+                reportUserInteractionEvent(/* action= */ "start", record.getUserId(), packageName);
+            }
+            mUserEngagingSessions.get(sessionUid).add(token);
+        } else if (mUserEngagingSessions.contains(sessionUid)) {
+            mUserEngagingSessions.get(sessionUid).remove(token);
+            if (mUserEngagingSessions.get(sessionUid).isEmpty()) {
+                reportUserInteractionEvent(/* action= */ "stop", record.getUserId(), packageName);
                 mUserEngagingSessions.remove(sessionUid);
             }
+        }
+    }
 
-            if (actionToLog != null) {
-                PersistableBundle extras = new PersistableBundle();
-                extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, "android.media");
-                extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION, actionToLog);
-                mUsageStatsManagerInternal.reportUserInteractionEvent(
-                        packageName, record.getUserId(), extras);
-            }
+    private void reportUserInteractionEvent(String action, int userId, String packageName) {
+        PersistableBundle extras = new PersistableBundle();
+        extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, "android.media");
+        extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION, action);
+        mUsageStatsManagerInternal.reportUserInteractionEvent(packageName, userId, extras);
     }
 
     void tempAllowlistTargetPkgIfPossible(int targetUid, String targetPackage,

@@ -100,6 +100,8 @@ public class VibrationSettingsTest {
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
+    private static final int OLD_USER_ID = 123;
+    private static final int NEW_USER_ID = 456;
     private static final int UID = 1;
     private static final int VIRTUAL_DEVICE_ID = 1;
     private static final String SYSUI_PACKAGE_NAME = "sysui";
@@ -211,10 +213,10 @@ public class VibrationSettingsTest {
         mVibrationSettings.addListener(mListenerMock);
 
         // Testing the broadcast flow manually.
-        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
-                new Intent(Intent.ACTION_USER_SWITCHED));
+        mVibrationSettings.mUserSwitchObserver.onUserSwitching(NEW_USER_ID);
+        mVibrationSettings.mUserSwitchObserver.onUserSwitchComplete(NEW_USER_ID);
 
-        verify(mListenerMock).onChange();
+        verify(mListenerMock, times(2)).onChange();
     }
 
     @Test
@@ -265,8 +267,7 @@ public class VibrationSettingsTest {
         // Trigger multiple observers manually.
         mVibrationSettings.mSettingObserver.onChange(false);
         mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
-        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
-                new Intent(Intent.ACTION_USER_SWITCHED));
+        mVibrationSettings.mUserSwitchObserver.onUserSwitchComplete(NEW_USER_ID);
         mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
                 new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
 
@@ -834,13 +835,17 @@ public class VibrationSettingsTest {
         assertEquals(VIBRATION_INTENSITY_HIGH,
                 mVibrationSettings.getCurrentIntensity(USAGE_RINGTONE));
 
-        // Switching user is not working with FakeSettingsProvider.
-        // Testing the broadcast flow manually.
-        Settings.System.putIntForUser(mContextSpy.getContentResolver(),
-                Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW,
+        // Test early update of settings based on new user id.
+        putUserSetting(Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW,
+                NEW_USER_ID);
+        mVibrationSettings.mUserSwitchObserver.onUserSwitching(NEW_USER_ID);
+        assertEquals(VIBRATION_INTENSITY_LOW,
+                mVibrationSettings.getCurrentIntensity(USAGE_RINGTONE));
+
+        // Test later update of settings for UserHandle.USER_CURRENT.
+        putUserSetting(Settings.System.RING_VIBRATION_INTENSITY, VIBRATION_INTENSITY_LOW,
                 UserHandle.USER_CURRENT);
-        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
-                new Intent(Intent.ACTION_USER_SWITCHED));
+        mVibrationSettings.mUserSwitchObserver.onUserSwitchComplete(NEW_USER_ID);
         assertEquals(VIBRATION_INTENSITY_LOW,
                 mVibrationSettings.getCurrentIntensity(USAGE_RINGTONE));
     }
@@ -956,10 +961,14 @@ public class VibrationSettingsTest {
     }
 
     private void setUserSetting(String settingName, int value) {
-        Settings.System.putIntForUser(
-                mContextSpy.getContentResolver(), settingName, value, UserHandle.USER_CURRENT);
+        putUserSetting(settingName, value, UserHandle.USER_CURRENT);
         // FakeSettingsProvider doesn't support testing triggering ContentObserver yet.
         mVibrationSettings.mSettingObserver.onChange(false);
+    }
+
+    private void putUserSetting(String settingName, int value, int userHandle) {
+        Settings.System.putIntForUser(
+                mContextSpy.getContentResolver(), settingName, value, userHandle);
     }
 
     private void setRingerMode(int ringerMode) {

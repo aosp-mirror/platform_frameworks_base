@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.os.Process.INVALID_UID;
+
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -28,6 +30,7 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -41,6 +44,7 @@ import com.android.server.uri.GrantUri;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.WeakHashMap;
 
 /**
@@ -51,6 +55,9 @@ final class ActivityCallerState {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityCallerState" : TAG_ATM;
 
     // XML tags for CallerInfo
+    private static final String ATTR_CALLER_UID = "caller_uid";
+    private static final String ATTR_CALLER_PACKAGE = "caller_package";
+    private static final String ATTR_CALLER_IS_SHARE_ENABLED = "caller_is_share_enabled";
     private static final String TAG_READABLE_CONTENT_URI = "readable_content_uri";
     private static final String TAG_WRITABLE_CONTENT_URI = "writable_content_uri";
     private static final String TAG_INACCESSIBLE_CONTENT_URI = "inaccessible_content_uri";
@@ -71,12 +78,33 @@ final class ActivityCallerState {
         return mCallerTokenInfoMap.getOrDefault(callerToken, null);
     }
 
+    boolean hasCaller(IBinder callerToken) {
+        return getCallerInfoOrNull(callerToken) != null;
+    }
+
+    int getUid(IBinder callerToken) {
+        CallerInfo callerInfo = getCallerInfoOrNull(callerToken);
+        return callerInfo != null ? callerInfo.mUid : INVALID_UID;
+    }
+
+    String getPackage(IBinder callerToken) {
+        CallerInfo callerInfo = getCallerInfoOrNull(callerToken);
+        return callerInfo != null ? callerInfo.mPackageName : null;
+    }
+
+    boolean isShareIdentityEnabled(IBinder callerToken) {
+        CallerInfo callerInfo = getCallerInfoOrNull(callerToken);
+        return callerInfo != null ? callerInfo.mIsShareIdentityEnabled : false;
+    }
+
     void add(IBinder callerToken, CallerInfo callerInfo) {
         mCallerTokenInfoMap.put(callerToken, callerInfo);
     }
 
-    void computeCallerInfo(IBinder callerToken, Intent intent, int callerUid) {
-        final CallerInfo callerInfo = new CallerInfo();
+    void computeCallerInfo(IBinder callerToken, Intent intent, int callerUid,
+            String callerPackageName, boolean isCallerShareIdentityEnabled) {
+        final CallerInfo callerInfo = new CallerInfo(callerUid, callerPackageName,
+                isCallerShareIdentityEnabled);
         mCallerTokenInfoMap.put(callerToken, callerInfo);
 
         final ArraySet<Uri> contentUris = getContentUrisFromIntent(intent);
@@ -117,8 +145,8 @@ final class ActivityCallerState {
         final boolean writeMet = callerInfo.mWritableContentUris.contains(grantUri);
 
         if (!readMet && !writeMet) {
-            throw new IllegalArgumentException("The supplied URI wasn't passed at launch: "
-                    + grantUri.uri.toSafeString());
+            throw new IllegalArgumentException("The supplied URI wasn't passed at launch in"
+                    + " #getData, #EXTRA_STREAM, nor #getClipData: " + grantUri.uri.toSafeString());
         }
 
         final boolean checkRead = (modeFlags & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0;
@@ -158,6 +186,18 @@ final class ActivityCallerState {
         // getData
         addUriIfContentUri(intent.getData(), uris);
 
+        // EXTRA_STREAM
+        if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+            final ArrayList<Uri> streams = tryToUnparcelArrayListExtraStreamsUri(intent);
+            if (streams == null) {
+                addUriIfContentUri(tryToUnparcelExtraStreamUri(intent), uris);
+            } else {
+                for (int i = streams.size() - 1; i >= 0; i--) {
+                    addUriIfContentUri(streams.get(i), uris);
+                }
+            }
+        }
+
         final ClipData clipData = intent.getClipData();
         if (clipData == null) return uris;
 
@@ -173,6 +213,33 @@ final class ActivityCallerState {
         return uris;
     }
 
+    private static Uri tryToUnparcelExtraStreamUri(Intent intent) {
+        try {
+            return intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri.class);
+        } catch (BadParcelableException e) {
+            // Even though the system "defuses" all the parsed Bundles, i.e. suppresses and logs
+            // instances of {@link BadParcelableException}, we still want to be on the safer side
+            // and catch the exception to ensure no breakages happen. If the unparcel fails, the
+            // item is still preserved with the underlying parcel.
+            Slog.w(TAG, "Failed to unparcel an URI in EXTRA_STREAM, returning null: " + e);
+            return null;
+        }
+    }
+
+    private static ArrayList<Uri> tryToUnparcelArrayListExtraStreamsUri(Intent intent) {
+        try {
+            return intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri.class);
+        } catch (BadParcelableException e) {
+            // Even though the system "defuses" all the parsed Bundles, i.e. suppresses and logs
+            // instances of {@link BadParcelableException}, we still want to be on the safer side
+            // and catch the exception to ensure no breakages happen. If the unparcel fails, the
+            // item is still preserved with the underlying parcel.
+            Slog.w(TAG, "Failed to unparcel an ArrayList of URIs in EXTRA_STREAM, returning null: "
+                    + e);
+            return null;
+        }
+    }
+
     private static void addUriIfContentUri(Uri uri, ArraySet<Uri> uris) {
         if (uri != null && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
             uris.add(uri);
@@ -180,12 +247,26 @@ final class ActivityCallerState {
     }
 
     public static final class CallerInfo {
+        final int mUid;
+        final String mPackageName;
+        final boolean mIsShareIdentityEnabled;
         final ArraySet<GrantUri> mReadableContentUris = new ArraySet<>();
         final ArraySet<GrantUri> mWritableContentUris = new ArraySet<>();
         final ArraySet<GrantUri> mInaccessibleContentUris = new ArraySet<>();
 
+        CallerInfo(int uid, String packageName, boolean isShareIdentityEnabled) {
+            mUid = uid;
+            mPackageName = packageName;
+            mIsShareIdentityEnabled = isShareIdentityEnabled;
+        }
+
         public void saveToXml(TypedXmlSerializer out)
                 throws IOException, XmlPullParserException {
+            out.attributeInt(null, ATTR_CALLER_UID, mUid);
+            if (mPackageName != null) {
+                out.attribute(null, ATTR_CALLER_PACKAGE, mPackageName);
+            }
+            out.attributeBoolean(null, ATTR_CALLER_IS_SHARE_ENABLED, mIsShareIdentityEnabled);
             for (int i = mReadableContentUris.size() - 1; i >= 0; i--) {
                 saveGrantUriToXml(out, mReadableContentUris.valueAt(i), TAG_READABLE_CONTENT_URI);
             }
@@ -202,7 +283,12 @@ final class ActivityCallerState {
 
         public static CallerInfo restoreFromXml(TypedXmlPullParser in)
                 throws IOException, XmlPullParserException {
-            CallerInfo callerInfo = new CallerInfo();
+            int uid = in.getAttributeInt(null, ATTR_CALLER_UID, 0);
+            String packageName = in.getAttributeValue(null, ATTR_CALLER_PACKAGE);
+            boolean isShareIdentityEnabled = in.getAttributeBoolean(null,
+                    ATTR_CALLER_IS_SHARE_ENABLED, false);
+
+            CallerInfo callerInfo = new CallerInfo(uid, packageName, isShareIdentityEnabled);
             final int outerDepth = in.getDepth();
             int event;
             while (((event = in.next()) != END_DOCUMENT)

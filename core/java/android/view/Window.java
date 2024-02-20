@@ -1409,6 +1409,42 @@ public abstract class Window {
     }
 
     /**
+     * Set whether frameratepowersavingsbalance is enabled for this Window.
+     * This allows device to adjust refresh rate
+     * as needed and can be useful for power saving.
+     *
+     * @param enabled whether the frameratepowersavingsbalance is enabled.
+     * @see #isFrameRatePowerSavingsBalanced()
+     * @see WindowManager.LayoutParams#setFrameRatePowerSavingsBalanced(boolean)
+     */
+    @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void setFrameRatePowerSavingsBalanced(boolean enabled) {
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            final WindowManager.LayoutParams attrs = getAttributes();
+            attrs.setFrameRatePowerSavingsBalanced(enabled);
+            dispatchWindowAttributesChanged(attrs);
+        }
+    }
+
+    /**
+     * Get whether frameratepowersavingsbalance is enabled for this Window.
+     * This allows device to adjust refresh rate
+     * as needed and can be useful for power saving.
+     * {@link #setFrameRateBoostOnTouchEnabled(boolean)}
+     *
+     * @return whether the frameratepowersavingsbalance is enabled.
+     * @see #setFrameRatePowerSavingsBalanced(boolean)
+     * @see WindowManager.LayoutParams#isFrameRatePowerSavingsBalanced()
+     */
+    @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public boolean isFrameRatePowerSavingsBalanced() {
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            return getAttributes().isFrameRatePowerSavingsBalanced();
+        }
+        return false;
+    }
+
+    /**
      * If {@code isPreferred} is true, this method requests that the connected display does minimal
      * post processing when this window is visible on the screen. Otherwise, it requests that the
      * display switches back to standard image processing.

@@ -16,11 +16,11 @@
 package com.android.server.devicepolicy;
 
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
-import static android.app.admin.flags.Flags.securityLogV2Enabled;
 
 import android.annotation.Nullable;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
+import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -400,7 +400,7 @@ class OwnersData {
 
             out.startTag(null, TAG_POLICY_ENGINE_MIGRATION);
             out.attributeBoolean(null, ATTR_MIGRATED_TO_POLICY_ENGINE, mMigratedToPolicyEngine);
-            if (securityLogV2Enabled()) {
+            if (Flags.securityLogV2Enabled()) {
                 out.attributeBoolean(null, ATTR_SECURITY_LOG_MIGRATED, mSecurityLoggingMigrated);
             }
             out.endTag(null, TAG_POLICY_ENGINE_MIGRATION);
@@ -463,7 +463,7 @@ class OwnersData {
                 case TAG_POLICY_ENGINE_MIGRATION:
                     mMigratedToPolicyEngine = parser.getAttributeBoolean(
                             null, ATTR_MIGRATED_TO_POLICY_ENGINE, false);
-                    mSecurityLoggingMigrated = securityLogV2Enabled()
+                    mSecurityLoggingMigrated = Flags.securityLogV2Enabled()
                             && parser.getAttributeBoolean(null, ATTR_SECURITY_LOG_MIGRATED, false);
                     break;
                 default:

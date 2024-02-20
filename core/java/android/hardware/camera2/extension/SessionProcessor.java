@@ -20,6 +20,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.impl.CameraExtensionUtils.HandlerExecutor;
@@ -132,13 +133,14 @@ public abstract class SessionProcessor {
          * This method is called instead of
          * {@link #onCaptureProcessStarted} when the camera device failed
          * to produce the required input for the device-specific
-         * extension. The cause could be a failed camera capture request,
-         * a failed capture result or dropped camera frame.
+         * extension. The callback allows clients to be notified
+         * about failure reason.
          *
          * @param captureSequenceId id of the current capture sequence
+         * @param failure           The capture failure reason
          */
         @FlaggedApi(Flags.FLAG_CONCERT_MODE)
-        void onCaptureFailed(int captureSequenceId);
+        void onCaptureFailed(int captureSequenceId, @CaptureFailure.FailureReason int failure);
 
         /**
          * This method is called independently of the others in the
@@ -181,8 +183,8 @@ public abstract class SessionProcessor {
          *                   capture results. This is the return value of
          *                   either {@link #startRepeating} or {@link
          *                   #startMultiFrameCapture}.
-         * @param results  The supported capture results. Do note
-         *                  that if results 'android.jpeg.quality' and
+         * @param results   Key value map of the supported capture results.
+         *                  Do note that if results 'android.jpeg.quality' and
          *                  android.jpeg.orientation' are present in the
          *                  process capture input results, then the values
          *                  must also be passed as part of this callback.
@@ -192,7 +194,7 @@ public abstract class SessionProcessor {
          */
         @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         void onCaptureCompleted(long shutterTimestamp, int requestId,
-                @NonNull CaptureResult results);
+                @NonNull Map<CaptureResult.Key, Object> results);
     }
 
     /**
@@ -412,7 +414,7 @@ public abstract class SessionProcessor {
         public int startRepeating(ICaptureCallback callback) throws RemoteException {
             return SessionProcessor.this.startRepeating(
                     new HandlerExecutor(new Handler(Looper.getMainLooper())),
-                    new CaptureCallbackImpl(callback));
+                    new CaptureCallbackImpl(callback, mVendorId));
         }
 
         @Override
@@ -425,7 +427,7 @@ public abstract class SessionProcessor {
                 throws RemoteException {
             return SessionProcessor.this.startMultiFrameCapture(
                     new HandlerExecutor(new Handler(Looper.getMainLooper())),
-                    new CaptureCallbackImpl(callback));
+                    new CaptureCallbackImpl(callback, mVendorId));
         }
 
         @Override
@@ -438,7 +440,7 @@ public abstract class SessionProcessor {
                 throws RemoteException {
             return SessionProcessor.this.startTrigger(captureRequest,
                     new HandlerExecutor(new Handler(Looper.getMainLooper())),
-                    new CaptureCallbackImpl(callback));
+                    new CaptureCallbackImpl(callback, mVendorId));
         }
 
         @Override
@@ -450,9 +452,11 @@ public abstract class SessionProcessor {
 
     private static final class CaptureCallbackImpl implements CaptureCallback {
         private final ICaptureCallback mCaptureCallback;
+        private long mVendorId = -1;
 
-        CaptureCallbackImpl(@NonNull ICaptureCallback cb) {
+        CaptureCallbackImpl(@NonNull ICaptureCallback cb, long vendorId) {
             mCaptureCallback = cb;
+            mVendorId = vendorId;
         }
 
         @Override
@@ -474,9 +478,9 @@ public abstract class SessionProcessor {
         }
 
         @Override
-        public void onCaptureFailed(int captureSequenceId) {
+        public void onCaptureFailed(int captureSequenceId, int failure) {
             try {
-                mCaptureCallback.onCaptureFailed(captureSequenceId);
+                mCaptureCallback.onCaptureProcessFailed(captureSequenceId, failure);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to notify capture failure start due to remote exception!");
             }
@@ -502,10 +506,14 @@ public abstract class SessionProcessor {
 
         @Override
         public void onCaptureCompleted(long shutterTimestamp, int requestId,
-                @androidx.annotation.NonNull CaptureResult results) {
+                Map<CaptureResult.Key, Object> results) {
+            CameraMetadataNative captureResults = new CameraMetadataNative();
+            captureResults.setVendorId(mVendorId);
+            for (Map.Entry<CaptureResult.Key, Object> entry : results.entrySet()) {
+                captureResults.set(entry.getKey(), entry.getValue());
+            }
             try {
-                mCaptureCallback.onCaptureCompleted(shutterTimestamp, requestId,
-                        results.getNativeCopy());
+                mCaptureCallback.onCaptureCompleted(shutterTimestamp, requestId, captureResults);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to notify capture complete due to remote exception!");
             }

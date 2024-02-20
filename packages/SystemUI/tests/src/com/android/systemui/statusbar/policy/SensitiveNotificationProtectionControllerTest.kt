@@ -19,17 +19,24 @@ package com.android.systemui.statusbar.policy
 import android.app.ActivityOptions
 import android.app.IActivityManager
 import android.app.Notification
+import android.app.Notification.FLAG_FOREGROUND_SERVICE
+import android.app.Notification.VISIBILITY_PRIVATE
+import android.app.Notification.VISIBILITY_PUBLIC
+import android.app.NotificationChannel
+import android.app.NotificationManager.IMPORTANCE_HIGH
+import android.app.NotificationManager.VISIBILITY_NO_OVERRIDE
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
 import android.platform.test.annotations.EnableFlags
 import android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS
-import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.server.notification.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.RankingBuilder
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.mockito.whenever
@@ -316,6 +323,25 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
         assertFalse(controller.shouldProtectNotification(notificationEntry))
     }
+    @Test
+    fun shouldProtectNotification_projectionActive_publicNotification_false() {
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        // App marked notification visibility as public
+        val notificationEntry = setupPublicNotificationEntry(TEST_PROJECTION_PACKAGE_NAME)
+
+        assertFalse(controller.shouldProtectNotification(notificationEntry))
+    }
+
+    @Test
+    fun shouldProtectNotification_projectionActive_publicNotificationUserChannelOverride_true() {
+        mediaProjectionCallback.onStart(mediaProjectionInfo)
+
+        val notificationEntry =
+            setupPublicNotificationEntryWithUserOverriddenChannel(TEST_PROJECTION_PACKAGE_NAME)
+
+        assertTrue(controller.shouldProtectNotification(notificationEntry))
+    }
 
     private fun setDisabledViaDeveloperOption() {
         globalSettings.putInt(DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 1)
@@ -336,21 +362,50 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
 
     private fun setupNotificationEntry(
         packageName: String,
-        isFgs: Boolean = false
+        isFgs: Boolean = false,
+        overrideVisibility: Boolean = false,
+        overrideChannelVisibility: Boolean = false,
     ): NotificationEntry {
-        val notificationEntry = mock(NotificationEntry::class.java)
-        val sbn = mock(StatusBarNotification::class.java)
-        val notification = mock(Notification::class.java)
-        whenever(notificationEntry.sbn).thenReturn(sbn)
-        whenever(sbn.packageName).thenReturn(packageName)
-        whenever(sbn.notification).thenReturn(notification)
-        whenever(notification.isFgsOrUij).thenReturn(isFgs)
-
+        val notification = Notification()
+        if (isFgs) {
+            notification.flags = notification.flags or FLAG_FOREGROUND_SERVICE
+        }
+        if (overrideVisibility) {
+            // Developer has marked notification as public
+            notification.visibility = VISIBILITY_PUBLIC
+        }
+        val notificationEntry =
+            NotificationEntryBuilder().setNotification(notification).setPkg(packageName).build()
+        val channel = NotificationChannel("1", "1", IMPORTANCE_HIGH)
+        if (overrideChannelVisibility) {
+            // User doesn't allow private notifications at the channel level
+            channel.lockscreenVisibility = VISIBILITY_PRIVATE
+        }
+        notificationEntry.setRanking(
+            RankingBuilder(notificationEntry.ranking)
+                .setChannel(channel)
+                .setVisibilityOverride(VISIBILITY_NO_OVERRIDE)
+                .build()
+        )
         return notificationEntry
     }
 
     private fun setupFgsNotificationEntry(packageName: String): NotificationEntry {
-        return setupNotificationEntry(packageName, /* isFgs= */ true)
+        return setupNotificationEntry(packageName, isFgs = true)
+    }
+
+    private fun setupPublicNotificationEntry(packageName: String): NotificationEntry {
+        return setupNotificationEntry(packageName, overrideVisibility = true)
+    }
+
+    private fun setupPublicNotificationEntryWithUserOverriddenChannel(
+        packageName: String
+    ): NotificationEntry {
+        return setupNotificationEntry(
+            packageName,
+            overrideVisibility = true,
+            overrideChannelVisibility = true
+        )
     }
 
     companion object {

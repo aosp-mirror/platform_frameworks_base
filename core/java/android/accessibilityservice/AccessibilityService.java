@@ -69,6 +69,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.inputmethod.EditorInfo;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
@@ -1388,7 +1389,9 @@ public abstract class AccessibilityService extends Service {
         getFingerprintGestureController().onGesture(gesture);
     }
 
-    int getConnectionId() {
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public int getConnectionId() {
         return mConnectionId;
     }
 

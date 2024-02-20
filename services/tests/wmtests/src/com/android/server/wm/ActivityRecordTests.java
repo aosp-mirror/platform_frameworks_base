@@ -769,7 +769,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setState(STOPPED, "Testing");
 
         ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
-        activity.addResultLocked(topActivity, "resultWho", 0, 0, new Intent());
+        activity.addResultLocked(topActivity, "resultWho", 0, 0, new Intent(),
+                /* callerToken */ null);
         topActivity.finishing = true;
 
         doReturn(TASK_FRAGMENT_VISIBILITY_VISIBLE).when(task).getVisibility(null);
@@ -1298,8 +1299,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         targetActivity.finishIfPossible(0, new Intent(), null, "test", false /* oomAdj */);
         waitUntilHandlersIdle();
 
-        verify(resultToActivity).sendResult(anyInt(), eq(null), anyInt(), anyInt(), any(), eq(null),
-                anyBoolean());
+        verify(resultToActivity).sendResult(anyInt(), eq(null), anyInt(), anyInt(), any(), any(),
+                eq(null), anyBoolean());
     }
 
     /**

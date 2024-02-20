@@ -20,7 +20,6 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Zavřít"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Rozbalit"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Nastavení"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Aktivovat rozdělenou obrazovku"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Nabídka"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Nabídka režimu obrazu v obraze"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"Aplikace <xliff:g id="NAME">%s</xliff:g> je v režimu obraz v obraze"</string>
