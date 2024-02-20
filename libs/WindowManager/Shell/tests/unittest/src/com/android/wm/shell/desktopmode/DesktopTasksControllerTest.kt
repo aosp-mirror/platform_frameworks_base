@@ -87,6 +87,7 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.times
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
@@ -112,6 +113,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock lateinit var recentsTransitionHandler: RecentsTransitionHandler
     @Mock lateinit var dragAndDropController: DragAndDropController
     @Mock lateinit var multiInstanceHelper: MultiInstanceHelper
+    @Mock lateinit var desktopModeLoggerTransitionObserver: DesktopModeLoggerTransitionObserver
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var controller: DesktopTasksController
@@ -161,6 +163,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             mToggleResizeDesktopTaskTransitionHandler,
             dragToDesktopTransitionHandler,
             desktopModeTaskRepository,
+            desktopModeLoggerTransitionObserver,
             launchAdjacentController,
             recentsTransitionHandler,
             multiInstanceHelper,
