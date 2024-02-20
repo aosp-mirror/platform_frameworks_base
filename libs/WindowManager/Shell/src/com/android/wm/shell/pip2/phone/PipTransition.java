@@ -152,6 +152,12 @@ public class PipTransition extends PipTransitionController {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (transition == mEnterTransition) {
             mEnterTransition = null;
+            if (mPipScheduler.isInSwipePipToHomeTransition()) {
+                // If this is the second transition as a part of swipe PiP to home cuj,
+                // handle this transition as a special case with no-op animation.
+                return handleSwipePipToHomeTransition(info, startTransaction, finishTransaction,
+                        finishCallback);
+            }
             if (isLegacyEnter(info)) {
                 // If this is a legacy-enter-pip (auto-enter is off and PiP activity went to pause),
                 // then we should run an ALPHA type (cross-fade) animation.
@@ -204,6 +210,25 @@ public class PipTransition extends PipTransitionController {
                 R.integer.config_pipResizeAnimationDuration);
         // TODO: b/275910498 Couple this routine with a new implementation of the PiP animator.
         startResizeAnimation(pipLeash, mPipBoundsState.getBounds(), destinationBounds, duration);
+        return true;
+    }
+
+    private boolean handleSwipePipToHomeTransition(@NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        TransitionInfo.Change pipChange = getPipChange(info);
+        if (pipChange == null) {
+            return false;
+        }
+        mPipScheduler.setInSwipePipToHomeTransition(false);
+        mPipTaskToken = pipChange.getContainer();
+
+        // cache the PiP task token and leash
+        mPipScheduler.setPipTaskToken(mPipTaskToken);
+
+        startTransaction.apply();
+        finishCallback.onTransitionFinished(null);
         return true;
     }
 

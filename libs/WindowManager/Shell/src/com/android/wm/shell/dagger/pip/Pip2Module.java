@@ -74,13 +74,18 @@ public abstract class Pip2Module {
             ShellController shellController,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
-            PipDisplayLayoutState pipDisplayLayoutState) {
+            PipBoundsState pipBoundsState,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipDisplayLayoutState pipDisplayLayoutState,
+            PipScheduler pipScheduler,
+            @ShellMainThread ShellExecutor mainExecutor) {
         if (!PipUtils.isPip2ExperimentEnabled()) {
             return Optional.empty();
         } else {
             return Optional.ofNullable(PipController.create(
                     context, shellInit, shellController, displayController, displayInsetsController,
-                    pipDisplayLayoutState));
+                    pipBoundsState, pipBoundsAlgorithm, pipDisplayLayoutState, pipScheduler,
+                    mainExecutor));
         }
     }
 
