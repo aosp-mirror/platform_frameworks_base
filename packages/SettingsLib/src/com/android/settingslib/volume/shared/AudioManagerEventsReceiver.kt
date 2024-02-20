@@ -21,6 +21,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
+import android.util.Log
+import com.android.settingslib.volume.shared.model.AudioManagerEvent
+import com.android.settingslib.volume.shared.model.AudioStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharedFlow
@@ -28,19 +31,20 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
-/** Exposes [AudioManager] intents as a observable shared flow. */
-interface AudioManagerIntentsReceiver {
+/** Exposes [AudioManager] events as a observable shared flow. */
+interface AudioManagerEventsReceiver {
 
-    val intents: SharedFlow<Intent>
+    val events: SharedFlow<AudioManagerEvent>
 }
 
-class AudioManagerIntentsReceiverImpl(
+class AudioManagerEventsReceiverImpl(
     private val context: Context,
     coroutineScope: CoroutineScope,
-) : AudioManagerIntentsReceiver {
+) : AudioManagerEventsReceiver {
 
     private val allActions: Collection<String>
         get() =
@@ -52,7 +56,7 @@ class AudioManagerIntentsReceiverImpl(
                 AudioManager.STREAM_DEVICES_CHANGED_ACTION,
             )
 
-    override val intents: SharedFlow<Intent> =
+    override val events: SharedFlow<AudioManagerEvent> =
         callbackFlow {
                 val receiver =
                     object : BroadcastReceiver() {
@@ -73,5 +77,34 @@ class AudioManagerIntentsReceiverImpl(
             }
             .filterNotNull()
             .filter { intent -> allActions.contains(intent.action) }
+            .mapNotNull { it.toAudioManagerEvent() }
             .shareIn(coroutineScope, SharingStarted.WhileSubscribed())
+
+    private fun Intent.toAudioManagerEvent(): AudioManagerEvent? {
+        when (action) {
+            AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION ->
+                return AudioManagerEvent.InternalRingerModeChanged
+            AudioManager.STREAM_DEVICES_CHANGED_ACTION ->
+                return AudioManagerEvent.StreamDevicesChanged
+            AudioManager.MASTER_MUTE_CHANGED_ACTION ->
+                return AudioManagerEvent.StreamMasterMuteChanged
+        }
+
+        val audioStreamType: Int =
+            getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, AudioManager.ERROR)
+        if (audioStreamType == AudioManager.ERROR) {
+            Log.e(
+                "AudioManagerIntentsReceiver",
+                "Intent doesn't have AudioManager.EXTRA_VOLUME_STREAM_TYPE extra",
+            )
+            return null
+        }
+        val audioStream = AudioStream(audioStreamType)
+        return when (action) {
+            AudioManager.STREAM_MUTE_CHANGED_ACTION ->
+                AudioManagerEvent.StreamMuteChanged(audioStream)
+            AudioManager.VOLUME_CHANGED_ACTION -> AudioManagerEvent.StreamVolumeChanged(audioStream)
+            else -> null
+        }
+    }
 }
