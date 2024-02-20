@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.WindowInsets.Type.statusBars;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -429,8 +430,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
 
             final long eventDuration = e.getEventTime() - e.getDownTime();
-            final boolean shouldLongClick = id == R.id.maximize_window && !mIsDragging
-                    && !mHasLongClicked && eventDuration >= ViewConfiguration.getLongPressTimeout();
+            final boolean isTouchScreen =
+                    (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
+            final boolean shouldLongClick = isTouchScreen && id == R.id.maximize_window
+                    && !mIsDragging && !mHasLongClicked
+                    && eventDuration >= ViewConfiguration.getLongPressTimeout();
             if (shouldLongClick) {
                 v.performLongClick();
                 mHasLongClicked = true;
