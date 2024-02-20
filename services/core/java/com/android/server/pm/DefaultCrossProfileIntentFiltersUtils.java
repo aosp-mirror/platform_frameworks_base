@@ -20,6 +20,9 @@ import static android.content.pm.PackageManager.ONLY_IF_NO_MATCH_FOUND;
 import static android.content.pm.PackageManager.SKIP_CURRENT_PROFILE;
 import static android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH;
 
+import static com.android.server.pm.CrossProfileIntentFilter.FLAG_ALLOW_CHAINED_RESOLUTION;
+import static com.android.server.pm.CrossProfileIntentFilter.FLAG_IS_PACKAGE_FOR_FILTER;
+
 import android.content.Intent;
 import android.hardware.usb.UsbManager;
 import android.provider.AlarmClock;
@@ -613,6 +616,27 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addDataScheme("mmsto")
                     .build();
 
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_ACTION_PICK_IMAGES =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ FLAG_IS_PACKAGE_FOR_FILTER | FLAG_ALLOW_CHAINED_RESOLUTION,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(MediaStore.ACTION_PICK_IMAGES)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .build();
+
+    private static final DefaultCrossProfileIntentFilter
+            CLONE_TO_PARENT_ACTION_PICK_IMAGES_WITH_DATA_TYPES =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ FLAG_IS_PACKAGE_FOR_FILTER | FLAG_ALLOW_CHAINED_RESOLUTION,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(MediaStore.ACTION_PICK_IMAGES)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addDataType("image/*")
+                    .addDataType("video/*")
+                    .build();
+
     public static List<DefaultCrossProfileIntentFilter> getDefaultCloneProfileFilters() {
         return Arrays.asList(
                 PARENT_TO_CLONE_SEND_ACTION,
@@ -626,7 +650,9 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 CLONE_TO_PARENT_PICK_INSERT_ACTION,
                 CLONE_TO_PARENT_DIAL_DATA,
                 CLONE_TO_PARENT_SMS_MMS,
-                CLONE_TO_PARENT_PHOTOPICKER_SELECTION
+                CLONE_TO_PARENT_PHOTOPICKER_SELECTION,
+                CLONE_TO_PARENT_ACTION_PICK_IMAGES,
+                CLONE_TO_PARENT_ACTION_PICK_IMAGES_WITH_DATA_TYPES
         );
     }
 }
