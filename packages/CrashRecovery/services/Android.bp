@@ -3,7 +3,7 @@ soong_config_module_type {
     module_type: "filegroup",
     config_namespace: "ANDROID",
     bool_variables: [
-        "move_crashrecovery_files",
+        "crashrecovery_files_in_platform",
     ],
     properties: [
         "srcs",
@@ -12,15 +12,14 @@ soong_config_module_type {
 
 platform_filegroup {
     name: "services-crashrecovery-sources",
-    srcs: [
-        "java/**/*.java",
-        "java/**/*.aidl",
-        ":statslog-crashrecovery-java-gen",
-    ],
     soong_config_variables: {
-        // if the flag is enabled, then files would be moved to module
-        move_crashrecovery_files: {
-            srcs: [],
+        // if this flag is enabled, then files are part of platform
+        crashrecovery_files_in_platform: {
+            srcs: [
+                "java/**/*.java",
+                "java/**/*.aidl",
+                ":statslog-crashrecovery-java-gen",
+            ],
         },
     },
     visibility: ["//frameworks/base:__subpackages__"],
@@ -31,7 +30,7 @@ soong_config_module_type {
     module_type: "filegroup",
     config_namespace: "ANDROID",
     bool_variables: [
-        "move_crashrecovery_files",
+        "crashrecovery_files_in_module",
     ],
     properties: [
         "srcs",
@@ -40,10 +39,9 @@ soong_config_module_type {
 
 module_filegroup {
     name: "services-crashrecovery-module-sources",
-    srcs: [],
     soong_config_variables: {
-        // if the flag is enabled, then files would be moved to module
-        move_crashrecovery_files: {
+        // if this flag is enabled, then files are part of module
+        crashrecovery_files_in_module: {
             srcs: [
                 "java/**/*.java",
                 "java/**/*.aidl",
