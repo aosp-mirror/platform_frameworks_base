@@ -18,8 +18,11 @@
 
 package com.android.credentialmanager.ui
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
@@ -29,6 +32,8 @@ import com.android.credentialmanager.CredentialSelectorUiState
 import com.android.credentialmanager.CredentialSelectorUiState.Get.SingleEntry
 import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry
 import com.android.credentialmanager.CredentialSelectorViewModel
+import com.android.credentialmanager.FlowEngine
+import com.android.credentialmanager.TAG
 import com.android.credentialmanager.ui.screens.LoadingScreen
 import com.android.credentialmanager.ui.screens.single.passkey.SinglePasskeyScreen
 import com.android.credentialmanager.ui.screens.single.password.SinglePasswordScreen
@@ -44,6 +49,7 @@ import com.android.credentialmanager.ui.screens.multiple.MultiCredentialsFoldScr
 @Composable
 fun WearApp(
     viewModel: CredentialSelectorViewModel,
+    flowEngine: FlowEngine = viewModel,
     onCloseApp: () -> Unit,
 ) {
     val navController = rememberSwipeDismissableNavController()
@@ -52,7 +58,6 @@ fun WearApp(
         rememberSwipeDismissableNavHostState(swipeToDismissBoxState = swipeToDismissBoxState)
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     WearNavScaffold(
         startDestination = Screen.Loading.route,
         navController = navController,
@@ -61,11 +66,11 @@ fun WearApp(
         composable(Screen.Loading.route) {
             LoadingScreen()
         }
-
         scrollable(Screen.SinglePasswordScreen.route) {
             SinglePasswordScreen(
-                credentialSelectorUiState = viewModel.uiState.value as SingleEntry,
+                entry = (remember { uiState } as SingleEntry).entry,
                 columnState = it.columnState,
+                flowEngine = flowEngine,
             )
         }
 
@@ -88,10 +93,13 @@ fun WearApp(
                 credentialSelectorUiState = viewModel.uiState.value as MultipleEntry,
                 screenIcon = null,
                 columnState = it.columnState,
-                )
+            )
         }
     }
-
+    BackHandler(true) {
+        viewModel.back()
+    }
+    Log.d(TAG, "uiState change, state: $uiState")
     when (val state = uiState) {
         CredentialSelectorUiState.Idle -> {
             if (navController.currentDestination?.route != Screen.Loading.route) {
@@ -142,7 +150,7 @@ private fun handleGetNavigation(
             }
         }
 
-        is CredentialSelectorUiState.Get.MultipleEntry -> {
+        is MultipleEntry -> {
             navController.navigateToMultipleCredentialsFoldScreen()
         }
 
