@@ -580,7 +580,7 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du tilføje en ny bruger?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enhed med andre ved at oprette ekstra brugere. Hver bruger har sit personlige område, som kan tilpasses med apps, baggrund osv. Brugerne kan også justere enhedsindstillinger, som for eksempel Wi-Fi, som påvirker alle.\n\nNår du tilføjer en ny bruger, skal vedkommende konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle andre brugere. Indstillinger og tjenester for hjælpefunktioner overføres muligvis ikke til den nye bruger."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
-    <string name="user_grant_admin_title" msgid="5157031020083343984">"Vil du tildele denne bruger administratorrettigheder?"</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Vil du tildele denne bruger admin­istrator­rettig­heder?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratorer har særlige rettigheder, som andre brugere ikke har. En administrator kan administrere alle brugere, opdatere eller gendanne denne enhed, skifte indstillinger, se alle installerede apps og tildele eller tilbagekalde andres administratorrettigheder."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Tildel administratorrettigheder"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brugeren nu?"</string>

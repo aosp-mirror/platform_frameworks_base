@@ -33,7 +33,7 @@ android_library {
         "dagger2",
         "jsr330",
     ],
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
     java_version: "1.8",
     sdk_version: "current",
     min_sdk_version: "current",
