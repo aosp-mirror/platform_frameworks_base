@@ -49,6 +49,8 @@ import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
+import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
@@ -120,6 +122,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 windowController = windowController,
                 deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
                 centralSurfaces = centralSurfaces,
+                headsUpInteractor = kosmos.headsUpNotificationInteractor,
             )
     }
 
@@ -167,6 +170,12 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(isVisible).isTrue()
             fakeSceneDataSource.unpause(expectedScene = SceneKey.Gone)
             transitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
+            assertThat(isVisible).isFalse()
+
+            kosmos.headsUpNotificationRepository.hasPinnedHeadsUp.value = true
+            assertThat(isVisible).isTrue()
+
+            kosmos.headsUpNotificationRepository.hasPinnedHeadsUp.value = false
             assertThat(isVisible).isFalse()
         }
 

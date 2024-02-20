@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.notification.data
 
+package com.android.systemui.statusbar.notification.stack.data.repository
+
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpNotificationRepository
-import com.android.systemui.statusbar.notification.data.repository.HeadsUpNotificationRepositoryImpl
-import dagger.Binds
-import dagger.Module
+import kotlinx.coroutines.flow.MutableStateFlow
 
-@Module(
-    includes =
-        [
-            NotificationSettingsRepositoryModule::class,
-        ]
-)
-interface NotificationDataLayerModule {
-    @Binds
-    fun bindHeadsUpNotificationRepository(
-        impl: HeadsUpNotificationRepositoryImpl
-    ): HeadsUpNotificationRepository
+val Kosmos.headsUpNotificationRepository by Fixture { FakeHeadsUpNotificationRepository() }
+
+class FakeHeadsUpNotificationRepository : HeadsUpNotificationRepository {
+    override val hasPinnedHeadsUp = MutableStateFlow(false)
 }
