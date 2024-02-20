@@ -18,14 +18,12 @@ package com.android.wm.shell.desktopmode;
 
 import android.os.SystemProperties;
 
-import com.android.wm.shell.Flags;
+import com.android.window.flags.Flags;
 
 /**
  * Constants for desktop mode feature
  */
 public class DesktopModeStatus {
-
-    private static final boolean ENABLE_DESKTOP_WINDOWING = Flags.enableDesktopWindowing();
 
     /**
      * Flag to indicate whether desktop mode proto is available on the device
@@ -79,7 +77,7 @@ public class DesktopModeStatus {
      */
     public static boolean isEnabled() {
         // Check for aconfig flag first
-        if (ENABLE_DESKTOP_WINDOWING) {
+        if (Flags.enableDesktopWindowingMode()) {
             return true;
         }
         // Fall back to sysprop flag

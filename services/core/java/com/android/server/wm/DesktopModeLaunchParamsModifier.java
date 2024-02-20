@@ -27,7 +27,7 @@ import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
-import com.android.wm.shell.Flags;
+import com.android.window.flags.Flags;
 /**
  * The class that defines default launch params for tasks in desktop mode
  */
@@ -37,8 +37,6 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             TAG_WITH_CLASS_NAME ? "DesktopModeLaunchParamsModifier" : TAG_ATM;
     private static final boolean DEBUG = false;
 
-    // Desktop mode feature flags.
-    private static final boolean ENABLE_DESKTOP_WINDOWING = Flags.enableDesktopWindowing();
     private static final boolean DESKTOP_MODE_PROTO2_SUPPORTED =
             SystemProperties.getBoolean("persist.wm.debug.desktop_mode_2", false);
     public static final float DESKTOP_MODE_INITIAL_BOUNDS_SCALE =
@@ -67,6 +65,11 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             LaunchParamsController.LaunchParams currentParams,
             LaunchParamsController.LaunchParams outParams) {
 
+        if (!isDesktopModeEnabled()) {
+            appendLog("desktop mode is not enabled, continuing");
+            return RESULT_CONTINUE;
+        }
+
         if (task == null) {
             appendLog("task null, skipping");
             return RESULT_SKIP;
@@ -87,7 +90,7 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
         // previous windowing mode to be restored even if the desktop mode state has changed.
         // Let task launches inherit the windowing mode from the source task if available, which
         // should have the desired windowing mode set by WM Shell. See b/286929122.
-        if (isDesktopModeSupported() && source != null && source.getTask() != null) {
+        if (isDesktopModeEnabled() && source != null && source.getTask() != null) {
             final Task sourceTask = source.getTask();
             outParams.mWindowingMode = sourceTask.getWindowingMode();
             appendLog("inherit-from-source=" + outParams.mWindowingMode);
@@ -140,10 +143,10 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
         if (DEBUG) Slog.d(TAG, mLogBuilder.toString());
     }
 
-    /** Whether desktop mode is supported. */
-    static boolean isDesktopModeSupported() {
+    /** Whether desktop mode is enabled. */
+    static boolean isDesktopModeEnabled() {
         // Check for aconfig flag first
-        if (ENABLE_DESKTOP_WINDOWING) {
+        if (Flags.enableDesktopWindowingMode()) {
             return true;
         }
         // Fall back to sysprop flag
