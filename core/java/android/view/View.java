@@ -24,6 +24,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
@@ -2367,6 +2368,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
+    // Used to set frame rate compatibility.
+    @Surface.FrameRateCompatibility int mFrameRateCompatibility =
+            FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 
     static {
         EMPTY_STATE_SET = StateSet.get(0);
@@ -33515,7 +33519,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
                     }
                 } else {
-                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
+                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate,
+                            mFrameRateCompatibility);
                     return;
                 }
             }
