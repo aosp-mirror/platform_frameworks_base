@@ -94,6 +94,11 @@ public class BackgroundActivityStartController {
     private static final long ASM_GRACEPERIOD_TIMEOUT_MS = TIMEOUT_MS;
     private static final int ASM_GRACEPERIOD_MAX_REPEATS = 5;
     private static final int NO_PROCESS_UID = -1;
+
+    static final String AUTO_OPT_IN_NOT_PENDING_INTENT = "notPendingIntent";
+    static final String AUTO_OPT_IN_CALL_FOR_RESULT = "callForResult";
+    static final String AUTO_OPT_IN_SAME_UID = "sameUid";
+
     /** If enabled the creator will not allow BAL on its behalf by default. */
     @ChangeId
     @EnabledAfter(targetSdkVersion = UPSIDE_DOWN_CAKE)
@@ -232,9 +237,9 @@ public class BackgroundActivityStartController {
         private final boolean mCallingUidHasAnyVisibleWindow;
         private final @ActivityManager.ProcessState int mCallingUidProcState;
         private final boolean mIsCallingUidPersistentSystemProcess;
-        private final BackgroundStartPrivileges mBalAllowedByPiSender;
-        private final BackgroundStartPrivileges mBalAllowedByPiCreatorWithHardening;
-        private final BackgroundStartPrivileges mBalAllowedByPiCreator;
+        final BackgroundStartPrivileges mBalAllowedByPiSender;
+        final BackgroundStartPrivileges mBalAllowedByPiCreatorWithHardening;
+        final BackgroundStartPrivileges mBalAllowedByPiCreator;
         private final String mRealCallingPackage;
         private final int mRealCallingUid;
         private final int mRealCallingPid;
@@ -248,11 +253,12 @@ public class BackgroundActivityStartController {
         private final WindowProcessController mRealCallerApp;
         private final boolean mIsCallForResult;
         private final ActivityOptions mCheckedOptions;
-        private final String mAutoOptInReason;
+        final String mAutoOptInReason;
+        private final boolean mAutoOptInCaller;
         private BalVerdict mResultForCaller;
         private BalVerdict mResultForRealCaller;
 
-        private BalState(int callingUid, int callingPid, final String callingPackage,
+        @VisibleForTesting BalState(int callingUid, int callingPid, final String callingPackage,
                  int realCallingUid, int realCallingPid,
                  WindowProcessController callerApp,
                  PendingIntentRecord originatingPendingIntent,
@@ -280,26 +286,27 @@ public class BackgroundActivityStartController {
             if (!balImproveRealCallerVisibilityCheck()) {
                 // without this fix the auto-opt ins below would violate CTS tests
                 mAutoOptInReason = null;
-            } else if (mIsCallForResult) {
-                mAutoOptInReason = "callForResult";
+                mAutoOptInCaller = false;
             } else if (originatingPendingIntent == null) {
-                mAutoOptInReason = "notPendingIntent";
+                mAutoOptInReason = AUTO_OPT_IN_NOT_PENDING_INTENT;
+                mAutoOptInCaller = true;
+            } else if (mIsCallForResult) {
+                mAutoOptInReason = AUTO_OPT_IN_CALL_FOR_RESULT;
+                mAutoOptInCaller = false;
             } else if (callingUid == realCallingUid && !balRequireOptInSameUid()) {
-                mAutoOptInReason = "sameUid";
+                mAutoOptInReason = AUTO_OPT_IN_SAME_UID;
+                mAutoOptInCaller = false;
             } else {
                 mAutoOptInReason = null;
+                mAutoOptInCaller = false;
             }
 
-            if (mAutoOptInReason != null) {
+            if (mAutoOptInCaller) {
                 // grant BAL privileges unless explicitly opted out
                 mBalAllowedByPiCreatorWithHardening = mBalAllowedByPiCreator =
                         callerBackgroundActivityStartMode == MODE_BACKGROUND_ACTIVITY_START_DENIED
                                 ? BackgroundStartPrivileges.NONE
                                 : BackgroundStartPrivileges.ALLOW_BAL;
-                mBalAllowedByPiSender = realCallerBackgroundActivityStartMode
-                        == MODE_BACKGROUND_ACTIVITY_START_DENIED
-                        ? BackgroundStartPrivileges.NONE
-                        : BackgroundStartPrivileges.ALLOW_BAL;
             } else {
                 // for PendingIntents we restrict BAL based on target_sdk
                 mBalAllowedByPiCreatorWithHardening = getBackgroundStartPrivilegesAllowedByCreator(
@@ -312,10 +319,21 @@ public class BackgroundActivityStartController {
                 mBalAllowedByPiCreator = balRequireOptInByPendingIntentCreator()
                         ? mBalAllowedByPiCreatorWithHardening
                         : mBalAllowedByPiCreatorWithoutHardening;
+            }
+
+            if (mAutoOptInReason != null) {
+                // grant BAL privileges unless explicitly opted out
+                mBalAllowedByPiSender = realCallerBackgroundActivityStartMode
+                        == MODE_BACKGROUND_ACTIVITY_START_DENIED
+                        ? BackgroundStartPrivileges.NONE
+                        : BackgroundStartPrivileges.ALLOW_BAL;
+            } else {
+                // for PendingIntents we restrict BAL based on target_sdk
                 mBalAllowedByPiSender =
                         PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
                                 checkedOptions, realCallingUid, mRealCallingPackage);
             }
+
             mAppSwitchState = mService.getBalAppSwitchesState();
             mCallingUidProcState = mService.mActiveUids.getUidState(callingUid);
             mIsCallingUidPersistentSystemProcess =
@@ -407,7 +425,7 @@ public class BackgroundActivityStartController {
             return mRealCallingUid != NO_PROCESS_UID;
         }
 
-        private boolean isPendingIntent() {
+        boolean isPendingIntent() {
             return mOriginatingPendingIntent != null && hasRealCaller();
         }
 
@@ -485,23 +503,19 @@ public class BackgroundActivityStartController {
         }
 
         public boolean callerExplicitOptInOrAutoOptIn() {
-            if (mAutoOptInReason == null) {
-                return mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
-                        == MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
-            } else {
-                return mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
-                        != MODE_BACKGROUND_ACTIVITY_START_DENIED;
+            if (mAutoOptInCaller) {
+                return !callerExplicitOptOut();
             }
+            return mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
         }
 
         public boolean realCallerExplicitOptInOrAutoOptIn() {
-            if (mAutoOptInReason == null) {
-                return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
-                        == MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
-            } else {
-                return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
-                        != MODE_BACKGROUND_ACTIVITY_START_DENIED;
+            if (mAutoOptInReason != null) {
+                return !realCallerExplicitOptOut();
             }
+            return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
         }
 
         public boolean callerExplicitOptOut() {
@@ -522,6 +536,11 @@ public class BackgroundActivityStartController {
         public boolean realCallerExplicitOptInOrOut() {
             return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
                     != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+        }
+
+        @Override
+        public String toString() {
+            return dump();
         }
     }
 
@@ -972,7 +991,7 @@ public class BackgroundActivityStartController {
      * String, int, boolean, boolean, boolean, long, long, long)} for details on the
      * exceptions.
      */
-    private BalVerdict checkProcessAllowsBal(WindowProcessController app,
+    @VisibleForTesting BalVerdict checkProcessAllowsBal(WindowProcessController app,
             BalState state) {
         if (app == null) {
             return BalVerdict.BLOCK;
