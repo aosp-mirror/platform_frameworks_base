@@ -317,7 +317,7 @@ flag {
    description: "Refactors shade header and keyguard status bar to read status bar dimens from a"
         " central place, instead of reading resources directly. This is to take into account display"
         " cutouts and other special cases. "
-   bug: "317199366"
+   bug: "317016114"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
@@ -451,6 +451,16 @@ flag {
 }
 
 flag {
+    name: "slice_manager_binder_call_background"
+    namespace: "systemui"
+    description: "Move the ISliceManager#getPinnedSpecs binder call to the background thread."
+    bug: "322745650"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
    name: "register_new_wallet_card_in_background"
    namespace: "systemui"
    description: "Decide whether the call to registerNewWalletCards method should be issued on background thread."
@@ -465,6 +475,16 @@ flag {
     namespace: "systemui"
     description: "Decide whether to update user switcher in background thread."
     bug: "322745650"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "register_zen_mode_content_observer_background"
+    namespace: "systemui"
+    description: "Decide whether to register zen mode content observers in the background thread."
+    bug: "324515627"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

@@ -37,6 +37,7 @@ import android.companion.virtual.camera.VirtualCameraCallback;
 import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtualcamera.IVirtualCameraService;
 import android.companion.virtualcamera.VirtualCameraConfiguration;
+import android.content.AttributionSource;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
@@ -104,7 +105,7 @@ public class VirtualCameraControllerTest {
     public void registerCamera_registersCamera(int lensFacing) throws Exception {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
                 CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT_1, CAMERA_MAX_FPS_1, CAMERA_NAME_1,
-                CAMERA_SENSOR_ORIENTATION_1, lensFacing));
+                CAMERA_SENSOR_ORIENTATION_1, lensFacing), AttributionSource.myAttributionSource());
 
         ArgumentCaptor<VirtualCameraConfiguration> configurationCaptor =
                 ArgumentCaptor.forClass(VirtualCameraConfiguration.class);
@@ -121,7 +122,7 @@ public class VirtualCameraControllerTest {
         VirtualCameraConfig config = createVirtualCameraConfig(
                 CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT_1, CAMERA_MAX_FPS_1, CAMERA_NAME_1,
                 CAMERA_SENSOR_ORIENTATION_1, CAMERA_LENS_FACING_1);
-        mVirtualCameraController.registerCamera(config);
+        mVirtualCameraController.registerCamera(config, AttributionSource.myAttributionSource());
 
         mVirtualCameraController.unregisterCamera(config);
 
@@ -131,11 +132,15 @@ public class VirtualCameraControllerTest {
     @Test
     public void close_unregistersAllCameras() throws Exception {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT_1, CAMERA_MAX_FPS_1, CAMERA_NAME_1,
-                CAMERA_SENSOR_ORIENTATION_1, CAMERA_LENS_FACING_1));
+                        CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT_1, CAMERA_MAX_FPS_1,
+                        CAMERA_NAME_1,
+                        CAMERA_SENSOR_ORIENTATION_1, CAMERA_LENS_FACING_1),
+                AttributionSource.myAttributionSource());
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT_2, CAMERA_MAX_FPS_2, CAMERA_NAME_2,
-                CAMERA_SENSOR_ORIENTATION_2, CAMERA_LENS_FACING_2));
+                        CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT_2, CAMERA_MAX_FPS_2,
+                        CAMERA_NAME_2,
+                        CAMERA_SENSOR_ORIENTATION_2, CAMERA_LENS_FACING_2),
+                AttributionSource.myAttributionSource());
 
         mVirtualCameraController.close();
 
@@ -160,11 +165,12 @@ public class VirtualCameraControllerTest {
             int lensFacing) {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
                 CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT_1, CAMERA_MAX_FPS_1, CAMERA_NAME_1,
-                CAMERA_SENSOR_ORIENTATION_1, lensFacing));
+                CAMERA_SENSOR_ORIENTATION_1, lensFacing), AttributionSource.myAttributionSource());
         assertThrows(IllegalArgumentException.class,
                 () -> mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                        CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT_2, CAMERA_MAX_FPS_2,
-                        CAMERA_NAME_2, CAMERA_SENSOR_ORIENTATION_2, lensFacing)));
+                                CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT_2, CAMERA_MAX_FPS_2,
+                                CAMERA_NAME_2, CAMERA_SENSOR_ORIENTATION_2, lensFacing),
+                        AttributionSource.myAttributionSource()));
     }
 
     @Parameters(method = "getAllLensFacingDirections")
@@ -176,8 +182,9 @@ public class VirtualCameraControllerTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                        CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT_1, CAMERA_MAX_FPS_1,
-                        CAMERA_NAME_1, CAMERA_SENSOR_ORIENTATION_1, lensFacing)));
+                                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT_1, CAMERA_MAX_FPS_1,
+                                CAMERA_NAME_1, CAMERA_SENSOR_ORIENTATION_1, lensFacing),
+                        AttributionSource.myAttributionSource()));
     }
 
     private VirtualCameraConfig createVirtualCameraConfig(
@@ -203,7 +210,7 @@ public class VirtualCameraControllerTest {
     }
 
     private static Integer[] getAllLensFacingDirections() {
-        return new Integer[] {
+        return new Integer[]{
                 LENS_FACING_BACK,
                 LENS_FACING_FRONT
         };

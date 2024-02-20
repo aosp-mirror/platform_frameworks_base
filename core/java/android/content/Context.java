@@ -6451,6 +6451,19 @@ public abstract class Context {
     @SystemApi
     public static final String WEARABLE_SENSING_SERVICE = "wearable_sensing";
 
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.ondeviceintelligence.OnDeviceIntelligenceManager}.
+     *
+     * @see #getSystemService(String)
+     * @see OnDeviceIntelligenceManager
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
+    public static final String ON_DEVICE_INTELLIGENCE_SERVICE = "on_device_intelligence";
+
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.health.connect.HealthConnectManager}.

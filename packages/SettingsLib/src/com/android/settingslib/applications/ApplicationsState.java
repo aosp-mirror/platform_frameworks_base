@@ -1702,7 +1702,8 @@ public class ApplicationsState {
         }
 
         public boolean isPrivateProfile() {
-            return UserManager.USER_TYPE_PROFILE_PRIVATE.equals(mProfileType);
+            return android.os.Flags.allowPrivateProfile()
+                    && UserManager.USER_TYPE_PROFILE_PRIVATE.equals(mProfileType);
         }
 
         /**

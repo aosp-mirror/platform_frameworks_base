@@ -21,6 +21,7 @@ import static android.text.TextUtils.formatSimple;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.StringDef;
+import android.content.AttributionSource;
 import android.graphics.PointF;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputDeviceIdentifier;
@@ -38,6 +39,7 @@ import android.os.IBinder;
 import android.os.IInputConstants;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.InputDevice;
@@ -45,6 +47,7 @@ import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Counter;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 
@@ -98,11 +101,12 @@ class InputController {
     private final DisplayManagerInternal mDisplayManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
     private final WindowManager mWindowManager;
+    private final AttributionSource mAttributionSource;
     private final DeviceCreationThreadVerifier mThreadVerifier;
 
     InputController(@NonNull Handler handler,
-            @NonNull WindowManager windowManager) {
-        this(new NativeWrapper(), handler, windowManager,
+            @NonNull WindowManager windowManager, AttributionSource attributionSource) {
+        this(new NativeWrapper(), handler, windowManager, attributionSource,
                 // Verify that virtual devices are not created on the handler thread.
                 () -> !handler.getLooper().isCurrentThread());
     }
@@ -110,12 +114,14 @@ class InputController {
     @VisibleForTesting
     InputController(@NonNull NativeWrapper nativeWrapper,
             @NonNull Handler handler, @NonNull WindowManager windowManager,
+            AttributionSource attributionSource,
             @NonNull DeviceCreationThreadVerifier threadVerifier) {
         mHandler = handler;
         mNativeWrapper = nativeWrapper;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mWindowManager = windowManager;
+        mAttributionSource = attributionSource;
         mThreadVerifier = threadVerifier;
     }
 
@@ -837,6 +843,33 @@ class InputController {
             mInputDeviceDescriptors.put(deviceToken,
                     new InputDeviceDescriptor(ptr, binderDeathRecipient, type, displayId, phys,
                             deviceName, inputDeviceId));
+        }
+
+        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+            String metricId = getMetricIdForInputType(type);
+            if (metricId != null) {
+                Counter.logIncrementWithUid(metricId, mAttributionSource.getUid());
+            }
+        }
+    }
+
+    private static String getMetricIdForInputType(@InputDeviceDescriptor.Type int type) {
+        switch (type) {
+            case InputDeviceDescriptor.TYPE_KEYBOARD:
+                return "virtual_devices.value_virtual_keyboard_created_count";
+            case InputDeviceDescriptor.TYPE_MOUSE:
+                return "virtual_devices.value_virtual_mouse_created_count";
+            case InputDeviceDescriptor.TYPE_TOUCHSCREEN:
+                return "virtual_devices.value_virtual_touchscreen_created_count";
+            case InputDeviceDescriptor.TYPE_DPAD:
+                return "virtual_devices.value_virtual_dpad_created_count";
+            case InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD:
+                return "virtual_devices.value_virtual_navigationtouchpad_created_count";
+            case InputDeviceDescriptor.TYPE_STYLUS:
+                return "virtual_devices.value_virtual_stylus_created_count";
+            default:
+                Log.e(TAG, "No metric known for input type: " + type);
+                return null;
         }
     }
 

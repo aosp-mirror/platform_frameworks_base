@@ -46,12 +46,12 @@ import android.content.Intent;
 import android.graphics.Region;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
@@ -75,8 +75,8 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
+@RunWith(AndroidJUnit4.class)
 public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();

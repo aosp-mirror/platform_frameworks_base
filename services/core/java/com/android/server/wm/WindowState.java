@@ -1332,7 +1332,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         updateSourceFrame(windowFrames.mFrame);
 
         if (mActivityRecord != null && !mIsChildWindow) {
-            mActivityRecord.layoutLetterbox(this);
+            mActivityRecord.layoutLetterboxIfNeeded(this);
         }
         mSurfacePlacementNeeded = true;
         mHaveFrame = true;

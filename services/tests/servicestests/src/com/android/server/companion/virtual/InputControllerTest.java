@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
+import android.content.AttributionSource;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManagerGlobal;
@@ -95,6 +96,7 @@ public class InputControllerTest {
         mInputController = new InputController(mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 InstrumentationRegistry.getTargetContext().getSystemService(WindowManager.class),
+                AttributionSource.myAttributionSource(),
                 threadVerifier);
     }
 

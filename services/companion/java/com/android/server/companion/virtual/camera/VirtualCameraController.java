@@ -26,6 +26,7 @@ import android.companion.virtual.VirtualDeviceParams.DevicePolicy;
 import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtualcamera.IVirtualCameraService;
 import android.companion.virtualcamera.VirtualCameraConfiguration;
+import android.content.AttributionSource;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -35,6 +36,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Counter;
 
 import java.io.PrintWriter;
 import java.util.Map;
@@ -76,7 +78,8 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
      *
      * @param cameraConfig The {@link VirtualCameraConfig} sent by the client.
      */
-    public void registerCamera(@NonNull VirtualCameraConfig cameraConfig) {
+    public void registerCamera(@NonNull VirtualCameraConfig cameraConfig,
+            AttributionSource attributionSource) {
         checkConfigByPolicy(cameraConfig);
 
         connectVirtualCameraServiceIfNeeded();
@@ -96,6 +99,11 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
             }
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
+            Counter.logIncrementWithUid(
+                    "virtual_devices.value_virtual_camera_created_count",
+                    attributionSource.getUid());
         }
     }
 

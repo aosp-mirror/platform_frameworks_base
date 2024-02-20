@@ -16,10 +16,11 @@
 
 package android.app.admin;
 
+import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED;
+
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.app.admin.flags.Flags;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -185,7 +186,7 @@ public final class DeviceAdminInfo implements Parcelable {
      * <p>This mode only allows a single secondary user on the device blocking the creation of
      * additional secondary users.
      */
-    @FlaggedApi(Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
+    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
     public static final int HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER = 2;
 
     @IntDef({HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED, HEADLESS_DEVICE_OWNER_MODE_AFFILIATED,
