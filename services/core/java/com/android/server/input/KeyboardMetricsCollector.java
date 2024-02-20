@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.role.RoleManager;
 import android.content.Intent;
 import android.hardware.input.KeyboardLayout;
 import android.icu.util.ULocale;
@@ -37,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.KeyboardConfiguredProto.KeyboardLayoutConfig;
 import com.android.internal.os.KeyboardConfiguredProto.RepeatedKeyboardLayoutConfig;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.policy.ModifierShortcutManager;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
@@ -318,6 +320,13 @@ public final class KeyboardMetricsCollector {
                 }
             }
 
+            // The shortcut may be targeting a system role rather than using an intent selector,
+            // so check for that.
+            String role = intent.getStringExtra(ModifierShortcutManager.EXTRA_ROLE);
+            if (!TextUtils.isEmpty(role)) {
+                return getLogEventFromRole(role);
+            }
+
             Set<String> intentCategories = intent.getCategories();
             if (intentCategories == null || intentCategories.isEmpty()
                     || !intentCategories.contains(Intent.CATEGORY_LAUNCHER)) {
@@ -361,6 +370,23 @@ public final class KeyboardMetricsCollector {
                     return LAUNCH_DEFAULT_FITNESS;
                 default:
                     return null;
+            }
+        }
+
+        /**
+         * Find KeyboardLogEvent corresponding to the provide system role name.
+         * Returns {@code null} if no matching event found.
+         */
+        @Nullable
+        private static KeyboardLogEvent getLogEventFromRole(String role) {
+            if (RoleManager.ROLE_BROWSER.equals(role)) {
+                return LAUNCH_DEFAULT_BROWSER;
+            } else if (RoleManager.ROLE_SMS.equals(role)) {
+                return LAUNCH_DEFAULT_MESSAGING;
+            } else {
+                Log.w(TAG, "Keyboard shortcut to launch "
+                        + role + " not supported for logging");
+                return null;
             }
         }
     }

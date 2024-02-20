@@ -60,6 +60,7 @@ import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.SearchManager;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -124,6 +125,8 @@ import java.util.function.Supplier;
 class TestPhoneWindowManager {
     private static final long TEST_SINGLE_KEY_DELAY_MILLIS
             = SingleKeyGestureDetector.MULTI_PRESS_TIMEOUT + 1000L * HW_TIMEOUT_MULTIPLIER;
+    private static final String TEST_BROWSER_ROLE_PACKAGE_NAME = "com.browser";
+    private static final String TEST_SMS_ROLE_PACKAGE_NAME = "com.sms";
 
     private PhoneWindowManager mPhoneWindowManager;
     private Context mContext;
@@ -151,6 +154,7 @@ class TestPhoneWindowManager {
     @Mock private UserManagerInternal mUserManagerInternal;
     @Mock private AudioManagerInternal mAudioManagerInternal;
     @Mock private SearchManager mSearchManager;
+    @Mock private RoleManager mRoleManager;
 
     @Mock private Display mDisplay;
     @Mock private DisplayRotation mDisplayRotation;
@@ -179,6 +183,9 @@ class TestPhoneWindowManager {
 
     private boolean mIsTalkBackEnabled;
     private boolean mIsTalkBackShortcutGestureEnabled;
+
+    private Intent mBrowserIntent;
+    private Intent mSmsIntent;
 
     private int mKeyEventPolicyFlags = FLAG_INTERACTIVE;
 
@@ -290,6 +297,7 @@ class TestPhoneWindowManager {
         doReturn(mSensorPrivacyManager).when(mContext).getSystemService(
                 eq(SensorPrivacyManager.class));
         doReturn(mSearchManager).when(mContext).getSystemService(eq(SearchManager.class));
+        doReturn(mRoleManager).when(mContext).getSystemService(eq(RoleManager.class));
         doReturn(false).when(mPackageManager).hasSystemFeature(any());
         try {
             doThrow(new PackageManager.NameNotFoundException("test")).when(mPackageManager)
@@ -359,6 +367,21 @@ class TestPhoneWindowManager {
         KeyInterceptionInfo interceptionInfo = new KeyInterceptionInfo(0, 0, null, 0);
         doReturn(interceptionInfo)
                 .when(mWindowManagerInternal).getKeyInterceptionInfoFromToken(any());
+
+        doReturn(true).when(mRoleManager).isRoleAvailable(eq(RoleManager.ROLE_BROWSER));
+        doReturn(true).when(mRoleManager).isRoleAvailable(eq(RoleManager.ROLE_SMS));
+        doReturn(TEST_BROWSER_ROLE_PACKAGE_NAME).when(mRoleManager).getDefaultApplication(
+                eq(RoleManager.ROLE_BROWSER));
+        doReturn(TEST_SMS_ROLE_PACKAGE_NAME).when(mRoleManager).getDefaultApplication(
+                eq(RoleManager.ROLE_SMS));
+        mBrowserIntent = new Intent(Intent.ACTION_MAIN);
+        mBrowserIntent.setPackage(TEST_BROWSER_ROLE_PACKAGE_NAME);
+        mSmsIntent = new Intent(Intent.ACTION_MAIN);
+        mSmsIntent.setPackage(TEST_SMS_ROLE_PACKAGE_NAME);
+        doReturn(mBrowserIntent).when(mPackageManager).getLaunchIntentForPackage(
+                eq(TEST_BROWSER_ROLE_PACKAGE_NAME));
+        doReturn(mSmsIntent).when(mPackageManager).getLaunchIntentForPackage(
+                eq(TEST_SMS_ROLE_PACKAGE_NAME));
 
         Mockito.reset(mContext);
     }
@@ -669,6 +692,29 @@ class TestPhoneWindowManager {
         // Reset verifier for next call.
         Mockito.reset(mContext);
     }
+
+    void assertLaunchRole(String role) {
+        mTestLooper.dispatchAll();
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        try {
+            verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
+            switch (role) {
+                case RoleManager.ROLE_BROWSER:
+                    Assert.assertEquals(intentCaptor.getValue(), mBrowserIntent);
+                    break;
+                case RoleManager.ROLE_SMS:
+                    Assert.assertEquals(intentCaptor.getValue(), mSmsIntent);
+                    break;
+                default:
+                    throw new AssertionError("Role " + role + " not supported in tests.");
+            }
+        } catch (Throwable t) {
+            throw new AssertionError("failed to assert " + role, t);
+        }
+        // Reset verifier for next call.
+        Mockito.reset(mContext);
+    }
+
 
     void assertShowRecentApps() {
         mTestLooper.dispatchAll();
