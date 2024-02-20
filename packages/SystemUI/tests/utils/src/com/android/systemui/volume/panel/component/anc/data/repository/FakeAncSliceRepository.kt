@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.shared.model
+package com.android.systemui.volume.panel.component.anc.data.repository
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import androidx.slice.Slice
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
-object VolumePanelComponents {
+class FakeAncSliceRepository : AncSliceRepository {
 
-    const val MEDIA_OUTPUT: VolumePanelComponentKey = "media_output"
-    const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
-    const val CAPTIONING: VolumePanelComponentKey = "captioning"
-    const val ANC: VolumePanelComponentKey = "anc"
+    private val sliceByWidth = mutableMapOf<Int, MutableStateFlow<Slice?>>()
+
+    override fun ancSlice(width: Int): Flow<Slice?> =
+        sliceByWidth.getOrPut(width) { MutableStateFlow(null) }
+
+    fun putSlice(width: Int, slice: Slice?) {
+        sliceByWidth.getOrPut(width) { MutableStateFlow(null) }.value = slice
+    }
 }
