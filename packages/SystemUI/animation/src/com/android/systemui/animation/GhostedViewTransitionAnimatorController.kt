@@ -123,7 +123,7 @@ constructor(
             val views = LinkedList<View>().apply { add(view) }
 
             while (views.isNotEmpty()) {
-                val v = views.removeFirst()
+                val v = views.removeAt(0)
                 if (v.background != null) {
                     return v.background
                 }
