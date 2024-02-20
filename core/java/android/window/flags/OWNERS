@@ -1,1 +1,2 @@
 per-file responsible_apis.aconfig = file:/BAL_OWNERS
+per-file large_screen_experiences_app_compat.aconfig = file:/LSE_APP_COMPAT_OWNERS
