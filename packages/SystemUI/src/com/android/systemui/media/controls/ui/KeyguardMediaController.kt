@@ -296,9 +296,11 @@ constructor(
     }
 
     private fun setVisibility(view: ViewGroup?, newVisibility: Int) {
-        val previousVisibility = view?.visibility
-        view?.visibility = newVisibility
-        if (previousVisibility != newVisibility) {
+        val currentMediaContainer = view ?: return
+
+        val previousVisibility = currentMediaContainer.visibility
+        currentMediaContainer.visibility = newVisibility
+        if (previousVisibility != newVisibility && currentMediaContainer is MediaContainerView) {
             visibilityChangedListener?.invoke(newVisibility == View.VISIBLE)
         }
     }
