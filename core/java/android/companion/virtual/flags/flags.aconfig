@@ -29,3 +29,11 @@ flag {
      bug: "291737188"
      is_fixed_read_only: true
 }
+
+flag {
+     namespace: "virtual_devices"
+     name: "metrics_collection"
+     description: "Enable collection of VDM-related metrics"
+     bug: "324842215"
+     is_fixed_read_only: true
+}

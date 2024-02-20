@@ -232,7 +232,12 @@ internal class SceneTransitionLayoutImpl(
                 scene(state.transitionState.currentScene).userActions[Back]?.let { result ->
                     // TODO(b/290184746): Handle predictive back and use result.distance if
                     // specified.
-                    BackHandler { with(state) { coroutineScope.onChangeScene(result.toScene) } }
+                    BackHandler {
+                        val targetScene = result.toScene
+                        if (state.canChangeScene(targetScene)) {
+                            with(state) { coroutineScope.onChangeScene(targetScene) }
+                        }
+                    }
                 }
 
                 Box {

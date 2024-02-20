@@ -66,6 +66,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @Nullable
     private static volatile IImeTracker sTrackerServiceCache = null;
+    private static int sCurStartInputSeq = 0;
 
     /**
      * @return {@code true} if {@link IInputMethodManager} is available.
@@ -327,6 +328,7 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
+    // TODO(b/293640003): Remove method once Flags.useZeroJankProxy() is enabled.
     @AnyThread
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
@@ -352,6 +354,41 @@ final class IInputMethodManagerGlobalInvoker {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Returns a sequence number for startInput.
+     */
+    @AnyThread
+    @NonNull
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
+    static int startInputOrWindowGainedFocusAsync(@StartInputReason int startInputReason,
+            @NonNull IInputMethodClient client, @Nullable IBinder windowToken,
+            @StartInputFlags int startInputFlags,
+            @WindowManager.LayoutParams.SoftInputModeFlags int softInputMode,
+            @WindowManager.LayoutParams.Flags int windowFlags, @Nullable EditorInfo editorInfo,
+            @Nullable IRemoteInputConnection remoteInputConnection,
+            @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
+            int unverifiedTargetSdkVersion, @UserIdInt int userId,
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return -1;
+        }
+        try {
+            service.startInputOrWindowGainedFocusAsync(startInputReason, client, windowToken,
+                    startInputFlags, softInputMode, windowFlags, editorInfo, remoteInputConnection,
+                    remoteAccessibilityInputConnection, unverifiedTargetSdkVersion, userId,
+                    imeDispatcher, advanceAngGetStartInputSequenceNumber());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return sCurStartInputSeq;
+    }
+
+    private static int advanceAngGetStartInputSequenceNumber() {
+        return ++sCurStartInputSeq;
+    }
+
 
     @AnyThread
     static void showInputMethodPickerFromClient(@NonNull IInputMethodClient client,

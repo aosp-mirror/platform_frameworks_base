@@ -16,6 +16,8 @@
 
 package android.app.admin;
 
+import static android.app.admin.flags.Flags.FLAG_BACKUP_SERVICE_SECURITY_LOG_EVENT_ENABLED;
+
 import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -24,7 +26,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.admin.flags.Flags;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Build;
@@ -610,7 +611,7 @@ public class SecurityLog {
      * <li> [2] backup service state ({@code Integer}, 1 for enabled, 0 for disabled)
      * @see DevicePolicyManager#setBackupServiceEnabled(ComponentName, boolean)
      */
-    @FlaggedApi(Flags.FLAG_BACKUP_SERVICE_SECURITY_LOG_EVENT_ENABLED)
+    @FlaggedApi(FLAG_BACKUP_SERVICE_SECURITY_LOG_EVENT_ENABLED)
     public static final int TAG_BACKUP_SERVICE_TOGGLED =
             SecurityLogTags.SECURITY_BACKUP_SERVICE_TOGGLED;
     /**

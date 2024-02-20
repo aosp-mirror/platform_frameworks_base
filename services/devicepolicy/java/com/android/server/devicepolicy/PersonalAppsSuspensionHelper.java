@@ -17,11 +17,11 @@
 package com.android.server.devicepolicy;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
-import static android.app.admin.flags.Flags.defaultSmsPersonalAppSuspensionFixEnabled;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -206,7 +206,7 @@ public final class PersonalAppsSuspensionHelper {
 
     private String getDefaultSmsPackage() {
         //TODO(b/319449037): Unflag the following change.
-        if (defaultSmsPersonalAppSuspensionFixEnabled()) {
+        if (Flags.defaultSmsPersonalAppSuspensionFixEnabled()) {
             return SmsApplication.getDefaultSmsApplicationAsUser(
                             mContext, /*updateIfNeeded=*/ false, mContext.getUser())
                     .getPackageName();

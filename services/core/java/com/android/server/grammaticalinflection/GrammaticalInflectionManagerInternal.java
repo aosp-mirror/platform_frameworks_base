@@ -16,6 +16,7 @@
 
 package com.android.server.grammaticalinflection;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 
@@ -55,11 +56,11 @@ public abstract class GrammaticalInflectionManagerInternal {
      *
      */
     public abstract @Configuration.GrammaticalGender int retrieveSystemGrammaticalGender(
-            Configuration configuration);
+            @NonNull Configuration configuration);
 
     /**
      * Whether the package can get the system grammatical gender or not.
      */
-    public abstract boolean canGetSystemGrammaticalGender(int uid, String packageName);
+    public abstract boolean canGetSystemGrammaticalGender(int uid, @Nullable String packageName);
 }
 

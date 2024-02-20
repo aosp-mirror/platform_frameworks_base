@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.Flags.registerZenModeContentObserverBackground;
+
 import android.app.AlarmManager;
 import android.app.Flags;
 import android.app.NotificationManager;
@@ -45,6 +47,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
@@ -104,6 +107,7 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     public ZenModeControllerImpl(
             Context context,
             @Main Handler handler,
+            @Background Handler bgHandler,
             BroadcastDispatcher broadcastDispatcher,
             DumpManager dumpManager,
             GlobalSettings globalSettings,
@@ -134,9 +138,18 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
             }
         };
         mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        globalSettings.registerContentObserver(Global.ZEN_MODE, modeContentObserver);
+        if (registerZenModeContentObserverBackground()) {
+            bgHandler.post(() -> {
+                globalSettings.registerContentObserver(Global.ZEN_MODE, modeContentObserver);
+                globalSettings.registerContentObserver(Global.ZEN_MODE_CONFIG_ETAG,
+                        configContentObserver);
+            });
+        } else {
+            globalSettings.registerContentObserver(Global.ZEN_MODE, modeContentObserver);
+            globalSettings.registerContentObserver(Global.ZEN_MODE_CONFIG_ETAG,
+                    configContentObserver);
+        }
         updateZenMode(getModeSettingValueFromProvider());
-        globalSettings.registerContentObserver(Global.ZEN_MODE_CONFIG_ETAG, configContentObserver);
         updateZenModeConfig();
         updateConsolidatedNotificationPolicy();
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
