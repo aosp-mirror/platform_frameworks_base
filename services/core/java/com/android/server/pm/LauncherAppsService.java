@@ -350,18 +350,50 @@ public class LauncherAppsService extends SystemService {
         public void registerPackageInstallerCallback(String callingPackage,
                 IPackageInstallerCallback callback) {
             verifyCallingPackage(callingPackage);
-            UserHandle callingIdUserHandle = new UserHandle(getCallingUserId());
-            getPackageInstallerService().registerCallback(callback, eventUserId ->
-                            isEnabledProfileOf(callingIdUserHandle,
-                                    new UserHandle(eventUserId), "shouldReceiveEvent"));
+            BroadcastCookie callerInfo =
+                    new BroadcastCookie(
+                            new UserHandle(getCallingUserId()),
+                            callingPackage,
+                            getCallingPid(),
+                            getCallingUid());
+            getPackageInstallerService()
+                    .registerCallback(
+                            callback,
+                            eventUserId ->
+                                    isEnabledProfileOf(
+                                            callerInfo,
+                                            new UserHandle(eventUserId),
+                                            "shouldReceiveEvent"));
+        }
+
+        @Override
+        public List<UserHandle> getUserProfiles() {
+            int[] userIds;
+            if (!canAccessHiddenProfile(getCallingUid(), getCallingPid())) {
+                userIds = mUm.getProfileIdsExcludingHidden(getCallingUserId(), /* enabled= */ true);
+            } else {
+                userIds = mUm.getEnabledProfileIds(getCallingUserId());
+            }
+            final List<UserHandle> result = new ArrayList<>(userIds.length);
+            for (int userId : userIds) {
+                result.add(UserHandle.of(userId));
+            }
+            return result;
         }
 
         @Override
         public ParceledListSlice<SessionInfo> getAllSessions(String callingPackage) {
             verifyCallingPackage(callingPackage);
             List<SessionInfo> sessionInfos = new ArrayList<>();
-            int[] userIds = mUm.getEnabledProfileIds(getCallingUserId());
             final int callingUid = Binder.getCallingUid();
+
+            int[] userIds;
+            if (!canAccessHiddenProfile(callingUid, Binder.getCallingPid())) {
+                userIds = mUm.getProfileIdsExcludingHidden(getCallingUserId(), /* enabled= */ true);
+            } else {
+                userIds = mUm.getEnabledProfileIds(getCallingUserId());
+            }
+
             final long token = Binder.clearCallingIdentity();
             try {
                 for (int userId : userIds) {
@@ -389,7 +421,7 @@ public class LauncherAppsService extends SystemService {
                     mPackageInstallerService = ((PackageInstallerService) ((IPackageManager)
                             ServiceManager.getService("package")).getPackageInstaller());
                 } catch (RemoteException e) {
-                    Slog.wtf(TAG, "Error gettig IPackageInstaller", e);
+                    Slog.wtf(TAG, "Error getting IPackageInstaller", e);
                 }
             }
             return mPackageInstallerService;
@@ -470,57 +502,86 @@ public class LauncherAppsService extends SystemService {
                             + targetUserId + " from " + callingUserId + " not allowed");
                     return false;
                 }
-
-                if (areHiddenApisChecksEnabled()
-                        && mUm.getUserProperties(UserHandle.of(targetUserId))
-                                        .getProfileApiVisibility()
-                                == UserProperties.PROFILE_API_VISIBILITY_HIDDEN
-                        && !canAccessHiddenProfileInjected(callingUid, callingPid)) {
-                    return false;
-                }
             } finally {
                 injectRestoreCallingIdentity(ident);
+            }
+
+            if (isHiddenProfile(UserHandle.of(targetUserId))
+                    && !canAccessHiddenProfile(callingUid, callingPid)) {
+                return false;
             }
 
             return mUserManagerInternal.isProfileAccessible(callingUserId, targetUserId,
                     message, true);
         }
 
-        boolean areHiddenApisChecksEnabled() {
-            return android.os.Flags.allowPrivateProfile()
-                    && Flags.enableLauncherAppsHiddenProfileChecks()
-                    && Flags.enablePermissionToAccessHiddenProfiles();
+        private boolean isHiddenProfile(UserHandle targetUser) {
+            if (!Flags.enableLauncherAppsHiddenProfileChecks()) {
+                return false;
+            }
+
+            long identity = injectClearCallingIdentity();
+            try {
+                UserProperties properties = mUm.getUserProperties(targetUser);
+                if (properties == null) {
+                    return false;
+                }
+
+                return properties.getProfileApiVisibility()
+                        == UserProperties.PROFILE_API_VISIBILITY_HIDDEN;
+            } catch (IllegalArgumentException e) {
+                return false;
+            } finally {
+                injectRestoreCallingIdentity(identity);
+            }
         }
 
         private void verifyCallingPackage(String callingPackage) {
             verifyCallingPackage(callingPackage, injectBinderCallingUid());
         }
 
-        boolean canAccessHiddenProfileInjected(int callingUid, int callingPid) {
-            AndroidPackage callingPackage = mPackageManagerInternal.getPackage(callingUid);
-            if (callingPackage == null) {
-                return false;
-            }
-
-            if (!mRoleManager
-                    .getRoleHoldersAsUser(
-                            RoleManager.ROLE_HOME, UserHandle.getUserHandleForUid(callingUid))
-                    .contains(callingPackage.getPackageName())) {
-                return false;
-            }
-
-            if (mContext.checkPermission(
-                            Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL, callingPid, callingUid)
-                    == PackageManager.PERMISSION_GRANTED) {
+        private boolean canAccessHiddenProfile(int callingUid, int callingPid) {
+            if (!areHiddenApisChecksEnabled()) {
                 return true;
             }
 
-            // TODO(b/321988638): add option to disable with a flag
-            return mContext.checkPermission(
-                            android.Manifest.permission.ACCESS_HIDDEN_PROFILES,
-                            callingPid,
-                            callingUid)
-                    == PackageManager.PERMISSION_GRANTED;
+            long ident = injectClearCallingIdentity();
+            try {
+                AndroidPackage callingPackage = mPackageManagerInternal.getPackage(callingUid);
+                if (callingPackage == null) {
+                    return false;
+                }
+
+                if (!mRoleManager
+                        .getRoleHoldersAsUser(
+                                RoleManager.ROLE_HOME, UserHandle.getUserHandleForUid(callingUid))
+                        .contains(callingPackage.getPackageName())) {
+                    return false;
+                }
+                if (mContext.checkPermission(
+                                Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL,
+                                callingPid,
+                                callingUid)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    return true;
+                }
+
+                // TODO(b/321988638): add option to disable with a flag
+                return mContext.checkPermission(
+                                android.Manifest.permission.ACCESS_HIDDEN_PROFILES,
+                                callingPid,
+                                callingUid)
+                        == PackageManager.PERMISSION_GRANTED;
+            } finally {
+                injectRestoreCallingIdentity(ident);
+            }
+        }
+
+        private boolean areHiddenApisChecksEnabled() {
+            return android.os.Flags.allowPrivateProfile()
+                    && Flags.enableHidingProfiles()
+                    && Flags.enableLauncherAppsHiddenProfileChecks()
+                    && Flags.enablePermissionToAccessHiddenProfiles();
         }
 
         @VisibleForTesting // We override it in unit tests
@@ -2068,12 +2129,18 @@ public class LauncherAppsService extends SystemService {
                     });
         }
 
-        /** Checks if user is a profile of or same as listeningUser.
-         * and the user is enabled. */
-        private boolean isEnabledProfileOf(UserHandle listeningUser, UserHandle user,
-                String debugMsg) {
-            return mUserManagerInternal.isProfileAccessible(listeningUser.getIdentifier(),
-                    user.getIdentifier(), debugMsg, false);
+        /**
+         * Checks if user is a profile of or same as listeningUser and the target user is enabled
+         * and accessible for caller.
+         */
+        private boolean isEnabledProfileOf(
+                BroadcastCookie cookie, UserHandle user, String debugMsg) {
+            if (isHiddenProfile(user)
+                    && !canAccessHiddenProfile(cookie.callingUid, cookie.callingPid)) {
+                return false;
+            }
+            return mUserManagerInternal.isProfileAccessible(
+                    cookie.user.getIdentifier(), user.getIdentifier(), debugMsg, false);
         }
 
         /**
@@ -2305,7 +2372,7 @@ public class LauncherAppsService extends SystemService {
                                         mListeners.getBroadcastItem(i);
                                 final BroadcastCookie cookie =
                                         (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                                if (!isEnabledProfileOf(cookie.user, user, "onPackageRemoved")) {
+                                if (!isEnabledProfileOf(cookie, user, "onPackageRemoved")) {
                                     continue;
                                 }
                                 if (!isCallingAppIdAllowed(appIdAllowList, UserHandle.getAppId(
@@ -2344,7 +2411,7 @@ public class LauncherAppsService extends SystemService {
                     for (int i = 0; i < n; i++) {
                         IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                        if (!isEnabledProfileOf(cookie.user, user, "onPackageAdded")) {
+                        if (!isEnabledProfileOf(cookie, user, "onPackageAdded")) {
                             continue;
                         }
                         if (!isPackageVisibleToListener(packageName, cookie, user)) {
@@ -2378,7 +2445,7 @@ public class LauncherAppsService extends SystemService {
                     for (int i = 0; i < n; i++) {
                         IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                        if (!isEnabledProfileOf(cookie.user, user, "onPackageModified")) {
+                        if (!isEnabledProfileOf(cookie, user, "onPackageModified")) {
                             continue;
                         }
                         if (!isPackageVisibleToListener(packageName, cookie, user)) {
@@ -2403,7 +2470,7 @@ public class LauncherAppsService extends SystemService {
                     for (int i = 0; i < n; i++) {
                         IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                        if (!isEnabledProfileOf(cookie.user, user, "onPackagesAvailable")) {
+                        if (!isEnabledProfileOf(cookie, user, "onPackagesAvailable")) {
                             continue;
                         }
                         final String[] filteredPackages =
@@ -2433,7 +2500,7 @@ public class LauncherAppsService extends SystemService {
                     for (int i = 0; i < n; i++) {
                         IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                        if (!isEnabledProfileOf(cookie.user, user, "onPackagesUnavailable")) {
+                        if (!isEnabledProfileOf(cookie, user, "onPackagesUnavailable")) {
                             continue;
                         }
                         final String[] filteredPackages =
@@ -2477,7 +2544,7 @@ public class LauncherAppsService extends SystemService {
                     for (int i = 0; i < n; i++) {
                         IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                        if (!isEnabledProfileOf(cookie.user, user, "onPackagesSuspended")) {
+                        if (!isEnabledProfileOf(cookie, user, "onPackagesSuspended")) {
                             continue;
                         }
                         final String[] filteredPackagesWithoutExtras =
@@ -2514,7 +2581,7 @@ public class LauncherAppsService extends SystemService {
                     for (int i = 0; i < n; i++) {
                         IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                        if (!isEnabledProfileOf(cookie.user, user, "onPackagesUnsuspended")) {
+                        if (!isEnabledProfileOf(cookie, user, "onPackagesUnsuspended")) {
                             continue;
                         }
                         final String[] filteredPackages =
@@ -2551,7 +2618,7 @@ public class LauncherAppsService extends SystemService {
                     for (int i = 0; i < n; i++) {
                         IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                        if (!isEnabledProfileOf(cookie.user, user, "onShortcutChanged")) {
+                        if (!isEnabledProfileOf(cookie, user, "onShortcutChanged")) {
                             continue;
                         }
                         if (!isPackageVisibleToListener(packageName, cookie, user)) {
@@ -2625,7 +2692,7 @@ public class LauncherAppsService extends SystemService {
                     for (int i = 0; i < n; i++) {
                         IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
-                        if (!isEnabledProfileOf(cookie.user, mUser, "onLoadingProgressChanged")) {
+                        if (!isEnabledProfileOf(cookie, mUser, "onLoadingProgressChanged")) {
                             continue;
                         }
                         if (!isPackageVisibleToListener(mPackageName, cookie, mUser)) {

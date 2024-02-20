@@ -130,4 +130,6 @@ interface ILauncherApps {
     void unRegisterDumpCallback(IDumpCallback cb);
 
     void setArchiveCompatibilityOptions(boolean enableIconOverlay, boolean enableUnarchivalConfirmation);
+
+    List<UserHandle> getUserProfiles();
 }
