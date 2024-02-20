@@ -154,7 +154,7 @@ fun updateSceneTransitionLayoutState(
     stateLinks: List<StateLink> = emptyList(),
 ): SceneTransitionLayoutState {
     return remember {
-            HoistedSceneTransitionLayoutScene(
+            HoistedSceneTransitionLayoutState(
                 currentScene,
                 transitions,
                 onChangeScene,
@@ -364,7 +364,7 @@ internal abstract class BaseSceneTransitionLayoutState(
  * A [SceneTransitionLayout] whose current scene/source of truth is hoisted (its current value comes
  * from outside).
  */
-internal class HoistedSceneTransitionLayoutScene(
+internal class HoistedSceneTransitionLayoutState(
     initialScene: SceneKey,
     override var transitions: SceneTransitions,
     private var changeScene: (SceneKey) -> Unit,
@@ -400,7 +400,7 @@ internal class HoistedSceneTransitionLayoutScene(
                 // late.
                 val newKey = targetSceneChannel.tryReceive().getOrNull() ?: newKey
                 animateToScene(
-                    layoutState = this@HoistedSceneTransitionLayoutScene,
+                    layoutState = this@HoistedSceneTransitionLayoutState,
                     target = newKey,
                     transitionKey = null,
                 )
