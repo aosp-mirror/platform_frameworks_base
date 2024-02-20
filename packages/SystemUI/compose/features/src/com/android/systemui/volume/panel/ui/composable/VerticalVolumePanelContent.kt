@@ -52,7 +52,7 @@ fun VolumePanelComposeScope.VerticalVolumePanelContent(
         if (layout.footerComponents.isNotEmpty()) {
             Row(
                 modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                horizontalArrangement = Arrangement.spacedBy(if (isLargeScreen) 28.dp else 20.dp),
             ) {
                 for (component in layout.footerComponents) {
                     AnimatedVisibility(component.isVisible) {

@@ -47,7 +47,7 @@ constructor(
     @Composable
     override fun VolumePanelComposeScope.Content(modifier: Modifier) {
         Row(
-            modifier = modifier.height(48.dp).fillMaxWidth(),
+            modifier = modifier.height(if (isLargeScreen) 54.dp else 48.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
