@@ -68,8 +68,7 @@ constructor(
                     serviceInteractor.setUser(user)
 
                     // Wait for the CustomTileInteractor to become initialized first, because
-                    // binding
-                    // the service might access it
+                    // binding the service might access it
                     customTileInteractor.initForUser(user)
                     // Bind the TileService for not active tile
                     serviceInteractor.bindOnStart()

@@ -16,9 +16,24 @@
 
 package com.android.systemui.qs.external
 
-import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 
-/** Returns mocks */
-var Kosmos.tileLifecycleManagerFactory: TileLifecycleManager.Factory by
-    Kosmos.Fixture { TileLifecycleManager.Factory { _, _ -> mock<TileLifecycleManager>() } }
+class FakeTileServicesFacade(
+    private val TileServiceManager: TileServiceManager,
+    val tileServices: TileServices = mock {}
+) {
+
+    var customTileInterface: CustomTileInterface? = null
+        private set
+
+    init {
+        with(tileServices) {
+            whenever(getTileWrapper(any())).then {
+                customTileInterface = it.getArgument(0)
+                TileServiceManager
+            }
+        }
+    }
+}
