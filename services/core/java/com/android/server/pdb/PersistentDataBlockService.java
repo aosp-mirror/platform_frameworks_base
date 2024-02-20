@@ -656,8 +656,10 @@ public class PersistentDataBlockService extends SystemService {
 
     @VisibleForTesting
     boolean isFrpActive() {
-        waitForInitDoneSignal();
         synchronized (mLock) {
+            // mFrpActive is initialized and automatic deactivation done (if possible) before the
+            // service is published, so there's no chance that callers could ask for the state
+            // before it has settled.
             return mFrpActive;
         }
     }
@@ -1253,6 +1255,7 @@ public class PersistentDataBlockService extends SystemService {
 
     private void enforceFactoryResetProtectionInactive() {
         if (mFrpEnforced && isFrpActive()) {
+            Slog.w(TAG, "Attempt to update PDB was blocked because FRP is active.");
             throw new SecurityException("FRP is active");
         }
     }
