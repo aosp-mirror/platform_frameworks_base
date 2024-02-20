@@ -233,6 +233,9 @@ android_library {
     resource_dirs: [
         "tests/res",
     ],
+    asset_dirs: [
+        "tests/goldens",
+    ],
     static_libs: [
         "SystemUI-res",
         "WifiTrackerLib",
@@ -334,6 +337,8 @@ android_library {
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
         "kotlin-test",
+        "platform-screenshot-diff-core",
+        "PlatformMotionTesting",
         "SystemUICustomizationTestUtils",
         "androidx.compose.runtime_runtime",
     ],

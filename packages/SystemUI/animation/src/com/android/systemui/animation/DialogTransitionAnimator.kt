@@ -917,6 +917,12 @@ private class AnimatedDialog(
                         endController.transitionContainer = value
                     }
 
+                // We tell TransitionController that this is always a launch, and handle the launch
+                // vs return logic internally.
+                // TODO(b/323863002): maybe move the launch vs return logic out of this class and
+                //     delegate it to TransitionController?
+                override val isLaunching: Boolean = true
+
                 override fun createAnimatorState(): TransitionAnimator.State {
                     return startController.createAnimatorState()
                 }

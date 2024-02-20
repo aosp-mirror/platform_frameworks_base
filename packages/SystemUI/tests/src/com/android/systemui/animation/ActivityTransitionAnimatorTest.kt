@@ -246,6 +246,8 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
  */
 private class TestTransitionAnimatorController(override var transitionContainer: ViewGroup) :
     ActivityTransitionAnimator.Controller {
+    override val isLaunching: Boolean = true
+
     override fun createAnimatorState() =
         TransitionAnimator.State(
             top = 100,
