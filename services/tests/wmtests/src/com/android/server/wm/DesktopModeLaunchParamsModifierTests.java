@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static com.android.server.wm.DesktopModeLaunchParamsModifier.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
+import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
@@ -31,6 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import android.graphics.Rect;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 
@@ -69,6 +71,12 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
         mCurrent.reset();
         mResult = new LaunchParamsController.LaunchParams();
         mResult.reset();
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    public void testReturnsContinueIfDesktopWindowingIsDisabled() {
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(null).calculate());
     }
 
     @Test

@@ -145,12 +145,6 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
 
     /** Whether desktop mode is enabled. */
     static boolean isDesktopModeEnabled() {
-        // Check for aconfig flag first
-        if (Flags.enableDesktopWindowingMode()) {
-            return true;
-        }
-        // Fall back to sysprop flag
-        // TODO(b/304778354): remove sysprop once desktop aconfig flag supports dynamic overriding
-        return DESKTOP_MODE_PROTO2_SUPPORTED;
+        return Flags.enableDesktopWindowingMode();
     }
 }
