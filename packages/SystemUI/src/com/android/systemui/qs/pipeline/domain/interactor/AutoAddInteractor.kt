@@ -35,6 +35,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
@@ -55,6 +56,7 @@ constructor(
 ) : Dumpable {
 
     private val initialized = AtomicBoolean(false)
+    private lateinit var currentTilesInteractor: CurrentTilesInteractor
 
     /** Start collection of signals following the user from [currentTilesInteractor]. */
     fun init(currentTilesInteractor: CurrentTilesInteractor) {
@@ -62,56 +64,72 @@ constructor(
             return
         }
 
+        this.currentTilesInteractor = currentTilesInteractor
         dumpManager.registerNormalDumpable(TAG, this)
 
         scope.launch {
             currentTilesInteractor.userId.collectLatest { userId ->
                 coroutineScope {
-                    val previouslyAdded = repository.autoAddedTiles(userId).stateIn(this)
-
-                    autoAddables
-                        .map { addable ->
-                            val autoAddSignal = addable.autoAddSignal(userId)
-                            when (val lifecycle = addable.autoAddTracking) {
-                                is AutoAddTracking.Always -> autoAddSignal
-                                is AutoAddTracking.Disabled -> emptyFlow()
-                                is AutoAddTracking.IfNotAdded -> {
-                                    if (lifecycle.spec !in previouslyAdded.value) {
-                                        autoAddSignal.filterIsInstance<AutoAddSignal.Add>().take(1)
-                                    } else {
-                                        emptyFlow()
-                                    }
-                                }
-                            }
-                        }
-                        .merge()
-                        .collect { signal ->
-                            when (signal) {
-                                is AutoAddSignal.Add -> {
-                                    if (signal.spec !in previouslyAdded.value) {
-                                        currentTilesInteractor.addTile(signal.spec, signal.position)
-                                        qsPipelineLogger.logTileAutoAdded(
-                                            userId,
-                                            signal.spec,
-                                            signal.position
-                                        )
-                                        repository.markTileAdded(userId, signal.spec)
-                                    }
-                                }
-                                is AutoAddSignal.Remove -> {
-                                    currentTilesInteractor.removeTiles(setOf(signal.spec))
-                                    qsPipelineLogger.logTileAutoRemoved(userId, signal.spec)
-                                    repository.unmarkTileAdded(userId, signal.spec)
-                                }
-                                is AutoAddSignal.RemoveTracking -> {
-                                    qsPipelineLogger.logTileUnmarked(userId, signal.spec)
-                                    repository.unmarkTileAdded(userId, signal.spec)
-                                }
-                            }
-                        }
+                    launch { collectAutoAddSignalsForUser(userId) }
+                    launch { markTrackIfNotAddedTilesThatAreCurrent(userId) }
                 }
             }
         }
+    }
+
+    private suspend fun markTrackIfNotAddedTilesThatAreCurrent(userId: Int) {
+        val trackIfNotAddedSpecs =
+            autoAddables
+                .map { it.autoAddTracking }
+                .filterIsInstance<AutoAddTracking.IfNotAdded>()
+                .map { it.spec }
+        currentTilesInteractor.currentTiles
+            .map { tiles -> tiles.map { it.spec } }
+            .collect {
+                it.filter { it in trackIfNotAddedSpecs }
+                    .forEach { spec -> repository.markTileAdded(userId, spec) }
+            }
+    }
+
+    private suspend fun CoroutineScope.collectAutoAddSignalsForUser(userId: Int) {
+        val previouslyAdded = repository.autoAddedTiles(userId).stateIn(this)
+
+        autoAddables
+            .map { addable ->
+                val autoAddSignal = addable.autoAddSignal(userId)
+                when (val lifecycle = addable.autoAddTracking) {
+                    is AutoAddTracking.Always -> autoAddSignal
+                    is AutoAddTracking.Disabled -> emptyFlow()
+                    is AutoAddTracking.IfNotAdded -> {
+                        if (lifecycle.spec !in previouslyAdded.value) {
+                            autoAddSignal.filterIsInstance<AutoAddSignal.Add>().take(1)
+                        } else {
+                            emptyFlow()
+                        }
+                    }
+                }
+            }
+            .merge()
+            .collect { signal ->
+                when (signal) {
+                    is AutoAddSignal.Add -> {
+                        if (signal.spec !in previouslyAdded.value) {
+                            currentTilesInteractor.addTile(signal.spec, signal.position)
+                            qsPipelineLogger.logTileAutoAdded(userId, signal.spec, signal.position)
+                            repository.markTileAdded(userId, signal.spec)
+                        }
+                    }
+                    is AutoAddSignal.Remove -> {
+                        currentTilesInteractor.removeTiles(setOf(signal.spec))
+                        qsPipelineLogger.logTileAutoRemoved(userId, signal.spec)
+                        repository.unmarkTileAdded(userId, signal.spec)
+                    }
+                    is AutoAddSignal.RemoveTracking -> {
+                        qsPipelineLogger.logTileUnmarked(userId, signal.spec)
+                        repository.unmarkTileAdded(userId, signal.spec)
+                    }
+                }
+            }
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
