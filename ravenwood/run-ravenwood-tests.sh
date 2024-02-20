@@ -20,5 +20,9 @@ all_tests="hoststubgentest tiny-framework-dump-test hoststubgen-invoke-test"
 # "echo" is to remove the newlines
 all_tests="$all_tests $(echo $(${0%/*}/list-ravenwood-tests.sh) )"
 
-echo "Running tests: $all_tests"
-atest $all_tests
+run() {
+    echo "Running: $*"
+    "${@}"
+}
+
+run ${ATEST:-atest} $all_tests
