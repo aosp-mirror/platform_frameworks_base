@@ -104,7 +104,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
@@ -2880,9 +2879,6 @@ public class DisplayPolicy {
         if (!CLIENT_TRANSIENT) {
             mSystemGestures.dump(pw, prefix);
         }
-
-        pw.print(prefix); pw.println("Looper state:");
-        mHandler.getLooper().dump(new PrintWriterPrinter(pw), prefix + "  ");
     }
 
     private boolean supportsPointerLocation() {

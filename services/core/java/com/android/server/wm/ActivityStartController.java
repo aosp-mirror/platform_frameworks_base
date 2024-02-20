@@ -639,6 +639,10 @@ public class ActivityStartController {
         return mPendingRemoteAnimationRegistry;
     }
 
+    ActivityRecord getLastStartActivity() {
+        return mLastStarter != null ? mLastStarter.mStartActivity : null;
+    }
+
     void dumpLastHomeActivityStartResult(PrintWriter pw, String prefix) {
         pw.print(prefix);
         pw.print("mLastHomeActivityStartResult=");
