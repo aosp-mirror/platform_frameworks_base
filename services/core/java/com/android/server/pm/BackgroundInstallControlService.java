@@ -30,6 +30,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IBackgroundInstallControlService;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -46,6 +47,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArrayMap;
 import android.util.SparseSetArray;
@@ -63,8 +65,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -102,6 +106,24 @@ public class BackgroundInstallControlService extends SystemService {
     // User ID -> package name -> set of foreground time frame
     private final SparseArrayMap<String, TreeSet<ForegroundTimeFrame>>
             mInstallerForegroundTimeFrames = new SparseArrayMap<>();
+
+    @VisibleForTesting
+    protected final PackageManagerInternal.PackageListObserver mPackageObserver =
+            new PackageManagerInternal.PackageListObserver() {
+                @Override
+                public void onPackageAdded(String packageName, int uid) {
+                    final int userId = UserHandle.getUserId(uid);
+                    mHandler.obtainMessage(MSG_PACKAGE_ADDED, userId, 0, packageName)
+                            .sendToTarget();
+                }
+
+                @Override
+                public void onPackageRemoved(String packageName, int uid) {
+                    final int userId = UserHandle.getUserId(uid);
+                    mHandler.obtainMessage(MSG_PACKAGE_REMOVED, userId, 0, packageName)
+                            .sendToTarget();
+                }
+            };
 
     public BackgroundInstallControlService(@NonNull Context context) {
         this(new InjectorImpl(context));
@@ -258,6 +280,7 @@ public class BackgroundInstallControlService extends SystemService {
 
         String installerPackageName;
         String initiatingPackageName;
+
         try {
             final InstallSourceInfo installInfo = mPackageManager.getInstallSourceInfo(packageName);
             installerPackageName = installInfo.getInstallingPackageName();
@@ -280,7 +303,8 @@ public class BackgroundInstallControlService extends SystemService {
 
         // convert up-time to current time.
         final long installTimestamp =
-                System.currentTimeMillis() - (SystemClock.uptimeMillis() - appInfo.createTimestamp);
+                System.currentTimeMillis() - (SystemClock.uptimeMillis()
+                        - retrieveInstallStartTimestamp(packageName, userId, appInfo));
 
         if (installedByAdb(initiatingPackageName)
                 || wasForegroundInstallation(installerPackageName, userId, installTimestamp)) {
@@ -291,6 +315,35 @@ public class BackgroundInstallControlService extends SystemService {
         mBackgroundInstalledPackages.add(userId, packageName);
         mCallbackHelper.notifyAllCallbacks(userId, packageName);
         writeBackgroundInstalledPackagesToDisk();
+    }
+
+    private long retrieveInstallStartTimestamp(String packageName,
+                                               int userId, ApplicationInfo appInfo) {
+        long installStartTimestamp = appInfo.createTimestamp;
+
+        try {
+            Optional<PackageInstaller.SessionInfo> latestInstallSession =
+                    getLatestInstallSession(packageName, userId);
+            if (latestInstallSession.isEmpty()) {
+                Slog.w(TAG, "Package's historical install session not found, falling back "
+                        + "to appInfo.createTimestamp: " + packageName);
+            } else {
+                installStartTimestamp = latestInstallSession.get().getCreatedMillis();
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "Retrieval of install time from historical session failed, falling "
+                    + "back to appInfo.createTimestamp");
+            Slog.w(TAG, Log.getStackTraceString(e));
+        }
+        return installStartTimestamp;
+    }
+
+    private Optional<PackageInstaller.SessionInfo> getLatestInstallSession(
+            String packageName, int userId) {
+        List<PackageInstaller.SessionInfo> historicalSessions =
+                mPackageManagerInternal.getHistoricalSessions(userId).getList();
+        return historicalSessions.stream().filter(s -> packageName.equals(s.getAppPackageName()))
+                .max(Comparator.comparingLong(PackageInstaller.SessionInfo::getCreatedMillis));
     }
 
     // ADB sets installerPackageName to null, this creates a loophole to bypass BIC which will be
@@ -496,22 +549,7 @@ public class BackgroundInstallControlService extends SystemService {
             publishBinderService(Context.BACKGROUND_INSTALL_CONTROL_SERVICE, mBinderService);
         }
 
-        mPackageManagerInternal.getPackageList(
-                new PackageManagerInternal.PackageListObserver() {
-                    @Override
-                    public void onPackageAdded(String packageName, int uid) {
-                        final int userId = UserHandle.getUserId(uid);
-                        mHandler.obtainMessage(MSG_PACKAGE_ADDED, userId, 0, packageName)
-                                .sendToTarget();
-                    }
-
-                    @Override
-                    public void onPackageRemoved(String packageName, int uid) {
-                        final int userId = UserHandle.getUserId(uid);
-                        mHandler.obtainMessage(MSG_PACKAGE_REMOVED, userId, 0, packageName)
-                                .sendToTarget();
-                    }
-                });
+        mPackageManagerInternal.getPackageList(mPackageObserver);
     }
 
     // The foreground time frame (ForegroundTimeFrame) represents the period
