@@ -37,3 +37,10 @@ flag {
      bug: "324842215"
      is_fixed_read_only: true
 }
+
+flag {
+     namespace: "virtual_devices"
+     name: "camera_device_awareness"
+     description: "Enable device awareness in camera service"
+     bug: "305170199"
+}
