@@ -637,4 +637,11 @@ public class LogModule {
         return factory.create("NavBarButtonClick", 50);
     }
 
+    /** Provides a {@link LogBuffer} for NavBar Orientation Tracking. */
+    @Provides
+    @SysUISingleton
+    @NavbarOrientationTrackingLog
+    public static LogBuffer provideNavbarOrientationTrackingLogBuffer(LogBufferFactory factory) {
+        return factory.create("NavbarOrientationTrackingLog", 50);
+    }
 }
