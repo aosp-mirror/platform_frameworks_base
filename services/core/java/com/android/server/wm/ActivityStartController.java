@@ -559,11 +559,14 @@ public class ActivityStartController {
             @Nullable IBinder errorCallbackToken) {
         final ActivityRecord caller =
                 resultTo != null ? ActivityRecord.forTokenLocked(resultTo) : null;
+        final String resolvedType =
+                activityIntent.resolveTypeIfNeeded(mService.mContext.getContentResolver());
         return obtainStarter(activityIntent, "startActivityInTaskFragment")
                 .setActivityOptions(activityOptions)
                 .setInTaskFragment(taskFragment)
                 .setResultTo(resultTo)
                 .setRequestCode(-1)
+                .setResolvedType(resolvedType)
                 .setCallingUid(callingUid)
                 .setCallingPid(callingPid)
                 .setRealCallingUid(callingUid)
