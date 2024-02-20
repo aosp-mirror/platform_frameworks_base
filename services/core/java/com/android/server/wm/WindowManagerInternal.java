@@ -409,13 +409,12 @@ public abstract class WindowManagerInternal {
     public abstract void setMagnificationSpec(int displayId, MagnificationSpec spec);
 
     /**
-     * Set by the accessibility framework to indicate whether the magnifiable regions of the display
-     * should be shown.
+     * Set by the accessibility framework to indicate whether fullscreen magnification is activated.
      *
      * @param displayId The logical display id.
-     * @param show {@code true} to show magnifiable region bounds, {@code false} to hide
+     * @param activated The activation of fullscreen magnification
      */
-    public abstract void setForceShowMagnifiableBounds(int displayId, boolean show);
+    public abstract void setFullscreenMagnificationActivated(int displayId, boolean activated);
 
     /**
      * Obtains the magnification regions.
