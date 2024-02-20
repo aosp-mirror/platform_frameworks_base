@@ -14,7 +14,8 @@
   ~ limitations under the License.
   -->
 
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
@@ -30,7 +31,8 @@
         android:layout_height="40dp"
         android:padding="9dp"
         android:contentDescription="@string/maximize_button_text"
+        android:tint="?androidprv:attr/materialColorOnSurface"
+        android:background="?android:selectableItemBackgroundBorderless"
         android:src="@drawable/decor_desktop_mode_maximize_button_dark"
-        android:scaleType="fitCenter"
-        android:background="@drawable/rounded_button"/>
+        android:scaleType="fitCenter" />
 </merge>
