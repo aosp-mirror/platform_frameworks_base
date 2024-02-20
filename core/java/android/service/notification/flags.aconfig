@@ -1,5 +1,4 @@
 package: "android.service.notification"
-container: "system"
 
 flag {
   name: "ranking_update_ashmem"
@@ -13,7 +12,6 @@ flag {
   namespace: "systemui"
   description: "This flag controls the redacting of sensitive notifications from untrusted NotificationListenerServices"
   bug: "306271190"
-  is_exported: true
 }
 
 flag {
