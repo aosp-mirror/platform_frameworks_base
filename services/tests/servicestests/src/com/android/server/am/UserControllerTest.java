@@ -87,6 +87,7 @@ import android.os.HandlerThread;
 import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -1223,6 +1224,7 @@ public class UserControllerTest {
         private final UserManagerInternal mUserManagerInternalMock;
         private final WindowManagerService mWindowManagerMock;
         private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
+        private final PowerManagerInternal mPowerManagerInternal;
         private final KeyguardManager mKeyguardManagerMock;
         private final LockPatternUtils mLockPatternUtilsMock;
 
@@ -1244,6 +1246,7 @@ public class UserControllerTest {
             mWindowManagerMock = mock(WindowManagerService.class);
             mActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
             mStorageManagerMock = mock(IStorageManager.class);
+            mPowerManagerInternal = mock(PowerManagerInternal.class);
             mKeyguardManagerMock = mock(KeyguardManager.class);
             when(mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
             mLockPatternUtilsMock = mock(LockPatternUtils.class);
@@ -1306,6 +1309,11 @@ public class UserControllerTest {
         @Override
         ActivityTaskManagerInternal getActivityTaskManagerInternal() {
             return mActivityTaskManagerInternal;
+        }
+
+        @Override
+        PowerManagerInternal getPowerManagerInternal() {
+            return mPowerManagerInternal;
         }
 
         @Override
