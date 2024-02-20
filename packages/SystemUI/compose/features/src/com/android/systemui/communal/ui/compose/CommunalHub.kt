@@ -73,6 +73,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -85,7 +86,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -110,6 +114,7 @@ import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CommunalHub(
     modifier: Modifier = Modifier,
@@ -140,6 +145,8 @@ fun CommunalHub(
     Box(
         modifier =
             modifier
+                .semantics { testTagsAsResourceId = true }
+                .testTag(COMMUNAL_HUB_TEST_TAG)
                 .fillMaxSize()
                 .background(LocalAndroidColorScheme.current.outlineVariant)
                 .pointerInput(gridState, contentOffset, contentListState) {
@@ -873,3 +880,6 @@ object Dimensions {
         )
     val IconSize = 48.dp
 }
+
+/** The resource id of communal hub accessible from UiAutomator. */
+private const val COMMUNAL_HUB_TEST_TAG = "communal_hub"
