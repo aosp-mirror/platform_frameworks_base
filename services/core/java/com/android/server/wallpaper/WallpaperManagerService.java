@@ -341,8 +341,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
                     // If this was the system wallpaper, rebind...
                     wallpaper.mBindSource = BindSource.SET_STATIC;
-                    bindWallpaperComponentLocked(mImageWallpaper, true, false, wallpaper,
-                            callback);
+                    bindWallpaperComponentLocked(mImageWallpaper, true, false, wallpaper, callback);
                 }
 
                 if (lockWallpaperChanged) {
@@ -369,11 +368,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     if (DEBUG) {
                         Slog.v(TAG, "Lock screen wallpaper changed to same as home");
                     }
-                    final WallpaperData lockedWallpaper = mLockWallpaperMap.get(
-                            mWallpaper.userId);
-                    if (lockedWallpaper != null) {
-                        detachWallpaperLocked(lockedWallpaper);
-                    }
+                    detachWallpaperLocked(mLockWallpaperMap.get(mWallpaper.userId));
                     clearWallpaperBitmaps(mWallpaper.userId, FLAG_LOCK);
                     mLockWallpaperMap.remove(wallpaper.userId);
                 }
@@ -1697,7 +1692,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         sWallpaperType.forEach((type, filename) -> {
             final File record = new File(getWallpaperDir(userID), filename);
             if (record.exists()) {
-                Slog.w(TAG, "User:" + userID + ", wallpaper tyep = " + type
+                Slog.w(TAG, "User:" + userID + ", wallpaper type = " + type
                         + ", wallpaper fail detect!! reset to default wallpaper");
                 clearWallpaperBitmaps(userID, type);
                 record.delete();
@@ -1794,12 +1789,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     systemWallpaper.wallpaperObserver.startWatching();
                 }
                 if (Flags.reorderWallpaperDuringUserSwitch()) {
-                    if (mLastLockWallpaper != null) {
-                        detachWallpaperLocked(mLastLockWallpaper);
-                    }
-                    if (mLastWallpaper != null) {
-                        detachWallpaperLocked(mLastWallpaper);
-                    }
+                    detachWallpaperLocked(mLastLockWallpaper);
+                    detachWallpaperLocked(mLastWallpaper);
                     if (lockWallpaper == systemWallpaper)  {
                         switchWallpaper(systemWallpaper, reply);
                     } else {
@@ -3403,10 +3394,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         boolean homeUpdated = (newWallpaper.mWhich & FLAG_SYSTEM) != 0;
         boolean lockUpdated = (newWallpaper.mWhich & FLAG_LOCK) != 0;
         boolean systemWillBecomeLock = newWallpaper.mSystemWasBoth && !lockUpdated;
-        if (mLastWallpaper != null && homeUpdated && !systemWillBecomeLock) {
+        if (homeUpdated && !systemWillBecomeLock) {
             detachWallpaperLocked(mLastWallpaper);
         }
-        if (mLastLockWallpaper != null && lockUpdated) {
+        if (lockUpdated) {
             detachWallpaperLocked(mLastLockWallpaper);
         }
     }
@@ -3414,7 +3405,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     // Frees up all rendering resources used by the given wallpaper so that the WallpaperData object
     // can be reused: detaches Engine, unbinds WallpaperService, etc.
     private void detachWallpaperLocked(WallpaperData wallpaper) {
-        if (wallpaper.connection != null) {
+        if (wallpaper != null && wallpaper.connection != null) {
             if (DEBUG) {
                 Slog.v(TAG, "Detaching wallpaper: " + wallpaper);
             }
