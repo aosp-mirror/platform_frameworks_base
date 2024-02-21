@@ -337,51 +337,39 @@ public class HearingAidDeviceManager {
         return null;
     }
 
-    private boolean isLeAudioHearingAid(CachedBluetoothDevice cachedDevice) {
-        List<LocalBluetoothProfile> profiles = cachedDevice.getProfiles();
-        boolean supportLeAudio = profiles.stream().anyMatch(p -> p instanceof LeAudioProfile);
-        boolean supportHapClient = profiles.stream().anyMatch(p -> p instanceof HapClientProfile);
-        return supportLeAudio && supportHapClient;
-    }
-
-    private boolean isAshaHearingAid(CachedBluetoothDevice cachedDevice) {
-        return cachedDevice.getProfiles().stream().anyMatch(p -> p instanceof HearingAidProfile);
-    }
-
     private HearingAidInfo generateHearingAidInfo(CachedBluetoothDevice cachedDevice) {
         final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
-        if (isAshaHearingAid(cachedDevice)) {
-            final HearingAidProfile asha = profileManager.getHearingAidProfile();
-            if (asha == null) {
-                Log.w(TAG, "HearingAidProfile is not supported on this device");
-            } else {
-                long hiSyncId = asha.getHiSyncId(cachedDevice.getDevice());
-                if (isValidHiSyncId(hiSyncId)) {
-                    final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
-                            .setAshaDeviceSide(asha.getDeviceSide(cachedDevice.getDevice()))
-                            .setAshaDeviceMode(asha.getDeviceMode(cachedDevice.getDevice()))
-                            .setHiSyncId(hiSyncId);
-                    return infoBuilder.build();
-                }
+
+        final HearingAidProfile asha = profileManager.getHearingAidProfile();
+        if (asha == null) {
+            Log.w(TAG, "HearingAidProfile is not supported on this device");
+        } else {
+            long hiSyncId = asha.getHiSyncId(cachedDevice.getDevice());
+            if (isValidHiSyncId(hiSyncId)) {
+                final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                        .setAshaDeviceSide(asha.getDeviceSide(cachedDevice.getDevice()))
+                        .setAshaDeviceMode(asha.getDeviceMode(cachedDevice.getDevice()))
+                        .setHiSyncId(hiSyncId);
+                return infoBuilder.build();
             }
         }
-        if (isLeAudioHearingAid(cachedDevice)) {
-            final HapClientProfile hapClientProfile = profileManager.getHapClientProfile();
-            final LeAudioProfile leAudioProfile = profileManager.getLeAudioProfile();
-            if (hapClientProfile == null || leAudioProfile == null) {
-                Log.w(TAG, "HapClientProfile or LeAudioProfile is not supported on this device");
-            } else {
-                int audioLocation = leAudioProfile.getAudioLocation(cachedDevice.getDevice());
-                int hearingAidType = hapClientProfile.getHearingAidType(cachedDevice.getDevice());
-                if (audioLocation != BluetoothLeAudio.AUDIO_LOCATION_INVALID
-                        && hearingAidType != HapClientProfile.HearingAidType.TYPE_INVALID) {
-                    final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
-                            .setLeAudioLocation(audioLocation)
-                            .setHapDeviceType(hearingAidType);
-                    return infoBuilder.build();
-                }
+
+        final HapClientProfile hapClientProfile = profileManager.getHapClientProfile();
+        final LeAudioProfile leAudioProfile = profileManager.getLeAudioProfile();
+        if (hapClientProfile == null || leAudioProfile == null) {
+            Log.w(TAG, "HapClientProfile or LeAudioProfile is not supported on this device");
+        } else {
+            int audioLocation = leAudioProfile.getAudioLocation(cachedDevice.getDevice());
+            int hearingAidType = hapClientProfile.getHearingAidType(cachedDevice.getDevice());
+            if (audioLocation != BluetoothLeAudio.AUDIO_LOCATION_INVALID
+                    && hearingAidType != HapClientProfile.HearingAidType.TYPE_INVALID) {
+                final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                        .setLeAudioLocation(audioLocation)
+                        .setHapDeviceType(hearingAidType);
+                return infoBuilder.build();
             }
         }
+
         return null;
     }
 
