@@ -17,7 +17,6 @@
 package com.android.systemui.scene.ui.composable
 
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Edge as ComposeAwareEdge
@@ -27,6 +26,7 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.TransitionKey as ComposeAwareTransitionKey
 import com.android.compose.animation.scene.UserAction as ComposeAwareUserAction
 import com.android.compose.animation.scene.UserActionDistance as ComposeAwareUserActionDistance
+import com.android.compose.animation.scene.UserActionDistanceScope
 import com.android.compose.animation.scene.UserActionResult as ComposeAwareUserActionResult
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
@@ -89,7 +89,7 @@ fun UserActionResult.asComposeAware(): ComposeAwareUserActionResult {
 fun UserActionDistance.asComposeAware(): ComposeAwareUserActionDistance {
     val composeUnware = this
     return object : ComposeAwareUserActionDistance {
-        override fun Density.absoluteDistance(
+        override fun UserActionDistanceScope.absoluteDistance(
             fromSceneSize: IntSize,
             orientation: Orientation,
         ): Float {

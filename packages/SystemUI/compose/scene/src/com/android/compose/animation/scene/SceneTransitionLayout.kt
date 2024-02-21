@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
@@ -415,15 +416,44 @@ interface UserActionDistance {
     /**
      * Return the **absolute** distance of the user action given the size of the scene we are
      * animating from and the [orientation].
+     *
+     * Note: This function will be called for each drag event until it returns a value > 0f. This
+     * for instance allows you to return 0f or a negative value until the first layout pass of a
+     * scene, so that you can use the size and position of elements in the scene we are
+     * transitioning to when computing this absolute distance.
      */
-    fun Density.absoluteDistance(fromSceneSize: IntSize, orientation: Orientation): Float
+    fun UserActionDistanceScope.absoluteDistance(
+        fromSceneSize: IntSize,
+        orientation: Orientation
+    ): Float
+}
+
+interface UserActionDistanceScope : Density {
+    /**
+     * Return the *target* size of [this] element in the given [scene], i.e. the size of the element
+     * when idle, or `null` if the element is not composed and measured in that scene (yet).
+     */
+    fun ElementKey.targetSize(scene: SceneKey): IntSize?
+
+    /**
+     * Return the *target* offset of [this] element in the given [scene], i.e. the size of the
+     * element when idle, or `null` if the element is not composed and placed in that scene (yet).
+     */
+    fun ElementKey.targetOffset(scene: SceneKey): Offset?
+
+    /**
+     * Return the *target* size of [this] scene, i.e. the size of the scene when idle, or `null` if
+     * the scene was never composed.
+     */
+    fun SceneKey.targetSize(): IntSize?
 }
 
 /** The user action has a fixed [absoluteDistance]. */
 private class FixedDistance(private val distance: Dp) : UserActionDistance {
-    override fun Density.absoluteDistance(fromSceneSize: IntSize, orientation: Orientation): Float {
-        return distance.toPx()
-    }
+    override fun UserActionDistanceScope.absoluteDistance(
+        fromSceneSize: IntSize,
+        orientation: Orientation,
+    ): Float = distance.toPx()
 }
 
 /**
