@@ -64,8 +64,10 @@ class SwipeToSceneTest {
 
     @get:Rule val rule = createComposeRule()
 
-    private fun layoutState(initialScene: SceneKey = TestScenes.SceneA) =
-        MutableSceneTransitionLayoutState(initialScene, EmptyTestTransitions)
+    private fun layoutState(
+        initialScene: SceneKey = TestScenes.SceneA,
+        transitions: SceneTransitions = EmptyTestTransitions,
+    ) = MutableSceneTransitionLayoutState(initialScene, transitions)
 
     /** The content under test. */
     @Composable
@@ -373,8 +375,16 @@ class SwipeToSceneTest {
         // detected as a drag event.
         var touchSlop = 0f
 
-        val layoutState = layoutState()
         val verticalSwipeDistance = 50.dp
+        val layoutState =
+            layoutState(
+                transitions =
+                    transitions {
+                        from(TestScenes.SceneA, to = TestScenes.SceneB) {
+                            distance = FixedDistance(verticalSwipeDistance)
+                        }
+                    }
+            )
         assertThat(verticalSwipeDistance).isNotEqualTo(LayoutHeight)
 
         rule.setContent {
@@ -386,14 +396,7 @@ class SwipeToSceneTest {
             ) {
                 scene(
                     TestScenes.SceneA,
-                    userActions =
-                        mapOf(
-                            Swipe.Down to
-                                UserActionResult(
-                                    toScene = TestScenes.SceneB,
-                                    distance = verticalSwipeDistance,
-                                )
-                        ),
+                    userActions = mapOf(Swipe.Down to TestScenes.SceneB),
                 ) {
                     Spacer(Modifier.fillMaxSize())
                 }
@@ -554,7 +557,6 @@ class SwipeToSceneTest {
 
     @Test
     fun dynamicSwipeDistance() {
-        val state = MutableSceneTransitionLayoutState(TestScenes.SceneA)
         val swipeDistance =
             object : UserActionDistance {
                 override fun UserActionDistanceScope.absoluteDistance(
@@ -572,6 +574,14 @@ class SwipeToSceneTest {
                 }
             }
 
+        val state =
+            MutableSceneTransitionLayoutState(
+                TestScenes.SceneA,
+                transitions {
+                    from(TestScenes.SceneA, to = TestScenes.SceneB) { distance = swipeDistance }
+                }
+            )
+
         val layoutSize = 200.dp
         val fooYOffset = 50.dp
         val fooSize = 25.dp
@@ -581,14 +591,7 @@ class SwipeToSceneTest {
             touchSlop = LocalViewConfiguration.current.touchSlop
 
             SceneTransitionLayout(state, Modifier.size(layoutSize)) {
-                scene(
-                    TestScenes.SceneA,
-                    userActions =
-                        mapOf(
-                            Swipe.Up to
-                                UserActionResult(TestScenes.SceneB, distance = swipeDistance)
-                        )
-                ) {
+                scene(TestScenes.SceneA, userActions = mapOf(Swipe.Up to TestScenes.SceneB)) {
                     Box(Modifier.fillMaxSize())
                 }
                 scene(TestScenes.SceneB) {

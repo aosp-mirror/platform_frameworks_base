@@ -55,14 +55,17 @@ internal class SceneGestureHandler(
         if (isDrivingTransition || force) {
             layoutState.startTransition(newTransition, newTransition.key)
 
-            // Initialize SwipeTransition.swipeSpec. Note that this must be called right after
-            // layoutState.startTransition() is called, because it computes the
-            // layoutState.transformationSpec().
+            // Initialize SwipeTransition.transformationSpec and .swipeSpec. Note that this must be
+            // called right after layoutState.startTransition() is called, because it computes the
+            // current layoutState.transformationSpec().
+            val transformationSpec = layoutState.transformationSpec
+            newTransition.transformationSpec = transformationSpec
             newTransition.swipeSpec =
-                layoutState.transformationSpec.swipeSpec ?: layoutState.transitions.defaultSwipeSpec
+                transformationSpec.swipeSpec ?: layoutState.transitions.defaultSwipeSpec
         } else {
-            // We were not driving the transition and we don't force the update, so the spec won't
-            // be used and it doesn't matter which one we set here.
+            // We were not driving the transition and we don't force the update, so the specs won't
+            // be used and it doesn't matter which ones we set here.
+            newTransition.transformationSpec = TransformationSpec.Empty
             newTransition.swipeSpec = SceneTransitions.DefaultSwipeSpec
         }
 
@@ -472,43 +475,20 @@ private fun SwipeTransition(
 ): SwipeTransition {
     val upOrLeftResult = swipes.upOrLeftResult
     val downOrRightResult = swipes.downOrRightResult
-    val userActionDistance = result.distance ?: DefaultSwipeDistance
-
-    // The absolute distance of the gesture. Note that the UserActionDistance might return 0f or a
-    // negative value at first if it needs the size or offset of an element that is not composed yet
-    // when computing the distance. We call UserActionDistance.absoluteDistance() until it returns a
-    // value different than 0.
-    var lastAbsoluteDistance = 0f
-    val absoluteDistance: () -> Float = {
-        if (lastAbsoluteDistance > 0f) {
-            lastAbsoluteDistance
-        } else {
-            with(userActionDistance) {
-                    layoutImpl.userActionDistanceScope.absoluteDistance(
-                        fromScene.targetSize,
-                        orientation,
-                    )
-                }
-                .also { lastAbsoluteDistance = it }
-        }
-    }
-
-    // The signed distance of the gesture.
-    val distance: () -> Float = {
-        val absoluteDistance = absoluteDistance()
-        when {
-            absoluteDistance <= 0f -> SwipeTransition.DistanceUnspecified
-            result == upOrLeftResult -> -absoluteDistance
-            result == downOrRightResult -> absoluteDistance
+    val isUpOrLeft =
+        when (result) {
+            upOrLeftResult -> true
+            downOrRightResult -> false
             else -> error("Unknown result $result ($upOrLeftResult $downOrRightResult)")
         }
-    }
 
     return SwipeTransition(
         key = result.transitionKey,
         _fromScene = fromScene,
         _toScene = layoutImpl.scene(result.toScene),
-        distance = distance,
+        userActionDistanceScope = layoutImpl.userActionDistanceScope,
+        orientation = orientation,
+        isUpOrLeft = isUpOrLeft,
     )
 }
 
@@ -516,16 +496,9 @@ private class SwipeTransition(
     val key: TransitionKey?,
     val _fromScene: Scene,
     val _toScene: Scene,
-
-    /**
-     * The signed distance between [fromScene] and [toScene]. It is negative if [fromScene] is above
-     * or to the left of [toScene].
-     *
-     * Note that this distance can be equal to [DistanceUnspecified] during the first frame of a
-     * transition when the distance depends on the size or position of an element that is composed
-     * in the scene we are going to.
-     */
-    val distance: () -> Float,
+    private val userActionDistanceScope: UserActionDistanceScope,
+    private val orientation: Orientation,
+    private val isUpOrLeft: Boolean,
 ) : TransitionState.Transition(_fromScene.key, _toScene.key) {
     var _currentScene by mutableStateOf(_fromScene)
     override val currentScene: SceneKey
@@ -566,8 +539,49 @@ private class SwipeTransition(
     /** Job to check that there is at most one offset animation in progress. */
     private var offsetAnimationJob: Job? = null
 
+    /**
+     * The [TransformationSpecImpl] associated to this transition.
+     *
+     * Note: This is lateinit because this [SwipeTransition] is needed by
+     * [BaseSceneTransitionLayoutState] to compute the [TransitionSpec], and it will be set right
+     * after [BaseSceneTransitionLayoutState.startTransition] is called with this transition.
+     */
+    lateinit var transformationSpec: TransformationSpecImpl
+
     /** The spec to use when animating this transition to either [fromScene] or [toScene]. */
     lateinit var swipeSpec: SpringSpec<Float>
+
+    private var lastDistance = DistanceUnspecified
+
+    /**
+     * The signed distance between [fromScene] and [toScene]. It is negative if [fromScene] is above
+     * or to the left of [toScene].
+     *
+     * Note that this distance can be equal to [DistanceUnspecified] during the first frame of a
+     * transition when the distance depends on the size or position of an element that is composed
+     * in the scene we are going to.
+     */
+    fun distance(): Float {
+        if (lastDistance != DistanceUnspecified) {
+            return lastDistance
+        }
+
+        val absoluteDistance =
+            with(transformationSpec.distance ?: DefaultSwipeDistance) {
+                userActionDistanceScope.absoluteDistance(
+                    _fromScene.targetSize,
+                    orientation,
+                )
+            }
+
+        if (absoluteDistance <= 0f) {
+            return DistanceUnspecified
+        }
+
+        val distance = if (isUpOrLeft) -absoluteDistance else absoluteDistance
+        lastDistance = distance
+        return distance
+    }
 
     /** Ends any previous [offsetAnimationJob] and runs the new [job]. */
     private fun startOffsetAnimation(job: () -> Job) {
@@ -611,6 +625,7 @@ private class SwipeTransition(
         }
         isAnimatingOffset = true
 
+        val animationSpec = transformationSpec
         offsetAnimatable.animateTo(
             targetValue = targetOffset,
             animationSpec = swipeSpec,

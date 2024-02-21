@@ -91,6 +91,14 @@ interface TransitionBuilder : PropertyTransformationBuilder {
     var swipeSpec: SpringSpec<Float>?
 
     /**
+     * The distance it takes for this transition to animate from 0% to 100% when it is driven by a
+     * [UserAction].
+     *
+     * If `null`, a default distance will be used that depends on the [UserAction] performed.
+     */
+    var distance: UserActionDistance?
+
+    /**
      * Define a progress-based range for the transformations inside [builder].
      *
      * For instance, the following will fade `Foo` during the first half of the transition then it

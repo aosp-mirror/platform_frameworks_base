@@ -395,22 +395,9 @@ class UserActionResult(
     /** The scene we should be transitioning to during the [UserAction]. */
     val toScene: SceneKey,
 
-    /**
-     * The distance the action takes to animate from 0% to 100%.
-     *
-     * If `null`, a default distance will be used that depends on the [UserAction] performed.
-     */
-    val distance: UserActionDistance? = null,
-
     /** The key of the transition that should be used. */
     val transitionKey: TransitionKey? = null,
-) {
-    constructor(
-        toScene: SceneKey,
-        distance: Dp,
-        transitionKey: TransitionKey? = null,
-    ) : this(toScene, FixedDistance(distance), transitionKey)
-}
+)
 
 interface UserActionDistance {
     /**
@@ -449,7 +436,7 @@ interface UserActionDistanceScope : Density {
 }
 
 /** The user action has a fixed [absoluteDistance]. */
-private class FixedDistance(private val distance: Dp) : UserActionDistance {
+class FixedDistance(private val distance: Dp) : UserActionDistance {
     override fun UserActionDistanceScope.absoluteDistance(
         fromSceneSize: IntSize,
         orientation: Orientation,
