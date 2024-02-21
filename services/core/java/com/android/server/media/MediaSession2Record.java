@@ -144,7 +144,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     @Override
     public boolean checkPlaybackActiveState(boolean expected) {
         synchronized (mLock) {
-            return mIsConnected && mController.isPlaybackActive() == expected;
+            return (mIsConnected && mController.isPlaybackActive()) == expected;
         }
     }
 
