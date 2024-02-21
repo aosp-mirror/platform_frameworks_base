@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -85,6 +86,8 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     private BatteryController mBatteryController;
     @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock
+    private CommunalInteractor mCommunalInteractor;
     private final DockManagerFake mDockManager = new DockManagerFake();
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
@@ -102,7 +105,8 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
                 mStatusBarStateController, mKeyguardStateController,
                 () -> mShadeInteractor, mBatteryController,
                 mDockManager, mFakeExecutor,
-                mJavaAdapter, mFakeSystemClock, () -> mSelectedUserInteractor
+                mJavaAdapter, mFakeSystemClock, () -> mSelectedUserInteractor,
+                () -> mCommunalInteractor
         );
         mFalsingCollector.init();
     }
