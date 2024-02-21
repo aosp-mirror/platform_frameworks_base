@@ -61,6 +61,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.wm.utils.InsetUtils;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -901,7 +902,8 @@ class BackNavigationController {
             mWindowManagerService = wms;
             final Context context = wms.mContext;
             mShowWindowlessSurface = context.getResources().getBoolean(
-                    com.android.internal.R.bool.config_predictShowStartingSurface);
+                    com.android.internal.R.bool.config_predictShowStartingSurface)
+                    && Flags.activitySnapshotByDefault();
         }
         private static final int UNKNOWN = 0;
         private static final int TASK_SWITCH = 1;
