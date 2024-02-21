@@ -17,12 +17,16 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
+import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.UserSetupInteractor
@@ -53,6 +57,8 @@ constructor(
     val logger: Optional<NotificationLoggerViewModel>,
     activeNotificationsInteractor: ActiveNotificationsInteractor,
     notificationStackInteractor: NotificationStackInteractor,
+    private val headsUpNotificationInteractor: HeadsUpNotificationInteractor,
+    keyguardInteractor: KeyguardInteractor,
     remoteInputInteractor: RemoteInputInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
@@ -212,4 +218,41 @@ constructor(
             activeNotificationsInteractor.hasNonClearableSilentNotifications
         }
     }
+
+    val topHeadsUpRow: Flow<HeadsUpRowKey?> by lazy {
+        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(null)
+        } else {
+            headsUpNotificationInteractor.topHeadsUpRow
+        }
+    }
+
+    val pinnedHeadsUpRows: Flow<Set<HeadsUpRowKey>> by lazy {
+        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(emptySet())
+        } else {
+            headsUpNotificationInteractor.pinnedHeadsUpRows
+        }
+    }
+
+    val headsUpAnimationsEnabled: Flow<Boolean> by lazy {
+        combine(keyguardInteractor.isKeyguardShowing, shadeInteractor.isShadeFullyExpanded) {
+            (isKeyguardShowing, isShadeFullyExpanded) ->
+            // TODO(b/325936094) use isShadeFullyCollapsed instead
+            !isKeyguardShowing && !isShadeFullyExpanded
+        }
+    }
+
+    val hasPinnedHeadsUpRow: Flow<Boolean> by lazy {
+        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            headsUpNotificationInteractor.hasPinnedRows
+        }
+    }
+
+    // TODO(b/325936094) use it for the text displayed in the StatusBar
+    fun headsUpRow(key: HeadsUpRowKey): HeadsUpRowViewModel =
+        HeadsUpRowViewModel(headsUpNotificationInteractor.headsUpRow(key))
+    fun elementKeyFor(key: HeadsUpRowKey): Any = headsUpNotificationInteractor.elementKeyFor(key)
 }

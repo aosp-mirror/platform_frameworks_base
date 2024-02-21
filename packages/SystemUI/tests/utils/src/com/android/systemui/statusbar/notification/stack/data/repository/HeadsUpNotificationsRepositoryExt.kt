@@ -16,18 +16,12 @@
 
 package com.android.systemui.statusbar.notification.stack.data.repository
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.statusbar.notification.data.repository.HeadsUpRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 
-val Kosmos.headsUpNotificationRepository by Fixture { FakeHeadsUpNotificationRepository() }
+fun FakeHeadsUpNotificationRepository.setNotifications(notifications: List<HeadsUpRowRepository>) {
+    setNotifications(*notifications.toTypedArray())
+}
 
-class FakeHeadsUpNotificationRepository : HeadsUpRepository {
-    override val headsUpAnimatingAway: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val topHeadsUpRow: Flow<HeadsUpRowRepository?> = MutableStateFlow(null)
-    override val activeHeadsUpRows: MutableStateFlow<Set<HeadsUpRowRepository>> =
-        MutableStateFlow(emptySet())
+fun FakeHeadsUpNotificationRepository.setNotifications(vararg notifications: HeadsUpRowRepository) {
+    this.activeHeadsUpRows.value = notifications.toSet()
 }

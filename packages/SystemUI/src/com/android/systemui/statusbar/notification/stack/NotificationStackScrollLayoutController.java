@@ -126,6 +126,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
@@ -685,11 +686,13 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             new OnHeadsUpChangedListener() {
                 @Override
                 public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
+                    NotificationsHeadsUpRefactor.assertInLegacyMode();
                     mView.setInHeadsUpPinnedMode(inPinnedMode);
                 }
 
                 @Override
                 public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
+                    NotificationsHeadsUpRefactor.assertInLegacyMode();
                     NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
                     mView.setTopHeadsUpRow(topEntry != null ? topEntry.getRow() : null);
                     generateHeadsUpAnimation(entry, isHeadsUp);
@@ -870,7 +873,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             });
         }
 
-        mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
+        if (!NotificationsHeadsUpRefactor.isEnabled()) {
+            mHeadsUpManager.addListener(mOnHeadsUpChangedListener);
+        }
         mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
 
