@@ -120,6 +120,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LauncherIcons;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.Immutable;
@@ -4047,11 +4048,16 @@ public class ApplicationPackageManager extends PackageManager {
     @Nullable
     private Drawable getArchivedAppIcon(String packageName) {
         try {
-            return new BitmapDrawable(null,
-                    mPM.getArchivedAppIcon(packageName, new UserHandle(getUserId()),
-                            mContext.getPackageName()));
+            Bitmap archivedAppIcon = mPM.getArchivedAppIcon(packageName,
+                    new UserHandle(getUserId()),
+                    mContext.getPackageName());
+            if (archivedAppIcon == null) {
+                return null;
+            }
+            return new BitmapDrawable(null, archivedAppIcon);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            Slog.e(TAG, "Failed to retrieve archived app icon: " + e.getMessage());
+            return null;
         }
     }
 
