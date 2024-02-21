@@ -118,6 +118,8 @@ per-file *ScreenCapture* = file:/services/core/java/com/android/server/wm/OWNERS
 # Multitasking
 per-file multitasking.aconfig = file:/services/core/java/com/android/server/wm/OWNERS
 per-file multitasking.aconfig = file:/libs/WindowManager/Shell/OWNERS
+per-file PictureInPicture* = file:/services/core/java/com/android/server/wm/OWNERS
+per-file PictureInPicture* = file:/libs/WindowManager/Shell/OWNERS
 
 # Zygote
 per-file *Zygote* = file:/ZYGOTE_OWNERS
