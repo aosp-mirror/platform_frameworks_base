@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -73,7 +75,6 @@ import kotlinx.coroutines.flow.stateIn
 
 object Shade {
     object Elements {
-        val QuickSettings = ElementKey("ShadeQuickSettings")
         val MediaCarousel = ElementKey("ShadeMediaCarousel")
         val BackgroundScrim =
             ElementKey("ShadeBackgroundScrim", scenePicker = LowestZIndexScenePicker)
@@ -160,6 +161,8 @@ private fun SceneScope.ShadeScene(
     val density = LocalDensity.current
     val layoutWidth = remember { mutableStateOf(0) }
     val maxNotifScrimTop = remember { mutableStateOf(0f) }
+    val tileSquishiness by
+        animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
 
     Box(
         modifier =
@@ -190,7 +193,11 @@ private fun SceneScope.ShadeScene(
                             )
                             QuickSettings(
                                 viewModel.qsSceneAdapter,
-                                { viewModel.qsSceneAdapter.qqsHeight },
+                                {
+                                    (viewModel.qsSceneAdapter.qqsHeight * tileSquishiness)
+                                        .roundToInt()
+                                },
+                                squishiness = tileSquishiness,
                             )
 
                             if (viewModel.isMediaVisible()) {

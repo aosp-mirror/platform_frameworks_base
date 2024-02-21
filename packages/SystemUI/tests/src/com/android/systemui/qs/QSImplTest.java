@@ -20,6 +20,7 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -509,6 +510,28 @@ public class QSImplTest extends SysuiTestCase {
                 mFooterActionsViewBinder,
                 mFooterActionsViewModelFactory
         );
+    }
+
+    @Test
+    public void testSceneContainerFlagsEnabled_statusBarStateIsShade() {
+        when(mSceneContainerFlags.isEnabled()).thenReturn(true);
+
+        mUnderTest.onStateChanged(KEYGUARD);
+        assertThat(mUnderTest.getStatusBarState()).isEqualTo(SHADE);
+
+        mUnderTest.onStateChanged(SHADE_LOCKED);
+        assertThat(mUnderTest.getStatusBarState()).isEqualTo(SHADE);
+    }
+
+    @Test
+    public void testSceneContainerFlagsEnabled_isKeyguardState_alwaysFalse() {
+        when(mSceneContainerFlags.isEnabled()).thenReturn(true);
+
+        mUnderTest.onStateChanged(KEYGUARD);
+        assertThat(mUnderTest.isKeyguardState()).isFalse();
+
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+        assertThat(mUnderTest.isKeyguardState()).isFalse();
     }
 
     private QSImpl instantiate() {
