@@ -23,7 +23,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeTileSpecRepository : TileSpecRepository {
+class FakeTileSpecRepository(
+    private val defaultTilesRepository: DefaultTilesRepository = FakeDefaultTilesRepository()
+) : TileSpecRepository {
 
     private val tilesPerUser = mutableMapOf<Int, MutableStateFlow<List<TileSpec>>>()
 
@@ -66,5 +68,9 @@ class FakeTileSpecRepository : TileSpecRepository {
         with(getFlow(restoreData.userId)) {
             value = UserTileSpecRepository.reconcileTiles(value, currentAutoAdded, restoreData)
         }
+    }
+
+    override suspend fun prependDefault(userId: Int) {
+        with(getFlow(userId)) { value = defaultTilesRepository.defaultTiles + value }
     }
 }
