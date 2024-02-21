@@ -24,6 +24,7 @@ import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.client.CredentialManagerClient
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.get.ActionEntryInfo
+import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.mappers.toGet
 import android.util.Log
@@ -114,6 +115,7 @@ sealed class CredentialSelectorUiState {
         data class MultipleEntry(
             val accounts: List<PerUserNameEntries>,
             val actionEntryList: List<ActionEntryInfo>,
+            val authenticationEntryList: List<AuthenticationEntryInfo>,
         ) : Get() {
             data class PerUserNameEntries(
                 val userName: String,

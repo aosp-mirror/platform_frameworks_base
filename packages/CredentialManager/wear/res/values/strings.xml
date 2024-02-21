@@ -27,11 +27,11 @@
   <!-- Title of a screen prompting if the user would like to sign in with provider
   [CHAR LIMIT=80] -->
   <string name="use_password_title">Use password?</string>
-  <!-- Content description for the dismiss button of a screen. [CHAR LIMIT=NONE] -->
+  <!-- Text on this dismiss button of a screen. [CHAR LIMIT=NONE] -->
   <string name="dialog_dismiss_button">Dismiss</string>
-  <!-- Content description for the continue button of a screen. [CHAR LIMIT=NONE] -->
+  <!-- Text on the continue button of a screen. [CHAR LIMIT=NONE] -->
   <string name="dialog_continue_button">Continue</string>
-  <!-- Content description for the sign in options button of a screen. [CHAR LIMIT=NONE] -->
+  <!-- Text on the sign in options button of a screen. [CHAR LIMIT=NONE] -->
   <string name="dialog_sign_in_options_button">Sign-in Options</string>
   <!-- Title for multiple credentials folded screen. [CHAR LIMIT=NONE] -->
   <string name="sign_in_options_title">Sign-in Options</string>
@@ -41,4 +41,11 @@
   <string name="choose_passkey_title">Choose passkey</string>
   <!-- Title for multiple credentials screen with only passwords. [CHAR LIMIT=NONE] -->
   <string name="choose_password_title">Choose password</string>
+  <!-- Text on the sign in on phone button [CHAR LIMIT=NONE] -->
+  <string name="sign_in_on_phone_button">Sign in on phone</string>
+  <!-- Text on the locked provider button when unlocked[CHAR LIMIT=NONE] -->
+  <string name="locked_credential_entry_label_subtext_no_sign_in">No sign-in info</string>
+  <!-- Text on the locked provider button when locked[CHAR LIMIT=NONE] -->
+  <string name="locked_credential_entry_label_subtext_tap_to_unlock">Tap to unlock</string>
+
 </resources>
