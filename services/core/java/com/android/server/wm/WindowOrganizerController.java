@@ -2016,6 +2016,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         ownerTask.addChild(taskFragment, position);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
         if (!creationParams.getInitialRelativeBounds().isEmpty()) {
+            // The surface operations for the task fragment should sync with the transition.
+            // This avoid using pending transaction before collectExistenceChange is called.
+            if (transition != null) {
+                addToSyncSet(transition.getSyncId(), taskFragment);
+            }
             // Set relative bounds instead of using setBounds. This will avoid unnecessary update in
             // case the parent has resized since the last time parent info is sent to the organizer.
             taskFragment.setRelativeEmbeddedBounds(creationParams.getInitialRelativeBounds());
