@@ -59,8 +59,10 @@ class CredentialSelectorViewModel @Inject constructor(
             isPrimaryScreen,
             shouldClose
         ) { request, isPrimary, shouldClose ->
+            Log.d(TAG, "Request updated: " + request?.toString() +
+                    " isClose: " + shouldClose.toString() +
+                    " isPrimaryScreen: " + isPrimary.toString())
             if (shouldClose) {
-                Log.d(TAG, "Request finished, closing ")
                 return@combine Close
             }
 
