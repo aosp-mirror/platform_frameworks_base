@@ -25,6 +25,7 @@ import android.graphics.Rect
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.View.OnLayoutChangeListener
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.ViewGroup.OnHierarchyChangeListener
 import android.view.ViewPropertyAnimator
@@ -66,6 +67,7 @@ import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import javax.inject.Provider
+import kotlin.math.min
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -345,7 +347,7 @@ object KeyguardRootViewBinder {
             }
         }
 
-        onLayoutChangeListener = OnLayoutChange(viewModel, burnInParams)
+        onLayoutChangeListener = OnLayoutChange(viewModel, childViews, burnInParams)
         view.addOnLayoutChangeListener(onLayoutChangeListener)
 
         // Views will be added or removed after the call to bind(). This is needed to avoid many
@@ -405,6 +407,7 @@ object KeyguardRootViewBinder {
 
     private class OnLayoutChange(
         private val viewModel: KeyguardRootViewModel,
+        private val childViews: Map<Int, View>,
         private val burnInParams: MutableStateFlow<BurnInParameters>,
     ) : OnLayoutChangeListener {
         override fun onLayoutChange(
@@ -418,7 +421,7 @@ object KeyguardRootViewBinder {
             oldRight: Int,
             oldBottom: Int
         ) {
-            view.findViewById<View>(R.id.nssl_placeholder)?.let { notificationListPlaceholder ->
+            childViews[R.id.nssl_placeholder]?.let { notificationListPlaceholder ->
                 // After layout, ensure the notifications are positioned correctly
                 viewModel.onNotificationContainerBoundsChanged(
                     notificationListPlaceholder.top.toFloat(),
@@ -426,9 +429,33 @@ object KeyguardRootViewBinder {
                 )
             }
 
-            view.findViewById<View>(R.id.keyguard_status_view)?.let { statusView ->
-                burnInParams.update { current -> current.copy(statusViewTop = statusView.top) }
+            burnInParams.update { current ->
+                current.copy(
+                    minViewY =
+                        if (migrateClocksToBlueprint()) {
+                            // To ensure burn-in doesn't enroach the top inset, get the min top Y
+                            childViews.entries.fold(Int.MAX_VALUE) { currentMin, (viewId, view) ->
+                                min(
+                                    currentMin,
+                                    if (!isUserVisible(view)) {
+                                        Int.MAX_VALUE
+                                    } else {
+                                        view.getTop()
+                                    }
+                                )
+                            }
+                        } else {
+                            childViews[R.id.keyguard_status_view]?.top ?: 0
+                        }
+                )
             }
+        }
+
+        private fun isUserVisible(view: View): Boolean {
+            return view.id != R.id.burn_in_layer &&
+                view.visibility == VISIBLE &&
+                view.width > 0 &&
+                view.height > 0
         }
     }
 

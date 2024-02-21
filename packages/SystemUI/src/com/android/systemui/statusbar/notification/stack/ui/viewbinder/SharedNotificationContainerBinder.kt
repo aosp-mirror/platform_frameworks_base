@@ -91,10 +91,10 @@ object SharedNotificationContainerBinder {
                     if (!sceneContainerFlags.flexiNotifsEnabled()) {
                         launch {
                             // Only temporarily needed, until flexi notifs go live
-                            viewModel.shadeCollpaseFadeIn.collect { fadeIn ->
+                            viewModel.shadeCollapseFadeIn.collect { fadeIn ->
                                 if (fadeIn) {
                                     android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
-                                        duration = 350
+                                        duration = 250
                                         addUpdateListener { animation ->
                                             controller.setMaxAlphaForExpansion(
                                                 animation.getAnimatedFraction()

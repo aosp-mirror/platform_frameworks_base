@@ -681,7 +681,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun shadeCollapseFadeIn() =
         testScope.runTest {
-            val fadeIn by collectLastValue(underTest.shadeCollpaseFadeIn)
+            val fadeIn by collectLastValue(underTest.shadeCollapseFadeIn)
 
             // Start on lockscreen without the shade
             underTest.setShadeCollapseFadeInComplete(false)

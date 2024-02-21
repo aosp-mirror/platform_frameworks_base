@@ -133,6 +133,21 @@ constructor(
             .distinctUntilChanged()
             .onStart { emit(false) }
 
+    /**
+     * Shade locked is a legacy concept, but necessary to mimic current functionality. Listen for
+     * both SHADE_LOCKED and shade/qs expansion in order to determine lock state, as one can arrive
+     * before the other.
+     */
+    private val isShadeLocked: Flow<Boolean> =
+        combine(
+                keyguardInteractor.statusBarState.map { it == SHADE_LOCKED },
+                shadeInteractor.qsExpansion.map { it > 0f },
+                shadeInteractor.shadeExpansion.map { it > 0f },
+            ) { isShadeLocked, isQsExpanded, isShadeExpanded ->
+                isShadeLocked && (isQsExpanded || isShadeExpanded)
+            }
+            .distinctUntilChanged()
+
     val shadeCollapseFadeInComplete = MutableStateFlow(false)
 
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
@@ -190,7 +205,7 @@ constructor(
             )
 
     /** Are we purely on the glanceable hub without the shade/qs? */
-    internal val isOnGlanceableHubWithoutShade: Flow<Boolean> =
+    val isOnGlanceableHubWithoutShade: Flow<Boolean> =
         combine(
                 communalInteractor.isIdleOnCommunal,
                 // Shade with notifications
@@ -208,12 +223,12 @@ constructor(
             )
 
     /** Fade in only for use after the shade collapses */
-    val shadeCollpaseFadeIn: Flow<Boolean> =
+    val shadeCollapseFadeIn: Flow<Boolean> =
         flow {
                 while (currentCoroutineContext().isActive) {
                     emit(false)
                     // Wait for shade to be fully expanded
-                    keyguardInteractor.statusBarState.first { it == SHADE_LOCKED }
+                    isShadeLocked.first { it }
                     // ... and then for it to be collapsed
                     isOnLockscreenWithoutShade.first { it }
                     emit(true)
@@ -330,16 +345,16 @@ constructor(
                 // shade expansion or swipe to dismiss
                 combineTransform(
                     isOnLockscreenWithoutShade,
-                    shadeCollpaseFadeIn,
+                    shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
                     keyguardInteractor.dismissAlpha,
                 ) {
                     isOnLockscreenWithoutShade,
-                    shadeCollpaseFadeIn,
+                    shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
                     dismissAlpha ->
                     if (isOnLockscreenWithoutShade) {
-                        if (!shadeCollpaseFadeIn && dismissAlpha != null) {
+                        if (!shadeCollapseFadeIn && dismissAlpha != null) {
                             emit(dismissAlpha)
                         }
                     } else {
