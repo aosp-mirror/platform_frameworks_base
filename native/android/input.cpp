@@ -87,7 +87,7 @@ int64_t AKeyEvent_getDownTime(const AInputEvent* key_event) {
 
 const AInputEvent* AKeyEvent_fromJava(JNIEnv* env, jobject keyEvent) {
     std::unique_ptr<KeyEvent> event = std::make_unique<KeyEvent>();
-    *event = android::android_view_KeyEvent_toNative(env, keyEvent);
+    *event = android::android_view_KeyEvent_obtainAsCopy(env, keyEvent);
     return event.release();
 }
 
@@ -323,9 +323,9 @@ jobject AInputEvent_toJava(JNIEnv* env, const AInputEvent* aInputEvent) {
                                                                   static_cast<const MotionEvent&>(
                                                                           *aInputEvent));
         case AINPUT_EVENT_TYPE_KEY:
-            return android::android_view_KeyEvent_fromNative(env,
-                                                             static_cast<const KeyEvent&>(
-                                                                     *aInputEvent));
+            return android::android_view_KeyEvent_obtainAsCopy(env,
+                                                               static_cast<const KeyEvent&>(
+                                                                       *aInputEvent));
         default:
             LOG_ALWAYS_FATAL("Unexpected event type %d in AInputEvent_toJava.", eventType);
     }
