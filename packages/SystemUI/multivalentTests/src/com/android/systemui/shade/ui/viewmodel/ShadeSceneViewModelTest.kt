@@ -31,6 +31,7 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -96,9 +97,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             ShadeHeaderViewModel(
                 applicationScope = testScope.backgroundScope,
                 context = context,
-                sceneInteractor = sceneInteractor,
                 mobileIconsInteractor = mobileIconsInteractor,
                 mobileIconsViewModel = mobileIconsViewModel,
+                privacyChipInteractor = kosmos.privacyChipInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
 
