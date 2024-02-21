@@ -312,8 +312,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 user.mPriorityStack.onSessionActiveStateChanged(record);
             }
-            boolean isUserEngaged =
-                    record.isActive() && (playbackState == null || playbackState.isActive());
+            boolean isUserEngaged = isUserEngaged(record, playbackState);
 
             Log.d(TAG, "onSessionActiveStateChanged: "
                     + "record=" + record
@@ -323,6 +322,15 @@ public class MediaSessionService extends SystemService implements Monitor {
             reportMediaInteractionEvent(record, isUserEngaged);
             mHandler.postSessionsChanged(record);
         }
+    }
+
+    private boolean isUserEngaged(MediaSessionRecordImpl record,
+            @Nullable PlaybackState playbackState) {
+        if (playbackState == null) {
+            // MediaSession2 case
+            return record.checkPlaybackActiveState(/* expected= */ true);
+        }
+        return playbackState.isActive() && record.isActive();
     }
 
     // Currently only media1 can become global priority session.
@@ -417,16 +425,13 @@ public class MediaSessionService extends SystemService implements Monitor {
                 return;
             }
             user.mPriorityStack.onPlaybackStateChanged(record, shouldUpdatePriority);
-            if (playbackState != null) {
-                boolean isUserEngaged = playbackState.isActive() && record.isActive();
-                Log.d(TAG, "onSessionPlaybackStateChanged: "
-                        + "record=" + record
-                        + "playbackState=" + playbackState
-                        + "allowRunningInForeground=" + isUserEngaged);
-                setForegroundServiceAllowance(
-                        record, /* allowRunningInForeground= */ isUserEngaged);
-                reportMediaInteractionEvent(record, isUserEngaged);
-            }
+            boolean isUserEngaged = isUserEngaged(record, playbackState);
+            Log.d(TAG, "onSessionPlaybackStateChanged: "
+                    + "record=" + record
+                    + "playbackState=" + playbackState
+                    + "allowRunningInForeground=" + isUserEngaged);
+            setForegroundServiceAllowance(record, /* allowRunningInForeground= */ isUserEngaged);
+            reportMediaInteractionEvent(record, isUserEngaged);
         }
     }
 
