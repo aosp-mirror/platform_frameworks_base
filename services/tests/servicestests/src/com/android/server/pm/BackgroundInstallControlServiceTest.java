@@ -660,7 +660,7 @@ public final class BackgroundInstallControlServiceTest {
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
                 // create timestamp is after generated foreground events (hence not considered
                 // foreground install)
-                convertToTestAdjustTimestamp(USAGE_EVENT_TIMESTAMP_2 + 1));
+                convertToTestAdjustTimestamp(USAGE_EVENT_TIMESTAMP_2 + 100000));
 
         int uid = USER_ID_1 * UserHandle.PER_USER_RANGE;
         assertEquals(USER_ID_1, UserHandle.getUserId(uid));
