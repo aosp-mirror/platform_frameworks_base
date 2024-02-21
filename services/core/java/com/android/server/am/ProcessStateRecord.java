@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
+import static android.app.ActivityManager.PROCESS_STATE_CACHED_EMPTY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UI_VISIBILITY;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_ACTIVITY;
@@ -24,6 +25,7 @@ import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BROADCAST_RE
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_STARTED_SERVICE;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
+import static com.android.server.am.ProcessList.CACHED_APP_MIN_ADJ;
 import static com.android.server.am.ProcessRecord.TAG;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -283,18 +285,6 @@ final class ProcessStateRecord {
     private long mLastTopTime = Long.MIN_VALUE;
 
     /**
-     * Is this an empty background process?
-     */
-    @GuardedBy("mService")
-    private boolean mEmpty;
-
-    /**
-     * Is this a cached process?
-     */
-    @GuardedBy("mService")
-    private boolean mCached;
-
-    /**
      * This is a system process, but not currently showing UI.
      */
     @GuardedBy("mService")
@@ -395,7 +385,7 @@ final class ProcessStateRecord {
     private boolean mNoKillOnBgRestrictedAndIdle;
 
     /**
-     * Last set value of {@link #mCached}.
+     * Last set value of {@link #isCached()}.
      */
     @GuardedBy("mService")
     private boolean mSetCached;
@@ -408,7 +398,7 @@ final class ProcessStateRecord {
 
     /**
      * The last time when the {@link #mNoKillOnBgRestrictedAndIdle} is false and the
-     * {@link #mCached} is true, and either the former state is flipping from true to false
+     * {@link #isCached()} is true, and either the former state is flipping from true to false
      * when latter state is true, or the latter state is flipping from false to true when the
      * former state is false.
      */
@@ -445,6 +435,8 @@ final class ProcessStateRecord {
         VALUE_INVALID, // CACHED_COMPAT_CHANGE_USE_SHORT_FGS_USAGE_INTERACTION_TIME
     };
 
+    @GuardedBy("mService")
+    private String mCachedAdjType = null;
     @GuardedBy("mService")
     private int mCachedAdj = ProcessList.INVALID_ADJ;
     @GuardedBy("mService")
@@ -535,7 +527,7 @@ final class ProcessStateRecord {
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     int getSetAdjWithServices() {
-        if (mSetAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
+        if (mSetAdj >= CACHED_APP_MIN_ADJ) {
             if (mHasStartedServices) {
                 return ProcessList.SERVICE_B_ADJ;
             }
@@ -915,36 +907,13 @@ final class ProcessStateRecord {
     }
 
     @GuardedBy("mService")
-    void setEmpty(boolean empty) {
-        mEmpty = empty;
-    }
-
-    @GuardedBy("mService")
     boolean isEmpty() {
-        return mEmpty;
-    }
-
-    @GuardedBy("mService")
-    void setCached(boolean cached) {
-        setCached(cached, false);
-    }
-
-    /**
-     * @return {@code true} if it's a dry run and it's going to uncache the process
-     * if it was a real run.
-     */
-    @GuardedBy("mService")
-    boolean setCached(boolean cached, boolean dryRun) {
-        if (dryRun) {
-            return mCached && !cached;
-        }
-        mCached = cached;
-        return false;
+        return mCurProcState >= PROCESS_STATE_CACHED_EMPTY;
     }
 
     @GuardedBy("mService")
     boolean isCached() {
-        return mCached;
+        return mCurAdj >= CACHED_APP_MIN_ADJ;
     }
 
     @GuardedBy("mService")
@@ -1041,6 +1010,7 @@ final class ProcessStateRecord {
         mCachedForegroundActivities = false;
         mCachedProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
         mCachedSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
+        mCachedAdjType = null;
     }
 
     @GuardedBy("mService")
@@ -1152,6 +1122,7 @@ final class ProcessStateRecord {
         mCachedHasVisibleActivities = callback.mHasVisibleActivities ? VALUE_TRUE : VALUE_FALSE;
         mCachedProcState = callback.procState;
         mCachedSchedGroup = callback.schedGroup;
+        mCachedAdjType = callback.mAdjType;
 
         if (mCachedAdj == ProcessList.VISIBLE_APP_ADJ) {
             mCachedAdj += minLayer;
@@ -1176,6 +1147,11 @@ final class ProcessStateRecord {
     @GuardedBy("mService")
     int getCachedSchedGroup() {
         return mCachedSchedGroup;
+    }
+
+    @GuardedBy("mService")
+    String getCachedAdjType() {
+        return mCachedAdjType;
     }
 
     @GuardedBy("mService")
@@ -1381,8 +1357,8 @@ final class ProcessStateRecord {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(mHasShownUi);
             pw.print(" pendingUiClean="); pw.println(mApp.mProfile.hasPendingUiClean());
         }
-        pw.print(prefix); pw.print("cached="); pw.print(mCached);
-        pw.print(" empty="); pw.println(mEmpty);
+        pw.print(prefix); pw.print("cached="); pw.print(isCached());
+        pw.print(" empty="); pw.println(isEmpty());
         if (mServiceB) {
             pw.print(prefix); pw.print("serviceb="); pw.print(mServiceB);
             pw.print(" serviceHighRam="); pw.println(mServiceHighRam);
