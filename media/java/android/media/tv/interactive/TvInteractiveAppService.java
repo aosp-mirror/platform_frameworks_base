@@ -964,7 +964,11 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Called when the TV App sends the selected track info as a response to
-         * {@link #requestSelectedTrackInfo()}
+         * {@link #requestSelectedTrackInfo()}.
+         *
+         * <p> When a selected track changes as a result of a new selection,
+         * {@link #onTrackSelected(int, String)} should be used instead to communicate the specific
+         * track selection.
          *
          * @param tracks A list of {@link TvTrackInfo} that are currently selected
          */
@@ -1383,6 +1387,8 @@ public abstract class TvInteractiveAppService extends Service {
          * <p> Normally, track info cannot be synchronized until the channel has
          * been changed. This is used when the session of the {@link TvInteractiveAppService}
          * is newly created and the normal synchronization has not happened yet.
+         *
+         * <p> The track info will be returned in {@link #onSelectedTrackInfo(List)}
          */
         @FlaggedApi(Flags.FLAG_TIAF_V_APIS)
         @CallSuper

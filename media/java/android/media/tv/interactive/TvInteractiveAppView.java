@@ -585,7 +585,8 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
-     * Sends the currently selected track info to the TV Interactive App.
+     * Sends the currently selected track info to the TV Interactive App in response to a
+     * {@link TvInteractiveAppCallback#onRequestSelectedTrackInfo(String)} request.
      *
      * @param tracks list of {@link TvTrackInfo} of the currently selected track(s)
      */
