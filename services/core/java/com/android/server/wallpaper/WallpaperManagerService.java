@@ -2219,8 +2219,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (wallpaper == null || !wallpaper.mSupportsMultiCrop) return null;
             SparseArray<Rect> relativeSuggestedCrops =
                     mWallpaperCropper.getRelativeCropHints(wallpaper);
-            Point croppedBitmapSize =
-                    new Point(wallpaper.cropHint.width(), wallpaper.cropHint.height());
+            Point croppedBitmapSize = new Point(
+                    (int) (0.5f + wallpaper.cropHint.width() / wallpaper.mSampleSize),
+                    (int) (0.5f + wallpaper.cropHint.height() / wallpaper.mSampleSize));
             SparseArray<Rect> relativeDefaultCrops =
                     mWallpaperCropper.getDefaultCrops(relativeSuggestedCrops, croppedBitmapSize);
             SparseArray<Rect> adjustedRelativeSuggestedCrops = new SparseArray<>();
