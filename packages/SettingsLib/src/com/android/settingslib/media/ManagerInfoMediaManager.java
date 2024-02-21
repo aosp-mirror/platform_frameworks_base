@@ -174,12 +174,6 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
 
     @Override
     @NonNull
-    protected List<MediaRoute2Info> getAllRoutes() {
-        return mRouterManager.getAllRoutes();
-    }
-
-    @Override
-    @NonNull
     protected List<MediaRoute2Info> getAvailableRoutesFromRouter() {
         return mRouterManager.getAvailableRoutes(mPackageName);
     }

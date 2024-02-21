@@ -136,12 +136,6 @@ import java.util.List;
 
     @NonNull
     @Override
-    protected List<MediaRoute2Info> getAllRoutes() {
-        return Collections.emptyList();
-    }
-
-    @NonNull
-    @Override
     protected List<MediaRoute2Info> getAvailableRoutesFromRouter() {
         return Collections.emptyList();
     }

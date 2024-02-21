@@ -207,9 +207,6 @@ public abstract class InfoMediaManager extends MediaManager {
     protected abstract RoutingSessionInfo getRoutingSessionById(@NonNull String sessionId);
 
     @NonNull
-    protected abstract List<MediaRoute2Info> getAllRoutes();
-
-    @NonNull
     protected abstract List<MediaRoute2Info> getAvailableRoutesFromRouter();
 
     @NonNull

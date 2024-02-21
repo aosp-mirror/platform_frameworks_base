@@ -241,12 +241,6 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
 
     @NonNull
     @Override
-    protected List<MediaRoute2Info> getAllRoutes() {
-        return mRouter.getAllRoutes();
-    }
-
-    @NonNull
-    @Override
     protected List<MediaRoute2Info> getAvailableRoutesFromRouter() {
         return mRouter.getRoutes();
     }
