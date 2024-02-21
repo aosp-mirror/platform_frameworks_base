@@ -31,12 +31,12 @@ import java.util.Objects;
 public final class PictureInPictureUiState implements Parcelable {
 
     private final boolean mIsStashed;
-    private final boolean mIsEnteringPip;
+    private final boolean mIsTransitioningToPip;
 
     /** {@hide} */
     PictureInPictureUiState(Parcel in) {
         mIsStashed = in.readBoolean();
-        mIsEnteringPip = in.readBoolean();
+        mIsTransitioningToPip = in.readBoolean();
     }
 
     /** {@hide} */
@@ -45,9 +45,9 @@ public final class PictureInPictureUiState implements Parcelable {
         this(isStashed, false /* isEnteringPip */);
     }
 
-    private PictureInPictureUiState(boolean isStashed, boolean isEnteringPip) {
+    private PictureInPictureUiState(boolean isStashed, boolean isTransitioningToPip) {
         mIsStashed = isStashed;
-        mIsEnteringPip = isEnteringPip;
+        mIsTransitioningToPip = isTransitioningToPip;
     }
 
     /**
@@ -77,14 +77,14 @@ public final class PictureInPictureUiState implements Parcelable {
      * whether via auto enter PiP or calling
      * {@link Activity#enterPictureInPictureMode(PictureInPictureParams)} explicitly, app can expect
      * {@link Activity#onPictureInPictureUiStateChanged(PictureInPictureUiState)} callback with
-     * {@link #isEnteringPip()} to be {@code true} first,
+     * {@link #isTransitioningToPip()} to be {@code true} first,
      * followed by {@link Activity#onPictureInPictureModeChanged(boolean, Configuration)} when it
      * fully settles in PiP mode.
      *
      * When app receives the
      * {@link Activity#onPictureInPictureUiStateChanged(PictureInPictureUiState)} callback with
-     * {@link #isEnteringPip()} being {@code true}, it's recommended to hide certain UI elements,
-     * such as video controls, to archive a clean entering PiP animation.
+     * {@link #isTransitioningToPip()} being {@code true}, it's recommended to hide certain UI
+     * elements, such as video controls, to archive a clean entering PiP animation.
      *
      * In case an application wants to restore the previously hidden UI elements when exiting
      * PiP, it is recommended to do that in
@@ -92,8 +92,8 @@ public final class PictureInPictureUiState implements Parcelable {
      * than the beginning of exit PiP animation.
      */
     @FlaggedApi(Flags.FLAG_ENABLE_PIP_UI_STATE_CALLBACK_ON_ENTERING)
-    public boolean isEnteringPip() {
-        return mIsEnteringPip;
+    public boolean isTransitioningToPip() {
+        return mIsTransitioningToPip;
     }
 
     @Override
@@ -102,12 +102,12 @@ public final class PictureInPictureUiState implements Parcelable {
         if (!(o instanceof PictureInPictureUiState)) return false;
         PictureInPictureUiState that = (PictureInPictureUiState) o;
         return mIsStashed == that.mIsStashed
-                && mIsEnteringPip == that.mIsEnteringPip;
+                && mIsTransitioningToPip == that.mIsTransitioningToPip;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mIsStashed, mIsEnteringPip);
+        return Objects.hash(mIsStashed, mIsTransitioningToPip);
     }
 
     @Override
@@ -118,7 +118,7 @@ public final class PictureInPictureUiState implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeBoolean(mIsStashed);
-        out.writeBoolean(mIsEnteringPip);
+        out.writeBoolean(mIsTransitioningToPip);
     }
 
     public static final @android.annotation.NonNull Creator<PictureInPictureUiState> CREATOR =
@@ -138,7 +138,7 @@ public final class PictureInPictureUiState implements Parcelable {
     @FlaggedApi(Flags.FLAG_ENABLE_PIP_UI_STATE_CALLBACK_ON_ENTERING)
     public static final class Builder {
         private boolean mIsStashed;
-        private boolean mIsEnteringPip;
+        private boolean mIsTransitioningToPip;
 
         /** Empty constructor. */
         public Builder() {
@@ -154,11 +154,11 @@ public final class PictureInPictureUiState implements Parcelable {
         }
 
         /**
-         * Sets the {@link #mIsEnteringPip} state.
+         * Sets the {@link #mIsTransitioningToPip} state.
          * @return The same {@link Builder} instance.
          */
-        public Builder setEnteringPip(boolean isEnteringPip) {
-            mIsEnteringPip = isEnteringPip;
+        public Builder setTransitioningToPip(boolean isEnteringPip) {
+            mIsTransitioningToPip = isEnteringPip;
             return this;
         }
 
@@ -166,7 +166,7 @@ public final class PictureInPictureUiState implements Parcelable {
          * @return The constructed {@link PictureInPictureUiState} instance.
          */
         public PictureInPictureUiState build() {
-            return new PictureInPictureUiState(mIsStashed, mIsEnteringPip);
+            return new PictureInPictureUiState(mIsStashed, mIsTransitioningToPip);
         }
     }
 }

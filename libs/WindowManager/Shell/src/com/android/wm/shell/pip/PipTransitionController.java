@@ -191,7 +191,7 @@ public abstract class PipTransitionController implements Transitions.TransitionH
             try {
                 ActivityTaskManager.getService().onPictureInPictureUiStateChanged(
                         new PictureInPictureUiState.Builder()
-                                .setEnteringPip(true)
+                                .setTransitioningToPip(true)
                                 .build());
             } catch (RemoteException | IllegalStateException e) {
                 ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -210,7 +210,7 @@ public abstract class PipTransitionController implements Transitions.TransitionH
             try {
                 ActivityTaskManager.getService().onPictureInPictureUiStateChanged(
                         new PictureInPictureUiState.Builder()
-                                .setEnteringPip(false)
+                                .setTransitioningToPip(false)
                                 .build());
             } catch (RemoteException | IllegalStateException e) {
                 ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
