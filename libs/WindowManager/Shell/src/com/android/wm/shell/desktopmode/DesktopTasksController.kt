@@ -255,7 +255,10 @@ class DesktopTasksController(
                 2 -> {
                     // Split-screen case where there are two focused tasks, then we find the child
                     // task to move to desktop.
-                    val splitFocusedTask = findChildFocusedTask(allFocusedTasks)
+                    val splitFocusedTask =
+                        if (allFocusedTasks[0].taskId == allFocusedTasks[1].parentTaskId)
+                            allFocusedTasks[1]
+                        else allFocusedTasks[0]
                     moveToDesktop(splitFocusedTask)
                 }
                 1 -> {
@@ -263,19 +266,15 @@ class DesktopTasksController(
                     moveToDesktop(allFocusedTasks[0].taskId)
                 }
                 else -> {
-                    KtProtoLog.v(
+                    KtProtoLog.w(
                         WM_SHELL_DESKTOP_MODE,
-                        "DesktopTasksController: Cannot enter desktop expected less " +
-                                "than 3 focused tasks but found " + allFocusedTasks.size
+                        "DesktopTasksController: Cannot enter desktop, expected less " +
+                                "than 3 focused tasks but found %d",
+                        allFocusedTasks.size
                     )
                 }
             }
         }
-    }
-
-    private fun findChildFocusedTask(allFocusedTasks: List<RunningTaskInfo>): RunningTaskInfo {
-        if (allFocusedTasks[0].taskId == allFocusedTasks[1].parentTaskId) return allFocusedTasks[1]
-        return allFocusedTasks[0]
     }
 
     /** Move a task with given `taskId` to desktop */
