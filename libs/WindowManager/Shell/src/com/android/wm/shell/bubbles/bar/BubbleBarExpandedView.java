@@ -143,6 +143,8 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
                 outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), mCurrentCornerRadius);
             }
         });
+        // Set a touch sink to ensure that clicks on the caption area do not propagate to the parent
+        setOnTouchListener((v, event) -> true);
     }
 
     @Override
@@ -245,12 +247,8 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        int menuViewHeight = Math.min(mCaptionHeight, height);
-        measureChild(mHandleView, widthMeasureSpec, MeasureSpec.makeMeasureSpec(menuViewHeight,
-                MeasureSpec.getMode(heightMeasureSpec)));
-
         if (mTaskView != null) {
+            int height = MeasureSpec.getSize(heightMeasureSpec);
             measureChild(mTaskView, widthMeasureSpec, MeasureSpec.makeMeasureSpec(height,
                     MeasureSpec.getMode(heightMeasureSpec)));
         }
@@ -259,14 +257,11 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        final int captionBottom = t + mCaptionHeight;
         if (mTaskView != null) {
             mTaskView.layout(l, t, r,
                     t + mTaskView.getMeasuredHeight());
             mTaskView.setCaptionInsets(Insets.of(0, mCaptionHeight, 0, 0));
         }
-        // Handle draws on top of task view in the caption area.
-        mHandleView.layout(l, t, r, captionBottom);
     }
 
     @Override
