@@ -41,6 +41,8 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.annotations.RequiresFlagsEnabled
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.testing.AndroidTestingRunner
@@ -140,6 +142,7 @@ private const val APP_NAME = "APP_NAME"
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MediaControlPanelTest : SysuiTestCase() {
+    @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
     private lateinit var player: MediaControlPanel
 
@@ -1244,6 +1247,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     fun bindBroadcastButton() {
         initMediaViewHolderMocks()
         initDeviceMediaData(true, APP_NAME)
