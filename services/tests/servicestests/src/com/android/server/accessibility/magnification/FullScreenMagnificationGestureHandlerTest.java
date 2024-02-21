@@ -189,6 +189,8 @@ public class FullScreenMagnificationGestureHandlerTest {
     FullScreenMagnificationVibrationHelper mMockFullScreenMagnificationVibrationHelper;
     @Mock
     FullScreenMagnificationGestureHandler.MagnificationLogger mMockMagnificationLogger;
+    @Mock
+    OneFingerPanningSettingsProvider mMockOneFingerPanningSettingsProvider;
 
     @Rule
     public final TestableContext mContext = new TestableContext(getInstrumentation().getContext());
@@ -266,6 +268,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         mMgh.onDestroy();
         mFullScreenMagnificationController.unregister(DISPLAY_0);
         verify(mWindowMagnificationPromptController).onDestroy();
+        verify(mMockOneFingerPanningSettingsProvider).unregister();
         Settings.Secure.putFloatForUser(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
                 mOriginalMagnificationPersistedScale,
@@ -288,11 +291,10 @@ public class FullScreenMagnificationGestureHandlerTest {
                         DISPLAY_0,
                         mMockFullScreenMagnificationVibrationHelper,
                         mMockMagnificationLogger,
-                        ViewConfiguration.get(mContext));
+                        ViewConfiguration.get(mContext),
+                        mMockOneFingerPanningSettingsProvider);
         if (isWatch()) {
-            h.setSinglePanningEnabled(true);
-        } else {
-            h.setSinglePanningEnabled(false);
+            enableOneFingerPanning(true);
         }
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
@@ -607,8 +609,8 @@ public class FullScreenMagnificationGestureHandlerTest {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
     public void testTwoFingerTap_StateIsActivated_shouldInDelegating() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
-        mMgh.setSinglePanningEnabled(false);
+        assumeTrue(isWatch());
+        enableOneFingerPanning(false);
         goFromStateIdleTo(STATE_ACTIVATED);
         allowEventDelegation();
 
@@ -623,8 +625,8 @@ public class FullScreenMagnificationGestureHandlerTest {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
     public void testTwoFingerTap_StateIsIdle_shouldInDelegating() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
-        mMgh.setSinglePanningEnabled(false);
+        assumeTrue(isWatch());
+        enableOneFingerPanning(false);
         goFromStateIdleTo(STATE_IDLE);
         allowEventDelegation();
 
@@ -830,7 +832,7 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     public void testActionUpNotAtEdge_singlePanningState_detectingState() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
 
         send(upEvent());
@@ -841,8 +843,8 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     public void testScroll_SinglePanningDisabled_delegatingState() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
-        mMgh.setSinglePanningEnabled(false);
+        assumeTrue(isWatch());
+        enableOneFingerPanning(false);
 
         goFromStateIdleTo(STATE_ACTIVATED);
         allowEventDelegation();
@@ -854,7 +856,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     @Test
     @FlakyTest
     public void testScroll_singleHorizontalPanningAndAtEdge_leftEdgeOverscroll() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         float centerY =
                 (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.bottom) / 2.0f;
@@ -878,7 +880,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     @Test
     @FlakyTest
     public void testScroll_singleHorizontalPanningAndAtEdge_rightEdgeOverscroll() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         float centerY =
                 (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.bottom) / 2.0f;
@@ -902,7 +904,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     @Test
     @FlakyTest
     public void testScroll_singleVerticalPanningAndAtEdge_verticalOverscroll() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         float centerX =
                 (INITIAL_MAGNIFICATION_BOUNDS.right + INITIAL_MAGNIFICATION_BOUNDS.left) / 2.0f;
@@ -924,7 +926,7 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     public void testScroll_singlePanningAndAtEdge_noOverscroll() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         float centerY =
                 (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.bottom) / 2.0f;
@@ -946,7 +948,7 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     public void testScroll_singleHorizontalPanningAndAtEdge_vibrate() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         mFullScreenMagnificationController.setCenter(
                 DISPLAY_0,
@@ -970,7 +972,7 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     public void testScroll_singleVerticalPanningAndAtEdge_doNotVibrate() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        assumeTrue(isWatch());
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         mFullScreenMagnificationController.setCenter(
                 DISPLAY_0,
@@ -993,8 +995,9 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FULLSCREEN_FLING_GESTURE)
     public void singleFinger_testScrollAfterMagnified_startsFling() {
-        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        assumeTrue(isWatch());
         goFromStateIdleTo(STATE_ACTIVATED);
 
         swipeAndHold();
@@ -1272,6 +1275,10 @@ public class FullScreenMagnificationGestureHandlerTest {
 
         mMgh.clearAndTransitionToStateDetecting();
         mFullScreenMagnificationController.reset(DISPLAY_0, /* animate= */ false);
+    }
+
+    private void enableOneFingerPanning(boolean enable) {
+        when(mMockOneFingerPanningSettingsProvider.isOneFingerPanningEnabled()).thenReturn(enable);
     }
 
     private void assertActionsInOrder(List<MotionEvent> actualEvents,
