@@ -159,6 +159,21 @@ public final class RampSegment extends VibrationEffectSegment {
     /** @hide */
     @NonNull
     @Override
+    public RampSegment scaleLinearly(float scaleFactor) {
+        float newStartAmplitude = VibrationEffect.scaleLinearly(mStartAmplitude, scaleFactor);
+        float newEndAmplitude = VibrationEffect.scaleLinearly(mEndAmplitude, scaleFactor);
+        if (Float.compare(mStartAmplitude, newStartAmplitude) == 0
+                && Float.compare(mEndAmplitude, newEndAmplitude) == 0) {
+            return this;
+        }
+        return new RampSegment(newStartAmplitude, newEndAmplitude, mStartFrequencyHz,
+                mEndFrequencyHz,
+                mDuration);
+    }
+
+    /** @hide */
+    @NonNull
+    @Override
     public RampSegment applyEffectStrength(int effectStrength) {
         return this;
     }

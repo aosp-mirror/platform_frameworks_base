@@ -106,6 +106,13 @@ public class PrebakedSegmentTest {
     }
 
     @Test
+    public void testScaleLinearly_ignoresAndReturnsSameEffect() {
+        PrebakedSegment prebaked = new PrebakedSegment(
+                VibrationEffect.EFFECT_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
+        assertSame(prebaked, prebaked.scaleLinearly(0.5f));
+    }
+
+    @Test
     public void testDuration() {
         assertEquals(-1, new PrebakedSegment(
                 VibrationEffect.EFFECT_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
