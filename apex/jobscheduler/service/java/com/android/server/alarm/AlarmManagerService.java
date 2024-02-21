@@ -16,6 +16,7 @@
 
 package com.android.server.alarm;
 
+import static android.app.ActivityManager.UidFrozenStateChangedCallback.UID_FROZEN_STATE_FROZEN;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
@@ -75,6 +76,7 @@ import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AlarmManager;
@@ -103,6 +105,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -145,6 +148,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.LocalLog;
@@ -293,6 +297,7 @@ public class AlarmManagerService extends SystemService {
 
     private final Injector mInjector;
     int mBroadcastRefCount = 0;
+    boolean mUseFrozenStateToDropListenerAlarms;
     MetricsHelper mMetricsHelper;
     PowerManager.WakeLock mWakeLock;
     SparseIntArray mAlarmsPerUid = new SparseIntArray();
@@ -1856,14 +1861,46 @@ public class AlarmManagerService extends SystemService {
     @Override
     public void onStart() {
         mInjector.init();
+        mHandler = new AlarmHandler();
+
         mOptsWithFgs.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mOptsWithFgsForAlarmClock.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mOptsWithoutFgs.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mOptsTimeBroadcast.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mActivityOptsRestrictBal.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mBroadcastOptsRestrictBal.setPendingIntentBackgroundActivityLaunchAllowed(false);
+
         mMetricsHelper = new MetricsHelper(getContext(), mLock);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+
+        mUseFrozenStateToDropListenerAlarms = Flags.useFrozenStateToDropListenerAlarms();
+        if (mUseFrozenStateToDropListenerAlarms) {
+            final ActivityManager.UidFrozenStateChangedCallback callback = (uids, frozenStates) -> {
+                final int size = frozenStates.length;
+                if (uids.length != size) {
+                    Slog.wtf(TAG, "Got different length arrays in frozen state callback!"
+                            + " uids.length: " + uids.length + " frozenStates.length: " + size);
+                    // Cannot process received data in any meaningful way.
+                    return;
+                }
+                final IntArray affectedUids = new IntArray();
+                for (int i = 0; i < size; i++) {
+                    if (frozenStates[i] != UID_FROZEN_STATE_FROZEN) {
+                        continue;
+                    }
+                    if (!CompatChanges.isChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED,
+                            uids[i])) {
+                        continue;
+                    }
+                    affectedUids.add(uids[i]);
+                }
+                if (affectedUids.size() > 0) {
+                    removeExactListenerAlarms(affectedUids.toArray());
+                }
+            };
+            final ActivityManager am = getContext().getSystemService(ActivityManager.class);
+            am.registerUidFrozenStateChangedCallback(new HandlerExecutor(mHandler), callback);
+        }
 
         mListenerDeathRecipient = new IBinder.DeathRecipient() {
             @Override
@@ -1880,7 +1917,6 @@ public class AlarmManagerService extends SystemService {
         };
 
         synchronized (mLock) {
-            mHandler = new AlarmHandler();
             mConstants = new Constants(mHandler);
 
             mAlarmStore = new LazyAlarmStore();
@@ -1958,6 +1994,21 @@ public class AlarmManagerService extends SystemService {
         }
         publishLocalService(AlarmManagerInternal.class, new LocalService());
         publishBinderService(Context.ALARM_SERVICE, mService);
+    }
+
+    private void removeExactListenerAlarms(int... whichUids) {
+        synchronized (mLock) {
+            removeAlarmsInternalLocked(a -> {
+                if (!ArrayUtils.contains(whichUids, a.uid) || a.listener == null
+                        || a.windowLength != 0) {
+                    return false;
+                }
+                Slog.w(TAG, "Alarm " + a.listenerTag + " being removed for "
+                        + UserHandle.formatUid(a.uid) + ":" + a.packageName
+                        + " because the app got frozen");
+                return true;
+            }, REMOVE_REASON_LISTENER_CACHED);
+        }
     }
 
     void refreshExactAlarmCandidates() {
@@ -3072,6 +3123,14 @@ public class AlarmManagerService extends SystemService {
             pw.increaseIndent();
 
             mConstants.dump(pw);
+            pw.println();
+
+            pw.println("Feature Flags:");
+            pw.increaseIndent();
+            pw.print(Flags.FLAG_USE_FROZEN_STATE_TO_DROP_LISTENER_ALARMS,
+                    mUseFrozenStateToDropListenerAlarms);
+            pw.decreaseIndent();
+            pw.println();
             pw.println();
 
             if (mConstants.USE_TARE_POLICY == EconomyManager.ENABLED_MODE_ON) {
@@ -4959,18 +5018,7 @@ public class AlarmManagerService extends SystemService {
                     break;
                 case REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED:
                     uid = (Integer) msg.obj;
-                    synchronized (mLock) {
-                        removeAlarmsInternalLocked(a -> {
-                            if (a.uid != uid || a.listener == null || a.windowLength != 0) {
-                                return false;
-                            }
-                            // TODO (b/265195908): Change to .w once we have some data on breakages.
-                            Slog.wtf(TAG, "Alarm " + a.listenerTag + " being removed for "
-                                    + UserHandle.formatUid(a.uid) + ":" + a.packageName
-                                    + " because the app went into cached state");
-                            return true;
-                        }, REMOVE_REASON_LISTENER_CACHED);
-                    }
+                    removeExactListenerAlarms(uid);
                     break;
                 default:
                     // nope, just ignore it
@@ -5322,6 +5370,10 @@ public class AlarmManagerService extends SystemService {
 
         @Override
         public void handleUidCachedChanged(int uid, boolean cached) {
+            if (mUseFrozenStateToDropListenerAlarms) {
+                // Use ActivityManager#UidFrozenStateChangedCallback instead.
+                return;
+            }
             if (!CompatChanges.isChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED, uid)) {
                 return;
             }
