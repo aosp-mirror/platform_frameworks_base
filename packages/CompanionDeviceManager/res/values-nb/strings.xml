@@ -69,6 +69,6 @@
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Strøm appene på telefonen"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Strøm apper og andre systemfunksjoner fra telefonen"</string>
-    <string name="device_type" product="default" msgid="8268703872070046263">"telefon"</string>
-    <string name="device_type" product="tablet" msgid="5038791954983067774">"nettbrett"</string>
+    <string name="device_type" product="default" msgid="8268703872070046263">"telefonen"</string>
+    <string name="device_type" product="tablet" msgid="5038791954983067774">"nettbrettet"</string>
 </resources>
