@@ -1774,11 +1774,12 @@ public class BubbleController implements ConfigurationChangeListener,
         @Override
         public void removeBubble(Bubble removedBubble) {
             if (mLayerView != null) {
-                mLayerView.removeBubble(removedBubble);
-                if (!mBubbleData.hasBubbles() && !isStackExpanded()) {
-                    mLayerView.setVisibility(INVISIBLE);
-                    removeFromWindowManagerMaybe();
-                }
+                mLayerView.removeBubble(removedBubble, () -> {
+                    if (!mBubbleData.hasBubbles() && !isStackExpanded()) {
+                        mLayerView.setVisibility(INVISIBLE);
+                        removeFromWindowManagerMaybe();
+                    }
+                });
             }
         }
 
