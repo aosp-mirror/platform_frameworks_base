@@ -842,7 +842,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         // We must tell sidekick/displayoffload to stop controlling the display
                         // before we can change its power mode, so do that first.
                         if (isDisplayOffloadEnabled) {
-                            if (displayOffloadSession != null) {
+                            if (displayOffloadSession != null
+                                    && !DisplayOffloadSession.isSupportedOffloadState(state)) {
                                 displayOffloadSession.stopOffload();
                             }
                         } else {
@@ -874,8 +875,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         // have a sidekick/displayoffload available, tell it now that it can take
                         // control.
                         if (isDisplayOffloadEnabled) {
-                            if (DisplayOffloadSession.isSupportedOffloadState(state)
-                                    && displayOffloadSession != null) {
+                            if (displayOffloadSession != null
+                                    && DisplayOffloadSession.isSupportedOffloadState(state)) {
                                 displayOffloadSession.startOffload();
                             }
                         } else {
