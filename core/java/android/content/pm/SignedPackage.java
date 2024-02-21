@@ -35,9 +35,9 @@ public class SignedPackage {
     private final SignedPackageParcel mData;
 
     /** @hide */
-    public SignedPackage(@NonNull String pkgName, @NonNull byte[] certificateDigest) {
+    public SignedPackage(@NonNull String packageName, @NonNull byte[] certificateDigest) {
         SignedPackageParcel data = new SignedPackageParcel();
-        data.pkgName = pkgName;
+        data.packageName = packageName;
         data.certificateDigest = certificateDigest;
         mData = data;
     }
@@ -52,8 +52,8 @@ public class SignedPackage {
         return mData;
     }
 
-    public @NonNull String getPkgName() {
-        return mData.pkgName;
+    public @NonNull String getPackageName() {
+        return mData.packageName;
     }
 
     public @NonNull byte[] getCertificateDigest() {
@@ -64,12 +64,12 @@ public class SignedPackage {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SignedPackage that)) return false;
-        return mData.pkgName.equals(that.mData.pkgName) && Arrays.equals(mData.certificateDigest,
-                that.mData.certificateDigest);
+        return mData.packageName.equals(that.mData.packageName) && Arrays.equals(
+                mData.certificateDigest, that.mData.certificateDigest);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mData.pkgName, Arrays.hashCode(mData.certificateDigest));
+        return Objects.hash(mData.packageName, Arrays.hashCode(mData.certificateDigest));
     }
 }
