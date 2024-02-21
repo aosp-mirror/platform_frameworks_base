@@ -222,7 +222,7 @@ public class GrammaticalInflectionService extends SystemService {
         }
 
         final int uid = mPackageManagerInternal.getPackageUid(appPackageName, 0, userId);
-        FrameworkStatsLog.write(FrameworkStatsLog.GRAMMATICAL_INFLECTION_CHANGED,
+        FrameworkStatsLog.write(FrameworkStatsLog.APPLICATION_GRAMMATICAL_INFLECTION_CHANGED,
                 FrameworkStatsLog.APPLICATION_GRAMMATICAL_INFLECTION_CHANGED__SOURCE_ID__OTHERS,
                 uid,
                 gender != GRAMMATICAL_GENDER_NOT_SPECIFIED,
@@ -266,8 +266,14 @@ public class GrammaticalInflectionService extends SystemService {
 
         try {
             Configuration config = new Configuration();
+            int preValue = config.getGrammaticalGender();
             config.setGrammaticalGender(grammaticalGender);
             ActivityTaskManager.getService().updateConfiguration(config);
+            FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_GRAMMATICAL_INFLECTION_CHANGED,
+                    FrameworkStatsLog.SYSTEM_GRAMMATICAL_INFLECTION_CHANGED__SOURCE_ID__SYSTEM,
+                    userId,
+                    grammaticalGender != GRAMMATICAL_GENDER_NOT_SPECIFIED,
+                    preValue != GRAMMATICAL_GENDER_NOT_SPECIFIED);
         } catch (RemoteException e) {
             Log.w(TAG, "Can not update configuration", e);
         }
