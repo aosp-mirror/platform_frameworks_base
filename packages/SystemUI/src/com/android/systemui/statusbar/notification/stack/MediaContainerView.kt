@@ -22,6 +22,7 @@ import android.graphics.Canvas
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.row.ExpandableView
 
@@ -86,5 +87,48 @@ class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableVie
         onEnd: Runnable?
     ) {
         // No animation, it doesn't need it, this would be local
+    }
+
+    override fun setVisibility(visibility: Int) {
+        super.setVisibility(visibility)
+        assertMediaContainerVisibility(visibility)
+    }
+
+    /**
+     * b/298213983
+     * MediaContainerView's visibility is changed to VISIBLE when it should be GONE.
+     * This method check this state and logs.
+     */
+    private fun assertMediaContainerVisibility(visibility: Int) {
+        val currentViewState = viewState
+
+        if (currentViewState is MediaContainerViewState) {
+            if (!currentViewState.shouldBeVisible && visibility == VISIBLE) {
+                Log.wtf("MediaContainerView", "MediaContainerView should be GONE " +
+                        "but its visibility changed to VISIBLE")
+            }
+        }
+    }
+
+    fun setKeyguardVisibility(isVisible: Boolean) {
+        val currentViewState = viewState
+        if (currentViewState is MediaContainerViewState) {
+            currentViewState.shouldBeVisible = isVisible
+        }
+
+        visibility = if (isVisible) VISIBLE else GONE
+    }
+
+    override fun createExpandableViewState(): ExpandableViewState = MediaContainerViewState()
+
+    class MediaContainerViewState : ExpandableViewState() {
+        var shouldBeVisible: Boolean = false
+
+        override fun copyFrom(viewState: ViewState) {
+            super.copyFrom(viewState)
+            if (viewState is MediaContainerViewState) {
+                shouldBeVisible = viewState.shouldBeVisible
+            }
+        }
     }
 }
