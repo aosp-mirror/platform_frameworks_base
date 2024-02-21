@@ -23,6 +23,7 @@ import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.Log
+import com.android.systemui.Flags
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.row.ExpandableView
 
@@ -90,8 +91,24 @@ class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableVie
     }
 
     override fun setVisibility(visibility: Int) {
-        super.setVisibility(visibility)
+        if (Flags.bindKeyguardMediaVisibility()) {
+            if (isVisibilityValid(visibility)) {
+                super.setVisibility(visibility)
+            }
+        } else {
+            super.setVisibility(visibility)
+        }
+
         assertMediaContainerVisibility(visibility)
+    }
+
+    /**
+     * visibility should be aligned with MediaContainerView visibility on the keyguard.
+     */
+    private fun isVisibilityValid(visibility: Int): Boolean {
+        val currentViewState = viewState as? MediaContainerViewState ?: return true
+        val shouldBeGone = !currentViewState.shouldBeVisible
+        return if (shouldBeGone) visibility == GONE else visibility != GONE
     }
 
     /**

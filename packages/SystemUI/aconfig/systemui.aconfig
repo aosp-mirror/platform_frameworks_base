@@ -529,3 +529,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "bind_keyguard_media_visibility"
+    namespace: "systemui"
+    description: "Binds Keyguard Media Controller Visibility to MediaContainerView"
+    bug: "298213983"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
