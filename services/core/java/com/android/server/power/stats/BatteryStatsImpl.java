@@ -13854,7 +13854,9 @@ public class BatteryStatsImpl extends BatteryStats {
             mNumAllUidCpuTimeReads += 2;
         }
 
-        updateSystemServerThreadStats();
+        if (!Flags.disableSystemServicePowerAttr()) {
+            updateSystemServerThreadStats();
+        }
 
         if (powerAccumulator != null) {
             updateCpuEnergyConsumerStatsLocked(cpuClusterChargeUC, powerAccumulator);
