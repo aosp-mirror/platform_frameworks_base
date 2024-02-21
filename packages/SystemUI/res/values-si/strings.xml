@@ -268,10 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"සුරැකිණි"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"විසන්ධි කරන්න"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"සක්‍රිය කරන්න"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"හෙට ස්වයංක්‍රීයව නැවත ක්‍රියාත්මක කරන්න"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"ඉක්මන් බෙදා ගැනීම, මගේ උපාංගය සෙවීම, සහ උපාංග ස්ථානය වැනි විශේෂාංග බ්ලූටූත් භාවිත කරයි"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ශ්‍රව්‍ය"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"හෙඩ්සෙටය"</string>
@@ -532,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"මෙම උපාංගය ඔබගේ මාපියන් විසින් කළමනාකරණය කෙරේ. ඔබ භාවිත කරන යෙදුම්, ඔබගේ ස්ථානය සහ ඔබගේ තිර කාලය වැනි තොරතුරු ඔබගේ මාපියන්ට බැලීමට සහ කළමනාකරණය කිරීමට හැකිය."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent මඟින් අඟුලු දමා තබා ගන්න"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"සොරකම් ආරක්ෂණය\nඋපාංගය අගුළු දමා ඇත, අගුළු හැරීමේ උත්සාහයන් වැඩියි"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ශබ්ද සැකසීම්"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"මාධ්‍ය ස්වයංක්‍රීයව සිරස්තල"</string>
@@ -541,8 +540,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"අබල කරන්න"</string>
     <string name="sound_settings" msgid="8874581353127418308">"ශබ්ද සහ කම්පනය"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"සැකසීම්"</string>
-    <!-- no translation found for volume_panel_captioning_title (5984936949147684357) -->
-    <skip />
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"සජීවී සිරස්තල"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"හඬ පරිමාව සුරක්ෂිත මට්ටමට අඩු කරන ලදි"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"නිර්දේශිත ප්‍රමාණයට වඩා වැඩි කාලයක් හෙඩ්ෆෝන් හඬ පරිමාව ඉහළ මට්ටමක පවතී"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"හෙඩ්ෆෝන් හඬ පරිමාව මෙම සතිය සඳහා සුරක්ෂිත සීමාව ඉක්මවා ඇත"</string>
@@ -586,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"කම්පනය"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"හඬ පරිමා පාලන %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"ඇමතුම් සහ දැනුම්දීම් (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>) නාද කරනු ඇත"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> වාදනය කරන්නේ"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ශ්‍රව්‍ය වාදනය වනු ඇත්තේ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"පද්ධති UI සුසරකය"</string>
     <string name="status_bar" msgid="4357390266055077437">"තත්ත්ව තීරුව"</string>
     <string name="demo_mode" msgid="263484519766901593">"පද්ධති UI ආදර්ශන ප්‍රකාරය"</string>

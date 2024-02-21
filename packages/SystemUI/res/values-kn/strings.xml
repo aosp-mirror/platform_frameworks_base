@@ -268,10 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"ನಾಳೆ ಪುನಃ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್ ಮಾಡಿ"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"ಕ್ವಿಕ್ ಶೇರ್, Find My Device ನಂತಹ ಫೀಚರ್‌ಗಳು ಮತ್ತು ಸಾಧನದ ಸ್ಥಳ ಬ್ಲೂಟೂತ್ ಬಳಸುತ್ತವೆ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ಆಡಿಯೋ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ಹೆಡ್‌ಸೆಟ್"</string>
@@ -532,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ಈ ಸಾಧನವನ್ನು ನಿಮ್ಮ ಪೋಷಕರು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ. ನೀವು ಬಳಸುವ ಆ್ಯಪ್‌ಗಳು, ನಿಮ್ಮ ಸ್ಥಳ ಮತ್ತು ನಿಮ್ಮ ವೀಕ್ಷಣಾ ಅವಧಿಯಂತಹ ಮಾಹಿತಿಯನ್ನು ನಿಮ್ಮ ಪೋಷಕರು ನೋಡಬಹುದು ಮತ್ತು ನಿರ್ವಹಿಸಬಹುದು."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ನಿಂದ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"ಕಳ್ಳತನದ ರಕ್ಷಣೆ\nಸಾಧನ ಲಾಕ್ ಆಗಿದೆ, ಅನ್‌ಲಾಕ್‌ಗೆ ಹೆಚ್ಚು ಪ್ರಯತ್ನ..."</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ಸೌಂಡ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ಸ್ವಯಂಚಾಲಿತ ಶೀರ್ಷಿಕೆ ಮಾಧ್ಯಮ"</string>
@@ -585,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ವೈಬ್ರೇಟ್‌"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ವಾಲ್ಯೂಮ್ ನಿಯಂತ್ರಕಗಳು"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"(<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>) ನಲ್ಲಿ ಕರೆಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳು ರಿಂಗ್ ಆಗುತ್ತವೆ"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> ನಲ್ಲಿ ಪ್ಲೇ ಆಗು..."</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ಇಲ್ಲಿ ಆಡಿಯೋ ಪ್ಲೇ..."</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್"</string>
     <string name="status_bar" msgid="4357390266055077437">"ಸ್ಥಿತಿ ಪಟ್ಟಿ"</string>
     <string name="demo_mode" msgid="263484519766901593">"ಸಿಸ್ಟಂ UI ಡೆಮೋ ಮೋಡ್"</string>
