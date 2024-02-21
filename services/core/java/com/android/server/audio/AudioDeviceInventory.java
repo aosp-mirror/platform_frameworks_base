@@ -167,8 +167,7 @@ public class AudioDeviceInventory {
                 ads = findBtDeviceStateForAddress(peerAddress, deviceType);
             }
             if (ads != null) {
-                if (ads.getAudioDeviceCategory() != category
-                        && category != AUDIO_DEVICE_CATEGORY_UNKNOWN) {
+                if (ads.getAudioDeviceCategory() != category) {
                     ads.setAudioDeviceCategory(category);
                     mDeviceBroker.postUpdatedAdiDeviceState(ads);
                     mDeviceBroker.postPersistAudioDeviceSettings();
