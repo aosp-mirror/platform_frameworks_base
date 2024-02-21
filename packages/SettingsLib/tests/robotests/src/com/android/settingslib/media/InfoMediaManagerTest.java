@@ -505,18 +505,6 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    public void connectDeviceWithoutPackageName_noSession_returnFalse() {
-        final MediaRoute2Info info = mock(MediaRoute2Info.class);
-        final MediaDevice device = new InfoMediaDevice(mContext, info);
-
-        final List<RoutingSessionInfo> infos = new ArrayList<>();
-
-        mShadowRouter2Manager.setRemoteSessions(infos);
-
-        assertThat(mInfoMediaManager.connectDeviceWithoutPackageName(device)).isFalse();
-    }
-
-    @Test
     public void onRoutesRemoved_getAvailableRoutes_shouldAddMediaDevice() {
         final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
         final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);

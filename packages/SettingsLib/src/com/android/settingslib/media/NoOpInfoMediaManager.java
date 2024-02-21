@@ -58,11 +58,6 @@ import java.util.List;
     }
 
     @Override
-    protected boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device) {
-        return false;
-    }
-
-    @Override
     protected void transferToRoute(@NonNull MediaRoute2Info route) {
         // Do nothing.
     }
