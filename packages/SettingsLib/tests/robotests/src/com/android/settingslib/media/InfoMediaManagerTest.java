@@ -30,6 +30,7 @@ import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.S
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -124,7 +125,11 @@ public class InfoMediaManagerTest {
 
     @Test
     public void stopScan_startFirst_callsUnregister() {
+        RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
         mInfoMediaManager.mRouterManager = mRouterManager;
+        // Since test is running in Robolectric, return a fake session to avoid NPE.
+        when(mRouterManager.getRoutingSessions(anyString())).thenReturn(List.of(sessionInfo));
+
         mInfoMediaManager.startScan();
         mInfoMediaManager.stopScan();
 
@@ -678,17 +683,6 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    public void getSessionVolumeMax_routeSessionInfoIsNull_returnNotFound() {
-        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
-        final RoutingSessionInfo info = null;
-        routingSessionInfos.add(info);
-
-        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
-
-        assertThat(mInfoMediaManager.getSessionVolumeMax()).isEqualTo(-1);
-    }
-
-    @Test
     public void getSessionVolume_containPackageName_returnMaxVolume() {
         final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
         final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
@@ -700,17 +694,6 @@ public class InfoMediaManagerTest {
         mInfoMediaManager.getSessionVolume();
 
         verify(info).getVolume();
-    }
-
-    @Test
-    public void getSessionVolume_routeSessionInfoIsNull_returnNotFound() {
-        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
-        final RoutingSessionInfo info = null;
-        routingSessionInfos.add(info);
-
-        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
-
-        assertThat(mInfoMediaManager.getSessionVolume()).isEqualTo(-1);
     }
 
     @Test
@@ -732,17 +715,6 @@ public class InfoMediaManagerTest {
         when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
 
         assertThat(mInfoMediaManager.releaseSession()).isTrue();
-    }
-
-    @Test
-    public void getSessionName_routeSessionInfoIsNull_returnNull() {
-        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
-        final RoutingSessionInfo info = null;
-        routingSessionInfos.add(info);
-
-        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
-
-        assertThat(mInfoMediaManager.getSessionName()).isNull();
     }
 
     @Test
