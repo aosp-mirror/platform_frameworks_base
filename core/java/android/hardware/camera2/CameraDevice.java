@@ -1718,7 +1718,7 @@ public abstract class CameraDevice implements AutoCloseable {
          * <p>Other than that, the characteristics returned here can be used in the same way as
          * those returned from {@link CameraManager#getCameraCharacteristics}.</p>
          *
-         * @param sessionConfig : The session configuration for which characteristics are fetched.
+         * @param sessionConfig The session configuration for which characteristics are fetched.
          * @return CameraCharacteristics specific to a given session configuration.
          *
          * @throws IllegalArgumentException      if the session configuration is invalid
