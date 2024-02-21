@@ -74,7 +74,7 @@ constructor(
     mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
-    private val communalSettingsInteractor: CommunalSettingsInteractor,
+    communalSettingsInteractor: CommunalSettingsInteractor,
     private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
     @CommunalLog logBuffer: LogBuffer,
@@ -88,8 +88,7 @@ constructor(
     val editModeOpen: StateFlow<Boolean> = _editModeOpen.asStateFlow()
 
     /** Whether communal features are enabled. */
-    val isCommunalEnabled: Boolean
-        get() = communalSettingsInteractor.isCommunalEnabled.value
+    val isCommunalEnabled: StateFlow<Boolean> = communalSettingsInteractor.isCommunalEnabled
 
     /** Whether communal features are enabled and available. */
     val isCommunalAvailable: Flow<Boolean> =

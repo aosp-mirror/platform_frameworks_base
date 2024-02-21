@@ -67,7 +67,7 @@ class CommunalInteractorCommunalDisabledTest : SysuiTestCase() {
 
     @Test
     fun isCommunalEnabled_false() =
-        testScope.runTest { assertThat(underTest.isCommunalEnabled).isFalse() }
+        testScope.runTest { assertThat(underTest.isCommunalEnabled.value).isFalse() }
 
     @Test
     fun isCommunalAvailable_whenStorageUnlock_false() =
