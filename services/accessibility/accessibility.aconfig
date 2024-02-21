@@ -80,6 +80,16 @@ flag {
 }
 
 flag {
+    name: "reset_hover_event_timer_on_action_up"
+    namespace: "accessibility"
+    description: "Reset the timer for sending hover events on receiving ACTION_UP to guarantee the correct amount of time is available between taps."
+    bug: "326260351"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "scan_packages_without_lock"
     namespace: "accessibility"
     description: "Scans packages for accessibility service/activity info without holding the A11yMS lock"
