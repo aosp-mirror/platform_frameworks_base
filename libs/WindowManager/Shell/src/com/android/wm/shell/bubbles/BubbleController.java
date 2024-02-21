@@ -1838,7 +1838,7 @@ public class BubbleController implements ConfigurationChangeListener,
                     + " expanded=%b selectionChanged=%b selected=%s"
                     + " suppressed=%s unsupressed=%s shouldShowEducation=%b",
                     update.addedBubble != null ? update.addedBubble.getKey() : "null",
-                    update.removedBubbles.isEmpty(),
+                    !update.removedBubbles.isEmpty(),
                     update.updatedBubble != null ? update.updatedBubble.getKey() : "null",
                     update.orderChanged, update.expandedChanged, update.expanded,
                     update.selectionChanged,
