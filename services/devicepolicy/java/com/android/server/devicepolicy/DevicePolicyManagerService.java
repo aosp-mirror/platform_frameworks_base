@@ -264,6 +264,7 @@ import static android.security.keystore.AttestationUtils.USE_INDIVIDUAL_ATTESTAT
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
@@ -22099,9 +22100,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforcePermission(MANAGE_DEVICE_POLICY_THEFT_DETECTION, caller.getPackageName(),
                 caller.getUserId());
 
-        //STOPSHIP: replace 1<<9 with
-        // LockPatternUtils.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST once ag/26042068 lands
-        return 0 != (mLockPatternUtils.getStrongAuthForUser(caller.getUserId()) & (1 << 9));
+        return mInjector.binderWithCleanCallingIdentity(() ->
+                0 != (mLockPatternUtils.getStrongAuthForUser(caller.getUserId())
+                        & SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST));
     }
 
     @Override

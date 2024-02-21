@@ -230,18 +230,12 @@ constructor(
         val currentAllowMediaPlayerOnLockScreen = allowMediaPlayerOnLockScreen
         val useSplitShade = useSplitShade
         val shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade()
-
         visible =
             isMediaHostVisible &&
                 isBypassNotEnabled &&
                 keyguardOrUserSwitcher &&
                 currentAllowMediaPlayerOnLockScreen &&
                 shouldBeVisibleForSplitShade
-        if (visible) {
-            showMediaPlayer()
-        } else {
-            hideMediaPlayer()
-        }
         logger.logRefreshMediaPosition(
             reason = reason,
             visible = visible,
@@ -251,8 +245,17 @@ constructor(
             mediaHostVisible = isMediaHostVisible,
             bypassNotEnabled = isBypassNotEnabled,
             currentAllowMediaPlayerOnLockScreen = currentAllowMediaPlayerOnLockScreen,
-            shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade
+            shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade,
         )
+        val currActiveContainer = activeContainer
+
+        logger.logActiveMediaContainer("before refreshMediaPosition", currActiveContainer)
+        if (visible) {
+            showMediaPlayer()
+        } else {
+            hideMediaPlayer()
+        }
+        logger.logActiveMediaContainer("after refreshMediaPosition", currActiveContainer)
 
         lastUsedStatusBarState = currentState
     }
@@ -293,9 +296,11 @@ constructor(
     }
 
     private fun setVisibility(view: ViewGroup?, newVisibility: Int) {
-        val previousVisibility = view?.visibility
-        view?.visibility = newVisibility
-        if (previousVisibility != newVisibility) {
+        val currentMediaContainer = view ?: return
+
+        val previousVisibility = currentMediaContainer.visibility
+        currentMediaContainer.visibility = newVisibility
+        if (previousVisibility != newVisibility && currentMediaContainer is MediaContainerView) {
             visibilityChangedListener?.invoke(newVisibility == View.VISIBLE)
         }
     }
@@ -325,4 +330,7 @@ constructor(
             }
         }
     }
+
+    private val activeContainer: ViewGroup? =
+        if (useSplitShade) splitShadeContainer else singlePaneContainer
 }

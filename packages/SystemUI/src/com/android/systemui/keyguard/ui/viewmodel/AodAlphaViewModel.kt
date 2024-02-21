@@ -18,7 +18,9 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
@@ -38,6 +40,7 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
     goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
+    keyguardInteractor: KeyguardInteractor,
 ) {
 
     /** The alpha level for the entire lockscreen while in AOD. */
@@ -46,7 +49,8 @@ constructor(
                 keyguardTransitionInteractor.transitions,
                 goneToAodTransitionViewModel.enterFromTopAnimationAlpha.onStart { emit(0f) },
                 goneToDozingTransitionViewModel.lockscreenAlpha.onStart { emit(0f) },
-            ) { step, goneToAodAlpha, goneToDozingAlpha ->
+                keyguardInteractor.keyguardAlpha.onStart { emit(1f) },
+            ) { step, goneToAodAlpha, goneToDozingAlpha, keyguardAlpha ->
                 if (step.to == GONE) {
                     // When transitioning to GONE, only emit a value when complete as other
                     // transitions may be controlling the alpha fade
@@ -57,6 +61,8 @@ constructor(
                     emit(goneToAodAlpha)
                 } else if (step.from == GONE && step.to == DOZING) {
                     emit(goneToDozingAlpha)
+                } else if (!migrateClocksToBlueprint()) {
+                    emit(keyguardAlpha)
                 }
             }
             .distinctUntilChanged()

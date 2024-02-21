@@ -197,7 +197,16 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
         }
 
-        assertThat(startedSteps).isEqualTo(listOf(steps[0], steps[3], steps[6]))
+        assertThat(startedSteps)
+            .isEqualTo(
+                listOf(
+                    // The initial transition will also get sent when collect started
+                    TransitionStep(OFF, LOCKSCREEN, 0f, STARTED),
+                    steps[0],
+                    steps[3],
+                    steps[6]
+                )
+            )
     }
 
     @Test

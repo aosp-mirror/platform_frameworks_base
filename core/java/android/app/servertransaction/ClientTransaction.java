@@ -29,6 +29,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -85,12 +86,15 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
      * @param item A single message that can contain a client activity/window request/callback.
      */
     public void addTransactionItem(@NonNull ClientTransactionItem item) {
-        if (mTransactionItems == null) {
-            mTransactionItems = new ArrayList<>();
+        if (Flags.bundleClientTransactionFlag()) {
+            if (mTransactionItems == null) {
+                mTransactionItems = new ArrayList<>();
+            }
+            mTransactionItems.add(item);
         }
-        mTransactionItems.add(item);
 
         // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
+        // Populate even if mTransactionItems is set to support the UnsupportedAppUsage.
         if (item.isActivityLifecycleItem()) {
             setLifecycleStateRequest((ActivityLifecycleItem) item);
         } else {
@@ -114,7 +118,7 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
      */
     // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
     @Deprecated
-    public void addCallback(@NonNull ClientTransactionItem activityCallback) {
+    private void addCallback(@NonNull ClientTransactionItem activityCallback) {
         if (mActivityCallbacks == null) {
             mActivityCallbacks = new ArrayList<>();
         }
@@ -169,7 +173,7 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
      */
     // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
     @Deprecated
-    public void setLifecycleStateRequest(@NonNull ActivityLifecycleItem stateRequest) {
+    private void setLifecycleStateRequest(@NonNull ActivityLifecycleItem stateRequest) {
         if (mLifecycleStateRequest != null) {
             return;
         }

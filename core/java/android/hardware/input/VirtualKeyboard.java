@@ -18,7 +18,9 @@ package android.hardware.input;
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -65,5 +67,16 @@ public class VirtualKeyboard extends VirtualInputDevice {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @return The id of the {@link android.view.InputDevice} corresponding to this keyboard.
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    @Override
+    public int getInputDeviceId() {
+        return super.getInputDeviceId();
     }
 }

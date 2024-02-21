@@ -27,12 +27,13 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadow.api.Shadow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Implements(MediaRouter2Manager.class)
 public class ShadowRouter2Manager {
 
-    private List<MediaRoute2Info> mAvailableRoutes;
+    private List<MediaRoute2Info> mAvailableRoutes = new ArrayList<>();
     private List<MediaRoute2Info> mAllRoutes;
     private List<MediaRoute2Info> mDeselectableRoutes;
     private List<RoutingSessionInfo> mRemoteSessions;

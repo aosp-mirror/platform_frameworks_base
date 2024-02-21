@@ -80,6 +80,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -3023,37 +3024,44 @@ public class Notification implements Parcelable
      * @hide
      */
     public String loadHeaderAppName(Context context) {
-        CharSequence name = null;
-        // Check if there is a non-empty substitute app name and return that.
-        if (extras.containsKey(EXTRA_SUBSTITUTE_APP_NAME)) {
-            name = extras.getString(EXTRA_SUBSTITUTE_APP_NAME);
-            if (!TextUtils.isEmpty(name)) {
-                return name.toString();
-            }
-        }
-        // If not, try getting the app info from extras.
-        if (context == null) {
-            return null;
-        }
-        final PackageManager pm = context.getPackageManager();
-        if (TextUtils.isEmpty(name)) {
-            if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
-                final ApplicationInfo info = extras.getParcelable(EXTRA_BUILDER_APPLICATION_INFO,
-                        ApplicationInfo.class);
-                if (info != null) {
-                    name = pm.getApplicationLabel(info);
+        Trace.beginSection("Notification#loadHeaderAppName");
+
+        try {
+            CharSequence name = null;
+            // Check if there is a non-empty substitute app name and return that.
+            if (extras.containsKey(EXTRA_SUBSTITUTE_APP_NAME)) {
+                name = extras.getString(EXTRA_SUBSTITUTE_APP_NAME);
+                if (!TextUtils.isEmpty(name)) {
+                    return name.toString();
                 }
             }
+            // If not, try getting the app info from extras.
+            if (context == null) {
+                return null;
+            }
+            final PackageManager pm = context.getPackageManager();
+            if (TextUtils.isEmpty(name)) {
+                if (extras.containsKey(EXTRA_BUILDER_APPLICATION_INFO)) {
+                    final ApplicationInfo info = extras.getParcelable(
+                            EXTRA_BUILDER_APPLICATION_INFO,
+                            ApplicationInfo.class);
+                    if (info != null) {
+                        name = pm.getApplicationLabel(info);
+                    }
+                }
+            }
+            // If that's still empty, use the one from the context directly.
+            if (TextUtils.isEmpty(name)) {
+                name = pm.getApplicationLabel(context.getApplicationInfo());
+            }
+            // If there's still nothing, ¯\_(ツ)_/¯
+            if (TextUtils.isEmpty(name)) {
+                return null;
+            }
+            return name.toString();
+        } finally {
+            Trace.endSection();
         }
-        // If that's still empty, use the one from the context directly.
-        if (TextUtils.isEmpty(name)) {
-            name = pm.getApplicationLabel(context.getApplicationInfo());
-        }
-        // If there's still nothing, ¯\_(ツ)_/¯
-        if (TextUtils.isEmpty(name)) {
-            return null;
-        }
-        return name.toString();
     }
 
     /**
@@ -6722,23 +6730,29 @@ public class Notification implements Parcelable
          */
         @NonNull
         public static Notification.Builder recoverBuilder(Context context, Notification n) {
-            // Re-create notification context so we can access app resources.
-            ApplicationInfo applicationInfo = n.extras.getParcelable(
-                    EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
-            Context builderContext;
-            if (applicationInfo != null) {
-                try {
-                    builderContext = context.createApplicationContext(applicationInfo,
-                            Context.CONTEXT_RESTRICTED);
-                } catch (NameNotFoundException e) {
-                    Log.e(TAG, "ApplicationInfo " + applicationInfo + " not found");
-                    builderContext = context;  // try with our context
-                }
-            } else {
-                builderContext = context; // try with given context
-            }
+            Trace.beginSection("Notification.Builder#recoverBuilder");
 
-            return new Builder(builderContext, n);
+            try {
+                // Re-create notification context so we can access app resources.
+                ApplicationInfo applicationInfo = n.extras.getParcelable(
+                        EXTRA_BUILDER_APPLICATION_INFO, ApplicationInfo.class);
+                Context builderContext;
+                if (applicationInfo != null) {
+                    try {
+                        builderContext = context.createApplicationContext(applicationInfo,
+                                Context.CONTEXT_RESTRICTED);
+                    } catch (NameNotFoundException e) {
+                        Log.e(TAG, "ApplicationInfo " + applicationInfo + " not found");
+                        builderContext = context;  // try with our context
+                    }
+                } else {
+                    builderContext = context; // try with given context
+                }
+
+                return new Builder(builderContext, n);
+            } finally {
+                Trace.endSection();
+            }
         }
 
         /**

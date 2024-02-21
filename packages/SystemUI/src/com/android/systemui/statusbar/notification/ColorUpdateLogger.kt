@@ -60,7 +60,7 @@ constructor(
         val didAppend = frames.lastOrNull()?.tryAddTrigger(event) == true
         if (!didAppend) {
             frames.add(Frame(event))
-            if (frames.size > maxFrames) frames.removeFirst()
+            if (frames.size > maxFrames) frames.removeAt(0)
         }
     }
 

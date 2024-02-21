@@ -1406,6 +1406,26 @@ public class NotificationManager {
     }
 
     /**
+     * Returns the current activation state of an {@link AutomaticZenRule}.
+     *
+     * <p>Returns {@link Condition#STATE_UNKNOWN} if the rule does not exist or the calling
+     * package doesn't have access to it.
+     *
+     * @param id The id of the rule
+     * @return the state of the rule.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @Condition.State
+    public int getAutomaticZenRuleState(@NonNull String id) {
+        INotificationManager service = getService();
+        try {
+            return service.getAutomaticZenRuleState(id);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Informs the notification manager that the state of an {@link AutomaticZenRule} has changed.
      * Use this method to put the system into Do Not Disturb mode or request that it exits Do Not
      * Disturb mode. The calling app must own the provided {@link android.app.AutomaticZenRule}.

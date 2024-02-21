@@ -8626,7 +8626,7 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mDragSurface = null;
                     }
                     if (mAttachInfo.mDragData != null) {
-                        mAttachInfo.mDragData.cleanUpPendingIntents();
+                        View.cleanUpPendingIntents(mAttachInfo.mDragData);
                         mAttachInfo.mDragData = null;
                     }
                 }

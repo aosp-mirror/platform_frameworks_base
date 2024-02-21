@@ -223,7 +223,11 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         KeyboardLogEvent.LAUNCH_DEFAULT_MAPS, KeyEvent.KEYCODE_M, META_ON},
                 {"Meta + S -> Launch Default Messaging App",
                         new int[]{META_KEY, KeyEvent.KEYCODE_S},
-                        KeyboardLogEvent.LAUNCH_DEFAULT_MESSAGING, KeyEvent.KEYCODE_S, META_ON}};
+                        KeyboardLogEvent.LAUNCH_DEFAULT_MESSAGING, KeyEvent.KEYCODE_S, META_ON},
+                {"Meta + Ctrl + DPAD_DOWN -> Enter desktop mode",
+                        new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_DOWN},
+                        KeyboardLogEvent.DESKTOP_MODE, KeyEvent.KEYCODE_DPAD_DOWN,
+                        META_ON | CTRL_ON}};
     }
 
     @Keep

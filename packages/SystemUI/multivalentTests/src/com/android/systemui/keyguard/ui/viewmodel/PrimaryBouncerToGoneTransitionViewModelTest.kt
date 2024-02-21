@@ -119,15 +119,19 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     fun lockscreenAlpha_runDimissFromKeyguard() =
         testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
+            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
             runCurrent()
 
-            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.PRIMARY_BOUNCER,
+                to = KeyguardState.GONE,
+                testScope,
+            )
 
-            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            keyguardTransitionRepository.sendTransitionStep(step(1f))
-
-            assertThat(values.size).isEqualTo(2)
-            values.forEach { assertThat(it).isEqualTo(1f) }
+            assertThat(values[0]).isEqualTo(1f)
+            assertThat(values[1]).isEqualTo(1f)
+            // Ensure FINISHED sets alpha to 0
+            assertThat(values[2]).isEqualTo(0f)
         }
 
     @Test

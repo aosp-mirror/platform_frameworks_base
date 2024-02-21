@@ -227,7 +227,12 @@ public final class KeyboardMetricsCollector {
                 "LAUNCH_DEFAULT_FITNESS"),
         LAUNCH_APPLICATION_BY_PACKAGE_NAME(
                 FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__LAUNCH_APPLICATION_BY_PACKAGE_NAME,
-                "LAUNCH_APPLICATION_BY_PACKAGE_NAME");
+                "LAUNCH_APPLICATION_BY_PACKAGE_NAME"),
+        DESKTOP_MODE(
+                FrameworkStatsLog
+                        .KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__DESKTOP_MODE,
+                "DESKTOP_MODE");
+
 
         private final int mValue;
         private final String mName;

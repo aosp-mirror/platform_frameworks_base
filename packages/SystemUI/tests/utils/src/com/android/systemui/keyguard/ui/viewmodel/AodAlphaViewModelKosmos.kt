@@ -18,6 +18,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -28,5 +29,6 @@ val Kosmos.aodAlphaViewModel by Fixture {
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
         goneToDozingTransitionViewModel = goneToDozingTransitionViewModel,
+        keyguardInteractor = keyguardInteractor,
     )
 }
