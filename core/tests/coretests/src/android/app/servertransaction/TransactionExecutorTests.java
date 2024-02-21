@@ -25,6 +25,9 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_START;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+
+import static com.android.window.flags.Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -51,12 +54,14 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -82,6 +87,9 @@ import java.util.stream.Collectors;
 @SmallTest
 @Presubmit
 public class TransactionExecutorTests {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     @Mock
     private ClientTransactionHandler mTransactionHandler;
@@ -240,29 +248,19 @@ public class TransactionExecutorTests {
 
     @Test
     public void testTransactionResolution() {
-        ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
-        when(callback1.getPostExecutionState()).thenReturn(UNDEFINED);
-        ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
-        when(callback2.getPostExecutionState()).thenReturn(UNDEFINED);
+        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
 
-        ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
-        transaction.addCallback(callback1);
-        transaction.addCallback(callback2);
-        transaction.setLifecycleStateRequest(mActivityLifecycleItem);
-
-        transaction.preExecute(mTransactionHandler);
-        mExecutor.execute(transaction);
-
-        InOrder inOrder = inOrder(mTransactionHandler, callback1, callback2,
-                mActivityLifecycleItem);
-        inOrder.verify(callback1).execute(eq(mTransactionHandler), any());
-        inOrder.verify(callback2).execute(eq(mTransactionHandler), any());
-        inOrder.verify(mActivityLifecycleItem).execute(eq(mTransactionHandler), eq(mClientRecord),
-                any());
+        testTransactionResolutionInner();
     }
 
     @Test
-    public void testExecuteTransactionItems_transactionResolution() {
+    public void testTransactionResolution_bundleClientTransaction() {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
+        testTransactionResolutionInner();
+    }
+
+    private void testTransactionResolutionInner() {
         ClientTransactionItem callback1 = mock(ClientTransactionItem.class);
         when(callback1.getPostExecutionState()).thenReturn(UNDEFINED);
         ClientTransactionItem callback2 = mock(ClientTransactionItem.class);
@@ -286,38 +284,19 @@ public class TransactionExecutorTests {
 
     @Test
     public void testDoNotLaunchDestroyedActivity() {
-        final Map<IBinder, DestroyActivityItem> activitiesToBeDestroyed = new ArrayMap<>();
-        when(mTransactionHandler.getActivitiesToBeDestroyed()).thenReturn(activitiesToBeDestroyed);
-        // Assume launch transaction is still in queue, so there is no client record.
-        when(mTransactionHandler.getActivityClient(any())).thenReturn(null);
+        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
 
-        // An incoming destroy transaction enters binder thread (preExecute).
-        final IBinder token = mock(IBinder.class);
-        final ClientTransaction destroyTransaction = ClientTransaction.obtain(null /* client */);
-        destroyTransaction.setLifecycleStateRequest(
-                DestroyActivityItem.obtain(token, false /* finished */, 0 /* configChanges */));
-        destroyTransaction.preExecute(mTransactionHandler);
-        // The activity should be added to to-be-destroyed container.
-        assertEquals(1, activitiesToBeDestroyed.size());
-
-        // A previous queued launch transaction runs on main thread (execute).
-        final ClientTransaction launchTransaction = ClientTransaction.obtain(null /* client */);
-        final LaunchActivityItem launchItem =
-                spy(new LaunchActivityItemBuilder(token, new Intent(), new ActivityInfo()).build());
-        launchTransaction.addCallback(launchItem);
-        mExecutor.execute(launchTransaction);
-
-        // The launch transaction should not be executed because its token is in the
-        // to-be-destroyed container.
-        verify(launchItem, never()).execute(any(), any());
-
-        // After the destroy transaction has been executed, the token should be removed.
-        mExecutor.execute(destroyTransaction);
-        assertTrue(activitiesToBeDestroyed.isEmpty());
+        testDoNotLaunchDestroyedActivityInner();
     }
 
     @Test
-    public void testExecuteTransactionItems_doNotLaunchDestroyedActivity() {
+    public void testDoNotLaunchDestroyedActivity_bundleClientTransaction() {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
+        testDoNotLaunchDestroyedActivityInner();
+    }
+
+    private void testDoNotLaunchDestroyedActivityInner() {
         final Map<IBinder, DestroyActivityItem> activitiesToBeDestroyed = new ArrayMap<>();
         when(mTransactionHandler.getActivitiesToBeDestroyed()).thenReturn(activitiesToBeDestroyed);
         // Assume launch transaction is still in queue, so there is no client record.
@@ -350,26 +329,19 @@ public class TransactionExecutorTests {
 
     @Test
     public void testActivityResultRequiredStateResolution() {
-        when(mTransactionHandler.getActivity(any())).thenReturn(mock(Activity.class));
+        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
 
-        PostExecItem postExecItem = new PostExecItem(ON_RESUME);
-
-        ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
-        transaction.addCallback(postExecItem);
-
-        // Verify resolution that should get to onPause
-        mClientRecord.setState(ON_RESUME);
-        mExecutor.executeCallbacks(transaction);
-        verify(mExecutor).cycleToPath(eq(mClientRecord), eq(ON_PAUSE), eq(transaction));
-
-        // Verify resolution that should get to onStart
-        mClientRecord.setState(ON_STOP);
-        mExecutor.executeCallbacks(transaction);
-        verify(mExecutor).cycleToPath(eq(mClientRecord), eq(ON_START), eq(transaction));
+        testActivityResultRequiredStateResolutionInner();
     }
 
     @Test
-    public void testExecuteTransactionItems_activityResultRequiredStateResolution() {
+    public void testActivityResultRequiredStateResolution_bundleClientTransaction() {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
+        testActivityResultRequiredStateResolutionInner();
+    }
+
+    private void testActivityResultRequiredStateResolutionInner() {
         when(mTransactionHandler.getActivity(any())).thenReturn(mock(Activity.class));
 
         PostExecItem postExecItem = new PostExecItem(ON_RESUME);
@@ -379,12 +351,12 @@ public class TransactionExecutorTests {
 
         // Verify resolution that should get to onPause
         mClientRecord.setState(ON_RESUME);
-        mExecutor.executeTransactionItems(transaction);
+        mExecutor.execute(transaction);
         verify(mExecutor).cycleToPath(eq(mClientRecord), eq(ON_PAUSE), eq(transaction));
 
         // Verify resolution that should get to onStart
         mClientRecord.setState(ON_STOP);
-        mExecutor.executeTransactionItems(transaction);
+        mExecutor.execute(transaction);
         verify(mExecutor).cycleToPath(eq(mClientRecord), eq(ON_START), eq(transaction));
     }
 
@@ -523,18 +495,19 @@ public class TransactionExecutorTests {
 
     @Test(expected = IllegalArgumentException.class)
     public void testActivityItemNullRecordThrowsException() {
-        final ActivityTransactionItem activityItem = mock(ActivityTransactionItem.class);
-        when(activityItem.getPostExecutionState()).thenReturn(UNDEFINED);
-        final IBinder token = mock(IBinder.class);
-        final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
-        transaction.addCallback(activityItem);
-        when(mTransactionHandler.getActivityClient(token)).thenReturn(null);
+        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
 
-        mExecutor.executeCallbacks(transaction);
+        testActivityItemNullRecordThrowsExceptionInner();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testExecuteTransactionItems_activityItemNullRecordThrowsException() {
+    public void testActivityItemNullRecordThrowsException_bundleClientTransaction() {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
+        testActivityItemNullRecordThrowsExceptionInner();
+    }
+
+    private void testActivityItemNullRecordThrowsExceptionInner() {
         final ActivityTransactionItem activityItem = mock(ActivityTransactionItem.class);
         when(activityItem.getPostExecutionState()).thenReturn(UNDEFINED);
         final IBinder token = mock(IBinder.class);
@@ -542,28 +515,24 @@ public class TransactionExecutorTests {
         transaction.addTransactionItem(activityItem);
         when(mTransactionHandler.getActivityClient(token)).thenReturn(null);
 
-        mExecutor.executeTransactionItems(transaction);
+        mExecutor.execute(transaction);
     }
 
     @Test
     public void testActivityItemExecute() {
-        final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
-        final ActivityTransactionItem activityItem = mock(ActivityTransactionItem.class);
-        when(activityItem.getPostExecutionState()).thenReturn(UNDEFINED);
-        when(activityItem.getActivityToken()).thenReturn(mActivityToken);
-        transaction.addCallback(activityItem);
-        transaction.setLifecycleStateRequest(mActivityLifecycleItem);
+        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
 
-        mExecutor.execute(transaction);
-
-        final InOrder inOrder = inOrder(activityItem, mActivityLifecycleItem);
-        inOrder.verify(activityItem).execute(eq(mTransactionHandler), eq(mClientRecord), any());
-        inOrder.verify(mActivityLifecycleItem).execute(eq(mTransactionHandler), eq(mClientRecord),
-                any());
+        testActivityItemExecuteInner();
     }
 
     @Test
-    public void testExecuteTransactionItems_activityItemExecute() {
+    public void testActivityItemExecute_bundleClientTransaction() {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
+        testActivityItemExecuteInner();
+    }
+
+    private void testActivityItemExecuteInner() {
         final ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
         final ActivityTransactionItem activityItem = mock(ActivityTransactionItem.class);
         when(activityItem.getPostExecutionState()).thenReturn(UNDEFINED);

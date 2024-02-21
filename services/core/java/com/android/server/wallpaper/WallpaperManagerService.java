@@ -52,6 +52,7 @@ import android.app.ApplicationExitInfo;
 import android.app.ILocalWallpaperColorConsumer;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.UidObserver;
 import android.app.UserSwitchObserver;
@@ -1792,10 +1793,27 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     systemWallpaper.wallpaperObserver = new WallpaperObserver(systemWallpaper);
                     systemWallpaper.wallpaperObserver.startWatching();
                 }
-                if (lockWallpaper != systemWallpaper)  {
-                    switchWallpaper(lockWallpaper, null);
+                if (Flags.reorderWallpaperDuringUserSwitch()) {
+                    if (mLastLockWallpaper != null) {
+                        detachWallpaperLocked(mLastLockWallpaper);
+                    }
+                    if (mLastWallpaper != null) {
+                        detachWallpaperLocked(mLastWallpaper);
+                    }
+                    if (lockWallpaper == systemWallpaper)  {
+                        switchWallpaper(systemWallpaper, reply);
+                    } else {
+                        KeyguardManager km = mContext.getSystemService(KeyguardManager.class);
+                        boolean isDeviceSecure = km != null && km.isDeviceSecure(userId);
+                        switchWallpaper(isDeviceSecure ? lockWallpaper : systemWallpaper, reply);
+                        switchWallpaper(isDeviceSecure ? systemWallpaper : lockWallpaper, null);
+                    }
+                } else {
+                    if (lockWallpaper != systemWallpaper)  {
+                        switchWallpaper(lockWallpaper, null);
+                    }
+                    switchWallpaper(systemWallpaper, reply);
                 }
-                switchWallpaper(systemWallpaper, reply);
                 mInitialUserSwitch = false;
             }
 

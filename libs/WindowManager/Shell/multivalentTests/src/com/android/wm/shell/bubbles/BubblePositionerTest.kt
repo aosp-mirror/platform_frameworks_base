@@ -466,6 +466,26 @@ class BubblePositionerTest {
             .isEqualTo(expectedExpandedViewY)
     }
 
+    @Test
+    fun testGetTaskViewContentWidth_onLeft() {
+        positioner.update(defaultDeviceConfig.copy(insets = Insets.of(100, 0, 200, 0)))
+        val taskViewWidth = positioner.getTaskViewContentWidth(true /* onLeft */)
+        val paddings = positioner.getExpandedViewContainerPadding(true /* onLeft */,
+                false /* isOverflow */)
+        assertThat(taskViewWidth).isEqualTo(
+                positioner.screenRect.width() - paddings[0] - paddings[2])
+    }
+
+    @Test
+    fun testGetTaskViewContentWidth_onRight() {
+        positioner.update(defaultDeviceConfig.copy(insets = Insets.of(100, 0, 200, 0)))
+        val taskViewWidth = positioner.getTaskViewContentWidth(false /* onLeft */)
+        val paddings = positioner.getExpandedViewContainerPadding(false /* onLeft */,
+                false /* isOverflow */)
+        assertThat(taskViewWidth).isEqualTo(
+                positioner.screenRect.width() - paddings[0] - paddings[2])
+    }
+
     private val defaultYPosition: Float
         /**
          * Calculates the Y position bubbles should be placed based on the config. Based on the

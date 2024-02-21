@@ -156,6 +156,8 @@ public class BrightnessClamperController {
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL;
         } else if (mClamperType == Type.POWER) {
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_POWER_IC;
+        } else if (mClamperType == Type.WEAR_BEDTIME_MODE) {
+            return BrightnessInfo.BRIGHTNESS_MAX_REASON_WEAR_BEDTIME_MODE;
         } else {
             Slog.wtf(TAG, "BrightnessMaxReason not mapped for type=" + mClamperType);
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;

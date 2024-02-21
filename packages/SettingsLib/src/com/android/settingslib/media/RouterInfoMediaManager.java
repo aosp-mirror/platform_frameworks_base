@@ -65,9 +65,9 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
             };
 
     // TODO (b/321969740): Plumb target UserHandle between UMO and RouterInfoMediaManager.
-    public RouterInfoMediaManager(
+    /* package */ RouterInfoMediaManager(
             Context context,
-            String packageName,
+            @NonNull String packageName,
             Notification notification,
             LocalBluetoothManager localBluetoothManager)
             throws PackageNotAvailableException {

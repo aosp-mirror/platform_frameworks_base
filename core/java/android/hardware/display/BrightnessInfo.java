@@ -80,6 +80,11 @@ public final class BrightnessInfo implements Parcelable {
      */
     public static final int BRIGHTNESS_MAX_REASON_POWER_IC = 2;
 
+    /**
+     * Maximum brightness is restricted due to the Wear bedtime mode.
+     */
+    public static final int BRIGHTNESS_MAX_REASON_WEAR_BEDTIME_MODE = 3;
+
     /** Brightness */
     public final float brightness;
 

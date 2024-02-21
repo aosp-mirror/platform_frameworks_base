@@ -44,7 +44,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -248,11 +247,9 @@ class ElementTest {
     }
 
     @Test
-    @Ignore
-    fun elementIsReusedInSameSceneAndBetweenScenes() {
+    fun elementIsReusedBetweenScenes() {
         var currentScene by mutableStateOf(TestScenes.SceneA)
         var sceneCState by mutableStateOf(0)
-        var sceneDState by mutableStateOf(0)
         val key = TestElements.Foo
         var nullableLayoutImpl: SceneTransitionLayoutImpl? = null
 
@@ -270,19 +267,6 @@ class ElementTest {
                 scene(TestScenes.SceneC) {
                     when (sceneCState) {
                         0 -> Row(Modifier.element(key)) {}
-                        1 -> Column(Modifier.element(key)) {}
-                        else -> {
-                            /* Nothing */
-                        }
-                    }
-                }
-                scene(TestScenes.SceneD) {
-                    // We should be able to extract the modifier before assigning it to different
-                    // nodes.
-                    val childModifier = Modifier.element(key)
-                    when (sceneDState) {
-                        0 -> Row(childModifier) {}
-                        1 -> Column(childModifier) {}
                         else -> {
                             /* Nothing */
                         }
@@ -315,33 +299,8 @@ class ElementTest {
         assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
         assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneC)
 
-        // Scene C, state 1: the same element is reused.
+        // Scene C, state 1: the element is removed from the map.
         sceneCState = 1
-        rule.waitForIdle()
-
-        assertThat(layoutImpl.elements.keys).containsExactly(key)
-        assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
-        assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneC)
-
-        // Scene D, state 0: the same element is reused.
-        currentScene = TestScenes.SceneD
-        sceneDState = 0
-        rule.waitForIdle()
-
-        assertThat(layoutImpl.elements.keys).containsExactly(key)
-        assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
-        assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneD)
-
-        // Scene D, state 1: the same element is reused.
-        sceneDState = 1
-        rule.waitForIdle()
-
-        assertThat(layoutImpl.elements.keys).containsExactly(key)
-        assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
-        assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneD)
-
-        // Scene D, state 2: the element is removed from the map.
-        sceneDState = 2
         rule.waitForIdle()
 
         assertThat(element.sceneStates).isEmpty()

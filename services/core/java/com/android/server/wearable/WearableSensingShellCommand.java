@@ -29,6 +29,7 @@ import android.util.Slog;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.time.Duration;
 
 final class WearableSensingShellCommand extends ShellCommand {
     private static final String TAG = WearableSensingShellCommand.class.getSimpleName();
@@ -90,6 +91,8 @@ final class WearableSensingShellCommand extends ShellCommand {
                 return getBoundPackageName();
             case "set-temporary-service":
                 return setTemporaryService();
+            case "set-data-request-rate-limit-window-size":
+                return setDataRequestRateLimitWindowSize();
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -114,6 +117,11 @@ final class WearableSensingShellCommand extends ShellCommand {
         pw.println("  set-temporary-service USER_ID [PACKAGE_NAME] [COMPONENT_NAME DURATION]");
         pw.println("    Temporarily (for DURATION ms) changes the service implementation.");
         pw.println("    To reset, call with just the USER_ID argument.");
+        pw.println("  set-data-request-rate-limit-window-size WINDOW_SIZE");
+        pw.println("    Set the window size used in data request rate limiting to WINDOW_SIZE"
+                + " seconds.");
+        pw.println("    positive WINDOW_SIZE smaller than 20 will be automatically set to 20.");
+        pw.println("    To reset, call with 0 or a negative WINDOW_SIZE.");
     }
 
     private int createDataStream() {
@@ -207,6 +215,22 @@ final class WearableSensingShellCommand extends ShellCommand {
         final int userId = Integer.parseInt(getNextArgRequired());
         final ComponentName componentName = mService.getComponentName(userId);
         resultPrinter.println(componentName == null ? "" : componentName.getPackageName());
+        return 0;
+    }
+
+    private int setDataRequestRateLimitWindowSize() {
+        Slog.d(TAG, "setDataRequestRateLimitWindowSize");
+        int windowSizeSeconds = Integer.parseInt(getNextArgRequired());
+        if (windowSizeSeconds <= 0) {
+            mService.resetDataRequestRateLimitWindowSize();
+        } else {
+            // 20 is the minimum window size supported by the rate limiter.
+            // It is defined by com.android.server.utils.quota.QuotaTracker#MIN_WINDOW_SIZE_MS
+            if (windowSizeSeconds < 20) {
+                windowSizeSeconds = 20;
+            }
+            mService.setDataRequestRateLimitWindowSize(Duration.ofSeconds(windowSizeSeconds));
+        }
         return 0;
     }
 }

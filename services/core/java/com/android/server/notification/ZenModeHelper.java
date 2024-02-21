@@ -856,6 +856,20 @@ public class ZenModeHelper {
         }
     }
 
+    @Condition.State
+    int getAutomaticZenRuleState(String id) {
+        synchronized (mConfigLock) {
+            if (mConfig == null) {
+                return Condition.STATE_UNKNOWN;
+            }
+            ZenRule rule = mConfig.automaticRules.get(id);
+            if (rule == null || !canManageAutomaticZenRule(rule)) {
+                return Condition.STATE_UNKNOWN;
+            }
+            return rule.condition != null ? rule.condition.state : Condition.STATE_FALSE;
+        }
+    }
+
     void setAutomaticZenRuleState(String id, Condition condition, @ConfigChangeOrigin int origin,
             int callingUid) {
         requirePublicOrigin("setAutomaticZenRuleState", origin);

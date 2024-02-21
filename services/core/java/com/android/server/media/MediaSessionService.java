@@ -312,14 +312,15 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 user.mPriorityStack.onSessionActiveStateChanged(record);
             }
-            boolean allowRunningInForeground = record.isActive()
-                    && (playbackState == null || playbackState.isActive());
+            boolean isUserEngaged =
+                    record.isActive() && (playbackState == null || playbackState.isActive());
 
             Log.d(TAG, "onSessionActiveStateChanged: "
                     + "record=" + record
                     + "playbackState=" + playbackState
-                    + "allowRunningInForeground=" + allowRunningInForeground);
-            setForegroundServiceAllowance(record, allowRunningInForeground);
+                    + "allowRunningInForeground=" + isUserEngaged);
+            setForegroundServiceAllowance(record, /* allowRunningInForeground= */ isUserEngaged);
+            reportMediaInteractionEvent(record, isUserEngaged);
             mHandler.postSessionsChanged(record);
         }
     }
@@ -417,12 +418,14 @@ public class MediaSessionService extends SystemService implements Monitor {
             }
             user.mPriorityStack.onPlaybackStateChanged(record, shouldUpdatePriority);
             if (playbackState != null) {
-                boolean allowRunningInForeground = playbackState.isActive() && record.isActive();
+                boolean isUserEngaged = playbackState.isActive() && record.isActive();
                 Log.d(TAG, "onSessionPlaybackStateChanged: "
                         + "record=" + record
                         + "playbackState=" + playbackState
-                        + "allowRunningInForeground=" + allowRunningInForeground);
-                setForegroundServiceAllowance(record, allowRunningInForeground);
+                        + "allowRunningInForeground=" + isUserEngaged);
+                setForegroundServiceAllowance(
+                        record, /* allowRunningInForeground= */ isUserEngaged);
+                reportMediaInteractionEvent(record, isUserEngaged);
             }
         }
     }
@@ -590,6 +593,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         Log.d(TAG, "destroySessionLocked: record=" + session);
         setForegroundServiceAllowance(session, /* allowRunningInForeground= */ false);
+        reportMediaInteractionEvent(session, /* userEngaged= */ false);
         mHandler.postSessionsChanged(session);
     }
 
@@ -608,11 +612,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         if (allowRunningInForeground) {
             mActivityManagerInternal.startForegroundServiceDelegate(
                     foregroundServiceDelegationOptions, /* connection= */ null);
-            reportMediaInteractionEvent(record, /* userEngaged= */ true);
         } else {
             mActivityManagerInternal.stopForegroundServiceDelegate(
                     foregroundServiceDelegationOptions);
-            reportMediaInteractionEvent(record, /* userEngaged= */ false);
         }
     }
 
