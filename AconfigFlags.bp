@@ -12,52 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-aconfig_srcjars = [
-    // !!! KEEP THIS LIST ALPHABETICAL !!!
-    ":aconfig_mediacodec_flags_java_lib{.generated_srcjars}",
-    ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
-    ":android.content.res.flags-aconfig-java{.generated_srcjars}",
-    ":android.crashrecovery.flags-aconfig-java{.generated_srcjars}",
-    ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
-    ":android.media.codec-aconfig-java{.generated_srcjars}",
-    ":android.media.playback.flags-aconfig-java{.generated_srcjars}",
-    ":android.net.platform.flags-aconfig-java{.generated_srcjars}",
-    ":android.net.vcn.flags-aconfig-java{.generated_srcjars}",
-    ":android.nfc.flags-aconfig-java{.generated_srcjars}",
-    ":android.os.flags-aconfig-java{.generated_srcjars}",
-    ":android.security.flags-aconfig-java{.generated_srcjars}",
-    ":com.android.hardware.camera2-aconfig-java{.generated_srcjars}",
-    ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
-    ":com.android.net.thread.flags-aconfig-java{.generated_srcjars}",
-    ":com.android.text.flags-aconfig-java{.generated_srcjars}",
-    ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
-    // !!! KEEP THIS LIST ALPHABETICAL !!!
-]
-
-stubs_defaults {
+aconfig_declarations_group {
     name: "framework-minus-apex-aconfig-declarations",
-    aconfig_declarations: [
-        "android.content.pm.flags-aconfig",
-        "android.content.res.flags-aconfig",
-        "android.crashrecovery.flags-aconfig",
-        "android.hardware.biometrics.flags-aconfig",
-        "android.media.playback.flags-aconfig",
-        "android.net.platform.flags-aconfig",
-        "android.net.vcn.flags-aconfig",
-        "android.nfc.flags-aconfig",
-        "android.os.flags-aconfig",
-        "android.security.flags-aconfig",
-        "com.android.hardware.camera2-aconfig",
-        "com.android.hardware.input.input-aconfig",
-        "com.android.net.thread.flags-aconfig",
-        "com.android.window.flags.window-aconfig",
-        "com.android.text.flags-aconfig",
+    java_aconfig_libraries: [
+        // !!! KEEP THIS LIST ALPHABETICAL !!!
+        "aconfig_mediacodec_flags_java_lib",
+        "android.content.pm.flags-aconfig-java",
+        "android.content.res.flags-aconfig-java",
+        "android.crashrecovery.flags-aconfig-java",
+        "android.hardware.biometrics.flags-aconfig-java",
+        "android.media.codec-aconfig-java",
+        "android.media.playback.flags-aconfig-java",
+        "android.net.platform.flags-aconfig-java",
+        "android.net.vcn.flags-aconfig-java",
+        "android.nfc.flags-aconfig-java",
+        "android.os.flags-aconfig-java",
+        "android.security.flags-aconfig-java",
+        "com.android.hardware.camera2-aconfig-java",
+        "com.android.hardware.input-aconfig-java",
+        "com.android.net.thread.flags-aconfig-java",
+        "com.android.text.flags-aconfig-java",
+        "com.android.window.flags.window-aconfig-java",
+        // !!! KEEP THIS LIST ALPHABETICAL !!!
     ],
 }
 
 filegroup {
     name: "framework-minus-apex-aconfig-srcjars",
-    srcs: aconfig_srcjars,
+    srcs: [
+        ":framework-minus-apex-aconfig-declarations{.srcjars}",
+    ],
 }
 
 // Aconfig declarations and libraries for the core framework
@@ -66,7 +50,9 @@ java_defaults {
 
     // Add java_aconfig_libraries to here to add them to the core framework
     // Add aconfig-annotations-lib as a dependency for the optimization
-    srcs: aconfig_srcjars,
+    srcs: [
+        ":framework-minus-apex-aconfig-declarations{.srcjars}",
+    ],
     libs: ["aconfig-annotations-lib"],
 }
 

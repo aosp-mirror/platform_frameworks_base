@@ -100,13 +100,15 @@ public class PackageWatchdog {
     public static final int FAILURE_REASON_EXPLICIT_HEALTH_CHECK = 2;
     public static final int FAILURE_REASON_APP_CRASH = 3;
     public static final int FAILURE_REASON_APP_NOT_RESPONDING = 4;
+    public static final int FAILURE_REASON_BOOT_LOOP = 5;
 
     @IntDef(prefix = { "FAILURE_REASON_" }, value = {
             FAILURE_REASON_UNKNOWN,
             FAILURE_REASON_NATIVE_CRASH,
             FAILURE_REASON_EXPLICIT_HEALTH_CHECK,
             FAILURE_REASON_APP_CRASH,
-            FAILURE_REASON_APP_NOT_RESPONDING
+            FAILURE_REASON_APP_NOT_RESPONDING,
+            FAILURE_REASON_BOOT_LOOP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FailureReasons {}
@@ -542,7 +544,7 @@ public class PackageWatchdog {
         mNumberOfNativeCrashPollsRemaining--;
         // Check if native watchdog reported a crash
         if ("1".equals(SystemProperties.get("sys.init.updatable_crashing"))) {
-            // We rollback everything available when crash is unattributable
+            // We rollback all available low impact rollbacks when crash is unattributable
             onPackageFailure(Collections.EMPTY_LIST, FAILURE_REASON_NATIVE_CRASH);
             // we stop polling after an attempt to execute rollback, regardless of whether the
             // attempt succeeds or not
@@ -572,6 +574,7 @@ public class PackageWatchdog {
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_30,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_50,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_70,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_90,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_100})
     public @interface PackageHealthObserverImpact {
         /** No action to take. */
@@ -582,6 +585,7 @@ public class PackageWatchdog {
         int USER_IMPACT_LEVEL_30 = 30;
         int USER_IMPACT_LEVEL_50 = 50;
         int USER_IMPACT_LEVEL_70 = 70;
+        int USER_IMPACT_LEVEL_90 = 90;
         /* Action has high user impact, a last resort, user of a device will be very frustrated. */
         int USER_IMPACT_LEVEL_100 = 100;
     }
