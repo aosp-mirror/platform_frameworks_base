@@ -57,7 +57,6 @@ import dagger.multibindings.IntoSet;
 @Module(
         includes = {
                 AudioModule.class,
-                AncModule.class,
                 CaptioningModule.class,
                 MediaDevicesModule.class
         },
