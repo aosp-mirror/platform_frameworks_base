@@ -161,11 +161,6 @@ public abstract class InfoMediaManager extends MediaManager {
 
     protected abstract void startScanOnRouter();
 
-    /**
-     * Transfer MediaDevice for media without package name.
-     */
-    protected abstract boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device);
-
     protected abstract void transferToRoute(@NonNull MediaRoute2Info route);
 
     protected abstract void selectRoute(
