@@ -34,7 +34,7 @@ import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.KeyguardViewConfigurator
 import com.android.systemui.keyguard.shared.model.KeyguardSection
-import com.android.systemui.media.controls.ui.KeyguardMediaController
+import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.shade.NotificationPanelViewController
