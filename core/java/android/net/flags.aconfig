@@ -9,3 +9,11 @@ flag {
   description: "The flag controls the access for getIpSecTransformState and IpSecTransformState"
   bug: "308011229"
 }
+
+flag {
+    name: "powered_off_finding_platform"
+    namespace: "nearby"
+    description: "Controls whether the Powered Off Finding feature is enabled"
+    bug: "307898240"
+}
+
