@@ -2915,7 +2915,9 @@ class ActivityStarter {
 
         activity.logStartActivity(EventLogTags.WM_NEW_INTENT, activity.getTask());
         activity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, intentGrants,
-                mStartActivity.launchedFromPackage, mStartActivity.mShareIdentity);
+                mStartActivity.launchedFromPackage, mStartActivity.mShareIdentity,
+                mStartActivity.mUserId,
+                UserHandle.getAppId(mStartActivity.info.applicationInfo.uid));
         mIntentDelivered = true;
     }
 
