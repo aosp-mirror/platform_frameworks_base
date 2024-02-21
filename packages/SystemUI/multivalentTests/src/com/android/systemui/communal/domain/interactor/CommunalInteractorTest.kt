@@ -47,6 +47,10 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
@@ -91,6 +95,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var communalPrefsRepository: FakeCommunalPrefsRepository
     private lateinit var editWidgetsActivityStarter: EditWidgetsActivityStarter
+    private lateinit var sceneInteractor: SceneInteractor
 
     private lateinit var underTest: CommunalInteractor
 
@@ -107,6 +112,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         keyguardRepository = kosmos.fakeKeyguardRepository
         editWidgetsActivityStarter = kosmos.editWidgetsActivityStarter
         communalPrefsRepository = kosmos.fakeCommunalPrefsRepository
+        sceneInteractor = kosmos.sceneInteractor
 
         whenever(mainUser.isMain).thenReturn(true)
         whenever(secondaryUser.isMain).thenReturn(false)
@@ -598,17 +604,53 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun isCommunalShowing() =
+    fun isCommunalShowing_whenSceneContainerDisabled() =
         testScope.runTest {
-            var isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
+            // Verify default is false
+            val isCommunalShowing by collectLastValue(underTest.isCommunalShowing)
             runCurrent()
-            assertThat(isCommunalShowing()).isEqualTo(false)
+            assertThat(isCommunalShowing).isFalse()
 
+            // Verify scene changes with the flag doesn't have any impact
+            sceneInteractor.changeScene(SceneKey.Communal, loggingReason = "")
+            runCurrent()
+            assertThat(isCommunalShowing).isFalse()
+
+            // Verify scene changes (without the flag) to communal sets the value to true
             underTest.onSceneChanged(CommunalSceneKey.Communal)
-
-            isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
             runCurrent()
-            assertThat(isCommunalShowing()).isEqualTo(true)
+            assertThat(isCommunalShowing).isTrue()
+
+            // Verify scene changes (without the flag) to blank sets the value back to false
+            underTest.onSceneChanged(CommunalSceneKey.Blank)
+            runCurrent()
+            assertThat(isCommunalShowing).isFalse()
+        }
+
+    @Test
+    fun isCommunalShowing_whenSceneContainerEnabled() =
+        testScope.runTest {
+            kosmos.fakeSceneContainerFlags.enabled = true
+
+            // Verify default is false
+            val isCommunalShowing by collectLastValue(underTest.isCommunalShowing)
+            runCurrent()
+            assertThat(isCommunalShowing).isFalse()
+
+            // Verify scene changes without the flag doesn't have any impact
+            underTest.onSceneChanged(CommunalSceneKey.Communal)
+            runCurrent()
+            assertThat(isCommunalShowing).isFalse()
+
+            // Verify scene changes (with the flag) to communal sets the value to true
+            sceneInteractor.changeScene(SceneKey.Communal, loggingReason = "")
+            runCurrent()
+            assertThat(isCommunalShowing).isTrue()
+
+            // Verify scene changes (with the flag) to lockscreen sets the value to false
+            sceneInteractor.changeScene(SceneKey.Lockscreen, loggingReason = "")
+            runCurrent()
+            assertThat(isCommunalShowing).isFalse()
         }
 
     @Test
