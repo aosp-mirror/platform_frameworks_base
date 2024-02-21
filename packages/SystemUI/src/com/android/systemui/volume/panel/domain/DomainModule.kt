@@ -50,7 +50,6 @@ interface DomainModule {
         @VolumePanelScope
         fun provideEnabledComponents(): Collection<VolumePanelComponentKey> {
             return setOf(
-                VolumePanelComponents.ANC,
                 VolumePanelComponents.CAPTIONING,
                 VolumePanelComponents.MEDIA_OUTPUT,
                 VolumePanelComponents.BOTTOM_BAR,

@@ -47,8 +47,7 @@ interface UiModule {
         @VolumePanelScope
         @FooterComponents
         fun provideFooterComponents(): Collection<VolumePanelComponentKey> {
-            return listOf(
-                VolumePanelComponents.ANC,
+            return setOf(
                 VolumePanelComponents.CAPTIONING,
             )
         }
