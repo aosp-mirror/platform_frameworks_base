@@ -61,9 +61,7 @@ class CredentialSelectorActivity : ComponentActivity() {
             if (isCancellationRequest && !shouldShowCancellationUi) {
                 return
             }
-            val userConfigRepo = UserConfigRepo(this)
-            val credManRepo = CredentialManagerRepo(
-                this, intent, userConfigRepo, isNewActivity = true)
+            val credManRepo = CredentialManagerRepo(this, intent, isNewActivity = true)
 
             val backPressedCallback = object : OnBackPressedCallback(
                 true // default to enabled
@@ -78,10 +76,7 @@ class CredentialSelectorActivity : ComponentActivity() {
 
             setContent {
                 PlatformTheme {
-                    CredentialManagerBottomSheet(
-                        credManRepo,
-                        userConfigRepo
-                    )
+                    CredentialManagerBottomSheet(credManRepo)
                 }
             }
         } catch (e: Exception) {
@@ -103,9 +98,7 @@ class CredentialSelectorActivity : ComponentActivity() {
                     return
                 }
             } else {
-                val userConfigRepo = UserConfigRepo(this)
-                val credManRepo = CredentialManagerRepo(
-                    this, intent, userConfigRepo, isNewActivity = false)
+                val credManRepo = CredentialManagerRepo(this, intent, isNewActivity = false)
                 viewModel.onNewCredentialManagerRepo(credManRepo)
             }
         } catch (e: Exception) {
@@ -147,10 +140,9 @@ class CredentialSelectorActivity : ComponentActivity() {
     @Composable
     private fun CredentialManagerBottomSheet(
         credManRepo: CredentialManagerRepo,
-        userConfigRepo: UserConfigRepo,
     ) {
         val viewModel: CredentialSelectorViewModel = viewModel {
-            CredentialSelectorViewModel(credManRepo, userConfigRepo)
+            CredentialSelectorViewModel(credManRepo)
         }
         val launcher = rememberLauncherForActivityResult(
             StartBalIntentSenderForResultContract()
