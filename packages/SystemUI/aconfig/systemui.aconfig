@@ -499,3 +499,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "clipboard_noninteractive_on_lockscreen"
+    namespace: "systemui"
+    description: "Prevents the interactive clipboard UI from appearing when device is locked"
+    bug: "317048495"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
