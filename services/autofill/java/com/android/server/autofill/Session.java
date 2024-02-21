@@ -2770,6 +2770,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
+        if (sDebug) {
+            Slog.d(TAG, "setAuthenticationResultLocked(): id= " + authenticationId
+                    + ", data=" + data);
+        }
         final int requestId = AutofillManager.getRequestIdFromAuthenticationId(authenticationId);
         if (requestId == AUGMENTED_AUTOFILL_REQUEST_ID) {
             setAuthenticationResultForAugmentedAutofillLocked(data, authenticationId);
@@ -2823,12 +2827,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + ", clientState=" + newClientState + ", authenticationId=" + authenticationId);
         }
         if (result instanceof FillResponse) {
+            if (sDebug) {
+                Slog.d(TAG, "setAuthenticationResultLocked(): received FillResponse from"
+                        + " authentication flow");
+            }
             logAuthenticationStatusLocked(requestId, MetricsEvent.AUTOFILL_AUTHENTICATED);
             mPresentationStatsEventLogger.maybeSetAuthenticationResult(
                 AUTHENTICATION_RESULT_SUCCESS);
             replaceResponseLocked(authenticatedResponse, (FillResponse) result, newClientState);
         } else if (result instanceof GetCredentialResponse) {
-            Slog.d(TAG, "Received GetCredentialResponse from authentication flow");
+            if (sDebug) {
+                Slog.d(TAG, "Received GetCredentialResponse from authentication flow");
+            }
             boolean isCredmanCallbackInvoked = false;
             if (Flags.autofillCredmanIntegration()) {
                 GetCredentialResponse response = (GetCredentialResponse) result;
@@ -2843,6 +2853,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
         } else if (result instanceof Dataset) {
+            if (sDebug) {
+                Slog.d(TAG, "setAuthenticationResultLocked(): received Dataset from"
+                        + " authentication flow");
+            }
             if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
                 logAuthenticationStatusLocked(requestId,
                         MetricsEvent.AUTOFILL_DATASET_AUTHENTICATED);

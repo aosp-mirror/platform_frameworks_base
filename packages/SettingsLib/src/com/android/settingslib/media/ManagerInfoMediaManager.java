@@ -51,9 +51,9 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
 
     private final Executor mExecutor = Executors.newSingleThreadExecutor();
 
-    public ManagerInfoMediaManager(
+    /* package */ ManagerInfoMediaManager(
             Context context,
-            String packageName,
+            @NonNull String packageName,
             Notification notification,
             LocalBluetoothManager localBluetoothManager) {
         super(context, packageName, notification, localBluetoothManager);

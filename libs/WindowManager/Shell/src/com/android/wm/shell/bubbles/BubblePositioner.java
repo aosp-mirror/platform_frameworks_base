@@ -395,7 +395,7 @@ public class BubblePositioner {
     public int getTaskViewContentWidth(boolean onLeft) {
         int[] paddings = getExpandedViewContainerPadding(onLeft, /* isOverflow = */ false);
         int pointerOffset = showBubblesVertically() ? getPointerSize() : 0;
-        return mPositionRect.width() - paddings[0] - paddings[2] - pointerOffset;
+        return mScreenRect.width() - paddings[0] - paddings[2] - pointerOffset;
     }
 
     /** Gets the y position of the expanded view if it was top-aligned. */

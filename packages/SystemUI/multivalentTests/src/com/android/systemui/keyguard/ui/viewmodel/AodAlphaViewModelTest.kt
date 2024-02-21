@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -64,6 +65,25 @@ class AodAlphaViewModelTest : SysuiTestCase() {
 
         underTest = kosmos.aodAlphaViewModel
     }
+
+    @Test
+    fun alpha_WhenNotGone_clockMigrationFlagIsOff_emitsKeyguardAlpha() =
+        testScope.runTest {
+            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+            val alpha by collectLastValue(underTest.alpha)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope = testScope,
+            )
+
+            keyguardRepository.setKeyguardAlpha(0.5f)
+            assertThat(alpha).isEqualTo(0.5f)
+
+            keyguardRepository.setKeyguardAlpha(0.8f)
+            assertThat(alpha).isEqualTo(0.8f)
+        }
 
     @Test
     fun alpha_WhenGoneToAod() =
@@ -112,6 +132,7 @@ class AodAlphaViewModelTest : SysuiTestCase() {
     @Test
     fun alpha_whenGone_equalsZero() =
         testScope.runTest {
+            mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
             val alpha by collectLastValue(underTest.alpha)
 
             keyguardTransitionRepository.sendTransitionStep(

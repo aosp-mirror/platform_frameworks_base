@@ -37,11 +37,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.dialog.SettingsDialog
+import com.android.settingslib.spa.widget.ui.SettingsBody
 import com.android.settingslib.spa.widget.ui.SettingsDialogItem
 
 data class ListPreferenceOption(
     val id: Int,
     val text: String,
+    val summary: String = String()
 )
 
 /**
@@ -129,6 +131,14 @@ private fun Radio(
     ) {
         RadioButton(selected = selected, onClick = null, enabled = enabled)
         Spacer(modifier = Modifier.width(SettingsDimension.itemPaddingEnd))
-        SettingsDialogItem(text = option.text, enabled = enabled)
+        Column {
+            SettingsDialogItem(text = option.text, enabled = enabled)
+            if (option.summary != String()) {
+                SettingsBody(
+                    body = option.summary,
+                    maxLines = 1
+                )
+            }
+        }
     }
 }

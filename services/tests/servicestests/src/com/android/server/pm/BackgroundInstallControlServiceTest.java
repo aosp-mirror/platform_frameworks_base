@@ -43,8 +43,10 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ParceledListSlice;
 import android.os.FileUtils;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -115,9 +117,6 @@ public final class BackgroundInstallControlServiceTest {
     private BackgroundInstallControlCallbackHelper mCallbackHelper;
 
     @Captor
-    private ArgumentCaptor<PackageManagerInternal.PackageListObserver> mPackageListObserverCaptor;
-
-    @Captor
     private ArgumentCaptor<UsageEventListener> mUsageEventListenerCaptor;
 
     @Before
@@ -137,8 +136,8 @@ public final class BackgroundInstallControlServiceTest {
         mUsageEventListener = mUsageEventListenerCaptor.getValue();
 
         mBackgroundInstallControlService.onStart(true);
-        verify(mPackageManagerInternal).getPackageList(mPackageListObserverCaptor.capture());
-        mPackageListObserver = mPackageListObserverCaptor.getValue();
+
+        mPackageListObserver = mBackgroundInstallControlService.mPackageObserver;
     }
 
     @After
@@ -554,6 +553,7 @@ public final class BackgroundInstallControlServiceTest {
         assertEquals(0, foregroundTimeFrames.size());
     }
 
+    //package installed, but no UI interaction found
     @Test
     public void testHandleUsageEvent_packageAddedNoUsageEvent()
             throws NoSuchFieldException, PackageManager.NameNotFoundException {
@@ -571,12 +571,10 @@ public final class BackgroundInstallControlServiceTest {
         when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
                 .thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
         FieldSetter.setField(
                 appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
-                createTimestamp);
+                convertToTestAdjustTimestamp(PACKAGE_ADD_TIMESTAMP_1));
 
         int uid = USER_ID_1 * UserHandle.PER_USER_RANGE;
         assertEquals(USER_ID_1, UserHandle.getUserId(uid));
@@ -588,6 +586,10 @@ public final class BackgroundInstallControlServiceTest {
         assertNotNull(packages);
         assertEquals(1, packages.size());
         assertTrue(packages.contains(USER_ID_1, PACKAGE_NAME_1));
+    }
+
+    private long convertToTestAdjustTimestamp(long timestamp) {
+        return timestamp - (System.currentTimeMillis() - SystemClock.uptimeMillis());
     }
 
     @Test
@@ -607,12 +609,10 @@ public final class BackgroundInstallControlServiceTest {
         when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
                 .thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
         FieldSetter.setField(
                 appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
-                createTimestamp);
+                convertToTestAdjustTimestamp(PACKAGE_ADD_TIMESTAMP_1));
 
         int uid = USER_ID_1 * UserHandle.PER_USER_RANGE;
         assertEquals(USER_ID_1, UserHandle.getUserId(uid));
@@ -639,6 +639,122 @@ public final class BackgroundInstallControlServiceTest {
     }
 
     @Test
+    public void testHandleUsageEvent_fallsBackToAppInfoTimeWhenHistoricalSessionsNotFound()
+            throws NoSuchFieldException, PackageManager.NameNotFoundException {
+        assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
+        InstallSourceInfo installSourceInfo =
+                new InstallSourceInfo(
+                        /* initiatingPackageName= */ INSTALLER_NAME_1,
+                        /* initiatingPackageSigningInfo= */ null,
+                        /* originatingPackageName= */ null,
+                        /* installingPackageName= */ INSTALLER_NAME_1);
+        assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
+        when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
+        ApplicationInfo appInfo = mock(ApplicationInfo.class);
+
+        when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
+                .thenReturn(appInfo);
+
+        FieldSetter.setField(
+                appInfo,
+                ApplicationInfo.class.getDeclaredField("createTimestamp"),
+                // create timestamp is after generated foreground events (hence not considered
+                // foreground install)
+                convertToTestAdjustTimestamp(USAGE_EVENT_TIMESTAMP_2 + 1));
+
+        int uid = USER_ID_1 * UserHandle.PER_USER_RANGE;
+        assertEquals(USER_ID_1, UserHandle.getUserId(uid));
+
+        createPackageManagerHistoricalSessions(List.of(), USER_ID_1);
+
+        // The 2 relevants usage events are before the timeframe, the app is not considered
+        // foreground installed.
+        doReturn(PERMISSION_GRANTED)
+                .when(mPermissionManager)
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
+        generateUsageEvent(
+                UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1,
+                INSTALLER_NAME_1,
+                USAGE_EVENT_TIMESTAMP_1);
+        generateUsageEvent(
+                Event.ACTIVITY_STOPPED, USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
+
+        mPackageListObserver.onPackageAdded(PACKAGE_NAME_1, uid);
+        mTestLooper.dispatchAll();
+
+        var packages = mBackgroundInstallControlService.getBackgroundInstalledPackages();
+        assertNotNull(packages);
+        assertEquals(1, packages.size());
+        assertTrue(packages.contains(USER_ID_1, PACKAGE_NAME_1));
+    }
+
+    @Test
+    public void testHandleUsageEvent_usesHistoricalSessionCreateTimeWhenHistoricalSessionsFound()
+            throws NoSuchFieldException, PackageManager.NameNotFoundException {
+        assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
+        InstallSourceInfo installSourceInfo =
+                new InstallSourceInfo(
+                        /* initiatingPackageName= */ INSTALLER_NAME_1,
+                        /* initiatingPackageSigningInfo= */ null,
+                        /* originatingPackageName= */ null,
+                        /* installingPackageName= */ INSTALLER_NAME_1);
+        assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
+        when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
+        ApplicationInfo appInfo = mock(ApplicationInfo.class);
+
+        when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
+                .thenReturn(appInfo);
+
+        FieldSetter.setField(
+                appInfo,
+                ApplicationInfo.class.getDeclaredField("createTimestamp"),
+                //create timestamp is out of window of (after) the interact events
+                convertToTestAdjustTimestamp(USAGE_EVENT_TIMESTAMP_2 + 1));
+
+        int uid = USER_ID_1 * UserHandle.PER_USER_RANGE;
+        assertEquals(USER_ID_1, UserHandle.getUserId(uid));
+
+        PackageInstaller.SessionInfo installSession1 = mock(PackageInstaller.SessionInfo.class);
+        PackageInstaller.SessionInfo installSession2 = mock(PackageInstaller.SessionInfo.class);
+        doReturn(convertToTestAdjustTimestamp(0L)).when(installSession1).getCreatedMillis();
+        doReturn(convertToTestAdjustTimestamp(PACKAGE_ADD_TIMESTAMP_1)).when(installSession2)
+                .getCreatedMillis();
+        doReturn(PACKAGE_NAME_1).when(installSession1).getAppPackageName();
+        doReturn(PACKAGE_NAME_1).when(installSession2).getAppPackageName();
+        createPackageManagerHistoricalSessions(List.of(installSession1, installSession2),
+                USER_ID_1);
+
+        // The following 2 generated usage events occur after historical session create times hence,
+        // considered foreground install. The appInfo createTimestamp occurs after events, so the
+        // app would be considered background install if it falls back to it as reference create
+        // timestamp.
+        doReturn(PERMISSION_GRANTED)
+                .when(mPermissionManager)
+                .checkPermission(anyString(), anyString(), anyString(), anyInt());
+        generateUsageEvent(
+                UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1,
+                INSTALLER_NAME_1,
+                USAGE_EVENT_TIMESTAMP_1);
+        generateUsageEvent(
+                Event.ACTIVITY_STOPPED, USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
+
+        mPackageListObserver.onPackageAdded(PACKAGE_NAME_1, uid);
+        mTestLooper.dispatchAll();
+
+        assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
+    }
+
+    private void createPackageManagerHistoricalSessions(
+            List<PackageInstaller.SessionInfo> sessions, int userId) {
+        ParceledListSlice<PackageInstaller.SessionInfo> mockParcelList =
+                mock(ParceledListSlice.class);
+        when(mockParcelList.getList()).thenReturn(sessions);
+        when(mPackageManagerInternal.getHistoricalSessions(userId)).thenReturn(mockParcelList);
+    }
+
+    @Test
     public void testHandleUsageEvent_packageAddedOutsideTimeFrame1()
             throws NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
@@ -655,12 +771,10 @@ public final class BackgroundInstallControlServiceTest {
         when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
                 .thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
         FieldSetter.setField(
                 appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
-                createTimestamp);
+                convertToTestAdjustTimestamp(PACKAGE_ADD_TIMESTAMP_1));
 
         int uid = USER_ID_1 * UserHandle.PER_USER_RANGE;
         assertEquals(USER_ID_1, UserHandle.getUserId(uid));
@@ -708,12 +822,10 @@ public final class BackgroundInstallControlServiceTest {
         when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
                 .thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
         FieldSetter.setField(
                 appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
-                createTimestamp);
+                convertToTestAdjustTimestamp(PACKAGE_ADD_TIMESTAMP_1));
 
         int uid = USER_ID_1 * UserHandle.PER_USER_RANGE;
         assertEquals(USER_ID_1, UserHandle.getUserId(uid));
@@ -765,12 +877,10 @@ public final class BackgroundInstallControlServiceTest {
         when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
                 .thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
         FieldSetter.setField(
                 appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
-                createTimestamp);
+                convertToTestAdjustTimestamp(PACKAGE_ADD_TIMESTAMP_1));
 
         int uid = USER_ID_1 * UserHandle.PER_USER_RANGE;
         assertEquals(USER_ID_1, UserHandle.getUserId(uid));
@@ -818,12 +928,10 @@ public final class BackgroundInstallControlServiceTest {
         when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
                 .thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
         FieldSetter.setField(
                 appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
-                createTimestamp);
+                convertToTestAdjustTimestamp(PACKAGE_ADD_TIMESTAMP_1));
 
         int uid = USER_ID_1 * UserHandle.PER_USER_RANGE;
         assertEquals(USER_ID_1, UserHandle.getUserId(uid));

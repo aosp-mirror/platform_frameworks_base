@@ -6750,11 +6750,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
             ArrayList<WindowState> windows) {
         pw.println("WINDOW MANAGER WINDOWS (dumpsys window windows)");
-        dumpWindowsNoHeaderLocked(pw, dumpAll, windows);
-    }
-
-    private void dumpWindowsNoHeaderLocked(PrintWriter pw, boolean dumpAll,
-            ArrayList<WindowState> windows) {
         mRoot.dumpWindowsNoHeader(pw, dumpAll, windows);
 
         if (!mHidingNonSystemOverlayWindows.isEmpty()) {
@@ -6989,9 +6984,15 @@ public class WindowManagerService extends IWindowManager.Stub
         if (reason != null) {
             pw.println("  Reason: " + reason);
         }
+        pw.println();
+        final ArrayList<WindowState> relatedWindows = new ArrayList<>();
         for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
             final DisplayContent dc = mRoot.getChildAt(i);
             final int displayId = dc.getDisplayId();
+            final WindowState currentFocus = dc.mCurrentFocus;
+            final ActivityRecord focusedApp = dc.mFocusedApp;
+            pw.println("  Display #" + displayId + " currentFocus=" + currentFocus
+                    + " focusedApp=" + focusedApp);
             if (!dc.mWinAddedSinceNullFocus.isEmpty()) {
                 pw.println("  Windows added in display #" + displayId + " since null focus: "
                         + dc.mWinAddedSinceNullFocus);
@@ -7000,12 +7001,25 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("  Windows removed in display #" + displayId + " since null focus: "
                         + dc.mWinRemovedSinceNullFocus);
             }
+            pw.println("  Tasks in top down Z order:");
+            dc.forAllTaskDisplayAreas(tda -> {
+                tda.dump(pw, "    ", false /* dumpAll */);
+            });
+            dc.getInputMonitor().dump(pw, "  ");
+            pw.println();
+            dc.forAllWindows(w -> {
+                if ((currentFocus != null && Objects.equals(w.mAttrs.packageName,
+                        currentFocus.mAttrs.packageName)) || (focusedApp != null
+                        && Objects.equals(w.mAttrs.packageName, focusedApp.packageName))) {
+                    relatedWindows.add(w);
+                }
+            }, true /* traverseTopToBottom */);
         }
+        if (windowState != null && !relatedWindows.contains(windowState)) {
+            relatedWindows.add(windowState);
+        }
+        mRoot.dumpWindowsNoHeader(pw, true /* dumpAll */, relatedWindows);
         pw.println();
-        dumpWindowsNoHeaderLocked(pw, true, null);
-        pw.println();
-        pw.println("Last ANR continued");
-        mRoot.dumpDisplayContents(pw);
         pw.close();
         mLastANRState = sw.toString();
 

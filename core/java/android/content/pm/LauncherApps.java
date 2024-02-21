@@ -695,12 +695,23 @@ public class LauncherApps {
      * Otherwise it'll return the same list as {@link UserManager#getUserProfiles()} would.
      */
     public List<UserHandle> getProfiles() {
-        if (mUserManager.isManagedProfile()) {
-            // If it's a managed profile, only return the current profile.
-            final List result =  new ArrayList(1);
+        if (mUserManager.isManagedProfile()
+                || (android.multiuser.Flags.enableLauncherAppsHiddenProfileChecks()
+                        && android.os.Flags.allowPrivateProfile()
+                        && mUserManager.isPrivateProfile())) {
+            // If it's a managed or private profile, only return the current profile.
+            final List result = new ArrayList(1);
             result.add(android.os.Process.myUserHandle());
             return result;
         } else {
+            if (android.multiuser.Flags.enableLauncherAppsHiddenProfileChecks()) {
+                try {
+                    return mService.getUserProfiles();
+                } catch (RemoteException re) {
+                    throw re.rethrowFromSystemServer();
+                }
+            }
+
             return mUserManager.getUserProfiles();
         }
     }

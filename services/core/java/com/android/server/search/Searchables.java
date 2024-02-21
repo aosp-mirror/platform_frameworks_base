@@ -147,6 +147,9 @@ public class Searchables {
             Log.e(LOG_TAG, "Error getting activity info " + re);
             return null;
         }
+        if (ai == null) {
+            return null;
+        }
         String refActivityName = null;
 
         // First look for activity-specific reference

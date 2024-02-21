@@ -973,7 +973,7 @@ public class UserManagerService extends IUserManager.Stub {
         mUsers = users != null ? users : new SparseArray<>();
         mHandler = new MainHandler();
         mInternalExecutor = new ThreadPoolExecutor(/* corePoolSize */ 0, /* maximumPoolSize */ 1,
-                /* keepAliveTime */ 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+                /* keepAliveTime */ 24, TimeUnit.HOURS, new LinkedBlockingQueue<>());
         mUserVisibilityMediator = new UserVisibilityMediator(mHandler);
         mUserDataPreparer = userDataPreparer;
         mUserTypes = UserTypeFactory.getUserTypes();

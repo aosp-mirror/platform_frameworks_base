@@ -43,7 +43,6 @@ import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
 import android.app.ResourcesManager;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
-import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
@@ -75,7 +74,6 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.content.ReferrerIntent;
-import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.Before;
@@ -230,7 +228,7 @@ public class ActivityThreadTest {
         try {
             // Send process level config change.
             ClientTransaction transaction = newTransaction(activityThread);
-            addClientTransactionItem(transaction, ConfigurationChangeItem.obtain(
+            transaction.addTransactionItem(ConfigurationChangeItem.obtain(
                     newConfig, DEVICE_ID_INVALID));
             appThread.scheduleTransaction(transaction);
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
@@ -247,7 +245,7 @@ public class ActivityThreadTest {
             newConfig.seq++;
             newConfig.smallestScreenWidthDp++;
             transaction = newTransaction(activityThread);
-            addClientTransactionItem(transaction, ActivityConfigurationChangeItem.obtain(
+            transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
                     activity.getActivityToken(), newConfig));
             appThread.scheduleTransaction(transaction);
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
@@ -448,16 +446,16 @@ public class ActivityThreadTest {
         activity.mTestLatch = new CountDownLatch(1);
 
         ClientTransaction transaction = newTransaction(activityThread);
-        addClientTransactionItem(transaction, ConfigurationChangeItem.obtain(
+        transaction.addTransactionItem(ConfigurationChangeItem.obtain(
                 processConfigLandscape, DEVICE_ID_INVALID));
         appThread.scheduleTransaction(transaction);
 
         transaction = newTransaction(activityThread);
-        addClientTransactionItem(transaction, ActivityConfigurationChangeItem.obtain(
+        transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
                 activity.getActivityToken(), activityConfigLandscape));
-        addClientTransactionItem(transaction, ConfigurationChangeItem.obtain(
+        transaction.addTransactionItem(ConfigurationChangeItem.obtain(
                 processConfigPortrait, DEVICE_ID_INVALID));
-        addClientTransactionItem(transaction, ActivityConfigurationChangeItem.obtain(
+        transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
                 activity.getActivityToken(), activityConfigPortrait));
         appThread.scheduleTransaction(transaction);
 
@@ -847,8 +845,8 @@ public class ActivityThreadTest {
                         false /* shouldSendCompatFakeFocus*/);
 
         final ClientTransaction transaction = newTransaction(activity);
-        addClientTransactionItem(transaction, callbackItem);
-        addClientTransactionItem(transaction, resumeStateRequest);
+        transaction.addTransactionItem(callbackItem);
+        transaction.addTransactionItem(resumeStateRequest);
 
         return transaction;
     }
@@ -860,7 +858,7 @@ public class ActivityThreadTest {
                         false /* shouldSendCompatFakeFocus */);
 
         final ClientTransaction transaction = newTransaction(activity);
-        addClientTransactionItem(transaction, resumeStateRequest);
+        transaction.addTransactionItem(resumeStateRequest);
 
         return transaction;
     }
@@ -871,7 +869,7 @@ public class ActivityThreadTest {
                 activity.getActivityToken(), 0 /* configChanges */);
 
         final ClientTransaction transaction = newTransaction(activity);
-        addClientTransactionItem(transaction, stopStateRequest);
+        transaction.addTransactionItem(stopStateRequest);
 
         return transaction;
     }
@@ -883,7 +881,7 @@ public class ActivityThreadTest {
                 activity.getActivityToken(), config);
 
         final ClientTransaction transaction = newTransaction(activity);
-        addClientTransactionItem(transaction, item);
+        transaction.addTransactionItem(item);
 
         return transaction;
     }
@@ -895,7 +893,7 @@ public class ActivityThreadTest {
                 resume);
 
         final ClientTransaction transaction = newTransaction(activity);
-        addClientTransactionItem(transaction, item);
+        transaction.addTransactionItem(item);
 
         return transaction;
     }
@@ -908,17 +906,6 @@ public class ActivityThreadTest {
     @NonNull
     private static ClientTransaction newTransaction(@NonNull ActivityThread activityThread) {
         return ClientTransaction.obtain(activityThread.getApplicationThread());
-    }
-
-    private static void addClientTransactionItem(@NonNull ClientTransaction transaction,
-            @NonNull ClientTransactionItem item) {
-        if (Flags.bundleClientTransactionFlag()) {
-            transaction.addTransactionItem(item);
-        } else if (item.isActivityLifecycleItem()) {
-            transaction.setLifecycleStateRequest((ActivityLifecycleItem) item);
-        } else {
-            transaction.addCallback(item);
-        }
     }
 
     // Test activity
