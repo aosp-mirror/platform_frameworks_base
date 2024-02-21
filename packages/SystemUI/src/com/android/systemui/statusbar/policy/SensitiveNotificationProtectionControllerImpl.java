@@ -51,6 +51,7 @@ import javax.inject.Inject;
 public class SensitiveNotificationProtectionControllerImpl
         implements SensitiveNotificationProtectionController {
     private static final String LOG_TAG = "SNPC";
+    private final SensitiveNotificationProtectionControllerLogger mLogger;
     private final ArraySet<String> mExemptPackages = new ArraySet<>();
     private final ListenerSet<Runnable> mListeners = new ListenerSet<>();
     private volatile MediaProjectionInfo mProjection;
@@ -66,6 +67,7 @@ public class SensitiveNotificationProtectionControllerImpl
                         if (mDisableScreenShareProtections) {
                             Log.w(LOG_TAG,
                                     "Screen share protections disabled, ignoring projectionstart");
+                            mLogger.logProjectionStart(false, info.getPackageName());
                             return;
                         }
 
@@ -73,6 +75,7 @@ public class SensitiveNotificationProtectionControllerImpl
                         // Launch cookie only set (non-null) if sharing single app/task
                         updateProjectionStateAndNotifyListeners(
                                 (info.getLaunchCookie() == null) ? info : null);
+                        mLogger.logProjectionStart(isSensitiveStateActive(), info.getPackageName());
                     } finally {
                         Trace.endSection();
                     }
@@ -82,6 +85,7 @@ public class SensitiveNotificationProtectionControllerImpl
                 public void onStop(MediaProjectionInfo info) {
                     Trace.beginSection("SNPC.onProjectionStop");
                     try {
+                        mLogger.logProjectionStop();
                         updateProjectionStateAndNotifyListeners(null);
                     } finally {
                         Trace.endSection();
@@ -96,7 +100,10 @@ public class SensitiveNotificationProtectionControllerImpl
             MediaProjectionManager mediaProjectionManager,
             IActivityManager activityManager,
             @Main Handler mainHandler,
-            @Background Executor bgExecutor) {
+            @Background Executor bgExecutor,
+            SensitiveNotificationProtectionControllerLogger logger) {
+        mLogger = logger;
+
         if (!screenshareNotificationHiding()) {
             return;
         }
@@ -201,8 +208,6 @@ public class SensitiveNotificationProtectionControllerImpl
         if (projection == null) {
             return false;
         }
-
-        // TODO(b/316955558): Add disabled by developer option
 
         return !mExemptPackages.contains(projection.getPackageName());
     }
