@@ -120,7 +120,6 @@ fun WearApp(
         }
 
         is CredentialSelectorUiState.Cancel -> {
-            // TODO: b/300422310 - Implement cancel with message flow
             onCloseApp()
         }
 

@@ -31,10 +31,7 @@ interface CredentialManagerClient {
     fun updateRequest(intent: Intent)
 
     /** Sends an error encountered during the UI. */
-    fun sendError(
-        @BaseDialogResult.ResultCode resultCode: Int,
-        errorMessage: String? = null,
-    )
+    fun sendError(@BaseDialogResult.ResultCode resultCode: Int)
 
     /**
      * Sends a response to the system service. The response
