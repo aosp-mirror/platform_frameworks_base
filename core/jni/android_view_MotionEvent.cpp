@@ -77,25 +77,28 @@ MotionEvent* android_view_MotionEvent_getNativePtr(JNIEnv* env, jobject eventObj
             env->GetLongField(eventObj, gMotionEventClassInfo.mNativePtr));
 }
 
-static void android_view_MotionEvent_setNativePtr(JNIEnv* env, jobject eventObj,
-        MotionEvent* event) {
-    env->SetLongField(eventObj, gMotionEventClassInfo.mNativePtr,
-            reinterpret_cast<jlong>(event));
+static void android_view_MotionEvent_setNativePtr(JNIEnv* env, ScopedLocalRef<jobject>& eventObj,
+                                                  MotionEvent* event) {
+    env->SetLongField(eventObj.get(), gMotionEventClassInfo.mNativePtr,
+                      reinterpret_cast<jlong>(event));
 }
 
-jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent& event) {
+ScopedLocalRef<jobject> android_view_MotionEvent_obtainAsCopy(JNIEnv* env,
+                                                              const MotionEvent& event) {
     std::unique_ptr<MotionEvent> destEvent = std::make_unique<MotionEvent>();
     destEvent->copyFrom(&event, true);
     return android_view_MotionEvent_obtainFromNative(env, std::move(destEvent));
 }
 
-jobject android_view_MotionEvent_obtainFromNative(JNIEnv* env, std::unique_ptr<MotionEvent> event) {
+ScopedLocalRef<jobject> android_view_MotionEvent_obtainFromNative(
+        JNIEnv* env, std::unique_ptr<MotionEvent> event) {
     if (event == nullptr) {
-        return nullptr;
+        return ScopedLocalRef<jobject>(env);
     }
-    jobject eventObj =
-            env->CallStaticObjectMethod(gMotionEventClassInfo.clazz, gMotionEventClassInfo.obtain);
-    if (env->ExceptionCheck() || !eventObj) {
+    ScopedLocalRef<jobject> eventObj(env,
+                                     env->CallStaticObjectMethod(gMotionEventClassInfo.clazz,
+                                                                 gMotionEventClassInfo.obtain));
+    if (env->ExceptionCheck() || !eventObj.get()) {
         LOGE_EX(env);
         LOG_ALWAYS_FATAL("An exception occurred while obtaining a Java motion event.");
     }

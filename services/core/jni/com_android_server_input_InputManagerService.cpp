@@ -1509,15 +1509,14 @@ bool NativeInputManager::filterInputEvent(const InputEvent& inputEvent, uint32_t
     ScopedLocalRef<jobject> inputEventObj(env);
     switch (inputEvent.getType()) {
         case InputEventType::KEY:
-            inputEventObj.reset(
+            inputEventObj =
                     android_view_KeyEvent_obtainAsCopy(env,
-                                                       static_cast<const KeyEvent&>(inputEvent)));
+                                                       static_cast<const KeyEvent&>(inputEvent));
             break;
         case InputEventType::MOTION:
-            inputEventObj.reset(
-                    android_view_MotionEvent_obtainAsCopy(env,
-                                                          static_cast<const MotionEvent&>(
-                                                                  inputEvent)));
+            inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
+                                                                  static_cast<const MotionEvent&>(
+                                                                          inputEvent));
             break;
         default:
             return true; // dispatch the event normally
@@ -1559,7 +1558,7 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent& keyEvent,
 
     const nsecs_t when = keyEvent.getEventTime();
     JNIEnv* env = jniEnv();
-    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_obtainAsCopy(env, keyEvent));
+    ScopedLocalRef<jobject> keyEventObj = android_view_KeyEvent_obtainAsCopy(env, keyEvent);
     if (!keyEventObj.get()) {
         ALOGE("Failed to obtain key event object for interceptKeyBeforeQueueing.");
         return;
@@ -1639,7 +1638,7 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(const sp<IBinder>& tok
 
     // Token may be null
     ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
-    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_obtainAsCopy(env, keyEvent));
+    ScopedLocalRef<jobject> keyEventObj = android_view_KeyEvent_obtainAsCopy(env, keyEvent);
     if (!keyEventObj.get()) {
         ALOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
         return 0;
@@ -1670,7 +1669,7 @@ std::optional<KeyEvent> NativeInputManager::dispatchUnhandledKey(const sp<IBinde
 
     // Note: tokenObj may be null.
     ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
-    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_obtainAsCopy(env, keyEvent));
+    ScopedLocalRef<jobject> keyEventObj = android_view_KeyEvent_obtainAsCopy(env, keyEvent);
     if (!keyEventObj.get()) {
         ALOGE("Failed to obtain key event object for dispatchUnhandledKey.");
         return {};
