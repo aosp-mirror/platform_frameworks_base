@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingerprint authenticated"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Face authenticated"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Face authenticated. Please press confirm"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Fingerprint hardware not available"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Can’t set up fingerprint"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Fingerprint setup timed out. Try again."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Fingerprint operation cancelled"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Fingerprint operation cancelled by user"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Too many attempts. Use screen lock instead."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Too many attempts. Use screen lock instead."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Can’t process fingerprint. Try again."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"No fingerprints enrolled"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"This device does not have a fingerprint sensor"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sensor temporarily disabled"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Can\'t use fingerprint sensor. Visit a repair provider."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Power button pressed"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Use fingerprint"</string>

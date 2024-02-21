@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"கைரேகை அங்கீகரிக்கப்பட்டது"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"முகம் அங்கீகரிக்கப்பட்டது. ’உறுதிப்படுத்துக’ என்பதை அழுத்துக"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"கைரேகை பாகம் இல்லை"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"கைரேகையை அமைக்க முடியவில்லை"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"கைரேகை அமைவுக்கான நேரம் முடிந்துவிட்டது. மீண்டும் முயலவும்."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"கைரேகைச் செயல்பாடு ரத்துசெய்யப்பட்டது"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"கைரேகைச் செயல்பாடு பயனரால் ரத்துசெய்யப்பட்டது"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"பலமுறை முயன்றுவிட்டீர்கள். இதற்குப் பதிலாகத் திரைப்பூட்டைப் பயன்படுத்தவும்."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"பலமுறை முயன்றுவிட்டீர்கள். இதற்குப் பதிலாகத் திரைப்பூட்டைப் பயன்படுத்தவும்."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"கைரேகையைச் செயலாக்க முடியவில்லை. மீண்டும் முயலவும்."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"கைரேகைகள் எதுவும் பதிவுசெய்யப்படவில்லை"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"இந்தச் சாதனத்தில் கைரேகை சென்சார் இல்லை"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"சென்சார் தற்காலிகமாக முடக்கப்பட்டுள்ளது"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"கைரேகை சென்சாரைப் பயன்படுத்த முடியவில்லை. பழுதுபார்ப்புச் சேவை வழங்குநரைத் தொடர்புகொள்ளவும்."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"பவர் பட்டன் அழுத்தப்பட்டுள்ளது"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"கைரேகை <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"கைரேகையைப் பயன்படுத்து"</string>

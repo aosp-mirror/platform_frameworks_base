@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Izigxivizo zeminwe zigunyaziwe"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Ubuso bufakazelwe ubuqiniso"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ukuqinisekiswa kobuso, sicela ucindezele okuthi qinisekisa"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Izingxenyekazi zekhompuyutha zezigxivizo zeminwe azitholakali"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Ayikwazi ukusetha izigxivizo zeminwe"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Ukusethwa kwesigxivizo somunwe kuphelelwe yisikhathi Zama futhi."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Ukusebenza kwezigxivizo zeminwe kukhanseliwe"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Umsebenzi wezigxivizo zeminwe ukhanselwe umsebenzisi"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Imizamo eminingi kakhulu. Sebenzisa ukukhiya isikrini kunalokho."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Imizamo eminingi kakhulu. Sebenzisa ukukhiya isikrini kunalokho."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Ayikwazi ukucubungula isigxivizo somunwe. Zama futhi."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Azikho izigxivizo zeminwe ezibhalisiwe"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Le divayisi ayinayo inzwa yezigxivizo zeminwe"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Inzwa ikhutshazwe okwesikhashana"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Ayikwazi ukusebenzisa inzwa yesigxivizo somunwe. Vakashela umhlinzeki wokulungisa."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Inkinobho yamandla icindezelwe"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Umunwe ongu-<xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Sebenzisa izigxivizo zeminwe"</string>
