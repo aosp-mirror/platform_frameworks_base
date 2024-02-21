@@ -643,19 +643,6 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
     }
 
-    /** Helper to set int metadata on the Surface corresponding to the task id. */
-    public void setSurfaceMetadata(int taskId, int key, int value) {
-        synchronized (mLock) {
-            final TaskAppearedInfo info = mTasks.get(taskId);
-            if (info == null || info.getLeash() == null) {
-                return;
-            }
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            t.setMetadata(info.getLeash(), key, value);
-            t.apply();
-        }
-    }
-
     private boolean updateTaskListenerIfNeeded(RunningTaskInfo taskInfo, SurfaceControl leash,
             TaskListener oldListener, TaskListener newListener) {
         if (oldListener == newListener) return false;

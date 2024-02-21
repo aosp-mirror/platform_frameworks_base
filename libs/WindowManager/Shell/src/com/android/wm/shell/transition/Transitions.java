@@ -1170,7 +1170,11 @@ public class Transitions implements RemoteCallable<Transitions>,
         mPendingTransitions.add(0, active);
     }
 
-    /** Start a new transition directly. */
+    /**
+     * Start a new transition directly.
+     * @param handler if null, the transition will be dispatched to the registered set of transition
+     *                handlers to be handled
+     */
     public IBinder startTransition(@WindowManager.TransitionType int type,
             @NonNull WindowContainerTransaction wct, @Nullable TransitionHandler handler) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Directly starting a new transition "
