@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.dozeParameters
 import com.android.systemui.statusbar.phone.screenOffAnimationController
@@ -72,6 +73,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
     private val notificationsKeyguardInteractor = kosmos.notificationsKeyguardInteractor
     private val dozeParameters = kosmos.dozeParameters
+    private val shadeRepository = kosmos.fakeShadeRepository
     private val underTest by lazy { kosmos.keyguardRootViewModel }
 
     private val viewState = ViewStateAccessor()
@@ -307,5 +309,23 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             )
 
             assertThat(alpha).isEqualTo(1.0f)
+        }
+
+    @Test
+    fun alpha_emitsOnShadeExpansion() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha(viewState))
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+
+            shadeRepository.setQsExpansion(0f)
+            assertThat(alpha).isEqualTo(1f)
+
+            shadeRepository.setQsExpansion(0.5f)
+            assertThat(alpha).isEqualTo(0f)
         }
 }
