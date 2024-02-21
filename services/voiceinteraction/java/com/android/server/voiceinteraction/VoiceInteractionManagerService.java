@@ -2543,7 +2543,6 @@ public class VoiceInteractionManagerService extends SystemService {
                         if (anyPackagesAppearing()) {
                             initRecognizer(userHandle);
                         }
-                        return;
                     }
 
                     if (curInteractor != null) {
@@ -2592,15 +2591,16 @@ public class VoiceInteractionManagerService extends SystemService {
                         }
                     }
 
-                    // There is no interactor, so just deal with a simple recognizer.
-                    int change = isPackageDisappearing(curRecognizer.getPackageName());
-                    if (change == PACKAGE_PERMANENT_CHANGE
-                            || change == PACKAGE_TEMPORARY_CHANGE) {
-                        setCurRecognizer(findAvailRecognizer(null, userHandle), userHandle);
+                    if (curRecognizer != null) {
+                        int change = isPackageDisappearing(curRecognizer.getPackageName());
+                        if (change == PACKAGE_PERMANENT_CHANGE
+                                || change == PACKAGE_TEMPORARY_CHANGE) {
+                            setCurRecognizer(findAvailRecognizer(null, userHandle), userHandle);
 
-                    } else if (isPackageModified(curRecognizer.getPackageName())) {
-                        setCurRecognizer(findAvailRecognizer(curRecognizer.getPackageName(),
-                                userHandle), userHandle);
+                        } else if (isPackageModified(curRecognizer.getPackageName())) {
+                            setCurRecognizer(findAvailRecognizer(curRecognizer.getPackageName(),
+                                    userHandle), userHandle);
+                        }
                     }
                 }
             }
