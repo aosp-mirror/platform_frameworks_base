@@ -476,7 +476,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     public void goToFullscreenFromSplit() {
-        mStageCoordinator.goToFullscreenFromSplit();
+        if (mStageCoordinator.isSplitActive()) {
+            mStageCoordinator.goToFullscreenFromSplit();
+        }
     }
 
     /** Move the specified task to fullscreen, regardless of focus state. */
