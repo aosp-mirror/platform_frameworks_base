@@ -1233,7 +1233,8 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @Override
-        public final void scheduleTimeoutServiceForType(IBinder token, int startId, int fgsType) {
+        public final void scheduleTimeoutServiceForType(IBinder token, int startId,
+                @ServiceInfo.ForegroundServiceType int fgsType) {
             if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                 Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                         "scheduleTimeoutServiceForType. token=" + token);
@@ -5151,7 +5152,8 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
-    private void handleTimeoutServiceForType(IBinder token, int startId, int fgsType) {
+    private void handleTimeoutServiceForType(IBinder token, int startId,
+            @ServiceInfo.ForegroundServiceType int fgsType) {
         Service s = mServices.get(token);
         if (s != null) {
             try {
