@@ -102,6 +102,9 @@ import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_FIRST_O
 import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_LAST_ORDERED_ID;
 import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_FIRST_ORDERED_ID;
 import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_LAST_ORDERED_ID;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
+import static com.android.server.wm.ActivityRecord.State.DESTROYING;
+import static com.android.server.wm.ActivityRecord.State.FINISHING;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
@@ -4173,7 +4176,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             task = mRootWindowContainer.getDefaultTaskDisplayArea().getRootTask(
                     t -> t.isActivityTypeStandard());
         }
-        if (task != null && task.getTopMostActivity() != null) {
+        if (task != null && task.getTopMostActivity() != null
+                && !task.getTopMostActivity().isState(FINISHING, DESTROYING, DESTROYED)) {
             mWindowManager.mAtmService.mActivityClientController.onPictureInPictureUiStateChanged(
                     task.getTopMostActivity(), pipState);
         }
