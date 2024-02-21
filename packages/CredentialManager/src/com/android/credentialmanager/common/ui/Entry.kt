@@ -29,13 +29,10 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -278,31 +275,6 @@ fun ActionEntry(
 }
 
 /**
- * A single row of leading icon and text describing a benefit of passkeys, used by the
- * [com.android.credentialmanager.createflow.PasskeyIntroCard].
- */
-@Composable
-fun PasskeyBenefitRow(
-    leadingIconPainter: Painter,
-    text: String,
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Icon(
-            modifier = Modifier.size(24.dp),
-            painter = leadingIconPainter,
-            tint = LocalAndroidColorScheme.current.onSurfaceVariant,
-            // Decorative purpose only.
-            contentDescription = null,
-        )
-        BodyMediumText(text = text)
-    }
-}
-
-/**
  * A single row of one or two CTA buttons for continuing or cancelling the current step.
  */
 @Composable
@@ -327,40 +299,36 @@ fun CtaButtonRow(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionTopAppBar(
     text: String,
     onNavigationIconClicked: () -> Unit,
     bottomPadding: Dp,
 ) {
-    TopAppBar(
-        title = {
-            LargeTitleText(text = text, modifier = Modifier.padding(horizontal = 4.dp))
-        },
-        navigationIcon = {
-            IconButton(
+    Row(
+            modifier = Modifier.padding(top = 12.dp, bottom = bottomPadding),
+            verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(
                 modifier = Modifier.padding(top = 8.dp, bottom = 8.dp, start = 4.dp).size(48.dp),
                 onClick = onNavigationIconClicked
-            ) {
-                Box(
+        ) {
+            Box(
                     modifier = Modifier.size(48.dp),
                     contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
+            ) {
+                Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = stringResource(
-                            R.string.accessibility_back_arrow_button
+                                R.string.accessibility_back_arrow_button
                         ),
                         modifier = Modifier.size(24.dp).autoMirrored(),
                         tint = LocalAndroidColorScheme.current.onSurfaceVariant,
-                    )
-                }
+                )
             }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-        modifier = Modifier.padding(top = 12.dp, bottom = bottomPadding)
-    )
+        }
+        LargeTitleText(text = text, modifier = Modifier.padding(horizontal = 4.dp))
+    }
 }
 
 private fun Modifier.autoMirrored() = composed {
