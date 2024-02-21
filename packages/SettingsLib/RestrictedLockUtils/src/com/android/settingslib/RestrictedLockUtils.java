@@ -219,7 +219,6 @@ public class RestrictedLockUtils {
         }
     }
 
-
     /**
      * Shows restricted setting dialog.
      *

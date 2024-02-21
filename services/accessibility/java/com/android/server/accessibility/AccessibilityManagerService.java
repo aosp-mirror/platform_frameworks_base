@@ -64,6 +64,7 @@ import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.app.admin.DevicePolicyManager;
+import android.app.ecm.EnhancedConfirmationManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -112,6 +113,7 @@ import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -4394,13 +4396,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // permittedServices null means all accessibility services are allowed.
             boolean allowed = permittedServices == null || permittedServices.contains(packageName);
             if (allowed) {
-                final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
-                final int mode = appOps.noteOpNoThrow(
-                        AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
-                        uid, packageName, /* attributionTag= */ null, /* message= */ null);
-                final boolean ecmEnabled = mContext.getResources().getBoolean(
-                        R.bool.config_enhancedConfirmationModeEnabled);
-                return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
+                if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                        && android.security.Flags.extendEcmToAllSettings()) {
+                    try {
+                        return !mContext.getSystemService(EnhancedConfirmationManager.class)
+                                .isRestricted(packageName,
+                                        AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Log.e(LOG_TAG, "Exception when retrieving package:" + packageName, e);
+                        return false;
+                    }
+                } else {
+                    try {
+                        final int mode = mContext.getSystemService(AppOpsManager.class)
+                                .noteOpNoThrow(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
+                                        uid, packageName);
+                        final boolean ecmEnabled = mContext.getResources().getBoolean(
+                                com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
+                        return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
+                    } catch (Exception e) {
+                        // Fallback in case if app ops is not available in testing.
+                        return false;
+                    }
+                }
             }
             return false;
         } finally {
@@ -4423,8 +4441,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return true;
         }
 
-        RestrictedLockUtils.sendShowRestrictedSettingDialogIntent(mContext,
-                packageName, uid);
+        if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                && android.security.Flags.extendEcmToAllSettings()) {
+            try {
+                Intent settingDialogIntent = mContext
+                        .getSystemService(EnhancedConfirmationManager.class)
+                        .createRestrictedSettingDialogIntent(packageName,
+                                AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
+                mContext.startActivity(settingDialogIntent);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Exception when retrieving package:" + packageName, e);
+            }
+        } else {
+            RestrictedLockUtils.sendShowRestrictedSettingDialogIntent(mContext,
+                    packageName, uid);
+        }
         return true;
     }
 
