@@ -22,7 +22,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
@@ -275,13 +274,5 @@ class SceneInteractorTest : SysuiTestCase() {
 
             underTest.setVisible(true, "reason")
             assertThat(isVisible).isTrue()
-        }
-
-    @Test
-    fun userInput() =
-        testScope.runTest {
-            assertThat(kosmos.fakePowerRepository.userTouchRegistered).isFalse()
-            underTest.onUserInput()
-            assertThat(kosmos.fakePowerRepository.userTouchRegistered).isTrue()
         }
 }

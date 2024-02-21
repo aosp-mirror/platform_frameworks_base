@@ -439,8 +439,13 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 )
         );
         SystemClock systemClock = new FakeSystemClock();
-        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger,
-                mInteractionJankMonitor, mJavaAdapter, () -> mShadeInteractor);
+        mStatusBarStateController = new StatusBarStateControllerImpl(
+                mUiEventLogger,
+                mInteractionJankMonitor,
+                mJavaAdapter,
+                () -> mShadeInteractor,
+                () -> mKosmos.getDeviceUnlockedInteractor(),
+                () -> mKosmos.getSceneInteractor());
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);
@@ -603,9 +608,13 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 new NotificationWakeUpCoordinator(
                         mDumpManager,
                         mock(HeadsUpManager.class),
-                        new StatusBarStateControllerImpl(new UiEventLoggerFake(),
+                        new StatusBarStateControllerImpl(
+                                new UiEventLoggerFake(),
                                 mInteractionJankMonitor,
-                                mJavaAdapter, () -> mShadeInteractor),
+                                mJavaAdapter,
+                                () -> mShadeInteractor,
+                                () -> mKosmos.getDeviceUnlockedInteractor(),
+                                () -> mKosmos.getSceneInteractor()),
                         mKeyguardBypassController,
                         mDozeParameters,
                         mScreenOffAnimationController,

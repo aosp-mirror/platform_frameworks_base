@@ -25,6 +25,8 @@ import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.classifier.fakeFalsingManager
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.data.repository.fakePowerRepository
+import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
@@ -32,6 +34,7 @@ import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -61,6 +64,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             SceneContainerViewModel(
                 sceneInteractor = interactor,
                 falsingInteractor = kosmos.falsingInteractor,
+                powerInteractor = kosmos.powerInteractor,
             )
     }
 
@@ -186,5 +190,13 @@ class SceneContainerViewModelTest : SysuiTestCase() {
                         .that(underTest.canChangeScene(toScene = toScene))
                         .isTrue()
                 }
+        }
+
+    @Test
+    fun userInput() =
+        testScope.runTest {
+            assertThat(kosmos.fakePowerRepository.userTouchRegistered).isFalse()
+            underTest.onMotionEvent(mock())
+            assertThat(kosmos.fakePowerRepository.userTouchRegistered).isTrue()
         }
 }
