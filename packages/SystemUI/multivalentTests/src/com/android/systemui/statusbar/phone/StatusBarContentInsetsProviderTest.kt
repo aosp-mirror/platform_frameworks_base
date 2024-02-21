@@ -1138,7 +1138,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
 
     private fun setCameraProtectionBounds(protectionBounds: Rect) {
         val protectionInfo =
-            mock<CameraProtectionInfo> { whenever(this.cutoutBounds).thenReturn(protectionBounds) }
+            mock<CameraProtectionInfo> { whenever(this.bounds).thenReturn(protectionBounds) }
         whenever(sysUICutout.cameraProtection).thenReturn(protectionInfo)
     }
 

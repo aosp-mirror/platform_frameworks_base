@@ -143,7 +143,7 @@ class CameraAvailabilityListener(
 
     private fun notifyCameraActive(info: CameraProtectionInfo) {
         listeners.forEach {
-            it.onApplyCameraProtection(info.cutoutProtectionPath, info.cutoutBounds)
+            it.onApplyCameraProtection(info.cutoutProtectionPath, info.bounds)
         }
     }
 
