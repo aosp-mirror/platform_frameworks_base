@@ -16,9 +16,9 @@
 
 package com.android.server;
 
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-
 import static android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
+
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -67,7 +67,11 @@ import java.util.Set;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @RequiresFlagsEnabled(FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION)
-public class SensitiveContentProtectionManagerServiceTest {
+/**
+ * Test {@link SensitiveContentProtectionManagerService} for sensitive notification protection,
+ * the service protects sensitive content during screen share.
+ */
+public class SensitiveContentProtectionManagerServiceNotificationTest {
     private static final String NOTIFICATION_KEY_1 = "com.android.server.notification.TEST_KEY_1";
     private static final String NOTIFICATION_KEY_2 = "com.android.server.notification.TEST_KEY_2";
 
