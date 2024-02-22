@@ -17,13 +17,10 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
+import com.android.systemui.communal.ui.view.layout.blueprints.DefaultCommunalBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
-import com.android.systemui.keyguard.shared.model.KeyguardSection
-import com.android.systemui.keyguard.ui.composable.blueprint.SplitShadeWeatherClockBlueprint
-import com.android.systemui.keyguard.ui.composable.blueprint.WeatherClockBlueprint
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.multibindings.IntoSet
 
 @Module
@@ -46,25 +43,9 @@ abstract class KeyguardBlueprintModule {
         shortcutsBesideUdfpsLockscreenBlueprint: ShortcutsBesideUdfpsKeyguardBlueprint
     ): KeyguardBlueprint
 
-    companion object {
-        /** This is a place holder for weather clock in compose. */
-        @Provides
-        @IntoSet
-        fun bindWeatherClockBlueprintPlaceHolder(): KeyguardBlueprint {
-            return object : KeyguardBlueprint {
-                override val id: String = WeatherClockBlueprint.ID
-                override val sections: List<KeyguardSection> = listOf()
-            }
-        }
-
-        /** This is a place holder for weather clock in compose. */
-        @Provides
-        @IntoSet
-        fun bindSplitShadeWeatherClockBlueprintPlaceHolder(): KeyguardBlueprint {
-            return object : KeyguardBlueprint {
-                override val id: String = SplitShadeWeatherClockBlueprint.ID
-                override val sections: List<KeyguardSection> = listOf()
-            }
-        }
-    }
+    @Binds
+    @IntoSet
+    abstract fun bindDefaultCommunalBlueprint(
+        defaultCommunalBlueprint: DefaultCommunalBlueprint
+    ): KeyguardBlueprint
 }

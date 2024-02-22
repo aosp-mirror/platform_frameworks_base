@@ -33,7 +33,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
-import com.android.systemui.keyguard.ui.composable.section.DefaultClockSection
+import com.android.systemui.keyguard.ui.composable.section.ClockSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
 import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
@@ -56,7 +56,7 @@ class DefaultBlueprint
 constructor(
     private val viewModel: LockscreenContentViewModel,
     private val statusBarSection: StatusBarSection,
-    private val clockSection: DefaultClockSection,
+    private val clockSection: ClockSection,
     private val smartSpaceSection: SmartSpaceSection,
     private val notificationSection: NotificationSection,
     private val lockSection: LockSection,
