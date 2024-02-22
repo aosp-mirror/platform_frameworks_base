@@ -49,7 +49,6 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 
 @SmallTest
@@ -64,11 +63,10 @@ public class BatteryUsageStatsProviderTest {
     private static final long MINUTE_IN_MS = 60 * 1000;
     private static final double PRECISION = 0.00001;
 
-    private File mHistoryDir;
-
     @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule =
-            new BatteryUsageStatsRule(12345, mHistoryDir)
+            new BatteryUsageStatsRule(12345)
+                    .createTempDirectory()
                     .setAveragePower(PowerProfile.POWER_FLASHLIGHT, 360.0)
                     .setAveragePower(PowerProfile.POWER_AUDIO, 720.0);
 
@@ -77,26 +75,12 @@ public class BatteryUsageStatsProviderTest {
 
     @Before
     public void setup() throws IOException {
-        mHistoryDir = Files.createTempDirectory("BatteryUsageStatsProviderTest").toFile();
-        clearDirectory(mHistoryDir);
-
         if (RavenwoodRule.isUnderRavenwood()) {
             mContext = mock(Context.class);
             SensorManager sensorManager = mock(SensorManager.class);
             when(mContext.getSystemService(SensorManager.class)).thenReturn(sensorManager);
         } else {
             mContext = InstrumentationRegistry.getContext();
-        }
-    }
-
-    private void clearDirectory(File dir) {
-        if (dir.exists()) {
-            for (File child : dir.listFiles()) {
-                if (child.isDirectory()) {
-                    clearDirectory(child);
-                }
-                child.delete();
-            }
         }
     }
 
@@ -417,7 +401,7 @@ public class BatteryUsageStatsProviderTest {
         }
 
         PowerStatsStore powerStatsStore = new PowerStatsStore(
-                new File(mHistoryDir, "powerstatsstore"),
+                new File(mStatsRule.getHistoryDir(), "powerstatsstore"),
                 mStatsRule.getHandler(), null);
         powerStatsStore.reset();
 

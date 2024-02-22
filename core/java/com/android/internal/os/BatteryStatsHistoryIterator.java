@@ -44,6 +44,7 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
     private BatteryStats.HistoryItem mHistoryItem = new BatteryStats.HistoryItem();
     private boolean mNextItemReady;
     private boolean mTimeInitialized;
+    private boolean mClosed;
 
     public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history, long startTimeMs,
             long endTimeMs) {
@@ -322,6 +323,9 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
      */
     @Override
     public void close() {
-        mBatteryStatsHistory.iteratorFinished();
+        if (!mClosed) {
+            mClosed = true;
+            mBatteryStatsHistory.iteratorFinished();
+        }
     }
 }
