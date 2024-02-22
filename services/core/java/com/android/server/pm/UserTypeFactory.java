@@ -306,6 +306,7 @@ public final class UserTypeFactory {
                 .setDarkThemeBadgeColors(
                         R.color.white)
                 .setDefaultRestrictions(getDefaultProfileRestrictions())
+                .setDefaultCrossProfileIntentFilters(getDefaultPrivateCrossProfileIntentFilter())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
                         .setCredentialShareableWithParent(true)
@@ -444,6 +445,11 @@ public final class UserTypeFactory {
 
     private static List<DefaultCrossProfileIntentFilter> getDefaultCloneCrossProfileIntentFilter() {
         return DefaultCrossProfileIntentFiltersUtils.getDefaultCloneProfileFilters();
+    }
+
+    private static List<DefaultCrossProfileIntentFilter> getDefaultPrivateCrossProfileIntentFilter()
+    {
+        return DefaultCrossProfileIntentFiltersUtils.getDefaultPrivateProfileFilters();
     }
 
     /** Gets a default bundle, keyed by Settings.Secure String names, for non-managed profiles. */
