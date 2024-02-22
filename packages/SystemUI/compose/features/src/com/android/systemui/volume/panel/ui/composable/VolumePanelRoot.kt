@@ -19,6 +19,7 @@ package com.android.systemui.volume.panel.ui.composable
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -42,6 +44,8 @@ import com.android.systemui.res.R
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayout
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelState
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
+
+private val padding = 24.dp
 
 @Composable
 fun VolumePanelRoot(
@@ -84,7 +88,18 @@ fun VolumePanelRoot(
                     shape = RoundedCornerShape(topStart = radius, topEnd = radius),
                     color = MaterialTheme.colorScheme.surfaceContainer,
                 ) {
-                    Column { components?.let { componentsState -> Components(componentsState) } }
+                    components?.let { componentsState ->
+                        Components(
+                            componentsState,
+                            Modifier.padding(
+                                    start = padding,
+                                    top = padding,
+                                    end = padding,
+                                    bottom = 20.dp,
+                                )
+                                .navigationBarsPadding()
+                        )
+                    }
                 }
             }
         }
@@ -92,36 +107,35 @@ fun VolumePanelRoot(
 }
 
 @Composable
-private fun VolumePanelComposeScope.Components(components: ComponentsLayout) {
-    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-        VerticalVolumePanelContent(
-            components,
-            modifier = Modifier.padding(24.dp),
-        )
-    } else {
-        HorizontalVolumePanelContent(
-            components,
-            modifier =
-                Modifier.padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 20.dp)
-                    .heightIn(max = 236.dp),
-        )
+private fun VolumePanelComposeScope.Components(
+    layout: ComponentsLayout,
+    modifier: Modifier = Modifier
+) {
+    var columnModifier = modifier.widthIn(max = 800.dp)
+    if (!isLargeScreen && orientation != Configuration.ORIENTATION_PORTRAIT) {
+        columnModifier = columnModifier.heightIn(max = 332.dp)
     }
+    Column(modifier = columnModifier, verticalArrangement = Arrangement.spacedBy(padding)) {
+        if (orientation == Configuration.ORIENTATION_PORTRAIT || isLargeScreen) {
+            VerticalVolumePanelContent(layout)
+        } else {
+            HorizontalVolumePanelContent(layout)
+        }
+        BottomBar(layout = layout, modifier = Modifier)
+    }
+}
 
-    if (components.bottomBarComponent.isVisible) {
-        val horizontalPadding =
-            dimensionResource(R.dimen.volume_panel_bottom_bar_horizontal_padding)
+@Composable
+private fun VolumePanelComposeScope.BottomBar(
+    layout: ComponentsLayout,
+    modifier: Modifier = Modifier
+) {
+    if (layout.bottomBarComponent.isVisible) {
         Box(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(
-                        start = horizontalPadding,
-                        end = horizontalPadding,
-                        bottom = dimensionResource(R.dimen.volume_panel_bottom_bar_bottom_padding),
-                    ),
+            modifier = modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
-            with(components.bottomBarComponent.component as ComposeVolumePanelUiComponent) {
+            with(layout.bottomBarComponent.component as ComposeVolumePanelUiComponent) {
                 Content(Modifier)
             }
         }
