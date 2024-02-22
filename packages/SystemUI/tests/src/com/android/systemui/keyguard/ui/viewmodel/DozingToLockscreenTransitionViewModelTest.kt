@@ -54,6 +54,19 @@ class DozingToLockscreenTransitionViewModelTest : SysuiTestCase() {
             deviceEntryParentViewAlpha.forEach { assertThat(it).isEqualTo(1f) }
         }
 
+    @Test
+    fun deviceEntryBackgroundViewShows() =
+        testScope.runTest {
+            val backgroundViewAlpha by collectValues(underTest.deviceEntryBackgroundViewAlpha)
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            repository.sendTransitionStep(step(1f))
+            backgroundViewAlpha.forEach { assertThat(it).isEqualTo(1f) }
+        }
+
     private fun step(
         value: Float,
         state: TransitionState = TransitionState.RUNNING

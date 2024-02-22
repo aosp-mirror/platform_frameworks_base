@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,17 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
-import com.android.systemui.biometrics.shared.model.FingerprintSensorType
-import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
-import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -46,31 +42,26 @@ import org.junit.runner.RunWith
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class AlternateBouncerToAodTransitionViewModelTest : SysuiTestCase() {
+class PrimaryBouncerToDozingTransitionViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
     private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
-    private lateinit var underTest: AlternateBouncerToAodTransitionViewModel
+    private lateinit var underTest: PrimaryBouncerToDozingTransitionViewModel
 
     @Before
     fun setUp() {
         keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
         fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
         biometricSettingsRepository = kosmos.biometricSettingsRepository
-        underTest = kosmos.alternateBouncerToAodTransitionViewModel
+        underTest = kosmos.primaryBouncerToDozingTransitionViewModel
     }
 
     @Test
     fun deviceEntryParentViewAppear_udfpsEnrolledAndEnabled() =
         testScope.runTest {
-            fingerprintPropertyRepository.setProperties(
-                sensorId = 0,
-                strength = SensorStrength.STRONG,
-                sensorType = FingerprintSensorType.UDFPS_OPTICAL,
-                sensorLocations = emptyMap(),
-            )
+            fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
             val values by collectValues(underTest.deviceEntryParentViewAlpha)
 
@@ -90,14 +81,9 @@ class AlternateBouncerToAodTransitionViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun deviceEntryParentViewDisappear_udfpsNotEnrolledAndEnabled() =
+    fun deviceEntryParentView_udfpsNotEnrolledAndEnabled_noUpdates() =
         testScope.runTest {
-            fingerprintPropertyRepository.setProperties(
-                sensorId = 0,
-                strength = SensorStrength.STRONG,
-                sensorType = FingerprintSensorType.UDFPS_OPTICAL,
-                sensorLocations = emptyMap(),
-            )
+            fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
             val values by collectValues(underTest.deviceEntryParentViewAlpha)
 
@@ -113,7 +99,7 @@ class AlternateBouncerToAodTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            values.forEach { assertThat(it).isEqualTo(0f) }
+            values.forEach { assertThat(it).isNull() }
         }
 
     @Test
@@ -133,17 +119,16 @@ class AlternateBouncerToAodTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values.size).isEqualTo(6)
-            values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
+            values.forEach { assertThat(it).isEqualTo(0f) }
         }
 
     private fun step(value: Float, state: TransitionState = RUNNING): TransitionStep {
         return TransitionStep(
-            from = KeyguardState.ALTERNATE_BOUNCER,
-            to = AOD,
+            from = KeyguardState.PRIMARY_BOUNCER,
+            to = KeyguardState.DOZING,
             value = value,
             transitionState = state,
-            ownerName = "AlternateBouncerToAodTransitionViewModelTest"
+            ownerName = "PrimaryBouncerToDozingTransitionViewModelTest"
         )
     }
 }

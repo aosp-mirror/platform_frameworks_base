@@ -48,9 +48,9 @@ constructor(
     deviceEntryIconViewModel: DeviceEntryIconViewModel,
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
-    private val isShowingAod: Flow<Boolean> =
+    private val isShowingAodOrDozing: Flow<Boolean> =
         transitionInteractor.startedKeyguardState.map { keyguardState ->
-            keyguardState == KeyguardState.AOD
+            keyguardState == KeyguardState.AOD || keyguardState == KeyguardState.DOZING
         }
 
     private fun getColor(usingBackgroundProtection: Boolean): Int {
@@ -68,11 +68,12 @@ constructor(
                 .onStart { emit(getColor(useBgProtection)) }
         }
 
+    // While dozing, the display can show the AOD UI; show the AOD udfps when dozing
     private val useAodIconVariant: Flow<Boolean> =
-        combine(isShowingAod, deviceEntryUdfpsInteractor.isUdfpsSupported) {
-                isTransitionToAod,
+        combine(isShowingAodOrDozing, deviceEntryUdfpsInteractor.isUdfpsSupported) {
+                isTransitionToAodOrDozing,
                 isUdfps ->
-                isTransitionToAod && isUdfps
+                isTransitionToAodOrDozing && isUdfps
             }
             .distinctUntilChanged()
 
