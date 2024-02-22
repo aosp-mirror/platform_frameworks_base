@@ -197,8 +197,6 @@ public class UserManagerServiceUserPropertiesTest {
         assertEqualGetterOrThrows(orig::getAlwaysVisible, copy::getAlwaysVisible, exposeAll);
         assertEqualGetterOrThrows(orig::getAllowStoppingUserWithDelayedLocking,
                 copy::getAllowStoppingUserWithDelayedLocking, exposeAll);
-        assertEqualGetterOrThrows(orig::areItemsRestrictedOnHomeScreen,
-                copy::areItemsRestrictedOnHomeScreen, exposeAll);
 
         // Items requiring hasManagePermission - put them here using hasManagePermission.
         assertEqualGetterOrThrows(orig::getShowInSettings, copy::getShowInSettings,
@@ -220,6 +218,8 @@ public class UserManagerServiceUserPropertiesTest {
                 copy::getCrossProfileContentSharingStrategy, true);
         assertEqualGetterOrThrows(orig::getProfileApiVisibility, copy::getProfileApiVisibility,
                 true);
+        assertEqualGetterOrThrows(orig::areItemsRestrictedOnHomeScreen,
+                copy::areItemsRestrictedOnHomeScreen, true);
     }
 
     /**
