@@ -103,7 +103,6 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
         Binder.withCleanCallingIdentity(() -> {
             try {
                 cancelExistingPendingIntent();
-                final boolean isShowAllOptionsRequested = false;
                 mPendingIntent = mCredentialManagerUi.createPendingIntent(
                         RequestInfo.newGetRequestInfo(
                                 mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
@@ -111,9 +110,8 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
                                         mClientAppInfo.getPackageName(),
                                         Manifest.permission
                                                 .CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
-                                isShowAllOptionsRequested),
-                        providerDataList,
-                        /*isRequestForAllOptions=*/ isShowAllOptionsRequested);
+                                /*isShowAllOptionsRequested=*/ false),
+                        providerDataList);
                 mClientCallback.onPendingIntent(mPendingIntent);
             } catch (RemoteException e) {
                 mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
