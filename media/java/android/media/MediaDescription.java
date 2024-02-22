@@ -397,8 +397,14 @@ public class MediaDescription implements Parcelable {
          * @return a new media description.
          */
         public MediaDescription build() {
-            return new MediaDescription(mMediaId, mTitle, mSubtitle, mDescription, mIcon, mIconUri,
-                    mExtras, mMediaUri);
+            if (com.android.media.performance.flags.Flags.mediaDescriptionAshmemBitmap()) {
+                Bitmap icon = mIcon != null ? mIcon.asShared() : null;
+                return new MediaDescription(mMediaId, mTitle, mSubtitle, mDescription, icon,
+                        mIconUri, mExtras, mMediaUri);
+            } else {
+                return new MediaDescription(mMediaId, mTitle, mSubtitle, mDescription, mIcon,
+                        mIconUri, mExtras, mMediaUri);
+            }
         }
     }
 }
