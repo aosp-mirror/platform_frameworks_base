@@ -57,7 +57,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -1071,6 +1070,41 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
             bouncerRepository.setPrimaryShow(true)
             runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER)
+
+            // GIVEN the device is idle on the glanceable hub
+            val idleTransitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                )
+            communalInteractor.setTransitionState(idleTransitionState)
+            runCurrent()
+
+            // WHEN the primaryBouncer stops showing
+            bouncerRepository.setPrimaryShow(false)
+            runCurrent()
+
+            // THEN a transition to LOCKSCREEN should occur
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = FromPrimaryBouncerTransitionInteractor::class.simpleName,
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun primaryBouncerToGlanceableHubWhileDreaming() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to PRIMARY_BOUNCER
+            bouncerRepository.setPrimaryShow(true)
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER)
+
+            // GIVEN that we are dreaming and occluded
+            keyguardRepository.setDreaming(true)
+            keyguardRepository.setKeyguardOccluded(true)
 
             // GIVEN the device is idle on the glanceable hub
             val idleTransitionState =
