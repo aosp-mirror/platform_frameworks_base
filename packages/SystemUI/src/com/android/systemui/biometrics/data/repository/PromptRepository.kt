@@ -16,8 +16,11 @@
 
 package com.android.systemui.biometrics.data.repository
 
+import android.hardware.biometrics.Flags
 import android.hardware.biometrics.PromptInfo
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.Utils
+import com.android.systemui.biometrics.Utils.isDeviceCredentialAllowed
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -64,6 +67,18 @@ interface PromptRepository {
      * Note: overlaps/conflicts with [PromptInfo.isConfirmationRequested], which needs clean up.
      */
     val isConfirmationRequired: Flow<Boolean>
+
+    /**
+     * If biometric prompt without icon needs to show for displaying content prior to credential
+     * view.
+     */
+    val showBpWithoutIconForCredential: StateFlow<Boolean>
+
+    /**
+     * Update whether biometric prompt without icon needs to show for displaying content prior to
+     * credential view, which should be set before [setPrompt].
+     */
+    fun setShouldShowBpWithoutIconForCredential(promptInfo: PromptInfo)
 
     /** Update the prompt configuration, which should be set before [isShowing]. */
     fun setPrompt(
@@ -128,6 +143,19 @@ constructor(
                 forceRequireConfirmation || appRequiresConfirmation
             }
             .distinctUntilChanged()
+
+    private val _showBpWithoutIconForCredential: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val showBpWithoutIconForCredential = _showBpWithoutIconForCredential.asStateFlow()
+
+    override fun setShouldShowBpWithoutIconForCredential(promptInfo: PromptInfo) {
+        val hasCredentialViewShown = kind.value !is PromptKind.Biometric
+        val showBpForCredential =
+            Flags.customBiometricPrompt() &&
+                !Utils.isBiometricAllowed(promptInfo) &&
+                isDeviceCredentialAllowed(promptInfo) &&
+                promptInfo.contentView != null
+        _showBpWithoutIconForCredential.value = showBpForCredential && !hasCredentialViewShown
+    }
 
     override fun setPrompt(
         promptInfo: PromptInfo,

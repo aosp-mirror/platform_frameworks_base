@@ -30,6 +30,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -58,6 +59,13 @@ constructor(
 ) {
     /** If the prompt is currently showing. */
     val isShowing: Flow<Boolean> = biometricPromptRepository.isShowing
+
+    /**
+     * If biometric prompt without icon needs to show for displaying content prior to credential
+     * view.
+     */
+    val showBpWithoutIconForCredential: StateFlow<Boolean> =
+        biometricPromptRepository.showBpWithoutIconForCredential
 
     /** Metadata about the current credential prompt, including app-supplied preferences. */
     val prompt: Flow<BiometricPromptRequest.Credential?> =

@@ -22,7 +22,6 @@ import android.content.Context
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricPrompt
-import android.hardware.biometrics.Flags.customBiometricPrompt
 import android.hardware.face.FaceManager
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -151,17 +150,6 @@ object BiometricViewBinder {
             // these do not change and need to be set before any size transitions
             val modalities = viewModel.modalities.first()
 
-            // If there is no biometrics available, biometric prompt is showing just for displaying
-            // content, no authentication needed.
-            if (!(customBiometricPrompt() && modalities.isEmpty)) {
-                PromptIconViewBinder.bind(
-                    iconView,
-                    iconOverlayView,
-                    iconSizeOverride,
-                    viewModel,
-                )
-            }
-
             if (modalities.hasFingerprint) {
                 /**
                  * Load the given [rawResources] immediately so they are cached for use in the
@@ -231,6 +219,19 @@ object BiometricViewBinder {
                     panelViewController = panelViewController,
                     jankListener = jankListener,
                 )
+            }
+
+            lifecycleScope.launch {
+                viewModel.showBpWithoutIconForCredential.collect {
+                    if (!it) {
+                        PromptIconViewBinder.bind(
+                            iconView,
+                            iconOverlayView,
+                            iconSizeOverride,
+                            viewModel,
+                        )
+                    }
+                }
             }
 
             // TODO(b/251476085): migrate legacy icon controllers and remove
