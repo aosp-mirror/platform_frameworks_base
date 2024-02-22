@@ -141,6 +141,23 @@ class SettingsCardTest {
         composeTestRule.onNodeWithText(TEXT).isNotDisplayed()
     }
 
+    @Test
+    fun settingsCard_clickable() {
+        var clicked by mutableStateOf(false)
+        composeTestRule.setContent {
+            SettingsCard(
+                CardModel(
+                    title = TITLE,
+                    text = "",
+                ) { clicked = true }
+            )
+        }
+
+        composeTestRule.onNodeWithText(TITLE).performClick()
+
+        assertThat(clicked).isTrue()
+    }
+
     private companion object {
         const val TITLE = "Title"
         const val TEXT = "Text"
