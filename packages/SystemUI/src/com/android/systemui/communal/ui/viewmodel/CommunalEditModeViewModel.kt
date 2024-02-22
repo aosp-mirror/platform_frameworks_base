@@ -25,7 +25,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import javax.inject.Inject
 import javax.inject.Named

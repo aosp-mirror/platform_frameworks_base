@@ -49,6 +49,7 @@ sealed class Request private constructor(
     data class Get(
         override val token: IBinder?,
         val resultReceiver: ResultReceiver?,
+        val finalResponseReceiver: ResultReceiver?,
         val providerInfos: List<ProviderInfo>,
     ) : Request(token)
     /**

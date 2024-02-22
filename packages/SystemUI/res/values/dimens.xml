@@ -1514,6 +1514,12 @@
     <!-- The amount of vertical offset for the keyguard during the full shade transition. -->
     <dimen name="lockscreen_shade_keyguard_transition_vertical_offset">0dp</dimen>
 
+    <!-- LOCKSCREEN -> GLANCEABLE_HUB transition: Amount to shift lockscreen content on entering -->
+    <dimen name="lockscreen_to_hub_transition_lockscreen_translation_x">-824dp</dimen>
+
+    <!-- GLANCEABLE_HUB -> LOCKSCREEN transition: Amount to shift lockscreen content on entering -->
+    <dimen name="hub_to_lockscreen_transition_lockscreen_translation_x">824dp</dimen>
+
     <!-- Distance that the full shade transition takes in order for media to fully transition to
          the shade -->
     <dimen name="lockscreen_shade_media_transition_distance">120dp</dimen>
@@ -1857,6 +1863,7 @@
     <dimen name="dream_overlay_y_offset">80dp</dimen>
     <dimen name="dream_overlay_entry_y_offset">40dp</dimen>
     <dimen name="dream_overlay_exit_y_offset">40dp</dimen>
+    <dimen name="dream_overlay_exit_x_offset">824dp</dimen>
 
     <dimen name="status_view_margin_horizontal">0dp</dimen>
 

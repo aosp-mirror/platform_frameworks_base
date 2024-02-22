@@ -38,7 +38,7 @@ import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
-import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos

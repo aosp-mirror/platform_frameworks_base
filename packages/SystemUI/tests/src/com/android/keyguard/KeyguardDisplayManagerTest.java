@@ -18,8 +18,6 @@ package com.android.keyguard;
 
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
-import static com.android.systemui.flags.Flags.ENABLE_CLOCK_KEYGUARD_PRESENTATION;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -37,9 +35,7 @@ import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -60,12 +56,8 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     @Mock
     private NavigationBarController mNavigationBarController;
     @Mock
-    private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
-    @Mock
     private ConnectedDisplayKeyguardPresentation.Factory
             mConnectedDisplayKeyguardPresentationFactory;
-    @Mock
-    private KeyguardDisplayManager.KeyguardPresentation mKeyguardPresentation;
     @Mock
     private ConnectedDisplayKeyguardPresentation mConnectedDisplayKeyguardPresentation;
     @Mock
@@ -77,7 +69,6 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     private Executor mBackgroundExecutor = Runnable::run;
     private KeyguardDisplayManager mManager;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
-    private FakeFeatureFlags mFakeFeatureFlags = new FakeFeatureFlags();
     // The default and secondary displays are both in the default group
     private Display mDefaultDisplay;
     private Display mSecondaryDisplay;
@@ -88,15 +79,13 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mFakeFeatureFlags.set(ENABLE_CLOCK_KEYGUARD_PRESENTATION, false);
         mManager = spy(new KeyguardDisplayManager(mContext, () -> mNavigationBarController,
-                mKeyguardStatusViewComponentFactory, mDisplayTracker, mMainExecutor,
-                mBackgroundExecutor, mDeviceStateHelper, mKeyguardStateController,
-                mConnectedDisplayKeyguardPresentationFactory, mFakeFeatureFlags));
-        doReturn(mKeyguardPresentation).when(mManager).createPresentation(any());
+                mDisplayTracker, mMainExecutor, mBackgroundExecutor, mDeviceStateHelper,
+                mKeyguardStateController, mConnectedDisplayKeyguardPresentationFactory));
         doReturn(mConnectedDisplayKeyguardPresentation).when(
                 mConnectedDisplayKeyguardPresentationFactory).create(any());
-
+        doReturn(mConnectedDisplayKeyguardPresentation).when(mManager)
+                .createPresentation(any());
         mDefaultDisplay = new Display(DisplayManagerGlobal.getInstance(), Display.DEFAULT_DISPLAY,
                 new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS);
         mSecondaryDisplay = new Display(DisplayManagerGlobal.getInstance(),
@@ -152,9 +141,8 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShow_withClockPresentationFlagEnabled_presentationCreated() {
+    public void testShow_presentationCreated() {
         when(mManager.createPresentation(any())).thenCallRealMethod();
-        mFakeFeatureFlags.set(ENABLE_CLOCK_KEYGUARD_PRESENTATION, true);
         mDisplayTracker.setAllDisplays(new Display[]{mDefaultDisplay, mSecondaryDisplay});
 
         mManager.show();

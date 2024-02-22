@@ -19,9 +19,12 @@ package com.android.systemui.scene.ui.composable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.SceneKey
@@ -63,6 +66,10 @@ constructor(
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
+        animateSceneFloatAsState(
+            value = QuickSettings.SharedValues.SquishinessValues.GoneSceneStarting,
+            key = QuickSettings.SharedValues.TilesSquishiness,
+        )
         Spacer(modifier.fillMaxSize())
     }
 }

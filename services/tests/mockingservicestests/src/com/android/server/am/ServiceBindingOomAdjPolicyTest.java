@@ -21,7 +21,6 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_EMPTY;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_HOME;
-import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
@@ -30,10 +29,10 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEM
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 
+import static com.android.server.am.ProcessList.CACHED_APP_MIN_ADJ;
 import static com.android.server.am.ProcessList.HOME_APP_ADJ;
 import static com.android.server.am.ProcessList.PERCEPTIBLE_APP_ADJ;
 import static com.android.server.am.ProcessList.SERVICE_ADJ;
-import static com.android.server.am.ProcessList.CACHED_APP_MIN_ADJ;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,8 +46,8 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -582,7 +581,6 @@ public final class ServiceBindingOomAdjPolicyTest {
         app.mState.setSetAdj(adj);
         app.mState.setCurCapability(cap);
         app.mState.setSetCapability(cap);
-        app.mState.setCached(procState >= PROCESS_STATE_LAST_ACTIVITY || adj >= CACHED_APP_MIN_ADJ);
         return app;
     }
 

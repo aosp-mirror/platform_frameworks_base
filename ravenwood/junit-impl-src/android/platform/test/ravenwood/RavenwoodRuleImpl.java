@@ -24,11 +24,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.ServiceManager;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.os.RuntimeInit;
+import com.android.server.LocalServices;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -103,9 +105,10 @@ public class RavenwoodRuleImpl {
                 rule.mSystemProperties.getKeyReadablePredicate(),
                 rule.mSystemProperties.getKeyWritablePredicate());
 
-        ActivityManager.init$ravenwood(rule.mCurrentUser);
+        ServiceManager.init$ravenwood();
+        LocalServices.removeAllServicesForTest();
 
-        com.android.server.LocalServices.removeAllServicesForTest();
+        ActivityManager.init$ravenwood(rule.mCurrentUser);
 
         if (rule.mProvideMainThread) {
             final HandlerThread main = new HandlerThread(MAIN_THREAD_NAME);
@@ -113,7 +116,12 @@ public class RavenwoodRuleImpl {
             Looper.setMainLooperForTest(main.getLooper());
         }
 
-        InstrumentationRegistry.registerInstance(new Instrumentation(), Bundle.EMPTY);
+        rule.mContext = new RavenwoodContext();
+        rule.mInstrumentation = new Instrumentation();
+        rule.mInstrumentation.basicInit(rule.mContext);
+        InstrumentationRegistry.registerInstance(rule.mInstrumentation, Bundle.EMPTY);
+
+        RavenwoodSystemServer.init(rule);
 
         if (ENABLE_TIMEOUT_STACKS) {
             sPendingTimeout = sTimeoutExecutor.schedule(RavenwoodRuleImpl::dumpStacks,
@@ -121,7 +129,7 @@ public class RavenwoodRuleImpl {
         }
 
         // Touch some references early to ensure they're <clinit>'ed
-        Objects.requireNonNull(Build.IS_USERDEBUG);
+        Objects.requireNonNull(Build.TYPE);
         Objects.requireNonNull(Build.VERSION.SDK);
     }
 
@@ -130,16 +138,21 @@ public class RavenwoodRuleImpl {
             sPendingTimeout.cancel(false);
         }
 
+        RavenwoodSystemServer.reset(rule);
+
         InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
+        rule.mInstrumentation = null;
+        rule.mContext = null;
 
         if (rule.mProvideMainThread) {
             Looper.getMainLooper().quit();
             Looper.clearMainLooperForTest();
         }
 
-        com.android.server.LocalServices.removeAllServicesForTest();
-
         ActivityManager.reset$ravenwood();
+
+        LocalServices.removeAllServicesForTest();
+        ServiceManager.reset$ravenwood();
 
         android.os.SystemProperties.reset$ravenwood();
         android.os.Binder.reset$ravenwood();

@@ -1032,7 +1032,10 @@ package android.content {
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    method @NonNull public android.content.Intent addExtendedFlags(int);
+    method public int getExtendedFlags();
     field public static final String ACTION_USER_STOPPED = "android.intent.action.USER_STOPPED";
+    field public static final int EXTENDED_FLAG_FILTER_MISMATCH = 1; // 0x1
   }
 
   public class SyncAdapterType implements android.os.Parcelable {
@@ -3059,6 +3062,14 @@ package android.service.autofill.augmented {
     method @Nullable public android.view.inputmethod.InlineSuggestionsRequest getInlineSuggestionsRequest();
     method @Nullable public android.service.autofill.augmented.PresentationParams getPresentationParams();
     method public int getTaskId();
+  }
+
+}
+
+package android.service.chooser {
+
+  @FlaggedApi("android.service.chooser.enable_chooser_result") public final class ChooserResult implements android.os.Parcelable {
+    ctor public ChooserResult(int, @Nullable android.content.ComponentName, boolean);
   }
 
 }

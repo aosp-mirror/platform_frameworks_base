@@ -19,6 +19,7 @@ package com.android.systemui.flags
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.content.Context
 import android.util.Log
 import com.android.systemui.CoreStartable
@@ -150,7 +151,7 @@ constructor(
         val title = "Invalid flag dependencies: ${unmet.size}"
         val details = unmet.joinToString("\n") { it.shortUnmetString() }
         Log.e("FlagDependencies", "$title:\n$details")
-        val channel = NotificationChannel("FLAGS", "Flags", NotificationManager.IMPORTANCE_DEFAULT)
+        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, IMPORTANCE_DEFAULT)
         val notification =
             Notification.Builder(context, channel.id)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
@@ -160,7 +161,18 @@ constructor(
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .build()
         notifManager.createNotificationChannel(channel)
-        notifManager.notify("flags", 0, notification)
+        notifManager.notify(NOTIF_TAG, NOTIF_ID, notification)
+    }
+
+    override fun onCollected(all: List<FlagDependenciesBase.Dependency>) {
+        notifManager.cancel(NOTIF_TAG, NOTIF_ID)
+    }
+
+    companion object {
+        private const val CHANNEL_ID = "FLAGS"
+        private const val CHANNEL_NAME = "Flags"
+        private const val NOTIF_TAG = "FlagDependenciesNotifier"
+        private const val NOTIF_ID = 0
     }
 }
 

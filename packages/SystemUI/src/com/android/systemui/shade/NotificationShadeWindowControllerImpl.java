@@ -60,6 +60,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.ui.view.WindowRootViewComponent;
 import com.android.systemui.settings.UserTracker;
@@ -506,7 +507,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void applyFitsSystemWindows(NotificationShadeWindowState state) {
         boolean fitsSystemWindows = !state.isKeyguardShowingAndNotOccluded();
-        if (mWindowRootView != null
+        if (!SceneContainerFlag.isEnabled() && mWindowRootView != null
                 && mWindowRootView.getFitsSystemWindows() != fitsSystemWindows) {
             mWindowRootView.setFitsSystemWindows(fitsSystemWindows);
             mWindowRootView.requestApplyInsets();

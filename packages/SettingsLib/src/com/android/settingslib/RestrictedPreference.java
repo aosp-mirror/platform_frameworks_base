@@ -23,6 +23,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
@@ -99,12 +100,12 @@ public class RestrictedPreference extends TwoTargetPreference {
     /**
      * Checks if the given setting is subject to Enhanced Confirmation Mode restrictions for this
      * package. Marks the preference as disabled if so.
-     * @param restriction The key identifying the setting
-     * @param packageName the package to check the restriction for
-     * @param uid the uid of the package
+     * @param settingIdentifier The key identifying the setting
+     * @param packageName the package to check the settingIdentifier for
      */
-    public void checkEcmRestrictionAndSetDisabled(String restriction, String packageName, int uid) {
-        mHelper.checkEcmRestrictionAndSetDisabled(restriction, packageName, uid);
+    public void checkEcmRestrictionAndSetDisabled(@NonNull String settingIdentifier,
+            @NonNull String packageName) {
+        mHelper.checkEcmRestrictionAndSetDisabled(settingIdentifier, packageName);
     }
 
     @Override

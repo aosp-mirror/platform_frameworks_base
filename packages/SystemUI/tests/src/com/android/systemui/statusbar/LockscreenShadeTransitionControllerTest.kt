@@ -15,7 +15,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R

@@ -378,8 +378,8 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                         ALOGD("channel '%s' ~ Received key event.", getInputChannelName().c_str());
                     }
                     inputEventObj =
-                            android_view_KeyEvent_fromNative(env,
-                                                             static_cast<KeyEvent&>(*inputEvent));
+                            android_view_KeyEvent_obtainAsCopy(env,
+                                                               static_cast<KeyEvent&>(*inputEvent));
                     break;
 
                 case InputEventType::MOTION: {

@@ -31,6 +31,8 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
@@ -43,9 +45,17 @@ import com.android.settingslib.utils.BuildCompatUtils;
  * by device admins via user restrictions.
  */
 public class RestrictedPreferenceHelper {
+    private static final String TAG = "RestrictedPreferenceHelper";
+
     private final Context mContext;
     private final Preference mPreference;
     String packageName;
+
+    /**
+     * @deprecated TODO(b/308921175): This will be deleted with the
+     * {@link android.security.Flags#extendEcmToAllSettings} feature flag. Do not use for any new
+     * code.
+     */
     int uid;
 
     private boolean mDisabledByAdmin;
@@ -148,14 +158,15 @@ public class RestrictedPreferenceHelper {
             return true;
         }
         if (mDisabledByEcm) {
-            if (android.security.Flags.extendEcmToAllSettings()) {
+            if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                    && android.security.Flags.extendEcmToAllSettings()) {
                 mContext.startActivity(mDisabledByEcmIntent);
                 return true;
+            } else {
+                RestrictedLockUtilsInternal.sendShowRestrictedSettingDialogIntent(mContext,
+                        packageName, uid);
+                return true;
             }
-
-            RestrictedLockUtilsInternal.sendShowRestrictedSettingDialogIntent(mContext, packageName,
-                    uid);
-            return true;
         }
         return false;
     }
@@ -184,14 +195,14 @@ public class RestrictedPreferenceHelper {
     /**
      * Checks if the given setting is subject to Enhanced Confirmation Mode restrictions for this
      * package. Marks the preference as disabled if so.
-     * @param restriction The key identifying the setting
-     * @param packageName the package to check the restriction for
-     * @param uid the uid of the package
+     * @param settingIdentifier The key identifying the setting
+     * @param packageName the package to check the settingIdentifier for
      */
-    public void checkEcmRestrictionAndSetDisabled(String restriction, String packageName, int uid) {
-        updatePackageDetails(packageName, uid);
+    public void checkEcmRestrictionAndSetDisabled(@NonNull String settingIdentifier,
+            @NonNull String packageName) {
+        updatePackageDetails(packageName, android.os.Process.INVALID_UID);
         Intent intent = RestrictedLockUtilsInternal.checkIfRequiresEnhancedConfirmation(
-                mContext, restriction, uid, packageName);
+                mContext, settingIdentifier, packageName);
         setDisabledByEcm(intent);
     }
 
@@ -240,7 +251,7 @@ public class RestrictedPreferenceHelper {
      * be disabled.
      * @return true if the disabled state was changed.
      */
-    public boolean setDisabledByEcm(Intent disabledIntent) {
+    public boolean setDisabledByEcm(@Nullable Intent disabledIntent) {
         boolean disabled = disabledIntent != null;
         boolean changed = false;
         if (mDisabledByEcm != disabled) {
@@ -274,6 +285,10 @@ public class RestrictedPreferenceHelper {
 
         if (mPreference instanceof PrimarySwitchPreference) {
             ((PrimarySwitchPreference) mPreference).setSwitchEnabled(isEnabled);
+        }
+
+        if (!isEnabled && mDisabledByEcm) {
+            mPreference.setSummary(R.string.disabled_by_app_ops_text);
         }
     }
 

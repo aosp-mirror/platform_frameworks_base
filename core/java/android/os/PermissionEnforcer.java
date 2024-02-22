@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.permission.PermissionCheckerManager;
+import android.permission.PermissionManager;
 
 /**
  * PermissionEnforcer check permissions for AIDL-generated services which use
@@ -71,6 +72,7 @@ import android.permission.PermissionCheckerManager;
  * @hide
  */
 @SystemService(Context.PERMISSION_ENFORCER_SERVICE)
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PermissionEnforcer {
 
     private final Context mContext;
@@ -84,6 +86,8 @@ public class PermissionEnforcer {
     }
 
     /** Constructor, prefer using the fromContext static method when possible */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = PermissionManager.class,
+            reason = "Use subclass for unit tests, such as FakePermissionEnforcer")
     public PermissionEnforcer(@NonNull Context context) {
         mContext = context;
     }
@@ -103,9 +107,19 @@ public class PermissionEnforcer {
         return PermissionCheckerManager.PERMISSION_HARD_DENIED;
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace(blockedBy = AppOpsManager.class,
+            reason = "Blocked on Mainline dependencies")
+    private static int permissionToOpCode(String permission) {
+        return AppOpsManager.permissionToOpCode(permission);
+    }
+
+    private static int permissionToOpCode$ravenwood(String permission) {
+        return AppOpsManager.OP_NONE;
+    }
+
     private boolean anyAppOps(@NonNull String[] permissions) {
         for (String permission : permissions) {
-            if (AppOpsManager.permissionToOpCode(permission) != AppOpsManager.OP_NONE) {
+            if (permissionToOpCode(permission) != AppOpsManager.OP_NONE) {
                 return true;
             }
         }
@@ -122,7 +136,7 @@ public class PermissionEnforcer {
 
     public void enforcePermission(@NonNull String permission, int pid, int uid)
             throws SecurityException {
-        if (AppOpsManager.permissionToOpCode(permission) != AppOpsManager.OP_NONE) {
+        if (permissionToOpCode(permission) != AppOpsManager.OP_NONE) {
             AttributionSource source = new AttributionSource(uid, null, null);
             enforcePermission(permission, source);
             return;

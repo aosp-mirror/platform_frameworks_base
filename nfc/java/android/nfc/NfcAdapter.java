@@ -38,6 +38,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.nfc.cardemulation.PollingFrame;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
@@ -2799,7 +2800,8 @@ public final class NfcAdapter {
      */
     @TestApi
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public void notifyPollingLoop(@NonNull Bundle frame) {
+    public void notifyPollingLoop(@NonNull PollingFrame pollingFrame) {
+        Bundle frame = pollingFrame.toBundle();
         try {
             if (sService == null) {
                 attemptDeadServiceRecovery(null);

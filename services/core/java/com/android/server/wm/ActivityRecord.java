@@ -303,6 +303,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConstrainDisplayApisConfig;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserProperties;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -5009,7 +5010,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * method will be called at the proper time.
      */
     final void deliverNewIntentLocked(int callingUid, Intent intent, NeededUriGrants intentGrants,
-            String referrer, boolean isShareIdentityEnabled) {
+            String referrer, boolean isShareIdentityEnabled, int userId, int recipientAppId) {
         IBinder callerToken = new Binder();
         if (android.security.Flags.contentUriPermissionApis()) {
             computeCallerInfo(callerToken, intent, callingUid, referrer, isShareIdentityEnabled);
@@ -5017,6 +5018,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // The activity now gets access to the data associated with this Intent.
         mAtmService.mUgmInternal.grantUriPermissionUncheckedFromIntent(intentGrants,
                 getUriPermissionsLocked());
+        if (isShareIdentityEnabled && android.security.Flags.contentUriPermissionApis()) {
+            final PackageManagerInternal pmInternal = mAtmService.getPackageManagerInternalLocked();
+            pmInternal.grantImplicitAccess(userId, intent, recipientAppId /*recipient*/,
+                    callingUid /*visible*/, true /*direct*/);
+        }
         final ReferrerIntent rintent = new ReferrerIntent(intent, getFilteredReferrer(referrer),
                 callerToken);
         boolean unsent = true;

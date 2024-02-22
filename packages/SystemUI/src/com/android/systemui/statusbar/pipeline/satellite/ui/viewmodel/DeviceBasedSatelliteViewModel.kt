@@ -18,15 +18,22 @@ package com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel
 
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.satellite.domain.interactor.DeviceBasedSatelliteInteractor
 import com.android.systemui.statusbar.pipeline.satellite.ui.model.SatelliteIconModel
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -42,25 +49,44 @@ constructor(
     interactor: DeviceBasedSatelliteInteractor,
     @Application scope: CoroutineScope,
     airplaneModeRepository: AirplaneModeRepository,
+    @OemSatelliteInputLog logBuffer: LogBuffer,
 ) {
-    private val shouldShowIcon: StateFlow<Boolean> =
-        interactor.areAllConnectionsOutOfService
-            .flatMapLatest { allOos ->
-                if (!allOos) {
-                    flowOf(false)
+    private val shouldShowIcon: Flow<Boolean> =
+        interactor.areAllConnectionsOutOfService.flatMapLatest { allOos ->
+            if (!allOos) {
+                flowOf(false)
+            } else {
+                combine(interactor.isSatelliteAllowed, airplaneModeRepository.isAirplaneMode) {
+                    isSatelliteAllowed,
+                    isAirplaneMode ->
+                    isSatelliteAllowed && !isAirplaneMode
+                }
+            }
+        }
+
+    // This adds a 10 seconds delay before showing the icon
+    private val shouldActuallyShowIcon: StateFlow<Boolean> =
+        shouldShowIcon
+            .distinctUntilChanged()
+            .flatMapLatest { shouldShow ->
+                if (shouldShow) {
+                    logBuffer.log(
+                        TAG,
+                        LogLevel.INFO,
+                        { long1 = DELAY_DURATION.inWholeSeconds },
+                        { "Waiting $long1 seconds before showing the satellite icon" }
+                    )
+                    delay(DELAY_DURATION)
+                    flowOf(true)
                 } else {
-                    combine(interactor.isSatelliteAllowed, airplaneModeRepository.isAirplaneMode) {
-                        isSatelliteAllowed,
-                        isAirplaneMode ->
-                        isSatelliteAllowed && !isAirplaneMode
-                    }
+                    flowOf(false)
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     val icon: StateFlow<Icon?> =
         combine(
-                shouldShowIcon,
+                shouldActuallyShowIcon,
                 interactor.connectionState,
                 interactor.signalStrength,
             ) { shouldShow, state, signalStrength ->
@@ -71,4 +97,9 @@ constructor(
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
+
+    companion object {
+        private const val TAG = "DeviceBasedSatelliteViewModel"
+        private val DELAY_DURATION = 10.seconds
+    }
 }

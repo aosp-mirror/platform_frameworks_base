@@ -35,6 +35,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.ResourceId;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -1065,8 +1066,9 @@ class BackNavigationController {
 
             if (mOpenActivities != null) {
                 for (int i = mOpenActivities.length - 1; i >= 0; --i) {
-                    if (mOpenActivities[i].mLaunchTaskBehind) {
-                        restoreLaunchBehind(mOpenActivities[i]);
+                    final ActivityRecord resetActivity = mOpenActivities[i];
+                    if (resetActivity.mLaunchTaskBehind) {
+                        restoreLaunchBehind(resetActivity);
                     }
                 }
             }
@@ -1233,8 +1235,7 @@ class BackNavigationController {
                         represent.allowEnterPip);
             }
 
-            void createStartingSurface(@NonNull WindowContainer closeWindow,
-                    ActivityRecord[] visibleOpenActivities) {
+            void createStartingSurface(ActivityRecord[] visibleOpenActivities) {
                 if (mAdaptors[0].mSwitchType == DIALOG_CLOSE) {
                     return;
                 }
@@ -1253,12 +1254,15 @@ class BackNavigationController {
                     return;
                 }
                 final TaskSnapshot snapshot = getSnapshot(mainOpen, visibleOpenActivities);
+                // If there is only one adaptor, attach the windowless window to top activity,
+                // because fixed rotation only applies on activity.
+                // Note that embedded activity won't use fixed rotation.
+                final Configuration openConfig = mAdaptors.length == 1
+                        ? mainActivity.getConfiguration() : openTask.getConfiguration();
                 mRequestedStartingSurfaceId = openTask.mAtmService.mTaskOrganizerController
                         .addWindowlessStartingSurface(openTask, mainActivity,
-                        // Choose configuration from closeWindow, because the configuration
-                        // of opening target may not update before resume, so the starting
-                        // surface should occlude it entirely.
-                        mRemoteAnimationTarget.leash, snapshot, closeWindow.getConfiguration(),
+                                mAdaptors.length == 1 ? mainActivity.getSurfaceControl()
+                                        : mRemoteAnimationTarget.leash, snapshot, openConfig,
                             new IWindowlessStartingSurfaceCallback.Stub() {
                             // Once the starting surface has been created in shell, it will call
                             // onSurfaceAdded to pass the created surface to core, so if a
@@ -1290,10 +1294,7 @@ class BackNavigationController {
                 if (mStartingSurface != null && mStartingSurface.isValid()) {
                     SurfaceControl.Transaction transaction = reparentTransaction != null
                             ? reparentTransaction : mAdaptors[0].mTarget.getPendingTransaction();
-                    if (mAdaptors.length == 1) {
-                        transaction.reparent(mStartingSurface,
-                                        mAdaptors[0].mTarget.getSurfaceControl());
-                    } else {
+                    if (mAdaptors.length != 1) {
                         // More than one opening window, reparent starting surface to leaf task.
                         final WindowContainer wc = mAdaptors[0].mTarget;
                         final Task task = wc.asActivityRecord() != null
@@ -1499,16 +1500,15 @@ class BackNavigationController {
 
             /**
              * Apply preview strategy on the opening target
-             * @param closeWindow The close window, where it's configuration should cover all
-             *                    open target(s).
+             *
              * @param openAnimationAdaptor The animator who can create starting surface.
              * @param visibleOpenActivities  The visible activities in opening targets.
              */
-            private void applyPreviewStrategy(@NonNull WindowContainer closeWindow,
+            private void applyPreviewStrategy(
                     @NonNull BackWindowAnimationAdaptorWrapper openAnimationAdaptor,
                     @NonNull ActivityRecord[] visibleOpenActivities) {
                 if (isSupportWindowlessSurface() && mShowWindowlessSurface && !mIsLaunchBehind) {
-                    openAnimationAdaptor.createStartingSurface(closeWindow, visibleOpenActivities);
+                    openAnimationAdaptor.createStartingSurface(visibleOpenActivities);
                 } else {
                     for (int i = visibleOpenActivities.length - 1; i >= 0; --i) {
                         setLaunchBehind(visibleOpenActivities[i]);
@@ -1539,7 +1539,7 @@ class BackNavigationController {
                 }
                 mCloseTarget.mTransitionController.mSnapshotController
                         .mActivitySnapshotController.clearOnBackPressedActivities();
-                applyPreviewStrategy(mCloseTarget, mOpenAnimAdaptor, openingActivities);
+                applyPreviewStrategy(mOpenAnimAdaptor, openingActivities);
 
                 final IBackAnimationFinishedCallback callback = makeAnimationFinishedCallback();
                 final RemoteAnimationTarget[] targets = getAnimationTargets();

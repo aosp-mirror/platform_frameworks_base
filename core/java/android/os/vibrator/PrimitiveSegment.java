@@ -98,8 +98,24 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
     @NonNull
     @Override
     public PrimitiveSegment scale(float scaleFactor) {
-        return new PrimitiveSegment(mPrimitiveId, VibrationEffect.scale(mScale, scaleFactor),
-                mDelay);
+        float newScale = VibrationEffect.scale(mScale, scaleFactor);
+        if (Float.compare(mScale, newScale) == 0) {
+            return this;
+        }
+
+        return new PrimitiveSegment(mPrimitiveId, newScale, mDelay);
+    }
+
+    /** @hide */
+    @NonNull
+    @Override
+    public PrimitiveSegment scaleLinearly(float scaleFactor) {
+        float newScale = VibrationEffect.scaleLinearly(mScale, scaleFactor);
+        if (Float.compare(mScale, newScale) == 0) {
+            return this;
+        }
+
+        return new PrimitiveSegment(mPrimitiveId, newScale, mDelay);
     }
 
     /** @hide */

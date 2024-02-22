@@ -21,8 +21,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.media.controls.models.player.MediaData
-import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat

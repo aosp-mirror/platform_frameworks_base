@@ -27,16 +27,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.KeyguardManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.os.PersistableBundle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -58,6 +62,8 @@ public class ClipboardListenerTest extends SysuiTestCase {
 
     @Mock
     private ClipboardManager mClipboardManager;
+    @Mock
+    private KeyguardManager mKeyguardManager;
     @Mock
     private ClipboardOverlayController mOverlayController;
     @Mock
@@ -96,7 +102,7 @@ public class ClipboardListenerTest extends SysuiTestCase {
         when(mClipboardManager.getPrimaryClipSource()).thenReturn(mSampleSource);
 
         mClipboardListener = new ClipboardListener(getContext(), mOverlayControllerProvider,
-                mClipboardToast, mClipboardManager, mUiEventLogger);
+                mClipboardToast, mClipboardManager, mKeyguardManager, mUiEventLogger);
     }
 
 
@@ -188,6 +194,34 @@ public class ClipboardListenerTest extends SysuiTestCase {
                 ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN, 0, mSampleSource);
         verify(mClipboardToast, times(1)).showCopiedToast();
         verifyZeroInteractions(mOverlayControllerProvider);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_CLIPBOARD_NONINTERACTIVE_ON_LOCKSCREEN)
+    public void test_deviceLocked_showsToast() {
+        when(mKeyguardManager.isDeviceLocked()).thenReturn(true);
+
+        mClipboardListener.start();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN, 0, mSampleSource);
+        verify(mClipboardToast, times(1)).showCopiedToast();
+        verifyZeroInteractions(mOverlayControllerProvider);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_CLIPBOARD_NONINTERACTIVE_ON_LOCKSCREEN)
+    public void test_deviceLocked_legacyBehavior_showsInteractiveUI() {
+        when(mKeyguardManager.isDeviceLocked()).thenReturn(true);
+
+        mClipboardListener.start();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED, 0, mSampleSource);
+        verify(mOverlayController).setClipData(mSampleClipData, mSampleSource);
+        verifyZeroInteractions(mClipboardToast);
     }
 
     @Test

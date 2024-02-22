@@ -167,8 +167,7 @@ public class AudioDeviceInventory {
                 ads = findBtDeviceStateForAddress(peerAddress, deviceType);
             }
             if (ads != null) {
-                if (ads.getAudioDeviceCategory() != category
-                        && category != AUDIO_DEVICE_CATEGORY_UNKNOWN) {
+                if (ads.getAudioDeviceCategory() != category) {
                     ads.setAudioDeviceCategory(category);
                     mDeviceBroker.postUpdatedAdiDeviceState(ads);
                     mDeviceBroker.postPersistAudioDeviceSettings();
@@ -892,7 +891,7 @@ public class AudioDeviceInventory {
             if (mDeviceBroker.hasScheduledA2dpConnection(btDevice)) {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                         "A2dp config change ignored (scheduled connection change)")
-                        .printLog(TAG));
+                        .printSlog(EventLogger.Event.ALOGI, TAG));
                 mmi.set(MediaMetrics.Property.EARLY_RETURN, "A2dp config change ignored")
                         .record();
                 return;
@@ -929,7 +928,7 @@ public class AudioDeviceInventory {
                                     "APM handleDeviceConfigChange failed for A2DP device addr="
                                             + address + " codec="
                                             + AudioSystem.audioFormatToString(codec))
-                                    .printLog(TAG));
+                                    .printSlog(EventLogger.Event.ALOGE, TAG));
 
                             // force A2DP device disconnection in case of error so that AudioService
                             // state is consistent with audio policy manager state
@@ -940,7 +939,7 @@ public class AudioDeviceInventory {
                                     "APM handleDeviceConfigChange success for A2DP device addr="
                                             + address
                                             + " codec=" + AudioSystem.audioFormatToString(codec))
-                                    .printLog(TAG));
+                                    .printSlog(EventLogger.Event.ALOGI, TAG));
                         }
                     }
                 }
@@ -1707,10 +1706,13 @@ public class AudioDeviceInventory {
                 if (res != AudioSystem.AUDIO_STATUS_OK) {
                     final String reason = "not connecting device 0x" + Integer.toHexString(device)
                             + " due to command error " + res;
-                    Slog.e(TAG, reason);
                     mmi.set(MediaMetrics.Property.EARLY_RETURN, reason)
                             .set(MediaMetrics.Property.STATE, MediaMetrics.Value.DISCONNECTED)
                             .record();
+                    AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                            "APM failed to make available device 0x" + Integer.toHexString(device)
+                            + "addr=" + address + " error=" + res)
+                            .printSlog(EventLogger.Event.ALOGE, TAG));
                     return false;
                 }
                 mConnectedDevices.put(deviceKey, new DeviceInfo(device, deviceName, address));
@@ -1736,7 +1738,8 @@ public class AudioDeviceInventory {
                     AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                             "SCO " + (AudioSystem.isInputDevice(device) ? "source" : "sink")
                             + " device addr=" + address
-                            + (connect ? " now available" : " made unavailable")).printLog(TAG));
+                            + (connect ? " now available" : " made unavailable"))
+                            .printSlog(EventLogger.Event.ALOGI, TAG));
                 }
                 mmi.set(MediaMetrics.Property.STATE, MediaMetrics.Value.CONNECTED).record();
             } else {
@@ -1992,14 +1995,15 @@ public class AudioDeviceInventory {
         // double connection is made.
         if (res != AudioSystem.AUDIO_STATUS_OK) {
             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
-                    "APM failed to make available A2DP device addr=" + address
-                            + " error=" + res).printLog(TAG));
+                    "APM failed to make available A2DP device addr="
+                            + Utils.anonymizeBluetoothAddress(address)
+                            + " error=" + res).printSlog(EventLogger.Event.ALOGE, TAG));
             // TODO: connection failed, stop here
             // TODO: return;
         } else {
             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                     "A2DP sink device addr=" + Utils.anonymizeBluetoothAddress(address)
-                            + " now available").printLog(TAG));
+                            + " now available").printSlog(EventLogger.Event.ALOGI, TAG));
         }
 
         // Reset A2DP suspend state each time a new sink is connected
@@ -2240,7 +2244,8 @@ public class AudioDeviceInventory {
             // removing A2DP device not currently used by AudioPolicy, log but don't act on it
             AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
                     "A2DP device " + Utils.anonymizeBluetoothAddress(address)
-                            + " made unavailable, was not used")).printLog(TAG));
+                            + " made unavailable, was not used"))
+                    .printSlog(EventLogger.Event.ALOGI, TAG));
             mmi.set(MediaMetrics.Property.EARLY_RETURN,
                     "A2DP device made unavailable, was not used")
                     .record();
@@ -2258,13 +2263,13 @@ public class AudioDeviceInventory {
             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                     "APM failed to make unavailable A2DP device addr="
                             + Utils.anonymizeBluetoothAddress(address)
-                            + " error=" + res).printLog(TAG));
+                            + " error=" + res).printSlog(EventLogger.Event.ALOGE, TAG));
             // TODO:  failed to disconnect, stop here
             // TODO: return;
         } else {
             AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
                     "A2DP device addr=" + Utils.anonymizeBluetoothAddress(address)
-                            + " made unavailable")).printLog(TAG));
+                            + " made unavailable")).printSlog(EventLogger.Event.ALOGI, TAG));
         }
         mApmConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
 
@@ -2297,10 +2302,22 @@ public class AudioDeviceInventory {
 
     @GuardedBy("mDevicesLock")
     private void makeA2dpSrcAvailable(String address) {
-        mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+        final int res = mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
                 AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address),
                 AudioSystem.DEVICE_STATE_AVAILABLE,
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
+        if (res != AudioSystem.AUDIO_STATUS_OK) {
+            AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                    "APM failed to make available A2DP source device addr="
+                            + Utils.anonymizeBluetoothAddress(address)
+                            + " error=" + res).printSlog(EventLogger.Event.ALOGE, TAG));
+            // TODO: connection failed, stop here
+            // TODO: return
+        } else {
+            AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                    "A2DP source device addr=" + Utils.anonymizeBluetoothAddress(address)
+                            + " now available").printSlog(EventLogger.Event.ALOGI, TAG));
+        }
         mConnectedDevices.put(
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address),
                 new DeviceInfo(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, "", address));
@@ -2453,14 +2470,14 @@ public class AudioDeviceInventory {
             if (res != AudioSystem.AUDIO_STATUS_OK) {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                         "APM failed to make available LE Audio device addr=" + address
-                                + " error=" + res).printLog(TAG));
+                                + " error=" + res).printSlog(EventLogger.Event.ALOGE, TAG));
                 // TODO: connection failed, stop here
                 // TODO: return;
             } else {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                         "LE Audio " + (AudioSystem.isInputDevice(device) ? "source" : "sink")
                                 + " device addr=" + Utils.anonymizeBluetoothAddress(address)
-                                + " now available").printLog(TAG));
+                                + " now available").printSlog(EventLogger.Event.ALOGI, TAG));
             }
             // Reset LEA suspend state each time a new sink is connected
             mDeviceBroker.clearLeAudioSuspended(true /* internalOnly */);
@@ -2502,13 +2519,13 @@ public class AudioDeviceInventory {
             if (res != AudioSystem.AUDIO_STATUS_OK) {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                         "APM failed to make unavailable LE Audio device addr=" + address
-                                + " error=" + res).printLog(TAG));
+                                + " error=" + res).printSlog(EventLogger.Event.ALOGE, TAG));
                 // TODO:  failed to disconnect, stop here
                 // TODO: return;
             } else {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                         "LE Audio device addr=" + Utils.anonymizeBluetoothAddress(address)
-                                + " made unavailable").printLog(TAG));
+                                + " made unavailable").printSlog(EventLogger.Event.ALOGI, TAG));
             }
             mConnectedDevices.remove(DeviceInfo.makeDeviceListKey(device, address));
         }

@@ -470,6 +470,7 @@ public class MockingOomAdjusterTests {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
         app.mState.setCurRawAdj(CACHED_APP_MIN_ADJ);
+        app.mState.setCurAdj(CACHED_APP_MIN_ADJ);
         doReturn(null).when(sService).getTopApp();
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app);
@@ -494,6 +495,8 @@ public class MockingOomAdjusterTests {
             field.set(callback, PROCESS_STATE_TOP);
             field = callback.getClass().getDeclaredField("schedGroup");
             field.set(callback, SCHED_GROUP_TOP_APP);
+            field = callback.getClass().getDeclaredField("mAdjType");
+            field.set(callback, "vis-activity");
             return 0;
         })).when(wpc).computeOomAdjFromActivities(
                 any(WindowProcessController.ComputeOomAdjCallback.class));
@@ -501,6 +504,9 @@ public class MockingOomAdjusterTests {
         updateOomAdj(app);
 
         assertProcStates(app, PROCESS_STATE_TOP, VISIBLE_APP_ADJ, SCHED_GROUP_TOP_APP);
+        assertFalse(app.mState.isCached());
+        assertFalse(app.mState.isEmpty());
+        assertEquals("vis-activity", app.mState.getAdjType());
     }
 
     @SuppressWarnings("GuardedBy")
@@ -871,8 +877,8 @@ public class MockingOomAdjusterTests {
     public void testUpdateOomAdj_DoOne_NonCachedToCached() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
-        app.mState.setCached(false);
         app.mState.setCurRawAdj(SERVICE_ADJ);
+        app.mState.setCurAdj(SERVICE_ADJ);
         doReturn(null).when(sService).getTopApp();
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app);
@@ -2546,7 +2552,6 @@ public class MockingOomAdjusterTests {
         s.startRequested = true;
         s.lastActivity = now;
 
-        app.mState.setCached(false);
         app.mServices.startService(s);
         app.mState.setHasShownUi(true);
 
@@ -2559,7 +2564,6 @@ public class MockingOomAdjusterTests {
         s2.startRequested = true;
         s2.lastActivity = now - sService.mConstants.MAX_SERVICE_INACTIVITY - 1;
 
-        app2.mState.setCached(false);
         app2.mServices.startService(s2);
         app2.mState.setHasShownUi(false);
 
@@ -2577,7 +2581,6 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
 
-        app.mState.setCached(false);
         app.mState.setSetProcState(PROCESS_STATE_NONEXISTENT);
         app.mState.setAdjType(null);
         app.mState.setSetAdj(UNKNOWN_ADJ);
@@ -2605,7 +2608,6 @@ public class MockingOomAdjusterTests {
         assertProcStates(app, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
         assertProcStates(app2, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
 
-        app.mState.setCached(true);
         app.mState.setSetProcState(PROCESS_STATE_NONEXISTENT);
         app.mState.setAdjType(null);
         app.mState.setSetAdj(UNKNOWN_ADJ);
@@ -3035,7 +3037,6 @@ public class MockingOomAdjusterTests {
             state.setHasTopUi(mHasTopUi);
             state.setRunningRemoteAnimation(mRunningRemoteAnimation);
             state.setHasOverlayUi(mHasOverlayUi);
-            state.setCached(mCached);
             state.setLastTopTime(mLastTopTime);
             state.setForcingToImportant(mForcingToImportant);
             services.setConnectionGroup(mConnectionGroup);

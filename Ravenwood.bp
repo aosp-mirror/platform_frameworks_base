@@ -78,6 +78,73 @@ java_genrule {
 }
 
 java_library {
+    name: "services.core-for-hoststubgen",
+    installable: false, // host only jar.
+    static_libs: [
+        "services.core",
+    ],
+    sdk_version: "core_platform",
+    visibility: ["//visibility:private"],
+}
+
+java_genrule {
+    name: "services.core.ravenwood-base",
+    tools: ["hoststubgen"],
+    cmd: "$(location hoststubgen) " +
+        "@$(location ravenwood/ravenwood-standard-options.txt) " +
+
+        "--debug-log $(location hoststubgen_services.core.log) " +
+        "--stats-file $(location hoststubgen_services.core_stats.csv) " +
+
+        "--out-impl-jar $(location ravenwood.jar) " +
+
+        "--gen-keep-all-file $(location hoststubgen_keep_all.txt) " +
+        "--gen-input-dump-file $(location hoststubgen_dump.txt) " +
+
+        "--in-jar $(location :services.core-for-hoststubgen) " +
+        "--policy-override-file $(location ravenwood/services.core-ravenwood-policies.txt) " +
+        "--annotation-allowed-classes-file $(location ravenwood/ravenwood-annotation-allowed-classes.txt) ",
+    srcs: [
+        ":services.core-for-hoststubgen",
+        "ravenwood/services.core-ravenwood-policies.txt",
+        "ravenwood/ravenwood-standard-options.txt",
+        "ravenwood/ravenwood-annotation-allowed-classes.txt",
+    ],
+    out: [
+        "ravenwood.jar",
+
+        // Following files are created just as FYI.
+        "hoststubgen_keep_all.txt",
+        "hoststubgen_dump.txt",
+
+        "hoststubgen_services.core.log",
+        "hoststubgen_services.core_stats.csv",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+java_genrule {
+    name: "services.core.ravenwood",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":services.core.ravenwood-base{ravenwood.jar}",
+    ],
+    out: [
+        "services.core.ravenwood.jar",
+    ],
+}
+
+java_library {
+    name: "services.core.ravenwood-jarjar",
+    installable: false,
+    static_libs: [
+        "services.core.ravenwood",
+    ],
+    jarjar_rules: ":ravenwood-services-jarjar-rules",
+}
+
+java_library {
     name: "mockito-ravenwood-prebuilt",
     installable: false,
     static_libs: [
@@ -121,6 +188,7 @@ android_ravenwood_libgroup {
         "android.test.mock.ravenwood",
         "ravenwood-helper-runtime",
         "hoststubgen-helper-runtime.ravenwood",
+        "services.core.ravenwood-jarjar",
 
         // Provide runtime versions of utils linked in below
         "junit",

@@ -26,11 +26,11 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
-import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.shared.model.UserActionResult
+import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
@@ -58,7 +58,6 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
     private val qsFlexiglassAdapter = FakeQSSceneAdapter({ mock() })
@@ -95,9 +94,9 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             ShadeHeaderViewModel(
                 applicationScope = testScope.backgroundScope,
                 context = context,
-                sceneInteractor = sceneInteractor,
                 mobileIconsInteractor = mobileIconsInteractor,
                 mobileIconsViewModel = mobileIconsViewModel,
+                privacyChipInteractor = kosmos.privacyChipInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
 

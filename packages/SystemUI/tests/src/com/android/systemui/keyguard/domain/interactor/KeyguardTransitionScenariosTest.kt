@@ -57,7 +57,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -148,6 +147,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
+                    glanceableHubTransitions = glanceableHubTransitions,
                 )
                 .apply { start() }
 
@@ -1366,6 +1366,44 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     from = KeyguardState.DREAMING,
                     to = KeyguardState.AOD,
                     animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun dreamingToGlanceableHub() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DREAMING
+            keyguardRepository.setDreaming(true)
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DREAMING)
+            runCurrent()
+
+            // WHEN a transition to the glanceable hub starts
+            val currentScene = CommunalSceneKey.Blank
+            val targetScene = CommunalSceneKey.Communal
+
+            val progress = MutableStateFlow(0f)
+            val transitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Transition(
+                        fromScene = currentScene,
+                        toScene = targetScene,
+                        progress = progress,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            communalInteractor.setTransitionState(transitionState)
+            progress.value = .1f
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = FromDreamingTransitionInteractor::class.simpleName,
+                    from = KeyguardState.DREAMING,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    animatorAssertion = { it.isNull() }, // transition should be manually animated
                 )
 
             coroutineContext.cancelChildren()

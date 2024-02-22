@@ -244,6 +244,8 @@
     <dimen name="bubble_popup_padding">24dp</dimen>
     <!-- The size of the caption bar inset at the top of bubble bar expanded view. -->
     <dimen name="bubble_bar_expanded_view_caption_height">32dp</dimen>
+    <!-- The width of the caption bar at the top of bubble bar expanded view. -->
+    <dimen name="bubble_bar_expanded_view_caption_width">128dp</dimen>
     <!-- The height of the dots shown for the caption menu in the bubble bar expanded view.. -->
     <dimen name="bubble_bar_expanded_view_caption_dot_size">4dp</dimen>
     <!-- The spacing between the dots for the caption menu in the bubble bar expanded view.. -->

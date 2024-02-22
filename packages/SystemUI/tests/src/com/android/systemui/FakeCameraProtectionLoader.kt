@@ -16,6 +16,7 @@
 
 package com.android.systemui
 
+import android.graphics.Rect
 import com.android.systemui.res.R
 
 class FakeCameraProtectionLoader(private val context: SysuiTestableContext) :
@@ -36,7 +37,10 @@ class FakeCameraProtectionLoader(private val context: SysuiTestableContext) :
         addInnerCameraProtection()
     }
 
-    fun addOuterCameraProtection(displayUniqueId: String = "111") {
+    fun addOuterCameraProtection(
+        displayUniqueId: String = "111",
+        bounds: Rect = Rect(/* left = */ 0, /* top = */ 0, /* right = */ 10, /* bottom = */ 10)
+    ) {
         context.orCreateTestableResources.addOverride(R.string.config_protectedCameraId, "1")
         context.orCreateTestableResources.addOverride(
             R.string.config_protectedPhysicalCameraId,
@@ -44,7 +48,7 @@ class FakeCameraProtectionLoader(private val context: SysuiTestableContext) :
         )
         context.orCreateTestableResources.addOverride(
             R.string.config_frontBuiltInDisplayCutoutProtection,
-            "M 0,0 H 10,10 V 10,10 H 0,10 Z"
+            bounds.asPath(),
         )
         context.orCreateTestableResources.addOverride(
             R.string.config_protectedScreenUniqueId,
@@ -52,7 +56,10 @@ class FakeCameraProtectionLoader(private val context: SysuiTestableContext) :
         )
     }
 
-    fun addInnerCameraProtection(displayUniqueId: String = "222") {
+    fun addInnerCameraProtection(
+        displayUniqueId: String = "222",
+        bounds: Rect = Rect(/* left = */ 0, /* top = */ 0, /* right = */ 20, /* bottom = */ 20)
+    ) {
         context.orCreateTestableResources.addOverride(R.string.config_protectedInnerCameraId, "2")
         context.orCreateTestableResources.addOverride(
             R.string.config_protectedInnerPhysicalCameraId,
@@ -60,11 +67,13 @@ class FakeCameraProtectionLoader(private val context: SysuiTestableContext) :
         )
         context.orCreateTestableResources.addOverride(
             R.string.config_innerBuiltInDisplayCutoutProtection,
-            "M 0,0 H 20,20 V 20,20 H 0,20 Z"
+            bounds.asPath(),
         )
         context.orCreateTestableResources.addOverride(
             R.string.config_protectedInnerScreenUniqueId,
             displayUniqueId
         )
     }
+
+    private fun Rect.asPath() = "M $left, $top H $right V $bottom H $left Z"
 }

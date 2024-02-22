@@ -58,11 +58,6 @@ import java.util.List;
     }
 
     @Override
-    protected boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device) {
-        return false;
-    }
-
-    @Override
     protected void transferToRoute(@NonNull MediaRoute2Info route) {
         // Do nothing.
     }
@@ -132,12 +127,6 @@ import java.util.List;
     @Override
     protected RoutingSessionInfo getRoutingSessionById(@NonNull String sessionId) {
         return null;
-    }
-
-    @NonNull
-    @Override
-    protected List<MediaRoute2Info> getAllRoutes() {
-        return Collections.emptyList();
     }
 
     @NonNull

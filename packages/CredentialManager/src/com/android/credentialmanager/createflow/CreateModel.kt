@@ -37,10 +37,6 @@ internal fun isFlowAutoSelectable(
     uiState: CreateCredentialUiState
 ): Boolean {
   return uiState.requestDisplayInfo.isAutoSelectRequest &&
-      // Even if the flow is auto selectable, still allow passkey intro screen to show once if
-      // applicable.
-      uiState.currentScreenState != CreateScreenState.PASSKEY_INTRO &&
-      uiState.currentScreenState != CreateScreenState.MORE_ABOUT_PASSKEYS_INTRO &&
       uiState.sortedCreateOptionsPairs.size == 1 &&
       uiState.activeEntry?.activeEntryInfo?.let {
         it is CreateOptionInfo && it.allowAutoSelect
@@ -98,8 +94,6 @@ data class ActiveEntry (
 
 /** The name of the current screen. */
 enum class CreateScreenState {
-  PASSKEY_INTRO,
-  MORE_ABOUT_PASSKEYS_INTRO,
   CREATION_OPTION_SELECTION,
   MORE_OPTIONS_SELECTION,
   DEFAULT_PROVIDER_CONFIRMATION,

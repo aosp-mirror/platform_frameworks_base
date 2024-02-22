@@ -23,11 +23,11 @@ import static android.app.role.RoleManager.ROLE_FINANCED_DEVICE_KIOSK;
 
 import static com.android.settingslib.Utils.getColorAttrDefaultColor;
 
-import android.Manifest;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.ecm.EnhancedConfirmationManager;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -42,12 +42,10 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManager.EnforcingUser;
-import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -60,7 +58,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * Utility class to host methods usable in adding a restricted padlock icon and showing admin
@@ -70,23 +67,10 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
 
     private static final String LOG_TAG = "RestrictedLockUtils";
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
-    private static final Set<String> ECM_KEYS = new ArraySet<>();
 
     // TODO(b/281701062): reference role name from role manager once its exposed.
     private static final String ROLE_DEVICE_LOCK_CONTROLLER =
             "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER";
-
-    static {
-        if (android.security.Flags.extendEcmToAllSettings()) {
-            ECM_KEYS.add(AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW);
-            ECM_KEYS.add(AppOpsManager.OPSTR_GET_USAGE_STATS);
-            ECM_KEYS.add(AppOpsManager.OPSTR_LOADER_USAGE_STATS);
-            ECM_KEYS.add(Manifest.permission.BIND_DEVICE_ADMIN);
-        }
-
-        ECM_KEYS.add(AppOpsManager.OPSTR_ACCESS_NOTIFICATIONS);
-        ECM_KEYS.add(AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
-    }
 
     /**
      * @return drawables for displaying with settings that are locked by a device admin.
@@ -112,29 +96,60 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
      */
     @Nullable
     public static Intent checkIfRequiresEnhancedConfirmation(@NonNull Context context,
-                                                             @NonNull String restriction,
-                                                             int uid,
-                                                             @Nullable String packageName) {
-        // TODO(b/297372999): Replace with call to mainline module once ready
+            @NonNull String settingIdentifier, @NonNull String packageName) {
 
-        if (!ECM_KEYS.contains(restriction)) {
+        if (!android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                || !android.security.Flags.extendEcmToAllSettings()) {
             return null;
         }
 
-        final AppOpsManager appOps = (AppOpsManager) context
-                .getSystemService(Context.APP_OPS_SERVICE);
-        final int mode = appOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
-                uid, packageName, null, null);
-        final boolean ecmEnabled = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
-        if (ecmEnabled && mode != AppOpsManager.MODE_ALLOWED) {
-            final Intent intent = new Intent(Settings.ACTION_SHOW_RESTRICTED_SETTING_DIALOG);
-            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
-            intent.putExtra(Intent.EXTRA_UID, uid);
-            return intent;
+        EnhancedConfirmationManager ecManager = (EnhancedConfirmationManager) context
+                .getSystemService(Context.ECM_ENHANCED_CONFIRMATION_SERVICE);
+        try {
+            if (ecManager.isRestricted(packageName, settingIdentifier)) {
+                return ecManager.createRestrictedSettingDialogIntent(
+                        packageName, settingIdentifier);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(LOG_TAG, "package not found: " + packageName, e);
         }
 
         return null;
+    }
+
+    /**
+     * <p>This is {@code true} when the setting is a protected setting (i.e., a sensitive resource),
+     * and the app is restricted (i.e., considered dangerous), and the user has not yet cleared the
+     * app's restriction status (i.e., by clicking "Allow restricted settings" for this app).     *
+     */
+    public static boolean isEnhancedConfirmationRestricted(@NonNull Context context,
+            @NonNull String settingIdentifier, @NonNull String packageName) {
+        if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
+                && android.security.Flags.extendEcmToAllSettings()) {
+            try {
+                return context.getSystemService(EnhancedConfirmationManager.class)
+                        .isRestricted(packageName, settingIdentifier);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Exception when retrieving package:" + packageName, e);
+                return false;
+            }
+        } else {
+            try {
+                if (!settingIdentifier.equals(AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE)) {
+                    return false;
+                }
+                int uid = context.getPackageManager().getPackageUid(packageName, 0);
+                final int mode = context.getSystemService(AppOpsManager.class)
+                        .noteOpNoThrow(AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
+                        uid, packageName);
+                final boolean ecmEnabled = context.getResources().getBoolean(
+                        com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
+                return ecmEnabled && mode != AppOpsManager.MODE_ALLOWED;
+            } catch (Exception e) {
+                // Fallback in case if app ops is not available in testing.
+                return false;
+            }
+        }
     }
 
     /**

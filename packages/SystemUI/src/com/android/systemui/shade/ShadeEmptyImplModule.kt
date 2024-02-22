@@ -17,6 +17,8 @@
 package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.data.repository.PrivacyChipRepository
+import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
@@ -61,4 +63,8 @@ abstract class ShadeEmptyImplModule {
     abstract fun bindsShadeAnimationInteractor(
         sai: ShadeAnimationInteractorEmptyImpl
     ): ShadeAnimationInteractor
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsPrivacyChipRepository(impl: PrivacyChipRepositoryImpl): PrivacyChipRepository
 }

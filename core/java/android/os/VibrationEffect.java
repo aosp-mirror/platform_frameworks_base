@@ -591,9 +591,14 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * Scale given vibration intensity by the given factor.
      *
+     * <p> This scale is not necessarily linear and may apply a gamma correction to the scale
+     * factor before using it.
+     *
      * @param intensity   relative intensity of the effect, must be between 0 and 1
      * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
      *                    scale down the intensity, values larger than 1 will scale up
+     * @return the scaled intensity which will be values within [0, 1].
+     *
      * @hide
      */
     public static float scale(float intensity, float scaleFactor) {
@@ -621,6 +626,20 @@ public abstract class VibrationEffect implements Parcelable {
         float fx = (expX - 1f) / (expX + 1f);
 
         return MathUtils.constrain(a * fx, 0f, 1f);
+    }
+
+    /**
+     * Performs a linear scaling on the given vibration intensity by the given factor.
+     *
+     * @param intensity relative intensity of the effect, must be between 0 and 1.
+     * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
+     *                    scale down the intensity, values larger than 1 will scale up.
+     * @return the scaled intensity which will be values within [0, 1].
+     *
+     * @hide
+     */
+    public static float scaleLinearly(float intensity, float scaleFactor) {
+        return MathUtils.constrain(intensity * scaleFactor, 0f, 1f);
     }
 
     /**

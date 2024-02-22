@@ -27,10 +27,12 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.wear.compose.material.Text
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Icon
 import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
 import androidx.compose.ui.text.style.TextAlign
 
+/* Used as header across Credential Selector screens. */
 @Composable
 fun SignInHeader(
     icon: Drawable?,
@@ -46,7 +48,9 @@ fun SignInHeader(
                 bitmap = icon.toBitmap().asImageBitmap(),
                 modifier = Modifier.size(32.dp),
                 // Decorative purpose only.
-                contentDescription = null
+                contentDescription = null,
+                tint = Color.Unspecified,
+
             )
         }
 

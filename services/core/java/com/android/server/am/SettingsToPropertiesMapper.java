@@ -161,6 +161,7 @@ public class SettingsToPropertiesMapper {
         "media_solutions",
         "nfc",
         "pdf_viewer",
+        "perfetto",
         "pixel_audio_android",
         "pixel_biometrics_face",
         "pixel_bluetooth",

@@ -18,6 +18,8 @@ package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.shade.data.repository.PrivacyChipRepository
+import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
 import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
@@ -124,4 +126,8 @@ abstract class ShadeModule {
     abstract fun bindsShadeViewController(
         notificationPanelViewController: NotificationPanelViewController
     ): ShadeViewController
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsPrivacyChipRepository(impl: PrivacyChipRepositoryImpl): PrivacyChipRepository
 }

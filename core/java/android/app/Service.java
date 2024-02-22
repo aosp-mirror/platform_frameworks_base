@@ -1164,7 +1164,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
 
     /** @hide */
-    public final void callOnTimeLimitExceeded(int startId, int fgsType) {
+    public final void callOnTimeLimitExceeded(int startId, @ForegroundServiceType int fgsType) {
         // Note, because all the service callbacks (and other similar callbacks, e.g. activity
         // callbacks) are delivered using the main handler, it's possible the service is already
         // stopped when before this method is called, so we do a double check here.
@@ -1189,10 +1189,11 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * Callback called when a particular foreground service type has timed out.
      *
      * @param startId the startId passed to {@link #onStartCommand(Intent, int, int)} when
-     * the service started.
-     * @param fgsType the foreground service type which caused the timeout.
+     *                the service started.
+     * @param fgsType the {@link ServiceInfo.ForegroundServiceType foreground service type} which
+     *                caused the timeout.
      */
     @FlaggedApi(Flags.FLAG_INTRODUCE_NEW_SERVICE_ONTIMEOUT_CALLBACK)
-    public void onTimeout(int startId, int fgsType) {
+    public void onTimeout(int startId, @ForegroundServiceType int fgsType) {
     }
 }

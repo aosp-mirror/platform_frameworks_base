@@ -15,32 +15,40 @@
  */
 package com.android.credentialmanager.ui.components
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Icon
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Chip
+import androidx.core.graphics.drawable.toBitmap
 import androidx.wear.compose.material.ChipColors
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.Color
 import androidx.wear.compose.material.ChipDefaults
 import androidx.wear.compose.material.Text
 import com.android.credentialmanager.R
+import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 import com.android.credentialmanager.ui.components.CredentialsScreenChip.TOPPADDING
 
+/* Used as credential suggestion or user action chip. */
 @Composable
 fun CredentialsScreenChip(
     label: String,
     onClick: () -> Unit,
     secondaryLabel: String? = null,
     icon: Drawable? = null,
+    isAuthenticationEntryLocked: Boolean = false,
     modifier: Modifier = Modifier,
     colors: ChipColors = ChipDefaults.secondaryChipColors(),
 ) {
@@ -56,18 +64,37 @@ fun CredentialsScreenChip(
     val secondaryLabelParam: (@Composable RowScope.() -> Unit)? =
         secondaryLabel?.let {
             {
-                Text(
-                    text = secondaryLabel,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                )
+                Row {
+                    Text(
+                        text = secondaryLabel,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                    )
+
+                    if (isAuthenticationEntryLocked)
+                        // TODO(b/324465527) change this to lock icon and correct size once figma mocks are
+                        // updated
+                        Icon(
+                            bitmap = checkNotNull(icon?.toBitmap()?.asImageBitmap()),
+                            // Decorative purpose only.
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = Color.Unspecified
+                        )
+                }
             }
         }
 
     val iconParam: (@Composable BoxScope.() -> Unit)? =
-        icon?.let {
+        icon?.toBitmap()?.asImageBitmap()?.let {
             {
-                 ChipDefaults.IconSize
+                Icon(
+                    bitmap = it,
+                    // Decorative purpose only.
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = Color.Unspecified
+                )
             }
         }
 
@@ -136,6 +163,37 @@ fun DismissChip(onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier
             .padding(top = TOPPADDING),
+    )
+}
+
+@Composable
+fun SignInOnPhoneChip(onClick: () -> Unit) {
+    CredentialsScreenChip(
+        label = stringResource(R.string.sign_in_on_phone_button),
+        onClick = onClick,
+        modifier = Modifier
+            .padding(top = TOPPADDING),
+    )
+}
+
+@Composable
+fun LockedProviderChip(
+    authenticationEntryInfo: AuthenticationEntryInfo,
+    onClick: () -> Unit
+) {
+    val secondaryLabel = stringResource(
+        if (authenticationEntryInfo.isUnlockedAndEmpty)
+            R.string.locked_credential_entry_label_subtext_no_sign_in
+        else R.string.locked_credential_entry_label_subtext_tap_to_unlock
+    )
+
+    CredentialsScreenChip(
+        label = authenticationEntryInfo.title,
+        icon = authenticationEntryInfo.icon,
+        secondaryLabel = secondaryLabel,
+        isAuthenticationEntryLocked = !authenticationEntryInfo.isUnlockedAndEmpty,
+        onClick = onClick,
+        modifier = Modifier.padding(top = TOPPADDING),
     )
 }
 

@@ -243,7 +243,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
 
         activity.deliverNewIntentLocked(ActivityBuilder.DEFAULT_FAKE_UID,
                 new Intent(), null /* intentGrants */, "other.package2",
-                /* isShareIdentityEnabled */ false);
+                /* isShareIdentityEnabled */ false, /* userId */ -1, /* recipientAppId */ -1);
         verify(activity).getFilteredReferrer(eq("other.package2"));
     }
 

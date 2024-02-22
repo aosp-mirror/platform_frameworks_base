@@ -149,9 +149,9 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransition
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
-import com.android.systemui.media.controls.pipeline.MediaDataManager;
-import com.android.systemui.media.controls.ui.KeyguardMediaController;
-import com.android.systemui.media.controls.ui.MediaHierarchyManager;
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.ui.controller.KeyguardMediaController;
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
