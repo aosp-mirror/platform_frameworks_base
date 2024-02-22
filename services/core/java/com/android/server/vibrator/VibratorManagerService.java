@@ -448,6 +448,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         VibrationAttributes attrs =
                 hapticVibrationProvider.getVibrationAttributesForHapticFeedback(
                         constant, /* bypassVibrationIntensitySetting= */ always);
+        VibratorFrameworkStatsLogger.logPerformHapticsFeedbackIfKeyboard(uid, constant);
         return vibrateWithoutPermissionCheck(uid, deviceId, opPkg, combinedVibration, attrs,
                 "performHapticFeedback: " + reason, token);
     }
