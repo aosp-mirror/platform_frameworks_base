@@ -20,6 +20,7 @@ import android.view.MotionEvent
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -34,6 +35,7 @@ class SceneContainerViewModel
 constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
+    private val powerInteractor: PowerInteractor,
 ) {
     /**
      * Keys of all scenes in the container.
@@ -64,7 +66,7 @@ constructor(
      * Call this before the [MotionEvent] starts to propagate through the UI hierarchy.
      */
     fun onMotionEvent(event: MotionEvent) {
-        sceneInteractor.onUserInput()
+        powerInteractor.onUserTouch()
         falsingInteractor.onTouchEvent(event)
     }
 
