@@ -183,6 +183,8 @@ public class Am extends BaseCommand {
                 instrument.disableTestApiChecks = false;
             } else if (opt.equals("--no-isolated-storage")) {
                 instrument.disableIsolatedStorage = true;
+            } else if (opt.equals("--no-logcat")) {
+                instrument.captureLogcat = false;
             } else if (opt.equals("--user")) {
                 instrument.userId = parseUserArg(nextArgRequired());
             } else if (opt.equals("--abi")) {
