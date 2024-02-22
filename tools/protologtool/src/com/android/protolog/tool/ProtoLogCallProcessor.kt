@@ -16,7 +16,9 @@
 
 package com.android.protolog.tool
 
+import com.android.internal.protolog.common.LogLevel
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.MethodCallExpr
@@ -105,9 +107,24 @@ open class ProtoLogCallProcessor(
                                 "- not a ProtoLogGroup enum member: $call", context)
                     }
 
-                    callVisitor?.processCall(call, messageString, LogLevel.getLevelForMethodName(
+                    callVisitor?.processCall(call, messageString, getLevelForMethodName(
                             call.name.toString(), call, context), groupMap.getValue(groupName))
                 }
         return code
+    }
+
+    companion object {
+        fun getLevelForMethodName(name: String, node: Node, context: ParsingContext): LogLevel {
+            return when (name) {
+                "d" -> LogLevel.DEBUG
+                "v" -> LogLevel.VERBOSE
+                "i" -> LogLevel.INFO
+                "w" -> LogLevel.WARN
+                "e" -> LogLevel.ERROR
+                "wtf" -> LogLevel.WTF
+                else ->
+                    throw InvalidProtoLogCallException("Unknown log level $name in $node", context)
+            }
+        }
     }
 }

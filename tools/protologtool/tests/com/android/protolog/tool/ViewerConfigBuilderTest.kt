@@ -16,6 +16,7 @@
 
 package com.android.protolog.tool
 
+import com.android.internal.protolog.common.LogLevel
 import com.android.json.stream.JsonReader
 import com.android.protolog.tool.ViewerConfigBuilder.LogCall
 import org.junit.Assert.assertEquals

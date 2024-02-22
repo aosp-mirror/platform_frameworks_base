@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.protolog.tool
+package com.android.internal.protolog.common;
 
-import com.android.internal.protolog.common.LogLevel
-import com.github.javaparser.ast.expr.MethodCallExpr
+public enum LogLevel {
+    DEBUG("d"), VERBOSE("v"), INFO("i"), WARN("w"), ERROR("e"), WTF("wtf");
 
-interface ProtoLogCallVisitor {
-    fun processCall(call: MethodCallExpr, messageString: String, level: LogLevel, group: LogGroup)
+    public final String shortCode;
+    LogLevel(String shortCode) {
+        this.shortCode = shortCode;
+    }
 }
