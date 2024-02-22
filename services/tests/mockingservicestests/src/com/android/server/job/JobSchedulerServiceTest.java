@@ -85,6 +85,8 @@ import com.android.server.SystemServiceManager;
 import com.android.server.job.controllers.ConnectivityController;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.QuotaController;
+import com.android.server.job.restrictions.JobRestriction;
+import com.android.server.job.restrictions.ThermalStatusRestriction;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 
@@ -2383,6 +2385,96 @@ public class JobSchedulerServiceTest {
         assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job2a));
         assertFalse(mService.getPendingJobQueue().contains(job2b));
         assertEquals(JobScheduler.PENDING_JOB_REASON_USER, mService.getPendingJobReason(job2b));
+    }
+
+    /**
+     * Unit tests {@link JobSchedulerService#checkIfRestricted(JobStatus)} with single {@link
+     * JobRestriction} registered.
+     */
+    @Test
+    public void testCheckIfRestrictedSingleRestriction() {
+        int bias = JobInfo.BIAS_BOUND_FOREGROUND_SERVICE;
+        JobStatus fgsJob =
+                createJobStatus(
+                        "testCheckIfRestrictedSingleRestriction", createJobInfo(1).setBias(bias));
+        ThermalStatusRestriction mockThermalStatusRestriction =
+                mock(ThermalStatusRestriction.class);
+        mService.mJobRestrictions.clear();
+        mService.mJobRestrictions.add(mockThermalStatusRestriction);
+        when(mockThermalStatusRestriction.isJobRestricted(fgsJob, bias)).thenReturn(true);
+
+        synchronized (mService.mLock) {
+            assertEquals(mService.checkIfRestricted(fgsJob), mockThermalStatusRestriction);
+        }
+
+        when(mockThermalStatusRestriction.isJobRestricted(fgsJob, bias)).thenReturn(false);
+        synchronized (mService.mLock) {
+            assertNull(mService.checkIfRestricted(fgsJob));
+        }
+    }
+
+    /**
+     * Unit tests {@link JobSchedulerService#checkIfRestricted(JobStatus)} with multiple {@link
+     * JobRestriction} registered.
+     */
+    @Test
+    public void testCheckIfRestrictedMultipleRestrictions() {
+        int bias = JobInfo.BIAS_BOUND_FOREGROUND_SERVICE;
+        JobStatus fgsJob =
+                createJobStatus(
+                        "testGetMinJobExecutionGuaranteeMs", createJobInfo(1).setBias(bias));
+        JobRestriction mock1JobRestriction = mock(JobRestriction.class);
+        JobRestriction mock2JobRestriction = mock(JobRestriction.class);
+        mService.mJobRestrictions.clear();
+        mService.mJobRestrictions.add(mock1JobRestriction);
+        mService.mJobRestrictions.add(mock2JobRestriction);
+
+        // Jobs will be restricted if any one of the registered {@link JobRestriction}
+        // reports true.
+        when(mock1JobRestriction.isJobRestricted(fgsJob, bias)).thenReturn(true);
+        when(mock2JobRestriction.isJobRestricted(fgsJob, bias)).thenReturn(false);
+        synchronized (mService.mLock) {
+            assertEquals(mService.checkIfRestricted(fgsJob), mock1JobRestriction);
+        }
+
+        when(mock1JobRestriction.isJobRestricted(fgsJob, bias)).thenReturn(false);
+        when(mock2JobRestriction.isJobRestricted(fgsJob, bias)).thenReturn(true);
+        synchronized (mService.mLock) {
+            assertEquals(mService.checkIfRestricted(fgsJob), mock2JobRestriction);
+        }
+
+        when(mock1JobRestriction.isJobRestricted(fgsJob, bias)).thenReturn(false);
+        when(mock2JobRestriction.isJobRestricted(fgsJob, bias)).thenReturn(false);
+        synchronized (mService.mLock) {
+            assertNull(mService.checkIfRestricted(fgsJob));
+        }
+
+        when(mock1JobRestriction.isJobRestricted(fgsJob, bias)).thenReturn(true);
+        when(mock2JobRestriction.isJobRestricted(fgsJob, bias)).thenReturn(true);
+        synchronized (mService.mLock) {
+            assertNotEquals(mService.checkIfRestricted(fgsJob), mock1JobRestriction);
+        }
+    }
+
+    /**
+     * Jobs with foreground service and top app biases must not be restricted. Modify the test
+     * accordingly, if this assumption changes in the future.
+     */
+    @Test
+    public void testCheckIfRestricted_highJobBias() {
+        JobStatus fgsJob =
+                createJobStatus(
+                        "testCheckIfRestrictedJobBiasFgs",
+                        createJobInfo(1).setBias(JobInfo.BIAS_FOREGROUND_SERVICE));
+        JobStatus topAppJob =
+                createJobStatus(
+                        "testCheckIfRestrictedJobBiasTopApp",
+                        createJobInfo(1).setBias(JobInfo.BIAS_TOP_APP));
+
+        synchronized (mService.mLock) {
+            assertNull(mService.checkIfRestricted(fgsJob));
+            assertNull(mService.checkIfRestricted(topAppJob));
+        }
     }
 
     private void setBatteryLevel(int level) {

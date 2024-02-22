@@ -85,7 +85,11 @@ public class ThermalStatusRestriction extends JobRestriction {
     }
 
     @Override
-    public boolean isJobRestricted(JobStatus job) {
+    public boolean isJobRestricted(JobStatus job, int bias) {
+        if (bias >= JobInfo.BIAS_FOREGROUND_SERVICE) {
+            // Jobs with BIAS_FOREGROUND_SERVICE or higher should not be restricted
+            return false;
+        }
         if (mThermalStatus >= UPPER_THRESHOLD) {
             return true;
         }
