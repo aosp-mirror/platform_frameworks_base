@@ -1,10 +1,1 @@
 // Signature format: 2.0
-package android.hardware.fingerprint {
-
-  @Deprecated public class FingerprintManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession createTestSession(int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
-  }
-
-}
-
