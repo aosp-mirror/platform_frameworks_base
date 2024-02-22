@@ -16,21 +16,17 @@
 
 package com.android.settingslib.volume.shared
 
-import android.content.Intent
+import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-class FakeAudioManagerIntentsReceiver : AudioManagerIntentsReceiver {
+class FakeAudioManagerEventsReceiver : AudioManagerEventsReceiver {
 
-    private val mutableIntents = MutableSharedFlow<Intent>()
-    override val intents: SharedFlow<Intent> = mutableIntents.asSharedFlow()
+    private val mutableIntents = MutableSharedFlow<AudioManagerEvent>()
+    override val events: SharedFlow<AudioManagerEvent> = mutableIntents.asSharedFlow()
 
-    suspend fun triggerIntent(intent: Intent) {
-        mutableIntents.emit(intent)
-    }
-
-    suspend fun triggerIntent(action: String) {
-        triggerIntent(Intent(action))
+    suspend fun triggerEvent(event: AudioManagerEvent) {
+        mutableIntents.emit(event)
     }
 }

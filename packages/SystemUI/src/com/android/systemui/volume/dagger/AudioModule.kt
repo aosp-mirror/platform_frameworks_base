@@ -27,8 +27,8 @@ import com.android.settingslib.statusbar.notification.data.repository.Notificati
 import com.android.settingslib.volume.data.repository.AudioRepository
 import com.android.settingslib.volume.data.repository.AudioRepositoryImpl
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
-import com.android.settingslib.volume.shared.AudioManagerIntentsReceiver
-import com.android.settingslib.volume.shared.AudioManagerIntentsReceiverImpl
+import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
+import com.android.settingslib.volume.shared.AudioManagerEventsReceiverImpl
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import dagger.Module
@@ -46,11 +46,11 @@ interface AudioModule {
         fun provideAudioManagerIntentsReceiver(
             @Application context: Context,
             @Application coroutineScope: CoroutineScope,
-        ): AudioManagerIntentsReceiver = AudioManagerIntentsReceiverImpl(context, coroutineScope)
+        ): AudioManagerEventsReceiver = AudioManagerEventsReceiverImpl(context, coroutineScope)
 
         @Provides
         fun provideAudioRepository(
-            intentsReceiver: AudioManagerIntentsReceiver,
+            intentsReceiver: AudioManagerEventsReceiver,
             audioManager: AudioManager,
             @Background coroutineContext: CoroutineContext,
             @Application coroutineScope: CoroutineScope,

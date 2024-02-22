@@ -21,10 +21,12 @@ import android.media.AudioManager
 import android.media.AudioManager.OnCommunicationDeviceChangedListener
 import androidx.concurrent.futures.DirectExecutor
 import com.android.internal.util.ConcurrentUtils
-import com.android.settingslib.volume.shared.AudioManagerIntentsReceiver
+import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
+import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
+import com.android.settingslib.volume.shared.model.StreamAudioManagerEvent
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -33,6 +35,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -72,7 +75,7 @@ interface AudioRepository {
 }
 
 class AudioRepositoryImpl(
-    private val audioManagerIntentsReceiver: AudioManagerIntentsReceiver,
+    private val audioManagerEventsReceiver: AudioManagerEventsReceiver,
     private val audioManager: AudioManager,
     private val backgroundCoroutineContext: CoroutineContext,
     private val coroutineScope: CoroutineScope,
@@ -89,8 +92,8 @@ class AudioRepositoryImpl(
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), audioManager.mode)
 
     override val ringerMode: StateFlow<RingerMode> =
-        audioManagerIntentsReceiver.intents
-            .filter { AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION == it.action }
+        audioManagerEventsReceiver.events
+            .filterIsInstance(AudioManagerEvent.InternalRingerModeChanged::class)
             .map { RingerMode(audioManager.ringerModeInternal) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(
@@ -120,7 +123,14 @@ class AudioRepositoryImpl(
                 )
 
     override suspend fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> {
-        return audioManagerIntentsReceiver.intents
+        return audioManagerEventsReceiver.events
+            .filter {
+                if (it is StreamAudioManagerEvent) {
+                    it.audioStream == audioStream
+                } else {
+                    true
+                }
+            }
             .map { getCurrentAudioStream(audioStream) }
             .flowOn(backgroundCoroutineContext)
     }
