@@ -30,6 +30,7 @@ import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ForegroundServiceDelegationOptions;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
@@ -89,6 +90,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -636,6 +638,15 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         }
 
         return foundNonSystemSession && remoteSessionAllowVolumeAdjustment;
+    }
+
+    @Override
+    boolean isLinkedToNotification(Notification notification) {
+        return notification.isMediaNotification()
+                && Objects.equals(
+                        notification.extras.getParcelable(
+                                Notification.EXTRA_MEDIA_SESSION, MediaSession.Token.class),
+                        mSessionToken);
     }
 
     @Override
