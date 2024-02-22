@@ -97,6 +97,14 @@ class FalsingCollectorImpl implements FalsingCollector {
                 }
             };
 
+    private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
+            new KeyguardStateController.Callback() {
+                @Override
+                public void onKeyguardShowingChanged() {
+                    updateSensorRegistration();
+                }
+            };
+
 
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -175,6 +183,8 @@ class FalsingCollectorImpl implements FalsingCollector {
 
         mStatusBarStateController.addCallback(mStatusBarStateListener);
         mState = mStatusBarStateController.getState();
+
+        mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
 
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback);
 
@@ -364,6 +374,24 @@ class FalsingCollectorImpl implements FalsingCollector {
         } else {
             sessionEnd();
         }
+        updateSensorRegistration();
+    }
+
+    private boolean shouldBeRegisteredToSensors() {
+        return mScreenOn
+                && (mState == StatusBarState.KEYGUARD
+                || (mState == StatusBarState.SHADE
+                && mKeyguardStateController.isOccluded()
+                && mKeyguardStateController.isShowing()))
+                && !mShowingAod;
+    }
+
+    private void updateSensorRegistration() {
+        if (shouldBeRegisteredToSensors()) {
+            registerSensors();
+        } else {
+            unregisterSensors();
+        }
     }
 
     private void sessionStart() {
@@ -371,7 +399,6 @@ class FalsingCollectorImpl implements FalsingCollector {
             logDebug("Starting Session");
             mSessionStarted = true;
             mFalsingDataProvider.setJustUnlockedWithFace(false);
-            registerSensors();
             mFalsingDataProvider.onSessionStarted();
         }
     }
@@ -380,7 +407,6 @@ class FalsingCollectorImpl implements FalsingCollector {
         if (mSessionStarted) {
             logDebug("Ending Session");
             mSessionStarted = false;
-            unregisterSensors();
             mFalsingDataProvider.onSessionEnd();
         }
     }
