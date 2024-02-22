@@ -217,6 +217,7 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
 
         deviceEntrySideFpsOverlayInteractor =
             DeviceEntrySideFpsOverlayInteractor(
+                testScope.backgroundScope,
                 mContext,
                 deviceEntryFingerprintAuthRepository,
                 primaryBouncerInteractor,
@@ -260,14 +261,14 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             SideFpsOverlayViewBinder(
                 testScope.backgroundScope,
                 mContext,
-                biometricStatusInteractor,
-                displayStateInteractor,
-                deviceEntrySideFpsOverlayInteractor,
-                fpsUnlockTracker,
-                layoutInflater,
-                sideFpsProgressBarViewModel,
-                sfpsSensorInteractor,
-                windowManager
+                { biometricStatusInteractor },
+                { displayStateInteractor },
+                { deviceEntrySideFpsOverlayInteractor },
+                { fpsUnlockTracker },
+                { layoutInflater },
+                { sideFpsProgressBarViewModel },
+                { sfpsSensorInteractor },
+                { windowManager }
             )
 
         context.addMockSystemService(DisplayManager::class.java, displayManager)

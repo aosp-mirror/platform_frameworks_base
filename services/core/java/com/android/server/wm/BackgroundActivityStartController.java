@@ -936,7 +936,7 @@ public class BackgroundActivityStartController {
                         BalVerdict balAllowedForUid = proc.areBackgroundActivityStartsAllowed(
                                 state.mAppSwitchState);
                         if (balAllowedForUid.allows()) {
-                            return balAllowedForCaller.withProcessInfo("process", proc);
+                            return balAllowedForUid.withProcessInfo("process", proc);
                         }
                     }
                 }
