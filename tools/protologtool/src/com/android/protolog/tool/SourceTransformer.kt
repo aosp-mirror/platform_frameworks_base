@@ -17,6 +17,7 @@
 package com.android.protolog.tool
 
 import com.android.internal.protolog.common.LogDataType
+import com.android.internal.protolog.common.LogLevel
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.NodeList
