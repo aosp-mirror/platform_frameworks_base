@@ -2043,6 +2043,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!isVisible()) {
             return;
         }
+        final WallpaperWindowToken wallpaperToken = mToken.asWallpaperToken();
+        if (wallpaperToken != null) {
+            if (wallpaperToken.hasVisibleNotDrawnWallpaper()) {
+                outWaitingForDrawn.add(this);
+            }
+            return;
+        }
         if (mActivityRecord != null) {
             if (!mActivityRecord.isVisibleRequested()) return;
             if (mActivityRecord.allDrawn) {
