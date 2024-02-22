@@ -791,14 +791,21 @@ internal class SceneNestedScrollHandler(
             )
 
         fun hasNextScene(amount: Float): Boolean {
-            val fromScene = layoutImpl.scene(layoutState.transitionState.currentScene)
+            val transitionState = layoutState.transitionState
+            val scene = transitionState.currentScene
+            val fromScene = layoutImpl.scene(scene)
             val nextScene =
                 when {
                     amount < 0f -> fromScene.userActions[actionUpOrLeft]
                     amount > 0f -> fromScene.userActions[actionDownOrRight]
                     else -> null
                 }
-            return nextScene != null
+            if (nextScene != null) return true
+
+            if (transitionState !is TransitionState.Idle) return false
+
+            val overscrollSpec = layoutImpl.state.transitions.overscrollSpec(scene, orientation)
+            return overscrollSpec != null
         }
 
         val source = this
