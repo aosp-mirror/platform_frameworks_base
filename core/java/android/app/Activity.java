@@ -1002,6 +1002,9 @@ public class Activity extends ContextThemeWrapper
             new ActivityManager.TaskDescription();
     private int mLastTaskDescriptionHashCode;
 
+    @ActivityInfo.ScreenOrientation
+    private int mLastRequestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSET;
+
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
     @SuppressWarnings("unused")
@@ -7530,11 +7533,15 @@ public class Activity extends ContextThemeWrapper
      * {@link ActivityInfo#screenOrientation ActivityInfo.screenOrientation}.
      */
     public void setRequestedOrientation(@ActivityInfo.ScreenOrientation int requestedOrientation) {
+        if (requestedOrientation == mLastRequestedOrientation) {
+            return;
+        }
         if (mParent == null) {
             ActivityClient.getInstance().setRequestedOrientation(mToken, requestedOrientation);
         } else {
             mParent.setRequestedOrientation(requestedOrientation);
         }
+        mLastRequestedOrientation = requestedOrientation;
     }
 
     /**
@@ -7548,6 +7555,9 @@ public class Activity extends ContextThemeWrapper
      */
     @ActivityInfo.ScreenOrientation
     public int getRequestedOrientation() {
+        if (mLastRequestedOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSET) {
+            return mLastRequestedOrientation;
+        }
         if (mParent == null) {
             return ActivityClient.getInstance().getRequestedOrientation(mToken);
         } else {
