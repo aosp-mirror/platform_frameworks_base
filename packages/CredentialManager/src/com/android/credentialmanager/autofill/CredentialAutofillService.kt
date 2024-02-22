@@ -607,10 +607,14 @@ class CredentialAutofillService : AutofillService() {
             autofillId: AutofillId,
             responseClientState: Bundle
     ): MutableList<CredentialOption> {
-        if (viewNode.credentialManagerRequest != null &&
-                viewNode.credentialManagerCallback != null) {
+        if (viewNode.credentialManagerRequest != null) {
             val options = viewNode.credentialManagerRequest?.getCredentialOptions()
             if (options != null) {
+                for (option in options) {
+                    option.candidateQueryData.putParcelable(
+                            CredentialProviderService.EXTRA_AUTOFILL_ID, autofillId
+                    )
+                }
                 return options
             }
         }

@@ -7034,7 +7034,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
         Preconditions.checkNotNull(request, "request must not be null");
         Preconditions.checkNotNull(callback, "request must not be null");
-
         mViewCredentialHandler = new ViewCredentialHandler(request, callback);
     }
 
@@ -9912,6 +9911,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 provider.performAction(virtualId, AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
             }
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void onGetCredentialResponse(GetCredentialResponse response) {
+        if (getCredentialManagerCallback() == null) {
+            Log.w(AUTOFILL_LOG_TAG, "onGetCredentialResponse called but no callback found");
+            return;
+        }
+        getCredentialManagerCallback().onResult(response);
     }
 
     /**
