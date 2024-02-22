@@ -56,7 +56,6 @@ public class MediaSession2Record extends MediaSessionRecordImpl {
     private boolean mIsClosed;
 
     private final int mPid;
-    private final ForegroundServiceDelegationOptions mForegroundServiceDelegationOptions;
 
     public MediaSession2Record(
             Session2Token sessionToken,
@@ -76,25 +75,6 @@ public class MediaSession2Record extends MediaSessionRecordImpl {
                     .build();
             mPid = pid;
             mPolicies = policies;
-            mForegroundServiceDelegationOptions =
-                    new ForegroundServiceDelegationOptions.Builder()
-                            .setClientPid(mPid)
-                            .setClientUid(getUid())
-                            .setClientPackageName(getPackageName())
-                            .setClientAppThread(null)
-                            .setSticky(false)
-                            .setClientInstanceName(
-                                    "MediaSessionFgsDelegate_"
-                                            + getUid()
-                                            + "_"
-                                            + mPid
-                                            + "_"
-                                            + getPackageName())
-                            .setForegroundServiceTypes(0)
-                            .setDelegationService(
-                                    ForegroundServiceDelegationOptions
-                                            .DELEGATION_SERVICE_MEDIA_PLAYBACK)
-                            .build();
         }
     }
 
@@ -119,7 +99,10 @@ public class MediaSession2Record extends MediaSessionRecordImpl {
 
     @Override
     public ForegroundServiceDelegationOptions getForegroundServiceDelegationOptions() {
-        return mForegroundServiceDelegationOptions;
+        // For an app to be eligible for FGS delegation, it needs a media session liked to a media
+        // notification. Currently, notifications cannot be linked to MediaSession2 so it is not
+        // supported.
+        return null;
     }
 
     @Override

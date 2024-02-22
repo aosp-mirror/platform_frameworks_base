@@ -610,9 +610,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
         ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
                 record.getForegroundServiceDelegationOptions();
-        if (foregroundServiceDelegationOptions == null
-                || foregroundServiceDelegationOptions.mClientPid == Process.INVALID_PID) {
-            // This record doesn't support FGS delegation. In practice, this is MediaSession2.
+        if (foregroundServiceDelegationOptions == null) {
             return;
         }
         if (allowRunningInForeground) {
