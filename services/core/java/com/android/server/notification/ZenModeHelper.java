@@ -1880,12 +1880,14 @@ public class ZenModeHelper {
         if (rule.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             policy.apply(new ZenPolicy.Builder()
                     .disallowAllSounds()
+                    .allowPriorityChannels(false)
                     .build());
         } else if (rule.zenMode == Global.ZEN_MODE_ALARMS) {
             policy.apply(new ZenPolicy.Builder()
                     .disallowAllSounds()
                     .allowAlarms(true)
                     .allowMedia(true)
+                    .allowPriorityChannels(false)
                     .build());
         } else if (rule.zenPolicy != null) {
             policy.apply(rule.zenPolicy);
