@@ -31,16 +31,12 @@ constructor(
     featureFlags: FeatureFlags,
     precomputedTextViewFactory: PrecomputedTextViewFactory,
     bigPictureLayoutInflaterFactory: BigPictureLayoutInflaterFactory,
-    callLayoutSetDataAsyncFactory: CallLayoutSetDataAsyncFactory,
     optimizedLinearLayoutFactory: NotificationOptimizedLinearLayoutFactory
 ) : NotifRemoteViewsFactoryContainer {
     override val factories: Set<NotifRemoteViewsFactory> = buildSet {
         add(precomputedTextViewFactory)
         if (featureFlags.isEnabled(Flags.BIGPICTURE_NOTIFICATION_LAZY_LOADING)) {
             add(bigPictureLayoutInflaterFactory)
-        }
-        if (featureFlags.isEnabled(Flags.CALL_LAYOUT_ASYNC_SET_DATA)) {
-            add(callLayoutSetDataAsyncFactory)
         }
         if (notifLinearlayoutOptimized()) {
             add(optimizedLinearLayoutFactory)
