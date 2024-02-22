@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.domain.interactor
+package com.android.systemui.statusbar.domain.interactor
 
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardOcclusionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.powerInteractor
-import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 
-val Kosmos.fromAodTransitionInteractor by
+val Kosmos.keyguardOcclusionInteractor by
     Kosmos.Fixture {
-        FromAodTransitionInteractor(
-            transitionRepository = fakeKeyguardTransitionRepository,
-            transitionInteractor = keyguardTransitionInteractor,
-            scope = applicationCoroutineScope,
-            bgDispatcher = testDispatcher,
-            mainDispatcher = testDispatcher,
-            keyguardInteractor = keyguardInteractor,
+        KeyguardOcclusionInteractor(
+            scope = testScope.backgroundScope,
+            repository = keyguardOcclusionRepository,
             powerInteractor = powerInteractor,
-            keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+            transitionInteractor = keyguardTransitionInteractor,
+            keyguardInteractor = keyguardInteractor,
         )
     }

@@ -23,6 +23,7 @@ import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
@@ -35,6 +36,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -49,14 +51,18 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     override val transitionRepository: KeyguardTransitionRepository,
     transitionInteractor: KeyguardTransitionInteractor,
-    private val powerInteractor: PowerInteractor,
+    powerInteractor: PowerInteractor,
+    keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.GLANCEABLE_HUB,
         transitionInteractor = transitionInteractor,
         mainDispatcher = mainDispatcher,
         bgDispatcher = bgDispatcher,
+        powerInteractor = powerInteractor,
+        keyguardOcclusionInteractor = keyguardOcclusionInteractor,
     ) {
+
     override fun start() {
         if (!Flags.communalHub()) {
             return
@@ -151,14 +157,27 @@ constructor(
     }
 
     private fun listenForHubToOccluded() {
-        scope.launch {
-            and(keyguardInteractor.isKeyguardOccluded, not(keyguardInteractor.isDreaming))
-                .sample(startedKeyguardState, ::Pair)
-                .collect { (isOccludedAndNotDreaming, keyguardState) ->
-                    if (isOccludedAndNotDreaming && keyguardState == fromState) {
-                        startTransitionTo(KeyguardState.OCCLUDED)
+        if (KeyguardWmStateRefactor.isEnabled) {
+            scope.launch {
+                keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop
+                    .filter { onTop -> onTop }
+                    .sample(startedKeyguardState)
+                    .collect {
+                        if (it == KeyguardState.GLANCEABLE_HUB) {
+                            maybeStartTransitionToOccludedOrInsecureCamera()
+                        }
                     }
-                }
+            }
+        } else {
+            scope.launch {
+                and(keyguardInteractor.isKeyguardOccluded, not(keyguardInteractor.isDreaming))
+                    .sample(startedKeyguardState, ::Pair)
+                    .collect { (isOccludedAndNotDreaming, keyguardState) ->
+                        if (isOccludedAndNotDreaming && keyguardState == fromState) {
+                            startTransitionTo(KeyguardState.OCCLUDED)
+                        }
+                    }
+            }
         }
     }
 

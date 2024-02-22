@@ -163,15 +163,18 @@ constructor(
             .distinctUntilChanged()
 
     /** Whether the keyguard is showing or not. */
+    @Deprecated("Use KeyguardTransitionInteractor + KeyguardState")
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
 
     /** Whether the keyguard is dismissible or not. */
     val isKeyguardDismissible: Flow<Boolean> = repository.isKeyguardDismissible
 
     /** Whether the keyguard is occluded (covered by an activity). */
+    @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.OCCLUDED")
     val isKeyguardOccluded: Flow<Boolean> = repository.isKeyguardOccluded
 
     /** Whether the keyguard is going away. */
+    @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.GONE")
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
 
     /** Keyguard can be clipped at the top as the shade is dragged */

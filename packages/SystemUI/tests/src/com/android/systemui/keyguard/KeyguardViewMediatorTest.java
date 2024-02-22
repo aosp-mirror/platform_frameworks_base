@@ -1263,7 +1263,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mSystemPropertiesHelper,
                 () -> mock(WindowManagerLockscreenVisibilityManager.class),
                 mSelectedUserInteractor,
-                mKeyguardInteractor);
+                mKeyguardInteractor,
+                mock(WindowManagerOcclusionManager.class));
         mViewMediator.start();
     }
 

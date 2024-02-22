@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.android.systemui.keyguard.ui.viewmodel
@@ -41,8 +40,10 @@ val Kosmos.keyguardRootViewModel by Fixture {
         alternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel,
         aodToGoneTransitionViewModel = aodToGoneTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
+        aodToOccludedTransitionViewModel = aodToOccludedTransitionViewModel,
         dozingToGoneTransitionViewModel = dozingToGoneTransitionViewModel,
         dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,
+        dozingToOccludedTransitionViewModel = dozingToOccludedTransitionViewModel,
         dreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel,
         glanceableHubToLockscreenTransitionViewModel = glanceableHubToLockscreenTransitionViewModel,
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
