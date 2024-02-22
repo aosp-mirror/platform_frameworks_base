@@ -16,6 +16,7 @@
 
 package com.android.settingslib.bluetooth;
 
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.icu.text.SimpleDateFormat;
@@ -126,16 +127,43 @@ public final class HearingAidStatsLogUtils {
     }
 
     /**
-     * Indicates if user is categorized as one of {@link #CATEGORY_HEARING_AIDS},
-     * {@link #CATEGORY_NEW_HEARING_AIDS}, {@link #CATEGORY_HEARING_DEVICES}, and
-     * {@link #CATEGORY_NEW_HEARING_DEVICES}.
+     * Updates corresponding history if we found the device is a hearing device after profile state
+     * changed.
      *
      * @param context the request context
-     * @return true if user is already categorized as one of interested group
+     * @param cachedDevice the remote device
+     * @param profile the profile that has a state changed
+     * @param profileState the new profile state
      */
-    public static boolean isUserCategorized(Context context) {
-        String userCategory = getSharedPreferences(context).getString(BT_HEARING_USER_CATEGORY, "");
-        return !userCategory.isEmpty();
+    public static void updateHistoryIfNeeded(Context context, CachedBluetoothDevice cachedDevice,
+            LocalBluetoothProfile profile, int profileState) {
+
+        if (isJustBonded(cachedDevice.getAddress())) {
+            // Saves bonded timestamp as the source for judging whether to display
+            // the survey
+            if (cachedDevice.getProfiles().stream().anyMatch(
+                    p -> (p instanceof HearingAidProfile || p instanceof HapClientProfile))) {
+                HearingAidStatsLogUtils.addCurrentTimeToHistory(context,
+                        HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_PAIRED);
+            } else if (cachedDevice.getProfiles().stream().anyMatch(
+                    p -> (p instanceof A2dpSinkProfile || p instanceof HeadsetProfile))) {
+                HearingAidStatsLogUtils.addCurrentTimeToHistory(context,
+                        HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_PAIRED);
+            }
+            removeFromJustBonded(cachedDevice.getAddress());
+        }
+
+        // Saves connected timestamp as the source for judging whether to display
+        // the survey
+        if (profileState == BluetoothProfile.STATE_CONNECTED) {
+            if (profile instanceof HearingAidProfile || profile instanceof HapClientProfile) {
+                HearingAidStatsLogUtils.addCurrentTimeToHistory(context,
+                        HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_CONNECTED);
+            } else if (profile instanceof A2dpSinkProfile || profile instanceof HeadsetProfile) {
+                HearingAidStatsLogUtils.addCurrentTimeToHistory(context,
+                        HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_CONNECTED);
+            }
+        }
     }
 
     /**
@@ -186,14 +214,6 @@ public final class HearingAidStatsLogUtils {
                 userCategory = CATEGORY_HEARING_DEVICES;
             }
         }
-
-        if (!userCategory.isEmpty()) {
-            // History become useless once user is categorized. Clear all history.
-            SharedPreferences.Editor editor = getSharedPreferences(context).edit();
-            editor.putString(BT_HEARING_USER_CATEGORY, userCategory).apply();
-            clearHistory(context);
-            sJustBondedDeviceAddressSet.clear();
-        }
         return userCategory;
     }
 
@@ -211,7 +231,7 @@ public final class HearingAidStatsLogUtils {
      * Removes the device address from the just bonded list.
      * @param address the device address
      */
-    public static void removeFromJustBonded(String address) {
+    private static void removeFromJustBonded(String address) {
         sJustBondedDeviceAddressSet.remove(address);
     }
 
@@ -220,21 +240,8 @@ public final class HearingAidStatsLogUtils {
      * @param address the device address
      * @return true if the device address is in the just bonded list
      */
-    public static boolean isJustBonded(String address) {
+    private static boolean isJustBonded(String address) {
         return sJustBondedDeviceAddressSet.contains(address);
-    }
-
-    /**
-     * Clears all BT hearing devices related history stored in shared preference.
-     * @param context the request context
-     */
-    private static synchronized void clearHistory(Context context) {
-        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
-        editor.remove(BT_HEARING_AIDS_PAIRED_HISTORY)
-                .remove(BT_HEARING_AIDS_CONNECTED_HISTORY)
-                .remove(BT_HEARING_DEVICES_PAIRED_HISTORY)
-                .remove(BT_HEARING_DEVICES_CONNECTED_HISTORY)
-                .apply();
     }
 
     /**
