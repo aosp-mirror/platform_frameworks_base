@@ -930,7 +930,7 @@ class DesktopTasksController(
         }
         // Then, update the indicator type.
         val indicator = visualIndicator ?: return
-        indicator.updateIndicatorType(PointF(inputX, taskTop))
+        indicator.updateIndicatorType(PointF(inputX, taskTop), taskInfo.windowingMode)
     }
 
     /**

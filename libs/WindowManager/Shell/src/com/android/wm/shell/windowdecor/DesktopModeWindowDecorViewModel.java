@@ -728,7 +728,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mTransitionDragActive = false;
                     final int statusBarHeight = getStatusBarHeight(
                             relevantDecor.mTaskInfo.displayId);
-                    if (ev.getY() > 2 * statusBarHeight) {
+                    if (ev.getRawY() > 2 * statusBarHeight) {
                         if (DesktopModeStatus.isEnabled()) {
                             animateToDesktop(relevantDecor, ev);
                         }
@@ -753,10 +753,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDesktopTasksController.ifPresent(
                             c -> c.updateVisualIndicator(
                                     relevantDecor.mTaskInfo,
-                                    relevantDecor.mTaskSurface, ev.getX(), ev.getY()));
+                                    relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY()));
                     final int statusBarHeight = getStatusBarHeight(
                             relevantDecor.mTaskInfo.displayId);
-                    if (ev.getY() > statusBarHeight) {
+                    if (ev.getRawY() > statusBarHeight) {
                         if (mMoveToDesktopAnimator == null) {
                             mMoveToDesktopAnimator = new MoveToDesktopAnimator(
                                     mContext, mDragToDesktopAnimationStartBounds,
