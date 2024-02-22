@@ -23,6 +23,7 @@ import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.face.Face;
 import android.hardware.face.FaceAuthenticateOptions;
+import android.hardware.face.FaceEnrollOptions;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
@@ -79,7 +80,7 @@ public interface ServiceProvider extends BiometricServiceProvider<FaceSensorProp
     long scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
             int userId, @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName,
             @NonNull int[] disabledFeatures, @Nullable Surface previewSurface,
-            boolean debugConsent);
+            boolean debugConsent, FaceEnrollOptions options);
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId);
 

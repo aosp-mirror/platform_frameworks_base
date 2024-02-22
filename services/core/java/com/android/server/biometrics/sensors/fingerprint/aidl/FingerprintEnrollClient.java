@@ -29,6 +29,7 @@ import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationState;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
@@ -98,11 +99,13 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
             // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
             @Nullable ISidefpsController sidefpsController,
             @NonNull AuthenticationStateListeners authenticationStateListeners,
-            int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
+            int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason,
+            @NonNull FingerprintEnrollOptions options) {
         // UDFPS haptics occur when an image is acquired (instead of when the result is known)
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 0 /* timeoutSec */, sensorId, shouldVibrateFor(context, sensorProps),
-                logger, biometricContext);
+                logger, biometricContext,
+                BiometricFingerprintConstants.reasonToMetric(options.getEnrollReason()));
         setRequestId(requestId);
         mSensorProps = sensorProps;
         if (sidefpsControllerRefactor()) {
@@ -120,6 +123,8 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
         if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
             getLogger().disableMetrics();
         }
+        Slog.w(TAG, "EnrollOptions "
+                + FingerprintEnrollOptions.enrollReasonToString(options.getEnrollReason()));
     }
 
     @Override

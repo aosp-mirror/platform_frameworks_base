@@ -35,6 +35,7 @@ import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -700,17 +701,18 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     public long scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
-            @FingerprintManager.EnrollReason int enrollReason) {
+            @FingerprintManager.EnrollReason int enrollReason,
+            @NonNull FingerprintEnrollOptions options) {
         final long id = mRequestCounter.incrementAndGet();
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
             if (Flags.deHidl()) {
                 scheduleEnrollAidl(token, hardwareAuthToken, userId, receiver,
-                        opPackageName, enrollReason, id);
+                        opPackageName, enrollReason, id, options);
             } else {
                 scheduleEnrollHidl(token, hardwareAuthToken, userId, receiver,
-                        opPackageName, enrollReason, id);
+                        opPackageName, enrollReason, id, options);
             }
         });
         return id;
@@ -719,7 +721,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     private void scheduleEnrollHidl(@NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
-            @FingerprintManager.EnrollReason int enrollReason, long id) {
+            @FingerprintManager.EnrollReason int enrollReason, long id,
+            @NonNull FingerprintEnrollOptions options) {
         final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
                 mLazyDaemon, token, id, new ClientMonitorCallbackConverter(receiver),
                 userId, hardwareAuthToken, opPackageName,
@@ -730,7 +733,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                 mBiometricContext, mUdfpsOverlayController,
                 // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
                 mSidefpsController,
-                mAuthenticationStateListeners, enrollReason);
+                mAuthenticationStateListeners, enrollReason, options);
         mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
             @Override
             public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
@@ -758,7 +761,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     private void scheduleEnrollAidl(@NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
-            @FingerprintManager.EnrollReason int enrollReason, long id) {
+            @FingerprintManager.EnrollReason int enrollReason, long id,
+            @NonNull FingerprintEnrollOptions options) {
         final com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintEnrollClient
                 client =
                 new com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintEnrollClient(
@@ -778,8 +782,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                         mAuthenticationStateListeners,
                         mContext.getResources().getInteger(
                                 com.android.internal.R.integer.config_fingerprintMaxTemplatesPerUser),
-                        enrollReason);
-
+                        enrollReason, options);
         mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
             @Override
             public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {

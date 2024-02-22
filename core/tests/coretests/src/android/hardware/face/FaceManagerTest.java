@@ -194,13 +194,13 @@ public class FaceManagerTest {
                 new CancellationSignal(), mEnrollmentCallback, null /* disabledFeatures */);
 
         verify(mService).enroll(eq(USER_ID), any(), any(), any(), anyString(), any(), any(),
-                anyBoolean());
+                anyBoolean(), any());
 
         mFaceManager.enroll(USER_ID, new byte[]{},
                 new CancellationSignal(), mEnrollmentCallback, null /* disabledFeatures */);
 
         verify(mService, atMost(1 /* maxNumberOfInvocations */)).enroll(eq(USER_ID), any(), any(),
-                any(), anyString(), any(), any(), anyBoolean());
+                any(), anyString(), any(), any(), anyBoolean(), any());
         verify(mEnrollmentCallback).onEnrollmentError(eq(FACE_ERROR_HW_UNAVAILABLE), anyString());
     }
 
@@ -213,7 +213,7 @@ public class FaceManagerTest {
         verify(mEnrollmentCallback).onEnrollmentError(eq(FACE_ERROR_UNABLE_TO_PROCESS),
                 anyString());
         verify(mService, never()).enroll(eq(USER_ID), any(), any(),
-                any(), anyString(), any(), any(), anyBoolean());
+                any(), anyString(), any(), any(), anyBoolean(), any());
     }
 
     @Test

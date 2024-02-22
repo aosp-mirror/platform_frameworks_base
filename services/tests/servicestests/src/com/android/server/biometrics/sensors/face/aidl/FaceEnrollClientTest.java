@@ -21,15 +21,20 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyByte;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
+import android.hardware.face.FaceEnrollOptions;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -68,6 +73,7 @@ public class FaceEnrollClientTest {
 
     private static final byte[] HAT = new byte[69];
     private static final int USER_ID = 12;
+    private static final int ENROLL_SOURCE = FaceEnrollOptions.ENROLL_REASON_SUW;
 
     @Rule
     public final TestableContext mContext = new TestableContext(
@@ -208,6 +214,16 @@ public class FaceEnrollClientTest {
         verify(mHal).enrollWithOptions(any());
     }
 
+    @Test
+    public void testEnrollWithReasonLogsMetric() throws RemoteException {
+        final FaceEnrollClient client = createClient(4);
+        client.start(mCallback);
+        client.onEnrollResult(new Face("face", 1 /* faceId */, 20 /* deviceId */), 0);
+
+        verify(mBiometricLogger).logOnEnrolled(anyInt(), anyLong(), anyBoolean(),
+                eq(BiometricsProtoEnums.ENROLLMENT_SOURCE_SUW));
+    }
+
     private FaceEnrollClient createClient() throws RemoteException {
         return createClient(200 /* version */);
     }
@@ -221,6 +237,7 @@ public class FaceEnrollClientTest {
                 mUtils, new int[0] /* disabledFeatures */, 6 /* timeoutSec */,
                 null /* previewSurface */, 8 /* sensorId */,
                 mBiometricLogger, mBiometricContext, 5 /* maxTemplatesPerUser */,
-                true /* debugConsent */);
+                true /* debugConsent */,
+                (new FaceEnrollOptions.Builder()).setEnrollReason(ENROLL_SOURCE).build());
     }
 }
