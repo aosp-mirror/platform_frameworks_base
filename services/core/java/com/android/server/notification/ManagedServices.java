@@ -942,6 +942,23 @@ abstract public class ManagedServices {
         return false;
     }
 
+    protected boolean isPackageOrComponentAllowedWithPermission(ComponentName component,
+            int userId) {
+        if (!(isPackageOrComponentAllowed(component.flattenToString(), userId)
+                || isPackageOrComponentAllowed(component.getPackageName(), userId))) {
+            return false;
+        }
+        return componentHasBindPermission(component, userId);
+    }
+
+    private boolean componentHasBindPermission(ComponentName component, int userId) {
+        ServiceInfo info = getServiceInfo(component, userId);
+        if (info == null) {
+            return false;
+        }
+        return mConfig.bindPermission.equals(info.permission);
+    }
+
     boolean isPackageOrComponentUserSet(String pkgOrComponent, int userId) {
         synchronized (mApproved) {
             ArraySet<String> services = mUserSetServices.get(userId);
@@ -1003,6 +1020,7 @@ abstract public class ManagedServices {
                     for (int uid : uidList) {
                         if (isPackageAllowed(pkgName, UserHandle.getUserId(uid))) {
                             anyServicesInvolved = true;
+                            trimApprovedListsForInvalidServices(pkgName, UserHandle.getUserId(uid));
                         }
                     }
                 }
@@ -1135,8 +1153,7 @@ abstract public class ManagedServices {
 
         synchronized (mMutex) {
             if (enabled) {
-                if (isPackageOrComponentAllowed(component.flattenToString(), userId)
-                        || isPackageOrComponentAllowed(component.getPackageName(), userId)) {
+                if (isPackageOrComponentAllowedWithPermission(component, userId)) {
                     registerServiceLocked(component, userId);
                 } else {
                     Slog.d(TAG, component + " no longer has permission to be bound");
@@ -1268,6 +1285,33 @@ abstract public class ManagedServices {
             }
         }
         return removed;
+    }
+
+    private void trimApprovedListsForInvalidServices(String packageName, int userId) {
+        synchronized (mApproved) {
+            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
+            if (approvedByType == null) {
+                return;
+            }
+            for (int i = 0; i < approvedByType.size(); i++) {
+                final ArraySet<String> approved = approvedByType.valueAt(i);
+                for (int j = approved.size() - 1; j >= 0; j--) {
+                    final String approvedPackageOrComponent = approved.valueAt(j);
+                    if (TextUtils.equals(getPackageName(approvedPackageOrComponent), packageName)) {
+                        final ComponentName component = ComponentName.unflattenFromString(
+                                approvedPackageOrComponent);
+                        if (component != null && !componentHasBindPermission(component, userId)) {
+                            approved.removeAt(j);
+                            if (DEBUG) {
+                                Slog.v(TAG, "Removing " + approvedPackageOrComponent
+                                        + " from approved list; no bind permission found "
+                                        + mConfig.bindPermission);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     protected String getPackageName(String packageOrComponent) {
@@ -1519,8 +1563,7 @@ abstract public class ManagedServices {
     void reregisterService(final ComponentName cn, final int userId) {
         // If rebinding a package that died, ensure it still has permission
         // after the rebind delay
-        if (isPackageOrComponentAllowed(cn.getPackageName(), userId)
-                || isPackageOrComponentAllowed(cn.flattenToString(), userId)) {
+        if (isPackageOrComponentAllowedWithPermission(cn, userId)) {
             registerService(cn, userId);
         }
     }
