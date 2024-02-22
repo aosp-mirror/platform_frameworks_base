@@ -36,6 +36,17 @@ class Utils {
         fun <A, B, C, D, E, F> toSextuple(a: A, bcdef: Quint<B, C, D, E, F>) =
             Sextuple(a, bcdef.first, bcdef.second, bcdef.third, bcdef.fourth, bcdef.fifth)
 
+        fun <A, B, C, D, E, F, G> toSeptuple(a: A, bcdefg: Sextuple<B, C, D, E, F, G>) =
+            Septuple(
+                a,
+                bcdefg.first,
+                bcdefg.second,
+                bcdefg.third,
+                bcdefg.fourth,
+                bcdefg.fifth,
+                bcdefg.sixth
+            )
+
         /**
          * Samples the provided flows, emitting a tuple of the original flow's value as well as each
          * of the combined flows' values.
@@ -90,6 +101,24 @@ class Utils {
         ): Flow<Sextuple<A, B, C, D, E, F>> {
             return this.sample(combine(b, c, d, e, f, ::Quint), ::toSextuple)
         }
+
+        /**
+         * Samples the provided flows, emitting a tuple of the original flow's value as well as each
+         * of the combined flows' values.
+         *
+         * Flow<A>.sample(Flow<B>, Flow<C>, Flow<D>, Flow<E>, Flow<F>, Flow<G>) -> (A, B, C, D, E,
+         * F, G)
+         */
+        fun <A, B, C, D, E, F, G> Flow<A>.sample(
+            b: Flow<B>,
+            c: Flow<C>,
+            d: Flow<D>,
+            e: Flow<E>,
+            f: Flow<F>,
+            g: Flow<G>,
+        ): Flow<Septuple<A, B, C, D, E, F, G>> {
+            return this.sample(combine(b, c, d, e, f, g, ::Sextuple), ::toSeptuple)
+        }
     }
 }
 
@@ -110,6 +139,16 @@ data class Sextuple<A, B, C, D, E, F>(
     val fourth: D,
     val fifth: E,
     val sixth: F,
+)
+
+data class Septuple<A, B, C, D, E, F, G>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D,
+    val fifth: E,
+    val sixth: F,
+    val seventh: G,
 )
 
 fun Int.toPx(context: Context): Int {
