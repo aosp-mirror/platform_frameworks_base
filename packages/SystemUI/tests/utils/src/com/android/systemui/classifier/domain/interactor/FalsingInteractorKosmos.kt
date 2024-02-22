@@ -17,11 +17,13 @@
 package com.android.systemui.classifier.domain.interactor
 
 import com.android.systemui.classifier.falsingCollector
+import com.android.systemui.classifier.falsingManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 
 val Kosmos.falsingInteractor by Fixture {
     FalsingInteractor(
         collector = falsingCollector,
+        manager = falsingManager,
     )
 }

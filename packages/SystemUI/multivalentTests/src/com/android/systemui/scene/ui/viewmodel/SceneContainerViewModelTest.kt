@@ -22,16 +22,20 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
+import com.android.systemui.classifier.fakeFalsingManager
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -45,6 +49,8 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     private val testScope by lazy { kosmos.testScope }
     private val interactor by lazy { kosmos.sceneInteractor }
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
+    private val sceneContainerConfig = kosmos.sceneContainerConfig
+    private val falsingManager = kosmos.fakeFalsingManager
 
     private lateinit var underTest: SceneContainerViewModel
 
@@ -85,5 +91,100 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             fakeSceneDataSource.changeScene(SceneKey.Shade)
 
             assertThat(currentScene).isEqualTo(SceneKey.Shade)
+        }
+
+    @Test
+    fun canChangeScene_whenAllowed_switchingFromGone_returnsTrue() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            fakeSceneDataSource.changeScene(toScene = SceneKey.Gone)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(SceneKey.Gone)
+
+            sceneContainerConfig.sceneKeys
+                .filter { it != currentScene }
+                .forEach { toScene ->
+                    assertWithMessage("Scene $toScene incorrectly protected when allowed")
+                        .that(underTest.canChangeScene(toScene = toScene))
+                        .isTrue()
+                }
+        }
+
+    @Test
+    fun canChangeScene_whenAllowed_switchingFromLockscreen_returnsTrue() =
+        testScope.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            fakeSceneDataSource.changeScene(toScene = SceneKey.Lockscreen)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+
+            sceneContainerConfig.sceneKeys
+                .filter { it != currentScene }
+                .forEach { toScene ->
+                    assertWithMessage("Scene $toScene incorrectly protected when allowed")
+                        .that(underTest.canChangeScene(toScene = toScene))
+                        .isTrue()
+                }
+        }
+
+    @Test
+    fun canChangeScene_whenNotAllowed_fromLockscreen_toFalsingProtectedScenes_returnsFalse() =
+        testScope.runTest {
+            falsingManager.setIsFalseTouch(true)
+            val currentScene by collectLastValue(underTest.currentScene)
+            fakeSceneDataSource.changeScene(toScene = SceneKey.Lockscreen)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+
+            sceneContainerConfig.sceneKeys
+                .filter { it != currentScene }
+                .filter {
+                    // Moving to the Communal scene is not currently falsing protected.
+                    it != SceneKey.Communal
+                }
+                .forEach { toScene ->
+                    assertWithMessage("Protected scene $toScene not properly protected")
+                        .that(underTest.canChangeScene(toScene = toScene))
+                        .isFalse()
+                }
+        }
+
+    @Test
+    fun canChangeScene_whenNotAllowed_fromLockscreen_toFalsingUnprotectedScenes_returnsTrue() =
+        testScope.runTest {
+            falsingManager.setIsFalseTouch(true)
+            val currentScene by collectLastValue(underTest.currentScene)
+            fakeSceneDataSource.changeScene(toScene = SceneKey.Lockscreen)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+
+            sceneContainerConfig.sceneKeys
+                .filter {
+                    // Moving to the Communal scene is not currently falsing protected.
+                    it == SceneKey.Communal
+                }
+                .forEach { toScene ->
+                    assertWithMessage("Unprotected scene $toScene is incorrectly protected")
+                        .that(underTest.canChangeScene(toScene = toScene))
+                        .isTrue()
+                }
+        }
+
+    @Test
+    fun canChangeScene_whenNotAllowed_fromGone_toAnyOtherScene_returnsTrue() =
+        testScope.runTest {
+            falsingManager.setIsFalseTouch(true)
+            val currentScene by collectLastValue(underTest.currentScene)
+            fakeSceneDataSource.changeScene(toScene = SceneKey.Gone)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(SceneKey.Gone)
+
+            sceneContainerConfig.sceneKeys
+                .filter { it != currentScene }
+                .forEach { toScene ->
+                    assertWithMessage("Protected scene $toScene not properly protected")
+                        .that(underTest.canChangeScene(toScene = toScene))
+                        .isTrue()
+                }
         }
 }
