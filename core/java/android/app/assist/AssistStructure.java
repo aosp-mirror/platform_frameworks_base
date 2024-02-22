@@ -913,6 +913,7 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 mExtras = in.readBundle();
             }
+            mGetCredentialRequest = in.readTypedObject(GetCredentialRequest.CREATOR);
         }
 
         /**
@@ -1149,6 +1150,7 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 out.writeBundle(mExtras);
             }
+            out.writeTypedObject(mGetCredentialRequest, flags);
             return flags;
         }
 
