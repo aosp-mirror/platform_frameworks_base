@@ -29,6 +29,7 @@ import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.PrivacyChipInteractor
+import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import java.util.Date
@@ -55,6 +56,7 @@ constructor(
     mobileIconsInteractor: MobileIconsInteractor,
     val mobileIconsViewModel: MobileIconsViewModel,
     private val privacyChipInteractor: PrivacyChipInteractor,
+    private val clockInteractor: ShadeHeaderClockInteractor,
     broadcastDispatcher: BroadcastDispatcher,
 ) {
     /** True if there is exactly one mobile connection. */
@@ -119,6 +121,11 @@ constructor(
     /** Notifies that the privacy chip was clicked. */
     fun onPrivacyChipClicked(privacyChip: OngoingPrivacyChip) {
         privacyChipInteractor.onPrivacyChipClicked(privacyChip)
+    }
+
+    /** Notifies that the clock was clicked. */
+    fun onClockClicked() {
+        clockInteractor.launchClockActivity()
     }
 
     private fun updateDateTexts(invalidateFormats: Boolean) {

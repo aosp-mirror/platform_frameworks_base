@@ -18,10 +18,15 @@ fun TransitionBuilder.shadeToQuickSettingsTransition() {
         y = ShadeHeader.Dimensions.CollapsedHeight
     )
     translate(ShadeHeader.Elements.CollapsedContentEnd, y = ShadeHeader.Dimensions.CollapsedHeight)
-    translate(ShadeHeader.Elements.ExpandedContent, y = (-ShadeHeader.Dimensions.ExpandedHeight))
+    translate(
+        ShadeHeader.Elements.ExpandedContent,
+        y = -(ShadeHeader.Dimensions.ExpandedHeight - ShadeHeader.Dimensions.CollapsedHeight)
+    )
+    translate(ShadeHeader.Elements.ShadeCarrierGroup, y = -ShadeHeader.Dimensions.CollapsedHeight)
 
     fractionRange(end = .14f) { fade(ShadeHeader.Elements.CollapsedContentStart) }
     fractionRange(end = .14f) { fade(ShadeHeader.Elements.CollapsedContentEnd) }
 
     fractionRange(start = .58f) { fade(ShadeHeader.Elements.ExpandedContent) }
+    fractionRange(start = .58f) { fade(ShadeHeader.Elements.ShadeCarrierGroup) }
 }
