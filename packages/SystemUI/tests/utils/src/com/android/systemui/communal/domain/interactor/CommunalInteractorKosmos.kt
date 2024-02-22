@@ -29,6 +29,8 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.smartspace.data.repository.smartspaceRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
@@ -47,6 +49,8 @@ val Kosmos.communalInteractor by Fixture {
         logBuffer = logcatLogBuffer("CommunalInteractor"),
         tableLogBuffer = mock(),
         communalSettingsInteractor = communalSettingsInteractor,
+        sceneInteractor = sceneInteractor,
+        sceneContainerFlags = fakeSceneContainerFlags,
     )
 }
 

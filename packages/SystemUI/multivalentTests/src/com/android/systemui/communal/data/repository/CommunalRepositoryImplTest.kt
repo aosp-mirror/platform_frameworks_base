@@ -25,7 +25,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
@@ -55,46 +54,6 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
             sceneContainerRepository,
         )
     }
-
-    @Test
-    fun isCommunalShowing_sceneContainerDisabled_onCommunalScene_true() =
-        testScope.runTest {
-            underTest.setDesiredScene(CommunalSceneKey.Communal)
-
-            val isCommunalHubShowing by collectLastValue(underTest.isCommunalHubShowing)
-            assertThat(isCommunalHubShowing).isTrue()
-        }
-
-    @Test
-    fun isCommunalShowing_sceneContainerDisabled_onBlankScene_false() =
-        testScope.runTest {
-            underTest.setDesiredScene(CommunalSceneKey.Blank)
-
-            val isCommunalHubShowing by collectLastValue(underTest.isCommunalHubShowing)
-            assertThat(isCommunalHubShowing).isFalse()
-        }
-
-    @Test
-    fun isCommunalShowing_sceneContainerEnabled_onCommunalScene_true() =
-        testScope.runTest {
-            underTest = createRepositoryImpl(true)
-
-            sceneContainerRepository.changeScene(SceneKey.Communal)
-
-            val isCommunalHubShowing by collectLastValue(underTest.isCommunalHubShowing)
-            assertThat(isCommunalHubShowing).isTrue()
-        }
-
-    @Test
-    fun isCommunalShowing_sceneContainerEnabled_onLockscreenScene_false() =
-        testScope.runTest {
-            underTest = createRepositoryImpl(true)
-
-            sceneContainerRepository.changeScene(SceneKey.Lockscreen)
-
-            val isCommunalHubShowing by collectLastValue(underTest.isCommunalHubShowing)
-            assertThat(isCommunalHubShowing).isFalse()
-        }
 
     @Test
     fun transitionState_idleByDefault() =
