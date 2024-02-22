@@ -884,8 +884,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private Vibration.EndInfo startVibrationOnInputDevicesLocked(HalVibration vib) {
         if (!vib.callerInfo.attrs.isFlagSet(
                 VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE)) {
-            // Scale effect before dispatching it to the input devices.
+            // Scale resolves the default amplitudes from the effect before scaling them.
             vib.scaleEffects(mVibrationScaler::scale);
+        } else {
+            vib.resolveEffects(mVibrationScaler.getDefaultVibrationAmplitude());
         }
         mInputDeviceDelegate.vibrateIfAvailable(vib.callerInfo, vib.getEffectToPlay());
 
