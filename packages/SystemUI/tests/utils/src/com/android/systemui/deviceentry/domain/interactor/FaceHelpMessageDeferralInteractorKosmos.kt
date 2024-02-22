@@ -16,20 +16,18 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
-import android.content.res.mainResources
-import com.android.systemui.biometrics.domain.interactor.fingerprintPropertyInteractor
+import com.android.systemui.biometrics.domain.faceHelpMessageDeferralFactory
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
-val Kosmos.biometricMessageInteractor by
+val Kosmos.faceHelpMessageDeferralInteractor by
     Kosmos.Fixture {
-        BiometricMessageInteractor(
-            resources = mainResources,
-            fingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
-            fingerprintPropertyInteractor = fingerprintPropertyInteractor,
+        FaceHelpMessageDeferralInteractor(
+            scope = applicationCoroutineScope,
             faceAuthInteractor = deviceEntryFaceAuthInteractor,
             biometricSettingsInteractor = deviceEntryBiometricSettingsInteractor,
-            faceHelpMessageDeferralInteractor = faceHelpMessageDeferralInteractor,
+            faceHelpMessageDeferralFactory = faceHelpMessageDeferralFactory,
         )
     }
