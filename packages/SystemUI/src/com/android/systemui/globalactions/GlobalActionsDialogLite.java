@@ -122,6 +122,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.globalactions.domain.interactor.GlobalActionsInteractor;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.scrim.ScrimDrawable;
@@ -257,6 +258,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final ShadeController mShadeController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DialogTransitionAnimator mDialogTransitionAnimator;
+    private final GlobalActionsInteractor mInteractor;
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
@@ -368,7 +370,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             ShadeController shadeController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DialogTransitionAnimator dialogTransitionAnimator,
-            SelectedUserInteractor selectedUserInteractor) {
+            SelectedUserInteractor selectedUserInteractor,
+            GlobalActionsInteractor interactor) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -404,6 +407,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDialogTransitionAnimator = dialogTransitionAnimator;
         mSelectedUserInteractor = selectedUserInteractor;
+        mInteractor = interactor;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -1333,6 +1337,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mUiEventLogger.log(GlobalActionsEvent.GA_POWER_MENU_CLOSE);
         mWindowManagerFuncs.onGlobalActionsHidden();
         mLifecycle.setCurrentState(Lifecycle.State.CREATED);
+        mInteractor.onDismissed();
     }
 
     /**
@@ -1342,6 +1347,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     public void onShow(DialogInterface dialog) {
         mMetricsLogger.visible(MetricsEvent.POWER_MENU);
         mUiEventLogger.log(GlobalActionsEvent.GA_POWER_MENU_OPEN);
+        mInteractor.onShown();
     }
 
     /**

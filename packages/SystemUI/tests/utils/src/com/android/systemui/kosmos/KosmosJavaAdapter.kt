@@ -30,6 +30,7 @@ import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.globalactions.domain.interactor.globalActionsInteractor
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -91,6 +92,7 @@ class KosmosJavaAdapter(
     val fromPrimaryBouncerTransitionInteractor by lazy {
         kosmos.fromPrimaryBouncerTransitionInteractor
     }
+    val globalActionsInteractor by lazy { kosmos.globalActionsInteractor }
     val sceneDataSource by lazy { kosmos.sceneDataSource }
 
     init {
