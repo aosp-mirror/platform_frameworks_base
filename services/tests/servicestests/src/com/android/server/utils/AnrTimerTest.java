@@ -16,9 +16,7 @@
 
 package com.android.server.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -110,7 +108,7 @@ public class AnrTimerTest {
          */
         TestArg[] messages(int expected) {
             synchronized (mLock) {
-                assertEquals(expected, mMessages.size());
+                assertThat(mMessages.size()).isEqualTo(expected);
                 return mMessages.toArray(new TestArg[expected]);
             }
         }
@@ -154,8 +152,8 @@ public class AnrTimerTest {
     }
 
     void validate(TestArg expected, TestArg actual) {
-        assertEquals(expected, actual);
-        assertEquals(actual.what, MSG_TIMEOUT);
+        assertThat(actual).isEqualTo(expected);
+        assertThat(actual.what).isEqualTo(MSG_TIMEOUT);
     }
 
     @Parameters(name = "featureEnabled={0}")
@@ -180,11 +178,11 @@ public class AnrTimerTest {
         Helper helper = new Helper(1);
         try (TestAnrTimer timer = new TestAnrTimer(helper)) {
             // One-time check that the injector is working as expected.
-            assertEquals(mEnabled, timer.serviceEnabled());
+            assertThat(mEnabled).isEqualTo(timer.serviceEnabled());
             TestArg t = new TestArg(1, 1);
             timer.start(t, 10);
             // Delivery is immediate but occurs on a different thread.
-            assertTrue(helper.await(5000));
+            assertThat(helper.await(5000)).isTrue();
             TestArg[] result = helper.messages(1);
             validate(t, result[0]);
         }
@@ -201,10 +199,10 @@ public class AnrTimerTest {
             TestArg t = new TestArg(1, 1);
             timer.start(t, 10000);
             // Briefly pause.
-            assertFalse(helper.await(10));
+            assertThat(helper.await(10)).isFalse();
             timer.start(t, 10);
             // Delivery is immediate but occurs on a different thread.
-            assertTrue(helper.await(5000));
+            assertThat(helper.await(5000)).isTrue();
             TestArg[] result = helper.messages(1);
             validate(t, result[0]);
         }
@@ -221,7 +219,7 @@ public class AnrTimerTest {
             TestArg t = new TestArg(1, 1);
             timer.start(t, 0);
             // Delivery is immediate but occurs on a different thread.
-            assertTrue(helper.await(5000));
+            assertThat(helper.await(5000)).isTrue();
             TestArg[] result = helper.messages(1);
             validate(t, result[0]);
         }
@@ -243,7 +241,7 @@ public class AnrTimerTest {
             timer.start(t2, 60);
             timer.start(t3, 40);
             // Delivery is immediate but occurs on a different thread.
-            assertTrue(helper.await(5000));
+            assertThat(helper.await(5000)).isTrue();
             TestArg[] result = helper.messages(3);
             validate(t3, result[0]);
             validate(t1, result[1]);
@@ -269,7 +267,7 @@ public class AnrTimerTest {
             x2.start(t2, 60);
             x3.start(t3, 40);
             // Delivery is immediate but occurs on a different thread.
-            assertTrue(helper.await(5000));
+            assertThat(helper.await(5000)).isTrue();
             TestArg[] result = helper.messages(3);
             validate(t3, result[0]);
             validate(t1, result[1]);
@@ -292,10 +290,10 @@ public class AnrTimerTest {
             timer.start(t2, 60);
             timer.start(t3, 40);
             // Briefly pause.
-            assertFalse(helper.await(10));
+            assertThat(helper.await(10)).isFalse();
             timer.cancel(t1);
             // Delivery is immediate but occurs on a different thread.
-            assertTrue(helper.await(5000));
+            assertThat(helper.await(5000)).isTrue();
             TestArg[] result = helper.messages(2);
             validate(t3, result[0]);
             validate(t2, result[1]);
@@ -319,7 +317,7 @@ public class AnrTimerTest {
     @Test
     public void testDumpOutput() throws Exception {
         String r1 = getDumpOutput();
-        assertEquals(false, r1.contains("timer:"));
+        assertThat(r1).doesNotContain("timer:");
 
         Helper helper = new Helper(2);
         TestArg t1 = new TestArg(1, 1);
@@ -332,12 +330,15 @@ public class AnrTimerTest {
 
             String r2 = getDumpOutput();
             // There are timers in the list if and only if the feature is enabled.
-            final boolean expected = mEnabled;
-            assertEquals(expected, r2.contains("timer:"));
+            if (mEnabled) {
+              assertThat(r2).contains("timer:");
+            } else {
+              assertThat(r2).doesNotContain("timer:");
+            }
         }
 
         String r3 = getDumpOutput();
-        assertEquals(false, r3.contains("timer:"));
+        assertThat(r3).doesNotContain("timer:");
     }
 
     /**
@@ -351,7 +352,7 @@ public class AnrTimerTest {
         if (!mEnabled) return;
 
         String r1 = getDumpOutput();
-        assertEquals(false, r1.contains("timer:"));
+        assertThat(r1).doesNotContain("timer:");
 
         Helper helper = new Helper(2);
         TestArg t1 = new TestArg(1, 1);
@@ -366,8 +367,11 @@ public class AnrTimerTest {
 
             String r2 = getDumpOutput();
             // There are timers in the list if and only if the feature is enabled.
-            final boolean expected = mEnabled;
-            assertEquals(expected, r2.contains("timer:"));
+            if (mEnabled) {
+              assertThat(r2).contains("timer:");
+            } else {
+              assertThat(r2).doesNotContain("timer:");
+            }
         }
 
         // Try to make finalizers run.  The timer object above should be a candidate.  Finalizers
@@ -382,7 +386,7 @@ public class AnrTimerTest {
         }
 
         // The timer was not explicitly closed but it should have been implicitly closed by GC.
-        assertEquals(false, r3.contains("timer:"));
+        assertThat(r3).doesNotContain("timer:");
     }
 
     // TODO: [b/302724778] Remove manual JNI load
