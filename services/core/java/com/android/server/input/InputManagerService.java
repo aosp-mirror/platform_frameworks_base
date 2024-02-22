@@ -86,7 +86,9 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.IInputFilter;
 import android.view.IInputFilterHost;
 import android.view.IInputMonitorHost;
@@ -415,11 +417,15 @@ public class InputManagerService extends IInputManager.Stub
     boolean mUseLargePointerIcons = false;
     @GuardedBy("mLoadedPointerIconsByDisplayAndType")
     final SparseArray<Context> mDisplayContexts = new SparseArray<>();
+    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
+    final SparseIntArray mDisplayDensities = new SparseIntArray();
 
     final DisplayManager.DisplayListener mDisplayListener = new DisplayManager.DisplayListener() {
         @Override
         public void onDisplayAdded(int displayId) {
-
+            synchronized (mLoadedPointerIconsByDisplayAndType) {
+                updateDisplayDensity(displayId);
+            }
         }
 
         @Override
@@ -427,14 +433,20 @@ public class InputManagerService extends IInputManager.Stub
             synchronized (mLoadedPointerIconsByDisplayAndType) {
                 mLoadedPointerIconsByDisplayAndType.remove(displayId);
                 mDisplayContexts.remove(displayId);
+                mDisplayDensities.delete(displayId);
             }
         }
 
         @Override
         public void onDisplayChanged(int displayId) {
             synchronized (mLoadedPointerIconsByDisplayAndType) {
-                // The display density could have changed, so force all cached pointer icons to be
+                if (!updateDisplayDensity(displayId)) {
+                    return;
+                }
+                // The display density changed, so force all cached pointer icons to be
                 // reloaded for the display.
+                Slog.i(TAG,
+                        "Reloading pointer icons due to density change on display: " + displayId);
                 var iconsByType = mLoadedPointerIconsByDisplayAndType.get(displayId);
                 if (iconsByType == null) {
                     return;
@@ -443,6 +455,26 @@ public class InputManagerService extends IInputManager.Stub
                 mDisplayContexts.remove(displayId);
             }
             mNative.reloadPointerIcons();
+        }
+
+        // Updates the cached display density for the given displayId, and returns true if
+        // the cached density changed.
+        @GuardedBy("mLoadedPointerIconsByDisplayAndType")
+        private boolean updateDisplayDensity(int displayId) {
+            final DisplayManager displayManager = Objects.requireNonNull(
+                    mContext.getSystemService(DisplayManager.class));
+            final Display display = displayManager.getDisplay(displayId);
+            if (display == null) {
+                return false;
+            }
+            DisplayInfo info = new DisplayInfo();
+            display.getDisplayInfo(info);
+            final int oldDensity = mDisplayDensities.get(displayId, 0 /* default */);
+            if (oldDensity == info.logicalDensityDpi) {
+                return false;
+            }
+            mDisplayDensities.put(displayId, info.logicalDensityDpi);
+            return true;
         }
     };
 
@@ -613,9 +645,13 @@ public class InputManagerService extends IInputManager.Stub
             mWiredAccessoryCallbacks.systemReady();
         }
 
-        Objects.requireNonNull(
-                mContext.getSystemService(DisplayManager.class)).registerDisplayListener(
-                mDisplayListener, mHandler);
+        final DisplayManager displayManager = Objects.requireNonNull(
+                mContext.getSystemService(DisplayManager.class));
+        displayManager.registerDisplayListener(mDisplayListener, mHandler);
+        final Display[] displays = displayManager.getDisplays();
+        for (int i = 0; i < displays.length; i++) {
+            mDisplayListener.onDisplayAdded(displays[i].getDisplayId());
+        }
 
         mKeyboardLayoutManager.systemRunning();
         mBatteryController.systemRunning();
