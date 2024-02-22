@@ -1137,22 +1137,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Return the global configuration used by the process corresponding to the input pid. This is
      * usually the global configuration with some overrides specific to that process.
      */
-    Configuration getGlobalConfigurationForCallingPid() {
+    private Configuration getGlobalConfigurationForCallingPid() {
         final int pid = Binder.getCallingPid();
-        return getGlobalConfigurationForPid(pid);
-    }
-
-    /**
-     * Return the global configuration used by the process corresponding to the given pid.
-     */
-    Configuration getGlobalConfigurationForPid(int pid) {
         if (pid == MY_PID || pid < 0) {
             return getGlobalConfiguration();
         }
-        synchronized (mGlobalLock) {
-            final WindowProcessController app = mProcessMap.getProcess(pid);
-            return app != null ? app.getConfiguration() : getGlobalConfiguration();
-        }
+        final WindowProcessController app = mProcessMap.getProcess(pid);
+        return app != null ? app.getConfiguration() : getGlobalConfiguration();
     }
 
     /**
