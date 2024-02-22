@@ -31,6 +31,7 @@ android_test {
         "platform-test-annotations",
         "services.core",
         "service-connectivity-tiramisu-pre-jarjar",
+        "flag-junit",
     ],
     libs: [
         "android.test.runner",
