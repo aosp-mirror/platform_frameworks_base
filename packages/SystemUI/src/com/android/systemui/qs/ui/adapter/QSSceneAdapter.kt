@@ -84,18 +84,36 @@ interface QSSceneAdapter {
      */
     val qsHeight: Int
 
-    sealed class State(
-        val isVisible: Boolean,
-        val expansion: Float,
-    ) {
-        data object CLOSED : State(false, 0f)
-        data class Expanding(val progress: Float) : State(true, progress)
+    sealed interface State {
+
+        val isVisible: Boolean
+        val expansion: Float
+        val squishiness: Float
+
+        data object CLOSED : State {
+            override val isVisible = false
+            override val expansion = 0f
+            override val squishiness = 1f
+        }
+
+        /** State for expanding between QQS and QS */
+        data class Expanding(override val expansion: Float) : State {
+            override val isVisible = true
+            override val squishiness = 1f
+        }
+
+        /** State for appearing QQS from Lockscreen or Gone */
+        data class Unsquishing(override val squishiness: Float) : State {
+            override val isVisible = true
+            override val expansion = 0f
+        }
 
         companion object {
             // These are special cases of the expansion.
             val QQS = Expanding(0f)
             val QS = Expanding(1f)
 
+            /** Collapsing from QS to QQS. [progress] is 0f in QS and 1f in QQS. */
             fun Collapsing(progress: Float) = Expanding(1f - progress)
         }
     }
@@ -232,7 +250,7 @@ constructor(
         setQsVisible(state.isVisible)
         setExpanded(state.isVisible)
         setListening(state.isVisible)
-        setQsExpansion(state.expansion, 1f, 0f, 1f)
-        setTransitionToFullShadeProgress(false, 1f, 1f)
+        setQsExpansion(state.expansion, 1f, 0f, state.squishiness)
+        setTransitionToFullShadeProgress(false, 1f, state.squishiness)
     }
 }

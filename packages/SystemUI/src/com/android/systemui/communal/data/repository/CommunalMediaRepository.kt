@@ -21,8 +21,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.dagger.CommunalTableLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
-import com.android.systemui.media.controls.models.player.MediaData
-import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.media.controls.shared.model.MediaData
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

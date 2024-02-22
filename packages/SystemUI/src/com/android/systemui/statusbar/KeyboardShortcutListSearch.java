@@ -25,8 +25,11 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
@@ -71,6 +74,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -114,6 +118,7 @@ public final class KeyboardShortcutListSearch {
     private Button mButtonInput;
     private Button mButtonOpenApps;
     private Button mButtonSpecificApp;
+    private CharSequence mCurrentAppPackageName;
     private TextView mNoSearchResults;
 
     private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
@@ -412,8 +417,10 @@ public final class KeyboardShortcutListSearch {
         mWindowManager.requestAppKeyboardShortcuts(result -> {
             // Add specific app shortcuts
             if (result.isEmpty()) {
+                mCurrentAppPackageName = null;
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, false);
             } else {
+                mCurrentAppPackageName = result.get(0).getPackageName();
                 mSpecificAppGroup.addAll(reMapToKeyboardShortcutMultiMappingGroup(result));
                 mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, true);
             }
@@ -823,6 +830,7 @@ public final class KeyboardShortcutListSearch {
         mNoSearchResults = keyboardShortcutsView.findViewById(R.id.shortcut_search_no_result);
         mKeyboardShortcutsBottomSheetDialog.setContentView(keyboardShortcutsView);
         setButtonsDefaultStatus(keyboardShortcutsView);
+        populateCurrentAppButton();
         populateKeyboardShortcutSearchList(shortcutsContainer);
 
         // Workaround for solve issue about dialog not full expanded when landscape.
@@ -1270,6 +1278,41 @@ public final class KeyboardShortcutListSearch {
         mFullButtonList.add(mButtonInput);
         mFullButtonList.add(mButtonOpenApps);
         mFullButtonList.add(mButtonSpecificApp);
+    }
+
+    private void resetCurrentAppButton() {
+        if (mButtonSpecificApp == null) {
+            return;
+        }
+        mButtonSpecificApp.setText(
+                mContext.getString(R.string.keyboard_shortcut_search_category_current_app));
+        // TODO(b/325252986): Reset icon once the icon is implemented
+    }
+
+    private void populateCurrentAppButton() {
+        if (mButtonSpecificApp == null) {
+            return;
+        }
+        if (mCurrentAppPackageName != null) {
+            final int userId = mContext.getUserId();
+            try {
+                PackageManager pmUser = CentralSurfaces.getPackageManagerForUser(
+                        mContext,
+                        userId);
+                ApplicationInfo appInfo = pmUser.getApplicationInfoAsUser(
+                        mCurrentAppPackageName.toString(),
+                        0,
+                        userId);
+                // According to the API, we will always get a label
+                mButtonSpecificApp.setText(pmUser.getApplicationLabel(appInfo));
+                // TODO(b/325252986): Show icon once it has been defined
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "Package name not found", e);
+                resetCurrentAppButton();
+            }
+        } else {
+            resetCurrentAppButton();
+        }
     }
 
     private void setButtonFocusColor(int i, boolean isFocused) {

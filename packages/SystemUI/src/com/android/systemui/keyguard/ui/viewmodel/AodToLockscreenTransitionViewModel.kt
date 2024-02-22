@@ -25,10 +25,13 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 
 /**
  * Breaks down AOD->LOCKSCREEN transition into discrete steps for corresponding views to consume.
@@ -39,6 +42,7 @@ class AodToLockscreenTransitionViewModel
 @Inject
 constructor(
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+    shadeInteractor: ShadeInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
 
@@ -73,11 +77,22 @@ constructor(
     }
 
     val notificationAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
-            duration = 500.milliseconds,
-            onStep = { it },
-            onCancel = { 1f },
-        )
+        combine(
+            shadeInteractor.shadeExpansion.map { it > 0f },
+            shadeInteractor.qsExpansion.map { it > 0f },
+            transitionAnimation.sharedFlow(
+                duration = 500.milliseconds,
+                onStep = { it },
+                onCancel = { 1f },
+            ),
+        ) { isShadeExpanded, isQsExpanded, alpha ->
+            if (isShadeExpanded || isQsExpanded) {
+                // One example of this happening is dragging a notification while pulsing on AOD
+                1f
+            } else {
+                alpha
+            }
+        }
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(

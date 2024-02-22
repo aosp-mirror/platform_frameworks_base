@@ -137,9 +137,10 @@ static BitmapPalette filterPalette(const SkPaint* paint, BitmapPalette palette) 
         return palette;
     }
 
-    SkColor color = palette == BitmapPalette::Light ? SK_ColorWHITE : SK_ColorBLACK;
-    color = paint->getColorFilter()->filterColor(color);
-    return paletteForColorHSV(color);
+    SkColor4f color = palette == BitmapPalette::Light ? SkColors::kWhite : SkColors::kBlack;
+    sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
+    color = paint->getColorFilter()->filterColor4f(color, srgb.get(), srgb.get());
+    return paletteForColorHSV(color.toSkColor());
 }
 
 bool transformPaint(ColorTransform transform, SkPaint* paint) {

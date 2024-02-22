@@ -1510,8 +1510,8 @@ bool NativeInputManager::filterInputEvent(const InputEvent& inputEvent, uint32_t
     switch (inputEvent.getType()) {
         case InputEventType::KEY:
             inputEventObj.reset(
-                    android_view_KeyEvent_fromNative(env,
-                                                     static_cast<const KeyEvent&>(inputEvent)));
+                    android_view_KeyEvent_obtainAsCopy(env,
+                                                       static_cast<const KeyEvent&>(inputEvent)));
             break;
         case InputEventType::MOTION:
             inputEventObj.reset(
@@ -1559,7 +1559,7 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent& keyEvent,
 
     const nsecs_t when = keyEvent.getEventTime();
     JNIEnv* env = jniEnv();
-    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_fromNative(env, keyEvent));
+    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_obtainAsCopy(env, keyEvent));
     if (!keyEventObj.get()) {
         ALOGE("Failed to obtain key event object for interceptKeyBeforeQueueing.");
         return;
@@ -1639,7 +1639,7 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(const sp<IBinder>& tok
 
     // Token may be null
     ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
-    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_fromNative(env, keyEvent));
+    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_obtainAsCopy(env, keyEvent));
     if (!keyEventObj.get()) {
         ALOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
         return 0;
@@ -1670,7 +1670,7 @@ std::optional<KeyEvent> NativeInputManager::dispatchUnhandledKey(const sp<IBinde
 
     // Note: tokenObj may be null.
     ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
-    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_fromNative(env, keyEvent));
+    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_obtainAsCopy(env, keyEvent));
     if (!keyEventObj.get()) {
         ALOGE("Failed to obtain key event object for dispatchUnhandledKey.");
         return {};
@@ -1689,7 +1689,8 @@ std::optional<KeyEvent> NativeInputManager::dispatchUnhandledKey(const sp<IBinde
         return {};
     }
 
-    const KeyEvent fallbackEvent = android_view_KeyEvent_toNative(env, fallbackKeyEventObj.get());
+    const KeyEvent fallbackEvent =
+            android_view_KeyEvent_obtainAsCopy(env, fallbackKeyEventObj.get());
     android_view_KeyEvent_recycle(env, fallbackKeyEventObj.get());
     return fallbackEvent;
 }
@@ -2070,7 +2071,7 @@ static jint nativeInjectInputEvent(JNIEnv* env, jobject nativeImplObj, jobject i
     InputEventInjectionSync mode = static_cast<InputEventInjectionSync>(syncMode);
 
     if (env->IsInstanceOf(inputEventObj, gKeyEventClassInfo.clazz)) {
-        const KeyEvent keyEvent = android_view_KeyEvent_toNative(env, inputEventObj);
+        const KeyEvent keyEvent = android_view_KeyEvent_obtainAsCopy(env, inputEventObj);
         const InputEventInjectionResult result =
                 im->getInputManager()->getDispatcher().injectInputEvent(&keyEvent, targetUid, mode,
                                                                         std::chrono::milliseconds(
@@ -2101,7 +2102,7 @@ static jobject nativeVerifyInputEvent(JNIEnv* env, jobject nativeImplObj, jobjec
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
     if (env->IsInstanceOf(inputEventObj, gKeyEventClassInfo.clazz)) {
-        const KeyEvent keyEvent = android_view_KeyEvent_toNative(env, inputEventObj);
+        const KeyEvent keyEvent = android_view_KeyEvent_obtainAsCopy(env, inputEventObj);
         std::unique_ptr<VerifiedInputEvent> verifiedEvent =
                 im->getInputManager()->getDispatcher().verifyInputEvent(keyEvent);
         if (verifiedEvent == nullptr) {
@@ -2186,9 +2187,9 @@ static void nativeSetSystemUiLightsOut(JNIEnv* env, jobject nativeImplObj, jbool
     im->setSystemUiLightsOut(lightsOut);
 }
 
-static jboolean nativeTransferTouchFocus(JNIEnv* env, jobject nativeImplObj,
-                                         jobject fromChannelTokenObj, jobject toChannelTokenObj,
-                                         jboolean isDragDrop) {
+static jboolean nativeTransferTouchGesture(JNIEnv* env, jobject nativeImplObj,
+                                           jobject fromChannelTokenObj, jobject toChannelTokenObj,
+                                           jboolean isDragDrop) {
     if (fromChannelTokenObj == nullptr || toChannelTokenObj == nullptr) {
         return JNI_FALSE;
     }
@@ -2197,21 +2198,22 @@ static jboolean nativeTransferTouchFocus(JNIEnv* env, jobject nativeImplObj,
     sp<IBinder> toChannelToken = ibinderForJavaObject(env, toChannelTokenObj);
 
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    if (im->getInputManager()->getDispatcher().transferTouchFocus(fromChannelToken, toChannelToken,
-                                                                  isDragDrop)) {
+    if (im->getInputManager()->getDispatcher().transferTouchGesture(fromChannelToken,
+                                                                    toChannelToken, isDragDrop)) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
     }
 }
 
-static jboolean nativeTransferTouch(JNIEnv* env, jobject nativeImplObj, jobject destChannelTokenObj,
-                                    jint displayId) {
+static jboolean nativeTransferTouchOnDisplay(JNIEnv* env, jobject nativeImplObj,
+                                             jobject destChannelTokenObj, jint displayId) {
     sp<IBinder> destChannelToken = ibinderForJavaObject(env, destChannelTokenObj);
 
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    if (im->getInputManager()->getDispatcher().transferTouch(destChannelToken,
-                                                             static_cast<int32_t>(displayId))) {
+    if (im->getInputManager()->getDispatcher().transferTouchOnDisplay(destChannelToken,
+                                                                      static_cast<int32_t>(
+                                                                              displayId))) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
@@ -2875,9 +2877,9 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"requestPointerCapture", "(Landroid/os/IBinder;Z)V", (void*)nativeRequestPointerCapture},
         {"setInputDispatchMode", "(ZZ)V", (void*)nativeSetInputDispatchMode},
         {"setSystemUiLightsOut", "(Z)V", (void*)nativeSetSystemUiLightsOut},
-        {"transferTouchFocus", "(Landroid/os/IBinder;Landroid/os/IBinder;Z)Z",
-         (void*)nativeTransferTouchFocus},
-        {"transferTouch", "(Landroid/os/IBinder;I)Z", (void*)nativeTransferTouch},
+        {"transferTouchGesture", "(Landroid/os/IBinder;Landroid/os/IBinder;Z)Z",
+         (void*)nativeTransferTouchGesture},
+        {"transferTouch", "(Landroid/os/IBinder;I)Z", (void*)nativeTransferTouchOnDisplay},
         {"getMousePointerSpeed", "()I", (void*)nativeGetMousePointerSpeed},
         {"setPointerSpeed", "(I)V", (void*)nativeSetPointerSpeed},
         {"setMousePointerAccelerationEnabled", "(IZ)V",

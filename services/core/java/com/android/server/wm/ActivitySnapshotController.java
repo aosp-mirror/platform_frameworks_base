@@ -21,6 +21,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.graphics.Rect;
 import android.os.Environment;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -615,6 +616,12 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
     @Override
     protected boolean use16BitFormat() {
         return mPersistInfoProvider.use16BitFormat();
+    }
+
+    @Override
+    protected Rect getLetterboxInsets(ActivityRecord topActivity) {
+        // Do not capture letterbox for ActivityRecord
+        return Letterbox.EMPTY_RECT;
     }
 
     @NonNull

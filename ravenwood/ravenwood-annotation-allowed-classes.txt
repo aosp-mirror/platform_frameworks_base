@@ -99,6 +99,7 @@ android.util.SparseSetArray
 android.util.StringBuilderPrinter
 android.util.TeeWriter
 android.util.TimeUtils
+android.util.TimingsTraceLog
 android.util.UtilConfig
 android.util.Xml
 
@@ -152,6 +153,7 @@ android.os.ParcelFormatException
 android.os.ParcelUuid
 android.os.Parcelable
 android.os.PatternMatcher
+android.os.PermissionEnforcer
 android.os.PersistableBundle
 android.os.PowerComponents
 android.os.Process
@@ -159,6 +161,8 @@ android.os.RemoteCallback
 android.os.RemoteCallbackList
 android.os.RemoteException
 android.os.ResultReceiver
+android.os.ServiceManager
+android.os.ServiceManager$ServiceNotFoundException
 android.os.ServiceSpecificException
 android.os.StrictMode
 android.os.SystemClock
@@ -252,6 +256,9 @@ android.view.Display$HdrCapabilities
 android.view.Display$Mode
 android.view.DisplayInfo
 
+android.hardware.SerialManager
+android.hardware.SerialManagerInternal
+
 android.telephony.ActivityStatsTechSpecificInfo
 android.telephony.CellSignalStrength
 android.telephony.ModemActivityInfo
@@ -310,3 +317,9 @@ com.android.internal.os.StoragedUidIoStatsReader
 com.google.android.collect.Lists
 com.google.android.collect.Maps
 com.google.android.collect.Sets
+
+com.android.server.SerialService
+com.android.server.SystemService
+com.android.server.SystemServiceManager
+
+com.android.server.utils.TimingsTraceAndSlog

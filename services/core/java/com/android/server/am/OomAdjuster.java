@@ -1628,6 +1628,7 @@ public class OomAdjuster {
         int appUid;
         int logUid;
         int processStateCurTop;
+        String mAdjType;
         ProcessStateRecord mState;
 
         void initialize(ProcessRecord app, int adj, boolean foregroundActivities,
@@ -1642,6 +1643,7 @@ public class OomAdjuster {
             this.appUid = appUid;
             this.logUid = logUid;
             this.processStateCurTop = processStateCurTop;
+            mAdjType = app.mState.getAdjType();
             this.mState = app.mState;
         }
 
@@ -1650,14 +1652,14 @@ public class OomAdjuster {
             // App has a visible activity; only upgrade adjustment.
             if (adj > VISIBLE_APP_ADJ) {
                 adj = VISIBLE_APP_ADJ;
-                mState.setAdjType("vis-activity");
+                mAdjType = "vis-activity";
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to vis-activity: " + app);
                 }
             }
             if (procState > processStateCurTop) {
                 procState = processStateCurTop;
-                mState.setAdjType("vis-activity");
+                mAdjType = "vis-activity";
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ,
                             "Raise procstate to vis-activity (top): " + app);
@@ -1666,8 +1668,6 @@ public class OomAdjuster {
             if (schedGroup < SCHED_GROUP_DEFAULT) {
                 schedGroup = SCHED_GROUP_DEFAULT;
             }
-            mState.setCached(false);
-            mState.setEmpty(false);
             foregroundActivities = true;
             mHasVisibleActivities = true;
         }
@@ -1676,14 +1676,14 @@ public class OomAdjuster {
         public void onPausedActivity() {
             if (adj > PERCEPTIBLE_APP_ADJ) {
                 adj = PERCEPTIBLE_APP_ADJ;
-                mState.setAdjType("pause-activity");
+                mAdjType = "pause-activity";
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to pause-activity: "  + app);
                 }
             }
             if (procState > processStateCurTop) {
                 procState = processStateCurTop;
-                mState.setAdjType("pause-activity");
+                mAdjType = "pause-activity";
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ,
                             "Raise procstate to pause-activity (top): "  + app);
@@ -1692,8 +1692,6 @@ public class OomAdjuster {
             if (schedGroup < SCHED_GROUP_DEFAULT) {
                 schedGroup = SCHED_GROUP_DEFAULT;
             }
-            mState.setCached(false);
-            mState.setEmpty(false);
             foregroundActivities = true;
             mHasVisibleActivities = false;
         }
@@ -1702,7 +1700,7 @@ public class OomAdjuster {
         public void onStoppingActivity(boolean finishing) {
             if (adj > PERCEPTIBLE_APP_ADJ) {
                 adj = PERCEPTIBLE_APP_ADJ;
-                mState.setAdjType("stop-activity");
+                mAdjType = "stop-activity";
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ,
                             "Raise adj to stop-activity: "  + app);
@@ -1718,15 +1716,13 @@ public class OomAdjuster {
             if (!finishing) {
                 if (procState > PROCESS_STATE_LAST_ACTIVITY) {
                     procState = PROCESS_STATE_LAST_ACTIVITY;
-                    mState.setAdjType("stop-activity");
+                    mAdjType = "stop-activity";
                     if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                         reportOomAdjMessageLocked(TAG_OOM_ADJ,
                                 "Raise procstate to stop-activity: " + app);
                     }
                 }
             }
-            mState.setCached(false);
-            mState.setEmpty(false);
             foregroundActivities = true;
             mHasVisibleActivities = false;
         }
@@ -1735,7 +1731,7 @@ public class OomAdjuster {
         public void onOtherActivity() {
             if (procState > PROCESS_STATE_CACHED_ACTIVITY) {
                 procState = PROCESS_STATE_CACHED_ACTIVITY;
-                mState.setAdjType("cch-act");
+                mAdjType = "cch-act";
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ,
                             "Raise procstate to cached activity: " + app);
@@ -1791,8 +1787,6 @@ public class OomAdjuster {
         state.setAdjTypeCode(ActivityManager.RunningAppProcessInfo.REASON_UNKNOWN);
         state.setAdjSource(null);
         state.setAdjTarget(null);
-        state.setEmpty(false);
-        state.setCached(false);
         if (!couldRecurse || !cycleReEval) {
             // Don't reset this flag when doing cycles re-evaluation.
             state.setNoKillOnBgRestrictedAndIdle(false);
@@ -1944,8 +1938,6 @@ public class OomAdjuster {
             adj = cachedAdj;
             procState = PROCESS_STATE_CACHED_EMPTY;
             if (!couldRecurse || !state.containsCycle()) {
-                state.setCached(true);
-                state.setEmpty(true);
                 state.setAdjType("cch-empty");
             }
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
@@ -1964,6 +1956,7 @@ public class OomAdjuster {
             hasVisibleActivities = state.getCachedHasVisibleActivities();
             procState = state.getCachedProcState();
             schedGroup = state.getCachedSchedGroup();
+            state.setAdjType(state.getCachedAdjType());
         }
 
         if (procState > PROCESS_STATE_CACHED_RECENT && state.getCachedHasRecentTasks()) {
@@ -2021,7 +2014,6 @@ public class OomAdjuster {
                 adj = newAdj;
                 procState = newProcState;
                 state.setAdjType(adjType);
-                state.setCached(false);
                 schedGroup = SCHED_GROUP_DEFAULT;
 
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
@@ -2079,7 +2071,6 @@ public class OomAdjuster {
                 // thus out of background check), so we yes the best background level we can.
                 adj = PERCEPTIBLE_APP_ADJ;
                 procState = PROCESS_STATE_TRANSIENT_BACKGROUND;
-                state.setCached(false);
                 state.setAdjType("force-imp");
                 state.setAdjSource(state.getForcingToImportant());
                 schedGroup = SCHED_GROUP_DEFAULT;
@@ -2094,7 +2085,6 @@ public class OomAdjuster {
                 // We don't want to kill the current heavy-weight process.
                 adj = HEAVY_WEIGHT_APP_ADJ;
                 schedGroup = SCHED_GROUP_BACKGROUND;
-                state.setCached(false);
                 state.setAdjType("heavy");
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to heavy: " + app);
@@ -2115,7 +2105,6 @@ public class OomAdjuster {
                 // home app, so we don't want to let it go into the background.
                 adj = HOME_APP_ADJ;
                 schedGroup = SCHED_GROUP_BACKGROUND;
-                state.setCached(false);
                 state.setAdjType("home");
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to home: " + app);
@@ -2149,7 +2138,6 @@ public class OomAdjuster {
                 if (adj > PREVIOUS_APP_ADJ) {
                     adj = PREVIOUS_APP_ADJ;
                     schedGroup = SCHED_GROUP_BACKGROUND;
-                    state.setCached(false);
                     state.setAdjType("previous");
                     if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                         reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to prev: " + app);
@@ -2197,7 +2185,6 @@ public class OomAdjuster {
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to backup: " + app);
                 }
-                state.setCached(false);
             }
             if (procState > ActivityManager.PROCESS_STATE_BACKUP) {
                 procState = ActivityManager.PROCESS_STATE_BACKUP;
@@ -2251,7 +2238,6 @@ public class OomAdjuster {
                                 reportOomAdjMessageLocked(TAG_OOM_ADJ,
                                         "Raise adj to started service: " + app);
                             }
-                            state.setCached(false);
                         }
                     }
                     // If we have let the service slide into the background
@@ -2376,7 +2362,6 @@ public class OomAdjuster {
                     adj = FOREGROUND_APP_ADJ;
                     state.setCurRawAdj(adj);
                     schedGroup = SCHED_GROUP_DEFAULT;
-                    state.setCached(false);
                     state.setAdjType("ext-provider");
                     state.setAdjTarget(cpr.name);
                     if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
@@ -2399,7 +2384,6 @@ public class OomAdjuster {
             if (adj > PREVIOUS_APP_ADJ) {
                 adj = PREVIOUS_APP_ADJ;
                 schedGroup = SCHED_GROUP_BACKGROUND;
-                state.setCached(false);
                 state.setAdjType("recent-provider");
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ,
@@ -2707,10 +2691,12 @@ public class OomAdjuster {
                     if (adj > clientAdj) {
                         adjType = "cch-bound-ui-services";
                     }
-                    if (state.setCached(false, dryRun)) {
+
+                    if (state.isCached() && dryRun) {
                         // Bail out early, as we only care about the return value for a dryrun.
                         return true;
                     }
+
                     clientAdj = adj;
                     clientProcState = procState;
                 } else {
@@ -2795,12 +2781,14 @@ public class OomAdjuster {
                             newAdj = adj;
                         }
                     }
+
                     if (!cstate.isCached()) {
-                        if (state.setCached(false, dryRun)) {
+                        if (state.isCached() && dryRun) {
                             // Bail out early, as we only care about the return value for a dryrun.
                             return true;
                         }
                     }
+
                     if (adj >  newAdj) {
                         adj = newAdj;
                         if (state.setCurRawAdj(adj, dryRun)) {
@@ -2958,8 +2946,8 @@ public class OomAdjuster {
                         schedGroup = SCHED_GROUP_DEFAULT;
                     }
                 }
+
                 if (!dryRun) {
-                    state.setCached(false);
                     state.setAdjType("service");
                     state.setAdjTypeCode(ActivityManager.RunningAppProcessInfo
                             .REASON_SERVICE_IN_USE);
@@ -3000,7 +2988,6 @@ public class OomAdjuster {
         }
         state.setCurCapability(capability);
 
-        state.setEmpty(false);
         return updated;
     }
 
@@ -3090,7 +3077,8 @@ public class OomAdjuster {
                 }
                 adjType = "provider";
             }
-            if (state.setCached(state.isCached() & cstate.isCached(), dryRun)) {
+
+            if (state.isCached() && !cstate.isCached() && dryRun) {
                 // Bail out early, as we only care about the return value for a dryrun.
                 return true;
             }
@@ -3157,7 +3145,6 @@ public class OomAdjuster {
         }
         state.setCurCapability(capability);
 
-        state.setEmpty(false);
         return false;
     }
 
@@ -3614,7 +3601,6 @@ public class OomAdjuster {
         state.setCurProcState(initialProcState);
         state.setCurRawProcState(initialProcState);
         state.setCurCapability(initialCapability);
-        state.setCached(initialCached);
 
         state.setCurAdj(ProcessList.FOREGROUND_APP_ADJ);
         state.setCurRawAdj(ProcessList.FOREGROUND_APP_ADJ);

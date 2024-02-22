@@ -133,6 +133,21 @@ constructor(
             .distinctUntilChanged()
             .onStart { emit(false) }
 
+    /**
+     * Shade locked is a legacy concept, but necessary to mimic current functionality. Listen for
+     * both SHADE_LOCKED and shade/qs expansion in order to determine lock state, as one can arrive
+     * before the other.
+     */
+    private val isShadeLocked: Flow<Boolean> =
+        combine(
+                keyguardInteractor.statusBarState.map { it == SHADE_LOCKED },
+                shadeInteractor.qsExpansion.map { it > 0f },
+                shadeInteractor.shadeExpansion.map { it > 0f },
+            ) { isShadeLocked, isQsExpanded, isShadeExpanded ->
+                isShadeLocked && (isQsExpanded || isShadeExpanded)
+            }
+            .distinctUntilChanged()
+
     val shadeCollapseFadeInComplete = MutableStateFlow(false)
 
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
@@ -190,7 +205,7 @@ constructor(
             )
 
     /** Are we purely on the glanceable hub without the shade/qs? */
-    internal val isOnGlanceableHubWithoutShade: Flow<Boolean> =
+    val isOnGlanceableHubWithoutShade: Flow<Boolean> =
         combine(
                 communalInteractor.isIdleOnCommunal,
                 // Shade with notifications
@@ -208,12 +223,12 @@ constructor(
             )
 
     /** Fade in only for use after the shade collapses */
-    val shadeCollpaseFadeIn: Flow<Boolean> =
+    val shadeCollapseFadeIn: Flow<Boolean> =
         flow {
                 while (currentCoroutineContext().isActive) {
                     emit(false)
                     // Wait for shade to be fully expanded
-                    keyguardInteractor.statusBarState.first { it == SHADE_LOCKED }
+                    isShadeLocked.first { it }
                     // ... and then for it to be collapsed
                     isOnLockscreenWithoutShade.first { it }
                     emit(true)
@@ -330,16 +345,16 @@ constructor(
                 // shade expansion or swipe to dismiss
                 combineTransform(
                     isOnLockscreenWithoutShade,
-                    shadeCollpaseFadeIn,
+                    shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
                     keyguardInteractor.dismissAlpha,
                 ) {
                     isOnLockscreenWithoutShade,
-                    shadeCollpaseFadeIn,
+                    shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
                     dismissAlpha ->
                     if (isOnLockscreenWithoutShade) {
-                        if (!shadeCollpaseFadeIn && dismissAlpha != null) {
+                        if (!shadeCollapseFadeIn && dismissAlpha != null) {
                             emit(dismissAlpha)
                         }
                     } else {
@@ -363,14 +378,9 @@ constructor(
                 lockscreenToGlanceableHubRunning,
                 glanceableHubToLockscreenRunning,
                 merge(
-                        lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
-                        glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
-                    )
-                    .onStart {
-                        // Transition flows don't emit a value on start, kick things off so the
-                        // combine starts.
-                        emit(1f)
-                    }
+                    lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
+                    glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
+                )
             ) { lockscreenToGlanceableHubRunning, glanceableHubToLockscreenRunning, alpha ->
                 if (isOnGlanceableHubWithoutShade) {
                     // Notifications should not be visible on the glanceable hub.
@@ -407,6 +417,16 @@ constructor(
             }
         }
     }
+
+    /**
+     * The container may need to be translated in the x direction as the keyguard fades out, such as
+     * when swiping open the glanceable hub from the lockscreen.
+     */
+    val translationX: Flow<Float> =
+        merge(
+            lockscreenToGlanceableHubTransitionViewModel.notificationTranslationX,
+            glanceableHubToLockscreenTransitionViewModel.notificationTranslationX,
+        )
 
     /**
      * When on keyguard, there is limited space to display notifications so calculate how many could

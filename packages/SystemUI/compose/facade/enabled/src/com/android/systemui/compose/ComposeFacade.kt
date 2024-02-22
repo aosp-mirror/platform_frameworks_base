@@ -22,12 +22,15 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.PlatformTheme
 import com.android.compose.ui.platform.DensityAwareComposeView
 import com.android.internal.policy.ScreenDecorationsUtils
@@ -89,12 +92,18 @@ object ComposeFacade : BaseComposeFacade {
     ) {
         activity.setContent {
             PlatformTheme {
-                CommunalHub(
-                    viewModel = viewModel,
-                    onOpenWidgetPicker = onOpenWidgetPicker,
-                    widgetConfigurator = widgetConfigurator,
-                    onEditDone = onEditDone,
-                )
+                Box(
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .background(LocalAndroidColorScheme.current.outlineVariant),
+                ) {
+                    CommunalHub(
+                        viewModel = viewModel,
+                        onOpenWidgetPicker = onOpenWidgetPicker,
+                        widgetConfigurator = widgetConfigurator,
+                        onEditDone = onEditDone,
+                    )
+                }
             }
         }
     }

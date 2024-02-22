@@ -20,7 +20,6 @@ import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
 import com.android.systemui.Flags
-import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -31,7 +30,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleMultiple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -71,7 +70,11 @@ constructor(
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
-            duration = DEFAULT_DURATION.inWholeMilliseconds
+            duration =
+                when (toState) {
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
 
@@ -80,10 +83,11 @@ constructor(
      * transition.
      */
     private fun listenForHubToLockscreen() {
-        glanceableHubTransitions.listenForLockscreenAndHubTransition(
+        glanceableHubTransitions.listenForGlanceableHubTransition(
             transitionName = "listenForHubToLockscreen",
             transitionOwnerName = TAG,
-            toScene = CommunalSceneKey.Blank,
+            fromState = KeyguardState.GLANCEABLE_HUB,
+            toState = KeyguardState.LOCKSCREEN,
         )
     }
 
@@ -175,7 +179,7 @@ constructor(
 
     companion object {
         const val TAG = "FromGlanceableHubTransitionInteractor"
-        val DEFAULT_DURATION = 400.milliseconds
+        val DEFAULT_DURATION = 1.seconds
         val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
     }
 }

@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
@@ -28,7 +29,10 @@ import com.android.systemui.statusbar.pipeline.satellite.domain.interactor.Devic
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.mockito.MockitoAnnotations
@@ -61,6 +65,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
                 interactor,
                 testScope.backgroundScope,
                 airplaneModeRepository,
+                FakeLogBuffer.Factory.create(),
             )
     }
 
@@ -121,8 +126,9 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             assertThat(latest).isNull()
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun icon_satelliteIsOff() =
+    fun icon_satelliteIsOn() =
         testScope.runTest {
             val latest by collectLastValue(underTest.icon)
 
@@ -133,7 +139,45 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
             i1.isInService.value = false
 
-            // THEN icon is null because we have service
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            // THEN icon is set because we don't have service
             assertThat(latest).isInstanceOf(Icon::class.java)
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun icon_hysteresisWhenEnablingIcon() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.icon)
+
+            // GIVEN satellite is allowed
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // THEN icon is null because of the hysteresis
+            assertThat(latest).isNull()
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            // THEN icon is set after the delay
+            assertThat(latest).isInstanceOf(Icon::class.java)
+
+            // GIVEN apm is enabled
+            airplaneModeRepository.setIsAirplaneMode(true)
+
+            // THEN icon is null immediately
+            assertThat(latest).isNull()
         }
 }

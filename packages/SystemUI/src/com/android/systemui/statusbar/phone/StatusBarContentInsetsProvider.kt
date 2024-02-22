@@ -185,7 +185,7 @@ constructor(
      */
     fun getStatusBarContentInsetsForRotation(@Rotation rotation: Int): Insets =
         traceSection(tag = "StatusBarContentInsetsProvider.getStatusBarContentInsetsForRotation") {
-            val sysUICutout = sysUICutoutProvider.cutoutInfoForCurrentDisplay()
+            val sysUICutout = sysUICutoutProvider.cutoutInfoForCurrentDisplayAndRotation()
             val displayCutout = sysUICutout?.cutout
             val key = getCacheKey(rotation, displayCutout)
 
@@ -227,7 +227,7 @@ constructor(
      */
     @JvmOverloads
     fun getStatusBarContentAreaForRotation(@Rotation rotation: Int): Rect {
-        val sysUICutout = sysUICutoutProvider.cutoutInfoForCurrentDisplay()
+        val sysUICutout = sysUICutoutProvider.cutoutInfoForCurrentDisplayAndRotation()
         val displayCutout = sysUICutout?.cutout
         val key = getCacheKey(rotation, displayCutout)
         return insetsCache[key]
@@ -528,7 +528,7 @@ private fun getStatusBarContentBounds(
     var leftMargin = minLeft
     var rightMargin = minRight
     for (cutoutRect in cutoutRects) {
-        val protectionRect = sysUICutout.cameraProtection?.cutoutBounds
+        val protectionRect = sysUICutout.cameraProtection?.bounds
         val actualCutoutRect =
             if (protectionRect?.intersects(cutoutRect) == true) {
                 rectUnion(cutoutRect, protectionRect)

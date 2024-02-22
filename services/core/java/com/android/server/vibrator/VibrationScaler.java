@@ -149,7 +149,7 @@ final class VibrationScaler {
                     && mAdaptiveHapticsScales.size() > 0
                     && mAdaptiveHapticsScales.contains(usageHint)) {
                 float adaptiveScale = mAdaptiveHapticsScales.get(usageHint);
-                segment = segment.scale(adaptiveScale);
+                segment = segment.scaleLinearly(adaptiveScale);
             }
 
             segments.set(i, segment);

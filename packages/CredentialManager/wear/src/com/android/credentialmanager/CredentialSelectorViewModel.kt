@@ -19,11 +19,15 @@ package com.android.credentialmanager
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.credentialmanager.CredentialSelectorUiState.Get
 import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.client.CredentialManagerClient
+import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.get.ActionEntryInfo
+import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.mappers.toGet
+import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,10 +39,20 @@ import javax.inject.Inject
 @HiltViewModel
 class CredentialSelectorViewModel @Inject constructor(
     private val credentialManagerClient: CredentialManagerClient,
-) : ViewModel() {
-    private val isPrimaryScreen = MutableStateFlow(false)
-    val uiState: StateFlow<CredentialSelectorUiState> = credentialManagerClient.requests
-        .combine(isPrimaryScreen) { request, isPrimary ->
+) : FlowEngine, ViewModel() {
+    private val isPrimaryScreen = MutableStateFlow(true)
+    private val shouldClose = MutableStateFlow(false)
+    val uiState: StateFlow<CredentialSelectorUiState> =
+        combine(
+            credentialManagerClient.requests,
+            isPrimaryScreen,
+            shouldClose
+        ) { request, isPrimary, shouldClose ->
+            if (shouldClose) {
+                Log.d(TAG, "Request finished, closing ")
+                return@combine CredentialSelectorUiState.Close
+            }
+
             when (request) {
                 null -> CredentialSelectorUiState.Idle
                 is Request.Cancel -> CredentialSelectorUiState.Cancel(request.appName)
@@ -56,6 +70,41 @@ class CredentialSelectorViewModel @Inject constructor(
     fun updateRequest(intent: Intent) {
             credentialManagerClient.updateRequest(intent = intent)
     }
+
+    override fun back() {
+        Log.d(TAG, "OnBackPressed")
+        when (uiState.value) {
+            is Get.MultipleEntry -> isPrimaryScreen.value = true
+            else -> {
+                shouldClose.value = true
+                // TODO("b/300422310 - [Wear] Implement UI for cancellation request with message")
+            }
+        }
+    }
+
+    override fun cancel() {
+        shouldClose.value = true
+        // TODO("b/300422310 - [Wear] Implement UI for cancellation request with message")
+    }
+
+    override fun openSecondaryScreen() {
+        isPrimaryScreen.value = false
+    }
+
+    override fun sendSelectionResult(
+        entryInfo: EntryInfo,
+        resultCode: Int?,
+        resultData: Intent?,
+        isAutoSelected: Boolean,
+    ) {
+        val result = credentialManagerClient.sendEntrySelectionResult(
+            entryInfo = entryInfo,
+            resultCode = resultCode,
+            resultData = resultData,
+            isAutoSelected = isAutoSelected
+        )
+        shouldClose.value = result
+    }
 }
 
 sealed class CredentialSelectorUiState {
@@ -66,6 +115,7 @@ sealed class CredentialSelectorUiState {
         data class MultipleEntry(
             val accounts: List<PerUserNameEntries>,
             val actionEntryList: List<ActionEntryInfo>,
+            val authenticationEntryList: List<AuthenticationEntryInfo>,
         ) : Get() {
             data class PerUserNameEntries(
                 val userName: String,

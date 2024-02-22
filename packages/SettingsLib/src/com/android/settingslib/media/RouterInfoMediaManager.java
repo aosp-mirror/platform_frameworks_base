@@ -114,17 +114,6 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
     }
 
     @Override
-    protected boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device) {
-        if (device.mRouteInfo == null) {
-            return false;
-        }
-
-        RoutingController controller = mRouter.getSystemController();
-        mRouter.transfer(controller, device.mRouteInfo);
-        return true;
-    }
-
-    @Override
     protected void transferToRoute(@NonNull MediaRoute2Info route) {
         mRouter.transferTo(route);
     }
@@ -237,12 +226,6 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
 
         RoutingSessionInfo systemSession = mRouterManager.getSystemRoutingSession(null);
         return TextUtils.equals(systemSession.getId(), sessionId) ? systemSession : null;
-    }
-
-    @NonNull
-    @Override
-    protected List<MediaRoute2Info> getAllRoutes() {
-        return mRouter.getAllRoutes();
     }
 
     @NonNull

@@ -74,11 +74,14 @@ java_library {
         "androidx.test.monitor-for-device",
     ],
     libs: [
+        "android.test.mock",
         "framework-minus-apex.ravenwood",
+        "services.core.ravenwood",
         "junit",
     ],
     sdk_version: "core_current",
     visibility: ["//frameworks/base"],
+    jarjar_rules: ":ravenwood-services-jarjar-rules",
 }
 
 // Carefully compiles against only test_current to support tests that
@@ -110,4 +113,10 @@ java_device_for_host {
     libs: [
         "androidx.test.monitor",
     ],
+}
+
+filegroup {
+    name: "ravenwood-services-jarjar-rules",
+    srcs: ["ravenwood-services-jarjar-rules.txt"],
+    visibility: ["//frameworks/base"],
 }

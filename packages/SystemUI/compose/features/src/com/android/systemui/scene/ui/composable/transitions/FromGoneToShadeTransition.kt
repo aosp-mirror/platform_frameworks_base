@@ -13,7 +13,9 @@ fun TransitionBuilder.goneToShadeTransition(
 ) {
     spec = tween(durationMillis = DefaultDuration.times(durationScale).inWholeMilliseconds.toInt())
 
-    fractionRange(start = .58f) { fade(ShadeHeader.Elements.CollapsedContent) }
+    fractionRange(start = .58f) { fade(ShadeHeader.Elements.CollapsedContentStart) }
+    fractionRange(start = .58f) { fade(ShadeHeader.Elements.CollapsedContentEnd) }
+    fractionRange(start = .58f) { fade(ShadeHeader.Elements.PrivacyChip) }
     translate(QuickSettings.Elements.Content, y = -ShadeHeader.Dimensions.CollapsedHeight * .66f)
     translate(Notifications.Elements.NotificationScrim, Edge.Top, false)
 }

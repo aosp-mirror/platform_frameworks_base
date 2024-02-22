@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.compose.modifiers.sysuiResTag
@@ -128,6 +129,7 @@ private fun SceneScope.QuickSettingsScene(
             remember(lifecycleOwner, viewModel) {
                 viewModel.getFooterActionsViewModel(lifecycleOwner)
             }
+        animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
 
         // ############## SCROLLING ################
 

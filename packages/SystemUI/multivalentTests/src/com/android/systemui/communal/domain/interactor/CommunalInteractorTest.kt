@@ -123,7 +123,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(mainUser)
             runCurrent()
-            assertThat(underTest.isCommunalEnabled).isTrue()
+            assertThat(underTest.isCommunalEnabled.value).isTrue()
         }
 
     @Test
