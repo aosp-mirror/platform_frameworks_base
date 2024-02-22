@@ -30,6 +30,8 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
 import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.settingslib.flags.Flags.enableLeAudioSharing
+import com.android.settingslib.flags.Flags.legacyLeAudioSharing
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.media.PhoneMediaDevice
@@ -332,14 +334,28 @@ constructor(
         @WorkerThread
         private fun updateCurrent() {
             if (isLeAudioBroadcastEnabled()) {
-                current =
-                    MediaDeviceData(
-                        /* enabled */ true,
-                        /* icon */ context.getDrawable(R.drawable.settings_input_antenna),
-                        /* name */ broadcastDescription,
-                        /* intent */ null,
-                        /* showBroadcastButton */ showBroadcastButton = true
-                    )
+                if (enableLeAudioSharing()) {
+                    current =
+                        MediaDeviceData(
+                            enabled = false,
+                            icon =
+                                context.getDrawable(
+                                    com.android.settingslib.R.drawable.ic_bt_le_audio_sharing
+                                ),
+                            name = context.getString(R.string.audio_sharing_description),
+                            intent = null,
+                            showBroadcastButton = false
+                        )
+                } else {
+                    current =
+                        MediaDeviceData(
+                            /* enabled */ true,
+                            /* icon */ context.getDrawable(R.drawable.settings_input_antenna),
+                            /* name */ broadcastDescription,
+                            /* intent */ null,
+                            /* showBroadcastButton */ showBroadcastButton = true
+                        )
+                }
             } else {
                 val aboutToConnect = aboutToConnectDeviceOverride
                 if (
@@ -420,6 +436,7 @@ constructor(
 
         @WorkerThread
         private fun isLeAudioBroadcastEnabled(): Boolean {
+            if (!enableLeAudioSharing() && !legacyLeAudioSharing()) return false
             val localBluetoothManager = localBluetoothManager.get()
             if (localBluetoothManager != null) {
                 val profileManager = localBluetoothManager.profileManager
