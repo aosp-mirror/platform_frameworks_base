@@ -668,31 +668,15 @@ public final class ApduServiceInfo implements Parcelable {
 
     /**
      * Add a Polling Loop Filter. Custom NFC polling frames that match this filter will be
-     * delivered to {@link HostApduService#processPollingFrames(List)}. Adding a key with this or
-     * {@link  ApduServiceInfo#addPollingLoopFilterToAutoTransact(String)} multiple times will
-     * cause the value to be overwritten each time.
+     * delivered to {@link HostApduService#processPollingFrames(List)}. Adding a key with this
+     * multiple times will cause the value to be overwritten each time.
      * @param pollingLoopFilter the polling loop filter to add, must be a  valide hexadecimal string
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public void addPollingLoopFilter(@NonNull String pollingLoopFilter) {
-        mAutoTransact.put(pollingLoopFilter.toUpperCase(Locale.ROOT), false);
+    public void addPollingLoopFilter(@NonNull String pollingLoopFilter,
+            boolean autoTransact) {
+        mAutoTransact.put(pollingLoopFilter, autoTransact);
 
-    }
-
-    /**
-     * Add a Polling Loop Filter. Custom NFC polling frames that match this filter will cause the
-     * device to exit observe mode, just as if
-     * {@link android.nfc.NfcAdapter#setObserveModeEnabled(boolean)} had been called with true,
-     * allowing transactions to proceed. The matching frame will also be delivered to
-     * {@link HostApduService#processPollingFrames(List)}. Adding a key with this or
-     * {@link  ApduServiceInfo#addPollingLoopFilter(String)} multiple times will
-     * cause the value to be overwritten each time.
-     *
-     * @param pollingLoopFilter the polling loop filter to add, must be a  valide hexadecimal string
-     */
-    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public void addPollingLoopFilterToAutoTransact(@NonNull String pollingLoopFilter) {
-        mAutoTransact.put(pollingLoopFilter.toUpperCase(Locale.ROOT), true);
     }
 
     /**
