@@ -14958,6 +14958,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #isLongClickable()}, {@link #isContextClickable()},
      * {@link #isScreenReaderFocusable()}, or {@link #isFocusable()}
      * <li>Has an {@link AccessibilityDelegate}
+     * <li>Has an {@link AccessibilityNodeProvider}
      * <li>Has an interaction listener, e.g. {@link OnTouchListener},
      * {@link OnKeyListener}, etc.
      * <li>Is an accessibility live region, e.g.
@@ -14990,7 +14991,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return mode == IMPORTANT_FOR_ACCESSIBILITY_YES || isActionableForAccessibility()
-                || hasListenersForAccessibility() || mAccessibilityDelegate != null
+                || hasListenersForAccessibility() || getAccessibilityNodeProvider() != null
+                || getAccessibilityDelegate() != null
                 || getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE
                 || isAccessibilityPane() || isAccessibilityHeading();
     }
