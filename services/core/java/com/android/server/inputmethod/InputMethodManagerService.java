@@ -2436,20 +2436,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.NOT_IME_TARGET_WINDOW;
         }
         final int csDisplayId = cs.mSelfReportedDisplayId;
-        final int oldDisplayIdToShowIme = mDisplayIdToShowIme;
         mDisplayIdToShowIme = mVisibilityStateComputer.computeImeDisplayId(winState, csDisplayId);
 
         // Potentially override the selected input method if the new display belongs to a virtual
         // device with a custom IME.
         String selectedMethodId = getSelectedMethodIdLocked();
-        if (oldDisplayIdToShowIme != mDisplayIdToShowIme) {
-            final String deviceMethodId = computeCurrentDeviceMethodIdLocked(selectedMethodId);
-            if (deviceMethodId == null) {
-                mVisibilityStateComputer.getImePolicy().setImeHiddenByDisplayPolicy(true);
-            } else if (!Objects.equals(deviceMethodId, selectedMethodId)) {
-                setInputMethodLocked(deviceMethodId, NOT_A_SUBTYPE_ID, mDeviceIdToShowIme);
-                selectedMethodId = deviceMethodId;
-            }
+        final String deviceMethodId = computeCurrentDeviceMethodIdLocked(selectedMethodId);
+        if (deviceMethodId == null) {
+            mVisibilityStateComputer.getImePolicy().setImeHiddenByDisplayPolicy(true);
+        } else if (!Objects.equals(deviceMethodId, selectedMethodId)) {
+            setInputMethodLocked(deviceMethodId, NOT_A_SUBTYPE_ID, mDeviceIdToShowIme);
+            selectedMethodId = deviceMethodId;
         }
 
         if (mVisibilityStateComputer.getImePolicy().isImeHiddenByDisplayPolicy()) {
@@ -2549,10 +2546,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         final int oldDeviceId = mDeviceIdToShowIme;
         mDeviceIdToShowIme = mVdmInternal.getDeviceIdForDisplayId(mDisplayIdToShowIme);
-        if (mDeviceIdToShowIme == oldDeviceId) {
-            return currentMethodId;
-        }
         if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+            if (oldDeviceId == DEVICE_ID_DEFAULT) {
+                return currentMethodId;
+            }
             final String defaultDeviceMethodId = mSettings.getSelectedDefaultDeviceInputMethod();
             if (DEBUG) {
                 Slog.v(TAG, "Restoring default device input method: " + defaultDeviceMethodId);
