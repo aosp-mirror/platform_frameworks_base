@@ -113,6 +113,7 @@ combined_apis {
         "framework-nfc",
         "framework-ondevicepersonalization",
         "framework-pdf",
+        "framework-pdf-v",
         "framework-permission",
         "framework-permission-s",
         "framework-scheduling",
