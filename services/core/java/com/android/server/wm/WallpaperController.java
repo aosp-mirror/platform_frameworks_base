@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
@@ -55,7 +54,6 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-import android.view.animation.Animation;
 import android.window.ScreenCapture;
 
 import com.android.internal.R;
@@ -80,6 +78,7 @@ class WallpaperController {
     private WallpaperCropUtils mWallpaperCropUtils = null;
     private DisplayContent mDisplayContent;
 
+    // Larger index has higher z-order.
     private final ArrayList<WallpaperWindowToken> mWallpaperTokens = new ArrayList<>();
 
     // If non-null, this is the currently visible window that is associated
@@ -125,18 +124,6 @@ class WallpaperController {
      * Whether the wallpaper has been notified about a physical display switch event is started.
      */
     private volatile boolean mIsWallpaperNotifiedOnDisplaySwitch;
-
-    private final Consumer<WindowState> mFindWallpapers = w -> {
-        if (w.mAttrs.type == TYPE_WALLPAPER) {
-            WallpaperWindowToken token = w.mToken.asWallpaperToken();
-            if (token.canShowWhenLocked() && !mFindResults.hasTopShowWhenLockedWallpaper()) {
-                mFindResults.setTopShowWhenLockedWallpaper(w);
-            } else if (!token.canShowWhenLocked()
-                    && !mFindResults.hasTopHideWhenLockedWallpaper()) {
-                mFindResults.setTopHideWhenLockedWallpaper(w);
-            }
-        }
-    };
 
     private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
         final boolean useShellTransition = w.mTransitionController.isShellTransitionsEnabled();
@@ -319,16 +306,6 @@ class WallpaperController {
             if (mWallpaperTokens.get(i).isVisible()) return true;
         }
         return false;
-    }
-
-    /**
-     * Starts {@param a} on all wallpaper windows.
-     */
-    void startWallpaperAnimation(Animation a) {
-        for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.startAnimation(a);
-        }
     }
 
     boolean isWallpaperTargetAnimating() {
@@ -621,7 +598,8 @@ class WallpaperController {
         if (Float.compare(window.mWallpaperZoomOut, zoom) != 0) {
             window.mWallpaperZoomOut = zoom;
             computeLastWallpaperZoomOut();
-            for (WallpaperWindowToken token : mWallpaperTokens) {
+            for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
+                final WallpaperWindowToken token = mWallpaperTokens.get(i);
                 token.updateWallpaperOffset(false);
             }
         }
@@ -744,7 +722,7 @@ class WallpaperController {
             mFindResults.setUseTopWallpaperAsTarget(true);
         }
 
-        mDisplayContent.forAllWindows(mFindWallpapers, true /* traverseTopToBottom */);
+        findWallpapers();
         mDisplayContent.forAllWindows(mFindWallpaperTargetFunction, true /* traverseTopToBottom */);
         if (mFindResults.mNeedsShowWhenLockedWallpaper) {
             // Keep wallpaper visible if the show-when-locked activities doesn't fill screen.
@@ -757,15 +735,29 @@ class WallpaperController {
         }
     }
 
-    List<WindowState> getAllTopWallpapers() {
-        ArrayList<WindowState> wallpapers = new ArrayList<>(2);
+    private void findWallpapers() {
+        for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
+            final WallpaperWindowToken token = mWallpaperTokens.get(i);
+            final boolean canShowWhenLocked = token.canShowWhenLocked();
+            for (int j = token.getChildCount() - 1; j >= 0; j--) {
+                final WindowState w = token.getChildAt(j);
+                if (!w.mIsWallpaper) continue;
+                if (canShowWhenLocked && !mFindResults.hasTopShowWhenLockedWallpaper()) {
+                    mFindResults.setTopShowWhenLockedWallpaper(w);
+                } else if (!canShowWhenLocked && !mFindResults.hasTopHideWhenLockedWallpaper()) {
+                    mFindResults.setTopHideWhenLockedWallpaper(w);
+                }
+            }
+        }
+    }
+
+    void collectTopWallpapers(Transition transition) {
         if (mFindResults.hasTopShowWhenLockedWallpaper()) {
-            wallpapers.add(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper);
+            transition.collect(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper);
         }
         if (mFindResults.hasTopHideWhenLockedWallpaper()) {
-            wallpapers.add(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper);
+            transition.collect(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper);
         }
-        return wallpapers;
     }
 
     private boolean isFullscreen(WindowManager.LayoutParams attrs) {
@@ -1016,6 +1008,12 @@ class WallpaperController {
         mWallpaperTokens.remove(token);
     }
 
+    void onWallpaperTokenReordered() {
+        if (mWallpaperTokens.size() > 1) {
+            mWallpaperTokens.sort(null /* by WindowContainer#compareTo */);
+        }
+    }
+
     @VisibleForTesting
     boolean canScreenshotWallpaper() {
         return canScreenshotWallpaper(getTopVisibleWallpaper());
@@ -1160,7 +1158,8 @@ class WallpaperController {
             pw.print(prefix); pw.print("mPrevWallpaperTarget="); pw.println(mPrevWallpaperTarget);
         }
 
-        for (WallpaperWindowToken t : mWallpaperTokens) {
+        for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
+            final WallpaperWindowToken t = mWallpaperTokens.get(i);
             pw.print(prefix); pw.println("token " + t + ":");
             pw.print(prefix); pw.print("  canShowWhenLocked="); pw.println(t.canShowWhenLocked());
             dumpValue(pw, prefix, "mWallpaperX", t.mWallpaperX);
