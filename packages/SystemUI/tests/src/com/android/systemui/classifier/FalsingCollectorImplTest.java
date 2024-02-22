@@ -188,6 +188,20 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testRegisterSensor_OccludingActivity() {
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+
+        ArgumentCaptor<StatusBarStateController.StateListener> stateListenerArgumentCaptor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+        verify(mStatusBarStateController).addCallback(stateListenerArgumentCaptor.capture());
+
+        mFalsingCollector.onScreenTurningOn();
+        reset(mProximitySensor);
+        stateListenerArgumentCaptor.getValue().onStateChanged(StatusBarState.SHADE);
+        verify(mProximitySensor).register(any(ThresholdSensor.Listener.class));
+    }
+
+    @Test
     public void testPassThroughGesture() {
         MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
         MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
