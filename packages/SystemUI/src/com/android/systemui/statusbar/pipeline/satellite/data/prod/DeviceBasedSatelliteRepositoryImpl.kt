@@ -315,8 +315,8 @@ constructor(
         // TTL for satellite polling is one hour
         const val POLLING_INTERVAL_MS: Long = 1000 * 60 * 60
 
-        // Let the system boot up (5s) and stabilize before we check for system support
-        const val MIN_UPTIME: Long = 1000 * 5
+        // Let the system boot up and stabilize before we check for system support
+        const val MIN_UPTIME: Long = 1000 * 60
 
         private const val TAG = "DeviceBasedSatelliteRepo"
 
