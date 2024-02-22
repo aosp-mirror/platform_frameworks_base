@@ -20,12 +20,14 @@ import android.content.Context
 import android.util.TypedValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.launch
 
@@ -40,8 +42,9 @@ object NotificationStackAppearanceViewBinder {
         viewModel: NotificationStackAppearanceViewModel,
         ambientState: AmbientState,
         controller: NotificationStackScrollLayoutController,
+        @Main mainImmediateDispatcher: CoroutineDispatcher,
     ): DisposableHandle {
-        return view.repeatWhenAttached {
+        return view.repeatWhenAttached(mainImmediateDispatcher) {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
                     viewModel.stackBounds.collect { bounds ->

@@ -55,7 +55,7 @@ constructor(
     notificationStackAppearanceViewModel: NotificationStackAppearanceViewModel,
     ambientState: AmbientState,
     notificationStackSizeCalculator: NotificationStackSizeCalculator,
-    @Main private val mainDispatcher: CoroutineDispatcher,
+    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
 ) {
 
     init {
@@ -80,7 +80,7 @@ constructor(
             sceneContainerFlags,
             controller,
             notificationStackSizeCalculator,
-            mainDispatcher,
+            mainImmediateDispatcher = mainImmediateDispatcher,
         )
 
         if (sceneContainerFlags.flexiNotifsEnabled()) {
@@ -90,6 +90,7 @@ constructor(
                 notificationStackAppearanceViewModel,
                 ambientState,
                 controller,
+                mainImmediateDispatcher = mainImmediateDispatcher,
             )
         }
     }
