@@ -243,7 +243,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      * {@link InputMethodManager#showSoftInput(View, int)} is called.
      */
     public void onShowRequested() {
-        if (mAnimationState == ANIMATION_STATE_HIDE) {
+        if (mAnimationState == ANIMATION_STATE_HIDE
+                || mController.isPredictiveBackImeHideAnimInProgress()) {
             mHasPendingRequest = true;
         }
     }
