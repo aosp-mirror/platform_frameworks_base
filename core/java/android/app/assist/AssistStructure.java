@@ -1289,11 +1289,7 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         *
-         * @return
-         *
          * @hide
-         *
          */
         @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
         @Nullable
@@ -2571,7 +2567,7 @@ public class AssistStructure implements Parcelable {
         }
         AutofillId autofillId = node.getAutofillId();
         if (autofillId == null) {
-            Log.i(TAG, prefix + " NO autofill ID");
+            Log.i(TAG, prefix + " No autofill ID");
         } else {
             Log.i(TAG, prefix + "  Autofill info: id= " + autofillId
                     + ", type=" + node.getAutofillType()
@@ -2586,7 +2582,7 @@ public class AssistStructure implements Parcelable {
         }
         GetCredentialRequest getCredentialRequest = node.getCredentialManagerRequest();
         if (getCredentialRequest == null) {
-            Log.i(TAG, prefix + " NO Credential Manager Request");
+            Log.i(TAG, prefix + " No Credential Manager Request");
         } else {
             Log.i(TAG, prefix + "  GetCredentialRequest: no. of options= "
                     + getCredentialRequest.getCredentialOptions().size()

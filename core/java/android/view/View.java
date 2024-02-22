@@ -1047,7 +1047,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     private ViewCredentialHandler mViewCredentialHandler;
 
-
     /** Used to avoid computing the full strings each time when layout tracing is enabled. */
     @Nullable
     private ViewTraversalTracingStrings mTracingStrings;
