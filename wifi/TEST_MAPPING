@@ -2,9 +2,7 @@
   "presubmit": [
     {
       "name": "FrameworksWifiNonUpdatableApiTests"
-    }
-  ],
-  "postsubmit": [
+    },
     {
       "name": "CtsWifiNonUpdatableTestCases"
     }

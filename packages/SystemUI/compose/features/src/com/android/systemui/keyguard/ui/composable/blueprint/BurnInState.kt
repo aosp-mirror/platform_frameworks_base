@@ -73,7 +73,7 @@ private fun rememberBurnInParameters(
         BurnInParameters(
             clockControllerProvider = { clock },
             topInset = topInset,
-            statusViewTop = topmostTop,
+            minViewY = topmostTop,
         )
     }
 }

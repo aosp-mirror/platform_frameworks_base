@@ -66,6 +66,7 @@ import java.util.List;
  * {@hide}
  */
 @SystemApi(client = Client.SYSTEM_SERVER)
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class SystemService {
 
     /** @hide */

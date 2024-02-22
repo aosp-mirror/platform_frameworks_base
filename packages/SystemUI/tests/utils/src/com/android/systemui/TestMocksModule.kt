@@ -37,7 +37,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.BiometricLog
 import com.android.systemui.log.dagger.BroadcastDispatcherLog
 import com.android.systemui.log.dagger.SceneFrameworkLog
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.model.SysUiState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.DarkIconDispatcher

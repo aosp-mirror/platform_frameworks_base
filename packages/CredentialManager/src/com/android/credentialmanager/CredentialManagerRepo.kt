@@ -50,7 +50,6 @@ import com.android.credentialmanager.createflow.isFlowAutoSelectable
 class CredentialManagerRepo(
     private val context: Context,
     intent: Intent,
-    userConfigRepo: UserConfigRepo,
     isNewActivity: Boolean,
 ) {
     val requestInfo: RequestInfo?
@@ -124,7 +123,6 @@ class CredentialManagerRepo(
 
         initialUiState = when (requestInfo?.type) {
             RequestInfo.TYPE_CREATE -> {
-                val isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
                 val providerEnableListUiState = getCreateProviderEnableListInitialUiState()
                 val providerDisableListUiState = getCreateProviderDisableListInitialUiState()
                 val requestDisplayInfoUiState =
@@ -137,8 +135,6 @@ class CredentialManagerRepo(
                     defaultProviderIdsSetByUser =
                     requestDisplayInfoUiState.userSetDefaultProviderIds,
                     requestDisplayInfo = requestDisplayInfoUiState,
-                    isOnPasskeyIntroStateAlready = false,
-                    isPasskeyFirstUse = isPasskeyFirstUse,
                 )!!
                 val isFlowAutoSelectable = isFlowAutoSelectable(createCredentialUiState)
                 UiState(

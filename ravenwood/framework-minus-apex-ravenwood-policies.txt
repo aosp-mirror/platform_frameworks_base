@@ -52,5 +52,6 @@ class android.content.BroadcastReceiver stub
     method <init> ()V stub
 class android.content.Context stub
     method <init> ()V stub
+    method getSystemService (Ljava/lang/Class;)Ljava/lang/Object; stub
 class android.content.pm.PackageManager stub
     method <init> ()V stub

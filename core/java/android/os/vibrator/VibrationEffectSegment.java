@@ -96,6 +96,9 @@ public abstract class VibrationEffectSegment implements Parcelable {
     /**
      * Scale the segment intensity with the given factor.
      *
+     * <p> This scale is not necessarily linear and may apply a gamma correction to the scale
+     * factor before using it.
+     *
      * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
      *                    scale down the intensity, values larger than 1 will scale up
      *
@@ -103,6 +106,17 @@ public abstract class VibrationEffectSegment implements Parcelable {
      */
     @NonNull
     public abstract <T extends VibrationEffectSegment> T scale(float scaleFactor);
+
+    /**
+     * Performs a linear scaling on the segment intensity with the given factor.
+     *
+     * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
+     *                    scale down the intensity, values larger than 1 will scale up
+     *
+     * @hide
+     */
+    @NonNull
+    public abstract <T extends VibrationEffectSegment> T scaleLinearly(float scaleFactor);
 
     /**
      * Applies given effect strength to prebaked effects.

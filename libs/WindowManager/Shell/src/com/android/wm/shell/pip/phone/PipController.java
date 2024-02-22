@@ -48,7 +48,6 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Pair;
-import android.util.Size;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
@@ -1042,22 +1041,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     /** Save the state to restore to on re-entry. */
     public void saveReentryState(Rect pipBounds) {
         float snapFraction = mPipBoundsAlgorithm.getSnapFraction(pipBounds);
-
-        if (!mPipBoundsState.hasUserResizedPip()) {
-            mPipBoundsState.saveReentryState(null /* bounds */, snapFraction);
-            return;
-        }
-
-        Size reentrySize = new Size(pipBounds.width(), pipBounds.height());
-
-        // TODO: b/279937014 Investigate why userResizeBounds are empty with shell transitions on
-        // fallback to using the userResizeBounds if userResizeBounds are not empty
-        if (!mTouchHandler.getUserResizeBounds().isEmpty()) {
-            Rect userResizeBounds = mTouchHandler.getUserResizeBounds();
-            reentrySize = new Size(userResizeBounds.width(), userResizeBounds.height());
-        }
-
-        mPipBoundsState.saveReentryState(reentrySize, snapFraction);
+        mPipBoundsState.saveReentryState(snapFraction);
     }
 
     @Override

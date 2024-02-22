@@ -185,13 +185,16 @@ constructor(
             return getOrCreateFlow(edge)
                 .map { step ->
                     StateToValue(
-                            step.transitionState,
-                            when (step.transitionState) {
-                                STARTED -> stepToValue(step)
-                                RUNNING -> stepToValue(step)
-                                CANCELED -> onCancel?.invoke()
-                                FINISHED -> onFinish?.invoke()
-                            }
+                            from = step.from,
+                            to = step.to,
+                            transitionState = step.transitionState,
+                            value =
+                                when (step.transitionState) {
+                                    STARTED -> stepToValue(step)
+                                    RUNNING -> stepToValue(step)
+                                    CANCELED -> onCancel?.invoke()
+                                    FINISHED -> onFinish?.invoke()
+                                }
                         )
                         .also { logger.logTransitionStep(name, step, it.value) }
                 }
@@ -208,6 +211,10 @@ constructor(
 }
 
 data class StateToValue(
+    val from: KeyguardState? = null,
+    val to: KeyguardState? = null,
     val transitionState: TransitionState = TransitionState.FINISHED,
     val value: Float? = 0f,
-)
+) {
+    fun isToOrFrom(state: KeyguardState) = from == state || to == state
+}

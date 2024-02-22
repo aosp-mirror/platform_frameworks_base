@@ -141,7 +141,6 @@ fun CommunalHub(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(LocalAndroidColorScheme.current.outlineVariant)
                 .pointerInput(gridState, contentOffset, contentListState) {
                     // If not in edit mode, don't allow selecting items.
                     if (!viewModel.isEditMode) return@pointerInput

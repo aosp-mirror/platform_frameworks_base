@@ -17,9 +17,10 @@
 package com.android.systemui.flags
 
 import android.platform.test.annotations.EnableFlags
+import com.android.systemui.Flags.FLAG_COMPOSE_LOCKSCREEN
 import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
-import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.Flags.FLAG_MEDIA_IN_SCENE_CONTAINER
+import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 
 /**
@@ -30,6 +31,7 @@ import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
     FLAG_SCENE_CONTAINER,
     FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
     FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+    FLAG_COMPOSE_LOCKSCREEN,
     FLAG_MEDIA_IN_SCENE_CONTAINER,
 )
 @Retention(AnnotationRetention.RUNTIME)

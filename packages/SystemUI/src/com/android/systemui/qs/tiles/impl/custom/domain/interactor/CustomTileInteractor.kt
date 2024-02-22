@@ -77,6 +77,13 @@ constructor(
     suspend fun isTileToggleable(): Boolean = customTileRepository.isTileToggleable()
 
     /**
+     * True if the tile is active and false the otherwise. This effectively is a value of the
+     * [android.service.quicksettings.TileService.META_DATA_ACTIVE_TILE]. This is not the same as
+     * [Tile.STATE_ACTIVE].
+     */
+    suspend fun isTileActive(): Boolean = customTileRepository.isTileActive()
+
+    /**
      * Initializes the repository for the current user. Suspends until it's safe to call [getTile]
      * which needs at least one of the following:
      * - defaults are loaded;

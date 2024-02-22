@@ -110,13 +110,15 @@ interface NativeInputManagerService {
 
     void setMinTimeBetweenUserActivityPokes(long millis);
 
-    boolean transferTouchFocus(IBinder fromChannelToken, IBinder toChannelToken,
+    boolean transferTouchGesture(IBinder fromChannelToken, IBinder toChannelToken,
             boolean isDragDrop);
 
     /**
      * Transfer the current touch gesture to the window identified by 'destChannelToken' positioned
      * on display with id 'displayId'.
+     * @deprecated Use {@link #transferTouchGesture(IBinder, IBinder, boolean)}
      */
+    @Deprecated
     boolean transferTouch(IBinder destChannelToken, int displayId);
 
     int getMousePointerSpeed();
@@ -359,10 +361,11 @@ interface NativeInputManagerService {
         public native void setMinTimeBetweenUserActivityPokes(long millis);
 
         @Override
-        public native boolean transferTouchFocus(IBinder fromChannelToken, IBinder toChannelToken,
+        public native boolean transferTouchGesture(IBinder fromChannelToken, IBinder toChannelToken,
                 boolean isDragDrop);
 
         @Override
+        @Deprecated
         public native boolean transferTouch(IBinder destChannelToken, int displayId);
 
         @Override

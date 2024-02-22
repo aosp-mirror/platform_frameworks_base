@@ -737,7 +737,9 @@ public class InputManagerService extends IInputManager.Stub
      * @param destChannelToken The token of the window or input channel that should receive the
      * gesture
      * @return True if the transfer succeeded, false if there was no active touch gesture happening
+     * @deprecated Use {@link #transferTouchGesture(IBinder, IBinder)}
      */
+    @Deprecated
     public boolean transferTouch(IBinder destChannelToken, int displayId) {
         // TODO(b/162194035): Replace this with a SPY window
         Objects.requireNonNull(destChannelToken, "destChannelToken must not be null");
@@ -1343,43 +1345,44 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     /**
-     * Atomically transfers touch focus from one window to another as identified by
-     * their input channels.  It is possible for multiple windows to have
-     * touch focus if they support split touch dispatch
-     * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
-     * method only transfers touch focus of the specified window without affecting
-     * other windows that may also have touch focus at the same time.
-     * @param fromChannel The channel of a window that currently has touch focus.
-     * @param toChannel The channel of the window that should receive touch focus in
-     * place of the first.
-     * @param isDragDrop True if transfer touch focus for drag and drop.
-     * @return True if the transfer was successful.  False if the window with the
-     * specified channel did not actually have touch focus at the time of the request.
+     * Start drag and drop.
+     *
+     * @param fromChannel The input channel that is currently receiving a touch gesture that should
+     *                    be turned into the drag pointer.
+     * @param dragAndDropChannel The input channel associated with the system drag window.
+     * @return true if drag and drop was successfully started, false otherwise.
      */
-    public boolean transferTouchFocus(@NonNull InputChannel fromChannel,
-            @NonNull InputChannel toChannel, boolean isDragDrop) {
-        return mNative.transferTouchFocus(fromChannel.getToken(), toChannel.getToken(),
-                isDragDrop);
+    public boolean startDragAndDrop(@NonNull InputChannel fromChannel,
+            @NonNull InputChannel dragAndDropChannel) {
+        return mNative.transferTouchGesture(fromChannel.getToken(), dragAndDropChannel.getToken(),
+                true /* isDragDrop */);
     }
 
     /**
-     * Atomically transfers touch focus from one window to another as identified by
-     * their input channels.  It is possible for multiple windows to have
-     * touch focus if they support split touch dispatch
-     * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
-     * method only transfers touch focus of the specified window without affecting
-     * other windows that may also have touch focus at the same time.
-     * @param fromChannelToken The channel token of a window that currently has touch focus.
-     * @param toChannelToken The channel token of the window that should receive touch focus in
-     * place of the first.
-     * @return True if the transfer was successful.  False if the window with the
-     * specified channel did not actually have touch focus at the time of the request.
+     * Atomically transfers an active touch gesture from one window to another, as identified by
+     * their input channels.
+     *
+     * <p>Only the touch gesture that is currently being dispatched to a window associated with
+     * {@code fromChannelToken} will be effected. That window will no longer receive
+     * the touch gesture (i.e. it will receive {@link android.view.MotionEvent#ACTION_CANCEL}).
+     * A window associated with the {@code toChannelToken} will receive the rest of the gesture
+     * (i.e. beginning with {@link android.view.MotionEvent#ACTION_DOWN} or
+     * {@link android.view.MotionEvent#ACTION_POINTER_DOWN}).
+     *
+     * <p>Transferring touch gestures will have no impact on focused windows. If the {@code
+     * toChannelToken} window is focusable, this will not bring focus to that window.
+     *
+     * @param fromChannelToken The channel token of a window that has an active touch gesture.
+     * @param toChannelToken The channel token of the window that should receive the gesture in
+     *   place of the first.
+     * @return True if the transfer was successful. False if the specified windows don't exist, or
+     *   if the source window is not actively receiving a touch gesture at the time of the request.
      */
-    public boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
+    public boolean transferTouchGesture(@NonNull IBinder fromChannelToken,
             @NonNull IBinder toChannelToken) {
         Objects.requireNonNull(fromChannelToken);
         Objects.requireNonNull(toChannelToken);
-        return mNative.transferTouchFocus(fromChannelToken, toChannelToken,
+        return mNative.transferTouchGesture(fromChannelToken, toChannelToken,
                 false /* isDragDrop */);
     }
 
@@ -3312,9 +3315,9 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
+        public boolean transferTouchGesture(@NonNull IBinder fromChannelToken,
                 @NonNull IBinder toChannelToken) {
-            return InputManagerService.this.transferTouchFocus(fromChannelToken, toChannelToken);
+            return InputManagerService.this.transferTouchGesture(fromChannelToken, toChannelToken);
         }
 
         @Override

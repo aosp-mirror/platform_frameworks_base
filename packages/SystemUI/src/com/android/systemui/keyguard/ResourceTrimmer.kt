@@ -32,13 +32,13 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.utils.GlobalWindowManager
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * Releases cached resources on allocated by keyguard.
@@ -62,7 +62,7 @@ constructor(
 
     override fun start() {
         Log.d(LOG_TAG, "Resource trimmer registered.")
-        if (featureFlags.isEnabled(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK)) {
+        if (com.android.systemui.Flags.trimResourcesWithBackgroundTrimAtLock()) {
             applicationScope.launch(bgDispatcher) {
                 // We need to wait for the AoD transition (and animation) to complete.
                 // This means we're waiting for isDreaming (== implies isDoze) and dozeAmount == 1f
@@ -107,19 +107,16 @@ constructor(
 
     @WorkerThread
     private fun onWakefulnessUpdated(
-            isAsleep: Boolean,
-            isDreaming: Boolean,
-            isDozingFully: Boolean
+        isAsleep: Boolean,
+        isDreaming: Boolean,
+        isDozingFully: Boolean
     ) {
-        if (!featureFlags.isEnabled(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK)) {
+        if (!com.android.systemui.Flags.trimResourcesWithBackgroundTrimAtLock()) {
             return
         }
 
         if (DEBUG) {
-            Log.d(
-                LOG_TAG,
-                "isAsleep: $isAsleep Dreaming: $isDreaming DozeAmount: $isDozingFully"
-            )
+            Log.d(LOG_TAG, "isAsleep: $isAsleep Dreaming: $isDreaming DozeAmount: $isDozingFully")
         }
         // There are three scenarios:
         // * No dozing and no AoD at all - where we go directly to ASLEEP with isDreaming = false
@@ -129,8 +126,7 @@ constructor(
         // * AoD - where we go to ASLEEP with iDreaming = true and dozeAmount slowly increases
         //      to 1f
         val dozeDisabledAndScreenOff = isAsleep && !isDreaming
-        val dozeEnabledAndDozeAnimationCompleted =
-                isAsleep && isDreaming && isDozingFully
+        val dozeEnabledAndDozeAnimationCompleted = isAsleep && isDreaming && isDozingFully
         if (dozeDisabledAndScreenOff || dozeEnabledAndDozeAnimationCompleted) {
             Trace.beginSection("ResourceTrimmer#trimMemory")
             Log.d(LOG_TAG, "SysUI asleep, trimming memory.")

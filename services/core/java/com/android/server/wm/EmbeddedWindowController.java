@@ -184,7 +184,7 @@ class EmbeddedWindowController {
         if (!isValidTouchGestureParams(transferToHostWindowState, ew)) {
             return false;
         }
-        return mInputManagerService.transferTouchFocus(ew.getInputChannelToken(),
+        return mInputManagerService.transferTouchGesture(ew.getInputChannelToken(),
                 transferToHostWindowState.mInputChannelToken);
     }
 
@@ -194,7 +194,7 @@ class EmbeddedWindowController {
         if (!isValidTouchGestureParams(hostWindowState, ew)) {
             return false;
         }
-        return mInputManagerService.transferTouchFocus(hostWindowState.mInputChannelToken,
+        return mInputManagerService.transferTouchGesture(hostWindowState.mInputChannelToken,
                 ew.getInputChannelToken());
     }
 

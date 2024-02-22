@@ -434,6 +434,9 @@ public class ActivityStartController {
                 // Don't modify the client's object!
                 intent = new Intent(intent);
 
+                // Remove existing mismatch flag so it can be properly updated later
+                intent.removeExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
+
                 // Collect information about the target of the Intent.
                 ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i],
                         0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid,

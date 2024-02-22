@@ -38,9 +38,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
+
+import com.android.media.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -51,6 +54,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Base class for media browser services.
@@ -96,6 +100,7 @@ public abstract class MediaBrowserService extends Service {
 
     private static final int RESULT_ERROR = -1;
     private static final int RESULT_OK = 0;
+    private final ServiceBinder mBinder;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -105,7 +110,7 @@ public abstract class MediaBrowserService extends Service {
 
     private final Handler mHandler = new Handler();
 
-    private final ServiceState mServiceState = new ServiceState();
+    private final AtomicReference<ServiceState> mServiceState;
 
     // Holds the connection record associated with the currently executing callback operation, if
     // any. See getCurrentBrowserInfo for an example. Must only be accessed on mHandler.
@@ -216,16 +221,21 @@ public abstract class MediaBrowserService extends Service {
     }
 
     private static class ServiceBinder extends IMediaBrowserService.Stub {
-        private WeakReference<ServiceState> mServiceState;
+        private final AtomicReference<WeakReference<ServiceState>> mServiceState;
 
         private ServiceBinder(ServiceState serviceState) {
-            mServiceState = new WeakReference(serviceState);
+            mServiceState = new AtomicReference<>();
+            setServiceState(serviceState);
+        }
+
+        public void setServiceState(ServiceState serviceState) {
+            mServiceState.set(new WeakReference<>(serviceState));
         }
 
         @Override
         public void connect(final String pkg, final Bundle rootHints,
                 final IMediaBrowserServiceCallbacks callbacks) {
-            ServiceState serviceState = mServiceState.get();
+            ServiceState serviceState = mServiceState.get().get();
             if (serviceState == null) {
                 return;
             }
@@ -243,7 +253,7 @@ public abstract class MediaBrowserService extends Service {
 
         @Override
         public void disconnect(final IMediaBrowserServiceCallbacks callbacks) {
-            ServiceState serviceState = mServiceState.get();
+            ServiceState serviceState = mServiceState.get().get();
             if (serviceState == null) {
                 return;
             }
@@ -260,7 +270,7 @@ public abstract class MediaBrowserService extends Service {
         @Override
         public void addSubscription(final String id, final IBinder token, final Bundle options,
                 final IMediaBrowserServiceCallbacks callbacks) {
-            ServiceState serviceState = mServiceState.get();
+            ServiceState serviceState = mServiceState.get().get();
             if (serviceState == null) {
                 return;
             }
@@ -278,7 +288,7 @@ public abstract class MediaBrowserService extends Service {
         @Override
         public void removeSubscription(final String id, final IBinder token,
                 final IMediaBrowserServiceCallbacks callbacks) {
-            ServiceState serviceState = mServiceState.get();
+            ServiceState serviceState = mServiceState.get().get();
             if (serviceState == null) {
                 return;
             }
@@ -294,7 +304,7 @@ public abstract class MediaBrowserService extends Service {
         @Override
         public void getMediaItem(final String mediaId, final ResultReceiver receiver,
                 final IMediaBrowserServiceCallbacks callbacks) {
-            ServiceState serviceState = mServiceState.get();
+            ServiceState serviceState = mServiceState.get().get();
             if (serviceState == null) {
                 return;
             }
@@ -304,17 +314,23 @@ public abstract class MediaBrowserService extends Service {
         }
     }
 
+    /** Default constructor. */
+    public MediaBrowserService() {
+        mServiceState = new AtomicReference<>(new ServiceState());
+        mBinder = new ServiceBinder(mServiceState.get());
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
-        mServiceState.mBinder = new ServiceBinder(mServiceState);
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
-            return mServiceState.mBinder;
+            return mBinder;
         }
+
         return null;
     }
 
@@ -428,21 +444,33 @@ public abstract class MediaBrowserService extends Service {
 
     /**
      * Call to set the media session.
-     * <p>
-     * This should be called as soon as possible during the service's startup.
-     * It may only be called once.
+     *
+     * <p>This should be called as soon as possible during the service's startup. It may only be
+     * called once.
      *
      * @param token The token for the service's {@link MediaSession}.
      */
+    // TODO: b/185136506 - Update the javadoc to reflect API changes when
+    // enableNullSessionInMediaBrowserService makes it to nextfood.
     public void setSessionToken(final MediaSession.Token token) {
+        ServiceState serviceState = mServiceState.get();
         if (token == null) {
-            throw new IllegalArgumentException("Session token may not be null.");
-        }
-        if (mServiceState.mSession != null) {
+            if (!Flags.enableNullSessionInMediaBrowserService()) {
+                throw new IllegalArgumentException("Session token may not be null.");
+            } else if (serviceState.mSession != null) {
+                ServiceState newServiceState = new ServiceState();
+                mBinder.setServiceState(newServiceState);
+                mServiceState.set(newServiceState);
+                serviceState.release();
+            } else {
+                // Nothing to do. The session is already null.
+            }
+        } else if (serviceState.mSession != null) {
             throw new IllegalStateException("The session token has already been set.");
+        } else {
+            serviceState.mSession = token;
+            mHandler.post(() -> serviceState.notifySessionTokenInitializedOnHandler(token));
         }
-        mServiceState.mSession = token;
-        mHandler.post(() -> mServiceState.notifySessionTokenInitializedOnHandler(token));
     }
 
     /**
@@ -450,7 +478,7 @@ public abstract class MediaBrowserService extends Service {
      * or if it has been destroyed.
      */
     public @Nullable MediaSession.Token getSessionToken() {
-        return mServiceState.mSession;
+        return mServiceState.get().mSession;
     }
 
     /**
@@ -521,7 +549,7 @@ public abstract class MediaBrowserService extends Service {
         if (parentId == null) {
             throw new IllegalArgumentException("parentId cannot be null in notifyChildrenChanged");
         }
-        mHandler.post(() -> mServiceState.notifyChildrenChangeOnHandler(parentId, options));
+        mHandler.post(() -> mServiceState.get().notifyChildrenChangeOnHandler(parentId, options));
     }
 
     /**
@@ -623,13 +651,36 @@ public abstract class MediaBrowserService extends Service {
 
         // Fields accessed from any caller thread.
         @Nullable private MediaSession.Token mSession;
-        @Nullable private ServiceBinder mBinder;
 
         // Fields accessed from mHandler only.
         @NonNull private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap<>();
 
+        public ServiceBinder getBinder() {
+            return mBinder;
+        }
+
         public void postOnHandler(Runnable runnable) {
             mHandler.post(runnable);
+        }
+
+        public void release() {
+            mHandler.postAtFrontOfQueue(this::clearConnectionsOnHandler);
+        }
+
+        private void clearConnectionsOnHandler() {
+            Iterator<ConnectionRecord> iterator = mConnections.values().iterator();
+            while (iterator.hasNext()) {
+                ConnectionRecord record = iterator.next();
+                iterator.remove();
+                try {
+                    record.callbacks.onDisconnect();
+                } catch (RemoteException exception) {
+                    Log.w(
+                            TAG,
+                            TextUtils.formatSimple("onDisconnectRequest for %s failed", record.pkg),
+                            exception);
+                }
+            }
         }
 
         public void removeConnectionRecordOnHandler(IMediaBrowserServiceCallbacks callbacks) {
@@ -796,8 +847,7 @@ public abstract class MediaBrowserService extends Service {
                         @Override
                         void onResultSent(
                                 List<MediaBrowser.MediaItem> list, @ResultFlags int flag) {
-                            if (mServiceState.mConnections.get(connection.callbacks.asBinder())
-                                    != connection) {
+                            if (mConnections.get(connection.callbacks.asBinder()) != connection) {
                                 if (DBG) {
                                     Log.d(
                                             TAG,

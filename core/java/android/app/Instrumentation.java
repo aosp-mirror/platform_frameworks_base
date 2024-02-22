@@ -145,7 +145,7 @@ public class Instrumentation {
      * reflection, but it will serve as noticeable discouragement from
      * doing such a thing.
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @android.ravenwood.annotation.RavenwoodKeep
     private void checkInstrumenting(String method) {
         // Check if we have an instrumentation context, as init should only get called by
         // the system in startup processes that are being instrumented.
@@ -155,16 +155,12 @@ public class Instrumentation {
         }
     }
 
-    private void checkInstrumenting$ravenwood(String method) {
-        // At the moment, Ravenwood doesn't attach a Context, but we're only ever
-        // running code as part of tests, so we continue quietly
-    }
-
     /**
      * Returns if it is being called in an instrumentation environment.
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public boolean isInstrumenting() {
         // Check if we have an instrumentation context, as init should only get called by
         // the system in startup processes that are being instrumented.
@@ -328,6 +324,7 @@ public class Instrumentation {
      * 
      * @see #getTargetContext
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public Context getContext() {
         return mInstrContext;
     }
@@ -352,6 +349,7 @@ public class Instrumentation {
      * 
      * @see #getContext
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public Context getTargetContext() {
         return mAppContext;
     }
@@ -2400,6 +2398,17 @@ public class Instrumentation {
      */
     final void basicInit(ActivityThread thread) {
         mThread = thread;
+    }
+
+    /**
+     * Only sets the Context up, keeps everything else null.
+     *
+     * @hide
+     */
+    @android.ravenwood.annotation.RavenwoodKeep
+    public final void basicInit(Context context) {
+        mInstrContext = context;
+        mAppContext = context;
     }
 
     /** @hide */

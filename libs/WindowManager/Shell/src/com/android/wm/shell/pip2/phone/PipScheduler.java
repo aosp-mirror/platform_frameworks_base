@@ -63,6 +63,9 @@ public class PipScheduler {
     @Nullable
     private SurfaceControl mPinnedTaskLeash;
 
+    // true if Launcher has started swipe PiP to home animation
+    private boolean mInSwipePipToHomeTransition;
+
     /**
      * Temporary PiP CUJ codes to schedule PiP related transitions directly from Shell.
      * This is used for a broadcast receiver to resolve intents. This should be removed once
@@ -166,6 +169,14 @@ public class PipScheduler {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setBounds(mPipTaskToken, toBounds);
         mPipTransitionController.startResizeTransition(wct, onFinishResizeCallback);
+    }
+
+    void setInSwipePipToHomeTransition(boolean inSwipePipToHome) {
+        mInSwipePipToHomeTransition = true;
+    }
+
+    boolean isInSwipePipToHomeTransition() {
+        return mInSwipePipToHomeTransition;
     }
 
     void onExitPip() {

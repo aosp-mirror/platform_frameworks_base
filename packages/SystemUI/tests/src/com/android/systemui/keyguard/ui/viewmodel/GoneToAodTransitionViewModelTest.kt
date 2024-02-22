@@ -59,7 +59,14 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             // The animation should only start > .4f way through
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
             assertThat(enterFromTopTranslationY)
-                .isEqualTo(StateToValue(TransitionState.STARTED, pixels))
+                .isEqualTo(
+                    StateToValue(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.AOD,
+                        transitionState = TransitionState.STARTED,
+                        value = pixels
+                    )
+                )
 
             repository.sendTransitionStep(step(.55f))
             assertThat(enterFromTopTranslationY!!.value ?: -1f).isIn(Range.closed(pixels, 0f))
@@ -70,7 +77,14 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             // At the end, the translation should be complete and set to zero
             repository.sendTransitionStep(step(1f))
             assertThat(enterFromTopTranslationY)
-                .isEqualTo(StateToValue(TransitionState.RUNNING, 0f))
+                .isEqualTo(
+                    StateToValue(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.AOD,
+                        transitionState = TransitionState.RUNNING,
+                        value = 0f
+                    )
+                )
         }
 
     @Test

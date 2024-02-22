@@ -58,7 +58,7 @@ constructor(
     private val activityStarter: ActivityStarter,
     private val userActionInteractor: Lazy<CustomTileUserActionInteractor>,
     private val customTileInteractor: CustomTileInteractor,
-    private val userRepository: UserRepository,
+    userRepository: UserRepository,
     private val qsTileLogger: QSTileLogger,
     private val tileServices: TileServices,
     @QSTileScope private val tileScope: CoroutineScope,
@@ -78,10 +78,10 @@ constructor(
         get() = tileReceivingInterface.mutableRefreshEvents
 
     /** Clears all pending binding for an active tile and binds not active one. */
-    fun bindOnStart() {
+    suspend fun bindOnStart() {
         try {
             with(getTileServiceManager()) {
-                if (isActiveTile) {
+                if (customTileInteractor.isTileActive()) {
                     clearPendingBind()
                 } else {
                     setBindRequested(true)
@@ -94,10 +94,10 @@ constructor(
     }
 
     /** Binds active tile WITHOUT CLEARING pending binds. */
-    fun bindOnClick() {
+    suspend fun bindOnClick() {
         try {
             with(getTileServiceManager()) {
-                if (isActiveTile) {
+                if (customTileInteractor.isTileActive()) {
                     setBindRequested(true)
                     tileServiceInterface.onStartListening()
                 }

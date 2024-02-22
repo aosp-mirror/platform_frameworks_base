@@ -147,6 +147,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
     @Nullable
     protected abstract ActivityRecord findAppTokenForSnapshot(TYPE source);
     protected abstract boolean use16BitFormat();
+    protected abstract Rect getLetterboxInsets(ActivityRecord topActivity);
 
     /**
      * This is different than {@link #recordSnapshotInner(TYPE)} because it doesn't store
@@ -309,7 +310,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         final WindowState mainWindow = result.second;
         final Rect contentInsets = getSystemBarInsets(mainWindow.getFrame(),
                 mainWindow.getInsetsStateWithVisibilityOverride());
-        final Rect letterboxInsets = activity.getLetterboxInsets();
+        final Rect letterboxInsets = getLetterboxInsets(activity);
         InsetUtils.addInsets(contentInsets, letterboxInsets);
         builder.setIsRealSnapshot(true);
         builder.setId(System.currentTimeMillis());
@@ -335,22 +336,27 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         final Configuration taskConfig = activity.getTask().getConfiguration();
         final int displayRotation = taskConfig.windowConfiguration.getDisplayRotation();
         final Rect outCrop = new Rect();
+        final Point taskSize = new Point();
         final Transition.ChangeInfo changeInfo = mCurrentChangeInfo;
         if (changeInfo != null && changeInfo.mRotation != displayRotation) {
             // For example, the source is closing and display rotation changes at the same time.
             // The snapshot should record the state in previous rotation.
             outCrop.set(changeInfo.mAbsoluteBounds);
+            taskSize.set(changeInfo.mAbsoluteBounds.right, changeInfo.mAbsoluteBounds.bottom);
             builder.setRotation(changeInfo.mRotation);
             builder.setOrientation(changeInfo.mAbsoluteBounds.height()
                     >= changeInfo.mAbsoluteBounds.width()
                     ? Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE);
         } else {
-            outCrop.set(taskConfig.windowConfiguration.getBounds());
+            final Configuration srcConfig = source.getConfiguration();
+            outCrop.set(srcConfig.windowConfiguration.getBounds());
+            final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
+            taskSize.set(taskBounds.width(), taskBounds.height());
             builder.setRotation(displayRotation);
-            builder.setOrientation(taskConfig.orientation);
+            builder.setOrientation(srcConfig.orientation);
         }
         outCrop.offsetTo(0, 0);
-        builder.setTaskSize(new Point(outCrop.right, outCrop.bottom));
+        builder.setTaskSize(taskSize);
         return outCrop;
     }
 
@@ -438,7 +444,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
             return null;
         }
         final Rect contentInsets = new Rect(systemBarInsets);
-        final Rect letterboxInsets = topActivity.getLetterboxInsets();
+        final Rect letterboxInsets = getLetterboxInsets(topActivity);
         InsetUtils.addInsets(contentInsets, letterboxInsets);
         // Note, the app theme snapshot is never translucent because we enforce a non-translucent
         // color above

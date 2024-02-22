@@ -158,9 +158,9 @@ constructor(
                 val burnInY = MathUtils.lerp(0, burnIn.translationY, interpolated).toInt()
                 val translationY =
                     if (Flags.migrateClocksToBlueprint()) {
-                        burnInY
+                        max(params.topInset - params.minViewY, burnInY)
                     } else {
-                        max(params.topInset, params.statusViewTop + burnInY) - params.statusViewTop
+                        max(params.topInset, params.minViewY + burnInY) - params.minViewY
                     }
 
                 BurnInModel(
@@ -194,8 +194,8 @@ data class BurnInParameters(
     val clockControllerProvider: Provider<ClockController>? = null,
     /** System insets that keyguard needs to stay out of */
     val topInset: Int = 0,
-    /** Status view top, without translation added in */
-    val statusViewTop: Int = 0,
+    /** The min y-value of the visible elements on lockscreen */
+    val minViewY: Int = Int.MAX_VALUE,
     /** The current y translation of the view */
     val translationY: () -> Float? = { null }
 )

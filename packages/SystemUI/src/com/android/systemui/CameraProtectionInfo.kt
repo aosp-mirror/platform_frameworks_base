@@ -23,6 +23,6 @@ data class CameraProtectionInfo(
     val logicalCameraId: String,
     val physicalCameraId: String?,
     val cutoutProtectionPath: Path,
-    val cutoutBounds: Rect,
+    val bounds: Rect,
     val displayUniqueId: String?,
 )

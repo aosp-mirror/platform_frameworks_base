@@ -24,4 +24,11 @@ oneway interface IMediaBrowserServiceCallbacks {
     @UnsupportedAppUsage
     void onConnectFailed();
     void onLoadChildren(String mediaId, in ParceledListSlice list, in Bundle options);
+    /**
+     * Invoked when the browser service cuts off the connection with the browser.
+     *
+     * <p>The browser must also clean up any state associated with this connection, as if the
+     * service had been destroyed.
+     */
+    void onDisconnect();
 }

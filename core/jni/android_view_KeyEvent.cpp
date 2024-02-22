@@ -94,7 +94,7 @@ static struct {
 
 // ----------------------------------------------------------------------------
 
-jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent& event) {
+jobject android_view_KeyEvent_obtainAsCopy(JNIEnv* env, const KeyEvent& event) {
     ScopedLocalRef<jbyteArray> hmac = toJbyteArray(env, event.getHmac());
     jobject eventObj =
             env->CallStaticObjectMethod(gKeyEventClassInfo.clazz, gKeyEventClassInfo.obtain,
@@ -113,7 +113,7 @@ jobject android_view_KeyEvent_fromNative(JNIEnv* env, const KeyEvent& event) {
     return eventObj;
 }
 
-KeyEvent android_view_KeyEvent_toNative(JNIEnv* env, jobject eventObj) {
+KeyEvent android_view_KeyEvent_obtainAsCopy(JNIEnv* env, jobject eventObj) {
     jint id = env->GetIntField(eventObj, gKeyEventClassInfo.mId);
     jint deviceId = env->GetIntField(eventObj, gKeyEventClassInfo.mDeviceId);
     jint source = env->GetIntField(eventObj, gKeyEventClassInfo.mSource);

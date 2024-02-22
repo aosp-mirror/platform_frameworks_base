@@ -404,10 +404,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     @VisibleForTesting
     void onPilferPointers() {
-        mCurrentTracker.updateStartLocation();
         // Dispatch onBackStarted, only to app callbacks.
         // System callbacks will receive onBackStarted when the remote animation starts.
         if (!shouldDispatchToAnimator() && mActiveCallback != null) {
+            mCurrentTracker.updateStartLocation();
             tryDispatchAppOnBackStarted(mActiveCallback, mCurrentTracker.createStartEvent(null));
         }
     }

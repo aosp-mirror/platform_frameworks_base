@@ -7656,6 +7656,22 @@ public class Intent implements Parcelable, Cloneable {
     /** @hide */
     public static final int LOCAL_FLAG_FROM_SYSTEM = 1 << 5;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "EXTENDED_FLAG_" }, value = {
+            EXTENDED_FLAG_FILTER_MISMATCH,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ExtendedFlags {}
+
+    /**
+     * This flag is not normally set by application code, but set for you by the system if
+     * an external intent does not match the receiving component's intent filter.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int EXTENDED_FLAG_FILTER_MISMATCH = 1 << 0;
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // toUri() and parseUri() options.
@@ -7775,6 +7791,7 @@ public class Intent implements Parcelable, Cloneable {
     private int mFlags;
     /** Set of in-process flags which are never parceled */
     private int mLocalFlags;
+    private int mExtendedFlags;
     private ArraySet<String> mCategories;
     @UnsupportedAppUsage
     private Bundle mExtras;
@@ -7834,6 +7851,7 @@ public class Intent implements Parcelable, Cloneable {
 
         if (copyMode != COPY_MODE_FILTER) {
             this.mFlags = o.mFlags;
+            this.mExtendedFlags = o.mExtendedFlags;
             this.mContentUserHint = o.mContentUserHint;
             this.mLaunchToken = o.mLaunchToken;
             if (o.mSourceBounds != null) {
@@ -8161,10 +8179,15 @@ public class Intent implements Parcelable, Cloneable {
 
                 // launch flags
                 else if (uri.startsWith("launchFlags=", i)) {
-                    intent.mFlags = Integer.decode(value).intValue();
+                    intent.mFlags = Integer.decode(value);
                     if ((flags& URI_ALLOW_UNSAFE) == 0) {
                         intent.mFlags &= ~IMMUTABLE_FLAGS;
                     }
+                }
+
+                // extended flags
+                else if (uri.startsWith("extendedLaunchFlags=", i)) {
+                    intent.mExtendedFlags = Integer.decode(value);
                 }
 
                 // package
@@ -8374,7 +8397,7 @@ public class Intent implements Parcelable, Cloneable {
                 isIntentFragment = true;
                 i += 12;
                 int j = uri.indexOf(')', i);
-                intent.mFlags = Integer.decode(uri.substring(i, j)).intValue();
+                intent.mFlags = Integer.decode(uri.substring(i, j));
                 if ((flags& URI_ALLOW_UNSAFE) == 0) {
                     intent.mFlags &= ~IMMUTABLE_FLAGS;
                 }
@@ -9868,6 +9891,22 @@ public class Intent implements Parcelable, Cloneable {
         return mFlags;
     }
 
+    /**
+     * Retrieve any extended flags associated with this intent.  You will
+     * normally just set them with {@link #setExtendedFlags} and let the system
+     * take the appropriate action with them.
+     *
+     * @return The currently set extended flags.
+     * @see #addExtendedFlags
+     * @see #removeExtendedFlags
+     *
+     * @hide
+     */
+    @TestApi
+    public @ExtendedFlags int getExtendedFlags() {
+        return mExtendedFlags;
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     public boolean isExcludingStopped() {
@@ -11198,6 +11237,23 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
+     * Add additional extended flags to the intent (or with existing flags value).
+     *
+     * @param flags The new flags to set.
+     * @return Returns the same Intent object, for chaining multiple calls into
+     *         a single statement.
+     * @see #getExtendedFlags
+     * @see #removeExtendedFlags
+     *
+     * @hide
+     */
+    @TestApi
+    public @NonNull Intent addExtendedFlags(@ExtendedFlags int flags) {
+        mExtendedFlags |= flags;
+        return this;
+    }
+
+    /**
      * Remove these flags from the intent.
      *
      * @param flags The flags to remove.
@@ -11207,6 +11263,19 @@ public class Intent implements Parcelable, Cloneable {
      */
     public void removeFlags(@Flags int flags) {
         mFlags &= ~flags;
+    }
+
+    /**
+     * Remove these extended flags from the intent.
+     *
+     * @param flags The flags to remove.
+     * @see #getExtendedFlags
+     * @see #addExtendedFlags
+     *
+     * @hide
+     */
+    public void removeExtendedFlags(@ExtendedFlags int flags) {
+        mExtendedFlags &= ~flags;
     }
 
     /**
@@ -11513,6 +11582,7 @@ public class Intent implements Parcelable, Cloneable {
             changes |= FILL_IN_COMPONENT;
         }
         mFlags |= other.mFlags;
+        mExtendedFlags |= other.mExtendedFlags;
         if (other.mSourceBounds != null
                 && (mSourceBounds == null || (flags&FILL_IN_SOURCE_BOUNDS) != 0)) {
             mSourceBounds = new Rect(other.mSourceBounds);
@@ -11748,6 +11818,13 @@ public class Intent implements Parcelable, Cloneable {
             first = false;
             b.append("flg=0x").append(Integer.toHexString(mFlags));
         }
+        if (mExtendedFlags != 0) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("xflg=0x").append(Integer.toHexString(mExtendedFlags));
+        }
         if (mPackage != null) {
             if (!first) {
                 b.append(' ');
@@ -11845,6 +11922,9 @@ public class Intent implements Parcelable, Cloneable {
         }
         if (mFlags != 0) {
             proto.write(IntentProto.FLAG, "0x" + Integer.toHexString(mFlags));
+        }
+        if (mExtendedFlags != 0) {
+            proto.write(IntentProto.EXTENDED_FLAG, "0x" + Integer.toHexString(mExtendedFlags));
         }
         if (mPackage != null) {
             proto.write(IntentProto.PACKAGE, mPackage);
@@ -12019,6 +12099,10 @@ public class Intent implements Parcelable, Cloneable {
         if (mFlags != 0) {
             uri.append("launchFlags=0x").append(Integer.toHexString(mFlags)).append(';');
         }
+        if (mExtendedFlags != 0) {
+            uri.append("extendedLaunchFlags=0x").append(Integer.toHexString(mExtendedFlags))
+                    .append(';');
+        }
         if (mPackage != null && !mPackage.equals(defPackage)) {
             uri.append("package=").append(Uri.encode(mPackage)).append(';');
         }
@@ -12068,6 +12152,7 @@ public class Intent implements Parcelable, Cloneable {
         out.writeString8(mType);
         out.writeString8(mIdentifier);
         out.writeInt(mFlags);
+        out.writeInt(mExtendedFlags);
         out.writeString8(mPackage);
         ComponentName.writeToParcel(mComponent, out);
 
@@ -12136,6 +12221,7 @@ public class Intent implements Parcelable, Cloneable {
         mType = in.readString8();
         mIdentifier = in.readString8();
         mFlags = in.readInt();
+        mExtendedFlags = in.readInt();
         mPackage = in.readString8();
         mComponent = ComponentName.readFromParcel(in);
 
@@ -12557,6 +12643,32 @@ public class Intent implements Parcelable, Cloneable {
     /** @hide */
     public boolean isImplicitImageCaptureIntent() {
         return mPackage == null && mComponent == null && isImageCaptureIntent();
+    }
+
+    /**
+     * Whether the intent mismatches all intent filters declared in the receiving component.
+     * <p>
+     * When a component receives an intent, normally obtainable through the following methods:
+     * <ul>
+     *     <li> {@link BroadcastReceiver#onReceive(Context, Intent)}
+     *     <li> {@link Activity#getIntent()}
+     *     <li> {@link Activity#onNewIntent)}
+     *     <li> {@link android.app.Service#onStartCommand(Intent, int, int)}
+     *     <li> {@link android.app.Service#onBind(Intent)}
+     * </ul>
+     * The developer can call this method to check if this intent does not match any of its
+     * declared intent filters. A non-matching intent can be delivered when the intent sender
+     * explicitly set the component through {@link #setComponent} or {@link #setClassName}.
+     * <p>
+     * This method always returns {@code false} if the intent originated from within the same
+     * application or the system, because these cases are always exempted from security checks.
+     *
+     * @return Returns true if the intent does not match any intent filters declared in the
+     * receiving component.
+     */
+    @FlaggedApi(android.security.Flags.FLAG_ENFORCE_INTENT_FILTER_MATCH)
+    public boolean isMismatchingFilter() {
+        return (mExtendedFlags & EXTENDED_FLAG_FILTER_MISMATCH) != 0;
     }
 
     /**

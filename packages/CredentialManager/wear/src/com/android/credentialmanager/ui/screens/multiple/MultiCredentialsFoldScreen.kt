@@ -39,6 +39,7 @@ import com.android.credentialmanager.ui.components.DismissChip
 import com.android.credentialmanager.ui.components.CredentialsScreenChip
 import com.android.credentialmanager.ui.components.SignInHeader
 import com.android.credentialmanager.ui.components.SignInOptionsChip
+import com.android.credentialmanager.ui.components.LockedProviderChip
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
@@ -142,7 +143,16 @@ fun MultiCredentialsFoldScreen(
                     )
                 }
             }
-        item { SignInOptionsChip(onSignInOptionsClicked) }
+
+        state.authenticationEntryList.forEach { authenticationEntryInfo ->
+            item {
+                LockedProviderChip(authenticationEntryInfo) {
+                    // TODO(b/322797032) invoke LockedProviderScreen here using flow engine
+                }
+            }
+        }
+
+        item { SignInOptionsChip(onSignInOptionsClicked)}
         item { DismissChip(onCancelClicked) }
     }
 }
