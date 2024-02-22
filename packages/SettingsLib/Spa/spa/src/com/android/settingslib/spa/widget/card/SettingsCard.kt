@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.widget.card
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -102,10 +103,11 @@ internal fun SettingsCardImpl(model: CardModel) {
     AnimatedVisibility(visible = model.isVisible()) {
         SettingsCardContent(containerColor = model.containerColor) {
             Column(
-                modifier = Modifier.padding(
-                    horizontal = SettingsDimension.dialogItemPaddingHorizontal,
-                    vertical = SettingsDimension.itemPaddingAround,
-                ),
+                modifier = (model.onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier)
+                    .padding(
+                        horizontal = SettingsDimension.dialogItemPaddingHorizontal,
+                        vertical = SettingsDimension.itemPaddingAround,
+                    ),
                 verticalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround)
             ) {
                 CardHeader(model.imageVector, model.tintColor, model.onDismiss)
