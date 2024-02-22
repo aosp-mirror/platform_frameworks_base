@@ -4808,6 +4808,53 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_MODES_API)
+    public void updateAutomaticZenRule_ruleChanged_deactivatesRule() {
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", CONDITION_ID)
+                .setConfigurationActivity(new ComponentName(mPkg, "cls"))
+                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, rule, UPDATE_ORIGIN_APP, "reason",
+                CUSTOM_PKG_UID);
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, UPDATE_ORIGIN_APP,
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+
+        AutomaticZenRule updateWithDiff = new AutomaticZenRule.Builder(rule)
+                .setTriggerDescription("Whenever")
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, updateWithDiff, UPDATE_ORIGIN_APP, "reason",
+                CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).condition).isNull();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void updateAutomaticZenRule_ruleNotChanged_doesNotDeactivateRule() {
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", CONDITION_ID)
+                .setConfigurationActivity(new ComponentName(mPkg, "cls"))
+                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, rule, UPDATE_ORIGIN_APP, "reason",
+                CUSTOM_PKG_UID);
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, UPDATE_ORIGIN_APP,
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+
+        AutomaticZenRule updateUnchanged = new AutomaticZenRule.Builder(rule).build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, updateUnchanged, UPDATE_ORIGIN_APP, "reason",
+                CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        assertThat(mZenModeHelper.mConfig.automaticRules.get(ruleId).condition).isEqualTo(
+                CONDITION_TRUE);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
     public void removeAutomaticZenRule_propagatesOriginToEffectsApplier() {
         mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
         reset(mDeviceEffectsApplier);
