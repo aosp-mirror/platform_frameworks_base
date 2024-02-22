@@ -15014,7 +15014,8 @@ public class TelephonyManager {
      * Get the emergency assistance package name.
      *
      * @return the package name of the emergency assistance app.
-     * @throws IllegalStateException if emergency assistance is not enabled.
+     * @throws IllegalStateException if emergency assistance is not enabled or the device is
+     * not voice capable.
      *
      * @hide
      */
@@ -15023,8 +15024,9 @@ public class TelephonyManager {
     @NonNull
     @SystemApi
     public String getEmergencyAssistancePackage() {
-        if (!isEmergencyAssistanceEnabled()) {
-            throw new IllegalStateException("isEmergencyAssistanceEnabled() is false.");
+        if (!isEmergencyAssistanceEnabled() || !isVoiceCapable()) {
+            throw new IllegalStateException("isEmergencyAssistanceEnabled() is false or device"
+                + " not voice capable.");
         }
         String emergencyRole = mContext.getSystemService(RoleManager.class)
                 .getEmergencyRoleHolder(mContext.getUserId());
