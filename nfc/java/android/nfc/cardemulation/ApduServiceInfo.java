@@ -682,7 +682,7 @@ public final class ApduServiceInfo implements Parcelable {
     /**
      * Add a Polling Loop Filter. Custom NFC polling frames that match this filter will cause the
      * device to exit observe mode, just as if
-     * {@link android.nfc.NfcAdapter#setTransactionAllowed(boolean)} had been called with true,
+     * {@link android.nfc.NfcAdapter#setObserveModeEnabled(boolean)} had been called with true,
      * allowing transactions to proceed. The matching frame will also be delivered to
      * {@link HostApduService#processPollingFrames(List)}. Adding a key with this or
      * {@link  ApduServiceInfo#addPollingLoopFilter(String)} multiple times will
