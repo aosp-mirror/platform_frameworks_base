@@ -15,7 +15,7 @@
  */
 package com.android.server.autofill.ui;
 
-import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
+import static android.service.autofill.FillResponse.FLAG_CREDENTIAL_MANAGER_RESPONSE;
 import static com.android.server.autofill.Helper.paramsToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
@@ -215,7 +215,7 @@ final class FillUi {
                 Slog.v(TAG, "overriding maximum visible datasets to " + mVisibleDatasetsMaxCount);
             }
         } else if (Flags.autofillCredmanIntegration() && (
-                (response.getFlags() & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0)) {
+                (response.getFlags() & FLAG_CREDENTIAL_MANAGER_RESPONSE) != 0)) {
             mVisibleDatasetsMaxCount = AUTOFILL_CREDMAN_MAX_VISIBLE_DATASETS;
         }
         else {
