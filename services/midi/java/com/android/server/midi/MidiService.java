@@ -1012,7 +1012,11 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
 
-        if (user.getUserIdentifier() == mUserManager.getMainUser().getIdentifier()) {
+        // Allow only the main user to create BluetoothMidiService.
+        // If there is no main user, allow all users to create it.
+        UserHandle mainUser = mUserManager.getMainUser();
+        if ((mainUser == null)
+                || (user.getUserIdentifier() == mainUser.getIdentifier())) {
             PackageInfo info;
             try {
                 info = mPackageManager.getPackageInfoAsUser(
