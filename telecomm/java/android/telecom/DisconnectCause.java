@@ -169,8 +169,7 @@ public final class DisconnectCause implements Parcelable {
             int toneToPlay) {
         this(code, label, description, reason, toneToPlay,
                 android.telephony.DisconnectCause.ERROR_UNSPECIFIED,
-                PreciseDisconnectCause.ERROR_UNSPECIFIED,
-                null /* imsReasonInfo */);
+                PreciseDisconnectCause.ERROR_UNSPECIFIED, null /* imsReasonInfo */);
     }
 
     /**
@@ -187,8 +186,6 @@ public final class DisconnectCause implements Parcelable {
      * @param imsReasonInfo The relevant {@link ImsReasonInfo}, or {@code null} if not available.
      * @hide
      */
-    @SystemApi
-    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     public DisconnectCause(int code, @NonNull CharSequence label,
             @NonNull CharSequence description, @NonNull String reason,
             int toneToPlay, @Annotation.DisconnectCauses int telephonyDisconnectCause,
@@ -296,6 +293,117 @@ public final class DisconnectCause implements Parcelable {
      */
     public int getTone() {
         return mToneToPlay;
+    }
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    public static final class Builder {
+        private int mDisconnectCode;
+        private CharSequence mDisconnectLabel;
+        private CharSequence mDisconnectDescription;
+        private String mDisconnectReason;
+        private int mToneToPlay;
+        private int mTelephonyDisconnectCause;
+        private int mTelephonyPreciseDisconnectCause;
+        private ImsReasonInfo mImsReasonInfo;
+
+        /**
+         * Sets the code for the reason for this disconnect.
+         * @param code The code denoting the type of disconnect.
+         */
+        public @NonNull DisconnectCause.Builder setCode(int code) {
+            mDisconnectCode = code;
+            return this;
+        }
+
+        /**
+         * Sets a label which explains the reason for the disconnect cause, used for display in the
+         * user interface.
+         * @param label The label to associate with the disconnect cause.
+         */
+        public @NonNull DisconnectCause.Builder setLabel(@Nullable CharSequence label) {
+            mDisconnectLabel = label;
+            return this;
+        }
+
+        /**
+         * Sets a description which provides the reason for the disconnect cause, used for display
+         * in the user interface.
+         * @param description The description to associate with the disconnect cause.
+         */
+        public @NonNull DisconnectCause.Builder setDescription(
+                @Nullable CharSequence description) {
+            mDisconnectDescription = description;
+            return this;
+        }
+
+        /**
+         * Sets a reason providing explanation for the disconnect (intended for logging and not for
+         * displaying in the user interface).
+         * @param reason The reason for the disconnect.
+         */
+        public @NonNull DisconnectCause.Builder setReason(@NonNull String reason) {
+            mDisconnectReason = reason;
+            return this;
+        }
+
+        /**
+         * Sets the tone to play when disconnected.
+         * @param toneToPlay The tone as defined in {@link ToneGenerator} to play when disconnected.
+         */
+        public @NonNull DisconnectCause.Builder setTone(int toneToPlay) {
+            mToneToPlay = toneToPlay;
+            return this;
+        }
+
+        /**
+         * Sets the telephony {@link android.telephony.DisconnectCause} for the call (used
+         * internally by Telecom for providing extra debug information from Telephony).
+         * @param telephonyDisconnectCause The disconnect cause as provided by Telephony.
+         */
+        public @NonNull DisconnectCause.Builder setTelephonyDisconnectCause(
+                @Annotation.DisconnectCauses int telephonyDisconnectCause) {
+            mTelephonyDisconnectCause = telephonyDisconnectCause;
+            return this;
+        }
+
+        /**
+         * Sets the telephony {@link android.telephony.PreciseDisconnectCause} for the call (used
+         * internally by Telecom for providing extra debug information from Telephony).
+         * @param telephonyPreciseDisconnectCause The precise disconnect cause as provided by
+         *                                        Telephony.
+         */
+
+        public @NonNull DisconnectCause.Builder setTelephonyPreciseDisconnectCause(
+                @Annotation.PreciseDisconnectCauses int telephonyPreciseDisconnectCause) {
+            mTelephonyPreciseDisconnectCause = telephonyPreciseDisconnectCause;
+            return this;
+        }
+
+        /**
+         * Returns the telephony {@link ImsReasonInfo} associated with the call disconnection. This
+         * is only used internally by Telecom for providing extra debug information from Telephony.
+         *
+         * @param imsReasonInfo The {@link ImsReasonInfo} or {@code null} if not known.
+         */
+        public @NonNull DisconnectCause.Builder setImsReasonInfo(
+                @Nullable ImsReasonInfo imsReasonInfo) {
+            mImsReasonInfo = imsReasonInfo;
+            return this;
+        }
+
+        /**
+         * Build the {@link DisconnectCause} from the provided Builder config.
+         * @return The {@link DisconnectCause} instance from provided builder.
+         */
+        public @NonNull DisconnectCause build() {
+            return new DisconnectCause(mDisconnectCode, mDisconnectLabel, mDisconnectDescription,
+                    mDisconnectReason, mToneToPlay, mTelephonyDisconnectCause,
+                    mTelephonyPreciseDisconnectCause, mImsReasonInfo);
+        }
     }
 
     public static final @android.annotation.NonNull Creator<DisconnectCause> CREATOR
