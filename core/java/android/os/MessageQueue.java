@@ -623,14 +623,14 @@ public final class MessageQueue {
                 // Message is to be inserted at tail or middle of queue. Usually we don't have to
                 // wake up the event queue unless there is a barrier at the head of the queue and
                 // the message is the earliest asynchronous message in the queue.
-                //
+                needWake = mBlocked && p.target == null && msg.isAsynchronous();
+
                 // For readability, we split this portion of the function into two blocks based on
                 // whether tail tracking is enabled. This has a minor implication for the case
                 // where tail tracking is disabled. See the comment below.
                 if (Flags.messageQueueTailTracking()) {
-                    needWake = mBlocked && p.target == null && msg.isAsynchronous()
-                        && mAsyncMessageCount == 0;
                     if (when >= mLast.when) {
+                        needWake = needWake && mAsyncMessageCount == 0;
                         msg.next = null;
                         mLast.next = msg;
                         mLast = msg;
@@ -643,6 +643,9 @@ public final class MessageQueue {
                             if (p == null || when < p.when) {
                                 break;
                             }
+                            if (needWake && p.isAsynchronous()) {
+                                needWake = false;
+                            }
                         }
                         if (p == null) {
                             /* Inserting at tail of queue */
@@ -652,7 +655,6 @@ public final class MessageQueue {
                         prev.next = msg;
                     }
                 } else {
-                    needWake = mBlocked && p.target == null && msg.isAsynchronous();
                     Message prev;
                     for (;;) {
                         prev = p;
