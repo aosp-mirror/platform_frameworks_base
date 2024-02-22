@@ -16,7 +16,10 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
+import android.app.ActivityOptions
+import android.app.PendingIntent
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
@@ -25,6 +28,7 @@ import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
+import android.content.Intent
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
@@ -32,6 +36,7 @@ import android.graphics.Region
 import android.os.IBinder
 import android.os.SystemProperties
 import android.util.DisplayMetrics.DENSITY_DEFAULT
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
@@ -49,6 +54,8 @@ import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.ExecutorUtils
 import com.android.wm.shell.common.ExternalInterfaceBinder
 import com.android.wm.shell.common.LaunchAdjacentController
+import com.android.wm.shell.common.MultiInstanceHelper
+import com.android.wm.shell.common.MultiInstanceHelper.Companion.getComponent
 import com.android.wm.shell.common.RemoteCallable
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
@@ -59,7 +66,9 @@ import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
+import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.recents.RecentTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -76,6 +85,7 @@ import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
+import java.util.function.Function
 
 /** Handles moving tasks in and out of desktop */
 class DesktopTasksController(
@@ -87,6 +97,7 @@ class DesktopTasksController(
         private val shellTaskOrganizer: ShellTaskOrganizer,
         private val syncQueue: SyncTransactionQueue,
         private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
+        private val dragAndDropController: DragAndDropController,
         private val transitions: Transitions,
         private val enterDesktopTaskTransitionHandler: EnterDesktopTaskTransitionHandler,
         private val exitDesktopTaskTransitionHandler: ExitDesktopTaskTransitionHandler,
@@ -96,8 +107,10 @@ class DesktopTasksController(
         private val desktopModeTaskRepository: DesktopModeTaskRepository,
         private val launchAdjacentController: LaunchAdjacentController,
         private val recentsTransitionHandler: RecentsTransitionHandler,
+        private val multiInstanceHelper: MultiInstanceHelper,
         @ShellMainThread private val mainExecutor: ShellExecutor
-) : RemoteCallable<DesktopTasksController>, Transitions.TransitionHandler {
+) : RemoteCallable<DesktopTasksController>, Transitions.TransitionHandler,
+    DragAndDropController.DragAndDropListener {
 
     private val desktopMode: DesktopModeImpl
     private var visualIndicator: DesktopModeVisualIndicator? = null
@@ -174,6 +187,7 @@ class DesktopTasksController(
                 }
             }
         )
+        dragAndDropController.addListener(this)
     }
 
     fun setOnTaskResizeAnimationListener(listener: OnTaskResizeAnimationListener) {
@@ -1021,6 +1035,50 @@ class DesktopTasksController(
             callbackExecutor: Executor
     ) {
         desktopModeTaskRepository.setExclusionRegionListener(listener, callbackExecutor)
+    }
+
+    override fun onUnhandledDrag(
+        launchIntent: PendingIntent,
+        dragSurface: SurfaceControl,
+        onFinishCallback: Consumer<Boolean>
+    ): Boolean {
+        // TODO(b/320797628): Pass through which display we are dropping onto
+        val activeTasks = desktopModeTaskRepository.getActiveTasks(DEFAULT_DISPLAY)
+        if (!activeTasks.any { desktopModeTaskRepository.isVisibleTask(it) }) {
+            // Not currently in desktop mode, ignore the drop
+            return false
+        }
+
+        val launchComponent = getComponent(launchIntent)
+        if (!multiInstanceHelper.supportsMultiInstanceSplit(launchComponent)) {
+            // TODO(b/320797628): Should only return early if there is an existing running task, and
+            //                    notify the user as well. But for now, just ignore the drop.
+            KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "Dropped intent does not support multi-instance")
+            return false
+        }
+
+        // Start a new transition to launch the app
+        val opts = ActivityOptions.makeBasic().apply {
+            launchWindowingMode = WINDOWING_MODE_FREEFORM
+            pendingIntentLaunchFlags =
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+            setPendingIntentBackgroundActivityStartMode(
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+            isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
+        }
+        val wct = WindowContainerTransaction()
+        wct.sendPendingIntent(launchIntent, null, opts.toBundle())
+        transitions.startTransition(TRANSIT_OPEN, wct, null /* handler */)
+
+        // Report that this is handled by the listener
+        onFinishCallback.accept(true)
+
+        // We've assumed responsibility of cleaning up the drag surface, so do that now
+        // TODO(b/320797628): Do an actual animation here for the drag surface
+        val t = SurfaceControl.Transaction()
+        t.remove(dragSurface)
+        t.apply()
+        return true
     }
 
     private fun dump(pw: PrintWriter, prefix: String) {

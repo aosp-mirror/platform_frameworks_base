@@ -498,6 +498,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            DragAndDropController dragAndDropController,
             Transitions transitions,
             EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
             ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
@@ -506,14 +507,15 @@ public abstract class WMShellModule {
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             LaunchAdjacentController launchAdjacentController,
             RecentsTransitionHandler recentsTransitionHandler,
+            MultiInstanceHelper multiInstanceHelper,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
-                transitions, enterDesktopTransitionHandler, exitDesktopTransitionHandler,
-                toggleResizeDesktopTaskTransitionHandler, dragToDesktopTransitionHandler,
-                desktopModeTaskRepository, launchAdjacentController, recentsTransitionHandler,
-                mainExecutor);
+                dragAndDropController, transitions, enterDesktopTransitionHandler,
+                exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
+                dragToDesktopTransitionHandler, desktopModeTaskRepository, launchAdjacentController,
+                recentsTransitionHandler, multiInstanceHelper, mainExecutor);
     }
 
     @WMSingleton
