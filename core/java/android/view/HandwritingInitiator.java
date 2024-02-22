@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -38,6 +39,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Initiates handwriting mode once it detects stylus movement in handwritable areas.
@@ -415,25 +417,53 @@ public class HandwritingInitiator {
      */
     @VisibleForTesting
     public boolean tryAcceptStylusHandwritingDelegation(@NonNull View view) {
+        if (Flags.useZeroJankProxy()) {
+            tryAcceptStylusHandwritingDelegationAsync(view);
+        } else {
+            return tryAcceptStylusHandwritingDelegationInternal(view);
+        }
+        return false;
+    }
+
+    private boolean tryAcceptStylusHandwritingDelegationInternal(@NonNull View view) {
         String delegatorPackageName =
                 view.getAllowedHandwritingDelegatorPackageName();
         if (delegatorPackageName == null) {
             delegatorPackageName = view.getContext().getOpPackageName();
         }
         if (mImm.acceptStylusHandwritingDelegation(view, delegatorPackageName)) {
-            if (mState != null) {
-                mState.mHasInitiatedHandwriting = true;
-                mState.mShouldInitHandwriting = false;
-            }
-            if (view instanceof TextView) {
-                ((TextView) view).hideHint();
-            }
-            // A handwriting delegate view is accepted and handwriting starts; hide the
-            // hover icon.
-            mShowHoverIconForConnectedView = false;
+            onDelegationAccepted(view);
             return true;
         }
         return false;
+    }
+
+    @FlaggedApi(Flags.FLAG_USE_ZERO_JANK_PROXY)
+    private void tryAcceptStylusHandwritingDelegationAsync(@NonNull View view) {
+        String delegatorPackageName =
+                view.getAllowedHandwritingDelegatorPackageName();
+        if (delegatorPackageName == null) {
+            delegatorPackageName = view.getContext().getOpPackageName();
+        }
+        Consumer<Boolean> consumer = delegationAccepted -> {
+            if (delegationAccepted) {
+                onDelegationAccepted(view);
+            }
+        };
+        mImm.acceptStylusHandwritingDelegation(view, delegatorPackageName, view::post, consumer);
+    }
+
+    private void onDelegationAccepted(View view) {
+        if (mState != null) {
+            mState.mHasInitiatedHandwriting = true;
+            mState.mShouldInitHandwriting = false;
+        }
+        if (view instanceof TextView) {
+            ((TextView) view).hideHint();
+        }
+        // A handwriting delegate view is accepted and handwriting starts; hide the
+        // hover icon.
+        mShowHoverIconForConnectedView = false;
     }
 
     /**

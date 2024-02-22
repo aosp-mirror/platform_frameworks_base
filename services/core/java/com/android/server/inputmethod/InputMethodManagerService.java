@@ -148,6 +148,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IBooleanListener;
 import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
@@ -3541,6 +3542,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         schedulePrepareStylusHandwritingDelegation(
                 userId, delegatePackageName, delegatorPackageName);
+    }
+
+    @Override
+    public void acceptStylusHandwritingDelegationAsync(
+            @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags, IBooleanListener callback)
+            throws RemoteException {
+        boolean result = acceptStylusHandwritingDelegation(
+                client, userId, delegatePackageName, delegatorPackageName, flags);
+        callback.onResult(result);
     }
 
     @Override
