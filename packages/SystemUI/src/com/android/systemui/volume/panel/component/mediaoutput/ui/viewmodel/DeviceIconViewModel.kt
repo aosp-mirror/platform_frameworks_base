@@ -23,15 +23,18 @@ import com.android.systemui.common.shared.model.Icon
 sealed interface DeviceIconViewModel {
 
     val icon: Icon
+    val iconColor: Color
     val backgroundColor: Color
 
     class IsPlaying(
         override val icon: Icon,
+        override val iconColor: Color,
         override val backgroundColor: Color,
     ) : DeviceIconViewModel
 
     class IsNotPlaying(
         override val icon: Icon,
+        override val iconColor: Color,
         override val backgroundColor: Color,
     ) : DeviceIconViewModel
 }
