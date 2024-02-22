@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.shared.model
+package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import kotlinx.coroutines.flow.StateFlow
 
-object VolumePanelComponents {
+/** Controls the behaviour of a volume slider. */
+interface SliderViewModel {
 
-    const val MEDIA_OUTPUT: VolumePanelComponentKey = "media_output"
-    const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
-    const val VOLUME_SLIDERS: VolumePanelComponentKey = "volume_sliders"
-    const val CAPTIONING: VolumePanelComponentKey = "captioning"
-    const val ANC: VolumePanelComponentKey = "anc"
+    val slider: StateFlow<SliderState>
+
+    fun onValueChangeFinished(state: SliderState, newValue: Float)
 }
