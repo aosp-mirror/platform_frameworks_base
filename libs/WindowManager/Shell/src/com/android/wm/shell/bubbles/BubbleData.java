@@ -165,7 +165,7 @@ public class BubbleData {
          * used when {@link BubbleController#isShowingAsBubbleBar()} is true.
          */
         BubbleBarUpdate getInitialState() {
-            BubbleBarUpdate bubbleBarUpdate = new BubbleBarUpdate();
+            BubbleBarUpdate bubbleBarUpdate = BubbleBarUpdate.createInitialState();
             bubbleBarUpdate.shouldShowEducation = shouldShowEducation;
             for (int i = 0; i < bubbles.size(); i++) {
                 bubbleBarUpdate.currentBubbleList.add(bubbles.get(i).asBubbleBarBubble());

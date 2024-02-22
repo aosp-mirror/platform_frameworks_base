@@ -33,6 +33,8 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleController;
@@ -42,6 +44,8 @@ import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.DeviceConfig;
 import com.android.wm.shell.bubbles.DismissViewUtils;
+import com.android.wm.shell.bubbles.bar.BubbleBarExpandedViewDragController.DragListener;
+import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 import com.android.wm.shell.common.bubbles.DismissView;
 
 import kotlin.Unit;
@@ -201,15 +205,23 @@ public class BubbleBarLayerView extends FrameLayout
                 }
             });
 
+            DragListener dragListener = new DragListener() {
+                @Override
+                public void onLocationChanged(@NonNull BubbleBarLocation location) {
+                    mBubbleController.setBubbleBarLocation(location);
+                }
+
+                @Override
+                public void onReleasedInDismiss() {
+                    mBubbleController.dismissBubble(mExpandedBubble.getKey(), DISMISS_USER_GESTURE);
+                }
+            };
             mDragController = new BubbleBarExpandedViewDragController(
                     mExpandedView,
                     mDismissView,
                     mAnimationHelper,
-                    () -> {
-                        mBubbleController.dismissBubble(mExpandedBubble.getKey(),
-                                DISMISS_USER_GESTURE);
-                        return Unit.INSTANCE;
-                    });
+                    mPositioner,
+                    dragListener);
 
             addView(mExpandedView, new LayoutParams(width, height, Gravity.LEFT));
         }

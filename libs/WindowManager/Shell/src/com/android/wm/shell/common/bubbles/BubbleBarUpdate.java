@@ -33,6 +33,7 @@ public class BubbleBarUpdate implements Parcelable {
 
     public static final String BUNDLE_KEY = "update";
 
+    public final boolean initialState;
     public boolean expandedChanged;
     public boolean expanded;
     public boolean shouldShowEducation;
@@ -58,10 +59,17 @@ public class BubbleBarUpdate implements Parcelable {
     // This is only populated the first time a listener is connected so it gets the current state.
     public List<BubbleInfo> currentBubbleList = new ArrayList<>();
 
+
     public BubbleBarUpdate() {
+        this(false);
+    }
+
+    private BubbleBarUpdate(boolean initialState) {
+        this.initialState = initialState;
     }
 
     public BubbleBarUpdate(Parcel parcel) {
+        initialState = parcel.readBoolean();
         expandedChanged = parcel.readBoolean();
         expanded = parcel.readBoolean();
         shouldShowEducation = parcel.readBoolean();
@@ -99,7 +107,9 @@ public class BubbleBarUpdate implements Parcelable {
 
     @Override
     public String toString() {
-        return "BubbleBarUpdate{ expandedChanged=" + expandedChanged
+        return "BubbleBarUpdate{"
+                + " initialState=" + initialState
+                + " expandedChanged=" + expandedChanged
                 + " expanded=" + expanded
                 + " selectedBubbleKey=" + selectedBubbleKey
                 + " shouldShowEducation=" + shouldShowEducation
@@ -121,6 +131,7 @@ public class BubbleBarUpdate implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeBoolean(initialState);
         parcel.writeBoolean(expandedChanged);
         parcel.writeBoolean(expanded);
         parcel.writeBoolean(shouldShowEducation);
@@ -133,6 +144,15 @@ public class BubbleBarUpdate implements Parcelable {
         parcel.writeStringList(bubbleKeysInOrder);
         parcel.writeParcelableList(currentBubbleList, flags);
         parcel.writeParcelable(bubbleBarLocation, flags);
+    }
+
+    /**
+     * Create update for initial set of values.
+     * <p>
+     * Used when bubble bar is newly created.
+     */
+    public static BubbleBarUpdate createInitialState() {
+        return new BubbleBarUpdate(true);
     }
 
     @NonNull
