@@ -573,7 +573,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Do notifications dismiss with normal transitioning
      */
     private boolean mDismissUsingRowTranslationX = true;
-    private NotificationEntry mTopHeadsUpEntry;
+    private ExpandableNotificationRow mTopHeadsUpRow;
     private long mNumHeadsUp;
     private NotificationStackScrollLayoutController.TouchHandler mTouchHandler;
     private final ScreenOffAnimationController mScreenOffAnimationController;
@@ -1688,10 +1688,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * is mainly used when dragging down from a heads up notification.
      */
     private int getTopHeadsUpPinnedHeight() {
-        if (mTopHeadsUpEntry == null) {
+        if (mTopHeadsUpRow == null) {
             return 0;
         }
-        ExpandableNotificationRow row = mTopHeadsUpEntry.getRow();
+        ExpandableNotificationRow row = mTopHeadsUpRow;
         if (row.isChildInGroup()) {
             final NotificationEntry groupSummary =
                     mGroupMembershipManager.getGroupSummary(row.getEntry());
@@ -1872,8 +1872,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (slidingChild instanceof ExpandableNotificationRow row) {
                     NotificationEntry entry = row.getEntry();
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
-                            && mTopHeadsUpEntry.getRow() != row
-                            && mGroupMembershipManager.getGroupSummary(mTopHeadsUpEntry) != entry) {
+                            && mTopHeadsUpRow != row
+                            && mGroupMembershipManager.getGroupSummary(mTopHeadsUpRow.getEntry())
+                            != entry) {
                         continue;
                     }
                     return row.getViewAtPosition(touchY - childTop);
@@ -5724,8 +5725,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mShelf.updateAppearance();
     }
 
-    void setTopHeadsUpEntry(NotificationEntry topEntry) {
-        mTopHeadsUpEntry = topEntry;
+    void setTopHeadsUpRow(ExpandableNotificationRow topHeadsUpRow) {
+        mTopHeadsUpRow = topHeadsUpRow;
     }
 
     void setNumHeadsUp(long numHeadsUp) {
