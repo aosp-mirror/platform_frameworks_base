@@ -17,6 +17,9 @@
 package com.android.systemui.communal.view.viewmodel
 
 import android.app.smartspace.SmartspaceTarget
+import android.appwidget.AppWidgetProviderInfo
+import android.content.pm.UserInfo
+import android.os.UserHandle
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -39,6 +42,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
@@ -59,6 +63,7 @@ import org.mockito.MockitoAnnotations
 class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var uiEventLogger: UiEventLogger
+    @Mock private lateinit var providerInfo: AppWidgetProviderInfo
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -78,6 +83,11 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         widgetRepository = kosmos.fakeCommunalWidgetRepository
         smartspaceRepository = kosmos.fakeSmartspaceRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
+        kosmos.fakeUserTracker.set(
+            userInfos = listOf(MAIN_USER_INFO),
+            selectedUserIndex = 0,
+        )
+        whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
 
         underTest =
             CommunalEditModeViewModel(
@@ -100,12 +110,12 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                     CommunalWidgetContentModel(
                         appWidgetId = 0,
                         priority = 30,
-                        providerInfo = mock(),
+                        providerInfo = providerInfo,
                     ),
                     CommunalWidgetContentModel(
                         appWidgetId = 1,
                         priority = 20,
-                        providerInfo = mock(),
+                        providerInfo = providerInfo,
                     ),
                 )
             widgetRepository.setCommunalWidgets(widgets)
@@ -156,12 +166,12 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                     CommunalWidgetContentModel(
                         appWidgetId = 0,
                         priority = 30,
-                        providerInfo = mock(),
+                        providerInfo = providerInfo,
                     ),
                     CommunalWidgetContentModel(
                         appWidgetId = 1,
                         priority = 20,
-                        providerInfo = mock(),
+                        providerInfo = providerInfo,
                     ),
                 )
             widgetRepository.setCommunalWidgets(widgets)
@@ -204,5 +214,9 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     fun reorderWidget_uiEventLogging_cancel() {
         underTest.onReorderWidgetCancel()
         verify(uiEventLogger).log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_CANCEL)
+    }
+
+    private companion object {
+        val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
     }
 }

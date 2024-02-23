@@ -16,7 +16,9 @@
 
 package com.android.systemui.communal.widgets
 
+import android.appwidget.AppWidgetProviderInfo
 import android.content.pm.UserInfo
+import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
@@ -32,6 +34,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
@@ -65,7 +68,7 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        kosmos.fakeUserRepository.setUserInfos(listOf(MAIN_USER_INFO))
+        kosmos.fakeUserRepository.setUserInfos(listOf(MAIN_USER_INFO, USER_INFO_WORK))
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
 
@@ -76,6 +79,7 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
             CommunalAppWidgetHostStartable(
                 appWidgetHost,
                 kosmos.communalInteractor,
+                kosmos.fakeUserTracker,
                 kosmos.applicationCoroutineScope,
                 kosmos.testDispatcher,
             )
@@ -170,6 +174,46 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun removeWidgetsForDeletedProfile_whenCommunalIsAvailable() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is available and work profile is configured.
+                setCommunalAvailable(true)
+                kosmos.fakeUserTracker.set(
+                    userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK),
+                    selectedUserIndex = 0,
+                )
+                val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
+                val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
+                val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
+                val widgets = listOf(widget1, widget2, widget3)
+                fakeCommunalWidgetRepository.setCommunalWidgets(widgets)
+
+                underTest.start()
+                runCurrent()
+
+                val communalWidgets by
+                    collectLastValue(fakeCommunalWidgetRepository.communalWidgets)
+                assertThat(communalWidgets).containsExactly(widget1, widget2, widget3)
+
+                // Unlock the device and remove work profile.
+                fakeKeyguardRepository.setKeyguardShowing(false)
+                kosmos.fakeUserTracker.set(
+                    userInfos = listOf(MAIN_USER_INFO),
+                    selectedUserIndex = 0,
+                )
+                runCurrent()
+
+                // Communal becomes available.
+                fakeKeyguardRepository.setKeyguardShowing(true)
+                runCurrent()
+
+                // Widget created for work profile is removed.
+                assertThat(communalWidgets).containsExactly(widget2, widget3)
+            }
+        }
+
     private suspend fun setCommunalAvailable(available: Boolean) =
         with(kosmos) {
             fakeKeyguardRepository.setIsEncryptedOrLockdown(false)
@@ -179,7 +223,16 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
             fakeSettings.putIntForUser(GLANCEABLE_HUB_ENABLED, settingsValue, MAIN_USER_INFO.id)
         }
 
+    private fun createWidgetForUser(appWidgetId: Int, userId: Int): CommunalWidgetContentModel =
+        mock<CommunalWidgetContentModel> {
+            whenever(this.appWidgetId).thenReturn(appWidgetId)
+            val providerInfo = mock<AppWidgetProviderInfo>()
+            whenever(providerInfo.profile).thenReturn(UserHandle(userId))
+            whenever(this.providerInfo).thenReturn(providerInfo)
+        }
+
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
+        val USER_INFO_WORK = UserInfo(10, "work", UserInfo.FLAG_PROFILE)
     }
 }
