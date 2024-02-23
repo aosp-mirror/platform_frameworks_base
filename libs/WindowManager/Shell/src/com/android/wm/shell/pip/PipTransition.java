@@ -1037,6 +1037,7 @@ public class PipTransition extends PipTransitionController {
     private void computeEnterPipRotatedBounds(int rotationDelta, int startRotation, int endRotation,
             TaskInfo taskInfo, Rect outDestinationBounds, @Nullable Rect outSourceHintRect) {
         mPipDisplayLayoutState.rotateTo(endRotation);
+        mPipBoundsState.updateMinMaxSize(mPipBoundsState.getAspectRatio());
 
         final Rect displayBounds = mPipDisplayLayoutState.getDisplayBounds();
         outDestinationBounds.set(mPipBoundsAlgorithm.getEntryDestinationBounds());

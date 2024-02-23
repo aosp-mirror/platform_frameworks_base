@@ -228,6 +228,14 @@ public class PipBoundsState {
         mExpandedMovementBounds.set(bounds);
     }
 
+    /** Updates the min and max sizes based on the size spec and aspect ratio. */
+    public void updateMinMaxSize(float aspectRatio) {
+        final Size minSize = mSizeSpecSource.getMinSize(aspectRatio);
+        mMinSize.set(minSize.getWidth(), minSize.getHeight());
+        final Size maxSize = mSizeSpecSource.getMaxSize(aspectRatio);
+        mMaxSize.set(maxSize.getWidth(), maxSize.getHeight());
+    }
+
     /** Sets the max possible size for resize. */
     public void setMaxSize(int width, int height) {
         mMaxSize.set(width, height);
