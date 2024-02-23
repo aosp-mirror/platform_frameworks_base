@@ -801,8 +801,9 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         Log.d(TAG, "teardown: entered");
         setOrientation(mOriginalOrientation);
         Log.d(TAG, "teardown: after setOrientation");
-        mAnimatorTestRule.advanceTimeBy(mLongestHideShowAnimationDuration);
-        Log.d(TAG, "teardown: after advanceTimeBy");
+        // Unclear why we used to do this, and it seems to be a source of flakes
+        // mAnimatorTestRule.advanceTimeBy(mLongestHideShowAnimationDuration);
+        Log.d(TAG, "teardown: skipped advanceTimeBy");
         mTestableLooper.moveTimeForward(mLongestHideShowAnimationDuration);
         Log.d(TAG, "teardown: after moveTimeForward");
         mTestableLooper.processAllMessages();
