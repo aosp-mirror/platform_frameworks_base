@@ -16,6 +16,8 @@
 
 package com.android.server.power.stats;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -28,6 +30,7 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
+import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UidBatteryConsumer;
@@ -74,6 +77,7 @@ public class BatteryUsageStatsRule implements TestRule {
     private NetworkStats mNetworkStats;
     private boolean[] mSupportedStandardBuckets;
     private String[] mCustomPowerComponentNames;
+    private Throwable mThrowable;
 
     public BatteryUsageStatsRule() {
         this(0, null);
@@ -270,6 +274,7 @@ public class BatteryUsageStatsRule implements TestRule {
             public void evaluate() throws Throwable {
                 before();
                 base.evaluate();
+                after();
             }
         };
     }
@@ -277,12 +282,35 @@ public class BatteryUsageStatsRule implements TestRule {
     private void before() {
         lateInitBatteryStats();
         HandlerThread bgThread = new HandlerThread("bg thread");
+        bgThread.setUncaughtExceptionHandler((thread, throwable)-> {
+            mThrowable = throwable;
+        });
         bgThread.start();
         mHandler = new Handler(bgThread.getLooper());
         mBatteryStats.setHandler(mHandler);
         mBatteryStats.setOnBatteryInternal(true);
         mBatteryStats.getOnBatteryTimeBase().setRunning(true, 0, 0);
         mBatteryStats.getOnBatteryScreenOffTimeBase().setRunning(!mScreenOn, 0, 0);
+    }
+
+    private void after() throws Throwable {
+        if (mHandler != null) {
+            waitForBackgroundThread();
+        }
+    }
+
+    public void waitForBackgroundThread() throws Throwable {
+        if (mThrowable != null) {
+            throw mThrowable;
+        }
+
+        ConditionVariable done = new ConditionVariable();
+        mHandler.post(done::open);
+        assertThat(done.block(10000)).isTrue();
+
+        if (mThrowable != null) {
+            throw mThrowable;
+        }
     }
 
     public PowerProfile getPowerProfile() {

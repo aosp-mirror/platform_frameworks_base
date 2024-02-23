@@ -15430,17 +15430,18 @@ public class BatteryStatsImpl extends BatteryStats {
             mPerDisplayBatteryStats[i].screenStateAtLastEnergyMeasurement = screenState;
         }
 
-        final boolean compatibleConfig;
         if (supportedStandardBuckets != null) {
             final EnergyConsumerStats.Config config = new EnergyConsumerStats.Config(
                     supportedStandardBuckets, customBucketNames,
                     SUPPORTED_PER_PROCESS_STATE_STANDARD_ENERGY_BUCKETS,
                     getBatteryConsumerProcessStateNames());
 
-            if (mEnergyConsumerStatsConfig == null) {
-                compatibleConfig = true;
-            } else {
-                compatibleConfig = mEnergyConsumerStatsConfig.isCompatible(config);
+            if (mEnergyConsumerStatsConfig != null
+                    &&  !mEnergyConsumerStatsConfig.isCompatible(config)) {
+                // Supported power buckets changed since last boot.
+                // Existing data is no longer reliable.
+                resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime(),
+                        RESET_REASON_ENERGY_CONSUMER_BUCKETS_CHANGE);
             }
 
             mEnergyConsumerStatsConfig = config;
@@ -15456,17 +15457,13 @@ public class BatteryStatsImpl extends BatteryStats {
                 mWifiPowerCalculator = new WifiPowerCalculator(mPowerProfile);
             }
         } else {
-            compatibleConfig = (mEnergyConsumerStatsConfig == null);
-            // EnergyConsumer no longer supported, wipe out the existing data.
+            if (mEnergyConsumerStatsConfig != null) {
+                // EnergyConsumer no longer supported, wipe out the existing data.
+                resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime(),
+                        RESET_REASON_ENERGY_CONSUMER_BUCKETS_CHANGE);
+            }
             mEnergyConsumerStatsConfig = null;
             mGlobalEnergyConsumerStats = null;
-        }
-
-        if (!compatibleConfig) {
-            // Supported power buckets changed since last boot.
-            // Existing data is no longer reliable.
-            resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime(),
-                    RESET_REASON_ENERGY_CONSUMER_BUCKETS_CHANGE);
         }
     }
 
