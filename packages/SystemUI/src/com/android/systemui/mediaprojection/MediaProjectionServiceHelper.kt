@@ -24,12 +24,14 @@ import android.media.projection.ReviewGrantedConsentResult
 import android.os.RemoteException
 import android.os.ServiceManager
 import android.util.Log
+import android.window.WindowContainerToken
+import javax.inject.Inject
 
 /**
  * Helper class that handles the media projection service related actions. It simplifies invoking
  * the MediaProjectionManagerService and updating the permission consent.
  */
-class MediaProjectionServiceHelper {
+class MediaProjectionServiceHelper @Inject constructor() {
     companion object {
         private const val TAG = "MediaProjectionServiceHelper"
         private val service =
@@ -88,6 +90,18 @@ class MediaProjectionServiceHelper {
                     Log.e(TAG, "Unable to set required consent result for token re-use", e)
                 }
             }
+        }
+    }
+
+    /** Updates the projected task to the task that has a matching [WindowContainerToken]. */
+    fun updateTaskRecordingSession(token: WindowContainerToken): Boolean {
+        return try {
+            true
+            // TODO: actually call the service once it is implemented
+            // service.updateTaskRecordingSession(token)
+        } catch (e: RemoteException) {
+            Log.e(TAG, "Unable to updateTaskRecordingSession", e)
+            false
         }
     }
 }

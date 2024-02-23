@@ -21,14 +21,15 @@ import android.app.NotificationManager
 import android.os.Handler
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionManagerRepository
 import com.android.systemui.mediaprojection.taskswitcher.domain.interactor.TaskSwitchInteractor
 import com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel.TaskSwitcherNotificationViewModel
+import com.android.systemui.res.R
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
@@ -42,6 +43,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -49,7 +51,7 @@ import org.mockito.Mockito.verify
 @SmallTest
 class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
 
-    private val notificationManager: NotificationManager = mock()
+    private val notificationManager = mock<NotificationManager>()
 
     private val dispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(dispatcher)
@@ -70,22 +72,26 @@ class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
             handler = Handler.getMain(),
             applicationScope = testScope.backgroundScope,
             tasksRepository = tasksRepo,
+            backgroundDispatcher = dispatcher,
+            mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
         )
 
     private val interactor = TaskSwitchInteractor(mediaRepo, tasksRepo)
-    private val viewModel = TaskSwitcherNotificationViewModel(interactor)
+    private val viewModel =
+        TaskSwitcherNotificationViewModel(interactor, backgroundDispatcher = dispatcher)
 
-    private val coordinator =
-        TaskSwitcherNotificationCoordinator(
-            context,
-            notificationManager,
-            testScope.backgroundScope,
-            dispatcher,
-            viewModel
-        )
+    private lateinit var coordinator: TaskSwitcherNotificationCoordinator
 
     @Before
     fun setup() {
+        coordinator =
+            TaskSwitcherNotificationCoordinator(
+                context,
+                notificationManager,
+                testScope.backgroundScope,
+                viewModel,
+                fakeBroadcastDispatcher,
+            )
         coordinator.start()
     }
 
@@ -105,7 +111,7 @@ class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
         testScope.runTest {
             fakeMediaProjectionManager.dispatchOnStop()
 
-            verify(notificationManager).cancel(any())
+            verify(notificationManager).cancel(any(), any())
         }
     }
 
@@ -114,7 +120,7 @@ class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
         testScope.runTest {
             fakeMediaProjectionManager.dispatchOnStop()
             val idCancel = argumentCaptor<Int>()
-            verify(notificationManager).cancel(idCancel.capture())
+            verify(notificationManager).cancel(any(), idCancel.capture())
 
             switchTask()
             val idNotify = argumentCaptor<Int>()
@@ -124,9 +130,55 @@ class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun switchTaskAction_hidesNotification() =
+        testScope.runTest {
+            switchTask()
+            val notification = argumentCaptor<Notification>()
+            verify(notificationManager).notify(any(), any(), notification.capture())
+            verify(notificationManager, never()).cancel(any(), any())
+
+            val action = findSwitchAction(notification.value)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                action.actionIntent.intent
+            )
+
+            verify(notificationManager).cancel(any(), any())
+        }
+
+    @Test
+    fun goBackAction_hidesNotification() =
+        testScope.runTest {
+            switchTask()
+            val notification = argumentCaptor<Notification>()
+            verify(notificationManager).notify(any(), any(), notification.capture())
+            verify(notificationManager, never()).cancel(any(), any())
+
+            val action = findGoBackAction(notification.value)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                action.actionIntent.intent
+            )
+
+            verify(notificationManager).cancel(any(), any())
+        }
+
+    private fun findSwitchAction(notification: Notification): Notification.Action {
+        return notification.actions.first {
+            it.title == context.getString(R.string.media_projection_task_switcher_action_switch)
+        }
+    }
+
+    private fun findGoBackAction(notification: Notification): Notification.Action {
+        return notification.actions.first {
+            it.title == context.getString(R.string.media_projection_task_switcher_action_back)
+        }
+    }
+
     private fun switchTask() {
-        val projectedTask = FakeActivityTaskManager.createTask(taskId = 1)
-        val foregroundTask = FakeActivityTaskManager.createTask(taskId = 2)
+        val projectedTask = createTask(taskId = 1)
+        val foregroundTask = createTask(taskId = 2)
         fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
         fakeMediaProjectionManager.dispatchOnSessionSet(
             session =

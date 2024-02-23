@@ -28,9 +28,8 @@ import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeAct
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createToken
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,7 +39,7 @@ import org.junit.runner.RunWith
 @SmallTest
 class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
 
-    private val dispatcher = StandardTestDispatcher()
+    private val dispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(dispatcher)
 
     private val fakeMediaProjectionManager = FakeMediaProjectionManager()
@@ -58,14 +57,27 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
             handler = Handler.getMain(),
             applicationScope = testScope.backgroundScope,
-            tasksRepository = tasksRepo
+            tasksRepository = tasksRepo,
+            backgroundDispatcher = dispatcher,
+            mediaProjectionServiceHelper = fakeMediaProjectionManager.helper
         )
+
+    @Test
+    fun switchProjectedTask_stateIsUpdatedWithNewTask() =
+        testScope.runTest {
+            val task = createTask(taskId = 1)
+            val state by collectLastValue(repo.mediaProjectionState)
+
+            fakeActivityTaskManager.addRunningTasks(task)
+            repo.switchProjectedTask(task)
+
+            assertThat(state).isEqualTo(MediaProjectionState.SingleTask(task))
+        }
 
     @Test
     fun mediaProjectionState_onStart_emitsNotProjecting() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             fakeMediaProjectionManager.dispatchOnStart()
 
@@ -76,7 +88,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
     fun mediaProjectionState_onStop_emitsNotProjecting() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             fakeMediaProjectionManager.dispatchOnStop()
 
@@ -87,7 +98,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
     fun mediaProjectionState_onSessionSet_sessionNull_emitsNotProjecting() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             fakeMediaProjectionManager.dispatchOnSessionSet(session = null)
 
@@ -98,7 +108,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
     fun mediaProjectionState_onSessionSet_contentToRecordDisplay_emitsEntireScreen() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             fakeMediaProjectionManager.dispatchOnSessionSet(
                 session = ContentRecordingSession.createDisplaySession(/* displayToMirror= */ 123)
@@ -111,7 +120,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
     fun mediaProjectionState_sessionSet_taskWithToken_noMatchingRunningTask_emitsEntireScreen() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             val taskWindowContainerToken = Binder()
             fakeMediaProjectionManager.dispatchOnSessionSet(
@@ -128,7 +136,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             val task = createTask(taskId = 1, token = token)
             fakeActivityTaskManager.addRunningTasks(task)
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             fakeMediaProjectionManager.dispatchOnSessionSet(
                 session = ContentRecordingSession.createTaskSession(token.asBinder())

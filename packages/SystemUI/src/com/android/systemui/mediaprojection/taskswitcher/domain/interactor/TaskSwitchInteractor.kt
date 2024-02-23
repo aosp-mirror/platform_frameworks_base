@@ -16,6 +16,7 @@
 
 package com.android.systemui.mediaprojection.taskswitcher.domain.interactor
 
+import android.app.ActivityManager.RunningTaskInfo
 import android.app.TaskInfo
 import android.content.Intent
 import android.util.Log
@@ -37,9 +38,17 @@ import kotlinx.coroutines.flow.map
 class TaskSwitchInteractor
 @Inject
 constructor(
-    mediaProjectionRepository: MediaProjectionRepository,
+    private val mediaProjectionRepository: MediaProjectionRepository,
     private val tasksRepository: TasksRepository,
 ) {
+
+    suspend fun switchProjectedTask(task: RunningTaskInfo) {
+        mediaProjectionRepository.switchProjectedTask(task)
+    }
+
+    suspend fun goBackToTask(task: RunningTaskInfo) {
+        tasksRepository.launchRecentTask(task)
+    }
 
     /**
      * Emits a stream of changes to the state of task switching, in the context of media projection.

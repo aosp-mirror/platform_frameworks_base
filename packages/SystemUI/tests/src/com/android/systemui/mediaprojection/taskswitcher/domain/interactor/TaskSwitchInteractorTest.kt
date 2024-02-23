@@ -61,6 +61,8 @@ class TaskSwitchInteractorTest : SysuiTestCase() {
             handler = Handler.getMain(),
             applicationScope = testScope.backgroundScope,
             tasksRepository = tasksRepo,
+            backgroundDispatcher = dispatcher,
+            mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
         )
 
     private val interactor = TaskSwitchInteractor(mediaRepo, tasksRepo)
@@ -115,6 +117,40 @@ class TaskSwitchInteractorTest : SysuiTestCase() {
                         foregroundTask = foregroundTask
                     )
                 )
+        }
+
+    @Test
+    fun taskSwitchChanges_projectingTask_foregroundTaskDifferent_thenSwitched_emitsUnchanged() =
+        testScope.runTest {
+            val projectedTask = createTask(taskId = 0)
+            val foregroundTask = createTask(taskId = 1)
+            val taskSwitchState by collectLastValue(interactor.taskSwitchChanges)
+
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(token = projectedTask.token.asBinder())
+            )
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
+            interactor.switchProjectedTask(foregroundTask)
+
+            assertThat(taskSwitchState).isEqualTo(TaskSwitchState.TaskUnchanged)
+        }
+
+    @Test
+    fun taskSwitchChanges_projectingTask_foregroundTaskDifferent_thenWentBack_emitsUnchanged() =
+        testScope.runTest {
+            val projectedTask = createTask(taskId = 0)
+            val foregroundTask = createTask(taskId = 1)
+            val taskSwitchState by collectLastValue(interactor.taskSwitchChanges)
+
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(token = projectedTask.token.asBinder())
+            )
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
+            interactor.goBackToTask(projectedTask)
+
+            assertThat(taskSwitchState).isEqualTo(TaskSwitchState.TaskUnchanged)
         }
 
     @Test
