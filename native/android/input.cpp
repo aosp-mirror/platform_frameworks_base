@@ -321,11 +321,13 @@ jobject AInputEvent_toJava(JNIEnv* env, const AInputEvent* aInputEvent) {
         case AINPUT_EVENT_TYPE_MOTION:
             return android::android_view_MotionEvent_obtainAsCopy(env,
                                                                   static_cast<const MotionEvent&>(
-                                                                          *aInputEvent));
+                                                                          *aInputEvent))
+                    .release();
         case AINPUT_EVENT_TYPE_KEY:
             return android::android_view_KeyEvent_obtainAsCopy(env,
                                                                static_cast<const KeyEvent&>(
-                                                                       *aInputEvent));
+                                                                       *aInputEvent))
+                    .release();
         default:
             LOG_ALWAYS_FATAL("Unexpected event type %d in AInputEvent_toJava.", eventType);
     }

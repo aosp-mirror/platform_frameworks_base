@@ -38,11 +38,4 @@ class FakeCommunalRepository(
     override fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?) {
         _transitionState.value = transitionState
     }
-
-    private val _isCommunalHubShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val isCommunalHubShowing: Flow<Boolean> = _isCommunalHubShowing
-
-    fun setIsCommunalHubShowing(isCommunalHubShowing: Boolean) {
-        _isCommunalHubShowing.value = isCommunalHubShowing
-    }
 }

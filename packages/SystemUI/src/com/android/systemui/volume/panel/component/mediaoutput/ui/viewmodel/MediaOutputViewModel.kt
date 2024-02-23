@@ -86,13 +86,21 @@ constructor(
                                 null
                             )
                     DeviceIconViewModel.IsPlaying(
-                        icon,
-                        Color.Attribute(com.android.internal.R.attr.materialColorSecondary),
+                        icon = icon,
+                        iconColor =
+                            Color.Attribute(com.android.internal.R.attr.materialColorSurface),
+                        backgroundColor =
+                            Color.Attribute(com.android.internal.R.attr.materialColorSecondary),
                     )
                 } else {
                     DeviceIconViewModel.IsNotPlaying(
-                        Icon.Resource(R.drawable.ic_media_home_devices, null),
-                        Color.Attribute(com.android.internal.R.attr.materialColorSurface),
+                        icon = Icon.Resource(R.drawable.ic_media_home_devices, null),
+                        iconColor =
+                            Color.Attribute(
+                                com.android.internal.R.attr.materialColorOnSurfaceVariant
+                            ),
+                        backgroundColor =
+                            Color.Attribute(com.android.internal.R.attr.materialColorSurface),
                     )
                 }
             }

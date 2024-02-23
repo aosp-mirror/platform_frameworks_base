@@ -35,7 +35,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_DRAG_AND_DROP;
 
+import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.PendingIntent;
 import android.content.ClipDescription;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -51,6 +53,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
@@ -71,14 +74,18 @@ import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Handles the global drag and drop handling for the Shell.
  */
 public class DragAndDropController implements RemoteCallable<DragAndDropController>,
+        GlobalDragListener.GlobalDragListenerCallback,
         DisplayController.OnDisplaysChangedListener,
         View.OnDragListener, ComponentCallbacks2 {
 
@@ -90,6 +97,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
     private final DisplayController mDisplayController;
     private final DragAndDropEventLogger mLogger;
     private final IconProvider mIconProvider;
+    private final GlobalDragListener mGlobalDragListener;
+    private final Transitions mTransitions;
     private SplitScreenController mSplitScreen;
     private ShellExecutor mMainExecutor;
     private ArrayList<DragAndDropListener> mListeners = new ArrayList<>();
@@ -97,12 +106,29 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
     // Map of displayId -> per-display info
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
 
+    // The current display if a drag is in progress
+    private int mActiveDragDisplay = -1;
+
     /**
-     * Listener called during drag events, currently just onDragStarted.
+     * Listener called during drag events.
      */
     public interface DragAndDropListener {
         /** Called when a drag has started. */
-        void onDragStarted();
+        default void onDragStarted() {}
+
+        /** Called when a drag has ended. */
+        default void onDragEnded() {}
+
+        /**
+         * Called when an unhandled drag has occurred. The impl must return true if it decides to
+         * handled the unhandled drag, and it must also call `onFinishCallback` to complete the
+         * drag.
+         */
+        default boolean onUnhandledDrag(@NonNull PendingIntent launchIntent,
+                @NonNull SurfaceControl dragSurface,
+                @NonNull Consumer<Boolean> onFinishCallback) {
+            return false;
+        }
     }
 
     public DragAndDropController(Context context,
@@ -112,6 +138,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
             DisplayController displayController,
             UiEventLogger uiEventLogger,
             IconProvider iconProvider,
+            GlobalDragListener globalDragListener,
+            Transitions transitions,
             ShellExecutor mainExecutor) {
         mContext = context;
         mShellController = shellController;
@@ -119,6 +147,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         mDisplayController = displayController;
         mLogger = new DragAndDropEventLogger(uiEventLogger);
         mIconProvider = iconProvider;
+        mGlobalDragListener = globalDragListener;
+        mTransitions = transitions;
         mMainExecutor = mainExecutor;
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -136,6 +166,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_DRAG_AND_DROP,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
+        mGlobalDragListener.setListener(this);
     }
 
     private ExternalInterfaceBinder createExternalInterface() {
@@ -169,10 +200,18 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         mListeners.remove(listener);
     }
 
-    private void notifyDragStarted() {
+    /**
+     * Notifies all listeners and returns whether any listener handled the callback.
+     */
+    private boolean notifyListeners(Function<DragAndDropListener, Boolean> callback) {
         for (int i = 0; i < mListeners.size(); i++) {
-            mListeners.get(i).onDragStarted();
+            boolean handled = callback.apply(mListeners.get(i));
+            if (handled) {
+                // Return once the callback reports it has handled it
+                return true;
+            }
         }
+        return false;
     }
 
     @Override
@@ -258,6 +297,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         }
 
         if (event.getAction() == ACTION_DRAG_STARTED) {
+            mActiveDragDisplay = displayId;
             pd.isHandlingDrag = DragUtils.canHandleDrag(event);
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
                     "Clip description: handlingDrag=%b itemCount=%d mimeTypes=%s",
@@ -283,7 +323,11 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                 pd.dragSession.update();
                 pd.dragLayout.prepare(pd.dragSession, loggerSessionId);
                 setDropTargetWindowVisibility(pd, View.VISIBLE);
-                notifyDragStarted();
+                notifyListeners(l -> {
+                    l.onDragStarted();
+                    // Return false to continue dispatch to next listener
+                    return false;
+                });
                 break;
             case ACTION_DRAG_ENTERED:
                 pd.dragLayout.show();
@@ -317,9 +361,41 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                     });
                 }
                 mLogger.logEnd();
+                mActiveDragDisplay = -1;
+                notifyListeners(l -> {
+                    l.onDragEnded();
+                    // Return false to continue dispatch to next listener
+                    return false;
+                });
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void onCrossWindowDrop(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
+        // Bring the task forward when an item is dropped on it
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reorder(taskInfo.token, true /* onTop */);
+        mTransitions.startTransition(WindowManager.TRANSIT_TO_FRONT, wct, null);
+    }
+
+    @Override
+    public void onUnhandledDrop(@NonNull DragEvent dragEvent,
+            @NonNull Consumer<Boolean> onFinishCallback) {
+        final PendingIntent launchIntent = DragUtils.getLaunchIntent(dragEvent);
+        if (launchIntent == null) {
+            // No intent to launch, report that this is unhandled by the listener
+            onFinishCallback.accept(false);
+            return;
+        }
+
+        final boolean handled = notifyListeners(
+                l -> l.onUnhandledDrag(launchIntent, dragEvent.getDragSurface(), onFinishCallback));
+        if (!handled) {
+            // Nobody handled this, we still have to notify WM
+            onFinishCallback.accept(false);
+        }
     }
 
     /**

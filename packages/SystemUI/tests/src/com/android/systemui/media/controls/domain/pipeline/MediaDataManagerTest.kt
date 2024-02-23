@@ -1476,7 +1476,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnMediaDataTimedOut_doesNotUpdateLastActiveTime() {
+    fun testOnMediaDataTimedOut_updatesLastActiveTime() {
         // GIVEN that the manager has a notification
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
@@ -1487,7 +1487,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         val currentTime = clock.elapsedRealtime()
         mediaDataManager.setTimedOut(KEY, true, true)
 
-        // THEN the last active time is not changed
+        // THEN the last active time is changed
         verify(listener)
             .onMediaDataLoaded(
                 eq(KEY),
@@ -1497,17 +1497,53 @@ class MediaDataManagerTest : SysuiTestCase() {
                 eq(0),
                 eq(false)
             )
-        assertThat(mediaDataCaptor.value.lastActive).isLessThan(currentTime)
+        assertThat(mediaDataCaptor.value.lastActive).isAtLeast(currentTime)
     }
 
     @Test
-    fun testOnActiveMediaConverted_doesNotUpdateLastActiveTime() {
+    fun testOnActiveMediaConverted_updatesLastActiveTime() {
         // GIVEN that the manager has a notification with a resume action
         addNotificationAndLoad()
         val data = mediaDataCaptor.value
         val instanceId = data.instanceId
         assertThat(data.resumption).isFalse()
         mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
+
+        // WHEN the notification is removed
+        clock.advanceTime(100)
+        val currentTime = clock.elapsedRealtime()
+        mediaDataManager.onNotificationRemoved(KEY)
+
+        // THEN the last active time is changed
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(PACKAGE_NAME),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        assertThat(mediaDataCaptor.value.resumption).isTrue()
+        assertThat(mediaDataCaptor.value.lastActive).isAtLeast(currentTime)
+
+        // Log as a conversion event, not as a new resume control
+        verify(logger).logActiveConvertedToResume(anyInt(), eq(PACKAGE_NAME), eq(instanceId))
+        verify(logger, never()).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), any())
+    }
+
+    @Test
+    fun testOnInactiveMediaConverted_doesNotUpdateLastActiveTime() {
+        // GIVEN that the manager has a notification with a resume action
+        addNotificationAndLoad()
+        val data = mediaDataCaptor.value
+        val instanceId = data.instanceId
+        assertThat(data.resumption).isFalse()
+        mediaDataManager.onMediaDataLoaded(
+            KEY,
+            null,
+            data.copy(resumeAction = Runnable {}, active = false)
+        )
 
         // WHEN the notification is removed
         clock.advanceTime(100)

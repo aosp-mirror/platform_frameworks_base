@@ -22,7 +22,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,14 +32,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates the state of communal mode. */
 interface CommunalRepository {
-    /** Whether the communal hub is showing. */
-    val isCommunalHubShowing: Flow<Boolean>
-
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through
      * [setDesiredScene].
@@ -99,11 +94,4 @@ constructor(
     override fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?) {
         _transitionState.value = transitionState
     }
-
-    override val isCommunalHubShowing: Flow<Boolean> =
-        if (sceneContainerFlags.isEnabled()) {
-            sceneContainerRepository.currentScene.map { sceneKey -> sceneKey == SceneKey.Communal }
-        } else {
-            desiredScene.map { sceneKey -> sceneKey == CommunalSceneKey.Communal }
-        }
 }

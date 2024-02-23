@@ -371,7 +371,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 }
             }
 
-            jobject inputEventObj;
+            ScopedLocalRef<jobject> inputEventObj(env);
             switch (inputEvent->getType()) {
                 case InputEventType::KEY:
                     if (kDebugDispatchCycle) {
@@ -447,20 +447,19 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 
             default:
                 assert(false); // InputConsumer should prevent this from ever happening
-                inputEventObj = nullptr;
             }
 
-            if (inputEventObj) {
+            if (inputEventObj.get()) {
                 if (kDebugDispatchCycle) {
                     ALOGD("channel '%s' ~ Dispatching input event.", getInputChannelName().c_str());
                 }
                 env->CallVoidMethod(receiverObj.get(),
-                        gInputEventReceiverClassInfo.dispatchInputEvent, seq, inputEventObj);
+                                    gInputEventReceiverClassInfo.dispatchInputEvent, seq,
+                                    inputEventObj.get());
                 if (env->ExceptionCheck()) {
                     ALOGE("Exception dispatching input event.");
                     skipCallbacks = true;
                 }
-                env->DeleteLocalRef(inputEventObj);
             } else {
                 ALOGW("channel '%s' ~ Failed to obtain event object.",
                         getInputChannelName().c_str());

@@ -25,6 +25,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACT
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.content.ClipData;
 import android.content.Context;
 import android.hardware.input.InputManagerGlobal;
@@ -43,8 +44,8 @@ import android.view.PointerIcon;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
+import android.window.IGlobalDragListener;
 import android.window.IUnhandledDragCallback;
-import android.window.IUnhandledDragListener;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.WindowManagerInternal.IDragDropCallback;
@@ -81,9 +82,9 @@ class DragDropController {
     private WindowManagerService mService;
     private final Handler mHandler;
 
-    // The unhandled drag listener for handling cross-window drags that end with no target window
-    private IUnhandledDragListener mUnhandledDragListener;
-    private final IBinder.DeathRecipient mUnhandledDragListenerDeathRecipient =
+    // The global drag listener for handling cross-window drags
+    private IGlobalDragListener mGlobalDragListener;
+    private final IBinder.DeathRecipient mGlobalDragListenerDeathRecipient =
             new IBinder.DeathRecipient() {
         @Override
         public void binderDied() {
@@ -91,7 +92,7 @@ class DragDropController {
                 if (hasPendingUnhandledDropCallback()) {
                     onUnhandledDropCallback(false /* consumedByListeners */);
                 }
-                setUnhandledDragListener(null);
+                setGlobalDragListener(null);
             }
         }
     };
@@ -129,27 +130,20 @@ class DragDropController {
     /**
      * Sets the listener for unhandled cross-window drags.
      */
-    public void setUnhandledDragListener(IUnhandledDragListener listener) {
-        if (mUnhandledDragListener != null && mUnhandledDragListener.asBinder() != null) {
-            mUnhandledDragListener.asBinder().unlinkToDeath(
-                    mUnhandledDragListenerDeathRecipient, 0);
+    public void setGlobalDragListener(IGlobalDragListener listener) {
+        if (mGlobalDragListener != null && mGlobalDragListener.asBinder() != null) {
+            mGlobalDragListener.asBinder().unlinkToDeath(
+                    mGlobalDragListenerDeathRecipient, 0);
         }
-        mUnhandledDragListener = listener;
+        mGlobalDragListener = listener;
         if (listener != null && listener.asBinder() != null) {
             try {
-                mUnhandledDragListener.asBinder().linkToDeath(
-                        mUnhandledDragListenerDeathRecipient, 0);
+                mGlobalDragListener.asBinder().linkToDeath(
+                        mGlobalDragListenerDeathRecipient, 0);
             } catch (RemoteException e) {
-                mUnhandledDragListener = null;
+                mGlobalDragListener = null;
             }
         }
-    }
-
-    /**
-     * Returns whether there is an unhandled drag listener set.
-     */
-    boolean hasUnhandledDragListener() {
-        return mUnhandledDragListener != null;
     }
 
     void sendDragStartedIfNeededLocked(WindowState window) {
@@ -351,7 +345,20 @@ class DragDropController {
 
                 final boolean relinquishDragSurfaceToDropTarget =
                         consumed && mDragState.targetInterceptsGlobalDrag(callingWin);
+                final boolean isCrossWindowDrag = !mDragState.mLocalWin.equals(token);
                 mDragState.endDragLocked(consumed, relinquishDragSurfaceToDropTarget);
+
+                final Task droppedWindowTask = callingWin.getTask();
+                if (com.android.window.flags.Flags.delegateUnhandledDrags()
+                        && mGlobalDragListener != null && droppedWindowTask != null && consumed
+                        && isCrossWindowDrag) {
+                    try {
+                        mGlobalDragListener.onCrossWindowDrop(droppedWindowTask.getTaskInfo());
+                    } catch (RemoteException e) {
+                        Slog.e(TAG_WM, "Failed to call global drag listener for cross-window "
+                                + "drop", e);
+                    }
+                }
             }
         } finally {
             mCallback.get().postReportDropResult();
@@ -367,19 +374,19 @@ class DragDropController {
         final boolean isLocalDrag =
                 (mDragState.mFlags & (DRAG_FLAG_GLOBAL_SAME_APPLICATION | DRAG_FLAG_GLOBAL)) == 0;
         if (!com.android.window.flags.Flags.delegateUnhandledDrags()
-                || mUnhandledDragListener == null
+                || mGlobalDragListener == null
                 || isLocalDrag) {
             // Skip if the flag is disabled, there is no unhandled-drag listener, or if this is a
             // purely local drag
             if (DEBUG_DRAG) Slog.d(TAG_WM, "Skipping unhandled listener "
-                    + "(listener=" + mUnhandledDragListener + ", flags=" + mDragState.mFlags + ")");
+                    + "(listener=" + mGlobalDragListener + ", flags=" + mDragState.mFlags + ")");
             return false;
         }
         if (DEBUG_DRAG) Slog.d(TAG_WM, "Sending DROP to unhandled listener (" + reason + ")");
         try {
             // Schedule timeout for the unhandled drag listener to call back
             sendTimeoutMessage(MSG_UNHANDLED_DROP_LISTENER_TIMEOUT, null, DRAG_TIMEOUT_MS);
-            mUnhandledDragListener.onUnhandledDrop(dropEvent, new IUnhandledDragCallback.Stub() {
+            mGlobalDragListener.onUnhandledDrop(dropEvent, new IUnhandledDragCallback.Stub() {
                 @Override
                 public void notifyUnhandledDropComplete(boolean consumedByListener) {
                     if (DEBUG_DRAG) Slog.d(TAG_WM, "Unhandled listener finished handling DROP");
@@ -390,7 +397,7 @@ class DragDropController {
             });
             return true;
         } catch (RemoteException e) {
-            Slog.e(TAG_WM, "Failed to call unhandled drag listener", e);
+            Slog.e(TAG_WM, "Failed to call global drag listener for unhandled drop", e);
             return false;
         }
     }

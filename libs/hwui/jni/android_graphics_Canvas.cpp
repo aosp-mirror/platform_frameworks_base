@@ -88,6 +88,10 @@ static void setBitmap(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHand
     get_canvas(canvasHandle)->setBitmap(bitmap);
 }
 
+static jboolean isHighContrastText(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle) {
+    return get_canvas(canvasHandle)->isHighContrastText() ? JNI_TRUE : JNI_FALSE;
+}
+
 static jboolean isOpaque(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle) {
     return get_canvas(canvasHandle)->isOpaque() ? JNI_TRUE : JNI_FALSE;
 }
@@ -792,6 +796,7 @@ static const JNINativeMethod gMethods[] = {
 
         // ------------ @CriticalNative ----------------
         {"nIsOpaque", "(J)Z", (void*)CanvasJNI::isOpaque},
+        {"nIsHighContrastText", "(J)Z", (void*)CanvasJNI::isHighContrastText},
         {"nGetWidth", "(J)I", (void*)CanvasJNI::getWidth},
         {"nGetHeight", "(J)I", (void*)CanvasJNI::getHeight},
         {"nSave", "(JI)I", (void*)CanvasJNI::save},

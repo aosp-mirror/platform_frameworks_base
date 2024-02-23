@@ -189,9 +189,9 @@ final class WearableSensingManagerPerUserService extends
      * Creates a CompanionDeviceManager secure channel and sends a proxy to the wearable sensing
      * service.
      */
-    public void onProvideWearableConnection(
+    public void onProvideConnection(
             ParcelFileDescriptor wearableConnection, RemoteCallback callback) {
-        Slog.i(TAG, "onProvideWearableConnection in per user service.");
+        Slog.i(TAG, "onProvideConnection in per user service.");
         synchronized (mLock) {
             if (!setUpServiceIfNeeded()) {
                 Slog.w(TAG, "Detection service is not available at this moment.");
@@ -217,7 +217,7 @@ final class WearableSensingManagerPerUserService extends
                                         Slog.i(TAG, "calling over to remote service.");
                                         synchronized (mLock) {
                                             ensureRemoteServiceInitiated();
-                                            mRemoteService.provideSecureWearableConnection(
+                                            mRemoteService.provideSecureConnection(
                                                     secureTransport, callback);
                                         }
                                     }

@@ -27,6 +27,7 @@ import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -75,10 +76,12 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
             @Nullable ISidefpsController sidefpsController,
             @NonNull AuthenticationStateListeners authenticationStateListeners,
-            @FingerprintManager.EnrollReason int enrollReason) {
+            @FingerprintManager.EnrollReason int enrollReason,
+            @NonNull FingerprintEnrollOptions options) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, sensorId, true /* shouldVibrate */, biometricLogger,
-                biometricContext);
+                biometricContext,
+                BiometricFingerprintConstants.reasonToMetric(options.getEnrollReason()));
         setRequestId(requestId);
         if (sidefpsControllerRefactor()) {
             mSensorOverlays = new SensorOverlays(udfpsOverlayController);
@@ -91,6 +94,8 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
         if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
             getLogger().disableMetrics();
         }
+        Slog.w(TAG, "EnrollOptions "
+                + FingerprintEnrollOptions.enrollReasonToString(options.getEnrollReason()));
     }
 
     @Override

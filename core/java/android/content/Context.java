@@ -6559,6 +6559,13 @@ public abstract class Context {
     public static final String ECM_ENHANCED_CONFIRMATION_SERVICE = "ecm_enhanced_confirmation";
 
     /**
+     * Service to protect sensitive content during screen share.
+     * @hide
+     */
+    public static final String SENSITIVE_CONTENT_PROTECTION_SERVICE =
+            "sensitive_content_protection_service";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.provider.ContactKeysManager} to managing contact keys.
      *

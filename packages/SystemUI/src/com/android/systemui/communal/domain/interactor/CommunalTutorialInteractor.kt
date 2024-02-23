@@ -17,7 +17,6 @@
 package com.android.systemui.communal.domain.interactor
 
 import android.provider.Settings
-import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalTutorialRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -51,7 +50,6 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val communalTutorialRepository: CommunalTutorialRepository,
     keyguardInteractor: KeyguardInteractor,
-    private val communalRepository: CommunalRepository,
     private val communalSettingsInteractor: CommunalSettingsInteractor,
     communalInteractor: CommunalInteractor,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
@@ -92,7 +90,7 @@ constructor(
                 if (tutorialSettingState == Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED) {
                     return@flatMapLatest flowOf(null)
                 }
-                communalRepository.isCommunalHubShowing.map { isCommunalShowing ->
+                communalInteractor.isCommunalShowing.map { isCommunalShowing ->
                     nextStateAfterTransition(
                         tutorialSettingState,
                         isCommunalShowing,

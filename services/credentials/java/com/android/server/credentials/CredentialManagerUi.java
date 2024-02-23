@@ -18,6 +18,7 @@ package com.android.server.credentials;
 import static android.credentials.selection.Constants.EXTRA_FINAL_RESPONSE_RECEIVER;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -152,16 +153,34 @@ public class CredentialManagerUi {
 
     /**
      * Creates a {@link PendingIntent} to be used to invoke the credential manager selector UI,
-     * by the calling app process.
+     * by the calling app process. The bottom-sheet navigates to the default page when the intent
+     * is invoked.
      *
      * @param requestInfo            the information about the request
      * @param providerDataList       the list of provider data from remote providers
-     * @param isRequestForAllOptions whether the bottom sheet should directly navigate to the
-     *                               all options page
      */
     public PendingIntent createPendingIntent(
-            RequestInfo requestInfo, ArrayList<ProviderData> providerDataList,
-            boolean isRequestForAllOptions) {
+            RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
+        return createPendingIntent(requestInfo, providerDataList, /*forAutofill=*/ false);
+    }
+
+    /**
+     * Creates a {@link PendingIntent} to be used to invoke the credential manager selector UI,
+     * by the calling app process. This intent is invoked from the Autofill flow, when the user
+     * requests to bring up the 'All Options' page of the credential bottom-sheet. When the user
+     * clicks on the pinned entry, the intent will bring up the 'All Options' page of the
+     * bottom-sheet. The provider data list is processed by the credential autofill service for
+     * each autofill id and passed in as an auth extra.
+     *
+     * @param requestInfo            the information about the request
+     */
+    public PendingIntent createPendingIntentForAutofill(RequestInfo requestInfo) {
+        return createPendingIntent(requestInfo, /*providerDataList=*/ null, /*forAutofill=*/ true);
+    }
+
+    private PendingIntent createPendingIntent(
+            RequestInfo requestInfo, @Nullable ArrayList<ProviderData> providerDataList,
+            boolean forAutofill) {
         List<CredentialProviderInfo> allProviders =
                 CredentialProviderInfoFactory.getCredentialProviderServices(
                         mContext,
@@ -176,11 +195,17 @@ public class CredentialManagerUi {
                 .map(disabledProvider -> new DisabledProviderData(
                         disabledProvider.getComponentName().flattenToString())).toList();
 
-        Intent intent = IntentFactory.createCredentialSelectorIntent(mContext, requestInfo,
-                        providerDataList,
-                        new ArrayList<>(disabledProviderDataList), mResultReceiver,
-                        isRequestForAllOptions)
-                .setAction(UUID.randomUUID().toString());
+        Intent intent;
+        if (forAutofill) {
+            intent = IntentFactory.createCredentialSelectorIntentForAutofill(
+                    mContext, requestInfo, new ArrayList<>(disabledProviderDataList),
+                    mResultReceiver);
+        } else {
+            intent = IntentFactory.createCredentialSelectorIntent(
+                    mContext, requestInfo, providerDataList,
+                    new ArrayList<>(disabledProviderDataList), mResultReceiver);
+        }
+        intent.setAction(UUID.randomUUID().toString());
         //TODO: Create unique pending intent using request code and cancel any pre-existing pending
         // intents
         return PendingIntent.getActivityAsUser(

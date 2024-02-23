@@ -144,6 +144,13 @@ flag {
 }
 
 flag {
+    name: "show_set_screen_lock_dialog"
+    namespace: "profile_experiences"
+    description: "Display the dialog to set up screen lock when private space unlock operation is requested"
+    bug: "316129700"
+}
+
+flag {
     name: "reorder_wallpaper_during_user_switch"
     namespace: "multiuser"
     description: "Reorder loading home and lock screen wallpapers during a user switch."
@@ -162,4 +169,11 @@ flag {
     namespace: "profile_experiences"
     description: "Disables adding items belonging to Private Space on Home Screen manually as well as automatically"
     bug: "287975131"
+}
+
+flag {
+    name: "enable_ps_sensitive_notifications_toggle"
+    namespace: "profile_experiences"
+    description: "Enable the sensitive notifications toggle to be visible in the Private space settings page"
+    bug: "317067050"
 }

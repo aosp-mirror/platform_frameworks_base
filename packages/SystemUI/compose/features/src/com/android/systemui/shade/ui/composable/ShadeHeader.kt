@@ -19,6 +19,7 @@ package com.android.systemui.shade.ui.composable
 
 import android.view.ContextThemeWrapper
 import android.view.ViewGroup
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,7 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.ValueKey
+import com.android.compose.animation.scene.animateElementFloatAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.settingslib.Utils
@@ -64,6 +66,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.ui.composable.QuickSettings
 import com.android.systemui.scene.ui.composable.Shade as ShadeKey
 import com.android.systemui.shade.ui.composable.ShadeHeader.Dimensions.CollapsedHeight
+import com.android.systemui.shade.ui.composable.ShadeHeader.Values.ClockScale
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
@@ -79,10 +82,16 @@ object ShadeHeader {
         val CollapsedContentStart = ElementKey("ShadeHeaderCollapsedContentStart")
         val CollapsedContentEnd = ElementKey("ShadeHeaderCollapsedContentEnd")
         val PrivacyChip = ElementKey("PrivacyChip", scenePicker = LowestZIndexScenePicker)
+        val Clock = ElementKey("ShadeHeaderClock", scenePicker = LowestZIndexScenePicker)
+        val ShadeCarrierGroup = ElementKey("ShadeCarrierGroup")
     }
 
     object Keys {
         val transitionProgress = ValueKey("ShadeHeaderTransitionProgress")
+    }
+
+    object Values {
+        val ClockScale = ValueKey("ShadeHeaderClockScale")
     }
 
     object Dimensions {
@@ -121,20 +130,18 @@ fun SceneScope.CollapsedShadeHeader(
         contents =
             listOf(
                 {
-                    Row(modifier = Modifier.element(ShadeHeader.Elements.CollapsedContentStart)) {
-                        AndroidView(
-                            factory = { context ->
-                                Clock(
-                                    ContextThemeWrapper(context, R.style.TextAppearance_QS_Status),
-                                    null
-                                )
-                            },
+                    Row {
+                        Clock(
+                            scale = 1f,
+                            viewModel = viewModel,
                             modifier = Modifier.align(Alignment.CenterVertically),
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         VariableDayDate(
                             viewModel = viewModel,
-                            modifier = Modifier.align(Alignment.CenterVertically),
+                            modifier =
+                                Modifier.element(ShadeHeader.Elements.CollapsedContentStart)
+                                    .align(Alignment.CenterVertically),
                         )
                     }
                 },
@@ -257,40 +264,29 @@ fun SceneScope.ExpandedShadeHeader(
         Column(
             verticalArrangement = Arrangement.Bottom,
             modifier =
-                Modifier.element(ShadeHeader.Elements.ExpandedContent)
-                    .fillMaxWidth()
+                Modifier.fillMaxWidth()
                     .defaultMinSize(minHeight = ShadeHeader.Dimensions.ExpandedHeight)
         ) {
-            Row {
-                AndroidView(
-                    factory = { context ->
-                        Clock(ContextThemeWrapper(context, R.style.TextAppearance_QS_Status), null)
-                    },
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Box {
+                    Clock(
+                        scale = 2.57f,
+                        viewModel = viewModel,
+                        modifier = Modifier.align(Alignment.CenterStart),
+                    )
+                }
+                Box(
                     modifier =
-                        Modifier.align(Alignment.CenterVertically)
-                            // use graphicsLayer instead of Modifier.scale to anchor transform to
-                            // the (start, top) corner
-                            .graphicsLayer(
-                                scaleX = 2.57f,
-                                scaleY = 2.57f,
-                                transformOrigin =
-                                    TransformOrigin(
-                                        when (LocalLayoutDirection.current) {
-                                            LayoutDirection.Ltr -> 0f
-                                            LayoutDirection.Rtl -> 1f
-                                        },
-                                        0.5f
-                                    )
-                            ),
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                ShadeCarrierGroup(
-                    viewModel = viewModel,
-                    modifier = Modifier.align(Alignment.CenterVertically),
-                )
+                        Modifier.element(ShadeHeader.Elements.ShadeCarrierGroup).fillMaxWidth()
+                ) {
+                    ShadeCarrierGroup(
+                        viewModel = viewModel,
+                        modifier = Modifier.align(Alignment.CenterEnd),
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(5.dp))
-            Row {
+            Row(modifier = Modifier.element(ShadeHeader.Elements.ExpandedContent)) {
                 VariableDayDate(
                     viewModel = viewModel,
                     modifier = Modifier.widthIn(max = 90.dp).align(Alignment.CenterVertically),
@@ -315,6 +311,41 @@ fun SceneScope.ExpandedShadeHeader(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SceneScope.Clock(
+    scale: Float,
+    viewModel: ShadeHeaderViewModel,
+    modifier: Modifier,
+) {
+    val layoutDirection = LocalLayoutDirection.current
+
+    Element(key = ShadeHeader.Elements.Clock, modifier = modifier) {
+        val animatedScale by animateElementFloatAsState(scale, ClockScale, canOverflow = false)
+        AndroidView(
+            factory = { context ->
+                Clock(ContextThemeWrapper(context, R.style.TextAppearance_QS_Status), null)
+            },
+            modifier =
+                modifier
+                    // use graphicsLayer instead of Modifier.scale to anchor transform
+                    // to the (start, top) corner
+                    .graphicsLayer {
+                        scaleX = animatedScale
+                        scaleY = animatedScale
+                        transformOrigin =
+                            TransformOrigin(
+                                when (layoutDirection) {
+                                    LayoutDirection.Ltr -> 0f
+                                    LayoutDirection.Rtl -> 1f
+                                },
+                                0.5f
+                            )
+                    }
+                    .clickable { viewModel.onClockClicked() }
+        )
     }
 }
 

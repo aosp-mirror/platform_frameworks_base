@@ -151,9 +151,13 @@ constructor(
         awaitClose { revealAmountAnimator.removeUpdateListener(updateListener) }
     }
 
+    private var willBeOrIsRevealed: Boolean? = null
+
     override fun startRevealAmountAnimator(reveal: Boolean) {
+        if (reveal == willBeOrIsRevealed) return
+        willBeOrIsRevealed = reveal
         if (reveal) revealAmountAnimator.start() else revealAmountAnimator.reverse()
-        scrimLogger.d(TAG, "startRevealAmountAnimator, reveal", reveal)
+        scrimLogger.d(TAG, "startRevealAmountAnimator, reveal: ", reveal)
     }
 
     override val revealEffect =

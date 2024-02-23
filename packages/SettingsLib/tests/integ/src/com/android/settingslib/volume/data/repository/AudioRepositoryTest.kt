@@ -20,7 +20,8 @@ import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.volume.shared.FakeAudioManagerIntentsReceiver
+import com.android.settingslib.volume.shared.FakeAudioManagerEventsReceiver
+import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
@@ -46,7 +47,6 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@Suppress("UnspecifiedRegisterReceiverFlag")
 @RunWith(AndroidJUnit4::class)
 class AudioRepositoryTest {
 
@@ -59,7 +59,7 @@ class AudioRepositoryTest {
     @Mock private lateinit var audioManager: AudioManager
     @Mock private lateinit var communicationDevice: AudioDeviceInfo
 
-    private val intentsReceiver = FakeAudioManagerIntentsReceiver()
+    private val eventsReceiver = FakeAudioManagerEventsReceiver()
     private val volumeByStream: MutableMap<Int, Int> = mutableMapOf()
     private val isAffectedByRingerModeByStream: MutableMap<Int, Boolean> = mutableMapOf()
     private val isMuteByStream: MutableMap<Int, Boolean> = mutableMapOf()
@@ -77,12 +77,14 @@ class AudioRepositoryTest {
         `when`(audioManager.getStreamMaxVolume(anyInt())).thenReturn(MAX_VOLUME)
         `when`(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_NORMAL)
         `when`(audioManager.setStreamVolume(anyInt(), anyInt(), anyInt())).then {
-            volumeByStream[it.arguments[0] as Int] = it.arguments[1] as Int
-            triggerIntent(AudioManager.ACTION_VOLUME_CHANGED)
+            val streamType = it.arguments[1] as Int
+            volumeByStream[it.arguments[0] as Int] = streamType
+            triggerEvent(AudioManagerEvent.StreamVolumeChanged(AudioStream(streamType)))
         }
         `when`(audioManager.adjustStreamVolume(anyInt(), anyInt(), anyInt())).then {
-            isMuteByStream[it.arguments[0] as Int] = it.arguments[2] == AudioManager.ADJUST_MUTE
-            triggerIntent(AudioManager.STREAM_MUTE_CHANGED_ACTION)
+            val streamType = it.arguments[0] as Int
+            isMuteByStream[streamType] = it.arguments[2] == AudioManager.ADJUST_MUTE
+            triggerEvent(AudioManagerEvent.StreamMuteChanged(AudioStream(streamType)))
         }
         `when`(audioManager.getStreamVolume(anyInt())).thenAnswer {
             volumeByStream.getOrDefault(it.arguments[0] as Int, 0)
@@ -96,7 +98,7 @@ class AudioRepositoryTest {
 
         underTest =
             AudioRepositoryImpl(
-                intentsReceiver,
+                eventsReceiver,
                 audioManager,
                 testScope.testScheduler,
                 testScope.backgroundScope,
@@ -125,7 +127,7 @@ class AudioRepositoryTest {
             runCurrent()
 
             `when`(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_SILENT)
-            triggerIntent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION)
+            triggerEvent(AudioManagerEvent.InternalRingerModeChanged)
             runCurrent()
 
             assertThat(modes)
@@ -267,8 +269,8 @@ class AudioRepositoryTest {
         modeListenerCaptor.value.onModeChanged(mode)
     }
 
-    private fun triggerIntent(action: String) {
-        testScope.launch { intentsReceiver.triggerIntent(action) }
+    private fun triggerEvent(event: AudioManagerEvent) {
+        testScope.launch { eventsReceiver.triggerEvent(event) }
     }
 
     private companion object {

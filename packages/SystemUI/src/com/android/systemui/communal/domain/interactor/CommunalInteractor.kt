@@ -42,6 +42,9 @@ import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.log.dagger.CommunalTableLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
@@ -57,6 +60,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -78,6 +82,8 @@ constructor(
     communalSettingsInteractor: CommunalSettingsInteractor,
     private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
+    sceneInteractor: SceneInteractor,
+    sceneContainerFlags: SceneContainerFlags,
     @CommunalLog logBuffer: LogBuffer,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
 ) {
@@ -172,8 +178,14 @@ constructor(
      */
     // TODO(b/323215860): rename to something more appropriate after cleaning up usages
     val isCommunalShowing: Flow<Boolean> =
-        communalRepository.desiredScene
-            .map { it == CommunalSceneKey.Communal }
+        flow { emit(sceneContainerFlags.isEnabled()) }
+            .flatMapLatest { sceneContainerEnabled ->
+                if (sceneContainerEnabled) {
+                    sceneInteractor.currentScene.map { it == SceneKey.Communal }
+                } else {
+                    desiredScene.map { it == CommunalSceneKey.Communal }
+                }
+            }
             .distinctUntilChanged()
             .onEach { showing ->
                 logger.i({ "Communal is ${if (bool1) "showing" else "gone"}" }) { bool1 = showing }

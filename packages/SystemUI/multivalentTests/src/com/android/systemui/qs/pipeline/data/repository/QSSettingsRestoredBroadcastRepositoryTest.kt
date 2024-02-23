@@ -8,6 +8,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.statusbar.policy.FakeDeviceProvisionedController
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -28,6 +29,7 @@ class QSSettingsRestoredBroadcastRepositoryTest : SysuiTestCase() {
     private val testScope = TestScope(dispatcher)
 
     @Mock private lateinit var pipelineLogger: QSPipelineLogger
+    private val deviceProvisionedController = FakeDeviceProvisionedController()
 
     private lateinit var underTest: QSSettingsRestoredBroadcastRepository
 
@@ -38,6 +40,7 @@ class QSSettingsRestoredBroadcastRepositoryTest : SysuiTestCase() {
         underTest =
             QSSettingsRestoredBroadcastRepository(
                 fakeBroadcastDispatcher,
+                deviceProvisionedController,
                 pipelineLogger,
                 testScope.backgroundScope,
                 dispatcher,
@@ -173,6 +176,100 @@ class QSSettingsRestoredBroadcastRepositoryTest : SysuiTestCase() {
                 assertThat(restoredTiles).isEqualTo(RESTORED_TILES.toTilesList())
                 assertThat(restoredAutoAddedTiles).isEqualTo(RESTORED_AUTO_ADDED_TILES.toTilesSet())
                 assertThat(userId).isEqualTo(user0)
+            }
+        }
+
+    @Test
+    fun restoreAfterUserSetup_singleTilesRestoredBroadcast() =
+        testScope.runTest {
+            runCurrent()
+            val restoreData by collectLastValue(underTest.restoreData)
+            val user = 0
+
+            val tilesIntent =
+                createRestoreIntent(
+                    RestoreType.TILES,
+                    CURRENT_TILES,
+                    RESTORED_TILES,
+                )
+
+            sendIntentForUser(tilesIntent, user)
+
+            deviceProvisionedController.setUserSetup(user)
+
+            with(restoreData!!) {
+                assertThat(restoredTiles).isEqualTo(RESTORED_TILES.toTilesList())
+                assertThat(restoredAutoAddedTiles).isEmpty()
+                assertThat(userId).isEqualTo(user)
+            }
+        }
+
+    @Test
+    fun restoreAfterUserSetup_singleAutoAddRestoredBroadcast_noRestore() =
+        testScope.runTest {
+            runCurrent()
+            val restoreData by collectLastValue(underTest.restoreData)
+            val user = 0
+
+            val autoAddIntent =
+                createRestoreIntent(
+                    RestoreType.AUTOADD,
+                    CURRENT_AUTO_ADDED_TILES,
+                    RESTORED_AUTO_ADDED_TILES,
+                )
+
+            sendIntentForUser(autoAddIntent, user)
+
+            deviceProvisionedController.setUserSetup(user)
+
+            assertThat(restoreData).isNull()
+        }
+
+    @Test
+    fun restoreAfterUserSetup_otherUserFinishedSetup_noRestore() =
+        testScope.runTest {
+            runCurrent()
+            val restoreData by collectLastValue(underTest.restoreData)
+            val user = 0
+
+            val tilesIntent =
+                createRestoreIntent(
+                    RestoreType.TILES,
+                    CURRENT_TILES,
+                    RESTORED_TILES,
+                )
+
+            sendIntentForUser(tilesIntent, user)
+
+            deviceProvisionedController.setUserSetup(user + 1)
+
+            assertThat(restoreData).isNull()
+        }
+
+    @Test
+    fun restoreAfterUserSetup_otherUserFinishedSetup_thenCorrectUser_restored() =
+        testScope.runTest {
+            runCurrent()
+            val restoreData by collectLastValue(underTest.restoreData)
+            val user = 0
+
+            val tilesIntent =
+                createRestoreIntent(
+                    RestoreType.TILES,
+                    CURRENT_TILES,
+                    RESTORED_TILES,
+                )
+
+            sendIntentForUser(tilesIntent, user)
+
+            deviceProvisionedController.setUserSetup(user + 1)
+            runCurrent()
+            deviceProvisionedController.setUserSetup(user)
+
+            with(restoreData!!) {
+                assertThat(restoredTiles).isEqualTo(RESTORED_TILES.toTilesList())
+                assertThat(restoredAutoAddedTiles).isEmpty()
+                assertThat(userId).isEqualTo(user)
             }
         }
 

@@ -260,6 +260,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     AppOpsManager mAppOps;
     TestableFlagResolver mTestFlagResolver = new TestableFlagResolver();
     ZenModeEventLoggerFake mZenModeEventLogger;
+    private String mPkg;
 
     @Before
     public void setUp() throws PackageManager.NameNotFoundException {
@@ -270,7 +271,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mContentResolver = mContext.getContentResolver();
         mResources = mock(Resources.class, withSettings()
                 .spiedInstance(mContext.getResources()));
-        String pkg = mContext.getPackageName();
+        mPkg = mContext.getPackageName();
         try {
             when(mResources.getXml(R.xml.default_zen_mode_config)).thenReturn(
                     getDefaultConfigParser());
@@ -301,14 +302,14 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         when(mPackageManager.getPackageUidAsUser(eq(CUSTOM_PKG_NAME), anyInt()))
                 .thenReturn(CUSTOM_PKG_UID);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(
-                new String[]{pkg});
+                new String[]{mPkg});
 
         ApplicationInfo appInfoSpy = spy(new ApplicationInfo());
         appInfoSpy.icon = ICON_RES_ID;
         when(appInfoSpy.loadLabel(any())).thenReturn(CUSTOM_APP_LABEL);
         when(mPackageManager.getApplicationInfo(eq(CUSTOM_PKG_NAME), anyInt()))
                 .thenReturn(appInfoSpy);
-        when(mPackageManager.getApplicationInfo(eq(mContext.getPackageName()), anyInt()))
+        when(mPackageManager.getApplicationInfo(eq(mPkg), anyInt()))
                 .thenReturn(appInfoSpy);
         mZenModeHelper.mPm = mPackageManager;
 
@@ -2512,16 +2513,16 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         scheduleInfo.endHour = 1;
         Uri sharedUri = ZenModeConfig.toScheduleConditionId(scheduleInfo);
         AutomaticZenRule zenRule = new AutomaticZenRule("name",
-                new ComponentName("android", "ScheduleConditionProvider"),
+                new ComponentName(mPkg, "ScheduleConditionProvider"),
                 sharedUri,
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-        String id = mZenModeHelper.addAutomaticZenRule("android", zenRule,
+        String id = mZenModeHelper.addAutomaticZenRule(mPkg, zenRule,
                 UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "test", Process.SYSTEM_UID);
         AutomaticZenRule zenRule2 = new AutomaticZenRule("name2",
-                new ComponentName("android", "ScheduleConditionProvider"),
+                new ComponentName(mPkg, "ScheduleConditionProvider"),
                 sharedUri,
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-        String id2 = mZenModeHelper.addAutomaticZenRule("android", zenRule2,
+        String id2 = mZenModeHelper.addAutomaticZenRule(mPkg, zenRule2,
                 UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "test", Process.SYSTEM_UID);
 
         Condition condition = new Condition(sharedUri, "", STATE_TRUE);
@@ -2531,11 +2532,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         for (ZenModeConfig.ZenRule rule : mZenModeHelper.mConfig.automaticRules.values()) {
             if (rule.id.equals(id)) {
                 assertNotNull(rule.condition);
-                assertTrue(rule.condition.state == STATE_TRUE);
+                assertEquals(STATE_TRUE, rule.condition.state);
             }
             if (rule.id.equals(id2)) {
                 assertNotNull(rule.condition);
-                assertTrue(rule.condition.state == STATE_TRUE);
+                assertEquals(STATE_TRUE, rule.condition.state);
             }
         }
 
@@ -2546,11 +2547,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         for (ZenModeConfig.ZenRule rule : mZenModeHelper.mConfig.automaticRules.values()) {
             if (rule.id.equals(id)) {
                 assertNotNull(rule.condition);
-                assertTrue(rule.condition.state == STATE_FALSE);
+                assertEquals(STATE_FALSE, rule.condition.state);
             }
             if (rule.id.equals(id2)) {
                 assertNotNull(rule.condition);
-                assertTrue(rule.condition.state == STATE_FALSE);
+                assertEquals(STATE_FALSE, rule.condition.state);
             }
         }
     }
@@ -3637,14 +3638,14 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         AutomaticZenRule bedtime = new AutomaticZenRule.Builder("Bedtime Mode (TM)", CONDITION_ID)
                 .setType(TYPE_BEDTIME)
                 .build();
-        String bedtimeRuleId = mZenModeHelper.addAutomaticZenRule("pkg", bedtime, UPDATE_ORIGIN_APP,
+        String bedtimeRuleId = mZenModeHelper.addAutomaticZenRule(mPkg, bedtime, UPDATE_ORIGIN_APP,
                 "reason", CUSTOM_PKG_UID);
 
         // Create immersive rule
         AutomaticZenRule immersive = new AutomaticZenRule.Builder("Immersed", CONDITION_ID)
                 .setType(TYPE_IMMERSIVE)
                 .build();
-        String immersiveId = mZenModeHelper.addAutomaticZenRule("pkg", immersive, UPDATE_ORIGIN_APP,
+        String immersiveId = mZenModeHelper.addAutomaticZenRule(mPkg, immersive, UPDATE_ORIGIN_APP,
                 "reason", CUSTOM_PKG_UID);
 
         // Event 2: Activate bedtime rule
@@ -5434,6 +5435,48 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void setAutomaticZenRuleState_idForNotOwnedRule_ignored() {
+        // Assume existence of an other-package-owned rule that is currently ACTIVE.
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+        ZenRule otherRule = newZenRule("another.package", Instant.now(), null);
+        otherRule.zenMode = ZEN_MODE_ALARMS;
+        otherRule.condition = new Condition(otherRule.conditionId, "on", Condition.STATE_TRUE);
+        ZenModeConfig config = mZenModeHelper.mConfig.copy();
+        config.automaticRules.put("otherRule", otherRule);
+        mZenModeHelper.setConfig(config, null, UPDATE_ORIGIN_INIT, "", Process.SYSTEM_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_ALARMS);
+
+        // Should be ignored.
+        mZenModeHelper.setAutomaticZenRuleState("otherRule",
+                new Condition(otherRule.conditionId, "off", Condition.STATE_FALSE),
+                UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_ALARMS);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void setAutomaticZenRuleState_conditionForNotOwnedRule_ignored() {
+        // Assume existence of an other-package-owned rule that is currently ACTIVE.
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
+        ZenRule otherRule = newZenRule("another.package", Instant.now(), null);
+        otherRule.zenMode = ZEN_MODE_ALARMS;
+        otherRule.condition = new Condition(otherRule.conditionId, "on", Condition.STATE_TRUE);
+        ZenModeConfig config = mZenModeHelper.mConfig.copy();
+        config.automaticRules.put("otherRule", otherRule);
+        mZenModeHelper.setConfig(config, null, UPDATE_ORIGIN_INIT, "", Process.SYSTEM_UID);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_ALARMS);
+
+        // Should be ignored.
+        mZenModeHelper.setAutomaticZenRuleState(otherRule.conditionId,
+                new Condition(otherRule.conditionId, "off", Condition.STATE_FALSE),
+                UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_ALARMS);
+    }
+
+    @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
     public void testCallbacks_policy() throws Exception {
         setupZenConfig();
@@ -5583,13 +5626,13 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void applyGlobalZenModeAsImplicitZenRule_modeOff_deactivatesImplicitRule() {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
         mZenModeHelper.mConfig.automaticRules.clear();
-        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID,
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(mPkg, CUSTOM_PKG_UID,
                 ZEN_MODE_IMPORTANT_INTERRUPTIONS);
         assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(1);
         assertThat(mZenModeHelper.mConfig.automaticRules.valueAt(0).condition.state)
                 .isEqualTo(STATE_TRUE);
 
-        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID,
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(mPkg, CUSTOM_PKG_UID,
                 ZEN_MODE_OFF);
 
         assertThat(mZenModeHelper.mConfig.automaticRules.valueAt(0).condition.state)

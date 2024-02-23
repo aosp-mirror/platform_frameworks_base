@@ -95,10 +95,6 @@ constructor(
     val currentConnectedDevice: Flow<MediaDevice?> =
         localMediaRepository.flatMapLatest { it.currentConnectedDevice }
 
-    /** A list of available [MediaDevice]s. */
-    val mediaDevices: Flow<Collection<MediaDevice>> =
-        localMediaRepository.flatMapLatest { it.mediaDevices }
-
     private suspend fun getApplicationLabel(packageName: String): CharSequence? {
         return try {
             withContext(backgroundCoroutineContext) {

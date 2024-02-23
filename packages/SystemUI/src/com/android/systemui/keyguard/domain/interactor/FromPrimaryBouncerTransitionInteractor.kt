@@ -134,8 +134,9 @@ constructor(
                     powerInteractor.isAwake,
                     startedKeyguardTransitionStep,
                     keyguardInteractor.isKeyguardOccluded,
+                    keyguardInteractor.isDreaming,
                     keyguardInteractor.isActiveDreamLockscreenHosted,
-                    communalInteractor.isIdleOnCommunal
+                    communalInteractor.isIdleOnCommunal,
                 )
                 .collect {
                     (
@@ -143,6 +144,7 @@ constructor(
                         isAwake,
                         lastStartedTransitionStep,
                         occluded,
+                        isDreaming,
                         isActiveDreamLockscreenHosted,
                         isIdleOnCommunal) ->
                     if (
@@ -152,10 +154,12 @@ constructor(
                             !isActiveDreamLockscreenHosted
                     ) {
                         val toState =
-                            if (occluded) {
+                            if (occluded && !isDreaming) {
                                 KeyguardState.OCCLUDED
                             } else if (isIdleOnCommunal) {
                                 KeyguardState.GLANCEABLE_HUB
+                            } else if (isDreaming) {
+                                KeyguardState.DREAMING
                             } else {
                                 KeyguardState.LOCKSCREEN
                             }

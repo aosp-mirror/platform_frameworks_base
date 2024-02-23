@@ -30,5 +30,6 @@ val Kosmos.biometricMessageInteractor by
             fingerprintPropertyInteractor = fingerprintPropertyInteractor,
             faceAuthInteractor = deviceEntryFaceAuthInteractor,
             biometricSettingsInteractor = deviceEntryBiometricSettingsInteractor,
+            faceHelpMessageDeferralInteractor = faceHelpMessageDeferralInteractor,
         )
     }

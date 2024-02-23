@@ -493,11 +493,9 @@ public class Transitions implements RemoteCallable<Transitions>,
             final SurfaceControl leash = change.getLeash();
             final int mode = info.getChanges().get(i).getMode();
 
-            if (mode == TRANSIT_TO_FRONT
-                    && ((change.getStartAbsBounds().height() != change.getEndAbsBounds().height()
-                    || change.getStartAbsBounds().width() != change.getEndAbsBounds().width()))) {
-                // When the window is moved to front with a different size, make sure the crop is
-                // updated to prevent it from using the old crop.
+            if (mode == TRANSIT_TO_FRONT) {
+                // When the window is moved to front, make sure the crop is updated to prevent it
+                // from using the old crop.
                 t.setWindowCrop(leash, change.getEndAbsBounds().width(),
                         change.getEndAbsBounds().height());
             }
@@ -1170,7 +1168,11 @@ public class Transitions implements RemoteCallable<Transitions>,
         mPendingTransitions.add(0, active);
     }
 
-    /** Start a new transition directly. */
+    /**
+     * Start a new transition directly.
+     * @param handler if null, the transition will be dispatched to the registered set of transition
+     *                handlers to be handled
+     */
     public IBinder startTransition(@WindowManager.TransitionType int type,
             @NonNull WindowContainerTransaction wct, @Nullable TransitionHandler handler) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Directly starting a new transition "
