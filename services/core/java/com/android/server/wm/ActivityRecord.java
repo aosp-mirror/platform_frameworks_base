@@ -1535,11 +1535,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Picture-in-picture mode changes also trigger a multi-window mode change as well, so
             // update that here in order. Set the last reported MW state to the same as the PiP
             // state since we haven't yet actually resized the task (these callbacks need to
-            // precede the configuration change from the resize.
+            // precede the configuration change from the resize.)
             mLastReportedPictureInPictureMode = inPictureInPictureMode;
             mLastReportedMultiWindowMode = inPictureInPictureMode;
             ensureActivityConfiguration(true /* ignoreVisibility */);
-            if (inPictureInPictureMode && findMainWindow() == null) {
+            if (inPictureInPictureMode && findMainWindow() == null
+                    && task.topRunningActivity() == this) {
                 // Prevent malicious app entering PiP without valid WindowState, which can in turn
                 // result a non-touchable PiP window since the InputConsumer for PiP requires it.
                 EventLog.writeEvent(0x534e4554, "265293293", -1, "");
