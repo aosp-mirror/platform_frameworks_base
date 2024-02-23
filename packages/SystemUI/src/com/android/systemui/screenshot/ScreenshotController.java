@@ -576,7 +576,7 @@ public class ScreenshotController {
 
     private void releaseMediaPlayer() {
         if (mScreenshotSoundController == null) return;
-        mScreenshotSoundController.releaseScreenshotSound();
+        mScreenshotSoundController.releaseScreenshotSoundAsync();
     }
 
     private void respondToKeyDismissal() {
@@ -891,7 +891,7 @@ public class ScreenshotController {
     private void playCameraSoundIfNeeded() {
         if (mScreenshotSoundController == null) return;
         // the controller is not-null only on the default display controller
-        mScreenshotSoundController.playCameraSound();
+        mScreenshotSoundController.playScreenshotSoundAsync();
     }
 
     /**
