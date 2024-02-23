@@ -829,7 +829,8 @@ final class InstallPackageHelper {
 
         if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
 
-        if (request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED && doRestore) {
+        final boolean succeeded = request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED;
+        if (succeeded && doRestore) {
             // Pass responsibility to the Backup Manager.  It will perform a
             // restore if appropriate, then pass responsibility back to the
             // Package Manager to run the post-install observer callbacks
@@ -843,8 +844,25 @@ final class InstallPackageHelper {
         // need to be snapshotted or restored for the package.
         //
         // TODO(narayan): Get this working for cases where userId == UserHandle.USER_ALL.
-        if (request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED && !doRestore && update) {
+        if (succeeded && !doRestore && update) {
             doRestore = performRollbackManagerRestore(userId, token, request);
+        }
+
+        if (succeeded && !request.hasPostInstallRunnable()) {
+            boolean hasNeverBeenRestored =
+                    packageSetting != null && packageSetting.isPendingRestore();
+            request.setPostInstallRunnable(() -> {
+                // Permissions should be restored on each user that has the app installed for the
+                // first time, unless it's an unarchive install for an archived app, in which case
+                // the permissions should be restored on each user that has the app updated.
+                int[] userIdsToRestorePermissions = hasNeverBeenRestored
+                        ? request.getUpdateBroadcastUserIds()
+                        : request.getFirstTimeBroadcastUserIds();
+                for (int restorePermissionUserId : userIdsToRestorePermissions) {
+                    mPm.restorePermissionsAndUpdateRolesForNewUserInstall(request.getName(),
+                            restorePermissionUserId);
+                }
+            });
         }
 
         if (doRestore) {
@@ -2851,7 +2869,6 @@ final class InstallPackageHelper {
             mPm.notifyInstantAppPackageInstalled(request.getPkg().getPackageName(),
                     request.getNewUsers());
 
-            request.populateBroadcastUsers();
             final int[] firstUserIds = request.getFirstTimeBroadcastUserIds();
 
             if (request.getPkg().getStaticSharedLibraryName() == null) {
@@ -2862,12 +2879,6 @@ final class InstallPackageHelper {
                     mPm.mRequiredPermissionControllerPackage, mPm.mRequiredVerifierPackages,
                     mPm.mRequiredInstallerPackage,
                     /* packageSender= */ mPm, launchedForRestore, killApp, update, archived);
-
-            // Work that needs to happen on first install within each user
-            for (int userId : firstUserIds) {
-                mPm.restorePermissionsAndUpdateRolesForNewUserInstall(packageName,
-                        userId);
-            }
 
             if (request.isAllNewUsers() && !update) {
                 mPm.notifyPackageAdded(packageName, request.getAppId());
