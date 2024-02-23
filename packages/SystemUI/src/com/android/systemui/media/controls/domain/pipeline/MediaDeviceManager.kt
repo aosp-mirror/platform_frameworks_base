@@ -35,10 +35,8 @@ import com.android.settingslib.flags.Flags.legacyLeAudioSharing
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.media.PhoneMediaDevice
-import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDeviceData
 import com.android.systemui.media.controls.util.LocalMediaManagerFactory
@@ -70,15 +68,10 @@ constructor(
     private val localBluetoothManager: Lazy<LocalBluetoothManager?>,
     @Main private val fgExecutor: Executor,
     @Background private val bgExecutor: Executor,
-    dumpManager: DumpManager,
-) : MediaDataManager.Listener, Dumpable {
+) : MediaDataManager.Listener {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val entries: MutableMap<String, Entry> = mutableMapOf()
-
-    init {
-        dumpManager.registerDumpable(this)
-    }
 
     /** Add a listener for changes to the media route (ie. device). */
     fun addListener(listener: Listener) = listeners.add(listener)
@@ -123,7 +116,7 @@ constructor(
         token?.let { listeners.forEach { it.onKeyRemoved(key) } }
     }
 
-    override fun dump(pw: PrintWriter, args: Array<String>) {
+    fun dump(pw: PrintWriter) {
         with(pw) {
             println("MediaDeviceManager state:")
             entries.forEach { (key, entry) ->
