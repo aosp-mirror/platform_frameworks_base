@@ -542,6 +542,13 @@ flag {
     namespace: "systemui"
     description: "Binds Keyguard Media Controller Visibility to MediaContainerView"
     bug: "298213983"
+}
+
+flag {
+    name: "delayed_wakelock_release_on_background_thread"
+    namespace: "systemui"
+    description: "Released delayed wakelocks on background threads to avoid janking screen transitions."
+    bug: "316128516"
     metadata {
         purpose: PURPOSE_BUGFIX
     }
