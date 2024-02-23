@@ -72,7 +72,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         context: Context,
         logger: MediaTttReceiverLogger,
         windowManager: WindowManager,
-        mainExecutor: DelayableExecutor,
+        @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         dumpManager: DumpManager,

@@ -28,6 +28,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
@@ -94,10 +95,12 @@ public class PersistentConnectionManager<T> implements Dumpable {
         }
     };
 
+    // TODO: b/326449074 - Ensure the DelayableExecutor is on the correct thread, and update the
+    //                     qualifier (to @Main) or name (to bgExecutor) to be consistent with that.
     @Inject
     public PersistentConnectionManager(
             SystemClock clock,
-            DelayableExecutor mainExecutor,
+            @Background DelayableExecutor mainExecutor,
             DumpManager dumpManager,
             @Named(DUMPSYS_NAME) String dumpsysName,
             @Named(SERVICE_CONNECTION) ObservableServiceConnection<T> serviceConnection,
