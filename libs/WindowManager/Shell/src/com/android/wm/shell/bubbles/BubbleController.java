@@ -122,6 +122,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -246,6 +247,9 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /** Saved font scale, used to detect font size changes in {@link #onConfigurationChanged}. */
     private float mFontScale = 0;
+
+    /** Saved locale, used to detect local changes in {@link #onConfigurationChanged}. */
+    private Locale mLocale = null;
 
     /** Saved direction, used to detect layout direction changes @link #onConfigChanged}. */
     private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
@@ -1067,6 +1071,11 @@ public class BubbleController implements ConfigurationChangeListener,
             if (newConfig.getLayoutDirection() != mLayoutDirection) {
                 mLayoutDirection = newConfig.getLayoutDirection();
                 mStackView.onLayoutDirectionChanged(mLayoutDirection);
+            }
+            Locale newLocale = newConfig.locale;
+            if (newLocale != null && !newLocale.equals(mLocale)) {
+                mLocale = newLocale;
+                mStackView.updateLocale();
             }
         }
     }

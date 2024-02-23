@@ -1452,6 +1452,12 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
+    void updateLocale() {
+        if (mBubbleOverflow != null && mBubbleOverflow.getExpandedView() != null) {
+            mBubbleOverflow.getExpandedView().updateLocale();
+        }
+    }
+
     private void updateOverflow() {
         mBubbleOverflow.update();
         mBubbleContainer.reorderView(mBubbleOverflow.getIconView(),
