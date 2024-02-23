@@ -67,7 +67,7 @@
             android:gravity="start"/>
 
         <!-- Buttons -->
-        <LinearLayout
+        <com.android.internal.widget.ButtonBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -90,6 +90,6 @@
                 android:layout_weight="0"
                 android:text="@string/screenrecord_continue"
                 style="@style/Widget.Dialog.Button" />
-        </LinearLayout>
+        </com.android.internal.widget.ButtonBarLayout>
     </LinearLayout>
 </ScrollView>
