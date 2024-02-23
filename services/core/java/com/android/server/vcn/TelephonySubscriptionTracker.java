@@ -164,7 +164,6 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         registerCarrierPrivilegesCallbacks();
     }
 
-    // TODO(b/221306368): Refactor with the new onCarrierServiceChange in the new CPCallback
     private void registerCarrierPrivilegesCallbacks() {
         final HandlerExecutor executor = new HandlerExecutor(mHandler);
         final int modemCount = mTelephonyManager.getActiveModemCount();
