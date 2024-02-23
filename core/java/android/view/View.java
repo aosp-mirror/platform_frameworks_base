@@ -10889,8 +10889,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             structure.setAutofillId(new AutofillId(getAutofillId(),
                     AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId())));
         }
-        structure.setCredentialManagerRequest(getCredentialManagerRequest(),
-                getCredentialManagerCallback());
+        if (getViewCredentialHandler() != null) {
+            structure.setCredentialManagerRequest(
+                    getViewCredentialHandler().getRequest(),
+                    getViewCredentialHandler().getCallback());
+        }
         CharSequence cname = info.getClassName();
         structure.setClassName(cname != null ? cname.toString() : null);
         structure.setContentDescription(info.getContentDescription());
