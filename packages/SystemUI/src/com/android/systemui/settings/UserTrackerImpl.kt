@@ -121,7 +121,6 @@ open class UserTrackerImpl internal constructor(
     @GuardedBy("callbacks")
     private val callbacks: MutableList<DataItem> = ArrayList()
 
-    private var beforeUserSwitchingJob: Job? = null
     private var userSwitchingJob: Job? = null
     private var afterUserSwitchingJob: Job? = null
 
@@ -194,14 +193,7 @@ open class UserTrackerImpl internal constructor(
     private fun registerUserSwitchObserver() {
         iActivityManager.registerUserSwitchObserver(object : UserSwitchObserver() {
             override fun onBeforeUserSwitching(newUserId: Int) {
-                if (isBackgroundUserSwitchEnabled) {
-                    beforeUserSwitchingJob?.cancel()
-                    beforeUserSwitchingJob = appScope.launch(backgroundContext) {
-                        handleBeforeUserSwitching(newUserId)
-                    }
-                } else {
-                    handleBeforeUserSwitching(newUserId)
-                }
+                handleBeforeUserSwitching(newUserId)
             }
 
             override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
@@ -233,15 +225,24 @@ open class UserTrackerImpl internal constructor(
 
     @WorkerThread
     protected open fun handleBeforeUserSwitching(newUserId: Int) {
-        Assert.isNotMainThread()
         setUserIdInternal(newUserId)
 
         val list = synchronized(callbacks) {
             callbacks.toList()
         }
+        val latch = CountDownLatch(list.size)
         list.forEach {
-            it.callback.get()?.onBeforeUserSwitching(newUserId)
+            val callback = it.callback.get()
+            if (callback != null) {
+                it.executor.execute {
+                    callback.onBeforeUserSwitching(newUserId)
+                    latch.countDown()
+                }
+            } else {
+                latch.countDown()
+            }
         }
+        latch.await()
     }
 
     @WorkerThread
