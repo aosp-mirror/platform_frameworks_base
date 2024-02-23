@@ -18,7 +18,7 @@ package com.android.systemui.controls.ui
 
 import android.app.Activity
 import android.app.ActivityOptions
-import android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+import android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.Dialog
 import android.app.PendingIntent
 import android.content.ComponentName
