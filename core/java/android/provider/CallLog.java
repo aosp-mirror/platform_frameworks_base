@@ -406,6 +406,7 @@ public class CallLog {
          * Builder for the add-call parameters.
          */
         public static final class AddCallParametersBuilder {
+            public static final int MAX_NUMBER_OF_CHARACTERS = 256;
             private CallerInfo mCallerInfo;
             private String mNumber;
             private String mPostDialDigits;
@@ -431,7 +432,7 @@ public class CallLog {
             private Uri mPictureUri;
             private int mIsPhoneAccountMigrationPending;
             private boolean mIsBusinessCall;
-            private String mBusinessName;
+            private String mAssertedDisplayName;
 
             /**
              * @param callerInfo the CallerInfo object to get the target contact from.
@@ -659,11 +660,18 @@ public class CallLog {
             }
 
             /**
-             * @param businessName should be set if the caller is a business call
+             * @param assertedDisplayName the asserted display name associated with the business
+             *                            call
+             * @throws IllegalArgumentException if the assertedDisplayName is over 256 characters
              */
             @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
-            public @NonNull AddCallParametersBuilder setBusinessName(String businessName) {
-                mBusinessName = businessName;
+            public @NonNull AddCallParametersBuilder setAssertedDisplayName(
+                    String assertedDisplayName) {
+                if (assertedDisplayName.length() > MAX_NUMBER_OF_CHARACTERS) {
+                    throw new IllegalArgumentException("assertedDisplayName exceeds the character"
+                            + " limit of " + MAX_NUMBER_OF_CHARACTERS + ".");
+                }
+                mAssertedDisplayName = assertedDisplayName;
                 return this;
             }
 
@@ -678,7 +686,7 @@ public class CallLog {
                             mCallBlockReason,
                             mCallScreeningAppName, mCallScreeningComponentName, mMissedReason,
                             mPriority, mSubject, mLatitude, mLongitude, mPictureUri,
-                            mIsPhoneAccountMigrationPending, mIsBusinessCall, mBusinessName);
+                            mIsPhoneAccountMigrationPending, mIsBusinessCall, mAssertedDisplayName);
                 } else {
                     return new AddCallParams(mCallerInfo, mNumber, mPostDialDigits, mViaNumber,
                             mPresentation, mCallType, mFeatures, mAccountHandle, mStart, mDuration,
@@ -716,7 +724,7 @@ public class CallLog {
         private Uri mPictureUri;
         private int mIsPhoneAccountMigrationPending;
         private boolean mIsBusinessCall;
-        private String mBusinessName;
+        private String mAssertedDisplayName;
 
         private AddCallParams(CallerInfo callerInfo, String number, String postDialDigits,
                 String viaNumber, int presentation, int callType, int features,
@@ -761,7 +769,8 @@ public class CallLog {
                 CharSequence callScreeningAppName, String callScreeningComponentName,
                 long missedReason,
                 int priority, String subject, double latitude, double longitude, Uri pictureUri,
-                int isPhoneAccountMigrationPending, boolean isBusinessCall, String businessName) {
+                int isPhoneAccountMigrationPending, boolean isBusinessCall,
+                String assertedDisplayName) {
             mCallerInfo = callerInfo;
             mNumber = number;
             mPostDialDigits = postDialDigits;
@@ -787,7 +796,7 @@ public class CallLog {
             mPictureUri = pictureUri;
             mIsPhoneAccountMigrationPending = isPhoneAccountMigrationPending;
             mIsBusinessCall = isBusinessCall;
-            mBusinessName = businessName;
+            mAssertedDisplayName = assertedDisplayName;
         }
 
     }
@@ -1833,7 +1842,7 @@ public class CallLog {
             values.put(IS_PHONE_ACCOUNT_MIGRATION_PENDING, params.mIsPhoneAccountMigrationPending);
             if (Flags.businessCallComposer()) {
                 values.put(IS_BUSINESS_CALL, Integer.valueOf(params.mIsBusinessCall ? 1 : 0));
-                values.put(ASSERTED_DISPLAY_NAME, params.mBusinessName);
+                values.put(ASSERTED_DISPLAY_NAME, params.mAssertedDisplayName);
             }
             if ((params.mCallerInfo != null) && (params.mCallerInfo.getContactId() > 0)) {
                 // Update usage information for the number associated with the contact ID.
