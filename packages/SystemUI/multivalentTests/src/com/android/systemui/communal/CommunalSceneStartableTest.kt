@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dock.DockManager
@@ -33,6 +34,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -50,7 +52,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     private lateinit var underTest: CommunalSceneStartable
 
     @Before
-    fun setUp() =
+    fun setUp() {
         with(kosmos) {
             underTest =
                 CommunalSceneStartable(
@@ -61,7 +63,15 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                         bgScope = applicationCoroutineScope,
                     )
                     .apply { start() }
+
+            // Make communal available so that communalInteractor.desiredScene accurately reflects
+            // scene changes instead of just returning Blank.
+            with(kosmos.testScope) {
+                launch { setCommunalAvailable(true) }
+                testScheduler.runCurrent()
+            }
         }
+    }
 
     @Test
     fun keyguardGoesAway_forceBlankScene() =
@@ -247,6 +257,12 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             runCurrent()
             fakeDockManager.setIsDocked(docked)
             fakeDockManager.setDockEvent(DockManager.STATE_DOCKED)
+            runCurrent()
+        }
+
+    private suspend fun TestScope.enableCommunal() =
+        with(kosmos) {
+            setCommunalAvailable(true)
             runCurrent()
         }
 }

@@ -129,8 +129,13 @@ constructor(
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through
      * [onSceneChanged].
+     *
+     * If [isCommunalAvailable] is false, will return [CommunalSceneKey.Blank]
      */
-    val desiredScene: StateFlow<CommunalSceneKey> = communalRepository.desiredScene
+    val desiredScene: Flow<CommunalSceneKey> =
+        communalRepository.desiredScene.combine(isCommunalAvailable) { scene, available ->
+            if (available) scene else CommunalSceneKey.Blank
+        }
 
     /** Transition state of the hub mode. */
     val transitionState: StateFlow<ObservableCommunalTransitionState> =
