@@ -1448,7 +1448,6 @@ public class StatusBarManager {
          *
          * @hide
          */
-        @SystemApi
         public boolean isBackDisabled() {
             return mBack;
         }
@@ -1862,38 +1861,38 @@ public class StatusBarManager {
         };
 
         @DataClass.Generated(
-                time = 1707345957771L,
+                time = 1708625947132L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/app/StatusBarManager.java",
-                inputSignatures = "private  boolean mStatusBarExpansion\nprivate  "
-                        + "boolean mNavigateHome\nprivate  boolean mNotificationPeeking\nprivate  "
-                        + "boolean mRecents\nprivate  boolean mBack\nprivate  boolean "
-                        + "mSearch\nprivate  boolean mSystemIcons\nprivate  boolean mClock\nprivate"
-                        + "  boolean mNotificationIcons\nprivate  boolean mRotationSuggestion\n"
+                inputSignatures = "private  boolean mStatusBarExpansion\nprivate  boolean "
+                        + "mNavigateHome\nprivate  boolean mNotificationPeeking\nprivate  "
+                        + "boolean mRecents\nprivate  boolean mBack\nprivate  boolean mSearch\n"
+                        + "private  boolean mSystemIcons\nprivate  boolean mClock\nprivate  "
+                        + "boolean mNotificationIcons\nprivate  boolean mRotationSuggestion\n"
                         + "private  boolean mNotificationTicker\npublic "
                         + "@android.annotation.SystemApi boolean isStatusBarExpansionDisabled()\n"
                         + "public  void setStatusBarExpansionDisabled(boolean)\npublic "
-                        + "@android.annotation.SystemApi boolean isNavigateToHomeDisabled()\n"
-                        + "public  void setNavigationHomeDisabled(boolean)\npublic "
-                        + "@android.annotation.SystemApi boolean isNotificationPeekingDisabled()\n"
-                        + "public  void setNotificationPeekingDisabled(boolean)\npublic "
+                        + "@android.annotation.SystemApi boolean isNavigateToHomeDisabled()\npublic"
+                        + "  void setNavigationHomeDisabled(boolean)\npublic "
+                        + "@android.annotation.SystemApi boolean isNotificationPeekingDisabled()"
+                        + "\npublic  void setNotificationPeekingDisabled(boolean)\npublic "
                         + "@android.annotation.SystemApi boolean isRecentsDisabled()\npublic  "
-                        + "void setRecentsDisabled(boolean)\npublic @android.annotation.SystemApi "
-                        + "boolean isBackDisabled()\npublic  void setBackDisabled(boolean)\npublic "
+                        + "void setRecentsDisabled(boolean)\npublic  boolean isBackDisabled()"
+                        + "\npublic  void setBackDisabled(boolean)\npublic "
                         + "@android.annotation.SystemApi boolean isSearchDisabled()\npublic  "
                         + "void setSearchDisabled(boolean)\npublic  boolean "
-                        + "areSystemIconsDisabled()\npublic  void setSystemIconsDisabled(boolean)"
-                        + "\npublic  boolean isClockDisabled()\npublic  "
-                        + "void setClockDisabled(boolean)\npublic  "
-                        + "boolean areNotificationIconsDisabled()\npublic  "
-                        + "void setNotificationIconsDisabled(boolean)\npublic  boolean "
+                        + "areSystemIconsDisabled()\npublic  void setSystemIconsDisabled(boolean)\n"
+                        + "public  boolean isClockDisabled()\npublic  "
+                        + "void setClockDisabled(boolean)\npublic  boolean "
+                        + "areNotificationIconsDisabled()\npublic  void "
+                        + "setNotificationIconsDisabled(boolean)\npublic  boolean "
                         + "isNotificationTickerDisabled()\npublic  void "
                         + "setNotificationTickerDisabled(boolean)\npublic "
                         + "@android.annotation.TestApi boolean isRotationSuggestionDisabled()\n"
                         + "public  void setRotationSuggestionDisabled(boolean)\npublic "
-                        + "@android.annotation.SystemApi boolean areAllComponentsEnabled()\n"
-                        + "public  void setEnableAll()\npublic  boolean areAllComponentsDisabled()"
-                        + "\npublic  void setDisableAll()\npublic @android.annotation.NonNull "
+                        + "@android.annotation.SystemApi boolean areAllComponentsEnabled()\npublic"
+                        + "  void setEnableAll()\npublic  boolean areAllComponentsDisabled()\n"
+                        + "public  void setDisableAll()\npublic @android.annotation.NonNull "
                         + "@java.lang.Override java.lang.String toString()\npublic  "
                         + "android.util.Pair<java.lang.Integer,java.lang.Integer> toFlags()\n"
                         + "class DisableInfo extends java.lang.Object implements "
