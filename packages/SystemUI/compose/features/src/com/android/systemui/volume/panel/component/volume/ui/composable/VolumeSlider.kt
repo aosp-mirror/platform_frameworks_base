@@ -20,6 +20,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -59,7 +60,12 @@ fun VolumeSlider(
         colors = sliderColors,
         label = {
             Column(modifier = Modifier.animateContentSize()) {
-                Text(state.label, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    modifier = Modifier.basicMarquee(),
+                    text = state.label,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                )
 
                 state.disabledMessage?.let { message ->
                     AnimatedVisibility(
@@ -67,7 +73,12 @@ fun VolumeSlider(
                         enter = expandVertically { it },
                         exit = shrinkVertically { it },
                     ) {
-                        Text(text = message, style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            modifier = Modifier.basicMarquee(),
+                            text = message,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                        )
                     }
                 }
             }
