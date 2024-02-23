@@ -40,6 +40,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.Flags.notifyPowerManagerUserActivityBackground;
 import static com.android.systemui.Flags.refactorGetCurrentUser;
 import static com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel.DREAMING_ANIMATION_DURATION_MS;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
@@ -1488,7 +1489,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     public void userActivity() {
-        mPM.userActivity(mSystemClock.uptimeMillis(), false);
+        if (notifyPowerManagerUserActivityBackground()) {
+            mUiBgExecutor.execute(() -> mPM.userActivity(mSystemClock.uptimeMillis(), false));
+        } else {
+            mPM.userActivity(mSystemClock.uptimeMillis(), false);
+        }
     }
 
     private void setupLocked() {
