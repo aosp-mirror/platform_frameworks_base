@@ -24,7 +24,7 @@ import javax.inject.Inject
 class VolumeSliderInteractor @Inject constructor() {
 
     /** mimic percentage volume setting */
-    private val displayValueRange: ClosedFloatingPointRange<Float> = 0f..100f
+    val displayValueRange: ClosedFloatingPointRange<Float> = 0f..100f
 
     /**
      * Translates [volume], that belongs to [volumeRange] to the value that belongs to

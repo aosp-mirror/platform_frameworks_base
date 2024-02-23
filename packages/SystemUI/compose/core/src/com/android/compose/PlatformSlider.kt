@@ -57,9 +57,6 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.modifiers.padding
 import com.android.compose.theme.LocalAndroidColorScheme
 
-/** Indicator corner radius used when the user drags the [PlatformSlider]. */
-private val DefaultPlatformSliderDraggingCornerRadius = 8.dp
-
 /**
  * Platform slider implementation that displays a slider with an [icon] and a [label] at the start.
  *
@@ -83,10 +80,8 @@ fun PlatformSlider(
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    colors: PlatformSliderColors =
-        if (isSystemInDarkTheme()) darkThemePlatformSliderColors()
-        else lightThemePlatformSliderColors(),
-    draggingCornersRadius: Dp = DefaultPlatformSliderDraggingCornerRadius,
+    colors: PlatformSliderColors = PlatformSliderDefaults.defaultPlatformSliderColors(),
+    draggingCornersRadius: Dp = PlatformSliderDefaults.DefaultPlatformSliderDraggingCornerRadius,
     icon: (@Composable (isDragging: Boolean) -> Unit)? = null,
     label: (@Composable (isDragging: Boolean) -> Unit)? = null,
 ) {
@@ -109,7 +104,7 @@ fun PlatformSlider(
     val paddingStart by
         animateDpAsState(
             targetValue =
-                if ((!isDragging && value == 0f) || icon == null) {
+                if ((!isDragging && value == valueRange.start) || icon == null) {
                     16.dp
                 } else {
                     0.dp
@@ -125,6 +120,7 @@ fun PlatformSlider(
             valueRange = valueRange,
             onValueChangeFinished = onValueChangeFinished,
             interactionSource = interactionSource,
+            enabled = enabled,
             track = {
                 Track(
                     sliderState = it,
@@ -285,6 +281,17 @@ data class PlatformSliderColors(
     val disabledIconColor: Color,
     val disabledLabelColor: Color,
 )
+
+object PlatformSliderDefaults {
+
+    /** Indicator corner radius used when the user drags the [PlatformSlider]. */
+    val DefaultPlatformSliderDraggingCornerRadius = 8.dp
+
+    @Composable
+    fun defaultPlatformSliderColors(): PlatformSliderColors =
+        if (isSystemInDarkTheme()) darkThemePlatformSliderColors()
+        else lightThemePlatformSliderColors()
+}
 
 /** [PlatformSliderColors] for the light theme */
 @Composable
