@@ -20,7 +20,7 @@ import android.media.session.MediaSessionManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.volume.data.repository.MediaControllerRepository
 import com.android.settingslib.volume.data.repository.MediaControllerRepositoryImpl
-import com.android.settingslib.volume.shared.AudioManagerIntentsReceiver
+import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -45,7 +45,7 @@ interface MediaDevicesModule {
         @Provides
         @SysUISingleton
         fun provideMediaDeviceSessionRepository(
-            intentsReceiver: AudioManagerIntentsReceiver,
+            intentsReceiver: AudioManagerEventsReceiver,
             mediaSessionManager: MediaSessionManager,
             localBluetoothManager: LocalBluetoothManager?,
             @Application coroutineScope: CoroutineScope,

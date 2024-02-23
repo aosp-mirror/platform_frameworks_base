@@ -48,9 +48,13 @@ class CredentialManagerClientImpl @Inject constructor(
 
 
     override fun updateRequest(intent: Intent) {
-        val request = intent.parse(
-            context = context,
-        )
+        val request: Request
+        try {
+            request = intent.parse(context)
+        } catch (e: Exception) {
+            sendError(BaseDialogResult.RESULT_CODE_DATA_PARSING_FAILURE)
+            return
+        }
         Log.d(TAG, "Request parsed: $request, client instance: $this")
         if (request is Request.Cancel || request is Request.Close) {
             if (request.token != null && request.token != _requests.value?.token) {
@@ -61,8 +65,9 @@ class CredentialManagerClientImpl @Inject constructor(
         _requests.value = request
     }
 
-    override fun sendError(resultCode: Int, errorMessage: String?) {
-        TODO("b/300422310 - [Wear] Implement UI for cancellation request with message")
+    override fun sendError(resultCode: Int) {
+        Log.w(TAG, "Error occurred, resultCode: $resultCode, current request: ${ requests.value }")
+        requests.value?.sendCancellationCode(resultCode)
     }
 
     override fun sendResult(result: UserSelectionDialogResult) {
@@ -108,7 +113,7 @@ class CredentialManagerClientImpl @Inject constructor(
         return entryInfo.shouldTerminateUiUponSuccessfulProviderResult
     }
 
-    private fun Request.Get.sendCancellationCode(cancelCode: Int) {
+    private fun Request.sendCancellationCode(cancelCode: Int) {
         sendCancellationCode(
             cancelCode = cancelCode,
             requestToken = token,

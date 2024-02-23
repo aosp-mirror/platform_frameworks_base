@@ -19,6 +19,8 @@ package com.android.wm.shell.desktopmode;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FINAL_FREEFORM_SCALE;
 
@@ -28,11 +30,13 @@ import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
@@ -40,6 +44,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.view.animation.DecelerateInterpolator;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
@@ -93,26 +99,112 @@ public class DesktopModeVisualIndicator {
     /**
      * Based on the coordinates of the current drag event, determine which indicator type we should
      * display, including no visible indicator.
-     * TODO(b/280828642): Update drag zones per starting windowing mode.
      */
-    IndicatorType updateIndicatorType(PointF inputCoordinates) {
+    IndicatorType updateIndicatorType(PointF inputCoordinates, int windowingMode) {
         final DisplayLayout layout = mDisplayController.getDisplayLayout(mTaskInfo.displayId);
         // If we are in freeform, we don't want a visible indicator in the "freeform" drag zone.
-        IndicatorType result = mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                ? IndicatorType.NO_INDICATOR : IndicatorType.TO_DESKTOP_INDICATOR;
-        int transitionAreaHeight = mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_area_height);
-        int transitionAreaWidth = mContext.getResources().getDimensionPixelSize(
+        IndicatorType result = IndicatorType.NO_INDICATOR;
+        final int transitionAreaWidth = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.desktop_mode_transition_area_width);
-        if (inputCoordinates.y <= transitionAreaHeight) {
+        // Because drags in freeform use task position for indicator calculation, we need to
+        // account for the possibility of the task going off the top of the screen by captionHeight
+        final int captionHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.desktop_mode_freeform_decor_caption_height);
+        final Region fullscreenRegion = calculateFullscreenRegion(layout, windowingMode,
+                captionHeight);
+        final Region splitLeftRegion = calculateSplitLeftRegion(layout, windowingMode,
+                transitionAreaWidth, captionHeight);
+        final Region splitRightRegion = calculateSplitRightRegion(layout, windowingMode,
+                transitionAreaWidth, captionHeight);
+        final Region toDesktopRegion = calculateToDesktopRegion(layout, windowingMode,
+                splitLeftRegion, splitRightRegion, fullscreenRegion);
+        if (fullscreenRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
             result = IndicatorType.TO_FULLSCREEN_INDICATOR;
-        } else if (inputCoordinates.x <= transitionAreaWidth) {
+        }
+        if (splitLeftRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
             result = IndicatorType.TO_SPLIT_LEFT_INDICATOR;
-        } else if (inputCoordinates.x >= layout.width() - transitionAreaWidth) {
+        }
+        if (splitRightRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
             result = IndicatorType.TO_SPLIT_RIGHT_INDICATOR;
+        }
+        if (toDesktopRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
+            result = IndicatorType.TO_DESKTOP_INDICATOR;
         }
         transitionIndicator(result);
         return result;
+    }
+
+    @VisibleForTesting
+    Region calculateFullscreenRegion(DisplayLayout layout,
+            @WindowConfiguration.WindowingMode int windowingMode, int captionHeight) {
+        final Region region = new Region();
+        int edgeTransitionHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.desktop_mode_transition_area_height);
+        // A thin, short Rect at the top of the screen.
+        if (windowingMode == WINDOWING_MODE_FREEFORM) {
+            int fromFreeformWidth = mContext.getResources().getDimensionPixelSize(
+                    com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_width);
+            int fromFreeformHeight = mContext.getResources().getDimensionPixelSize(
+                    com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height);
+            region.union(new Rect((layout.width() / 2) - (fromFreeformWidth / 2),
+                    -captionHeight,
+                    (layout.width() / 2) + (fromFreeformWidth / 2),
+                    fromFreeformHeight));
+        }
+        // A screen-wide, shorter Rect if the task is in fullscreen or split.
+        if (windowingMode == WINDOWING_MODE_FULLSCREEN
+                || windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+            region.union(new Rect(0,
+                    -captionHeight,
+                    layout.width(),
+                    edgeTransitionHeight));
+        }
+        return region;
+    }
+
+    @VisibleForTesting
+    Region calculateToDesktopRegion(DisplayLayout layout,
+            @WindowConfiguration.WindowingMode int windowingMode,
+            Region splitLeftRegion, Region splitRightRegion,
+            Region toFullscreenRegion) {
+        final Region region = new Region();
+        // If in desktop, we need no region. Otherwise it's the same for all windowing modes.
+        if (windowingMode != WINDOWING_MODE_FREEFORM) {
+            region.union(new Rect(0, 0, layout.width(), layout.height()));
+            region.op(splitLeftRegion, Region.Op.DIFFERENCE);
+            region.op(splitRightRegion, Region.Op.DIFFERENCE);
+            region.op(toFullscreenRegion, Region.Op.DIFFERENCE);
+        }
+        return region;
+    }
+
+    @VisibleForTesting
+    Region calculateSplitLeftRegion(DisplayLayout layout,
+            @WindowConfiguration.WindowingMode int windowingMode,
+            int transitionEdgeWidth, int captionHeight) {
+        final Region region = new Region();
+        // In freeform, keep the top corners clear.
+        int transitionHeight = windowingMode == WINDOWING_MODE_FREEFORM
+                ? mContext.getResources().getDimensionPixelSize(
+                        com.android.wm.shell.R.dimen.desktop_mode_split_from_desktop_height) :
+                -captionHeight;
+        region.union(new Rect(0, transitionHeight, transitionEdgeWidth, layout.height()));
+        return region;
+    }
+
+    @VisibleForTesting
+    Region calculateSplitRightRegion(DisplayLayout layout,
+            @WindowConfiguration.WindowingMode int windowingMode,
+            int transitionEdgeWidth, int captionHeight) {
+        final Region region = new Region();
+        // In freeform, keep the top corners clear.
+        int transitionHeight = windowingMode == WINDOWING_MODE_FREEFORM
+                ? mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.desktop_mode_split_from_desktop_height) :
+                -captionHeight;
+        region.union(new Rect(layout.width() - transitionEdgeWidth, transitionHeight,
+                layout.width(), layout.height()));
+        return region;
     }
 
     /**
@@ -175,7 +267,6 @@ public class DesktopModeVisualIndicator {
                         mDisplayController.getDisplayLayout(mTaskInfo.displayId));
         animator.start();
         mCurrentType = IndicatorType.NO_INDICATOR;
-
     }
 
     /**

@@ -88,11 +88,13 @@ object CardPageProvider : SettingsPageProvider {
 
     @Composable
     private fun SettingsCardWithoutIcon() {
+        val sampleTitle = stringResource(R.string.sample_title)
+        var title by remember { mutableStateOf(sampleTitle) }
         SettingsCard(
             CardModel(
-                title = stringResource(R.string.sample_title),
+                title = title,
                 text = stringResource(R.string.sample_text),
-            )
+            ) { title = "Clicked" }
         )
     }
 

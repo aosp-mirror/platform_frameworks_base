@@ -16,6 +16,7 @@
 
 package android.text;
 
+import static com.android.graphics.hwui.flags.Flags.highContrastTextLuminance;
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
@@ -28,7 +29,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -46,7 +49,9 @@ import android.text.style.ReplacementSpan;
 import android.text.style.TabStopSpan;
 import android.widget.TextView;
 
+import com.android.graphics.hwui.flags.Flags;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -480,14 +485,41 @@ public abstract class Layout {
         int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
         if (lastLine < 0) return;
 
-        drawWithoutText(canvas, highlightPaths, highlightPaints, selectionPath, selectionPaint,
-                cursorOffsetVertical, firstLine, lastLine);
+        if (shouldDrawHighlightsOnTop(canvas)) {
+            drawBackground(canvas, firstLine, lastLine);
+        } else {
+            drawWithoutText(canvas, highlightPaths, highlightPaints, selectionPath, selectionPaint,
+                    cursorOffsetVertical, firstLine, lastLine);
+        }
+
         drawText(canvas, firstLine, lastLine);
+
+        // Since high contrast text draws a solid rectangle background behind the text, it covers up
+        // the highlights and selections. In this case we draw over the top of the text with a
+        // blend mode that ensures the text stays high-contrast.
+        if (shouldDrawHighlightsOnTop(canvas)) {
+            drawHighlights(canvas, highlightPaths, highlightPaints, selectionPath, selectionPaint,
+                    cursorOffsetVertical, firstLine, lastLine);
+        }
+
         if (leftShift != 0) {
             // Manually translate back to the original position because of b/324498002, using
             // save/restore disappears the toggle switch drawables.
             canvas.translate(-leftShift, 0);
         }
+    }
+
+    private static boolean shouldDrawHighlightsOnTop(Canvas canvas) {
+        return Flags.highContrastTextSmallTextRect() && canvas.isHighContrastTextEnabled();
+    }
+
+    private static Paint setToHighlightPaint(Paint p, BlendMode blendMode, Paint outPaint) {
+        if (p == null) return null;
+        outPaint.set(p);
+        outPaint.setBlendMode(blendMode);
+        // Yellow for maximum contrast
+        outPaint.setColor(Color.YELLOW);
+        return outPaint;
     }
 
     /**
@@ -542,11 +574,28 @@ public abstract class Layout {
             int firstLine,
             int lastLine) {
         drawBackground(canvas, firstLine, lastLine);
+        drawHighlights(canvas, highlightPaths, highlightPaints, selectionPath, selectionPaint,
+                cursorOffsetVertical, firstLine, lastLine);
+    }
+
+    /**
+     * @hide public for Editor.java
+     */
+    public void drawHighlights(
+            @NonNull Canvas canvas,
+            @Nullable List<Path> highlightPaths,
+            @Nullable List<Paint> highlightPaints,
+            @Nullable Path selectionPath,
+            @Nullable Paint selectionPaint,
+            int cursorOffsetVertical,
+            int firstLine,
+            int lastLine) {
         if (highlightPaths == null && highlightPaints == null) {
             return;
         }
         if (cursorOffsetVertical != 0) canvas.translate(0, cursorOffsetVertical);
         try {
+            BlendMode blendMode = determineHighContrastHighlightBlendMode(canvas);
             if (highlightPaths != null) {
                 if (highlightPaints == null) {
                     throw new IllegalArgumentException(
@@ -559,7 +608,12 @@ public abstract class Layout {
                 }
                 for (int i = 0; i < highlightPaths.size(); ++i) {
                     final Path highlight = highlightPaths.get(i);
-                    final Paint highlightPaint = highlightPaints.get(i);
+                    Paint highlightPaint = highlightPaints.get(i);
+                    if (shouldDrawHighlightsOnTop(canvas)) {
+                        highlightPaint = setToHighlightPaint(highlightPaint, blendMode,
+                                mWorkPlainPaint);
+                    }
+
                     if (highlight != null) {
                         canvas.drawPath(highlight, highlightPaint);
                     }
@@ -567,10 +621,39 @@ public abstract class Layout {
             }
 
             if (selectionPath != null) {
+                if (shouldDrawHighlightsOnTop(canvas)) {
+                    selectionPaint = setToHighlightPaint(selectionPaint, blendMode,
+                            mWorkPlainPaint);
+                }
                 canvas.drawPath(selectionPath, selectionPaint);
             }
         } finally {
             if (cursorOffsetVertical != 0) canvas.translate(0, -cursorOffsetVertical);
+        }
+    }
+
+    @Nullable
+    private BlendMode determineHighContrastHighlightBlendMode(Canvas canvas) {
+        if (!shouldDrawHighlightsOnTop(canvas)) {
+            return null;
+        }
+
+        return isHighContrastTextDark() ? BlendMode.MULTIPLY : BlendMode.DIFFERENCE;
+    }
+
+    private boolean isHighContrastTextDark() {
+        // High-contrast text mode
+        // Determine if the text is black-on-white or white-on-black, so we know what blendmode will
+        // give the highest contrast and most realistic text color.
+        // This equation should match the one in libs/hwui/hwui/DrawTextFunctor.h
+        if (highContrastTextLuminance()) {
+            var lab = new double[3];
+            ColorUtils.colorToLAB(mPaint.getColor(), lab);
+            return lab[0] < 0.5;
+        } else {
+            var color = mPaint.getColor();
+            int channelSum = Color.red(color) + Color.green(color) + Color.blue(color);
+            return channelSum < (128 * 3);
         }
     }
 
@@ -3396,7 +3479,8 @@ public abstract class Layout {
     private CharSequence mText;
     @UnsupportedAppUsage
     private TextPaint mPaint;
-    private TextPaint mWorkPaint = new TextPaint();
+    private final TextPaint mWorkPaint = new TextPaint();
+    private final Paint mWorkPlainPaint = new Paint();
     private int mWidth;
     private Alignment mAlignment = Alignment.ALIGN_NORMAL;
     private float mSpacingMult;

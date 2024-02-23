@@ -78,6 +78,7 @@ fun SceneContainer(
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
             initialScene = currentSceneKey.asComposeAware(),
+            canChangeScene = { toScene -> viewModel.canChangeScene(toScene.asComposeUnaware()) },
             transitions = SceneContainerTransitions,
         )
     }

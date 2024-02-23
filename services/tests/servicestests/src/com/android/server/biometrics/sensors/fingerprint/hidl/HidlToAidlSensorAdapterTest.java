@@ -34,6 +34,7 @@ import android.app.AlarmManager;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.HidlFingerprintSensorConfig;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -217,7 +218,8 @@ public class HidlToAidlSensorAdapterTest {
                 1 /* requestId */, null /* listener */, USER_ID, HAT, TAG, mBiometricUtils,
                 SENSOR_ID, mLogger, mBiometricContext,
                 mHidlToAidlSensorAdapter.getSensorProperties(), null, null,
-                mAuthenticationStateListeners, 5 /* maxTemplatesPerUser */, ENROLL_ENROLL));
+                mAuthenticationStateListeners, 5 /* maxTemplatesPerUser */, ENROLL_ENROLL,
+                (new FingerprintEnrollOptions.Builder()).build()));
         mLooper.dispatchAll();
 
         verify(mAidlResponseHandlerCallback).onEnrollSuccess();

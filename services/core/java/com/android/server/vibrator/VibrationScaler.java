@@ -73,6 +73,13 @@ final class VibrationScaler {
     }
 
     /**
+     * Returns the default vibration amplitude configured for this device, value in [1,255].
+     */
+    public int getDefaultVibrationAmplitude() {
+        return mDefaultVibrationAmplitude;
+    }
+
+    /**
      * Calculates the scale to be applied to external vibration with given usage.
      *
      * @param usageHint one of VibrationAttributes.USAGE_*

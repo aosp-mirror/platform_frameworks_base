@@ -17,8 +17,10 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -33,6 +35,7 @@ class SceneContainerViewModel
 constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
+    private val powerInteractor: PowerInteractor,
 ) {
     /**
      * Keys of all scenes in the container.
@@ -63,7 +66,7 @@ constructor(
      * Call this before the [MotionEvent] starts to propagate through the UI hierarchy.
      */
     fun onMotionEvent(event: MotionEvent) {
-        sceneInteractor.onUserInput()
+        powerInteractor.onUserTouch()
         falsingInteractor.onTouchEvent(event)
     }
 
@@ -77,7 +80,33 @@ constructor(
         falsingInteractor.onMotionEventComplete()
     }
 
-    companion object {
-        private const val SCENE_TRANSITION_LOGGING_REASON = "user input"
+    /**
+     * Returns `true` if a change to [toScene] is currently allowed; `false` otherwise.
+     *
+     * This is invoked only for user-initiated transitions. The goal is to check with the falsing
+     * system whether the change from the current scene to the given scene should be rejected due to
+     * it being a false touch.
+     */
+    fun canChangeScene(toScene: SceneKey): Boolean {
+        val interactionTypeOrNull =
+            when (toScene) {
+                SceneKey.Bouncer -> Classifier.BOUNCER_UNLOCK
+                SceneKey.Gone -> Classifier.UNLOCK
+                SceneKey.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
+                SceneKey.QuickSettings -> Classifier.QUICK_SETTINGS
+                else -> null
+            }
+
+        return interactionTypeOrNull?.let { interactionType ->
+            // It's important that the falsing system is always queried, even if no enforcement will
+            // occur. This helps build up the right signal in the system.
+            val isFalseTouch = falsingInteractor.isFalseTouch(interactionType)
+
+            // Only enforce falsing if moving from the lockscreen scene to a new scene.
+            val fromLockscreenScene = currentScene.value == SceneKey.Lockscreen
+
+            !fromLockscreenScene || !isFalseTouch
+        }
+            ?: true
     }
 }

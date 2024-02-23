@@ -16,21 +16,19 @@
 
 package com.android.settingslib.volume.data.repository
 
-import android.content.Intent
-import android.media.AudioManager
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
-import android.media.session.PlaybackState
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.headsetAudioModeChanges
 import com.android.settingslib.media.session.activeMediaChanges
-import com.android.settingslib.volume.shared.AudioManagerIntentsReceiver
+import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
+import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
@@ -44,7 +42,7 @@ interface MediaControllerRepository {
 }
 
 class MediaControllerRepositoryImpl(
-    audioManagerIntentsReceiver: AudioManagerIntentsReceiver,
+    audioManagerEventsReceiver: AudioManagerEventsReceiver,
     private val mediaSessionManager: MediaSessionManager,
     localBluetoothManager: LocalBluetoothManager?,
     coroutineScope: CoroutineScope,
@@ -52,9 +50,9 @@ class MediaControllerRepositoryImpl(
 ) : MediaControllerRepository {
 
     private val devicesChanges =
-        audioManagerIntentsReceiver.intents.filter {
-            AudioManager.STREAM_DEVICES_CHANGED_ACTION == it.action
-        }
+        audioManagerEventsReceiver.events.filterIsInstance(
+            AudioManagerEvent.StreamDevicesChanged::class
+        )
 
     override val activeLocalMediaController: StateFlow<MediaController?> =
         combine(
@@ -63,7 +61,7 @@ class MediaControllerRepositoryImpl(
                 },
                 localBluetoothManager?.headsetAudioModeChanges?.onStart { emit(Unit) }
                     ?: flowOf(null),
-                devicesChanges.onStart { emit(Intent()) },
+                devicesChanges.onStart { emit(AudioManagerEvent.StreamDevicesChanged) },
             ) { controllers, _, _ ->
                 controllers?.let(::findLocalMediaController)
             }
@@ -97,10 +95,5 @@ class MediaControllerRepositoryImpl(
             }
         }
         return localController
-    }
-
-    private companion object {
-        val inactivePlaybackStates =
-            setOf(PlaybackState.STATE_STOPPED, PlaybackState.STATE_NONE, PlaybackState.STATE_ERROR)
     }
 }

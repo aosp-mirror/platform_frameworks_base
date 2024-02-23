@@ -33,6 +33,7 @@ import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.NetCapability;
 import android.telephony.PreciseDataConnectionState;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -82,6 +83,7 @@ public abstract class QualifiedNetworksService extends Service {
     private static final int QNS_APN_THROTTLE_STATUS_CHANGED                        = 5;
     private static final int QNS_EMERGENCY_DATA_NETWORK_PREFERRED_TRANSPORT_CHANGED = 6;
     private static final int QNS_REQUEST_NETWORK_VALIDATION                         = 7;
+    private static final int QNS_RECONNECT_QUALIFIED_NETWORK                        = 8;
 
     /** Feature flags */
     private static final FeatureFlags sFeatureFlag = new FeatureFlagsImpl();
@@ -186,14 +188,59 @@ public abstract class QualifiedNetworksService extends Service {
                     qualifiedNetworkTypesArray).sendToTarget();
         }
 
-        private void onUpdateQualifiedNetworkTypes(@ApnType int apnTypes,
-                                                   int[] qualifiedNetworkTypes) {
+        /**
+         * Request to make a clean initial connection instead of handover to a transport type mapped
+         * to the {@code qualifiedNetworkType} for the {@code apnTypes}. This will update the
+         * preferred network type like {@link #updateQualifiedNetworkTypes(int, List)}, however if
+         * the data network for the {@code apnTypes} is not in the state {@link TelephonyManager
+         * #DATA_CONNECTED} or it's already connected on the transport type mapped to the
+         * qualified network type, forced reconnection will be ignored.
+         *
+         * <p>This will tear down current data network even though target transport type mapped to
+         * the {@code qualifiedNetworkType} is not available, and the data network will be connected
+         * to the transport type when it becomes available.
+         *
+         * <p>This is one shot request and does not mean further handover is not allowed to the
+         * qualified network type for this APN type.
+         *
+         * @param apnTypes APN type(s) of the qualified networks. This must be a bitmask combination
+         * of {@link ApnType}. The same qualified networks will be applicable to all APN types
+         * specified here.
+         * @param qualifiedNetworkType Access network types which are qualified for data connection
+         * setup for {@link ApnType}. Empty list means QNS has no suggestion to the frameworks, and
+         * for that APN type frameworks will route the corresponding network requests to
+         * {@link AccessNetworkConstants#TRANSPORT_TYPE_WWAN}.
+         *
+         * <p> If one of the element is invalid, for example, {@link AccessNetworkType#UNKNOWN},
+         * then this operation becomes a no-op.
+         *
+         * @hide
+         */
+        public final void reconnectQualifiedNetworkType(@ApnType int apnTypes,
+                @AccessNetworkConstants.RadioAccessNetworkType int qualifiedNetworkType) {
+            mHandler.obtainMessage(QNS_RECONNECT_QUALIFIED_NETWORK, mSlotIndex, apnTypes,
+                    new Integer(qualifiedNetworkType)).sendToTarget();
+        }
+
+        private void onUpdateQualifiedNetworkTypes(
+                @ApnType int apnTypes, int[] qualifiedNetworkTypes) {
             mQualifiedNetworkTypesList.put(apnTypes, qualifiedNetworkTypes);
             if (mCallback != null) {
                 try {
                     mCallback.onQualifiedNetworkTypesChanged(apnTypes, qualifiedNetworkTypes);
                 } catch (RemoteException e) {
                     loge("Failed to call onQualifiedNetworksChanged. " + e);
+                }
+            }
+        }
+
+        private void onReconnectQualifiedNetworkType(@ApnType int apnTypes,
+                @AccessNetworkConstants.RadioAccessNetworkType int qualifiedNetworkType) {
+            if (mCallback != null) {
+                try {
+                    mCallback.onReconnectQualifedNetworkType(apnTypes, qualifiedNetworkType);
+                } catch (RemoteException e) {
+                    loge("Failed to call onReconnectQualifiedNetworkType. " + e);
                 }
             }
         }
@@ -366,6 +413,12 @@ public abstract class QualifiedNetworksService extends Service {
                 case QNS_REQUEST_NETWORK_VALIDATION:
                     if (provider == null) break;
                     provider.onRequestNetworkValidation((NetworkValidationRequestData) message.obj);
+                    break;
+
+                case QNS_RECONNECT_QUALIFIED_NETWORK:
+                    if (provider == null) break;
+                    provider.onReconnectQualifiedNetworkType(message.arg2, (Integer) message.obj);
+                    break;
             }
         }
     }

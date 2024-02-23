@@ -30,7 +30,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.SparseArray;
-import android.view.animation.Animation;
 
 import com.android.internal.protolog.common.ProtoLog;
 
@@ -90,16 +89,14 @@ class WallpaperWindowToken extends WindowToken {
             return;
         }
         mShowWhenLocked = showWhenLocked;
-        // Move the window token to the front (private) or back (showWhenLocked). This is
-        // possible
-        // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER
-        // windows.
+        // Move the window token to the front (private) or back (showWhenLocked). This is possible
+        // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER windows.
         final int position = showWhenLocked ? POSITION_BOTTOM : POSITION_TOP;
 
-        // Note: Moving all the way to the front or back breaks ordering based on addition
-        // times.
-        // We should never have more than one non-animating token of each type.
+        // Note: Moving all the way to the front or back breaks ordering based on addition times.
+        // There should never have more than one non-animating token of each type.
         getParent().positionChildAt(position, this /* child */, false /*includingParents */);
+        mDisplayContent.mWallpaperController.onWallpaperTokenReordered();
     }
 
     boolean canShowWhenLocked() {
@@ -136,16 +133,6 @@ class WallpaperWindowToken extends WindowToken {
                 // We only want to be synchronous with one wallpaper.
                 sync = false;
             }
-        }
-    }
-
-    /**
-     * Starts {@param anim} on all children.
-     */
-    void startAnimation(Animation anim) {
-        for (int ndx = mChildren.size() - 1; ndx >= 0; ndx--) {
-            final WindowState windowState = mChildren.get(ndx);
-            windowState.startAnimation(anim);
         }
     }
 

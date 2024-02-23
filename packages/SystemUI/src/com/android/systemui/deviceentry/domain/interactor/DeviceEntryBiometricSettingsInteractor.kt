@@ -33,6 +33,7 @@ constructor(
 ) {
     val fingerprintAuthCurrentlyAllowed: Flow<Boolean> =
         repository.isFingerprintAuthCurrentlyAllowed
+    val faceAuthEnrolledAndEnabled: Flow<Boolean> = repository.isFaceAuthEnrolledAndEnabled
     val faceAuthCurrentlyAllowed: Flow<Boolean> = repository.isFaceAuthCurrentlyAllowed
 
     /** Whether both fingerprint and face are enrolled and enabled for device entry. */

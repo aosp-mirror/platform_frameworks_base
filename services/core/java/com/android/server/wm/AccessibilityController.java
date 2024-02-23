@@ -1543,8 +1543,6 @@ final class AccessibilityController {
 
         private final Set<IBinder> mTempBinderSet = new ArraySet<>();
 
-        private final Point mTempPoint = new Point();
-
         private final Region mTempRegion = new Region();
 
         private final Region mTempRegion2 = new Region();
@@ -1614,8 +1612,9 @@ final class AccessibilityController {
                 Slog.i(LOG_TAG, "computeChangedWindows()");
             }
 
-            final List<WindowInfo> windows;
+            List<WindowInfo> windows = null;
             final List<AccessibilityWindow> visibleWindows = new ArrayList<>();
+            final Point screenSize = new Point();
             final int topFocusedDisplayId;
             IBinder topFocusedWindowToken = null;
 
@@ -1643,19 +1642,27 @@ final class AccessibilityController {
                     return;
                 }
                 final Display display = dc.getDisplay();
-                display.getRealSize(mTempPoint);
+                display.getRealSize(screenSize);
 
                 mA11yWindowsPopulator.populateVisibleWindowsOnScreenLocked(
                         mDisplayId, visibleWindows);
 
-                windows = buildWindowInfoListLocked(visibleWindows, mTempPoint);
+                if (!com.android.server.accessibility.Flags.computeWindowChangesOnA11y()) {
+                    windows = buildWindowInfoListLocked(visibleWindows, screenSize);
+                }
 
                 // Gets the top focused display Id and window token for supporting multi-display.
                 topFocusedDisplayId = mService.mRoot.getTopFocusedDisplayContent().getDisplayId();
                 topFocusedWindowToken = topFocusedWindowState.mClient.asBinder();
             }
-            mCallback.onWindowsForAccessibilityChanged(forceSend, topFocusedDisplayId,
-                    topFocusedWindowToken, windows);
+
+            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11y()) {
+                mCallback.onAccessibilityWindowsChanged(forceSend, topFocusedDisplayId,
+                        topFocusedWindowToken, screenSize, visibleWindows);
+            } else {
+                mCallback.onWindowsForAccessibilityChanged(forceSend, topFocusedDisplayId,
+                        topFocusedWindowToken, windows);
+            }
 
             // Recycle the windows as we do not need them.
             for (final AccessibilityWindowsPopulator.AccessibilityWindow window : visibleWindows) {
@@ -1663,6 +1670,9 @@ final class AccessibilityController {
             }
             mInitialized = true;
         }
+
+        // Here are old code paths, called when computeWindowChangesOnA11y flag is disabled.
+        // LINT.IfChange
 
         /**
          * From a list of windows, decides windows to be exposed to accessibility based on touchable
@@ -1822,6 +1832,8 @@ final class AccessibilityController {
                     && windowType != WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY
                     && windowType != WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION);
         }
+
+        // LINT.ThenChange(/services/accessibility/java/com/android/server/accessibility/AccessibilityWindowManager.java)
 
         private WindowState getTopFocusWindow() {
             return mService.mRoot.getTopFocusedDisplayContent().mCurrentFocus;

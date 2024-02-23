@@ -37,6 +37,7 @@ import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
 import android.hardware.face.FaceAuthenticateOptions;
+import android.hardware.face.FaceEnrollOptions;
 import android.hardware.face.FaceSensorConfigurations;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.FaceServiceReceiver;
@@ -44,6 +45,7 @@ import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.face.IFaceService;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.NativeHandle;
 import android.os.RemoteException;
@@ -210,7 +212,8 @@ public class FaceService extends SystemService {
         @Override // Binder call
         public long enroll(int userId, final IBinder token, final byte[] hardwareAuthToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
-                final int[] disabledFeatures, Surface previewSurface, boolean debugConsent) {
+                final int[] disabledFeatures, Surface previewSurface, boolean debugConsent,
+                FaceEnrollOptions options) {
             super.enroll_enforcePermission();
 
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
@@ -220,7 +223,8 @@ public class FaceService extends SystemService {
             }
 
             return provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
-                    receiver, opPackageName, disabledFeatures, previewSurface, debugConsent);
+                    receiver, opPackageName, disabledFeatures, previewSurface, debugConsent,
+                    options);
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
@@ -955,6 +959,27 @@ public class FaceService extends SystemService {
                     provider.scheduleInternalCleanup(props.sensorId, userId, null /* callback */,
                             true /* favorHalEnrollments */);
                 }
+            }
+        }
+    }
+
+    /**
+     * This should only be called from FaceShellCommand class.
+     */
+    void sendFaceReEnrollNotification() {
+        Utils.checkPermissionOrShell(getContext(), MANAGE_FACE);
+        if (Build.IS_DEBUGGABLE) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
+                if (provider != null) {
+                    FaceProvider faceProvider = (FaceProvider) provider.second;
+                    faceProvider.sendFaceReEnrollNotification();
+                } else {
+                    Slog.w(TAG, "Null provider for notification");
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }

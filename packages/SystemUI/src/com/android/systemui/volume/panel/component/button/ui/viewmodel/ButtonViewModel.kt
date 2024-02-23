@@ -14,23 +14,12 @@
  *  limitations under the License.
  */
 
-package com.android.settingslib.volume.shared
+package com.android.systemui.volume.panel.component.button.ui.viewmodel
 
-import android.content.Intent
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import com.android.systemui.common.shared.model.Icon
 
-class FakeAudioManagerIntentsReceiver : AudioManagerIntentsReceiver {
-
-    private val mutableIntents = MutableSharedFlow<Intent>()
-    override val intents: SharedFlow<Intent> = mutableIntents.asSharedFlow()
-
-    suspend fun triggerIntent(intent: Intent) {
-        mutableIntents.emit(intent)
-    }
-
-    suspend fun triggerIntent(action: String) {
-        triggerIntent(Intent(action))
-    }
-}
+/** Models base buttons appearance. */
+data class ButtonViewModel(
+    val icon: Icon,
+    val label: CharSequence,
+)

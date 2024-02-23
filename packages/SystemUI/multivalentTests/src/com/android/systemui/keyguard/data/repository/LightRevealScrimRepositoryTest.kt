@@ -175,6 +175,21 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
             animatorTestRule.advanceTimeBy(500L)
             assertEquals(1.0f, value)
         }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    fun revealAmount_startingRevealTwiceWontRerunAnimator() =
+        runTest(UnconfinedTestDispatcher()) {
+            val value by collectLastValue(underTest.revealAmount)
+            underTest.startRevealAmountAnimator(true)
+            assertEquals(0.0f, value)
+            animatorTestRule.advanceTimeBy(250L)
+            assertEquals(0.5f, value)
+            underTest.startRevealAmountAnimator(true)
+            animatorTestRule.advanceTimeBy(250L)
+            assertEquals(1.0f, value)
+        }
+
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     fun revealAmount_emitsTo0AfterAnimationStartedReversed() =

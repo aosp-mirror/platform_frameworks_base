@@ -306,11 +306,11 @@ import android.view.displayhash.VerifiedDisplayHash;
 import android.view.inputmethod.ImeTracker;
 import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
+import android.window.IGlobalDragListener;
 import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ITrustedPresentationListener;
-import android.window.IUnhandledDragListener;
 import android.window.InputTransferToken;
 import android.window.ScreenCapture;
 import android.window.SystemPerformanceHinter;
@@ -10020,14 +10020,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Sets the listener to be called back when a cross-window drag and drop operation is unhandled
-     * (ie. not handled by any window which can handle the drag).
+     * Sets the listener to be called back when a cross-window drag and drop operation happens.
      */
     @Override
-    public void setUnhandledDragListener(IUnhandledDragListener listener) throws RemoteException {
+    public void setGlobalDragListener(IGlobalDragListener listener) throws RemoteException {
         mAtmService.enforceTaskPermission("setUnhandledDragListener");
         synchronized (mGlobalLock) {
-            mDragDropController.setUnhandledDragListener(listener);
+            mDragDropController.setGlobalDragListener(listener);
         }
     }
 }

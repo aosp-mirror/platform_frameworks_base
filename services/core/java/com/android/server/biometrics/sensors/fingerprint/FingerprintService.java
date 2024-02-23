@@ -48,6 +48,7 @@ import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorConfigurations;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -239,7 +240,8 @@ public class FingerprintService extends SystemService {
         @Override // Binder call
         public long enroll(final IBinder token, @NonNull final byte[] hardwareAuthToken,
                 final int userId, final IFingerprintServiceReceiver receiver,
-                final String opPackageName, @FingerprintManager.EnrollReason int enrollReason) {
+                final String opPackageName, @FingerprintManager.EnrollReason int enrollReason,
+                FingerprintEnrollOptions options) {
             super.enroll_enforcePermission();
 
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
@@ -249,7 +251,7 @@ public class FingerprintService extends SystemService {
             }
 
             return provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
-                    receiver, opPackageName, enrollReason);
+                    receiver, opPackageName, enrollReason, options);
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_FINGERPRINT)
@@ -1319,6 +1321,27 @@ public class FingerprintService extends SystemService {
             if (provider != null) {
                 provider.second.simulateVhalFingerDown(UserHandle.getCallingUserId(),
                         provider.first);
+            }
+        }
+    }
+
+    /**
+     * This should only be called from FingerprintShellCommand
+     */
+    void sendFingerprintReEnrollNotification() {
+        Utils.checkPermissionOrShell(getContext(), MANAGE_FINGERPRINT);
+        if (Build.IS_DEBUGGABLE) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
+                if (provider != null) {
+                    FingerprintProvider fingerprintProvider = (FingerprintProvider) provider.second;
+                    fingerprintProvider.sendFingerprintReEnrollNotification();
+                } else {
+                    Slog.w(TAG, "Null provider for notification");
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }

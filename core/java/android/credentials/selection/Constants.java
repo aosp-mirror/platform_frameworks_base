@@ -30,13 +30,6 @@ public class Constants {
             "android.credentials.selection.extra.RESULT_RECEIVER";
 
     /**
-     * The intent extra key for indicating whether the bottom sheet should be started directly
-     * on the 'All Options' screen.
-     */
-    public static final String EXTRA_REQ_FOR_ALL_OPTIONS =
-            "android.credentials.selection.extra.REQ_FOR_ALL_OPTIONS";
-
-    /**
      * The intent extra key for the final result receiver object
      */
     public static final String EXTRA_FINAL_RESPONSE_RECEIVER =

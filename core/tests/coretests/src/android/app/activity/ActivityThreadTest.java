@@ -988,7 +988,7 @@ public class ActivityThreadTest {
 
         @Override
         public void onPictureInPictureUiStateChanged(PictureInPictureUiState pipState) {
-            if (mPipUiStateLatch != null && pipState.isEnteringPip()) {
+            if (mPipUiStateLatch != null && pipState.isTransitioningToPip()) {
                 mPipUiStateLatch.countDown();
             }
         }

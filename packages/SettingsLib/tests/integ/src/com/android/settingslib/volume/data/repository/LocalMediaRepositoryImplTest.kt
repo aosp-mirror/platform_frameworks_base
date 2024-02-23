@@ -23,7 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.volume.data.model.RoutingSession
-import com.android.settingslib.volume.shared.FakeAudioManagerIntentsReceiver
+import com.android.settingslib.volume.shared.FakeAudioManagerEventsReceiver
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -58,7 +58,7 @@ class LocalMediaRepositoryImplTest {
     @Captor
     private lateinit var deviceCallbackCaptor: ArgumentCaptor<LocalMediaManager.DeviceCallback>
 
-    private val intentsReceiver = FakeAudioManagerIntentsReceiver()
+    private val eventsReceiver = FakeAudioManagerEventsReceiver()
     private val testScope = TestScope()
 
     private lateinit var underTest: LocalMediaRepository
@@ -69,7 +69,7 @@ class LocalMediaRepositoryImplTest {
 
         underTest =
             LocalMediaRepositoryImpl(
-                intentsReceiver,
+                eventsReceiver,
                 localMediaManager,
                 mediaRouter2Manager,
                 testScope.backgroundScope,

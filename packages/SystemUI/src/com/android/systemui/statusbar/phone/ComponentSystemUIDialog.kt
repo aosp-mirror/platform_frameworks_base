@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
+import androidx.annotation.GravityInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -56,6 +57,7 @@ class ComponentSystemUIDialog(
     sysUiState: SysUiState,
     broadcastDispatcher: BroadcastDispatcher,
     dialogTransitionAnimator: DialogTransitionAnimator,
+    @GravityInt private val dialogGravity: Int?,
 ) :
     SystemUIDialog(
         context,
@@ -90,6 +92,7 @@ class ComponentSystemUIDialog(
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        dialogGravity?.let { window?.setGravity(it) }
         onBackPressedDispatcher.setOnBackInvokedDispatcher(onBackInvokedDispatcher)
         savedStateRegistryController.performRestore(savedInstanceState)
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)

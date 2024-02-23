@@ -94,21 +94,23 @@ static struct {
 
 // ----------------------------------------------------------------------------
 
-jobject android_view_KeyEvent_obtainAsCopy(JNIEnv* env, const KeyEvent& event) {
+ScopedLocalRef<jobject> android_view_KeyEvent_obtainAsCopy(JNIEnv* env, const KeyEvent& event) {
     ScopedLocalRef<jbyteArray> hmac = toJbyteArray(env, event.getHmac());
-    jobject eventObj =
-            env->CallStaticObjectMethod(gKeyEventClassInfo.clazz, gKeyEventClassInfo.obtain,
-                                        event.getId(), event.getDownTime(), event.getEventTime(),
-                                        event.getAction(), event.getKeyCode(),
-                                        event.getRepeatCount(), event.getMetaState(),
-                                        event.getDeviceId(), event.getScanCode(), event.getFlags(),
-                                        event.getSource(), event.getDisplayId(), hmac.get(),
-                                        nullptr);
+    ScopedLocalRef<jobject>
+            eventObj(env,
+                     env->CallStaticObjectMethod(gKeyEventClassInfo.clazz,
+                                                 gKeyEventClassInfo.obtain, event.getId(),
+                                                 event.getDownTime(), event.getEventTime(),
+                                                 event.getAction(), event.getKeyCode(),
+                                                 event.getRepeatCount(), event.getMetaState(),
+                                                 event.getDeviceId(), event.getScanCode(),
+                                                 event.getFlags(), event.getSource(),
+                                                 event.getDisplayId(), hmac.get(), nullptr));
     if (env->ExceptionCheck()) {
         ALOGE("An exception occurred while obtaining a key event.");
         LOGE_EX(env);
         env->ExceptionClear();
-        return NULL;
+        return ScopedLocalRef<jobject>(env);
     }
     return eventObj;
 }

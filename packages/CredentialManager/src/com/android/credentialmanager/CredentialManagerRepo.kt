@@ -110,11 +110,7 @@ class CredentialManagerRepo(
                 ResultReceiver::class.java
         )
 
-        isReqForAllOptions = intent.getBooleanExtra(
-                Constants.EXTRA_REQ_FOR_ALL_OPTIONS,
-                /*defaultValue=*/ false
-        ) || (requestInfo?.isShowAllOptionsRequested ?: false) // TODO(b/323552850) - Remove
-        // usage on Constants.EXTRA_REQ_FOR_ALL_OPTIONS once it is deprecated.
+        isReqForAllOptions = requestInfo?.isShowAllOptionsRequested ?: false
 
         val cancellationRequest = getCancelUiRequest(intent)
         val cancelUiRequestState = cancellationRequest?.let {

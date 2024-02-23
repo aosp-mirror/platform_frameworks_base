@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -163,6 +165,7 @@ private fun SceneScope.ShadeScene(
     val maxNotifScrimTop = remember { mutableStateOf(0f) }
     val tileSquishiness by
         animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
+    val isClickable by viewModel.isClickable.collectAsState()
 
     Box(
         modifier =
@@ -178,8 +181,9 @@ private fun SceneScope.ShadeScene(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier =
-                                Modifier.fillMaxWidth()
-                                    .clickable(onClick = { viewModel.onContentClicked() })
+                                Modifier.fillMaxWidth().thenIf(isClickable) {
+                                    Modifier.clickable(onClick = { viewModel.onContentClicked() })
+                                }
                         ) {
                             CollapsedShadeHeader(
                                 viewModel = viewModel.shadeHeaderViewModel,

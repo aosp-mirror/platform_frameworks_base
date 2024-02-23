@@ -542,10 +542,6 @@ object Flags {
     @JvmField
     val ENABLE_NEW_PRIVACY_DIALOG = releasedFlag("enable_new_privacy_dialog")
 
-    // TODO(b/302087895): Tracking Bug
-    @JvmField val CALL_LAYOUT_ASYNC_SET_DATA =
-            unreleasedFlag("call_layout_async_set_data", teamfood = true)
-
     // TODO(b/302144438): Tracking Bug
     @JvmField val DECOUPLE_REMOTE_INPUT_DELEGATE_AND_CALLBACK_UPDATE =
             unreleasedFlag("decouple_remote_input_delegate_and_callback_update")

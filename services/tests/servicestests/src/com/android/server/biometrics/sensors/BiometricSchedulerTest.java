@@ -1139,7 +1139,7 @@ public class BiometricSchedulerTest {
             super(context, lazyDaemon, token, listener, 0 /* userId */, new byte[69],
                     "test" /* owner */, mock(BiometricUtils.class), 5 /* timeoutSec */,
                     TEST_SENSOR_ID, true /* shouldVibrate */, mock(BiometricLogger.class),
-                    mock(BiometricContext.class));
+                    mock(BiometricContext.class), 0 /* enrollReason */);
         }
 
         @Override

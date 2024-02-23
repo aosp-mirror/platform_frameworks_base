@@ -167,6 +167,7 @@ constructor(
             ) {
                 Icon(
                     icon = it.icon,
+                    tint = it.iconColor.toColor(),
                     modifier = Modifier.padding(12.dp).fillMaxSize(),
                 )
             }

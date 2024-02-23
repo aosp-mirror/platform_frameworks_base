@@ -32,6 +32,7 @@ import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.domain.interactor.privacyChipInteractor
+import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -100,6 +101,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 mobileIconsInteractor = mobileIconsInteractor,
                 mobileIconsViewModel = mobileIconsViewModel,
                 privacyChipInteractor = kosmos.privacyChipInteractor,
+                clockInteractor = kosmos.shadeHeaderClockInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
 
@@ -164,6 +166,32 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             sceneInteractor.changeScene(SceneKey.Gone, "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
+        }
+
+    @Test
+    fun isClickable_deviceUnlocked_false() =
+        testScope.runTest {
+            val isClickable by collectLastValue(underTest.isClickable)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            runCurrent()
+
+            assertThat(isClickable).isFalse()
+        }
+
+    @Test
+    fun isClickable_deviceLockedSecurely_true() =
+        testScope.runTest {
+            val isClickable by collectLastValue(underTest.isClickable)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
+            runCurrent()
+
+            assertThat(isClickable).isTrue()
         }
 
     @Test

@@ -20,8 +20,13 @@ import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 
+import android.app.PendingIntent;
+import android.content.ClipData;
 import android.content.ClipDescription;
 import android.view.DragEvent;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /** Collection of utility classes for handling drag and drop. */
 public class DragUtils {
@@ -42,6 +47,31 @@ public class DragUtils {
         return description.hasMimeType(MIMETYPE_APPLICATION_ACTIVITY)
                 || description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT)
                 || description.hasMimeType(MIMETYPE_APPLICATION_TASK);
+    }
+
+    /**
+     * Returns a launchable intent in the given `DragEvent` or `null` if there is none.
+     */
+    @Nullable
+    public static PendingIntent getLaunchIntent(@NonNull DragEvent dragEvent) {
+        return getLaunchIntent(dragEvent.getClipData());
+    }
+
+    /**
+     * Returns a launchable intent in the given `ClipData` or `null` if there is none.
+     */
+    @Nullable
+    public static PendingIntent getLaunchIntent(@NonNull ClipData data) {
+        for (int i = 0; i < data.getItemCount(); i++) {
+            final ClipData.Item item = data.getItemAt(i);
+            if (item.getIntentSender() != null) {
+                final PendingIntent intent = new PendingIntent(item.getIntentSender().getTarget());
+                if (intent != null && intent.isActivity()) {
+                    return intent;
+                }
+            }
+        }
+        return null;
     }
 
     /**

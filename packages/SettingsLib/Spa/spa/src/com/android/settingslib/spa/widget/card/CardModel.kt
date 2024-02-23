@@ -45,4 +45,6 @@ data class CardModel(
 
     /** If specified, this color will be used to tint the icon and the buttons. */
     val containerColor: Color = Color.Unspecified,
+
+    val onClick: (() -> Unit)? = null,
 )

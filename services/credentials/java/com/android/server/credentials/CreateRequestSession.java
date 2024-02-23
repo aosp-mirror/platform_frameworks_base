@@ -104,7 +104,6 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                 flattenedPrimaryProviders.add(cn.flattenToString());
             }
 
-            final boolean isShowAllOptionsRequested = false;
             mPendingIntent = mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newCreateRequestInfo(
                             mRequestId, mClientRequest,
@@ -112,8 +111,8 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
                                     Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
                             /*defaultProviderId=*/flattenedPrimaryProviders,
-                            isShowAllOptionsRequested),
-                    providerDataList, /*isRequestForAllOptions=*/ isShowAllOptionsRequested);
+                            /*isShowAllOptionsRequested=*/ false),
+                    providerDataList);
             mClientCallback.onPendingIntent(mPendingIntent);
         } catch (RemoteException e) {
             mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);

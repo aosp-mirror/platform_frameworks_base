@@ -28,7 +28,7 @@ import android.os.SharedMemory;
  * @hide
  */
 oneway interface IWearableSensingService {
-    void provideSecureWearableConnection(in ParcelFileDescriptor parcelFileDescriptor, in RemoteCallback callback);
+    void provideSecureConnection(in ParcelFileDescriptor parcelFileDescriptor, in RemoteCallback callback);
     void provideDataStream(in ParcelFileDescriptor parcelFileDescriptor, in RemoteCallback callback);
     void provideData(in PersistableBundle data, in SharedMemory sharedMemory, in RemoteCallback callback);
     void registerDataRequestObserver(int dataType, in RemoteCallback dataRequestCallback, int dataRequestObserverId, in String packageName, in RemoteCallback statusCallback);

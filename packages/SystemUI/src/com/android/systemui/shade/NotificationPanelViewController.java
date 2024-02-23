@@ -165,6 +165,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.shared.model.WakefulnessModel;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.data.repository.FlingInfo;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
@@ -4595,8 +4596,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         public void onViewAttachedToWindow(View v) {
             mFragmentService.getFragmentHostManager(mView)
                     .addTagListener(QS.TAG, mQsController.getQsFragmentListener());
-            mStatusBarStateController.addCallback(mStatusBarStateListener);
-            mStatusBarStateListener.onStateChanged(mStatusBarStateController.getState());
+            if (!SceneContainerFlag.isEnabled()) {
+                mStatusBarStateController.addCallback(mStatusBarStateListener);
+                mStatusBarStateListener.onStateChanged(mStatusBarStateController.getState());
+            }
             mConfigurationController.addCallback(mConfigurationListener);
             // Theme might have changed between inflating this view and attaching it to the
             // window, so

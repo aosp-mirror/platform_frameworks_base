@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.app.KeyguardManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.biometrics.BiometricManager.Authenticators;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
+import android.hardware.fingerprint.FingerprintEnrollOptions.EnrollReason;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 
@@ -349,5 +351,23 @@ public interface BiometricFingerprintConstants {
                 // Keep the UDFPS mode in case of an unknown message.
                 return false;
         }
+    }
+
+
+    /**
+     * Converts FaceEnrollOptions.reason into BiometricsProtoEnums.enrollReason
+     */
+    static int reasonToMetric(@EnrollReason int reason) {
+        switch(reason) {
+            case FingerprintEnrollOptions.ENROLL_REASON_RE_ENROLL_NOTIFICATION:
+                return BiometricsProtoEnums.ENROLLMENT_SOURCE_FRR_NOTIFICATION;
+            case FingerprintEnrollOptions.ENROLL_REASON_SETTINGS:
+                return BiometricsProtoEnums.ENROLLMENT_SOURCE_SETTINGS;
+            case FingerprintEnrollOptions.ENROLL_REASON_SUW:
+                return BiometricsProtoEnums.ENROLLMENT_SOURCE_SUW;
+            default:
+                return BiometricsProtoEnums.ENROLLMENT_SOURCE_UNKNOWN;
+        }
+
     }
 }
