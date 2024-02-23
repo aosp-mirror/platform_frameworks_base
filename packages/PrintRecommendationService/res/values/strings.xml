@@ -18,7 +18,6 @@
 -->
 
 <resources>
-    <string name="plugin_vendor_google_cloud_print">Cloud Print</string>
     <string name="plugin_vendor_hp">HP</string>
     <string name="plugin_vendor_lexmark">Lexmark</string>
     <string name="plugin_vendor_brother">Brother</string>
