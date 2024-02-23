@@ -57,6 +57,7 @@ import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import com.android.credentialmanager.GetFlowUtils
+import com.android.credentialmanager.common.ui.InlinePresentationsFactory
 import com.android.credentialmanager.common.ui.RemoteViewsFactory
 import com.android.credentialmanager.getflow.ProviderDisplayInfo
 import com.android.credentialmanager.getflow.toProviderDisplayInfo
@@ -294,8 +295,12 @@ class CredentialAutofillService : AutofillService() {
                 } else {
                     inlinePresentationSpecs[inlinePresentationSpecsCount - 1]
                 }
-                inlinePresentation = createInlinePresentation(primaryEntry, pendingIntent, icon,
-                        spec!!, duplicateDisplayNamesForPasskeys)
+                if (spec != null) {
+                    inlinePresentation = createInlinePresentation(primaryEntry, pendingIntent, icon,
+                            InlinePresentationsFactory.modifyInlinePresentationSpec
+                            (this@CredentialAutofillService, spec),
+                            duplicateDisplayNamesForPasskeys)
+                }
             }
             var dropdownPresentation: RemoteViews? = null
             if (i < lastDropdownDatasetIndex) {

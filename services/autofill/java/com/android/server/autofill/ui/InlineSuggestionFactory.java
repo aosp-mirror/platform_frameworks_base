@@ -16,6 +16,7 @@
 
 package com.android.server.autofill.ui;
 
+import static android.service.autofill.FillResponse.FLAG_CREDENTIAL_MANAGER_RESPONSE;
 import static android.view.inputmethod.InlineSuggestionInfo.TYPE_SUGGESTION;
 
 import static com.android.server.autofill.Helper.sDebug;
@@ -25,6 +26,7 @@ import android.annotation.Nullable;
 import android.content.IntentSender;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
+import android.service.autofill.Flags;
 import android.service.autofill.InlinePresentation;
 import android.util.Pair;
 import android.util.Slog;
@@ -47,11 +49,14 @@ final class InlineSuggestionFactory {
             @NonNull InlineFillUi.InlineSuggestionUiCallback uiCallback) {
         InlinePresentation inlineAuthentication = response.getInlinePresentation();
         final int requestId = response.getRequestId();
+        boolean ignoreHostSpec = Flags.autofillCredmanIntegration() && (
+                (response.getFlags() & FLAG_CREDENTIAL_MANAGER_RESPONSE) != 0);
 
         return createInlineSuggestion(inlineFillUiInfo, InlineSuggestionInfo.SOURCE_AUTOFILL,
                 InlineSuggestionInfo.TYPE_ACTION, () -> uiCallback.authenticate(requestId,
                         AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED),
-                mergedInlinePresentation(inlineFillUiInfo.mInlineRequest, 0, inlineAuthentication),
+                mergedInlinePresentation(inlineFillUiInfo.mInlineRequest, 0, inlineAuthentication,
+                        ignoreHostSpec),
                 createInlineSuggestionTooltip(inlineFillUiInfo.mInlineRequest,
                         inlineFillUiInfo, InlineSuggestionInfo.SOURCE_AUTOFILL,
                         response.getInlineTooltipPresentation()),
@@ -67,7 +72,7 @@ final class InlineSuggestionFactory {
             @NonNull InlineFillUi.InlineFillUiInfo inlineFillUiInfo,
             @NonNull @InlineSuggestionInfo.Source String suggestionSource,
             @NonNull List<Dataset> datasets,
-            @NonNull InlineFillUi.InlineSuggestionUiCallback uiCallback) {
+            @NonNull InlineFillUi.InlineSuggestionUiCallback uiCallback, boolean ignoreHostSpec) {
         if (sDebug) Slog.d(TAG, "createInlineSuggestions(source=" + suggestionSource + ") called");
 
         final InlineSuggestionsRequest request = inlineFillUiInfo.mInlineRequest;
@@ -107,7 +112,8 @@ final class InlineSuggestionFactory {
             InlineSuggestion inlineSuggestion = createInlineSuggestion(
                     inlineFillUiInfo, suggestionSource, suggestionType,
                     () -> uiCallback.autofill(dataset, index),
-                    mergedInlinePresentation(request, datasetIndex, inlinePresentation),
+                    mergedInlinePresentation(request, datasetIndex, inlinePresentation,
+                            ignoreHostSpec),
                     inlineSuggestionTooltip,
                     uiCallback);
             response.append(datasetIndex, Pair.create(dataset, inlineSuggestion));
@@ -141,16 +147,18 @@ final class InlineSuggestionFactory {
      */
     private static InlinePresentation mergedInlinePresentation(
             @NonNull InlineSuggestionsRequest request,
-            int index, @NonNull InlinePresentation inlinePresentation) {
+            int index, @NonNull InlinePresentation inlinePresentation, boolean ignoreHostSpec) {
         final List<InlinePresentationSpec> specs = request.getInlinePresentationSpecs();
         if (specs.isEmpty()) {
             return inlinePresentation;
         }
         InlinePresentationSpec specFromHost = specs.get(Math.min(specs.size() - 1, index));
+        InlinePresentationSpec specToUse =
+                ignoreHostSpec ? inlinePresentation.getInlinePresentationSpec() : specFromHost;
         InlinePresentationSpec mergedInlinePresentation = new InlinePresentationSpec.Builder(
                 inlinePresentation.getInlinePresentationSpec().getMinSize(),
                 inlinePresentation.getInlinePresentationSpec().getMaxSize()).setStyle(
-                specFromHost.getStyle()).build();
+                specToUse.getStyle()).build();
 
         return new InlinePresentation(inlinePresentation.getSlice(), mergedInlinePresentation,
                 inlinePresentation.isPinned());
@@ -211,7 +219,7 @@ final class InlineSuggestionFactory {
                 inlineFillUiInfo, tooltipInline, () -> { /* no operation */ }, uiCallback);
         final InlineSuggestionInfo tooltipInlineSuggestionInfo = new InlineSuggestionInfo(
                 mergedSpec, suggestionSource, /* autofillHints */ null, TYPE_SUGGESTION,
-                        /* pinned */ false, /* tooltip */ null);
+                /* pinned */ false, /* tooltip */ null);
         return new InlineSuggestion(tooltipInlineSuggestionInfo, tooltipContentProvider);
     }
 
