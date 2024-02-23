@@ -41,6 +41,7 @@ import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
@@ -87,6 +88,7 @@ constructor(
     private val windowController: NotificationShadeWindowController,
     private val deviceProvisioningInteractor: DeviceProvisioningInteractor,
     private val centralSurfaces: CentralSurfaces,
+    private val headsUpInteractor: HeadsUpNotificationInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -145,6 +147,15 @@ constructor(
                                             null
                                         }
                                     }
+                                }
+                            }
+                            .combine(headsUpInteractor.isHeadsUpOrAnimatingAway) {
+                                visibilityForTransitionState,
+                                isHeadsUpOrAnimatingAway ->
+                                if (isHeadsUpOrAnimatingAway) {
+                                    true to "showing a HUN"
+                                } else {
+                                    visibilityForTransitionState
                                 }
                             }
                             .distinctUntilChanged()

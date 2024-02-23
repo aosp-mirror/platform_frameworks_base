@@ -13,6 +13,7 @@ fun TransitionBuilder.goneToShadeTransition(
 ) {
     spec = tween(durationMillis = DefaultDuration.times(durationScale).inWholeMilliseconds.toInt())
 
+    fractionRange(start = .58f) { fade(ShadeHeader.Elements.Clock) }
     fractionRange(start = .58f) { fade(ShadeHeader.Elements.CollapsedContentStart) }
     fractionRange(start = .58f) { fade(ShadeHeader.Elements.CollapsedContentEnd) }
     fractionRange(start = .58f) { fade(ShadeHeader.Elements.PrivacyChip) }

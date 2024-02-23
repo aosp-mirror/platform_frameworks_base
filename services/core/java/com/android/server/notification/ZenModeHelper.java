@@ -123,6 +123,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -593,20 +594,20 @@ public class ZenModeHelper {
             if (mConfig == null) {
                 return;
             }
+            ZenModeConfig newConfig = mConfig.copy();
+            ZenRule rule = newConfig.automaticRules.get(implicitRuleId(callingPkg));
             if (zenMode == Global.ZEN_MODE_OFF) {
                 // Deactivate implicit rule if it exists and is active; otherwise ignore.
-                ZenRule rule = mConfig.automaticRules.get(implicitRuleId(callingPkg));
                 if (rule != null) {
                     Condition deactivated = new Condition(rule.conditionId,
                             mContext.getString(R.string.zen_mode_implicit_deactivated),
                             Condition.STATE_FALSE);
-                    setAutomaticZenRuleState(rule.id, deactivated, UPDATE_ORIGIN_APP, callingUid);
+                    setAutomaticZenRuleStateLocked(newConfig, Collections.singletonList(rule),
+                            deactivated, UPDATE_ORIGIN_APP, callingUid);
                 }
             } else {
                 // Either create a new rule with a default ZenPolicy, or update an existing rule's
                 // filter value. In both cases, also activate (and unsnooze) it.
-                ZenModeConfig newConfig = mConfig.copy();
-                ZenRule rule = newConfig.automaticRules.get(implicitRuleId(callingPkg));
                 if (rule == null) {
                     rule = newImplicitZenRule(callingPkg);
 
@@ -878,9 +879,17 @@ public class ZenModeHelper {
             if (mConfig == null) return;
 
             newConfig = mConfig.copy();
-            ArrayList<ZenRule> rules = new ArrayList<>();
-            rules.add(newConfig.automaticRules.get(id));
-            setAutomaticZenRuleStateLocked(newConfig, rules, condition, origin, callingUid);
+            ZenRule rule = newConfig.automaticRules.get(id);
+            if (Flags.modesApi()) {
+                if (rule != null && canManageAutomaticZenRule(rule)) {
+                    setAutomaticZenRuleStateLocked(newConfig, Collections.singletonList(rule),
+                            condition, origin, callingUid);
+                }
+            } else {
+                ArrayList<ZenRule> rules = new ArrayList<>();
+                rules.add(rule); // rule may be null and throw NPE in the next method.
+                setAutomaticZenRuleStateLocked(newConfig, rules, condition, origin, callingUid);
+            }
         }
     }
 
@@ -892,9 +901,15 @@ public class ZenModeHelper {
             if (mConfig == null) return;
             newConfig = mConfig.copy();
 
-            setAutomaticZenRuleStateLocked(newConfig,
-                    findMatchingRules(newConfig, ruleDefinition, condition),
-                    condition, origin, callingUid);
+            List<ZenRule> matchingRules = findMatchingRules(newConfig, ruleDefinition, condition);
+            if (Flags.modesApi()) {
+                for (int i = matchingRules.size() - 1; i >= 0; i--) {
+                    if (!canManageAutomaticZenRule(matchingRules.get(i))) {
+                        matchingRules.remove(i);
+                    }
+                }
+            }
+            setAutomaticZenRuleStateLocked(newConfig, matchingRules, condition, origin, callingUid);
         }
     }
 
@@ -914,8 +929,9 @@ public class ZenModeHelper {
         }
     }
 
-    private List<ZenRule> findMatchingRules(ZenModeConfig config, Uri id, Condition condition) {
-        List<ZenRule> matchingRules= new ArrayList<>();
+    private static List<ZenRule> findMatchingRules(ZenModeConfig config, Uri id,
+            Condition condition) {
+        List<ZenRule> matchingRules = new ArrayList<>();
         if (ruleMatches(id, condition, config.manualRule)) {
             matchingRules.add(config.manualRule);
         } else {
@@ -928,7 +944,7 @@ public class ZenModeHelper {
         return matchingRules;
     }
 
-    private boolean ruleMatches(Uri id, Condition condition, ZenRule rule) {
+    private static boolean ruleMatches(Uri id, Condition condition, ZenRule rule) {
         if (id == null || rule == null || rule.conditionId == null) return false;
         if (!rule.conditionId.equals(id)) return false;
         if (Objects.equals(condition, rule.condition)) return false;
@@ -1880,12 +1896,14 @@ public class ZenModeHelper {
         if (rule.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             policy.apply(new ZenPolicy.Builder()
                     .disallowAllSounds()
+                    .allowPriorityChannels(false)
                     .build());
         } else if (rule.zenMode == Global.ZEN_MODE_ALARMS) {
             policy.apply(new ZenPolicy.Builder()
                     .disallowAllSounds()
                     .allowAlarms(true)
                     .allowMedia(true)
+                    .allowPriorityChannels(false)
                     .build());
         } else if (rule.zenPolicy != null) {
             policy.apply(rule.zenPolicy);

@@ -73,6 +73,10 @@ public final class SignalingDataResponse extends BroadcastInfoResponse implement
     /**
      * Gets a list of types of metadata that are contained in this response.
      *
+     * <p> This list correlates to all the available types that can be found within
+     * {@link #getSignalingDataInfoList()}. This list is determined by the types specified in
+     * {@link SignalingDataRequest#getSignalingDataTypes()}.
+     *
      * <p> A list of types available are defined in {@link SignalingDataRequest}.
      * For more information about these types, see A/344:2023-5 9.2.10 - Query Signaling Data API.
      *

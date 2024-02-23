@@ -43,16 +43,16 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
             com.android.server.wearable.RemoteWearableSensingService.class.getSimpleName();
     private final static boolean DEBUG = false;
 
-    private final Object mSecureWearableConnectionLock = new Object();
+    private final Object mSecureConnectionLock = new Object();
 
-    // mNextSecureWearableConnectionContext will only be non-null when we are waiting for the
+    // mNextSecureConnectionContext will only be non-null when we are waiting for the
     // WearableSensingService process to restart. It will be set to null after it is passed into
     // WearableSensingService.
-    @GuardedBy("mSecureWearableConnectionLock")
-    private SecureWearableConnectionContext mNextSecureWearableConnectionContext;
+    @GuardedBy("mSecureConnectionLock")
+    private SecureWearableConnectionContext mNextSecureConnectionContext;
 
-    @GuardedBy("mSecureWearableConnectionLock")
-    private boolean mSecureWearableConnectionProvided = false;
+    @GuardedBy("mSecureConnectionLock")
+    private boolean mSecureConnectionProvided = false;
 
     RemoteWearableSensingService(Context context, ComponentName serviceName,
             int userId) {
@@ -77,23 +77,23 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
      * @param secureWearableConnection The secure connection to the wearable
      * @param callback The callback for service status
      */
-    public void provideSecureWearableConnection(
+    public void provideSecureConnection(
             ParcelFileDescriptor secureWearableConnection, RemoteCallback callback) {
         if (DEBUG) {
-            Slog.i(TAG, "#provideSecureWearableConnection");
+            Slog.i(TAG, "#provideSecureConnection");
         }
         if (!Flags.enableRestartWssProcess()) {
             Slog.d(
                     TAG,
                     "FLAG_ENABLE_RESTART_WSS_PROCESS is disabled. Do not attempt to restart the"
                         + " WearableSensingService process");
-            provideSecureWearableConnectionInternal(secureWearableConnection, callback);
+            provideSecureConnectionInternal(secureWearableConnection, callback);
             return;
         }
-        synchronized (mSecureWearableConnectionLock) {
-            if (mNextSecureWearableConnectionContext != null) {
+        synchronized (mSecureConnectionLock) {
+            if (mNextSecureConnectionContext != null) {
                 // A process restart is in progress, #binderDied is about to be called. Replace
-                // the previous mNextSecureWearableConnectionContext with the current one
+                // the previous mNextSecureConnectionContext with the current one
                 Slog.i(
                         TAG,
                         "A new wearable connection is provided before the process restart triggered"
@@ -101,33 +101,33 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
                             + " connection.");
                 if (Flags.enableProvideWearableConnectionApi()) {
                     WearableSensingManagerPerUserService.notifyStatusCallback(
-                            mNextSecureWearableConnectionContext.mStatusCallback,
+                            mNextSecureConnectionContext.mStatusCallback,
                             WearableSensingManager.STATUS_CHANNEL_ERROR);
                 }
-                mNextSecureWearableConnectionContext =
+                mNextSecureConnectionContext =
                         new SecureWearableConnectionContext(secureWearableConnection, callback);
                 return;
             }
-            if (!mSecureWearableConnectionProvided) {
+            if (!mSecureConnectionProvided) {
                 // no need to kill the process
-                provideSecureWearableConnectionInternal(secureWearableConnection, callback);
-                mSecureWearableConnectionProvided = true;
+                provideSecureConnectionInternal(secureWearableConnection, callback);
+                mSecureConnectionProvided = true;
                 return;
             }
-            mNextSecureWearableConnectionContext =
+            mNextSecureConnectionContext =
                     new SecureWearableConnectionContext(secureWearableConnection, callback);
             // Killing the process causes the binder to die. #binderDied will then be triggered
             killWearableSensingServiceProcess();
         }
     }
 
-    private void provideSecureWearableConnectionInternal(
+    private void provideSecureConnectionInternal(
             ParcelFileDescriptor secureWearableConnection, RemoteCallback callback) {
         Slog.d(TAG, "Providing secure wearable connection.");
         var unused =
                 post(
                         service -> {
-                            service.provideSecureWearableConnection(
+                            service.provideSecureConnection(
                                     secureWearableConnection, callback);
                             try {
                                 // close the local fd after it has been sent to the WSS process
@@ -141,15 +141,15 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
     @Override
     public void binderDied() {
         super.binderDied();
-        synchronized (mSecureWearableConnectionLock) {
-            if (mNextSecureWearableConnectionContext != null) {
+        synchronized (mSecureConnectionLock) {
+            if (mNextSecureConnectionContext != null) {
                 // This will call #post, which will recreate the process and bind to it
-                provideSecureWearableConnectionInternal(
-                        mNextSecureWearableConnectionContext.mSecureWearableConnection,
-                        mNextSecureWearableConnectionContext.mStatusCallback);
-                mNextSecureWearableConnectionContext = null;
+                provideSecureConnectionInternal(
+                        mNextSecureConnectionContext.mSecureConnection,
+                        mNextSecureConnectionContext.mStatusCallback);
+                mNextSecureConnectionContext = null;
             } else {
-                mSecureWearableConnectionProvided = false;
+                mSecureConnectionProvided = false;
                 Slog.w(TAG, "Binder died but there is no secure wearable connection to provide.");
             }
         }
@@ -307,12 +307,12 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
     }
 
     private static class SecureWearableConnectionContext {
-        final ParcelFileDescriptor mSecureWearableConnection;
+        final ParcelFileDescriptor mSecureConnection;
         final RemoteCallback mStatusCallback;
 
         SecureWearableConnectionContext(
                 ParcelFileDescriptor secureWearableConnection, RemoteCallback statusCallback) {
-            this.mSecureWearableConnection = secureWearableConnection;
+            this.mSecureConnection = secureWearableConnection;
             this.mStatusCallback = statusCallback;
         }
     }

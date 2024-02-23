@@ -16,8 +16,15 @@
 
 package com.android.server.wm;
 
+import static android.permission.flags.Flags.sensitiveNotificationAppProtection;
+import static android.view.flags.Flags.sensitiveContentAppProtection;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.IBinder;
 import android.util.ArraySet;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -29,12 +36,26 @@ import java.util.Objects;
 public class SensitiveContentPackages {
     private final ArraySet<PackageInfo> mProtectedPackages = new ArraySet<>();
 
-    /** Returns {@code true} if package/uid pair should be blocked from screen capture */
-    public boolean shouldBlockScreenCaptureForApp(String pkg, int uid) {
+    /**
+     * Returns {@code true} if package/uid/window combination should be blocked
+     * from screen capture.
+     */
+    public boolean shouldBlockScreenCaptureForApp(String pkg, int uid, IBinder windowToken) {
+        if (!(sensitiveContentAppProtection() || sensitiveNotificationAppProtection())) {
+            return false;
+        }
+
         for (int i = 0; i < mProtectedPackages.size(); i++) {
             PackageInfo info = mProtectedPackages.valueAt(i);
             if (info != null && info.mPkg.equals(pkg) && info.mUid == uid) {
-                return true;
+                // sensitiveContentAppProtection blocks specific window where sensitive content
+                // is rendered, whereas sensitiveNotificationAppProtection blocks the package
+                // if the package has a sensitive notification.
+                if ((sensitiveContentAppProtection() && windowToken == info.getWindowToken())
+                        || (sensitiveNotificationAppProtection() && info.getWindowToken() == null)
+                ) {
+                    return true;
+                }
             }
         }
         return false;
@@ -73,11 +94,18 @@ public class SensitiveContentPackages {
      */
     public boolean clearBlockedApps() {
         if (mProtectedPackages.isEmpty()) {
-            // set was already empty
             return false;
         }
         mProtectedPackages.clear();
         return true;
+    }
+
+    /**
+     * @return the size of protected packages.
+     */
+    @VisibleForTesting
+    public int size() {
+        return mProtectedPackages.size();
     }
 
     void dump(PrintWriter pw) {
@@ -86,18 +114,30 @@ public class SensitiveContentPackages {
         pw.println(innerPrefix + "Packages that should block screen capture ("
                 + mProtectedPackages.size() + "):");
         for (PackageInfo info : mProtectedPackages) {
-            pw.println(innerPrefix + "  package=" + info.mPkg + "  uid=" + info.mUid);
+            pw.println(innerPrefix + "  package=" + info.mPkg + "  uid=" + info.mUid
+                    + " windowToken=" + info.mWindowToken);
         }
     }
 
-    /** Helper class that represents a package/uid pair */
+    /**
+     * Helper class that represents a package, uid, and window token combination, window token
+     * is set to block screen capture at window level.
+     */
     public static class PackageInfo {
-        private String mPkg;
-        private int mUid;
+        private final String mPkg;
+        private final int mUid;
+
+        @Nullable
+        private final IBinder mWindowToken;
 
         public PackageInfo(String pkg, int uid) {
+            this(pkg, uid, null);
+        }
+
+        public PackageInfo(String pkg, int uid, IBinder windowToken) {
             this.mPkg = pkg;
             this.mUid = uid;
+            this.mWindowToken = windowToken;
         }
 
         @Override
@@ -105,12 +145,30 @@ public class SensitiveContentPackages {
             if (this == o) return true;
             if (!(o instanceof PackageInfo)) return false;
             PackageInfo that = (PackageInfo) o;
-            return mUid == that.mUid && Objects.equals(mPkg, that.mPkg);
+            return mUid == that.mUid && Objects.equals(mPkg, that.mPkg)
+                    && Objects.equals(mWindowToken, that.mWindowToken);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mPkg, mUid);
+            return Objects.hash(mPkg, mUid, mWindowToken);
+        }
+
+        public IBinder getWindowToken() {
+            return mWindowToken;
+        }
+
+        public int getUid() {
+            return mUid;
+        }
+
+        public String getPkg() {
+            return mPkg;
+        }
+
+        @Override
+        public String toString() {
+            return "package=" + mPkg + "  uid=" + mUid + " windowToken=" + mWindowToken;
         }
     }
 }

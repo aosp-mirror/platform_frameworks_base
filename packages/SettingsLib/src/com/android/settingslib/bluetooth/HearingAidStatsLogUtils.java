@@ -16,10 +16,9 @@
 
 package com.android.settingslib.bluetooth;
 
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.icu.text.SimpleDateFormat;
-import android.icu.util.TimeZone;
 import android.util.Log;
 
 import androidx.annotation.IntDef;
@@ -30,12 +29,14 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /** Utils class to report hearing aid metrics to statsd */
@@ -54,13 +55,13 @@ public final class HearingAidStatsLogUtils {
     private static final String BT_HEARING_USER_CATEGORY = "bt_hearing_user_category";
 
     private static final String HISTORY_RECORD_DELIMITER = ",";
-    private static final String CATEGORY_HEARING_AIDS = "A11yHearingAidsUser";
-    private static final String CATEGORY_NEW_HEARING_AIDS = "A11yNewHearingAidsUser";
-    private static final String CATEGORY_HEARING_DEVICES = "A11yHearingDevicesUser";
-    private static final String CATEGORY_NEW_HEARING_DEVICES = "A11yNewHearingDevicesUser";
+    static final String CATEGORY_HEARING_AIDS = "A11yHearingAidsUser";
+    static final String CATEGORY_NEW_HEARING_AIDS = "A11yNewHearingAidsUser";
+    static final String CATEGORY_HEARING_DEVICES = "A11yHearingDevicesUser";
+    static final String CATEGORY_NEW_HEARING_DEVICES = "A11yNewHearingDevicesUser";
 
-    private static final long PAIRED_HISTORY_EXPIRED_TIME = TimeUnit.DAYS.toMillis(30);
-    private static final long CONNECTED_HISTORY_EXPIRED_TIME = TimeUnit.DAYS.toMillis(7);
+    static final int PAIRED_HISTORY_EXPIRED_DAY = 30;
+    static final int CONNECTED_HISTORY_EXPIRED_DAY = 7;
     private static final int VALID_PAIRED_EVENT_COUNT = 1;
     private static final int VALID_CONNECTED_EVENT_COUNT = 7;
 
@@ -126,16 +127,43 @@ public final class HearingAidStatsLogUtils {
     }
 
     /**
-     * Indicates if user is categorized as one of {@link #CATEGORY_HEARING_AIDS},
-     * {@link #CATEGORY_NEW_HEARING_AIDS}, {@link #CATEGORY_HEARING_DEVICES}, and
-     * {@link #CATEGORY_NEW_HEARING_DEVICES}.
+     * Updates corresponding history if we found the device is a hearing device after profile state
+     * changed.
      *
      * @param context the request context
-     * @return true if user is already categorized as one of interested group
+     * @param cachedDevice the remote device
+     * @param profile the profile that has a state changed
+     * @param profileState the new profile state
      */
-    public static boolean isUserCategorized(Context context) {
-        String userCategory = getSharedPreferences(context).getString(BT_HEARING_USER_CATEGORY, "");
-        return !userCategory.isEmpty();
+    public static void updateHistoryIfNeeded(Context context, CachedBluetoothDevice cachedDevice,
+            LocalBluetoothProfile profile, int profileState) {
+
+        if (isJustBonded(cachedDevice.getAddress())) {
+            // Saves bonded timestamp as the source for judging whether to display
+            // the survey
+            if (cachedDevice.getProfiles().stream().anyMatch(
+                    p -> (p instanceof HearingAidProfile || p instanceof HapClientProfile))) {
+                HearingAidStatsLogUtils.addCurrentTimeToHistory(context,
+                        HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_PAIRED);
+            } else if (cachedDevice.getProfiles().stream().anyMatch(
+                    p -> (p instanceof A2dpSinkProfile || p instanceof HeadsetProfile))) {
+                HearingAidStatsLogUtils.addCurrentTimeToHistory(context,
+                        HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_PAIRED);
+            }
+            removeFromJustBonded(cachedDevice.getAddress());
+        }
+
+        // Saves connected timestamp as the source for judging whether to display
+        // the survey
+        if (profileState == BluetoothProfile.STATE_CONNECTED) {
+            if (profile instanceof HearingAidProfile || profile instanceof HapClientProfile) {
+                HearingAidStatsLogUtils.addCurrentTimeToHistory(context,
+                        HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_CONNECTED);
+            } else if (profile instanceof A2dpSinkProfile || profile instanceof HeadsetProfile) {
+                HearingAidStatsLogUtils.addCurrentTimeToHistory(context,
+                        HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_CONNECTED);
+            }
+        }
     }
 
     /**
@@ -186,14 +214,6 @@ public final class HearingAidStatsLogUtils {
                 userCategory = CATEGORY_HEARING_DEVICES;
             }
         }
-
-        if (!userCategory.isEmpty()) {
-            // History become useless once user is categorized. Clear all history.
-            SharedPreferences.Editor editor = getSharedPreferences(context).edit();
-            editor.putString(BT_HEARING_USER_CATEGORY, userCategory).apply();
-            clearHistory(context);
-            sJustBondedDeviceAddressSet.clear();
-        }
         return userCategory;
     }
 
@@ -211,7 +231,7 @@ public final class HearingAidStatsLogUtils {
      * Removes the device address from the just bonded list.
      * @param address the device address
      */
-    public static void removeFromJustBonded(String address) {
+    private static void removeFromJustBonded(String address) {
         sJustBondedDeviceAddressSet.remove(address);
     }
 
@@ -220,21 +240,8 @@ public final class HearingAidStatsLogUtils {
      * @param address the device address
      * @return true if the device address is in the just bonded list
      */
-    public static boolean isJustBonded(String address) {
+    private static boolean isJustBonded(String address) {
         return sJustBondedDeviceAddressSet.contains(address);
-    }
-
-    /**
-     * Clears all BT hearing devices related history stored in shared preference.
-     * @param context the request context
-     */
-    private static synchronized void clearHistory(Context context) {
-        SharedPreferences.Editor editor = getSharedPreferences(context).edit();
-        editor.remove(BT_HEARING_AIDS_PAIRED_HISTORY)
-                .remove(BT_HEARING_AIDS_CONNECTED_HISTORY)
-                .remove(BT_HEARING_DEVICES_PAIRED_HISTORY)
-                .remove(BT_HEARING_DEVICES_CONNECTED_HISTORY)
-                .apply();
     }
 
     /**
@@ -256,7 +263,7 @@ public final class HearingAidStatsLogUtils {
             }
             return;
         }
-        if (history.peekLast() != null && isSameDay(history.peekLast(), timestamp)) {
+        if (history.peekLast() != null && isSameDay(timestamp, history.peekLast())) {
             if (DEBUG) {
                 Log.w(TAG, "Skip this record, it's same day record");
             }
@@ -275,25 +282,25 @@ public final class HearingAidStatsLogUtils {
                 || BT_HEARING_DEVICES_PAIRED_HISTORY.equals(spName)) {
             LinkedList<Long> history = convertToHistoryList(
                     getSharedPreferences(context).getString(spName, ""));
-            removeRecordsBeforeTime(history, PAIRED_HISTORY_EXPIRED_TIME);
+            removeRecordsBeforeDay(history, PAIRED_HISTORY_EXPIRED_DAY);
             return history;
         } else if (BT_HEARING_AIDS_CONNECTED_HISTORY.equals(spName)
                 || BT_HEARING_DEVICES_CONNECTED_HISTORY.equals(spName)) {
             LinkedList<Long> history = convertToHistoryList(
                     getSharedPreferences(context).getString(spName, ""));
-            removeRecordsBeforeTime(history, CONNECTED_HISTORY_EXPIRED_TIME);
+            removeRecordsBeforeDay(history, CONNECTED_HISTORY_EXPIRED_DAY);
             return history;
         }
         return null;
     }
 
-    private static void removeRecordsBeforeTime(LinkedList<Long> history, long time) {
-        if (history == null) {
+    private static void removeRecordsBeforeDay(LinkedList<Long> history, int day) {
+        if (history == null || history.isEmpty()) {
             return;
         }
-        Long currentTime = System.currentTimeMillis();
+        long currentTime = System.currentTimeMillis();
         while (history.peekFirst() != null
-                && currentTime - history.peekFirst() > time) {
+                && dayDifference(currentTime, history.peekFirst()) >= day) {
             history.poll();
         }
     }
@@ -324,11 +331,13 @@ public final class HearingAidStatsLogUtils {
      * @return {@code true} if two timestamps are on the same day
      */
     private static boolean isSameDay(long t1, long t2) {
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
-        sdf.setTimeZone(TimeZone.getDefault());
-        String dateString1 = sdf.format(t1);
-        String dateString2 = sdf.format(t2);
-        return dateString1.equals(dateString2);
+        return dayDifference(t1, t2) == 0;
+    }
+    private static long dayDifference(long t1, long t2) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        LocalDate date1 = Instant.ofEpochMilli(t1).atZone(zoneId).toLocalDate();
+        LocalDate date2 = Instant.ofEpochMilli(t2).atZone(zoneId).toLocalDate();
+        return Math.abs(ChronoUnit.DAYS.between(date1, date2));
     }
 
     private static SharedPreferences getSharedPreferences(Context context) {

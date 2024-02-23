@@ -102,6 +102,9 @@ import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_FIRST_O
 import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_LAST_ORDERED_ID;
 import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_FIRST_ORDERED_ID;
 import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_LAST_ORDERED_ID;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
+import static com.android.server.wm.ActivityRecord.State.DESTROYING;
+import static com.android.server.wm.ActivityRecord.State.FINISHING;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
@@ -1134,22 +1137,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Return the global configuration used by the process corresponding to the input pid. This is
      * usually the global configuration with some overrides specific to that process.
      */
-    Configuration getGlobalConfigurationForCallingPid() {
+    private Configuration getGlobalConfigurationForCallingPid() {
         final int pid = Binder.getCallingPid();
-        return getGlobalConfigurationForPid(pid);
-    }
-
-    /**
-     * Return the global configuration used by the process corresponding to the given pid.
-     */
-    Configuration getGlobalConfigurationForPid(int pid) {
         if (pid == MY_PID || pid < 0) {
             return getGlobalConfiguration();
         }
-        synchronized (mGlobalLock) {
-            final WindowProcessController app = mProcessMap.getProcess(pid);
-            return app != null ? app.getConfiguration() : getGlobalConfiguration();
-        }
+        final WindowProcessController app = mProcessMap.getProcess(pid);
+        return app != null ? app.getConfiguration() : getGlobalConfiguration();
     }
 
     /**
@@ -4173,7 +4167,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             task = mRootWindowContainer.getDefaultTaskDisplayArea().getRootTask(
                     t -> t.isActivityTypeStandard());
         }
-        if (task != null && task.getTopMostActivity() != null) {
+        if (task != null && task.getTopMostActivity() != null
+                && !task.getTopMostActivity().isState(FINISHING, DESTROYING, DESTROYED)) {
             mWindowManager.mAtmService.mActivityClientController.onPictureInPictureUiStateChanged(
                     task.getTopMostActivity(), pipState);
         }

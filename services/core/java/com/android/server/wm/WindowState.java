@@ -1897,11 +1897,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return true;
         }
 
-        if (android.permission.flags.Flags.sensitiveNotificationAppProtection()) {
-            if (mWmService.mSensitiveContentPackages
-                    .shouldBlockScreenCaptureForApp(getOwningPackage(), getOwningUid())) {
-                return true;
-            }
+        // block screen capture to protect sensitive notifications or content on the screen.
+        if (mWmService.mSensitiveContentPackages.shouldBlockScreenCaptureForApp(
+                getOwningPackage(), getOwningUid(), getWindowToken())) {
+            return true;
         }
 
         return !DevicePolicyCache.getInstance().isScreenCaptureAllowed(mShowUserId);
@@ -2839,10 +2838,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // For child windows we want to use the pid for the parent window in case the the child
         // window was added from another process.
         final WindowState parentWindow = getParentWindow();
-        final int pid = parentWindow != null ? parentWindow.mSession.mPid : mSession.mPid;
-        final Configuration processConfig =
-                mWmService.mAtmService.getGlobalConfigurationForPid(pid);
-        return processConfig;
+        final Session session = parentWindow != null ? parentWindow.mSession : mSession;
+        return session.mPid == MY_PID ? mWmService.mRoot.getConfiguration()
+                : session.mProcess.getConfiguration();
     }
 
     private Configuration getLastReportedConfiguration() {

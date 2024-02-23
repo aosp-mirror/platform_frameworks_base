@@ -40,23 +40,17 @@ constructor(
     alternateBouncerInteractor: AlternateBouncerInteractor,
 ) {
 
-    private val faceHelp: Flow<FaceMessage> =
-        biometricMessageInteractor.faceMessage.filterNot { faceMessage ->
-            faceMessage !is FaceTimeoutMessage
-        }
-    private val fingerprintMessages: Flow<FingerprintMessage> =
-        biometricMessageInteractor.fingerprintMessage.filterNot { fingerprintMessage ->
-            // On lockout, the device will show the bouncer. Let's not show the message
-            // before the transition or else it'll look flickery.
-            fingerprintMessage is FingerprintLockoutMessage
-        }
+    private val faceMessage: Flow<FaceMessage> =
+        biometricMessageInteractor.faceMessage.filterNot { it is FaceTimeoutMessage }
+    private val fingerprintMessage: Flow<FingerprintMessage> =
+        biometricMessageInteractor.fingerprintMessage.filterNot { it is FingerprintLockoutMessage }
 
     val message: Flow<BiometricMessage?> =
         alternateBouncerInteractor.isVisible.flatMapLatest { isVisible ->
             if (isVisible) {
                 merge(
-                    faceHelp,
-                    fingerprintMessages,
+                    faceMessage,
+                    fingerprintMessage,
                 )
             } else {
                 flowOf(null)

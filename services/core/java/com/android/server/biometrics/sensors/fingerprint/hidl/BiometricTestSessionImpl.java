@@ -16,20 +16,18 @@
 
 package com.android.server.biometrics.sensors.fingerprint.hidl;
 
-import static android.Manifest.permission.TEST_BIOMETRIC;
-
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -153,7 +151,8 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         super.startEnroll_enforcePermission();
 
         mFingerprint21.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
-                mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL);
+                mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL,
+                (new FingerprintEnrollOptions.Builder()).build());
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)

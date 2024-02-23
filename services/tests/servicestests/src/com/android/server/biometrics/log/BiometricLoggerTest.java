@@ -137,11 +137,11 @@ public class BiometricLoggerTest {
         final long latency = 44;
         final boolean enrollSuccessful = true;
 
-        mLogger.logOnEnrolled(targetUserId, latency, enrollSuccessful);
+        mLogger.logOnEnrolled(targetUserId, latency, enrollSuccessful, -1);
 
         verify(mSink).enroll(
                 eq(DEFAULT_MODALITY), eq(DEFAULT_ACTION), eq(DEFAULT_CLIENT),
-                eq(targetUserId), eq(latency), eq(enrollSuccessful), anyFloat());
+                eq(targetUserId), eq(latency), eq(enrollSuccessful), anyFloat(), anyInt());
     }
 
     @Test
@@ -192,7 +192,8 @@ public class BiometricLoggerTest {
                 true/* isBiometricPrompt */);
         mLogger.logOnEnrolled(2 /* targetUserId */,
                 10 /* latency */,
-                true /* enrollSuccessful */);
+                true /* enrollSuccessful */,
+                30 /* source */);
         mLogger.logOnError(mContext, mOpContext,
                 4 /* error */,
                 0 /* vendorCode */,
@@ -205,7 +206,8 @@ public class BiometricLoggerTest {
                 anyInt(), anyInt(), anyInt(), anyBoolean(),
                 anyLong(), anyInt(), anyBoolean(), anyInt(), anyFloat());
         verify(mSink, never()).enroll(
-                anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyBoolean(), anyFloat());
+                anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyBoolean(), anyFloat(),
+                anyInt());
         verify(mSink, never()).error(eq(mOpContext),
                 anyInt(), anyInt(), anyInt(), anyBoolean(),
                 anyLong(), anyInt(), anyInt(), anyInt());

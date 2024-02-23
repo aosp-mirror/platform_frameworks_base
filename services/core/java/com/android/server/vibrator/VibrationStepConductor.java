@@ -160,7 +160,10 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
             if (Flags.adaptiveHapticsEnabled()) {
                 waitForVibrationParamsIfRequired();
             }
+            // Scale resolves the default amplitudes from the effect before scaling them.
             mVibration.scaleEffects(mVibrationScaler::scale);
+        } else {
+            mVibration.resolveEffects(mVibrationScaler.getDefaultVibrationAmplitude());
         }
 
         mVibration.adaptToDevice(mDeviceAdapter);

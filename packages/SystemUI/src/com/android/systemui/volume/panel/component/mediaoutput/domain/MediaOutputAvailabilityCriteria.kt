@@ -17,27 +17,19 @@
 package com.android.systemui.volume.panel.component.mediaoutput.domain
 
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
-import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 
 /** Determines if the Media Output Volume Panel component is available. */
 @VolumePanelScope
 class MediaOutputAvailabilityCriteria
 @Inject
 constructor(
-    private val mediaOutputInteractor: MediaOutputInteractor,
     private val audioModeInteractor: AudioModeInteractor,
 ) : ComponentAvailabilityCriteria {
 
-    override fun isAvailable(): Flow<Boolean> {
-        return combine(mediaOutputInteractor.mediaDevices, audioModeInteractor.isOngoingCall) {
-            devices,
-            isOngoingCall ->
-            !isOngoingCall && devices.isNotEmpty()
-        }
-    }
+    override fun isAvailable(): Flow<Boolean> = audioModeInteractor.isOngoingCall.map { !it }
 }

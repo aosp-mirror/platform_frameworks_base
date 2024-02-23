@@ -65,7 +65,7 @@ import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
 import com.android.wm.shell.draganddrop.DragAndDropController;
-import com.android.wm.shell.draganddrop.UnhandledDragController;
+import com.android.wm.shell.draganddrop.GlobalDragListener;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
@@ -498,6 +498,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            DragAndDropController dragAndDropController,
             Transitions transitions,
             EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
             ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
@@ -506,14 +507,15 @@ public abstract class WMShellModule {
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             LaunchAdjacentController launchAdjacentController,
             RecentsTransitionHandler recentsTransitionHandler,
+            MultiInstanceHelper multiInstanceHelper,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return new DesktopTasksController(context, shellInit, shellCommandHandler, shellController,
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
-                transitions, enterDesktopTransitionHandler, exitDesktopTransitionHandler,
-                toggleResizeDesktopTaskTransitionHandler, dragToDesktopTransitionHandler,
-                desktopModeTaskRepository, launchAdjacentController, recentsTransitionHandler,
-                mainExecutor);
+                dragAndDropController, transitions, enterDesktopTransitionHandler,
+                exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
+                dragToDesktopTransitionHandler, desktopModeTaskRepository, launchAdjacentController,
+                recentsTransitionHandler, multiInstanceHelper, mainExecutor);
     }
 
     @WMSingleton
@@ -562,10 +564,10 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static UnhandledDragController provideUnhandledDragController(
+    static GlobalDragListener provideGlobalDragListener(
             IWindowManager wmService,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new UnhandledDragController(wmService, mainExecutor);
+        return new GlobalDragListener(wmService, mainExecutor);
     }
 
     @WMSingleton
@@ -577,9 +579,12 @@ public abstract class WMShellModule {
             DisplayController displayController,
             UiEventLogger uiEventLogger,
             IconProvider iconProvider,
+            GlobalDragListener globalDragListener,
+            Transitions transitions,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new DragAndDropController(context, shellInit, shellController,
-                shellCommandHandler, displayController, uiEventLogger, iconProvider, mainExecutor);
+        return new DragAndDropController(context, shellInit, shellController, shellCommandHandler,
+                displayController, uiEventLogger, iconProvider, globalDragListener, transitions,
+                mainExecutor);
     }
 
     //

@@ -153,6 +153,18 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * Indicates whether this Canvas is drawing high contrast text.
+     *
+     * @see android.view.accessibility.AccessibilityManager#isHighTextContrastEnabled()
+     * @return True if high contrast text is enabled, false otherwise.
+     *
+     * @hide
+     */
+    public boolean isHighContrastTextEnabled() {
+        return nIsHighContrastText(mNativeCanvasWrapper);
+    }
+
+    /**
      * Specify a bitmap for the canvas to draw into. All canvas state such as
      * layers, filters, and the save/restore stack are reset. Additionally,
      * the canvas' target density is updated to match that of the bitmap.
@@ -1451,6 +1463,8 @@ public class Canvas extends BaseCanvas {
 
     @CriticalNative
     private static native boolean nIsOpaque(long canvasHandle);
+    @CriticalNative
+    private static native boolean nIsHighContrastText(long canvasHandle);
     @CriticalNative
     private static native int nGetWidth(long canvasHandle);
     @CriticalNative

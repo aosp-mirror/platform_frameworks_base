@@ -18,7 +18,7 @@ package com.android.systemui.volume.panel.component.mediaoutput.data.repository
 import android.media.MediaRouter2Manager
 import com.android.settingslib.volume.data.repository.LocalMediaRepository
 import com.android.settingslib.volume.data.repository.LocalMediaRepositoryImpl
-import com.android.settingslib.volume.shared.AudioManagerIntentsReceiver
+import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.media.controls.util.LocalMediaManagerFactory
@@ -34,7 +34,7 @@ interface LocalMediaRepositoryFactory {
 class LocalMediaRepositoryFactoryImpl
 @Inject
 constructor(
-    private val intentsReceiver: AudioManagerIntentsReceiver,
+    private val eventsReceiver: AudioManagerEventsReceiver,
     private val mediaRouter2Manager: MediaRouter2Manager,
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     @Application private val coroutineScope: CoroutineScope,
@@ -43,7 +43,7 @@ constructor(
 
     override fun create(packageName: String?): LocalMediaRepository =
         LocalMediaRepositoryImpl(
-            intentsReceiver,
+            eventsReceiver,
             localMediaManagerFactory.create(packageName),
             mediaRouter2Manager,
             coroutineScope,

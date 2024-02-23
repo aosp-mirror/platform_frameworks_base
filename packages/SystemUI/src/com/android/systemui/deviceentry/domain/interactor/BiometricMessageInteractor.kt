@@ -29,6 +29,7 @@ import com.android.systemui.deviceentry.shared.model.FingerprintMessage
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.res.R
+import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,9 +42,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
 /**
- * BiometricMessage business logic. Filters biometric error/acquired/fail/success events for
- * authentication events that should never surface a message to the user at the current device
- * state.
+ * BiometricMessage business logic. Filters biometric error/fail/success events for authentication
+ * events that should never surface a message to the user at the current device state.
  */
 @ExperimentalCoroutinesApi
 @SysUISingleton
@@ -54,7 +54,8 @@ constructor(
     fingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
     fingerprintPropertyInteractor: FingerprintPropertyInteractor,
     faceAuthInteractor: DeviceEntryFaceAuthInteractor,
-    biometricSettingsInteractor: DeviceEntryBiometricSettingsInteractor,
+    private val biometricSettingsInteractor: DeviceEntryBiometricSettingsInteractor,
+    faceHelpMessageDeferralInteractor: FaceHelpMessageDeferralInteractor,
 ) {
     private val faceHelp: Flow<HelpFaceAuthenticationStatus> =
         faceAuthInteractor.authenticationStatus.filterIsInstance<HelpFaceAuthenticationStatus>()
@@ -130,19 +131,24 @@ constructor(
         )
 
     private val faceHelpMessage: Flow<FaceMessage> =
-        biometricSettingsInteractor.fingerprintAndFaceEnrolledAndEnabled
-            .flatMapLatest { fingerprintAndFaceEnrolledAndEnabled ->
+        faceHelp
+            .filterNot {
+                // Message deferred to potentially show at face timeout error instead
+                faceHelpMessageDeferralInteractor.shouldDefer(it.msgId)
+            }
+            .sample(biometricSettingsInteractor.fingerprintAndFaceEnrolledAndEnabled, ::Pair)
+            .filter { (faceAuthHelpStatus, fingerprintAndFaceEnrolledAndEnabled) ->
                 if (fingerprintAndFaceEnrolledAndEnabled) {
-                    faceHelp.filter { faceAuthHelpStatus ->
-                        coExFaceAcquisitionMsgIdsToShow.contains(faceAuthHelpStatus.msgId)
-                    }
+                    // Show only some face help messages if fingerprint is also enrolled
+                    coExFaceAcquisitionMsgIdsToShow.contains(faceAuthHelpStatus.msgId)
                 } else {
-                    faceHelp
+                    // Show all face help messages if only face is enrolled
+                    true
                 }
             }
-            .sample(biometricSettingsInteractor.faceAuthCurrentlyAllowed, ::Pair)
-            .filter { (_, faceAuthCurrentlyAllowed) -> faceAuthCurrentlyAllowed }
-            .map { (status, _) -> FaceMessage(status.msg) }
+            .sample(biometricSettingsInteractor.faceAuthCurrentlyAllowed, ::toTriple)
+            .filter { (_, _, faceAuthCurrentlyAllowed) -> faceAuthCurrentlyAllowed }
+            .map { (status, _, _) -> FaceMessage(status.msg) }
 
     private val faceFailureMessage: Flow<FaceMessage> =
         faceFailure
@@ -159,12 +165,18 @@ constructor(
             }
             .map { (status, _) ->
                 when {
-                    status.isTimeoutError() -> FaceTimeoutMessage(status.msg)
+                    status.isTimeoutError() -> {
+                        val deferredMessage = faceHelpMessageDeferralInteractor.getDeferredMessage()
+                        if (deferredMessage != null) {
+                            FaceMessage(deferredMessage.toString())
+                        } else {
+                            FaceTimeoutMessage(status.msg)
+                        }
+                    }
                     else -> FaceMessage(status.msg)
                 }
             }
 
-    // TODO(b/317215391): support showing face acquired messages on timeout + face lockout errors
     val faceMessage: Flow<FaceMessage> =
         merge(
             faceHelpMessage,

@@ -48,41 +48,28 @@ import java.util.ArrayList;
 public class IntentFactory {
 
     /**
-     * Generate a new launch intent to the Credential Selector UI for auto-filling.
+     * Generate a new launch intent to the Credential Selector UI for auto-filling. This intent is
+     * invoked from the Autofill flow, when the user requests to bring up the 'All Options' page of
+     * the credential bottom-sheet. When the user clicks on the pinned entry, the intent will bring
+     * up the 'All Options' page of the bottom-sheet. The provider data list is processed by the
+     * credential autofill service for each autofill id and passed in as an auth extra.
      *
      * @hide
      */
     @NonNull
-    // TODO(b/323552850) - clean up method overloads
-    public static Intent createCredentialSelectorIntent(
+    public static Intent createCredentialSelectorIntentForAutofill(
             @NonNull Context context,
             @NonNull RequestInfo requestInfo,
             @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
-            @Nullable
-            ArrayList<ProviderData> enabledProviderDataList,
-            @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
             @NonNull
             ArrayList<DisabledProviderData> disabledProviderDataList,
-            @NonNull ResultReceiver resultReceiver,
-            boolean isRequestForAllOptions) {
-
-        Intent intent;
-        if (enabledProviderDataList != null) {
-            intent = createCredentialSelectorIntent(context, requestInfo, enabledProviderDataList,
-                    disabledProviderDataList, resultReceiver);
-        } else {
-            intent = createCredentialSelectorIntent(context, requestInfo,
-                    disabledProviderDataList, resultReceiver);
-        }
-        intent.putExtra(Constants.EXTRA_REQ_FOR_ALL_OPTIONS, isRequestForAllOptions);
-
-        return intent;
+            @NonNull ResultReceiver resultReceiver) {
+        return createCredentialSelectorIntent(context, requestInfo,
+                disabledProviderDataList, resultReceiver);
     }
 
     /**
      * Generate a new launch intent to the Credential Selector UI.
-     *
-     * @hide
      */
     @NonNull
     private static Intent createCredentialSelectorIntent(

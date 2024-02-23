@@ -583,6 +583,10 @@ class MediaDataManager(
                 }
                 return
             }
+            // Update last active if media was still active.
+            if (it.active) {
+                it.lastActive = systemClock.elapsedRealtime()
+            }
             it.active = !timedOut
             if (DEBUG) Log.d(TAG, "Updating $key timedOut: $timedOut")
             onMediaDataLoaded(key, key, it)
@@ -1520,6 +1524,12 @@ class MediaDataManager(
             context.packageManager.getLaunchIntentForPackage(data.packageName)?.let {
                 PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE)
             }
+        val lastActive =
+            if (data.active) {
+                systemClock.elapsedRealtime()
+            } else {
+                data.lastActive
+            }
         val updated =
             data.copy(
                 token = null,
@@ -1531,6 +1541,7 @@ class MediaDataManager(
                 isPlaying = false,
                 isClearable = true,
                 clickIntent = launcherIntent,
+                lastActive = lastActive,
             )
         val pkg = data.packageName
         val migrate = mediaEntries.put(pkg, updated) == null

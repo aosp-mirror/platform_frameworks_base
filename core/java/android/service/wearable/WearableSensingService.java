@@ -112,11 +112,11 @@ public abstract class WearableSensingService extends Service {
             return new IWearableSensingService.Stub() {
                 /** {@inheritDoc} */
                 @Override
-                public void provideSecureWearableConnection(
+                public void provideSecureConnection(
                         ParcelFileDescriptor secureWearableConnection, RemoteCallback callback) {
                     Objects.requireNonNull(secureWearableConnection);
                     Consumer<Integer> consumer = createWearableStatusConsumer(callback);
-                    WearableSensingService.this.onSecureWearableConnectionProvided(
+                    WearableSensingService.this.onSecureConnectionProvided(
                             secureWearableConnection, consumer);
                 }
 
@@ -311,12 +311,12 @@ public abstract class WearableSensingService extends Service {
 
     /**
      * Called when a secure connection to the wearable is available. See {@link
-     * WearableSensingManager#provideWearableConnection(ParcelFileDescriptor, Executor, Consumer)}
+     * WearableSensingManager#provideConnection(ParcelFileDescriptor, Executor, Consumer)}
      * for details about the secure connection.
      *
      * <p>When the {@code secureWearableConnection} is closed, the system will send a {@link
      * WearableSensingManager#STATUS_CHANNEL_ERROR} status code to the status consumer provided by
-     * the caller of {@link WearableSensingManager#provideWearableConnection(ParcelFileDescriptor,
+     * the caller of {@link WearableSensingManager#provideConnection(ParcelFileDescriptor,
      * Executor, Consumer)}.
      *
      * <p>The implementing class should override this method. It should return an appropriate status
@@ -327,7 +327,7 @@ public abstract class WearableSensingService extends Service {
      */
     @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
     @BinderThread
-    public void onSecureWearableConnectionProvided(
+    public void onSecureConnectionProvided(
             @NonNull ParcelFileDescriptor secureWearableConnection,
             @NonNull Consumer<Integer> statusConsumer) {
         statusConsumer.accept(WearableSensingManager.STATUS_UNSUPPORTED_OPERATION);

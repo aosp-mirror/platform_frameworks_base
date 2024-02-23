@@ -69,11 +69,11 @@ import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.window.AddToSurfaceSyncGroupResult;
+import android.window.IGlobalDragListener;
 import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ITrustedPresentationListener;
-import android.window.IUnhandledDragListener;
 import android.window.InputTransferToken;
 import android.window.ScreenCapture;
 import android.window.TrustedPresentationThresholds;
@@ -1094,10 +1094,9 @@ interface IWindowManager
     void unregisterScreenRecordingCallback(IScreenRecordingCallback callback);
 
     /**
-     * Sets the listener to be called back when a cross-window drag and drop operation is unhandled
-     * (ie. not handled by any window which can handle the drag).
+     * Sets the listener to be called back when a cross-window drag and drop operation happens.
      */
-    void setUnhandledDragListener(IUnhandledDragListener listener);
+    void setGlobalDragListener(IGlobalDragListener listener);
 
     boolean transferTouchGesture(in InputTransferToken transferFromToken,
             in InputTransferToken transferToToken);

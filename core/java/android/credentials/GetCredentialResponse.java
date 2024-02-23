@@ -63,9 +63,6 @@ public final class GetCredentialResponse implements Parcelable {
     }
 
     /**
-     *
-     * @return
-     *
      * @hide
      */
     public AutofillId getAutofillId() {

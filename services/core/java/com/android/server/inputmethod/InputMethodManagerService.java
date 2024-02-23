@@ -148,6 +148,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IBooleanListener;
 import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
@@ -2435,20 +2436,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.NOT_IME_TARGET_WINDOW;
         }
         final int csDisplayId = cs.mSelfReportedDisplayId;
-        final int oldDisplayIdToShowIme = mDisplayIdToShowIme;
         mDisplayIdToShowIme = mVisibilityStateComputer.computeImeDisplayId(winState, csDisplayId);
 
         // Potentially override the selected input method if the new display belongs to a virtual
         // device with a custom IME.
         String selectedMethodId = getSelectedMethodIdLocked();
-        if (oldDisplayIdToShowIme != mDisplayIdToShowIme) {
-            final String deviceMethodId = computeCurrentDeviceMethodIdLocked(selectedMethodId);
-            if (deviceMethodId == null) {
-                mVisibilityStateComputer.getImePolicy().setImeHiddenByDisplayPolicy(true);
-            } else if (!Objects.equals(deviceMethodId, selectedMethodId)) {
-                setInputMethodLocked(deviceMethodId, NOT_A_SUBTYPE_ID, mDeviceIdToShowIme);
-                selectedMethodId = deviceMethodId;
-            }
+        final String deviceMethodId = computeCurrentDeviceMethodIdLocked(selectedMethodId);
+        if (deviceMethodId == null) {
+            mVisibilityStateComputer.getImePolicy().setImeHiddenByDisplayPolicy(true);
+        } else if (!Objects.equals(deviceMethodId, selectedMethodId)) {
+            setInputMethodLocked(deviceMethodId, NOT_A_SUBTYPE_ID, mDeviceIdToShowIme);
+            selectedMethodId = deviceMethodId;
         }
 
         if (mVisibilityStateComputer.getImePolicy().isImeHiddenByDisplayPolicy()) {
@@ -2548,10 +2546,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         final int oldDeviceId = mDeviceIdToShowIme;
         mDeviceIdToShowIme = mVdmInternal.getDeviceIdForDisplayId(mDisplayIdToShowIme);
-        if (mDeviceIdToShowIme == oldDeviceId) {
-            return currentMethodId;
-        }
         if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+            if (oldDeviceId == DEVICE_ID_DEFAULT) {
+                return currentMethodId;
+            }
             final String defaultDeviceMethodId = mSettings.getSelectedDefaultDeviceInputMethod();
             if (DEBUG) {
                 Slog.v(TAG, "Restoring default device input method: " + defaultDeviceMethodId);
@@ -3541,6 +3539,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         schedulePrepareStylusHandwritingDelegation(
                 userId, delegatePackageName, delegatorPackageName);
+    }
+
+    @Override
+    public void acceptStylusHandwritingDelegationAsync(
+            @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags, IBooleanListener callback)
+            throws RemoteException {
+        boolean result = acceptStylusHandwritingDelegation(
+                client, userId, delegatePackageName, delegatorPackageName, flags);
+        callback.onResult(result);
     }
 
     @Override

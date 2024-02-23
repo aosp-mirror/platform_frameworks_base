@@ -62,6 +62,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -85,6 +86,7 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.ExceptionUtils;
 import android.util.Pair;
@@ -163,6 +165,9 @@ public class PackageArchiver {
 
     @Nullable
     private AppOpsManager mAppOpsManager;
+
+    @Nullable
+    private UserManager mUserManager;
 
     /* IntentSender store that maps key: {userId, appPackageName} to respective existing attached
      unarchival intent sender. */
@@ -276,12 +281,8 @@ public class PackageArchiver {
             Slog.e(TAG, "callerPackageName cannot be null for unarchival!");
             return START_CLASS_NOT_FOUND;
         }
-        if (!isCallingPackageValid(callerPackageName, callingUid, userId)) {
-            // Return early as the calling UID does not match caller package's UID.
-            return START_CLASS_NOT_FOUND;
-        }
 
-        String currentLauncherPackageName = getCurrentLauncherPackageName(userId);
+        String currentLauncherPackageName = getCurrentLauncherPackageName(getParentUserId(userId));
         if ((currentLauncherPackageName == null || !callerPackageName.equals(
                 currentLauncherPackageName)) && callingUid != Process.SHELL_UID) {
             // TODO(b/311619990): Remove dependency on SHELL_UID for testing
@@ -314,6 +315,13 @@ public class PackageArchiver {
         // 3. Returning STATUS_ABORTED helps us avoid manually handling of different cases like
         // aborting activity options, animations etc in the Windows Manager.
         return START_ABORTED;
+    }
+
+    // Profiles share their UI and default apps, so we have to get the profile parent before
+    // fetching the default launcher.
+    private int getParentUserId(int userId) {
+        UserInfo profileParent = getUserManager().getProfileParent(userId);
+        return profileParent == null ? userId : profileParent.id;
     }
 
     /**
@@ -1126,6 +1134,13 @@ public class PackageArchiver {
             mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         }
         return mAppOpsManager;
+    }
+
+    private UserManager getUserManager() {
+        if (mUserManager == null) {
+            mUserManager = mContext.getSystemService(UserManager.class);
+        }
+        return mUserManager;
     }
 
     private void storeArchiveState(String packageName, ArchiveState archiveState, int userId)

@@ -19,7 +19,6 @@ package com.android.systemui.scene.domain.interactor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.shared.logger.sceneLogger
 
@@ -28,7 +27,6 @@ val Kosmos.sceneInteractor by
         SceneInteractor(
             applicationScope = applicationCoroutineScope,
             repository = sceneContainerRepository,
-            powerInteractor = powerInteractor,
             logger = sceneLogger,
             deviceUnlockedInteractor = deviceUnlockedInteractor,
         )

@@ -1097,6 +1097,41 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    fun primaryBouncerToGlanceableHubWhileDreaming() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to PRIMARY_BOUNCER
+            bouncerRepository.setPrimaryShow(true)
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER)
+
+            // GIVEN that we are dreaming and occluded
+            keyguardRepository.setDreaming(true)
+            keyguardRepository.setKeyguardOccluded(true)
+
+            // GIVEN the device is idle on the glanceable hub
+            val idleTransitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                )
+            communalInteractor.setTransitionState(idleTransitionState)
+            runCurrent()
+
+            // WHEN the primaryBouncer stops showing
+            bouncerRepository.setPrimaryShow(false)
+            runCurrent()
+
+            // THEN a transition to LOCKSCREEN should occur
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = FromPrimaryBouncerTransitionInteractor::class.simpleName,
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
     fun primaryBouncerToDreamingLockscreenHosted() =
         testScope.runTest {
             // GIVEN device dreaming with the lockscreen hosted dream and not dozing

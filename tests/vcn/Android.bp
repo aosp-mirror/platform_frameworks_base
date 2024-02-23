@@ -3,6 +3,7 @@
 //########################################################################
 
 package {
+    default_team: "trendy_team_enigma",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -30,6 +31,7 @@ android_test {
         "platform-test-annotations",
         "services.core",
         "service-connectivity-tiramisu-pre-jarjar",
+        "flag-junit",
     ],
     libs: [
         "android.test.runner",
