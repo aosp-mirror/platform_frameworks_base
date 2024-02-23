@@ -569,7 +569,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     /**
      * Return whether this key is critical to the device encryption flow.
      *
-     * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
+     * @see Builder#setCriticalToDeviceEncryption(boolean)
      * @hide
      */
     public boolean isCriticalToDeviceEncryption() {
@@ -1105,9 +1105,10 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
          * Set whether this key is critical to the device encryption flow
          *
          * This is a special flag only available to system servers to indicate the current key
-         * is part of the device encryption flow.
+         * is part of the device encryption flow. Setting this flag causes the key to not
+         * be cryptographically bound to the LSKF even if the key is otherwise authentication
+         * bound.
          *
-         * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
          * @hide
          */
         public Builder setCriticalToDeviceEncryption(boolean critical) {
