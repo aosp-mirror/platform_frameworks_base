@@ -53,4 +53,7 @@
         <item>bottom_start:home</item>
         <item>bottom_end:create_note</item>
     </string-array>
+
+    <!-- Whether volume panel should use the large screen layout or not -->
+    <bool name="volume_panel_is_large_screen">true</bool>
 </resources>
