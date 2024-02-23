@@ -21,6 +21,7 @@ import com.android.internal.R.attr.materialColorSurfaceContainerHigh
 import com.android.internal.R.attr.materialColorSurfaceContainerLow
 import com.android.internal.R.attr.materialColorSurfaceDim
 import com.android.wm.shell.R
+import com.android.wm.shell.windowdecor.MaximizeButtonView
 
 /**
  * A desktop mode window decoration used when the window is floating (i.e. freeform). It hosts
@@ -32,8 +33,10 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         onCaptionTouchListener: View.OnTouchListener,
         onCaptionButtonClickListener: View.OnClickListener,
         onLongClickListener: OnLongClickListener,
+        onCaptionGenericMotionListener: View.OnGenericMotionListener,
         appName: CharSequence,
-        appIconBitmap: Bitmap
+        appIconBitmap: Bitmap,
+        onMaximizeHoverAnimationFinishedListener: () -> Unit
 ) : DesktopModeWindowDecorationViewHolder(rootView) {
 
     private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
@@ -41,6 +44,8 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
     private val openMenuButton: View = rootView.requireViewById(R.id.open_menu_button)
     private val closeWindowButton: ImageButton = rootView.requireViewById(R.id.close_window)
     private val expandMenuButton: ImageButton = rootView.requireViewById(R.id.expand_menu_button)
+    private val maximizeButtonView: MaximizeButtonView =
+            rootView.requireViewById(R.id.maximize_button_view)
     private val maximizeWindowButton: ImageButton = rootView.requireViewById(R.id.maximize_window)
     private val appNameTextView: TextView = rootView.requireViewById(R.id.application_name)
     private val appIconImageView: ImageView = rootView.requireViewById(R.id.application_icon)
@@ -55,10 +60,13 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         closeWindowButton.setOnClickListener(onCaptionButtonClickListener)
         maximizeWindowButton.setOnClickListener(onCaptionButtonClickListener)
         maximizeWindowButton.setOnTouchListener(onCaptionTouchListener)
+        maximizeWindowButton.setOnGenericMotionListener(onCaptionGenericMotionListener)
         maximizeWindowButton.onLongClickListener = onLongClickListener
         closeWindowButton.setOnTouchListener(onCaptionTouchListener)
         appNameTextView.text = appName
         appIconImageView.setImageBitmap(appIconBitmap)
+        maximizeButtonView.onHoverAnimationFinishedListener =
+                onMaximizeHoverAnimationFinishedListener
     }
 
     override fun bindData(taskInfo: RunningTaskInfo) {
@@ -73,11 +81,29 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         maximizeWindowButton.imageAlpha = alpha
         closeWindowButton.imageAlpha = alpha
         expandMenuButton.imageAlpha = alpha
+
+        maximizeButtonView.setAnimationTints(isDarkMode())
     }
 
     override fun onHandleMenuOpened() {}
 
     override fun onHandleMenuClosed() {}
+
+    fun setAnimatingTaskResize(animatingTaskResize: Boolean) {
+        // If animating a task resize, cancel any running hover animations
+        if (animatingTaskResize) {
+            maximizeButtonView.cancelHoverAnimation()
+        }
+        maximizeButtonView.hoverDisabled = animatingTaskResize
+    }
+
+    fun onMaximizeWindowHoverExit() {
+        maximizeButtonView.cancelHoverAnimation()
+    }
+
+    fun onMaximizeWindowHoverEnter() {
+        maximizeButtonView.startHoverAnimation()
+    }
 
     @ColorInt
     private fun getCaptionBackgroundColor(taskInfo: RunningTaskInfo): Int {
