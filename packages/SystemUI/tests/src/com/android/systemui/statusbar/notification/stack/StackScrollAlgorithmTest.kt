@@ -222,6 +222,26 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
+    fun resetViewStates_hunAnimatingAwayWhileDozing_yTranslationIsInset() {
+        whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
+
+        ambientState.isDozing = true
+
+        resetViewStates_hunYTranslationIs(stackScrollAlgorithm.mHeadsUpInset)
+    }
+
+    @Test
+    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
+    fun resetViewStates_hunAnimatingAwayWhileDozing_hasStackMargin_changesHunYTranslation() {
+        whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
+
+        ambientState.isDozing = true
+
+        resetViewStates_stackMargin_changesHunYTranslation()
+    }
+
+    @Test
     fun resetViewStates_hunsOverlapping_bottomHunClipped() {
         val topHun = mockExpandableNotificationRow()
         val bottomHun = mockExpandableNotificationRow()
