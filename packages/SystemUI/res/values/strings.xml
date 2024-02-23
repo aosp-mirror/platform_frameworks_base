@@ -34,6 +34,10 @@
         remaining [CHAR LIMIT=none]-->
     <string name="battery_low_percent_format"><xliff:g id="percentage">%s</xliff:g> remaining</string>
 
+    <!-- SVG path description for the battery frame of the unified battery drawable
+    (BatteryLayersDrawable.kt). Drawn on a 24x14 canvas. Not suitable outside in any other context -->
+    <string name="battery_unified_frame_path_string" translatable="false">M2.75,3C2.75,1.757 3.757,0.75 5,0.75H20C21.795,0.75 23.25,2.205 23.25,4V10C23.25,11.795 21.795,13.25 20,13.25H5C3.757,13.25 2.75,12.243 2.75,11V3Z </string>
+
     <!-- A message that appears when the battery remaining estimate is low in a dialog.  This is
     appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery
     remaining. "time" is the amount of time remaining before the phone runs out of battery [CHAR LIMIT=none]-->
