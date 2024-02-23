@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -63,6 +64,8 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
                 notifyRouteListingPreferenceUpdated(preference);
                 refreshDevices();
             };
+
+    private final AtomicReference<MediaRouter2.ScanToken> mScanToken = new AtomicReference<>();
 
     // TODO (b/321969740): Plumb target UserHandle between UMO and RouterInfoMediaManager.
     /* package */ RouterInfoMediaManager(
@@ -101,12 +104,24 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
                 mExecutor, mRouteListingPreferenceCallback);
         mRouter.registerTransferCallback(mExecutor, mTransferCallback);
         mRouter.registerControllerCallback(mExecutor, mControllerCallback);
-        mRouter.startScan();
+        if (Flags.enableScreenOffScanning()) {
+            MediaRouter2.ScanRequest request = new MediaRouter2.ScanRequest.Builder().build();
+            mScanToken.compareAndSet(null, mRouter.requestScan(request));
+        } else {
+            mRouter.startScan();
+        }
     }
 
     @Override
     public void stopScan() {
-        mRouter.stopScan();
+        if (Flags.enableScreenOffScanning()) {
+            MediaRouter2.ScanToken token = mScanToken.getAndSet(null);
+            if (token != null) {
+                mRouter.cancelScanRequest(token);
+            }
+        } else {
+            mRouter.stopScan();
+        }
         mRouter.unregisterControllerCallback(mControllerCallback);
         mRouter.unregisterTransferCallback(mTransferCallback);
         mRouter.unregisterRouteListingPreferenceUpdatedCallback(mRouteListingPreferenceCallback);
