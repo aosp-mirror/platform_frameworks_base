@@ -683,6 +683,17 @@ public class BubbleController implements ConfigurationChangeListener,
         mDataRepository.removeBubblesForUser(removedUserId, parentUserId);
     }
 
+    /** Called when sensitive notification state has changed */
+    public void onSensitiveNotificationProtectionStateChanged(
+            boolean sensitiveNotificationProtectionActive) {
+        if (mStackView != null) {
+            mStackView.onSensitiveNotificationProtectionStateChanged(
+                    sensitiveNotificationProtectionActive);
+            ProtoLog.d(WM_SHELL_BUBBLES, "onSensitiveNotificationProtectionStateChanged=%b",
+                    sensitiveNotificationProtectionActive);
+        }
+    }
+
     /** Whether bubbles are showing in the bubble bar. */
     public boolean isShowingAsBubbleBar() {
         return canShowAsBubbleBar() && mBubbleStateListener != null;
@@ -2582,6 +2593,14 @@ public class BubbleController implements ConfigurationChangeListener,
         public void onNotificationPanelExpandedChanged(boolean expanded) {
             mMainExecutor.execute(
                     () -> BubbleController.this.onNotificationPanelExpandedChanged(expanded));
+        }
+
+        @Override
+        public void onSensitiveNotificationProtectionStateChanged(
+                boolean sensitiveNotificationProtectionActive) {
+            mMainExecutor.execute(
+                    () -> BubbleController.this.onSensitiveNotificationProtectionStateChanged(
+                            sensitiveNotificationProtectionActive));
         }
     }
 

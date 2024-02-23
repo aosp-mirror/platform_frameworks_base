@@ -286,6 +286,16 @@ public interface Bubbles {
     void onUserRemoved(int removedUserId);
 
     /**
+     * Called when the Sensitive notification protection state has changed, such as when media
+     * projection starts and stops.
+     *
+     * @param sensitiveNotificationProtectionActive {@code true} if notifications should be
+     *     protected
+     */
+    void onSensitiveNotificationProtectionStateChanged(
+            boolean sensitiveNotificationProtectionActive);
+
+    /**
      * A listener to be notified of bubble state changes, used by launcher to render bubbles in
      * its process.
      */
