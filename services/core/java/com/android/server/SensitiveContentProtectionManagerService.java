@@ -77,23 +77,24 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                 @Override
                 public void onStart(MediaProjectionInfo info) {
                     if (DEBUG) Log.d(TAG, "onStart projection: " + info);
-                    Trace.beginSection(
+                    Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                             "SensitiveContentProtectionManagerService.onProjectionStart");
                     try {
                         onProjectionStart(info.getPackageName());
                     } finally {
-                        Trace.endSection();
+                        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                     }
                 }
 
                 @Override
                 public void onStop(MediaProjectionInfo info) {
                     if (DEBUG) Log.d(TAG, "onStop projection: " + info);
-                    Trace.beginSection("SensitiveContentProtectionManagerService.onProjectionStop");
+                    Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                            "SensitiveContentProtectionManagerService.onProjectionStop");
                     try {
                         onProjectionEnd();
                     } finally {
-                        Trace.endSection();
+                        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                     }
                 }
             };
@@ -285,7 +286,8 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         @Override
         public void onListenerConnected() {
             super.onListenerConnected();
-            Trace.beginSection("SensitiveContentProtectionManagerService.onListenerConnected");
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                    "SensitiveContentProtectionManagerService.onListenerConnected");
             try {
                 // Projection started before notification listener was connected
                 synchronized (mSensitiveContentProtectionLock) {
@@ -294,14 +296,15 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                     }
                 }
             } finally {
-                Trace.endSection();
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
         }
 
         @Override
         public void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
             super.onNotificationPosted(sbn, rankingMap);
-            Trace.beginSection("SensitiveContentProtectionManagerService.onNotificationPosted");
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                    "SensitiveContentProtectionManagerService.onNotificationPosted");
             try {
                 synchronized (mSensitiveContentProtectionLock) {
                     if (!mProjectionActive) {
@@ -317,14 +320,14 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                     }
                 }
             } finally {
-                Trace.endSection();
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
         }
 
         @Override
         public void onNotificationRankingUpdate(RankingMap rankingMap) {
             super.onNotificationRankingUpdate(rankingMap);
-            Trace.beginSection(
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                     "SensitiveContentProtectionManagerService.onNotificationRankingUpdate");
             try {
                 synchronized (mSensitiveContentProtectionLock) {
@@ -333,7 +336,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                     }
                 }
             } finally {
-                Trace.endSection();
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
         }
     }
@@ -382,7 +385,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
 
         public void setSensitiveContentProtection(IBinder windowToken, String packageName,
                 boolean isShowingSensitiveContent) {
-            Trace.beginSection(
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
                     "SensitiveContentProtectionManagerService.setSensitiveContentProtection");
             try {
                 int callingUid = Binder.getCallingUid();
@@ -395,7 +398,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                     Binder.restoreCallingIdentity(identity);
                 }
             } finally {
-                Trace.endSection();
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
         }
 
