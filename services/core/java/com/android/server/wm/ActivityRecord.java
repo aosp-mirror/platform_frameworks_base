@@ -3550,7 +3550,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             IBinder callerToken = new Binder();
             if (android.security.Flags.contentUriPermissionApis()) {
                 try {
-                    resultTo.computeCallerInfo(callerToken, intent, this.getUid(),
+                    resultTo.computeCallerInfo(callerToken, resultData, this.getUid(),
                             mAtmService.getPackageManager().getNameForUid(this.getUid()),
                             /* isShareIdentityEnabled */ false);
                     // Result callers cannot share their identity via
