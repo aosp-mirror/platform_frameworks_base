@@ -35,7 +35,6 @@ import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
-import com.android.systemui.keyguard.ui.viewmodel.AodAlphaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
@@ -55,7 +54,6 @@ constructor(
     private val vibratorHelper: VibratorHelper,
     private val indicationController: KeyguardIndicationController,
     private val indicationAreaViewModel: KeyguardIndicationAreaViewModel,
-    private val alphaViewModel: AodAlphaViewModel,
 ) {
     /**
      * Renders a single lockscreen shortcut.
@@ -104,7 +102,6 @@ constructor(
             content {
                 IndicationArea(
                     indicationAreaViewModel = indicationAreaViewModel,
-                    alphaViewModel = alphaViewModel,
                     indicationController = indicationController,
                 )
             }
@@ -183,7 +180,6 @@ constructor(
     @Composable
     private fun IndicationArea(
         indicationAreaViewModel: KeyguardIndicationAreaViewModel,
-        alphaViewModel: AodAlphaViewModel,
         indicationController: KeyguardIndicationController,
         modifier: Modifier = Modifier,
     ) {
@@ -196,7 +192,6 @@ constructor(
                     KeyguardIndicationAreaBinder.bind(
                         view = view,
                         viewModel = indicationAreaViewModel,
-                        aodAlphaViewModel = alphaViewModel,
                         indicationController = indicationController,
                     )
                 )

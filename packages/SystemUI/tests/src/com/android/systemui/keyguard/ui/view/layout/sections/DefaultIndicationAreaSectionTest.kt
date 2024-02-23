@@ -23,7 +23,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.keyguard.ui.viewmodel.AodAlphaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
@@ -40,7 +39,6 @@ import org.mockito.MockitoAnnotations
 class DefaultIndicationAreaSectionTest : SysuiTestCase() {
 
     @Mock private lateinit var keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel
-    @Mock private lateinit var aodAlphaViewModel: AodAlphaViewModel
     @Mock private lateinit var indicationController: KeyguardIndicationController
 
     private lateinit var underTest: DefaultIndicationAreaSection
@@ -52,7 +50,6 @@ class DefaultIndicationAreaSectionTest : SysuiTestCase() {
             DefaultIndicationAreaSection(
                 context,
                 keyguardIndicationAreaViewModel,
-                aodAlphaViewModel,
                 indicationController,
             )
     }

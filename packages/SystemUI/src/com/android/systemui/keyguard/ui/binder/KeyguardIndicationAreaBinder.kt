@@ -23,7 +23,7 @@ import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
-import com.android.systemui.keyguard.ui.viewmodel.AodAlphaViewModel
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
@@ -51,7 +51,6 @@ object KeyguardIndicationAreaBinder {
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardIndicationAreaViewModel,
-        aodAlphaViewModel: AodAlphaViewModel,
         indicationController: KeyguardIndicationController,
     ): DisposableHandle {
         indicationController.setIndicationArea(view)
@@ -68,30 +67,10 @@ object KeyguardIndicationAreaBinder {
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch {
-                        if (keyguardBottomAreaRefactor()) {
-                            aodAlphaViewModel.alpha.collect { alpha ->
-                                view.apply {
-                                    this.importantForAccessibility =
-                                        if (alpha == 0f) {
-                                            View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                                        } else {
-                                            View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                        }
-                                    this.alpha = alpha
-                                }
-                            }
-                        } else {
-                            viewModel.alpha.collect { alpha ->
-                                view.apply {
-                                    this.importantForAccessibility =
-                                        if (alpha == 0f) {
-                                            View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                                        } else {
-                                            View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                        }
-                                    this.alpha = alpha
-                                }
-                            }
+                        // Do not independently apply alpha, as [KeyguardRootViewModel] should work
+                        // for this and all its children
+                        if (!(migrateClocksToBlueprint() || keyguardBottomAreaRefactor())) {
+                            viewModel.alpha.collect { alpha -> view.alpha = alpha }
                         }
                     }
 
