@@ -530,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Pinapamahalaan ng iyong magulang ang device na ito. Makikita at mapapamahalaan ng iyong magulang ang impormasyon tulad ng mga app na ginagamit mo, iyong lokasyon, at tagal ng paggamit mo sa device."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Pinanatiling naka-unlock ng TrustAgent"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Theft protection\nNa-lock ang device, sobrang pag-unlock"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Mga setting ng tunog"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"I-autocaption ang media"</string>
@@ -583,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"i-vibrate"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Mga kontrol ng volume ng %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Magri-ring kapag may mga tawag at notification (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"Nagpe-play ang <xliff:g id="LABEL">%s</xliff:g> sa"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"I-play ang audio sa"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Tuner ng System UI"</string>
     <string name="status_bar" msgid="4357390266055077437">"Status bar"</string>
     <string name="demo_mode" msgid="263484519766901593">"Demo mode ng System UI"</string>
