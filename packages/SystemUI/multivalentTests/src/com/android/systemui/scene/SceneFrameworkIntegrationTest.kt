@@ -40,6 +40,7 @@ import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.bouncerViewModel
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.classifier.falsingCollector
+import com.android.systemui.classifier.falsingManager
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
@@ -265,6 +266,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 displayId = displayTracker.defaultDisplayId,
                 sceneLogger = mock(),
                 falsingCollector = kosmos.falsingCollector,
+                falsingManager = kosmos.falsingManager,
                 powerInteractor = powerInteractor,
                 bouncerInteractor = bouncerInteractor,
                 simBouncerInteractor = dagger.Lazy { kosmos.simBouncerInteractor },
