@@ -51,6 +51,7 @@ import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.SystemUser;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.deviceentry.DeviceEntryModule;
 import com.android.systemui.display.DisplayModule;
@@ -365,7 +366,8 @@ public abstract class SystemUIModule {
             SysUiState sysUiState,
             FeatureFlags featureFlags,
             NotifPipelineFlags notifPipelineFlags,
-            @Main Executor sysuiMainExecutor) {
+            @Main Executor sysuiMainExecutor,
+            @UiBackground Executor sysuiUiBgExecutor) {
         return Optional.ofNullable(BubblesManager.create(context,
                 bubblesOptional,
                 notificationShadeWindowController,
@@ -384,7 +386,8 @@ public abstract class SystemUIModule {
                 sysUiState,
                 featureFlags,
                 notifPipelineFlags,
-                sysuiMainExecutor));
+                sysuiMainExecutor,
+                sysuiUiBgExecutor));
     }
 
     @Binds

@@ -609,6 +609,7 @@ public class BubblesTest extends SysuiTestCase {
                 mSysUiState,
                 mFeatureFlags,
                 mNotifPipelineFlags,
+                syncExecutor,
                 syncExecutor);
         mBubblesManager.addNotifCallback(mNotifCallback);
 
@@ -651,7 +652,7 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void dreamingHidesBubbles() throws RemoteException {
+    public void bubblesHiddenWhileDreaming() throws RemoteException {
         mBubbleController.updateBubble(mBubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
         assertThat(mBubbleController.getStackView().getVisibility()).isEqualTo(View.VISIBLE);
@@ -662,7 +663,17 @@ public class BubblesTest extends SysuiTestCase {
                 mKeyguardStateControllerCallbackCaptor.getValue();
         callback.onKeyguardShowingChanged();
 
+        // Dreaming should hide bubbles
         assertThat(mBubbleController.getStackView().getVisibility()).isEqualTo(View.INVISIBLE);
+
+        // Finish dreaming should show bubbles
+        mNotificationShadeWindowController.setDreaming(false);
+        when(mIDreamManager.isDreamingOrInPreview()).thenReturn(false); // dreaming finished
+
+        // Dreaming updates come through mNotificationShadeWindowController
+        mNotificationShadeWindowController.notifyStateChangedCallbacks();
+
+        assertThat(mBubbleController.getStackView().getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
