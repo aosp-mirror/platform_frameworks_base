@@ -184,3 +184,11 @@ flag {
     bug: "310029108"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "sensor_based_brightness_throttling"
+    namespace: "display_manager"
+    description: "Feature flag for enabling brightness throttling using sensor from config."
+    bug: "294900859"
+    is_fixed_read_only: true
+}
