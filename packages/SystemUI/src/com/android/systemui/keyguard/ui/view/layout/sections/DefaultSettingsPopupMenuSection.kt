@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
+import androidx.constraintlayout.widget.ConstraintSet.VISIBILITY_MODE_IGNORE
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import androidx.core.view.isVisible
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
@@ -103,7 +104,8 @@ constructor(
                 BOTTOM,
                 resources.getDimensionPixelSize(R.dimen.keyguard_affordance_vertical_offset)
             )
-            setVisibility(R.id.keyguard_settings_button, View.GONE)
+            // Ignore ConstrainSet's default visibility, and let the view choose
+            setVisibilityMode(R.id.keyguard_settings_button, VISIBILITY_MODE_IGNORE)
         }
     }
 
