@@ -78,6 +78,8 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
     private static final String NOTIFICATION_PKG_1 = "com.android.server.notification.one";
     private static final String NOTIFICATION_PKG_2 = "com.android.server.notification.two";
 
+    private static final String EXEMPTED_SCREEN_RECORDER_PACKAGE = "test.screen.recorder.package";
+
     private static final int NOTIFICATION_UID_1 = 5;
     private static final int NOTIFICATION_UID_2 = 6;
 
@@ -138,7 +140,8 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
         setupSensitiveNotification();
 
-        mSensitiveContentProtectionManagerService.init(mProjectionManager, mWindowManager);
+        mSensitiveContentProtectionManagerService.init(mProjectionManager, mWindowManager,
+                new ArraySet<>(Set.of(EXEMPTED_SCREEN_RECORDER_PACKAGE)));
 
         // Obtain useful mMediaProjectionCallback
         verify(mProjectionManager).addCallback(mMediaProjectionCallbackCaptor.capture(), any());
@@ -272,6 +275,16 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         doReturn(mNotifications)
                 .when(mSensitiveContentProtectionManagerService.mNotificationListener)
                 .getActiveNotifications();
+    }
+
+    @Test
+    public void mediaProjectionOnStart_verifyExemptedRecorderPackage() {
+        MediaProjectionInfo mediaProjectionInfo = mock(MediaProjectionInfo.class);
+        when(mediaProjectionInfo.getPackageName()).thenReturn(EXEMPTED_SCREEN_RECORDER_PACKAGE);
+
+        mMediaProjectionCallbackCaptor.getValue().onStart(mediaProjectionInfo);
+
+        verifyZeroInteractions(mWindowManager);
     }
 
     @Test

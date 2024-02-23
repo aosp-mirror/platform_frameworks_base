@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.os.Binder;
+import android.os.Process;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -52,6 +53,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Set;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RequiresFlagsEnabled(FLAG_SENSITIVE_CONTENT_APP_PROTECTION)
@@ -62,12 +65,14 @@ import org.mockito.MockitoAnnotations;
 public class SensitiveContentProtectionManagerServiceContentTest {
     private final PackageInfo mPackageInfo =
             new PackageInfo("test.package", 12345, new Binder());
+    private final String mScreenRecorderPackage = "test.screen.recorder.package";
+    private final String mExemptedScreenRecorderPackage = "test.exempted.screen.recorder.package";
     private SensitiveContentProtectionManagerService mSensitiveContentProtectionManagerService;
     private MediaProjectionManager.Callback mMediaPorjectionCallback;
 
     @Mock private WindowManagerInternal mWindowManager;
     @Mock private MediaProjectionManager mProjectionManager;
-    @Mock private MediaProjectionInfo mMediaProjectionInfo;
+    private MediaProjectionInfo mMediaProjectionInfo;
 
     @Captor
     private ArgumentCaptor<MediaProjectionManager.Callback> mMediaProjectionCallbackCaptor;
@@ -85,9 +90,22 @@ public class SensitiveContentProtectionManagerServiceContentTest {
         MockitoAnnotations.initMocks(this);
         mSensitiveContentProtectionManagerService =
                 new SensitiveContentProtectionManagerService(mContext);
-        mSensitiveContentProtectionManagerService.init(mProjectionManager, mWindowManager);
+        mSensitiveContentProtectionManagerService.init(mProjectionManager, mWindowManager,
+                new ArraySet<>(Set.of(mExemptedScreenRecorderPackage)));
         verify(mProjectionManager).addCallback(mMediaProjectionCallbackCaptor.capture(), any());
         mMediaPorjectionCallback = mMediaProjectionCallbackCaptor.getValue();
+        mMediaProjectionInfo =
+                new MediaProjectionInfo(mScreenRecorderPackage, Process.myUserHandle(), null);
+    }
+
+    @Test
+    public void testExemptedRecorderPackageForScreenCapture() {
+        MediaProjectionInfo exemptedRecorderPackage = new MediaProjectionInfo(
+                mExemptedScreenRecorderPackage, Process.myUserHandle(), null);
+        mMediaPorjectionCallback.onStart(exemptedRecorderPackage);
+        mSensitiveContentProtectionManagerService.setSensitiveContentProtection(
+                mPackageInfo.getWindowToken(), mPackageInfo.getPkg(), mPackageInfo.getUid(), true);
+        verifyZeroInteractions(mWindowManager);
     }
 
     @Test
