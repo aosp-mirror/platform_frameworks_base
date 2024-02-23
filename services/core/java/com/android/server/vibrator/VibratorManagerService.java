@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import static android.os.ExternalVibrationScale.ScaleLevel.SCALE_MUTE;
 import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
 import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
 
@@ -35,6 +36,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.CombinedVibration;
 import android.os.ExternalVibration;
+import android.os.ExternalVibrationScale;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IExternalVibratorService;
@@ -277,7 +279,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         context.registerReceiver(mIntentReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         injector.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
-        if (ServiceManager.isDeclared(VIBRATOR_CONTROL_SERVICE)) {
+        if (injector.isServiceDeclared(VIBRATOR_CONTROL_SERVICE)) {
             injector.addService(VIBRATOR_CONTROL_SERVICE, mVibratorControlService);
         }
 
@@ -1427,6 +1429,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         VibratorControllerHolder createVibratorControllerHolder() {
             return new VibratorControllerHolder();
         }
+
+        boolean isServiceDeclared(String name) {
+            return ServiceManager.isDeclared(name);
+        }
     }
 
     /**
@@ -1594,7 +1600,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             IBinder.DeathRecipient {
 
         public final ExternalVibration externalVibration;
-        public int scale;
+        public ExternalVibrationScale scale = new ExternalVibrationScale();
 
         private Vibration.Status mStatus;
 
@@ -1605,7 +1611,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     // instead of using DEVICE_ID_INVALID here and relying on the UID checks.
                     Context.DEVICE_ID_INVALID, externalVibration.getPackage(), null));
             this.externalVibration = externalVibration;
-            this.scale = IExternalVibratorService.SCALE_NONE;
             mStatus = Vibration.Status.RUNNING;
         }
 
@@ -1658,7 +1663,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         public Vibration.DebugInfo getDebugInfo() {
             return new Vibration.DebugInfo(mStatus, stats, /* playedEffect= */ null,
-                    /* originalEffect= */ null, scale, callerInfo);
+                    /* originalEffect= */ null, scale.scaleLevel, callerInfo);
         }
 
         public VibrationStats.StatsInfo getStatsInfo(long completionUptimeMillis) {
@@ -1988,11 +1993,17 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     /** Implementation of {@link IExternalVibratorService} to be triggered on external control. */
     @VisibleForTesting
     final class ExternalVibratorService extends IExternalVibratorService.Stub {
+        private static final ExternalVibrationScale SCALE_MUTE = new ExternalVibrationScale();
+
+        static {
+            SCALE_MUTE.scaleLevel = ExternalVibrationScale.ScaleLevel.SCALE_MUTE;
+        }
 
         @Override
-        public int onExternalVibrationStart(ExternalVibration vib) {
+        public ExternalVibrationScale onExternalVibrationStart(ExternalVibration vib) {
+
             if (!hasExternalControlCapability()) {
-                return IExternalVibratorService.SCALE_MUTE;
+                return SCALE_MUTE;
             }
             if (ActivityManager.checkComponentPermission(android.Manifest.permission.VIBRATE,
                     vib.getUid(), -1 /*owningUid*/, true /*exported*/)
@@ -2000,7 +2011,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 Slog.w(TAG, "pkg=" + vib.getPackage() + ", uid=" + vib.getUid()
                         + " tried to play externally controlled vibration"
                         + " without VIBRATE permission, ignoring.");
-                return IExternalVibratorService.SCALE_MUTE;
+                return SCALE_MUTE;
             }
 
             // Create Vibration.Stats as close to the received request as possible, for tracking.
@@ -2033,7 +2044,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 }
 
                 if (vibrationEndInfo != null) {
-                    vibHolder.scale = IExternalVibratorService.SCALE_MUTE;
+                    vibHolder.scale = SCALE_MUTE;
                     // Failed to start the vibration, end it and report metrics right away.
                     endVibrationAndWriteStatsLocked(vibHolder, vibrationEndInfo);
                     return vibHolder.scale;
@@ -2074,7 +2085,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 }
                 mCurrentExternalVibration = vibHolder;
                 vibHolder.linkToDeath();
-                vibHolder.scale = mVibrationScaler.getExternalVibrationScale(attrs.getUsage());
+                vibHolder.scale.scaleLevel = mVibrationScaler.getExternalVibrationScaleLevel(
+                        attrs.getUsage());
+                vibHolder.scale.adaptiveHapticsScale = mVibrationScaler.getAdaptiveHapticsScale(
+                        attrs.getUsage());
             }
 
             if (waitForCompletion) {
@@ -2086,7 +2100,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                                 new Vibration.EndInfo(Vibration.Status.IGNORED_ERROR_CANCELLING),
                                 /* continueExternalControl= */ false);
                     }
-                    return IExternalVibratorService.SCALE_MUTE;
+                    return SCALE_MUTE;
                 }
             }
             if (!alreadyUnderExternalControl) {

@@ -126,6 +126,7 @@ filegroup {
     srcs: [
         "android/os/IExternalVibrationController.aidl",
         "android/os/IExternalVibratorService.aidl",
+        "android/os/ExternalVibrationScale.aidl",
     ],
 }
 
