@@ -41,7 +41,9 @@ import android.os.UserManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.companion.AssociationStore;
 import com.android.server.companion.ObservableUuid;
 import com.android.server.companion.ObservableUuidStore;
@@ -102,11 +104,23 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     private final @NonNull Set<Integer> mNearbyBleDevices = new HashSet<>();
     private final @NonNull Set<Integer> mReportedSelfManagedDevices = new HashSet<>();
     private final @NonNull Set<ParcelUuid> mConnectedUuidDevices = new HashSet<>();
+    @GuardedBy("mBtDisconnectedDevices")
+    private final @NonNull Set<Integer> mBtDisconnectedDevices = new HashSet<>();
+
+    // A map to track device presence within 10 seconds of Bluetooth disconnection.
+    // The key is the association ID, and the boolean value indicates if the device
+    // was detected again within that time frame.
+    @GuardedBy("mBtDisconnectedDevices")
+    private final @NonNull SparseBooleanArray mBtDisconnectedDevicesBlePresence =
+            new SparseBooleanArray();
 
     // Tracking "simulated" presence. Used for debugging and testing only.
     private final @NonNull Set<Integer> mSimulated = new HashSet<>();
     private final SimulatedDevicePresenceSchedulerHelper mSchedulerHelper =
             new SimulatedDevicePresenceSchedulerHelper();
+
+    private final BleDeviceDisappearedScheduler mBleDeviceDisappearedScheduler =
+            new BleDeviceDisappearedScheduler();
 
     public CompanionDevicePresenceMonitor(UserManager userManager,
             @NonNull AssociationStore associationStore,
@@ -229,13 +243,24 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
 
     @Override
     public void onBluetoothCompanionDeviceConnected(int associationId) {
-        Slog.i(TAG, "onBluetoothCompanionDeviceConnected: "
-                + "associationId( " + associationId + " )");
-        onDevicePresenceEvent(mConnectedBtDevices, associationId, EVENT_BT_CONNECTED);
-        // Stop scanning for BLE devices when this device is connected
-        // and there are no other devices to connect to.
-        if (canStopBleScan()) {
-            mBleScanner.stopScanIfNeeded();
+        synchronized (mBtDisconnectedDevices) {
+            // A device is considered reconnected within 10 seconds if a pending BLE lost report is
+            // followed by a detected Bluetooth connection.
+            boolean isReconnected = mBtDisconnectedDevices.contains(associationId);
+            if (isReconnected) {
+                Slog.i(TAG, "Device ( " + associationId + " ) is reconnected within 10s.");
+                mBleDeviceDisappearedScheduler.unScheduleDeviceDisappeared(associationId);
+            }
+
+            Slog.i(TAG, "onBluetoothCompanionDeviceConnected: "
+                    + "associationId( " + associationId + " )");
+            onDevicePresenceEvent(mConnectedBtDevices, associationId, EVENT_BT_CONNECTED);
+
+            // Stop the BLE scan if all devices report BT connected status and BLE was present.
+            if (canStopBleScan()) {
+                mBleScanner.stopScanIfNeeded();
+            }
+
         }
     }
 
@@ -247,6 +272,14 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         mBleScanner.startScan();
 
         onDevicePresenceEvent(mConnectedBtDevices, associationId, EVENT_BT_DISCONNECTED);
+        // If current device is BLE present but BT is disconnected , means it will be
+        // potentially out of range later. Schedule BLE disappeared callback.
+        if (isBlePresent(associationId)) {
+            synchronized (mBtDisconnectedDevices) {
+                mBtDisconnectedDevices.add(associationId);
+            }
+            mBleDeviceDisappearedScheduler.scheduleBleDeviceDisappeared(associationId);
+        }
     }
 
     @Override
@@ -283,6 +316,12 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     @Override
     public void onBleCompanionDeviceFound(int associationId) {
         onDevicePresenceEvent(mNearbyBleDevices, associationId, EVENT_BLE_APPEARED);
+        synchronized (mBtDisconnectedDevices) {
+            final boolean isCurrentPresent = mBtDisconnectedDevicesBlePresence.get(associationId);
+            if (mBtDisconnectedDevices.contains(associationId) && isCurrentPresent) {
+                mBleDeviceDisappearedScheduler.unScheduleDeviceDisappeared(associationId);
+            }
+        }
     }
 
     @Override
@@ -353,6 +392,16 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
 
         switch (event) {
             case EVENT_BLE_APPEARED:
+                synchronized (mBtDisconnectedDevices) {
+                    // If a BLE device is detected within 10 seconds after BT is disconnected,
+                    // flag it as BLE is present.
+                    if (mBtDisconnectedDevices.contains(associationId)) {
+                        Slog.i(TAG, "Device ( " + associationId + " ) is present,"
+                                + " do not need to send the callback with event ( "
+                                + EVENT_BLE_APPEARED + " ).");
+                        mBtDisconnectedDevicesBlePresence.append(associationId, true);
+                    }
+                }
             case EVENT_BT_CONNECTED:
             case EVENT_SELF_MANAGED_APPEARED:
                 final boolean added = presentDevicesForSource.add(associationId);
@@ -405,6 +454,8 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         mNearbyBleDevices.remove(id);
         mReportedSelfManagedDevices.remove(id);
         mSimulated.remove(id);
+        mBtDisconnectedDevices.remove(id);
+        mBtDisconnectedDevicesBlePresence.delete(id);
 
         // Do NOT call mCallback.onDeviceDisappeared()!
         // CompanionDeviceManagerService will know that the association is removed, and will do
@@ -427,14 +478,21 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         throw new SecurityException("Caller is neither Shell nor Root");
     }
 
+    /**
+     * The BLE scan can be only stopped if all the devices have been reported
+     * BT connected and BLE presence and are not pending to report BLE lost.
+     */
     private boolean canStopBleScan() {
         for (AssociationInfo ai : mAssociationStore.getAssociations()) {
             int id = ai.getId();
-            // The BLE scan cannot be stopped if there's a device is not yet connected.
-            if (ai.isNotifyOnDeviceNearby() && !isBtConnected(id)) {
-                Slog.i(TAG, "The BLE scan cannot be stopped, "
-                        + "device( " + id + " ) is not yet connected");
-                return false;
+            synchronized (mBtDisconnectedDevices) {
+                if (ai.isNotifyOnDeviceNearby() && !(isBtConnected(id)
+                        && isBlePresent(id) && mBtDisconnectedDevices.isEmpty())) {
+                    Slog.i(TAG, "The BLE scan cannot be stopped, "
+                            + "device( " + id + " ) is not yet connected "
+                            + "OR the BLE is not current present Or is pending to report BLE lost");
+                    return false;
+                }
             }
         }
         return true;
@@ -511,6 +569,53 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
             final int associationId = msg.what;
             if (mSimulated.contains(associationId)) {
                 onDevicePresenceEvent(mSimulated, associationId, EVENT_BLE_DISAPPEARED);
+            }
+        }
+    }
+
+    private class BleDeviceDisappearedScheduler extends Handler {
+        BleDeviceDisappearedScheduler() {
+            super(Looper.getMainLooper());
+        }
+
+        void scheduleBleDeviceDisappeared(int associationId) {
+            if (hasMessages(associationId)) {
+                removeMessages(associationId);
+            }
+            Slog.i(TAG, "scheduleBleDeviceDisappeared for Device: ( " + associationId + " ).");
+            sendEmptyMessageDelayed(associationId,  10 * 1000 /* 10 seconds */);
+        }
+
+        void unScheduleDeviceDisappeared(int associationId) {
+            if (hasMessages(associationId)) {
+                Slog.i(TAG, "unScheduleDeviceDisappeared for Device( " + associationId + " )");
+                synchronized (mBtDisconnectedDevices) {
+                    mBtDisconnectedDevices.remove(associationId);
+                    mBtDisconnectedDevicesBlePresence.delete(associationId);
+                }
+
+                removeMessages(associationId);
+            }
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            final int associationId = msg.what;
+            synchronized (mBtDisconnectedDevices) {
+                final boolean isCurrentPresent = mBtDisconnectedDevicesBlePresence.get(
+                        associationId);
+                // If a device hasn't reported after 10 seconds and is not currently present,
+                // assume BLE is lost and trigger the onDeviceEvent callback with the
+                // EVENT_BLE_DISAPPEARED event.
+                if (mBtDisconnectedDevices.contains(associationId)
+                        && !isCurrentPresent) {
+                    Slog.i(TAG, "Device ( " + associationId + " ) is likely BLE out of range, "
+                            + "sending callback with event ( " + EVENT_BLE_DISAPPEARED + " )");
+                    onDevicePresenceEvent(mNearbyBleDevices, associationId, EVENT_BLE_DISAPPEARED);
+                }
+
+                mBtDisconnectedDevices.remove(associationId);
+                mBtDisconnectedDevicesBlePresence.delete(associationId);
             }
         }
     }
