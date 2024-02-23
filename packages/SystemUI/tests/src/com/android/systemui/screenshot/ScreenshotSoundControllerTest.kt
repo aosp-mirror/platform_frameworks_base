@@ -22,8 +22,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import java.lang.IllegalStateException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -31,12 +33,14 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @SmallTest
+@OptIn(ExperimentalCoroutinesApi::class)
 class ScreenshotSoundControllerTest : SysuiTestCase() {
 
     private val soundProvider = mock<ScreenshotSoundProvider>()
     private val mediaPlayer = mock<MediaPlayer>()
     private val bgDispatcher = UnconfinedTestDispatcher()
     private val scope = TestScope(bgDispatcher)
+
     @Before
     fun setup() {
         whenever(soundProvider.getScreenshotSound()).thenReturn(mediaPlayer)
@@ -45,52 +49,59 @@ class ScreenshotSoundControllerTest : SysuiTestCase() {
     @Test
     fun init_soundLoading() {
         createController()
-        bgDispatcher.scheduler.runCurrent()
+        scope.advanceUntilIdle()
 
         verify(soundProvider).getScreenshotSound()
     }
 
     @Test
-    fun init_soundLoadingException_playAndReleaseDoNotThrow() = runTest {
-        whenever(soundProvider.getScreenshotSound()).thenThrow(IllegalStateException())
+    fun init_soundLoadingException_playAndReleaseDoNotThrow() =
+        scope.runTest {
+            whenever(soundProvider.getScreenshotSound()).thenThrow(IllegalStateException())
 
-        val controller = createController()
+            val controller = createController()
 
-        controller.playCameraSound().await()
-        controller.releaseScreenshotSound().await()
+            controller.playScreenshotSound()
+            advanceUntilIdle()
 
-        verify(mediaPlayer, never()).start()
-        verify(mediaPlayer, never()).release()
-    }
-
-    @Test
-    fun playCameraSound_soundLoadingSuccessful_mediaPlayerPlays() = runTest {
-        val controller = createController()
-
-        controller.playCameraSound().await()
-
-        verify(mediaPlayer).start()
-    }
+            verify(mediaPlayer, never()).start()
+            verify(mediaPlayer, never()).release()
+        }
 
     @Test
-    fun playCameraSound_illegalStateException_doesNotThrow() = runTest {
-        whenever(mediaPlayer.start()).thenThrow(IllegalStateException())
+    fun playCameraSound_soundLoadingSuccessful_mediaPlayerPlays() =
+        scope.runTest {
+            val controller = createController()
 
-        val controller = createController()
-        controller.playCameraSound().await()
+            controller.playScreenshotSound()
+            advanceUntilIdle()
 
-        verify(mediaPlayer).start()
-        verify(mediaPlayer).release()
-    }
+            verify(mediaPlayer).start()
+        }
 
     @Test
-    fun playCameraSound_soundLoadingSuccessful_mediaPlayerReleases() = runTest {
-        val controller = createController()
+    fun playCameraSound_illegalStateException_doesNotThrow() =
+        scope.runTest {
+            whenever(mediaPlayer.start()).thenThrow(IllegalStateException())
 
-        controller.releaseScreenshotSound().await()
+            val controller = createController()
+            controller.playScreenshotSound()
+            advanceUntilIdle()
 
-        verify(mediaPlayer).release()
-    }
+            verify(mediaPlayer).start()
+            verify(mediaPlayer).release()
+        }
+
+    @Test
+    fun playCameraSound_soundLoadingSuccessful_mediaPlayerReleases() =
+        scope.runTest {
+            val controller = createController()
+
+            controller.releaseScreenshotSound()
+            advanceUntilIdle()
+
+            verify(mediaPlayer).release()
+        }
 
     private fun createController() =
         ScreenshotSoundControllerImpl(soundProvider, scope, bgDispatcher)
