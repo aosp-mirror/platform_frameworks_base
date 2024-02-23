@@ -23,6 +23,7 @@ import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -222,6 +223,21 @@ public class SystemImpl implements SystemInterface {
             Log.w(TAG, "Tried to " + (enable ? "enable " : "disable ") + packageName
                     + " for user " + userId + ": " + e);
         }
+    }
+
+    @Override
+    public void installExistingPackageForAllUsers(Context context, String packageName) {
+        UserManager userManager = context.getSystemService(UserManager.class);
+        for (UserInfo userInfo : userManager.getUsers()) {
+            installPackageForUser(packageName, userInfo.id);
+        }
+    }
+
+    private void installPackageForUser(String packageName, int userId) {
+        final Context context = AppGlobals.getInitialApplication();
+        final Context contextAsUser = context.createContextAsUser(UserHandle.of(userId), 0);
+        final PackageInstaller installer = contextAsUser.getPackageManager().getPackageInstaller();
+        installer.installExistingPackage(packageName, PackageManager.INSTALL_REASON_UNKNOWN, null);
     }
 
     @Override

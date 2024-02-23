@@ -83,6 +83,13 @@ public class TestSystemImpl implements SystemInterface {
         }
     }
 
+    @Override
+    public void installExistingPackageForAllUsers(Context context, String packageName) {
+        for (int userId : mUsers) {
+            installPackageForUser(packageName, userId);
+        }
+    }
+
     private void enablePackageForUser(String packageName, boolean enable, int userId) {
         Map<Integer, PackageInfo> userPackages = mPackages.get(packageName);
         if (userPackages == null) {
@@ -90,6 +97,17 @@ public class TestSystemImpl implements SystemInterface {
         }
         PackageInfo packageInfo = userPackages.get(userId);
         packageInfo.applicationInfo.enabled = enable;
+        setPackageInfoForUser(userId, packageInfo);
+    }
+
+    private void installPackageForUser(String packageName, int userId) {
+        Map<Integer, PackageInfo> userPackages = mPackages.get(packageName);
+        if (userPackages == null) {
+            return;
+        }
+        PackageInfo packageInfo = userPackages.get(userId);
+        packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
+        packageInfo.applicationInfo.privateFlags &= (~ApplicationInfo.PRIVATE_FLAG_HIDDEN);
         setPackageInfoForUser(userId, packageInfo);
     }
 
