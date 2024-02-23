@@ -2209,8 +2209,10 @@ public class LauncherAppsService extends SystemService {
             for (UserHandle user : users) {
                 mPackageManagerInternal.forEachInstalledPackage(pkg -> {
                     final String packageName = pkg.getPackageName();
-                    if (mPackageManagerInternal.getIncrementalStatesInfo(packageName,
-                            Process.myUid(), user.getIdentifier()).isLoading()) {
+                    final IncrementalStatesInfo info =
+                            mPackageManagerInternal.getIncrementalStatesInfo(packageName,
+                                    Process.myUid(), user.getIdentifier());
+                    if (info != null && info.isLoading()) {
                         mPackageManagerInternal.registerInstalledLoadingProgressCallback(
                                 packageName, new PackageLoadingProgressCallback(packageName, user),
                                 user.getIdentifier());
