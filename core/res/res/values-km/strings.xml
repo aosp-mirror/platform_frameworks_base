@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"បាន​ផ្ទៀង​ផ្ទាត់​ស្នាម​ម្រាមដៃ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"បានផ្ទៀងផ្ទាត់​មុខ សូម​ចុច​បញ្ជាក់"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"មិនអាចប្រើ​ហាតវែរស្កេនស្នាមម្រាមដៃ​បានទេ"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"មិនអាចរៀបចំ​ស្នាមម្រាមដៃបានទេ"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"កា​ររៀបចំ​ស្នាមម្រាមដៃបានអស់ម៉ោង។ សូមព្យាយាមម្ដងទៀត។"</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"បានបោះបង់ប្រតិបត្តិការស្នាមម្រាមដៃ"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"ប្រតិបត្តិការ​ស្នាម​ម្រាម​ដៃ​ត្រូវ​បាន​បោះ​បង់​ដោយ​អ្នក​ប្រើប្រាស់"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ព្យាយាម​ច្រើនដងពេក។ សូមប្រើការចាក់សោ​អេក្រង់ជំនួសវិញ។"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ព្យាយាម​ច្រើនដងពេក។ សូមប្រើការចាក់សោ​អេក្រង់ជំនួសវិញ។"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"មិន​មាន​ការ​ថតបញ្ចូល​ស្នាម​ម្រាមដៃទេ"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"ឧបករណ៍នេះ​មិនមាន​ឧបករណ៍ចាប់​ស្នាមម្រាមដៃទេ"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"បានបិទ​សេនស័រ​ជាបណ្តោះអាសន្ន"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"មិនអាចប្រើ​សេនស័រចាប់ស្នាមម្រាមដៃបានទេ។ សូមទាក់ទងក្រុមហ៊ុន​ផ្ដល់ការជួសជុល។"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"បាន​ចុច​ប៊ូតុង​ថាមពល"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ម្រាមដៃទី <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ប្រើស្នាមម្រាមដៃ"</string>

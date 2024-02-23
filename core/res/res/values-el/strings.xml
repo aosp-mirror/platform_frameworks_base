@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Η ταυτότητα του δακτυλικού αποτυπώματος ελέγχθηκε"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Έγινε έλεγχος ταυτότητας προσώπου"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Έγινε έλεγχος ταυτότητας προσώπου, πατήστε \"Επιβεβαίωση\""</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Ο εξοπλισμός δακτυλικού αποτυπώματος δεν είναι διαθέσιμος"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Δεν είναι δυνατή η ρύθμιση του δακτυλικού αποτυπώματος"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Λήξη χρονικού ορίου ρύθμισης δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Η λειτουργία δακτυλικού αποτυπώματος ακυρώθηκε"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Η λειτουργία δακτυλικού αποτυπώματος ακυρώθηκε από τον χρήστη"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Υπερβολικά πολλές προσπάθειες. Χρησιμοποιήστε εναλλακτικά το κλείδωμα οθόνης."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Υπερβολικά πολλές προσπάθειες. Χρησιμοποιήστε εναλλακτικά το κλείδωμα οθόνης."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Δεν είναι δυνατή η επεξεργασία του δακτυλικού αποτυπώματος. Δοκιμάστε ξανά."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Δεν έχουν καταχωριστεί δακτυλικά αποτυπώματα"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Αυτή η συσκευή δεν διαθέτει αισθητήρα δακτυλικού αποτυπώματος"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Ο αισθητήρας απενεργοποιήθηκε προσωρινά"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Δεν είναι δυνατή η χρήση του αισθητήρα δακτυλικών αποτυπωμάτων. Επισκεφτείτε έναν πάροχο υπηρεσιών επισκευής."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Το κουμπί λειτουργίας πατήθηκε"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Δάχτυλο <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Χρήση δακτυλικού αποτυπώματος"</string>

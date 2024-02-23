@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Đã xác thực vân tay"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Đã xác thực khuôn mặt"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Đã xác thực khuôn mặt, vui lòng nhấn để xác nhận"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Không có phần cứng xử lý vân tay"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Không thể thiết lập vân tay"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Hết thời gian chờ thiết lập vân tay. Hãy thử lại."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Đã huỷ thao tác dùng vân tay"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Người dùng đã huỷ thao tác sử dụng vân tay"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Bạn đã thử quá nhiều lần. Hãy dùng phương thức khoá màn hình."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Bạn đã thử quá nhiều lần. Hãy dùng phương thức khoá màn hình."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Không xử lý được vân tay. Hãy thử lại."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Chưa đăng ký vân tay"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Thiết bị này không có cảm biến vân tay"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Đã tắt tạm thời cảm biến"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Không dùng được cảm biến vân tay. Hãy liên hệ với một nhà cung cấp dịch vụ sửa chữa."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Đã nhấn nút nguồn"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Ngón tay <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Dùng vân tay"</string>
