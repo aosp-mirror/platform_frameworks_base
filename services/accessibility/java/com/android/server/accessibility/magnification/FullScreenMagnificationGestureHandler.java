@@ -1004,17 +1004,19 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                                     && overscrollState(event, mFirstPointerDownLocation)
                                     == OVERSCROLL_VERTICAL_EDGE) {
                                 transitionToDelegatingStateAndClear();
-                            } // TODO(b/319537921): should there be an else here?
-                            //Primary pointer is swiping, so transit to PanningScalingState
-                            transitToPanningScalingStateAndClear();
+                            } else {
+                                //Primary pointer is swiping, so transit to PanningScalingState
+                                transitToPanningScalingStateAndClear();
+                            }
                         } else if (mIsSinglePanningEnabled
                                 && isActivated()
                                 && event.getPointerCount() == 1) {
                             if (overscrollState(event, mFirstPointerDownLocation)
                                     == OVERSCROLL_VERTICAL_EDGE) {
                                 transitionToDelegatingStateAndClear();
-                            } // TODO(b/319537921): should there be an else here?
-                            transitToSinglePanningStateAndClear();
+                            } else {
+                                transitToSinglePanningStateAndClear();
+                            }
                         } else if (!mIsTwoFingerCountReached) {
                             // If it is a two-finger gesture, do not transition to the
                             // delegating state to ensure the reachability of
@@ -1257,17 +1259,19 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                                     && overscrollState(event, mFirstPointerDownLocation)
                                     == OVERSCROLL_VERTICAL_EDGE) {
                                 transitionToDelegatingStateAndClear();
+                            } else {
+                                //Primary pointer is swiping, so transit to PanningScalingState
+                                transitToPanningScalingStateAndClear();
                             }
-                            //Primary pointer is swiping, so transit to PanningScalingState
-                            transitToPanningScalingStateAndClear();
                         } else if (mIsSinglePanningEnabled
                                 && isActivated()
                                 && event.getPointerCount() == 1) {
                             if (overscrollState(event, mFirstPointerDownLocation)
                                     == OVERSCROLL_VERTICAL_EDGE) {
                                 transitionToDelegatingStateAndClear();
+                            } else {
+                                transitToSinglePanningStateAndClear();
                             }
-                            transitToSinglePanningStateAndClear();
                         } else {
                             transitionToDelegatingStateAndClear();
                         }
