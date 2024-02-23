@@ -239,7 +239,9 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
             // WHEN all of the connections are OOS
             i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
             i2.isInService.value = false
+            i2.isEmergencyOnly.value = false
 
             // THEN the value is propagated to this interactor
             assertThat(latest).isTrue()
@@ -256,6 +258,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
             // WHEN all of the connections are OOS
             i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
 
             // THEN the value is propagated to this interactor
             assertThat(latest).isTrue()

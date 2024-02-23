@@ -69,6 +69,9 @@ interface MobileIconInteractor {
     /** True if we consider this connection to be in service, i.e. can make calls */
     val isInService: StateFlow<Boolean>
 
+    /** True if this connection is emergency only */
+    val isEmergencyOnly: StateFlow<Boolean>
+
     /** Observable for the data enabled state of this connection */
     val isDataEnabled: StateFlow<Boolean>
 
@@ -305,6 +308,8 @@ class MobileIconInteractorImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isInService = connectionRepository.isInService
+
+    override val isEmergencyOnly: StateFlow<Boolean> = connectionRepository.isEmergencyOnly
 
     override val isAllowedDuringAirplaneMode = connectionRepository.isAllowedDuringAirplaneMode
 

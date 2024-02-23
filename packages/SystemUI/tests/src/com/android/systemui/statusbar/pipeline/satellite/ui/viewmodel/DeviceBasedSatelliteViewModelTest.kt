@@ -80,6 +80,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN all icons are OOS
             val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
             i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
 
             // GIVEN apm is disabled
             airplaneModeRepository.setIsAirplaneMode(false)
@@ -99,11 +100,41 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN all icons are not OOS
             val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
             i1.isInService.value = true
+            i1.isEmergencyOnly.value = false
 
             // GIVEN apm is disabled
             airplaneModeRepository.setIsAirplaneMode(false)
 
             // THEN icon is null because we have service
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun icon_nullWhenShouldNotShow_isEmergencyOnly() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.icon)
+
+            // GIVEN satellite is allowed
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+
+            // GIVEN all icons are OOS
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // Wait for delay to be completed
+            advanceTimeBy(10.seconds)
+
+            // THEN icon is set because we don't have service
+            assertThat(latest).isInstanceOf(Icon::class.java)
+
+            // GIVEN the connection is emergency only
+            i1.isEmergencyOnly.value = true
+
+            // THEN icon is null because we have emergency connection
             assertThat(latest).isNull()
         }
 
@@ -118,6 +149,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN all icons are OOS
             val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
             i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
 
             // GIVEN apm is enabled
             airplaneModeRepository.setIsAirplaneMode(true)
@@ -138,6 +170,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN all icons are OOS
             val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
             i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
 
             // GIVEN apm is disabled
             airplaneModeRepository.setIsAirplaneMode(false)
@@ -161,6 +194,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN all icons are OOS
             val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
             i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
 
             // GIVEN apm is disabled
             airplaneModeRepository.setIsAirplaneMode(false)
