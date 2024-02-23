@@ -28,6 +28,7 @@ import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.flags.Flags;
 import com.android.settingslib.media.MediaOutputConstants;
 import com.android.systemui.SysuiTestCase;
 
@@ -84,7 +85,20 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
     }
 
     @Test
+    public void launchMediaOutputBroadcastDialog_flagOff_broadcastDialogFactoryNotCalled() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING);
+        Intent intent = new Intent(
+                MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG);
+        intent.putExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME, getContext().getPackageName());
+        mMediaOutputDialogReceiver.onReceive(getContext(), intent);
+
+        verify(mMockMediaOutputDialogFactory, never()).create(any(), anyBoolean(), any());
+        verify(mMockMediaOutputBroadcastDialogFactory, never()).create(any(), anyBoolean(), any());
+    }
+
+    @Test
     public void launchMediaOutputBroadcastDialog_ExtraPackageName_BroadcastDialogFactoryCalled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING);
         Intent intent = new Intent(
                 MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG);
         intent.putExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME, getContext().getPackageName());
@@ -97,6 +111,7 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
 
     @Test
     public void launchMediaOutputBroadcastDialog_WrongExtraKey_DialogBroadcastFactoryNotCalled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING);
         Intent intent = new Intent(
                 MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG);
         intent.putExtra("Wrong Package Name Key", getContext().getPackageName());
@@ -108,6 +123,7 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
 
     @Test
     public void launchMediaOutputBroadcastDialog_NoExtra_BroadcastDialogFactoryNotCalled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING);
         Intent intent = new Intent(
                 MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG);
         mMediaOutputDialogReceiver.onReceive(getContext(), intent);

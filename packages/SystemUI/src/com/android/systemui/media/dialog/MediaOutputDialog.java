@@ -16,7 +16,7 @@
 
 package com.android.systemui.media.dialog;
 
-import static com.android.systemui.Flags.legacyLeAudioSharing;
+import static com.android.settingslib.flags.Flags.legacyLeAudioSharing;
 
 import android.content.Context;
 import android.os.Bundle;
