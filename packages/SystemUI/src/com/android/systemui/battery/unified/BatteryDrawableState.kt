@@ -127,4 +127,11 @@ sealed interface BatteryColors {
         // GM Yellow
         override val warnBackground = Color.parseColor("#FBBC04")
     }
+
+    companion object {
+        /** For use from java */
+        @JvmField val LIGHT_THEME_COLORS = LightThemeColors
+
+        @JvmField val DARK_THEME_COLORS = DarkThemeColors
+    }
 }

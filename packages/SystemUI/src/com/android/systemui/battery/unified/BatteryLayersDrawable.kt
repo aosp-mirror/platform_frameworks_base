@@ -78,6 +78,7 @@ class BatteryLayersDrawable(
                 // Update before we set the backing field so we can diff
                 handleUpdateState(field, value)
                 field = value
+                invalidateSelf()
             }
         }
 
