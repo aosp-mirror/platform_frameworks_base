@@ -38,7 +38,6 @@ import android.graphics.PointF;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.HostUsiVersion;
@@ -86,9 +85,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 import android.view.Display;
-import android.view.DisplayInfo;
 import android.view.IInputFilter;
 import android.view.IInputFilterHost;
 import android.view.IInputMonitorHost;
@@ -117,7 +114,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
-import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerInternal.LidSwitchCallback;
 import com.android.server.input.debug.FocusEventDebugView;
@@ -325,6 +321,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages Keyboard modifier keys remapping
     private final KeyRemapper mKeyRemapper;
 
+    // Manages loading PointerIcons
+    private final PointerIconCache mPointerIconCache;
+
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -411,74 +410,6 @@ public class InputManagerService extends IInputManager.Stub
     private boolean mShowKeyPresses = false;
     private boolean mShowRotaryInput = false;
 
-    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
-    final SparseArray<SparseArray<PointerIcon>> mLoadedPointerIconsByDisplayAndType =
-            new SparseArray<>();
-    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
-    boolean mUseLargePointerIcons = false;
-    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
-    final SparseArray<Context> mDisplayContexts = new SparseArray<>();
-    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
-    final SparseIntArray mDisplayDensities = new SparseIntArray();
-
-    final DisplayManager.DisplayListener mDisplayListener = new DisplayManager.DisplayListener() {
-        @Override
-        public void onDisplayAdded(int displayId) {
-            synchronized (mLoadedPointerIconsByDisplayAndType) {
-                updateDisplayDensity(displayId);
-            }
-        }
-
-        @Override
-        public void onDisplayRemoved(int displayId) {
-            synchronized (mLoadedPointerIconsByDisplayAndType) {
-                mLoadedPointerIconsByDisplayAndType.remove(displayId);
-                mDisplayContexts.remove(displayId);
-                mDisplayDensities.delete(displayId);
-            }
-        }
-
-        @Override
-        public void onDisplayChanged(int displayId) {
-            synchronized (mLoadedPointerIconsByDisplayAndType) {
-                if (!updateDisplayDensity(displayId)) {
-                    return;
-                }
-                // The display density changed, so force all cached pointer icons to be
-                // reloaded for the display.
-                Slog.i(TAG,
-                        "Reloading pointer icons due to density change on display: " + displayId);
-                var iconsByType = mLoadedPointerIconsByDisplayAndType.get(displayId);
-                if (iconsByType == null) {
-                    return;
-                }
-                iconsByType.clear();
-                mDisplayContexts.remove(displayId);
-            }
-            mNative.reloadPointerIcons();
-        }
-
-        // Updates the cached display density for the given displayId, and returns true if
-        // the cached density changed.
-        @GuardedBy("mLoadedPointerIconsByDisplayAndType")
-        private boolean updateDisplayDensity(int displayId) {
-            final DisplayManager displayManager = Objects.requireNonNull(
-                    mContext.getSystemService(DisplayManager.class));
-            final Display display = displayManager.getDisplay(displayId);
-            if (display == null) {
-                return false;
-            }
-            DisplayInfo info = new DisplayInfo();
-            display.getDisplayInfo(info);
-            final int oldDensity = mDisplayDensities.get(displayId, 0 /* default */);
-            if (oldDensity == info.logicalDensityDpi) {
-                return false;
-            }
-            mDisplayDensities.put(displayId, info.logicalDensityDpi);
-            return true;
-        }
-    };
-
     /** Point of injection for test dependencies. */
     @VisibleForTesting
     static class Injector {
@@ -537,6 +468,7 @@ public class InputManagerService extends IInputManager.Stub
                 : new KeyboardBacklightControllerInterface() {};
         mStickyModifierStateController = new StickyModifierStateController();
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
+        mPointerIconCache = new PointerIconCache(mContext, mNative);
 
         mUseDevInputEventForAudioJack =
                 mContext.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
@@ -646,18 +578,11 @@ public class InputManagerService extends IInputManager.Stub
             mWiredAccessoryCallbacks.systemReady();
         }
 
-        final DisplayManager displayManager = Objects.requireNonNull(
-                mContext.getSystemService(DisplayManager.class));
-        displayManager.registerDisplayListener(mDisplayListener, UiThread.getHandler());
-        final Display[] displays = displayManager.getDisplays();
-        for (int i = 0; i < displays.length; i++) {
-            mDisplayListener.onDisplayAdded(displays[i].getDisplayId());
-        }
-
         mKeyboardLayoutManager.systemRunning();
         mBatteryController.systemRunning();
         mKeyboardBacklightController.systemRunning();
         mKeyRemapper.systemRunning();
+        mPointerIconCache.systemRunning();
     }
 
     private void reloadDeviceAliases() {
@@ -2411,8 +2336,8 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mLidSwitchLock) { /* Test if blocked by lid switch lock. */ }
         synchronized (mInputMonitors) { /* Test if blocked by input monitor lock. */ }
         synchronized (mAdditionalDisplayInputPropertiesLock) { /* Test if blocked by props lock */ }
-        synchronized (mLoadedPointerIconsByDisplayAndType) { /* Test if blocked by pointer lock */}
         mBatteryController.monitor();
+        mPointerIconCache.monitor();
         mNative.monitor();
     }
 
@@ -2806,21 +2731,7 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     @SuppressWarnings("unused")
     private @NonNull PointerIcon getLoadedPointerIcon(int displayId, int type) {
-        synchronized (mLoadedPointerIconsByDisplayAndType) {
-            SparseArray<PointerIcon> iconsByType = mLoadedPointerIconsByDisplayAndType.get(
-                    displayId);
-            if (iconsByType == null) {
-                iconsByType = new SparseArray<>();
-                mLoadedPointerIconsByDisplayAndType.put(displayId, iconsByType);
-            }
-            PointerIcon icon = iconsByType.get(type);
-            if (icon == null) {
-                icon = PointerIcon.getLoadedSystemIcon(getContextForDisplay(displayId), type,
-                        mUseLargePointerIcons);
-                iconsByType.put(type, icon);
-            }
-            return Objects.requireNonNull(icon);
-        }
+        return mPointerIconCache.getLoadedPointerIcon(displayId, type);
     }
 
     // Native callback.
@@ -2831,33 +2742,6 @@ public class InputManagerService extends IInputManager.Stub
             return 0;
         }
         return sc.mNativeObject;
-    }
-
-    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
-    @NonNull
-    private Context getContextForDisplay(int displayId) {
-        if (displayId == Display.INVALID_DISPLAY) {
-            // Fallback to using the default context.
-            return mContext;
-        }
-        if (displayId == mContext.getDisplay().getDisplayId()) {
-            return mContext;
-        }
-
-        Context displayContext = mDisplayContexts.get(displayId);
-        if (displayContext == null) {
-            final DisplayManager displayManager = Objects.requireNonNull(
-                    mContext.getSystemService(DisplayManager.class));
-            final Display display = displayManager.getDisplay(displayId);
-            if (display == null) {
-                // Fallback to using the default context.
-                return mContext;
-            }
-
-            displayContext = mContext.createDisplayContext(display);
-            mDisplayContexts.put(displayId, displayContext);
-        }
-        return displayContext;
     }
 
     // Native callback.
@@ -3665,15 +3549,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     void setUseLargePointerIcons(boolean useLargeIcons) {
-        synchronized (mLoadedPointerIconsByDisplayAndType) {
-            if (mUseLargePointerIcons == useLargeIcons) {
-                return;
-            }
-            mUseLargePointerIcons = useLargeIcons;
-            // Clear all cached icons on all displays.
-            mLoadedPointerIconsByDisplayAndType.clear();
-        }
-        UiThread.getHandler().post(mNative::reloadPointerIcons);
+        mPointerIconCache.setUseLargePointerIcons(useLargeIcons);
     }
 
     interface KeyboardBacklightControllerInterface {
