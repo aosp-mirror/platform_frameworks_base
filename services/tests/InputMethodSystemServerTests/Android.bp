@@ -69,7 +69,7 @@ android_test {
 }
 
 android_ravenwood_test {
-    name: "FrameworksInputMethodSystemServerTests_host",
+    name: "FrameworksInputMethodSystemServerTestsRavenwood",
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.test.rules",
