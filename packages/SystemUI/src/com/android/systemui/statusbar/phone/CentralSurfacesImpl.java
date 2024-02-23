@@ -1375,7 +1375,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 || !mKeyguardStateController.canDismissLockScreen()
                 || mKeyguardViewMediator.isAnySimPinSecure()
                 || (mQsController.getExpanded() && trackingTouch)
-                || mShadeSurface.getBarState() == StatusBarState.SHADE_LOCKED) {
+                || mShadeSurface.getBarState() == StatusBarState.SHADE_LOCKED
+                // This last one causes a race condition when the shade resets. Don't send a 0
+                // and let StatusBarStateController process a keyguard state change instead
+                || 1f - fraction == 0f) {
             return;
         }
 

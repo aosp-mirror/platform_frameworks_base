@@ -170,7 +170,6 @@ constructor(
             KeyguardIndicationAreaBinder.bind(
                 notificationShadeWindowView.requireViewById(R.id.keyguard_indication_area),
                 keyguardIndicationAreaViewModel,
-                aodAlphaViewModel,
                 indicationController,
             )
     }
