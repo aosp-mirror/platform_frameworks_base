@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.app.animation.Interpolators.EMPHASIZED
+import com.android.app.animation.Interpolators
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
-class DreamingToGlanceableHubTransitionViewModel
+class GlanceableHubToDreamingTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
@@ -40,32 +40,33 @@ constructor(
 
     private val transitionAnimation =
         animationFlow.setup(
-            duration = TO_GLANCEABLE_HUB_DURATION,
-            from = KeyguardState.DREAMING,
-            to = KeyguardState.GLANCEABLE_HUB,
+            duration = FROM_GLANCEABLE_HUB_DURATION,
+            from = KeyguardState.GLANCEABLE_HUB,
+            to = KeyguardState.DREAMING,
         )
-
-    val dreamOverlayTranslationX: Flow<Float> =
-        configurationInteractor
-            .dimensionPixelSize(R.dimen.dreaming_to_hub_transition_dream_overlay_translation_x)
-            .flatMapLatest { translatePx ->
-                transitionAnimation.sharedFlow(
-                    duration = TO_GLANCEABLE_HUB_DURATION,
-                    onStep = { value -> value * translatePx },
-                    interpolator = EMPHASIZED,
-                    onCancel = { 0f },
-                    name = "DREAMING->GLANCEABLE_HUB: overlayTranslationX",
-                )
-            }
 
     val dreamOverlayAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = 167.milliseconds,
-            onStep = { 1f - it },
-            name = "DREAMING->GLANCEABLE_HUB: dreamOverlayAlpha",
+            startTime = 167.milliseconds,
+            onStep = { it },
+            name = "GLANCEABLE_HUB->DREAMING: dreamOverlayAlpha",
         )
 
+    val dreamOverlayTranslationX: Flow<Float> =
+        configurationInteractor
+            .dimensionPixelSize(R.dimen.hub_to_dreaming_transition_dream_overlay_translation_x)
+            .flatMapLatest { translatePx: Int ->
+                transitionAnimation.sharedFlow(
+                    duration = FROM_GLANCEABLE_HUB_DURATION,
+                    onStep = { value -> -translatePx + value * translatePx },
+                    interpolator = Interpolators.EMPHASIZED,
+                    onCancel = { -translatePx.toFloat() },
+                    name = "GLANCEABLE_HUB->LOCKSCREEN: dreamOverlayTranslationX"
+                )
+            }
+
     private companion object {
-        val TO_GLANCEABLE_HUB_DURATION = 1.seconds
+        val FROM_GLANCEABLE_HUB_DURATION = 1.seconds
     }
 }
