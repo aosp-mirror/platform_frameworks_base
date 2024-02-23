@@ -73,6 +73,16 @@ flag {
 }
 
 flag {
+    name: "handle_multi_device_input"
+    namespace: "accessibility"
+    description: "Select a single active device when a multi-device stream is received by AccessibilityInputFilter"
+    bug: "310014874"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "pinch_zoom_zero_min_span"
     namespace: "accessibility"
     description: "Whether to set min span of ScaleGestureDetector to zero."
