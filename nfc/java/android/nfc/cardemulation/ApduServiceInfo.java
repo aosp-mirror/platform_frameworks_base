@@ -176,11 +176,25 @@ public final class ApduServiceInfo implements Parcelable {
             List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, boolean requiresScreenOn, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost, boolean isEnabled) {
+        this(info, onHost, description, staticAidGroups, dynamicAidGroups,
+                requiresUnlock, requiresScreenOn, bannerResource, uid,
+                settingsActivityName, offHost, staticOffHost, isEnabled,
+                new HashMap<String, Boolean>());
+    }
+
+    /**
+     * @hide
+     */
+    public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
+            List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
+            boolean requiresUnlock, boolean requiresScreenOn, int bannerResource, int uid,
+            String settingsActivityName, String offHost, String staticOffHost, boolean isEnabled,
+            HashMap<String, Boolean> autoTransact) {
         this.mService = info;
         this.mDescription = description;
         this.mStaticAidGroups = new HashMap<String, AidGroup>();
         this.mDynamicAidGroups = new HashMap<String, AidGroup>();
-        this.mAutoTransact = new HashMap<String, Boolean>();
+        this.mAutoTransact = autoTransact;
         this.mOffHostName = offHost;
         this.mStaticOffHostName = staticOffHost;
         this.mOnHost = onHost;
@@ -196,7 +210,6 @@ public final class ApduServiceInfo implements Parcelable {
         this.mUid = uid;
         this.mSettingsActivityName = settingsActivityName;
         this.mCategoryOtherServiceEnabled = isEnabled;
-
     }
 
     /**
@@ -857,6 +870,8 @@ public final class ApduServiceInfo implements Parcelable {
         dest.writeString(mSettingsActivityName);
 
         dest.writeInt(mCategoryOtherServiceEnabled ? 1 : 0);
+        dest.writeInt(mAutoTransact.size());
+        dest.writeMap(mAutoTransact);
     };
 
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
@@ -885,10 +900,15 @@ public final class ApduServiceInfo implements Parcelable {
                     int uid = source.readInt();
                     String settingsActivityName = source.readString();
                     boolean isEnabled = source.readInt() != 0;
+                    int autoTransactSize = source.readInt();
+                    HashMap<String, Boolean> autoTransact =
+                            new HashMap<String, Boolean>(autoTransactSize);
+                    source.readMap(autoTransact, getClass().getClassLoader(),
+                            String.class, Boolean.class);
                     return new ApduServiceInfo(info, onHost, description, staticAidGroups,
                             dynamicAidGroups, requiresUnlock, requiresScreenOn, bannerResource, uid,
                             settingsActivityName, offHostName, staticOffHostName,
-                            isEnabled);
+                            isEnabled, autoTransact);
                 }
 
                 @Override
