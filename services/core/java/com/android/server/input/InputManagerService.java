@@ -117,6 +117,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
+import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerInternal.LidSwitchCallback;
 import com.android.server.input.debug.FocusEventDebugView;
@@ -647,7 +648,7 @@ public class InputManagerService extends IInputManager.Stub
 
         final DisplayManager displayManager = Objects.requireNonNull(
                 mContext.getSystemService(DisplayManager.class));
-        displayManager.registerDisplayListener(mDisplayListener, mHandler);
+        displayManager.registerDisplayListener(mDisplayListener, UiThread.getHandler());
         final Display[] displays = displayManager.getDisplays();
         for (int i = 0; i < displays.length; i++) {
             mDisplayListener.onDisplayAdded(displays[i].getDisplayId());
@@ -3672,7 +3673,7 @@ public class InputManagerService extends IInputManager.Stub
             // Clear all cached icons on all displays.
             mLoadedPointerIconsByDisplayAndType.clear();
         }
-        mNative.reloadPointerIcons();
+        UiThread.getHandler().post(mNative::reloadPointerIcons);
     }
 
     interface KeyboardBacklightControllerInterface {
