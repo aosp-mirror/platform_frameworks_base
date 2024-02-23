@@ -27,12 +27,16 @@ import android.media.RoutingSessionInfo
 import android.media.session.MediaController
 import android.media.session.MediaController.PlaybackInfo
 import android.media.session.MediaSession
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager
+import com.android.settingslib.flags.Flags
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.media.PhoneMediaDevice
@@ -83,6 +87,7 @@ private const val NORMAL_APP_NAME = "NORMAL_APP_NAME"
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 public class MediaDeviceManagerTest : SysuiTestCase() {
+    @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
     private lateinit var manager: MediaDeviceManager
     @Mock private lateinit var controllerFactory: MediaControllerFactory
@@ -668,7 +673,28 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onBroadcastStarted_currentMediaDeviceDataIsBroadcasting() {
+    fun onBroadcastStarted_flagOff_currentMediaDeviceDataIsBroadcasting() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING)
+        val broadcastCallback = setupBroadcastCallback()
+        setupLeAudioConfiguration(true)
+        setupBroadcastPackage(BROADCAST_APP_NAME)
+        broadcastCallback.onBroadcastStarted(1, 1)
+
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        val data = captureDeviceData(KEY)
+        assertThat(data.showBroadcastButton).isFalse()
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(DEVICE_NAME)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
+    @DisableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING)
+    fun onBroadcastStarted_legacy_currentMediaDeviceDataIsBroadcasting() {
         val broadcastCallback = setupBroadcastCallback()
         setupLeAudioConfiguration(true)
         setupBroadcastPackage(BROADCAST_APP_NAME)
@@ -686,7 +712,9 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onBroadcastStarted_currentMediaDeviceDataIsNotBroadcasting() {
+    @EnableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
+    @DisableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING)
+    fun onBroadcastStarted_legacy_currentMediaDeviceDataIsNotBroadcasting() {
         val broadcastCallback = setupBroadcastCallback()
         setupLeAudioConfiguration(true)
         setupBroadcastPackage(NORMAL_APP_NAME)
@@ -703,6 +731,62 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
+    @DisableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING)
+    fun onBroadcastStopped_legacy_bluetoothLeBroadcastIsDisabledAndBroadcastingButtonIsGone() {
+        val broadcastCallback = setupBroadcastCallback()
+        setupLeAudioConfiguration(false)
+        broadcastCallback.onBroadcastStopped(1, 1)
+
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        val data = captureDeviceData(KEY)
+        assertThat(data.showBroadcastButton).isFalse()
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
+    @EnableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING)
+    fun onBroadcastStarted_currentMediaDeviceDataIsBroadcasting() {
+        val broadcastCallback = setupBroadcastCallback()
+        setupLeAudioConfiguration(true)
+        setupBroadcastPackage(BROADCAST_APP_NAME)
+        broadcastCallback.onBroadcastStarted(1, 1)
+
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        val data = captureDeviceData(KEY)
+        assertThat(data.showBroadcastButton).isFalse()
+        assertThat(data.enabled).isFalse()
+        assertThat(data.name).isEqualTo(context.getString(R.string.audio_sharing_description))
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
+    @EnableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING)
+    fun onBroadcastStarted_currentMediaDeviceDataIsNotBroadcasting() {
+        val broadcastCallback = setupBroadcastCallback()
+        setupLeAudioConfiguration(true)
+        setupBroadcastPackage(NORMAL_APP_NAME)
+        broadcastCallback.onBroadcastStarted(1, 1)
+
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        val data = captureDeviceData(KEY)
+        assertThat(data.showBroadcastButton).isFalse()
+        assertThat(data.enabled).isFalse()
+        assertThat(data.name).isEqualTo(context.getString(R.string.audio_sharing_description))
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
+    @EnableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING)
     fun onBroadcastStopped_bluetoothLeBroadcastIsDisabledAndBroadcastingButtonIsGone() {
         val broadcastCallback = setupBroadcastCallback()
         setupLeAudioConfiguration(false)
@@ -714,6 +798,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
         val data = captureDeviceData(KEY)
         assertThat(data.showBroadcastButton).isFalse()
+        assertThat(data.name?.equals(context.getString(R.string.audio_sharing_description)))
+            .isFalse()
     }
 
     private fun captureCallback(): LocalMediaManager.DeviceCallback {
