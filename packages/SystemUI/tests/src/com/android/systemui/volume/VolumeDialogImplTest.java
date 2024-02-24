@@ -61,7 +61,6 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 
 import androidx.test.core.view.MotionEventBuilder;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -502,7 +501,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     }
 
     @Test
-    @FlakyTest(bugId = 326204750)
     public void dialogDestroy_removesPostureControllerCallback() {
         verify(mPostureController, never()).removeCallback(any());
         mDialog.destroy();
