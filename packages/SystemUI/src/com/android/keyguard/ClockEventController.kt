@@ -377,7 +377,9 @@ constructor(
                 if (mode == ZenMode.OFF) SysuiR.string::dnd_is_off.name
                     else SysuiR.string::dnd_is_on.name
             ).also { data ->
-                clock?.run { events.onZenDataChanged(data) }
+                mainExecutor.execute {
+                    clock?.run { events.onZenDataChanged(data) }
+                }
             }
         }
 
