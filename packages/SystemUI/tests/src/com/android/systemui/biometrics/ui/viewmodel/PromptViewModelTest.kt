@@ -241,19 +241,27 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
             viewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
 
-            val confirmConstant by collectLastValue(viewModel.hapticsToPlay)
-            assertThat(confirmConstant)
+            val confirmHaptics by collectLastValue(viewModel.hapticsToPlay)
+            assertThat(confirmHaptics?.hapticFeedbackConstant)
                 .isEqualTo(
                     if (expectConfirmation) HapticFeedbackConstants.NO_HAPTICS
                     else HapticFeedbackConstants.CONFIRM
+                )
+            assertThat(confirmHaptics?.flag)
+                .isEqualTo(
+                    if (expectConfirmation) null
+                    else HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
                 )
 
             if (expectConfirmation) {
                 viewModel.confirmAuthenticated()
             }
 
-            val confirmedConstant by collectLastValue(viewModel.hapticsToPlay)
-            assertThat(confirmedConstant).isEqualTo(HapticFeedbackConstants.CONFIRM)
+            val confirmedHaptics by collectLastValue(viewModel.hapticsToPlay)
+            assertThat(confirmedHaptics?.hapticFeedbackConstant)
+                .isEqualTo(HapticFeedbackConstants.CONFIRM)
+            assertThat(confirmedHaptics?.flag)
+                .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
         }
 
     @Test
@@ -265,16 +273,21 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             viewModel.confirmAuthenticated()
         }
 
-        val currentConstant by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(currentConstant).isEqualTo(HapticFeedbackConstants.CONFIRM)
+        val currentHaptics by collectLastValue(viewModel.hapticsToPlay)
+        assertThat(currentHaptics?.hapticFeedbackConstant)
+            .isEqualTo(HapticFeedbackConstants.CONFIRM)
+        assertThat(currentHaptics?.flag)
+            .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
     }
 
     @Test
     fun playErrorHaptic_SetsRejectConstant() = runGenericTest {
         viewModel.showTemporaryError("test", "messageAfterError", false)
 
-        val currentConstant by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(currentConstant).isEqualTo(HapticFeedbackConstants.REJECT)
+        val currentHaptics by collectLastValue(viewModel.hapticsToPlay)
+        assertThat(currentHaptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
+        assertThat(currentHaptics?.flag)
+            .isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
     }
 
     @Test
@@ -800,8 +813,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             hapticFeedback = true,
         )
 
-        val constant by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(constant).isEqualTo(HapticFeedbackConstants.REJECT)
+        val haptics by collectLastValue(viewModel.hapticsToPlay)
+        assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.REJECT)
+        assertThat(haptics?.flag).isEqualTo(HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING)
     }
 
     @Test
@@ -813,8 +827,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             hapticFeedback = false,
         )
 
-        val constant by collectLastValue(viewModel.hapticsToPlay)
-        assertThat(constant).isEqualTo(HapticFeedbackConstants.NO_HAPTICS)
+        val haptics by collectLastValue(viewModel.hapticsToPlay)
+        assertThat(haptics?.hapticFeedbackConstant).isEqualTo(HapticFeedbackConstants.NO_HAPTICS)
     }
 
     private suspend fun TestScope.showTemporaryErrors(
