@@ -414,6 +414,7 @@ class ActivityStarter {
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
         BackgroundStartPrivileges forcedBalByPiSender;
+        boolean freezeScreen;
 
         final StringBuilder logMessage = new StringBuilder();
 
@@ -477,6 +478,7 @@ class ActivityStarter {
             filterCallingUid = UserHandle.USER_NULL;
             originatingPendingIntent = null;
             forcedBalByPiSender = BackgroundStartPrivileges.NONE;
+            freezeScreen = false;
             errorCallbackToken = null;
         }
 
@@ -520,6 +522,7 @@ class ActivityStarter {
             filterCallingUid = request.filterCallingUid;
             originatingPendingIntent = request.originatingPendingIntent;
             forcedBalByPiSender = request.forcedBalByPiSender;
+            freezeScreen = request.freezeScreen;
             errorCallbackToken = request.errorCallbackToken;
         }
 
@@ -1525,6 +1528,18 @@ class ActivityStarter {
         Transition newTransition = transitionController.isShellTransitionsEnabled()
                 ? transitionController.createAndStartCollecting(TRANSIT_OPEN) : null;
         RemoteTransition remoteTransition = r.takeRemoteTransition();
+        // Create a display snapshot as soon as possible.
+        if (newTransition != null && mRequest.freezeScreen) {
+            final TaskDisplayArea tda = mLaunchParams.hasPreferredTaskDisplayArea()
+                    ? mLaunchParams.mPreferredTaskDisplayArea
+                    : mRootWindowContainer.getDefaultTaskDisplayArea();
+            final DisplayContent dc = mRootWindowContainer.getDisplayContentOrCreate(
+                    tda.getDisplayId());
+            if (dc != null) {
+                transitionController.collect(dc);
+                transitionController.collectVisibleChange(dc);
+            }
+        }
         try {
             mService.deferWindowLayout();
             transitionController.collect(r);
@@ -3267,6 +3282,11 @@ class ActivityStarter {
 
     ActivityStarter setBackgroundStartPrivileges(BackgroundStartPrivileges forcedBalByPiSender) {
         mRequest.forcedBalByPiSender = forcedBalByPiSender;
+        return this;
+    }
+
+    ActivityStarter setFreezeScreen(boolean freezeScreen) {
+        mRequest.freezeScreen = freezeScreen;
         return this;
     }
 

@@ -148,7 +148,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"चेहरा स्कॅन करत आहे"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"पाठवा"</string>
     <string name="cancel" msgid="1089011503403416730">"रद्द करा"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"कंफर्म करा"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"कन्फर्म करा"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"पुन्हा प्रयत्न करा"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ऑथेंटिकेशन रद्द करण्यासाठी टॅप करा"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"कृपया पुन्हा प्रयत्न करा"</string>
@@ -205,7 +205,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"फेस अनलॉक उपलब्ध नाही"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ब्लूटूथ कनेक्‍ट केले."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ब्लूटूथ डिव्‍हाइस आयकन"</string>
-    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"डिव्हाइसचे तपशील कॉंफिगर करण्यासाठी क्लिक करा"</string>
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"डिव्हाइसचे तपशील कॉन्फिगर करण्यासाठी क्लिक करा"</string>
     <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"सर्व डिव्हाइस पाहण्यासाठी क्लिक करा"</string>
     <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"नवीन डिव्हाइस पेअर करण्यासाठी क्लिक करा"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"बॅटरीच्या चार्जिंगची टक्केवारी माहित नाही."</string>
@@ -268,10 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"सेव्ह केले"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिस्कनेक्ट करा"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ॲक्टिव्हेट करा"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"उद्या पुन्हा आपोआप सुरू करा"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Quick Share, Find My Device आणि डिव्हाइस स्थान यांसारखी वैशिष्ट्ये ब्लूटूथ वापरतात"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> बॅटरी"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ऑडिओ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"हेडसेट"</string>
@@ -532,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"हे डिव्हाइस तुमच्या पालकाने व्यवस्थापित केले आहे. तुम्ही वापरत असलेली ॲप्स, तुमचे स्थान आणि तुमचा स्क्रीन वेळ यांसारखी माहिती तुमचे पालक पाहू आणि व्यवस्‍थापित करू शकतात."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ने अनलॉक ठेवले"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"चोरीपासून संरक्षण\nडिव्हाइस लॉक केले, अनलॉक करायचे खूप प्रयत्न"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"आवाज सेटिंग्ज"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"मीडियाला आपोआप सबटायटल द्या"</string>
@@ -585,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"व्हायब्रेट करा"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s व्हॉल्यूम नियंत्रण"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"कॉल आणि सूचना वाजतील (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> वर प्ले करत आहे"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"यावर ऑडिओ प्ले होईल"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"सिस्टम UI ट्युनर"</string>
     <string name="status_bar" msgid="4357390266055077437">"स्टेटस बार"</string>
     <string name="demo_mode" msgid="263484519766901593">"सिस्टम UI डेमो मोड"</string>
@@ -647,7 +648,7 @@
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे संभाषण वैशिष्ट्यांना सपोर्ट करत नाही"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"कॉलशी संबंधित सूचनांमध्ये फेरबदल केला जाऊ शकत नाही."</string>
-    <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉंफिगर केला जाऊ शकत नाही"</string>
+    <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी केलेल्या सूचना"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"सर्व <xliff:g id="APP_NAME">%1$s</xliff:g> वरील सूचना"</string>
     <string name="see_more_title" msgid="7409317011708185729">"आणखी पहा"</string>

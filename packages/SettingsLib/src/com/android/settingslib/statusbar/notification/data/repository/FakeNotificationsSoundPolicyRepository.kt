@@ -40,3 +40,21 @@ class FakeNotificationsSoundPolicyRepository : NotificationsSoundPolicyRepositor
         mutableZenMode.value = zenMode
     }
 }
+
+fun FakeNotificationsSoundPolicyRepository.updateNotificationPolicy(
+    priorityCategories: Int = 0,
+    priorityCallSenders: Int = NotificationManager.Policy.PRIORITY_SENDERS_ANY,
+    priorityMessageSenders: Int = NotificationManager.Policy.CONVERSATION_SENDERS_NONE,
+    suppressedVisualEffects: Int = NotificationManager.Policy.SUPPRESSED_EFFECTS_UNSET,
+    state: Int = NotificationManager.Policy.STATE_UNSET,
+    priorityConversationSenders: Int = NotificationManager.Policy.CONVERSATION_SENDERS_NONE,
+) = updateNotificationPolicy(
+    NotificationManager.Policy(
+        priorityCategories,
+        priorityCallSenders,
+        priorityMessageSenders,
+        suppressedVisualEffects,
+        state,
+        priorityConversationSenders,
+    )
+)

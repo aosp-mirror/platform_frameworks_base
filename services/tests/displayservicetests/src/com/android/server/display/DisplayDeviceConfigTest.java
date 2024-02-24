@@ -20,6 +20,7 @@ package com.android.server.display;
 import static com.android.internal.display.BrightnessSynchronizer.brightnessIntToFloat;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
+import static com.android.server.display.config.SensorData.TEMPERATURE_TYPE_SKIN;
 import static com.android.server.display.config.SensorData.SupportedMode;
 import static com.android.server.display.utils.DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat;
 import static com.android.server.display.utils.DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat;
@@ -106,6 +107,7 @@ public final class DisplayDeviceConfigTest {
         MockitoAnnotations.initMocks(this);
         when(mContext.getResources()).thenReturn(mResources);
         when(mFlags.areAutoBrightnessModesEnabled()).thenReturn(true);
+        when(mFlags.isSensorBasedBrightnessThrottlingEnabled()).thenReturn(true);
         mockDeviceConfigs();
     }
 
@@ -143,6 +145,8 @@ public final class DisplayDeviceConfigTest {
         assertEquals("", mDisplayDeviceConfig.getAmbientLightSensor().name);
         assertNull(mDisplayDeviceConfig.getProximitySensor().type);
         assertNull(mDisplayDeviceConfig.getProximitySensor().name);
+        assertEquals(TEMPERATURE_TYPE_SKIN, mDisplayDeviceConfig.getTempSensor().type);
+        assertNull(mDisplayDeviceConfig.getTempSensor().name);
         assertTrue(mDisplayDeviceConfig.isAutoBrightnessAvailable());
     }
 
@@ -589,6 +593,13 @@ public final class DisplayDeviceConfigTest {
         mode = mDisplayDeviceConfig.getProximitySensor().supportedModes.get(1);
         assertEquals(mode.refreshRate, 120, SMALL_DELTA);
         assertEquals(mode.vsyncRate, 125, SMALL_DELTA);
+    }
+
+    @Test
+    public void testTempSensorFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+        assertEquals("DISPLAY", mDisplayDeviceConfig.getTempSensor().type);
+        assertEquals("VIRTUAL-SKIN-DISPLAY", mDisplayDeviceConfig.getTempSensor().name);
     }
 
     @Test
@@ -1356,6 +1367,10 @@ public final class DisplayDeviceConfigTest {
                 +       "<name>Test Binned Brightness Sensor</name>\n"
                 +   "</screenOffBrightnessSensor>\n"
                 + proxSensor
+                +   "<tempSensor>\n"
+                +       "<type>DISPLAY</type>\n"
+                +       "<name>VIRTUAL-SKIN-DISPLAY</name>\n"
+                +   "</tempSensor>\n"
                 +   "<ambientBrightnessChangeThresholds>\n"
                 +       "<brighteningThresholds>\n"
                 +           "<minimum>10</minimum>\n"

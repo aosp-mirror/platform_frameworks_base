@@ -291,6 +291,11 @@ public class BubbleStackView extends FrameLayout
      */
     private boolean mRemovingLastBubbleWhileExpanded = false;
 
+    /**
+     * Whether sensitive notification protection should disable flyout
+     */
+    private boolean mSensitiveNotificationProtectionActive = false;
+
     /** Animator for animating the expanded view's alpha (including the TaskView inside it). */
     private final ValueAnimator mExpandedViewAlphaAnimator = ValueAnimator.ofFloat(0f, 1f);
 
@@ -1447,6 +1452,12 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
+    void updateLocale() {
+        if (mBubbleOverflow != null && mBubbleOverflow.getExpandedView() != null) {
+            mBubbleOverflow.getExpandedView().updateLocale();
+        }
+    }
+
     private void updateOverflow() {
         mBubbleOverflow.update();
         mBubbleContainer.reorderView(mBubbleOverflow.getIconView(),
@@ -2199,6 +2210,11 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
+    void onSensitiveNotificationProtectionStateChanged(
+            boolean sensitiveNotificationProtectionActive) {
+        mSensitiveNotificationProtectionActive = sensitiveNotificationProtectionActive;
+    }
+
     /**
      * Asks the BubbleController to hide the IME from anywhere, whether it's focused on Bubbles or
      * not.
@@ -2842,6 +2858,7 @@ public class BubbleStackView extends FrameLayout
                 || isExpanded()
                 || mIsExpansionAnimating
                 || mIsGestureInProgress
+                || mSensitiveNotificationProtectionActive
                 || mBubbleToExpandAfterFlyoutCollapse != null
                 || bubbleView == null) {
             if (bubbleView != null && mFlyout.getVisibility() != VISIBLE) {

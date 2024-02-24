@@ -3633,6 +3633,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 userId == UserHandle.USER_SYSTEM ? UserHandle.USER_ALL : userId);
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
+        updateContentProtectionPolicyCache(userId);
 
         final List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs;
         synchronized (getLockObject()) {
@@ -23532,6 +23533,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } else {
             return policy;
         }
+    }
+
+    private void updateContentProtectionPolicyCache(@UserIdInt int userId) {
+        mPolicyCache.setContentProtectionPolicy(
+                userId,
+                mDevicePolicyEngine.getResolvedPolicy(PolicyDefinition.CONTENT_PROTECTION, userId));
     }
 
     @Override

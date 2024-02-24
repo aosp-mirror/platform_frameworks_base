@@ -109,7 +109,7 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
 
     /** Plays the turbulence noise with linear ease-in. */
     @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-    fun playEaseIn(offsetX: Float = 0f, offsetY: Float = 0f, onAnimationEnd: Runnable? = null) {
+    fun playEaseIn(onAnimationEnd: Runnable? = null) {
         if (noiseConfig == null) {
             return
         }
@@ -129,8 +129,8 @@ class TurbulenceNoiseView(context: Context?, attrs: AttributeSet?) : View(contex
             val progress = updateListener.animatedValue as Float
 
             shader.setNoiseMove(
-                offsetX + initialX + timeInSec * config.noiseMoveSpeedX,
-                offsetY + initialY + timeInSec * config.noiseMoveSpeedY,
+                initialX + timeInSec * config.noiseMoveSpeedX,
+                initialY + timeInSec * config.noiseMoveSpeedY,
                 initialZ + timeInSec * config.noiseMoveSpeedZ
             )
 

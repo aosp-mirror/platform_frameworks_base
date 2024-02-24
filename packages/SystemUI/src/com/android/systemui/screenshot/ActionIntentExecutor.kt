@@ -31,10 +31,13 @@ import android.view.WindowManager
 import android.view.WindowManagerGlobal
 import com.android.app.tracing.coroutines.launch
 import com.android.internal.infra.ServiceConnector
+import com.android.systemui.Flags.screenshotActionDismissSystemWindows
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.DisplayTracker
+import com.android.systemui.shared.system.ActivityManagerWrapper
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
@@ -46,9 +49,11 @@ class ActionIntentExecutor
 @Inject
 constructor(
     private val context: Context,
+    private val activityManagerWrapper: ActivityManagerWrapper,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val displayTracker: DisplayTracker,
+    private val keyguardController: ScreenshotKeyguardController,
 ) {
     /**
      * Execute the given intent with startActivity while performing operations for screenshot action
@@ -74,7 +79,14 @@ constructor(
         user: UserHandle,
         overrideTransition: Boolean,
     ) {
-        dismissKeyguard()
+        if (screenshotActionDismissSystemWindows()) {
+            keyguardController.dismiss()
+            activityManagerWrapper.closeSystemWindows(
+                CentralSurfaces.SYSTEM_DIALOG_REASON_SCREENSHOT
+            )
+        } else {
+            dismissKeyguard()
+        }
 
         if (user == myUserHandle()) {
             withContext(mainDispatcher) { context.startActivity(intent, options) }

@@ -268,10 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"已儲存"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"解除連結"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"啟動"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"明天自動重新開啟"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"「快速共享」、「尋找我的裝置」和裝置位置等功能都會使用藍牙"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音訊"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳機"</string>
@@ -532,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"此裝置由你的家長管理。家長可以查看及管理裝置上的資料，例如你使用的應用程式、位置和裝置使用時間。"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"由信任的代理保持解鎖狀態"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"防盜保護\n嘗試解鎖次數過多，裝置已上鎖"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"音效設定"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"自動為媒體加入字幕"</string>
@@ -541,8 +540,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"停用"</string>
     <string name="sound_settings" msgid="8874581353127418308">"音效和震動"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"設定"</string>
-    <!-- no translation found for volume_panel_captioning_title (5984936949147684357) -->
-    <skip />
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"即時字幕"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"音量已降至較安全的水平"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"以高音量使用耳機的時間已超過建議範圍"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"耳機音量已超過本週安全限制"</string>
@@ -586,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"震動"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s音量控制項"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"有來電和通知時會發出鈴聲 (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"正在播放「<xliff:g id="LABEL">%s</xliff:g>」的裝置："</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"音訊播放媒體"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"系統使用者介面調諧器"</string>
     <string name="status_bar" msgid="4357390266055077437">"狀態列"</string>
     <string name="demo_mode" msgid="263484519766901593">"系統使用者介面示範模式"</string>

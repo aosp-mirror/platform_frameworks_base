@@ -50,6 +50,15 @@ class KeyguardIndicationArea(
         )
     }
 
+    override fun setAlpha(alpha: Float) {
+        super.setAlpha(alpha)
+
+        if (alpha == 0f) {
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+        } else {
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+        }
+    }
     private fun indicationTopRow(): KeyguardIndicationTextView {
         return KeyguardIndicationTextView(context, attrs).apply {
             id = R.id.keyguard_indication_text

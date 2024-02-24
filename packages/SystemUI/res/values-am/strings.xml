@@ -268,10 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ተቀምጧል"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ግንኙነትን አቋርጥ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ያግብሩ"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"ነገ እንደገና በራስ-ሰር አስጀምር"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"እንደ ፈጣን ማጋራት፣ የእኔን መሣሪያ አግኝ እና የመሣሪያ አካባቢ ያሉ ባህሪያት ብሉቱዝን ይጠቀማሉ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ባትሪ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ኦዲዮ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ማዳመጫ"</string>
@@ -532,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ይህ መሣሪያ በእርስዎ ወላጅ የሚተዳደር ነው። ወላጅዎ የሚጠቀሙባቸውን መተግበሪያዎች፣ አካባቢዎን እና የማያ ገፅ ጊዜዎን የመሳሰሉ መረጃዎችን ማየት እና ማስተዳደር ይችላል።"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"በ TrustAgent እንደተከፈተ ቀርቷል"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"የስርቆት መከላከያ\nመሳሪያ ተቆልፏል፣ በጣም ብዙ የመክፈት ሙከራዎች"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>። <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"የድምፅ ቅንብሮች"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ራስሰር የሥዕል መግለጫ ጽሑፍን ሚዲያ"</string>
@@ -585,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ንዘር"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s የድምፅ መቆጣጠሪያዎች"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"ጥሪዎች እና ማሳወቂያዎች (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>) ላይ ይደውላሉ"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> እየተጫወተ ያለው በ"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ኦዲዮ ይጫወታል በ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"የስርዓት በይነገጽ መቃኛ"</string>
     <string name="status_bar" msgid="4357390266055077437">"የሁኔታ አሞሌ"</string>
     <string name="demo_mode" msgid="263484519766901593">"የስርዓት ተጠቃሚ በይነገጽ ማሳያ ሁነታ"</string>

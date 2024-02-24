@@ -43,6 +43,9 @@ import com.android.internal.inputmethod.InputBindResult;
  * the given {@link Handler} thread if {@link IInputMethodClient} is not a proxy object. Be careful
  * about its call ordering characteristics.</p>
  */
+// TODO(b/322895594) Mark this class to be host side test compatible once enabling fw/services in
+//     Ravenwood (mark this class with @RavenwoodKeepWholeClass and #create with @RavenwoodReplace,
+//     so Ravenwood can properly swap create method during test execution).
 final class IInputMethodClientInvoker {
     private static final String TAG = InputMethodManagerService.TAG;
     private static final boolean DEBUG = InputMethodManagerService.DEBUG;
@@ -62,6 +65,16 @@ final class IInputMethodClientInvoker {
         }
         final boolean isProxy = Binder.isProxy(inputMethodClient);
         return new IInputMethodClientInvoker(inputMethodClient, isProxy, isProxy ? null : handler);
+    }
+
+    @AnyThread
+    @Nullable
+    static IInputMethodClientInvoker create$ravenwood(
+            @Nullable IInputMethodClient inputMethodClient, @NonNull Handler handler) {
+        if (inputMethodClient == null) {
+            return null;
+        }
+        return new IInputMethodClientInvoker(inputMethodClient, true, null);
     }
 
     private IInputMethodClientInvoker(@NonNull IInputMethodClient target,

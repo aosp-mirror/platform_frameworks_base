@@ -849,6 +849,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void setNotificationGroupWhen(long whenMillis) {
         if (mIsSummaryWithChildren) {
             mChildrenContainer.setNotificationGroupWhen(whenMillis);
+            mPublicLayout.setNotificationWhen(whenMillis);
         } else {
             Log.w(TAG, "setNotificationGroupWhen( whenMillis: " + whenMillis + ")"
                     + " mIsSummaryWithChildren: false"
@@ -2704,6 +2705,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void onAttachedChildrenCountChanged() {
+        final boolean wasSummary = mIsSummaryWithChildren;
         mIsSummaryWithChildren = mChildrenContainer != null
                 && mChildrenContainer.getNotificationChildCount() > 0;
         if (mIsSummaryWithChildren) {
@@ -2713,6 +2715,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
                         isConversation());
             }
+        }
+        if (!mIsSummaryWithChildren && wasSummary) {
+            // Reset the 'when' once the row stops being a summary
+            mPublicLayout.setNotificationWhen(mEntry.getSbn().getNotification().when);
         }
         getShowingLayout().updateBackgroundColor(false /* animate */);
         mPrivateLayout.updateExpandButtons(isExpandable());

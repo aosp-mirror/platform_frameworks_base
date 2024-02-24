@@ -6014,6 +6014,24 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     false /*validateIncomingUser*/);
         }
 
+        @Override
+        public int startActivityWithScreenshot(@NonNull Intent intent,
+                @NonNull String callingPackage, int callingUid, int callingPid,
+                @Nullable IBinder resultTo, @Nullable Bundle options, int userId) {
+            return getActivityStartController()
+                    .obtainStarter(intent, "startActivityWithScreenshot")
+                    .setCallingUid(callingUid)
+                    .setCallingPid(callingPid)
+                    .setCallingPackage(callingPackage)
+                    .setResultTo(resultTo)
+                    .setActivityOptions(createSafeActivityOptionsWithBalAllowed(options))
+                    .setRealCallingUid(Binder.getCallingUid())
+                    .setUserId(userId)
+                    .setBackgroundStartPrivileges(BackgroundStartPrivileges.ALLOW_BAL)
+                    .setFreezeScreen(true)
+                    .execute();
+        }
+
         /**
          * Called after virtual display Id is updated by
          * {@link com.android.server.vr.Vr2dDisplay} with a specific

@@ -242,6 +242,11 @@ public class BubbleOverflowContainerView extends LinearLayout {
         mEmptyStateSubtitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize);
     }
 
+    public void updateLocale() {
+        mEmptyStateTitle.setText(mContext.getString(R.string.bubble_overflow_empty_title));
+        mEmptyStateSubtitle.setText(mContext.getString(R.string.bubble_overflow_empty_subtitle));
+    }
+
     private final BubbleData.Listener mDataListener = new BubbleData.Listener() {
 
         @Override

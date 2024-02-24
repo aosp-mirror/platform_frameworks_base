@@ -268,10 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ছেভ কৰা হৈছে"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"সংযোগ বিচ্ছিন্ন কৰক"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"সক্ৰিয় কৰক"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"কাইলৈ পুনৰ স্বয়ংক্ৰিয়ভাৱে অন কৰক"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Quick Share, Find My Device আৰু ডিভাইচৰ অৱস্থানৰ দৰে সুবিধাই ব্লুটুথ ব্যৱহাৰ কৰে"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"বেটাৰী <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"অডিঅ’"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"হেডছেট"</string>
@@ -532,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"এই ডিভাইচটো আপোনাৰ অভিভাৱকে পৰিচালনা কৰে। আপোনাৰ অভিভাৱকে আপুনি ব্যৱহাৰ কৰা এপ্‌, আপোনাৰ অৱস্থান আৰু আপুনি ডিভাইচত অতিবাহিত কৰা সময়ৰ দৰে তথ্য চাব আৰু পৰিচালনা কৰিব পাৰে।"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"ভিপিএন"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgentএ আনলক কৰি ৰাখিছে"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"চুৰিৰ পৰা সুৰক্ষা\nডিভাইচ লক আছে, বহুবাৰ আনলকৰ চেষ্টা কৰা হৈছে"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ধ্বনিৰ ছেটিং"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"স্বয়ংক্ৰিয় কেপশ্বন মিডিয়া"</string>
@@ -585,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"কম্পন কৰক"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ধ্বনি নিয়ন্ত্ৰণসমূহ"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"কল আৰু জাননীবোৰ ইমান ভলিউমত বাজিব (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"ইয়াত <xliff:g id="LABEL">%s</xliff:g> প্লে’ হৈ আছে"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"অডিঅ’ ইয়াত প্লে’ হ’ব"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"স্থিতি দণ্ড"</string>
     <string name="demo_mode" msgid="263484519766901593">"ছিষ্টেমৰ UI প্ৰদৰ্শন ম\'ড"</string>

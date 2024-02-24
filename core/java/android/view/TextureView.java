@@ -196,8 +196,6 @@ public class TextureView extends View {
     private Canvas mCanvas;
     private int mSaveCount;
 
-    @Surface.FrameRateCompatibility int mFrameRateCompatibility;
-
     private final Object[] mNativeWindowLock = new Object[0];
     // Set by native code, do not write!
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)

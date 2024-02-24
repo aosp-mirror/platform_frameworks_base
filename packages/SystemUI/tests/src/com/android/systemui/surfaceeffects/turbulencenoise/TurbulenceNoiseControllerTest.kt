@@ -166,4 +166,28 @@ class TurbulenceNoiseControllerTest : SysuiTestCase() {
             assertThat(config.color).isEqualTo(expectedColor)
         }
     }
+
+    @Test
+    fun play_initializesShader() {
+        val expectedNoiseOffset = floatArrayOf(0.1f, 0.2f, 0.3f)
+        val config =
+            TurbulenceNoiseAnimationConfig(
+                noiseOffsetX = expectedNoiseOffset[0],
+                noiseOffsetY = expectedNoiseOffset[1],
+                noiseOffsetZ = expectedNoiseOffset[2]
+            )
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        val turbulenceNoiseController = TurbulenceNoiseController(turbulenceNoiseView)
+
+        fakeExecutor.execute {
+            turbulenceNoiseController.play(SIMPLEX_NOISE, config)
+
+            assertThat(turbulenceNoiseView.noiseConfig).isNotNull()
+            val shader = turbulenceNoiseView.turbulenceNoiseShader!!
+            assertThat(shader).isNotNull()
+            assertThat(shader.noiseOffsetX).isEqualTo(expectedNoiseOffset[0])
+            assertThat(shader.noiseOffsetY).isEqualTo(expectedNoiseOffset[1])
+            assertThat(shader.noiseOffsetZ).isEqualTo(expectedNoiseOffset[2])
+        }
+    }
 }

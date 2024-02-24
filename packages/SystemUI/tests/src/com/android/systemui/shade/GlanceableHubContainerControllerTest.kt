@@ -26,17 +26,20 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.testKosmos
@@ -45,6 +48,7 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Assert.assertThrows
@@ -113,6 +117,14 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             R.dimen.communal_bottom_edge_swipe_region_height,
             BOTTOM_SWIPE_REGION_WIDTH
         )
+
+        // Make communal available so that communalInteractor.desiredScene accurately reflects
+        // scene changes instead of just returning Blank.
+        mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
+        with(kosmos.testScope) {
+            launch { kosmos.setCommunalAvailable(true) }
+            testScheduler.runCurrent()
+        }
 
         initAndAttachContainerView()
     }

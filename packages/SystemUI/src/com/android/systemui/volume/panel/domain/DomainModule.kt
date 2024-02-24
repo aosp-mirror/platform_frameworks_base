@@ -52,6 +52,7 @@ interface DomainModule {
             return setOf(
                 VolumePanelComponents.ANC,
                 VolumePanelComponents.CAPTIONING,
+                VolumePanelComponents.VOLUME_SLIDERS,
                 VolumePanelComponents.MEDIA_OUTPUT,
                 VolumePanelComponents.BOTTOM_BAR,
             )

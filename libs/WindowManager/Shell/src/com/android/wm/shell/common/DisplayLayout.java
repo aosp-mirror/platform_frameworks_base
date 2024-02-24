@@ -22,12 +22,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.os.Process.SYSTEM_UID;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
-import static android.util.RotationUtils.rotateBounds;
-import static android.util.RotationUtils.rotateInsets;
 import static android.view.Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
-import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_270;
-import static android.view.Surface.ROTATION_90;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -40,11 +35,9 @@ import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.Size;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
-import android.view.Gravity;
 import android.view.InsetsState;
 import android.view.Surface;
 import android.view.WindowInsets;
@@ -226,25 +219,22 @@ public class DisplayLayout {
 
     /**
      * Apply a rotation to this layout and its parameters.
-     * @param res
-     * @param targetRotation
      */
-    public void rotateTo(Resources res, @Surface.Rotation int targetRotation) {
-        final int rotationDelta = (targetRotation - mRotation + 4) % 4;
-        final boolean changeOrient = (rotationDelta % 2) != 0;
-
+    public void rotateTo(Resources res, @Surface.Rotation int toRotation) {
         final int origWidth = mWidth;
         final int origHeight = mHeight;
+        final int fromRotation = mRotation;
+        final int rotationDelta = (toRotation - fromRotation + 4) % 4;
+        final boolean changeOrient = (rotationDelta % 2) != 0;
 
-        mRotation = targetRotation;
+        mRotation = toRotation;
         if (changeOrient) {
             mWidth = origHeight;
             mHeight = origWidth;
         }
 
-        if (mCutout != null && !mCutout.isEmpty()) {
-            mCutout = calculateDisplayCutoutForRotation(mCutout, rotationDelta, origWidth,
-                    origHeight);
+        if (mCutout != null) {
+            mCutout = mCutout.getRotated(origWidth, origHeight, fromRotation, toRotation);
         }
 
         recalcInsets(res);
@@ -395,96 +385,6 @@ public class DisplayLayout {
             outInsets.top += displayCutout.getSafeInsetTop();
             outInsets.right += displayCutout.getSafeInsetRight();
             outInsets.bottom += displayCutout.getSafeInsetBottom();
-        }
-    }
-
-    /** Calculate the DisplayCutout for a particular display size/rotation. */
-    public static DisplayCutout calculateDisplayCutoutForRotation(
-            DisplayCutout cutout, int rotation, int displayWidth, int displayHeight) {
-        if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
-            return null;
-        }
-        if (rotation == ROTATION_0) {
-            return computeSafeInsets(cutout, displayWidth, displayHeight);
-        }
-        final Insets waterfallInsets = rotateInsets(cutout.getWaterfallInsets(), rotation);
-        final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-        Rect[] cutoutRects = cutout.getBoundingRectsAll();
-        final Rect[] newBounds = new Rect[cutoutRects.length];
-        final Rect displayBounds = new Rect(0, 0, displayWidth, displayHeight);
-        for (int i = 0; i < cutoutRects.length; ++i) {
-            final Rect rect = new Rect(cutoutRects[i]);
-            if (!rect.isEmpty()) {
-                rotateBounds(rect, displayBounds, rotation);
-            }
-            newBounds[getBoundIndexFromRotation(i, rotation)] = rect;
-        }
-        final DisplayCutout.CutoutPathParserInfo info = cutout.getCutoutPathParserInfo();
-        final DisplayCutout.CutoutPathParserInfo newInfo = new DisplayCutout.CutoutPathParserInfo(
-                info.getDisplayWidth(), info.getDisplayHeight(), info.getPhysicalDisplayWidth(),
-                info.getPhysicalDisplayHeight(), info.getDensity(), info.getCutoutSpec(), rotation,
-                info.getScale(), info.getPhysicalPixelDisplaySizeRatio());
-        return computeSafeInsets(
-                DisplayCutout.constructDisplayCutout(newBounds, waterfallInsets, newInfo),
-                rotated ? displayHeight : displayWidth,
-                rotated ? displayWidth : displayHeight);
-    }
-
-    private static int getBoundIndexFromRotation(int index, int rotation) {
-        return (index - rotation) < 0
-                ? index - rotation + DisplayCutout.BOUNDS_POSITION_LENGTH
-                : index - rotation;
-    }
-
-    /** Calculate safe insets. */
-    public static DisplayCutout computeSafeInsets(DisplayCutout inner,
-            int displayWidth, int displayHeight) {
-        if (inner == DisplayCutout.NO_CUTOUT) {
-            return null;
-        }
-
-        final Size displaySize = new Size(displayWidth, displayHeight);
-        final Rect safeInsets = computeSafeInsets(displaySize, inner);
-        return inner.replaceSafeInsets(safeInsets);
-    }
-
-    private static Rect computeSafeInsets(
-            Size displaySize, DisplayCutout cutout) {
-        if (displaySize.getWidth() == displaySize.getHeight()) {
-            throw new UnsupportedOperationException("not implemented: display=" + displaySize
-                    + " cutout=" + cutout);
-        }
-
-        int leftInset = Math.max(cutout.getWaterfallInsets().left,
-                findCutoutInsetForSide(displaySize, cutout.getBoundingRectLeft(), Gravity.LEFT));
-        int topInset = Math.max(cutout.getWaterfallInsets().top,
-                findCutoutInsetForSide(displaySize, cutout.getBoundingRectTop(), Gravity.TOP));
-        int rightInset = Math.max(cutout.getWaterfallInsets().right,
-                findCutoutInsetForSide(displaySize, cutout.getBoundingRectRight(), Gravity.RIGHT));
-        int bottomInset = Math.max(cutout.getWaterfallInsets().bottom,
-                findCutoutInsetForSide(displaySize, cutout.getBoundingRectBottom(),
-                        Gravity.BOTTOM));
-
-        return new Rect(leftInset, topInset, rightInset, bottomInset);
-    }
-
-    private static int findCutoutInsetForSide(Size display, Rect boundingRect, int gravity) {
-        if (boundingRect.isEmpty()) {
-            return 0;
-        }
-
-        int inset = 0;
-        switch (gravity) {
-            case Gravity.TOP:
-                return Math.max(inset, boundingRect.bottom);
-            case Gravity.BOTTOM:
-                return Math.max(inset, display.getHeight() - boundingRect.top);
-            case Gravity.LEFT:
-                return Math.max(inset, boundingRect.right);
-            case Gravity.RIGHT:
-                return Math.max(inset, display.getWidth() - boundingRect.left);
-            default:
-                throw new IllegalArgumentException("unknown gravity: " + gravity);
         }
     }
 

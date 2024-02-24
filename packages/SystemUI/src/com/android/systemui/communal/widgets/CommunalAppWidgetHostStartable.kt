@@ -18,11 +18,14 @@ package com.android.systemui.communal.widgets
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import com.android.systemui.util.kotlin.pairwise
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -37,6 +40,7 @@ class CommunalAppWidgetHostStartable
 constructor(
     private val appWidgetHost: CommunalAppWidgetHost,
     private val communalInteractor: CommunalInteractor,
+    private val userTracker: UserTracker,
     @Background private val bgScope: CoroutineScope,
     @Main private val uiDispatcher: CoroutineDispatcher
 ) : CoreStartable {
@@ -47,6 +51,14 @@ constructor(
             .pairwise(false)
             .filter { (previous, new) -> previous != new }
             .onEach { (_, shouldListen) -> updateAppWidgetHostActive(shouldListen) }
+            .sample(communalInteractor.communalWidgets, ::Pair)
+            .onEach { (withPrev, widgets) ->
+                val (_, isActive) = withPrev
+                // The validation is performed once the hub becomes active.
+                if (isActive) {
+                    validateWidgetsAndDeleteOrphaned(widgets)
+                }
+            }
             .launchIn(bgScope)
 
         appWidgetHost.appWidgetIdToRemove
@@ -63,4 +75,15 @@ constructor(
                 appWidgetHost.stopListening()
             }
         }
+
+    /**
+     * Ensure the existence of all associated users for widgets, and remove widgets belonging to
+     * users who have been deleted.
+     */
+    private fun validateWidgetsAndDeleteOrphaned(widgets: List<CommunalWidgetContentModel>) {
+        val currentUserIds = userTracker.userProfiles.map { it.id }.toSet()
+        widgets
+            .filter { widget -> !currentUserIds.contains(widget.providerInfo.profile?.identifier) }
+            .onEach { widget -> communalInteractor.deleteWidget(id = widget.appWidgetId) }
+    }
 }

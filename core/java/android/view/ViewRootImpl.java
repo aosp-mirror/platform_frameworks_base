@@ -30,6 +30,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -1027,6 +1028,13 @@ public final class ViewRootImpl implements ViewParent,
     // as needed and can be useful for power saving.
     // Should not enable the dVRR feature if the value is false.
     private boolean mIsFrameRatePowerSavingsBalanced = true;
+    // Used to check if there is a conflict between different frame rate voting.
+    // Take 24 and 30 as an example, 24 is not a divisor of 30.
+    // We consider there is a conflict.
+    private boolean mIsFrameRateConflicted = false;
+    // Used to set frame rate compatibility.
+    @Surface.FrameRateCompatibility int mFrameRateCompatibility =
+            FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
     // time for touch boost period.
     private static final int FRAME_RATE_TOUCH_BOOST_TIME = 3000;
     // time for checking idle status periodically.
@@ -4110,6 +4118,7 @@ public final class ViewRootImpl implements ViewParent,
                 ? mFrameRateCategoryLowCount - 1 : mFrameRateCategoryLowCount;
         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
         mPreferredFrameRate = -1;
+        mIsFrameRateConflicted = false;
     }
 
     private void createSyncIfNeeded() {
@@ -6508,6 +6517,7 @@ public final class ViewRootImpl implements ViewParent,
                     break;
                 case MSG_FRAME_RATE_SETTING:
                     mPreferredFrameRate = 0;
+                    mFrameRateCompatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
                     setPreferredFrameRate(mPreferredFrameRate);
                     break;
             }
@@ -12286,9 +12296,15 @@ public final class ViewRootImpl implements ViewParent,
         if (!shouldSetFrameRateCategory()) {
             return;
         }
+        int categoryFromConflictedFrameRates = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+        if (mIsFrameRateConflicted) {
+            categoryFromConflictedFrameRates = mPreferredFrameRate > 60
+                    ? FRAME_RATE_CATEGORY_HIGH : FRAME_RATE_CATEGORY_NORMAL;
+        }
 
         int frameRateCategory = mIsTouchBoosting
-                ? FRAME_RATE_CATEGORY_HIGH_HINT : preferredFrameRateCategory;
+                ? FRAME_RATE_CATEGORY_HIGH_HINT
+                : Math.max(preferredFrameRateCategory, categoryFromConflictedFrameRates);
 
         // FRAME_RATE_CATEGORY_HIGH has a higher precedence than FRAME_RATE_CATEGORY_HIGH_HINT
         // For now, FRAME_RATE_CATEGORY_HIGH_HINT is used for boosting with user interaction.
@@ -12338,7 +12354,7 @@ public final class ViewRootImpl implements ViewParent,
                                 + preferredFrameRate);
                 }
                 mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
-                    Surface.FRAME_RATE_COMPATIBILITY_DEFAULT).applyAsyncUnsafe();
+                    mFrameRateCompatibility).applyAsyncUnsafe();
                 mLastPreferredFrameRate = preferredFrameRate;
             }
         } catch (Exception e) {
@@ -12361,7 +12377,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldSetFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
-        return mSurface.isValid() && mPreferredFrameRate > 0 && shouldEnableDvrr();
+        return mSurface.isValid() && mPreferredFrameRate > 0
+                && shouldEnableDvrr() && !mIsFrameRateConflicted;
     }
 
     private boolean shouldTouchBoost(int motionEventAction, int windowType) {
@@ -12404,29 +12421,45 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * Allow Views to vote for the preferred frame rate
+     * Allow Views to vote for the preferred frame rate and compatibility.
      * When determining the preferred frame rate value,
      * we follow this logic: If no preferred frame rate has been set yet,
      * we assign the value of frameRate as the preferred frame rate.
-     * If either the current or the new preferred frame rate exceeds 60 Hz,
-     * we select the higher value between them.
-     * However, if both values are 60 Hz or lower, we set the preferred frame rate
-     * to 60 Hz to maintain optimal performance.
+     * IF there are multiple frame rates are voted:
+     * 1. There is a frame rate is a multiple of all other frame rates.
+     * We choose this frmae rate to be the one to be set.
+     * 2. There is no frame rate can be a multiple of others
+     * We set category to HIGH if the maximum frame rate is greater than 60.
+     * Otherwise, we set category to NORMAL.
+     *
+     * Use FRAME_RATE_COMPATIBILITY_GTE for velocity and FRAME_RATE_COMPATIBILITY_FIXED_SOURCE
+     * for TextureView video play and user requested frame rate.
      *
      * @param frameRate the preferred frame rate of a View
+     * @param frameRateCompatibility the preferred frame rate compatibility of a View
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
-    public void votePreferredFrameRate(float frameRate) {
+    public void votePreferredFrameRate(float frameRate, int frameRateCompatibility) {
         if (frameRate <= 0) {
             return;
         }
+        if (mPreferredFrameRate > 0 && mPreferredFrameRate % frameRate != 0
+                && frameRate % mPreferredFrameRate != 0) {
+            mIsFrameRateConflicted = true;
+            mFrameRateCompatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+        }
+        if (frameRate > mPreferredFrameRate) {
+            mFrameRateCompatibility = frameRateCompatibility;
+        }
 
         mPreferredFrameRate = Math.max(mPreferredFrameRate, frameRate);
-
         mHasInvalidation = true;
-        mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
-        mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
-                FRAME_RATE_SETTING_REEVALUATE_TIME);
+
+        if (!mIsFrameRateConflicted) {
+            mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
+            mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
+                    FRAME_RATE_SETTING_REEVALUATE_TIME);
+        }
     }
 
     /**
@@ -12451,6 +12484,14 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public float getPreferredFrameRate() {
         return mPreferredFrameRate >= 0 ? mPreferredFrameRate : mLastPreferredFrameRate;
+    }
+
+    /**
+     * Get the value of mFrameRateCompatibility
+     */
+    @VisibleForTesting
+    public int getFrameRateCompatibility() {
+        return mFrameRateCompatibility;
     }
 
     /**
@@ -12500,6 +12541,15 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public boolean isFrameRatePowerSavingsBalanced() {
         return mIsFrameRatePowerSavingsBalanced;
+    }
+
+    /**
+     * Get the value of mIsFrameRateConflicted
+     * Can be used to checked if there is a conflict of frame rate votes.
+     */
+    @VisibleForTesting
+    public boolean isFrameRateConflicted() {
+        return mIsFrameRateConflicted;
     }
 
     /**

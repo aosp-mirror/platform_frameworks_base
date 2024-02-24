@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.composable.section
 
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -38,14 +39,17 @@ import com.android.systemui.keyguard.ui.composable.modifier.onTopPlacementChange
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import javax.inject.Inject
 
-class ClockSection
+/** Provides small clock and large clock composables for the default clock face. */
+class DefaultClockSection
 @Inject
 constructor(
     private val viewModel: KeyguardClockViewModel,
     private val clockInteractor: KeyguardClockInteractor,
     private val aodBurnInViewModel: AodBurnInViewModel,
+    private val lockscreenSmartspaceController: LockscreenSmartspaceController,
 ) {
 
     @Composable
@@ -151,6 +155,7 @@ constructor(
                         (newClockView.parent as? ViewGroup)?.removeView(newClockView)
                         it.addView(newClockView)
                     },
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }

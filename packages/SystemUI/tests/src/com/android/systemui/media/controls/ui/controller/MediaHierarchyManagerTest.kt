@@ -24,8 +24,10 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
@@ -508,6 +510,10 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Test
     fun testCommunalLocation() =
         testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
             communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
             runCurrent()
             verify(mediaCarouselController)
@@ -525,6 +531,66 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
                     eq(MediaHierarchyManager.LOCATION_QQS),
+                    any(MediaHostState::class.java),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+        }
+
+    @Test
+    fun testCommunalLocation_showsOverLockscreen() =
+        testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            // Device is on lock screen.
+            whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
+
+            // UMO goes to communal even over the lock screen.
+            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            runCurrent()
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
+                    nullable(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+        }
+
+    @Test
+    fun testCommunalLocation_showsUntilQsExpands() =
+        testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            // Device is on lock screen.
+            whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
+
+            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            runCurrent()
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
+                    nullable(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+            clearInvocations(mediaCarouselController)
+
+            // Start opening the shade.
+            mediaHierarchyManager.qsExpansion = 0.1f
+            runCurrent()
+
+            // UMO goes to the shade instead.
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_QS),
                     any(MediaHostState::class.java),
                     eq(false),
                     anyLong(),

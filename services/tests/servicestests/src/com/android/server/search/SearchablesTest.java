@@ -92,7 +92,7 @@ public class SearchablesTest {
     public void testNonSearchable() {
         // test basic array & hashmap
         Searchables searchables = new Searchables(mContext, 0);
-        searchables.updateSearchableList();
+        searchables.updateSearchableListIfNeeded();
 
         // confirm that we return null for non-searchy activities
         ComponentName nonActivity = new ComponentName("com.android.frameworks.servicestests",
@@ -121,7 +121,7 @@ public class SearchablesTest {
         doReturn(true).when(mPackageManagerInternal).canAccessComponent(anyInt(), any(), anyInt());
 
         Searchables searchables = new Searchables(mContext, 0);
-        searchables.updateSearchableList();
+        searchables.updateSearchableListIfNeeded();
         // tests with "real" searchables (deprecate, this should be a unit test)
         ArrayList<SearchableInfo> searchablesList = searchables.getSearchablesList();
         int count = searchablesList.size();
@@ -139,7 +139,7 @@ public class SearchablesTest {
         doReturn(false).when(mPackageManagerInternal).canAccessComponent(anyInt(), any(), anyInt());
 
         Searchables searchables = new Searchables(mContext, 0);
-        searchables.updateSearchableList();
+        searchables.updateSearchableListIfNeeded();
         ArrayList<SearchableInfo> searchablesList = searchables.getSearchablesList();
         assertNotNull(searchablesList);
         MoreAsserts.assertEmpty(searchablesList);

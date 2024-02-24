@@ -31,6 +31,7 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.settings.userTracker
 import com.android.systemui.smartspace.data.repository.smartspaceRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
@@ -46,6 +47,7 @@ val Kosmos.communalInteractor by Fixture {
         appWidgetHost = mock(),
         keyguardInteractor = keyguardInteractor,
         editWidgetsActivityStarter = editWidgetsActivityStarter,
+        userTracker = userTracker,
         logBuffer = logcatLogBuffer("CommunalInteractor"),
         tableLogBuffer = mock(),
         communalSettingsInteractor = communalSettingsInteractor,
@@ -60,9 +62,11 @@ suspend fun Kosmos.setCommunalAvailable(available: Boolean) {
     fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, available)
     if (available) {
         fakeUserRepository.asMainUser()
-        with(fakeKeyguardRepository) {
-            setIsEncryptedOrLockdown(false)
-            setKeyguardShowing(true)
-        }
+    } else {
+        fakeUserRepository.asDefaultUser()
+    }
+    with(fakeKeyguardRepository) {
+        setIsEncryptedOrLockdown(!available)
+        setKeyguardShowing(available)
     }
 }

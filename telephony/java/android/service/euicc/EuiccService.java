@@ -856,10 +856,22 @@ public abstract class EuiccService extends Service {
                 int slotId, IGetAvailableMemoryInBytesCallback callback) {
             mExecutor.execute(
                     () -> {
-                        long availableMemoryInBytes =
-                                EuiccService.this.onGetAvailableMemoryInBytes(slotId);
+                        long availableMemoryInBytes = EuiccManager.EUICC_MEMORY_FIELD_UNAVAILABLE;
+                        String unsupportedOperationMessage = "";
                         try {
-                            callback.onSuccess(availableMemoryInBytes);
+                            availableMemoryInBytes =
+                                    EuiccService.this.onGetAvailableMemoryInBytes(slotId);
+                        } catch (UnsupportedOperationException e) {
+                            unsupportedOperationMessage = e.getMessage();
+                        }
+
+                        try {
+                            if (!unsupportedOperationMessage.isEmpty()) {
+                                callback.onUnsupportedOperationException(
+                                        unsupportedOperationMessage);
+                            } else {
+                                callback.onSuccess(availableMemoryInBytes);
+                            }
                         } catch (RemoteException e) {
                             // Can't communicate with the phone process; ignore.
                         }

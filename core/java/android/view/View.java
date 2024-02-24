@@ -24,6 +24,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
@@ -85,6 +86,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.credentials.CredentialManager;
+import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
 import android.credentials.GetCredentialResponse;
@@ -129,6 +131,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.Vibrator;
 import android.os.vibrator.Flags;
+import android.service.credentials.CredentialProviderService;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -2366,6 +2369,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
+    // Used to set frame rate compatibility.
+    @Surface.FrameRateCompatibility int mFrameRateCompatibility =
+            FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 
     static {
         EMPTY_STATE_SET = StateSet.get(0);
@@ -7033,6 +7039,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
         Preconditions.checkNotNull(request, "request must not be null");
         Preconditions.checkNotNull(callback, "request must not be null");
+
+        for (CredentialOption option : request.getCredentialOptions()) {
+            ArrayList<AutofillId> ids = option.getCandidateQueryData()
+                    .getParcelableArrayList(
+                            CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId.class);
+            ids = ids != null ? ids : new ArrayList<>();
+            if (!ids.contains(getAutofillId())) {
+                ids.add(getAutofillId());
+            }
+            option.getCandidateQueryData()
+                    .putParcelableArrayList(CredentialProviderService.EXTRA_AUTOFILL_ID, ids);
+        }
         mViewCredentialHandler = new ViewCredentialHandler(request, callback);
     }
 
@@ -10875,8 +10893,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             structure.setAutofillId(new AutofillId(getAutofillId(),
                     AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId())));
         }
-        structure.setCredentialManagerRequest(getCredentialManagerRequest(),
-                getCredentialManagerCallback());
+        if (getViewCredentialHandler() != null) {
+            structure.setCredentialManagerRequest(
+                    getViewCredentialHandler().getRequest(),
+                    getViewCredentialHandler().getCallback());
+        }
         CharSequence cname = info.getClassName();
         structure.setClassName(cname != null ? cname.toString() : null);
         structure.setContentDescription(info.getContentDescription());
@@ -33524,7 +33545,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
                     }
                 } else {
-                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
+                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate,
+                            mFrameRateCompatibility);
                     return;
                 }
             }

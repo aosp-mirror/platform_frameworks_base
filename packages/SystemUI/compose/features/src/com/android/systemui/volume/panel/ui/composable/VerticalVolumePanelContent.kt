@@ -17,7 +17,6 @@
 package com.android.systemui.volume.panel.ui.composable
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,14 +33,12 @@ fun VolumePanelComposeScope.VerticalVolumePanelContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.animateContentSize(),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         for (component in layout.headerComponents) {
             AnimatedVisibility(component.isVisible) {
-                with(component.component as ComposeVolumePanelUiComponent) {
-                    Content(Modifier.weight(1f))
-                }
+                with(component.component as ComposeVolumePanelUiComponent) { Content(Modifier) }
             }
         }
         for (component in layout.contentComponents) {
@@ -55,9 +52,12 @@ fun VolumePanelComposeScope.VerticalVolumePanelContent(
                 horizontalArrangement = Arrangement.spacedBy(if (isLargeScreen) 28.dp else 20.dp),
             ) {
                 for (component in layout.footerComponents) {
-                    AnimatedVisibility(component.isVisible) {
+                    AnimatedVisibility(
+                        visible = component.isVisible,
+                        modifier = Modifier.weight(1f),
+                    ) {
                         with(component.component as ComposeVolumePanelUiComponent) {
-                            Content(Modifier.weight(1f))
+                            Content(Modifier)
                         }
                     }
                 }
