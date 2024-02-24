@@ -16,6 +16,8 @@
 
 package com.android.server.autofill.ui;
 
+import static android.service.autofill.FillResponse.FLAG_CREDENTIAL_MANAGER_RESPONSE;
+
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
@@ -24,6 +26,7 @@ import android.annotation.UserIdInt;
 import android.content.IntentSender;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
+import android.service.autofill.Flags;
 import android.service.autofill.InlinePresentation;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -141,10 +144,12 @@ public final class InlineFillUi {
             return new InlineFillUi(inlineFillUiInfo, inlineAuthentication,
                     maxInputLengthForAutofill);
         } else if (response.getDatasets() != null) {
+            boolean ignoreHostSpec = Flags.autofillCredmanIntegration() && (
+                    (response.getFlags() & FLAG_CREDENTIAL_MANAGER_RESPONSE) != 0);
             SparseArray<Pair<Dataset, InlineSuggestion>> inlineSuggestions =
                     InlineSuggestionFactory.createInlineSuggestions(inlineFillUiInfo,
                             InlineSuggestionInfo.SOURCE_AUTOFILL, response.getDatasets(),
-                            uiCallback);
+                            uiCallback, ignoreHostSpec);
             return new InlineFillUi(inlineFillUiInfo, inlineSuggestions,
                     maxInputLengthForAutofill);
         }
@@ -160,7 +165,8 @@ public final class InlineFillUi {
             @NonNull InlineSuggestionUiCallback uiCallback) {
         SparseArray<Pair<Dataset, InlineSuggestion>> inlineSuggestions =
                 InlineSuggestionFactory.createInlineSuggestions(inlineFillUiInfo,
-                        InlineSuggestionInfo.SOURCE_PLATFORM, datasets, uiCallback);
+                        InlineSuggestionInfo.SOURCE_PLATFORM, datasets,
+                        uiCallback, /* ignoreHostSpec= */ false);
         return new InlineFillUi(inlineFillUiInfo, inlineSuggestions);
     }
 
@@ -254,7 +260,7 @@ public final class InlineFillUi {
         if (!TextUtils.isEmpty(mFilterText) && mFilterText.length() > mMaxInputLengthForAutofill) {
             if (sVerbose) {
                 Slog.v(TAG, "Not showing inline suggestion when user entered more than "
-                         + mMaxInputLengthForAutofill + " characters");
+                        + mMaxInputLengthForAutofill + " characters");
             }
             return new InlineSuggestionsResponse(inlineSuggestions);
         }

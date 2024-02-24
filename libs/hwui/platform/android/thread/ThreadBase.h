@@ -17,13 +17,13 @@
 #ifndef HWUI_THREADBASE_H
 #define HWUI_THREADBASE_H
 
-#include "WorkQueue.h"
-#include "utils/Macros.h"
-
 #include <utils/Looper.h>
 #include <utils/Thread.h>
 
 #include <algorithm>
+
+#include "thread/WorkQueue.h"
+#include "utils/Macros.h"
 
 namespace android::uirenderer {
 

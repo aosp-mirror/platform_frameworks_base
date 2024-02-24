@@ -18,7 +18,9 @@
 package com.android.systemui.communal.domain.interactor
 
 import android.app.smartspace.SmartspaceTarget
+import android.appwidget.AppWidgetProviderInfo
 import android.content.pm.UserInfo
+import android.os.UserHandle
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -51,6 +53,8 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
@@ -96,6 +100,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var communalPrefsRepository: FakeCommunalPrefsRepository
     private lateinit var editWidgetsActivityStarter: EditWidgetsActivityStarter
     private lateinit var sceneInteractor: SceneInteractor
+    private lateinit var userTracker: FakeUserTracker
 
     private lateinit var underTest: CommunalInteractor
 
@@ -113,6 +118,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         editWidgetsActivityStarter = kosmos.editWidgetsActivityStarter
         communalPrefsRepository = kosmos.fakeCommunalPrefsRepository
         sceneInteractor = kosmos.sceneInteractor
+        userTracker = kosmos.fakeUserTracker
 
         whenever(mainUser.isMain).thenReturn(true)
         whenever(secondaryUser.isMain).thenReturn(false)
@@ -207,25 +213,19 @@ class CommunalInteractorTest : SysuiTestCase() {
             keyguardRepository.setKeyguardOccluded(false)
             tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
 
-            // Widgets are available.
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = mock(),
-                    ),
-                    CommunalWidgetContentModel(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = mock(),
-                    ),
-                    CommunalWidgetContentModel(
-                        appWidgetId = 2,
-                        priority = 10,
-                        providerInfo = mock(),
-                    ),
-                )
+            val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(
+                userInfos = userInfos,
+                selectedUserIndex = 0,
+            )
+            runCurrent()
+
+            // Widgets available.
+            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
+            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
+            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
+            val widgets = listOf(widget1, widget2, widget3)
             widgetRepository.setCommunalWidgets(widgets)
 
             val widgetContent by collectLastValue(underTest.widgetContent)
@@ -455,6 +455,9 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun listensToSceneChange() =
         testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
             var desiredScene = collectLastValue(underTest.desiredScene)
             runCurrent()
             assertThat(desiredScene()).isEqualTo(CommunalSceneKey.Blank)
@@ -476,6 +479,30 @@ class CommunalInteractorTest : SysuiTestCase() {
             val desiredScene = collectLastValue(communalRepository.desiredScene)
             runCurrent()
             assertThat(desiredScene()).isEqualTo(targetScene)
+        }
+
+    @Test
+    fun desiredScene_communalNotAvailable_returnsBlank() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            val desiredScene by collectLastValue(underTest.desiredScene)
+
+            underTest.onSceneChanged(CommunalSceneKey.Communal)
+            assertThat(desiredScene).isEqualTo(CommunalSceneKey.Communal)
+
+            kosmos.setCommunalAvailable(false)
+            runCurrent()
+
+            // Scene returns blank when communal is not available.
+            assertThat(desiredScene).isEqualTo(CommunalSceneKey.Blank)
+
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            // After re-enabling, scene goes back to Communal.
+            assertThat(desiredScene).isEqualTo(CommunalSceneKey.Communal)
         }
 
     @Test
@@ -604,8 +631,28 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun isCommunalShowing() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            var isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
+            runCurrent()
+            assertThat(isCommunalShowing()).isEqualTo(false)
+
+            underTest.onSceneChanged(CommunalSceneKey.Communal)
+
+            isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
+            runCurrent()
+            assertThat(isCommunalShowing()).isEqualTo(true)
+        }
+
+    @Test
     fun isCommunalShowing_whenSceneContainerDisabled() =
         testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
             // Verify default is false
             val isCommunalShowing by collectLastValue(underTest.isCommunalShowing)
             runCurrent()
@@ -752,6 +799,38 @@ class CommunalInteractorTest : SysuiTestCase() {
             verify(editWidgetsActivityStarter).startActivity(widgetKey)
         }
 
+    @Test
+    fun filterWidgets_whenUserProfileRemoved() =
+        testScope.runTest {
+            // Keyguard showing, and tutorial completed.
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setKeyguardOccluded(false)
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+
+            // Only main user exists.
+            val userInfos = listOf(MAIN_USER_INFO)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(
+                userInfos = userInfos,
+                selectedUserIndex = 0,
+            )
+            runCurrent()
+
+            val widgetContent by collectLastValue(underTest.widgetContent)
+            // Given three widgets, and one of them is associated with pre-existing work profile.
+            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
+            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
+            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
+            val widgets = listOf(widget1, widget2, widget3)
+            widgetRepository.setCommunalWidgets(widgets)
+
+            // One widget is filtered out and the remaining two link to main user id.
+            assertThat(checkNotNull(widgetContent).size).isEqualTo(2)
+            widgetContent!!.forEachIndexed { _, model ->
+                assertThat(model.providerInfo.profile?.identifier).isEqualTo(MAIN_USER_INFO.id)
+            }
+        }
+
     private fun smartspaceTimer(id: String, timestamp: Long = 0L): SmartspaceTarget {
         val timer = mock(SmartspaceTarget::class.java)
         whenever(timer.smartspaceTargetId).thenReturn(id)
@@ -759,5 +838,18 @@ class CommunalInteractorTest : SysuiTestCase() {
         whenever(timer.remoteViews).thenReturn(mock(RemoteViews::class.java))
         whenever(timer.creationTimeMillis).thenReturn(timestamp)
         return timer
+    }
+
+    private fun createWidgetForUser(appWidgetId: Int, userId: Int): CommunalWidgetContentModel =
+        mock<CommunalWidgetContentModel> {
+            whenever(this.appWidgetId).thenReturn(appWidgetId)
+            val providerInfo = mock<AppWidgetProviderInfo>()
+            whenever(providerInfo.profile).thenReturn(UserHandle(userId))
+            whenever(this.providerInfo).thenReturn(providerInfo)
+        }
+
+    private companion object {
+        val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
+        val USER_INFO_WORK = UserInfo(10, "work", UserInfo.FLAG_PROFILE)
     }
 }

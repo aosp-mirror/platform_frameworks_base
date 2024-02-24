@@ -667,24 +667,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"טביעת האצבע אומתה"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"זיהוי הפנים בוצע"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"זיהוי הפנים בוצע. יש ללחוץ על אישור"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"החומרה לזיהוי טביעות אצבע לא זמינה"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"לא ניתן להגדיר טביעת אצבע"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"הזמן שהוקצב להגדרה של טביעת האצבע פג. יש לנסות שוב."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"הפעולה של טביעת האצבע בוטלה"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"הפעולה של טביעת האצבע בוטלה על ידי המשתמש"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"בוצעו יותר מדי ניסיונות. יש להשתמש בנעילת המסך במקום זאת."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"בוצעו יותר מדי ניסיונות. יש להשתמש בנעילת המסך במקום זאת."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"לא ניתן לעבד את טביעת האצבע. יש לנסות שוב."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"לא נסרקו טביעות אצבע"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"במכשיר הזה אין חיישן טביעות אצבע"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"החיישן מושבת באופן זמני"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"לא ניתן להשתמש בחיישן טביעות האצבע. צריך ליצור קשר עם ספק תיקונים."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"לחצן ההפעלה נלחץ"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"אצבע <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"שימוש בטביעת אצבע"</string>

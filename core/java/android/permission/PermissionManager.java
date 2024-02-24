@@ -1944,25 +1944,27 @@ public final class PermissionManager {
      *
      * @param permissionName The name of the permission you are checking for.
      * @param packageName The name of the package you are checking against.
-     * @param persistentDeviceId The persistent device id you are checking against.
-     * @param userId The user Id associated with context.
+     * @param persistentDeviceId The id of the physical device that you are checking permission
+     *                           against.
      *
      * @return If the package has the permission on the device, PERMISSION_GRANTED is
      * returned.  If it does not have the permission on the device, PERMISSION_DENIED
      * is returned.
      *
+     * @see VirtualDevice#getPersistentDeviceId()
      * @see PackageManager#PERMISSION_GRANTED
      * @see PackageManager#PERMISSION_DENIED
      *
      * @hide
      */
     @SystemApi
+    @PermissionResult
     @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
-    public static int checkPermission(@NonNull String permissionName, @NonNull String packageName,
-            @NonNull String persistentDeviceId, @UserIdInt int userId) {
+    public int checkPermission(@NonNull String permissionName, @NonNull String packageName,
+            @NonNull String persistentDeviceId) {
         return sPackageNamePermissionCache.query(
                 new PackageNamePermissionQuery(permissionName, packageName, persistentDeviceId,
-                        userId));
+                        mContext.getUserId()));
     }
 
     /**

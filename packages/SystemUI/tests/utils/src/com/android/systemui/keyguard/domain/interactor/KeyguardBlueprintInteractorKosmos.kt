@@ -29,5 +29,6 @@ val Kosmos.keyguardBlueprintInteractor by
             applicationScope = applicationCoroutineScope,
             context = applicationContext,
             splitShadeStateController = splitShadeStateController,
+            clockInteractor = keyguardClockInteractor,
         )
     }

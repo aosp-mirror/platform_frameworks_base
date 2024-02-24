@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Autentifikatu da hatz-marka"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Autentifikatu da aurpegia"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Hatz-marken hardwarea ez dago erabilgarri"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Ezin da konfiguratu hatz-marka"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Hatz-marka konfiguratzeko denbora-muga gainditu da. Saiatu berriro."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Bertan behera utzi da hatz-marka bidezko eragiketa"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Erabiltzaileak bertan behera utzi du hatz-marka bidezko eragiketa"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Saiakera gehiegi egin dira. Erabili pantailaren blokeoa."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Saiakera gehiegi egin dira. Erabili pantailaren blokeoa."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Ezin da prozesatu hatz-marka. Saiatu berriro."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Ez dago hatz-markarik erregistratuta"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Gailu honek ez du hatz-marken sentsorerik"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sentsorea aldi baterako desgaitu da"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Ezin da erabili hatz-marken sentsorea. Joan konponketak egiten dituen hornitzaile baten webgunera edo dendara."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Etengailua sakatu da"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. hatza"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Erabili hatz-marka"</string>

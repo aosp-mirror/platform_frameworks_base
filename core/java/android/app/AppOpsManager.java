@@ -74,6 +74,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.permission.PermissionGroupUsage;
 import android.permission.PermissionUsageHelper;
+import android.permission.flags.Flags;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -99,7 +100,6 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Parcelling;
 import com.android.internal.util.Preconditions;
-import com.android.media.flags.Flags;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -2077,7 +2077,8 @@ public class AppOpsManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL)
+    @FlaggedApi(com.android.media.flags.Flags
+            .FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL)
     public static final String OPSTR_MEDIA_ROUTING_CONTROL = "android:media_routing_control";
 
     /**
@@ -2243,7 +2244,7 @@ public class AppOpsManager {
      *
      * @hide
      */
-    @FlaggedApi(android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
+    @FlaggedApi(Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
     @SystemApi
     public static final String OPSTR_ACCESS_RESTRICTED_SETTINGS =
             "android:access_restricted_settings";
@@ -3432,7 +3433,8 @@ public class AppOpsManager {
             }
         }
 
-        public static final @android.annotation.NonNull Creator<PackageOps> CREATOR = new Creator<PackageOps>() {
+        public static final @android.annotation.NonNull Creator<PackageOps> CREATOR =
+                new Creator<PackageOps>() {
             @Override public PackageOps createFromParcel(Parcel source) {
                 return new PackageOps(source);
             }
@@ -7410,7 +7412,7 @@ public class AppOpsManager {
          * @param userId User id of the app whose Op changed.
          * @param persistentDeviceId persistent device id whose Op changed.
          */
-        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
         default void onOpChanged(@NonNull String op, @NonNull String packageName, int userId,
                 @NonNull String persistentDeviceId) {
             if (Objects.equals(persistentDeviceId,
@@ -7480,7 +7482,7 @@ public class AppOpsManager {
          * @param attributionFlags the attribution flags for this operation.
          * @param attributionChainId the unique id of the attribution chain this op is a part of.
          */
-        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
         default void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
                 @Nullable String attributionTag, int virtualDeviceId, boolean active,
                 @AttributionFlags int attributionFlags, int attributionChainId) {
@@ -7534,7 +7536,7 @@ public class AppOpsManager {
          * @param flags The flags of this op
          * @param result The result of the note.
          */
-        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
         default void onOpNoted(@NonNull String op, int uid, @NonNull String packageName,
                 @Nullable String attributionTag, int virtualDeviceId, @OpFlags int flags,
                 @Mode int result) {
@@ -8361,14 +8363,26 @@ public class AppOpsManager {
                         String attributionTag, int virtualDeviceId, boolean active,
                         @AttributionFlags int attributionFlags, int attributionChainId) {
                     executor.execute(() -> {
-                        if (callback instanceof OnOpActiveChangedInternalListener) {
-                            ((OnOpActiveChangedInternalListener) callback).onOpActiveChanged(op,
-                                    uid, packageName, virtualDeviceId, active);
-                        }
-                        if (sAppOpInfos[op].name != null) {
-                            callback.onOpActiveChanged(sAppOpInfos[op].name, uid, packageName,
-                                    attributionTag, virtualDeviceId, active, attributionFlags,
-                                    attributionChainId);
+                        if (Flags.deviceAwarePermissionApisEnabled()) {
+                            if (callback instanceof OnOpActiveChangedInternalListener) {
+                                ((OnOpActiveChangedInternalListener) callback).onOpActiveChanged(op,
+                                        uid, packageName, virtualDeviceId, active);
+                            }
+                            if (sAppOpInfos[op].name != null) {
+                                callback.onOpActiveChanged(sAppOpInfos[op].name, uid, packageName,
+                                        attributionTag, virtualDeviceId, active, attributionFlags,
+                                        attributionChainId);
+                            }
+                        } else {
+                            if (callback instanceof OnOpActiveChangedInternalListener) {
+                                ((OnOpActiveChangedInternalListener) callback).onOpActiveChanged(op,
+                                        uid, packageName, active);
+                            }
+                            if (sAppOpInfos[op].name != null) {
+                                callback.onOpActiveChanged(sAppOpInfos[op].name, uid, packageName,
+                                        attributionTag, active, attributionFlags,
+                                        attributionChainId);
+                            }
                         }
                     });
                 }
@@ -8613,9 +8627,13 @@ public class AppOpsManager {
                     try {
                         executor.execute(() -> {
                             if (sAppOpInfos[op].name != null) {
-                                listener.onOpNoted(sAppOpInfos[op].name, uid, packageName,
-                                        attributionTag, virtualDeviceId,
-                                        flags, mode);
+                                if (Flags.deviceAwarePermissionApisEnabled()) {
+                                    listener.onOpNoted(sAppOpInfos[op].name, uid, packageName,
+                                            attributionTag, virtualDeviceId, flags, mode);
+                                } else {
+                                    listener.onOpNoted(sAppOpInfos[op].name, uid, packageName,
+                                            attributionTag, flags, mode);
+                                }
                             }
                         });
                     } finally {

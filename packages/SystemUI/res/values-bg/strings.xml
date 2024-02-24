@@ -268,10 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Запазено"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"прекратяване на връзката"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"активиране"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Автоматично включване отново утре"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Bluetooth се използва от различни функции, като например „Бързо споделяне“, „Намиране на устройството ми“ и местоположението на устройството"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Слушалки"</string>
@@ -532,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Това устройство се управлява от родителя ви. Той може да вижда и управлява информация, като например приложенията, които използвате, местоположението ви и времето на ползване."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Поддържа се отключено от надежден агент"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Защита от кражба\nУ-вото е закл., твърде много опити за откл."</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Настройки за звука"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Медия с автоматични надписи"</string>
@@ -541,8 +540,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"деактивиране"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Звук и вибриране"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Настройки"</string>
-    <!-- no translation found for volume_panel_captioning_title (5984936949147684357) -->
-    <skip />
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Надписи на живо"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Силата на звука е намалена до по-безопасно ниво"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Нивото на силата на звука на слушалките е било високо по-дълго, отколкото е препоръчително"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Нивото на силата на звука на слушалките е надвишило безопасния лимит за тази седмица"</string>
@@ -586,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"вибриране"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Контроли за силата на звука – %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"При обаждания и известия устройството ще звъни (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"Възпроизвеждане на <xliff:g id="LABEL">%s</xliff:g> на"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Аудиото ще се възпроизвежда на"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Тунер на системния потребителски интерфейс"</string>
     <string name="status_bar" msgid="4357390266055077437">"Лента на състоянието"</string>
     <string name="demo_mode" msgid="263484519766901593">"Демонстрационен режим на системния ПИ"</string>
@@ -1235,7 +1235,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Установено е присъствие на потребител"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Задайте стандартно приложение за бележки от настройките"</string>
     <string name="install_app" msgid="5066668100199613936">"Инсталиране на приложението"</string>
-    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"Прекарайте пръст нагоре, за да продължите"</string>
+    <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"Плъзнете нагоре, за да продължите"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Да се дублира ли на външния екран?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"Съдържанието на вътрешния ви дисплей ще бъде дублирано. Предният ви дисплей ще бъде изключен."</string>
     <string name="mirror_display" msgid="2515262008898122928">"Дублиране на дисплея"</string>

@@ -52,7 +52,7 @@
     <string name="wifi_remembered" msgid="3266709779723179188">"सेव्ह केले"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"डिस्कनेक्ट केले"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"अक्षम"</string>
-    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉंफिगरेशन अयशस्वी"</string>
+    <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP कॉन्फिगरेशन अयशस्वी"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"प्रमाणीकरण समस्या"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"कनेक्ट करू शकत नाही"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'शी कनेक्‍ट करू शकत नाही"</string>
@@ -478,7 +478,8 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%1$s</xliff:g> शिल्लक आहेत"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूर्ण चार्ज होण्यासाठी <xliff:g id="TIME">%2$s</xliff:g> शिल्लक आहे"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग ऑप्टिमाइझ केले"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग ऑप्टिमाइझ केले"</string>
+    <!-- no translation found for power_charging_future_paused (1809543660923642799) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज होत आहे"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"वेगाने चार्ज होत आहे"</string>

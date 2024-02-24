@@ -19,28 +19,15 @@ package com.android.settingslib.spa.widget.editor
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsOpacity.alphaForEnabled
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -68,7 +55,6 @@ data class SettingsDropdownCheckOption(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsDropdownCheckBox(
     label: String,
@@ -78,43 +64,18 @@ fun SettingsDropdownCheckBox(
     errorMessage: String? = null,
     onSelectedStateChange: () -> Unit = {},
 ) {
-    var dropDownWidth by remember { mutableIntStateOf(0) }
-    var expanded by remember { mutableStateOf(false) }
-    val changeable = enabled && options.changeable
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = changeable && it },
-        modifier = Modifier
-            .width(350.dp)
-            .padding(SettingsDimension.textFieldPadding)
-            .onSizeChanged { dropDownWidth = it.width },
+    DropdownTextBox(
+        label = label,
+        text = getDisplayText(options) ?: emptyText,
+        enabled = enabled && options.changeable,
+        errorMessage = errorMessage,
     ) {
-        OutlinedTextField(
-            // The `menuAnchor` modifier must be passed to the text field for correctness.
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth(),
-            value = getDisplayText(options) ?: emptyText,
-            onValueChange = {},
-            label = { Text(text = label) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-            readOnly = true,
-            enabled = changeable,
-            isError = errorMessage != null,
-            supportingText = errorMessage?.let { { Text(text = it) } },
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            modifier = Modifier.width(with(LocalDensity.current) { dropDownWidth.toDp() }),
-            onDismissRequest = { expanded = false },
-        ) {
-            for (option in options) {
-                CheckboxItem(option) {
-                    option.onClick()
-                    if (option.changeable) {
-                        checkboxItemOnClick(options, option)
-                        onSelectedStateChange()
-                    }
+        for (option in options) {
+            CheckboxItem(option) {
+                option.onClick()
+                if (option.changeable) {
+                    checkboxItemOnClick(options, option)
+                    onSelectedStateChange()
                 }
             }
         }

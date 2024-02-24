@@ -24,6 +24,8 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
@@ -705,17 +707,51 @@ public class ViewRootImplTest {
     public void votePreferredFrameRate_voteFrameRate_aggregate() {
         View view = new View(sContext);
         attachViewToWindow(view);
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
         sInstrumentation.runOnMainSync(() -> {
-            ViewRootImpl viewRootImpl = view.getViewRootImpl();
             assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
-            viewRootImpl.votePreferredFrameRate(24);
+            assertEquals(viewRootImpl.getFrameRateCompatibility(),
+                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+            viewRootImpl.votePreferredFrameRate(24, FRAME_RATE_COMPATIBILITY_GTE);
             assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
-            viewRootImpl.votePreferredFrameRate(30);
+            assertEquals(viewRootImpl.getFrameRateCompatibility(),
+                    FRAME_RATE_COMPATIBILITY_GTE);
+            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+            viewRootImpl.votePreferredFrameRate(30, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
             assertEquals(viewRootImpl.getPreferredFrameRate(), 30, 0.1);
-            viewRootImpl.votePreferredFrameRate(60);
+            // If there is a conflict, then set compatibility to
+            // FRAME_RATE_COMPATIBILITY_FIXED_SOURCE
+            assertEquals(viewRootImpl.getFrameRateCompatibility(),
+                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+            // Should be true since there is a conflict between 24 and 30.
+            assertEquals(viewRootImpl.isFrameRateConflicted(), true);
+            view.invalidate();
+        });
+        sInstrumentation.waitForIdleSync();
+
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+            viewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_GTE);
             assertEquals(viewRootImpl.getPreferredFrameRate(), 60, 0.1);
-            viewRootImpl.votePreferredFrameRate(120);
+            assertEquals(viewRootImpl.getFrameRateCompatibility(),
+                    FRAME_RATE_COMPATIBILITY_GTE);
+            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+            viewRootImpl.votePreferredFrameRate(120, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
             assertEquals(viewRootImpl.getPreferredFrameRate(), 120, 0.1);
+            assertEquals(viewRootImpl.getFrameRateCompatibility(),
+                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+            // Should be false since 60 is a divisor of 120.
+            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+            viewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_GTE);
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 120, 0.1);
+            // compatibility should be remained the same (FRAME_RATE_COMPATIBILITY_FIXED_SOURCE)
+            // since the frame rate 60 is smaller than 120.
+            assertEquals(viewRootImpl.getFrameRateCompatibility(),
+                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+            // Should be false since 60 is a divisor of 120.
+            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+
         });
     }
 
@@ -842,14 +878,26 @@ public class ViewRootImplTest {
 
         sInstrumentation.runOnMainSync(() -> {
             assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
-            viewRootImpl.votePreferredFrameRate(24);
+            assertEquals(viewRootImpl.getFrameRateCompatibility(),
+                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
+            viewRootImpl.votePreferredFrameRate(24, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
             assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
+            assertEquals(viewRootImpl.getFrameRateCompatibility(),
+                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
             view.invalidate();
             assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
+            assertEquals(viewRootImpl.getFrameRateCompatibility(),
+                    FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+            assertEquals(viewRootImpl.isFrameRateConflicted(), false);
         });
 
         Thread.sleep(delay);
         assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
+        assertEquals(viewRootImpl.getFrameRateCompatibility(),
+                FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
+        assertEquals(viewRootImpl.isFrameRateConflicted(), false);
     }
 
     /**

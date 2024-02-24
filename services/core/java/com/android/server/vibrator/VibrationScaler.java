@@ -19,7 +19,7 @@ package com.android.server.vibrator;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
-import android.os.IExternalVibratorService;
+import android.os.ExternalVibrationScale;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -37,11 +37,13 @@ final class VibrationScaler {
 
     // Scale levels. Each level, except MUTE, is defined as the delta between the current setting
     // and the default intensity for that type of vibration (i.e. current - default).
-    private static final int SCALE_VERY_LOW = IExternalVibratorService.SCALE_VERY_LOW; // -2
-    private static final int SCALE_LOW = IExternalVibratorService.SCALE_LOW; // -1
-    private static final int SCALE_NONE = IExternalVibratorService.SCALE_NONE; // 0
-    private static final int SCALE_HIGH = IExternalVibratorService.SCALE_HIGH; // 1
-    private static final int SCALE_VERY_HIGH = IExternalVibratorService.SCALE_VERY_HIGH; // 2
+    private static final int SCALE_VERY_LOW =
+            ExternalVibrationScale.ScaleLevel.SCALE_VERY_LOW; // -2
+    private static final int SCALE_LOW = ExternalVibrationScale.ScaleLevel.SCALE_LOW; // -1
+    private static final int SCALE_NONE = ExternalVibrationScale.ScaleLevel.SCALE_NONE; // 0
+    private static final int SCALE_HIGH = ExternalVibrationScale.ScaleLevel.SCALE_HIGH; // 1
+    private static final int SCALE_VERY_HIGH =
+            ExternalVibrationScale.ScaleLevel.SCALE_VERY_HIGH; // 2
 
     // Scale factors for each level.
     private static final float SCALE_FACTOR_VERY_LOW = 0.6f;
@@ -83,9 +85,9 @@ final class VibrationScaler {
      * Calculates the scale to be applied to external vibration with given usage.
      *
      * @param usageHint one of VibrationAttributes.USAGE_*
-     * @return one of IExternalVibratorService.SCALE_*
+     * @return one of ExternalVibrationScale.ScaleLevel.SCALE_*
      */
-    public int getExternalVibrationScale(int usageHint) {
+    public int getExternalVibrationScaleLevel(int usageHint) {
         int defaultIntensity = mSettingsController.getDefaultIntensity(usageHint);
         int currentIntensity = mSettingsController.getCurrentIntensity(usageHint);
 
@@ -104,6 +106,22 @@ final class VibrationScaler {
                     + scaleLevel + " for vibration with usage " + usageHint);
             return SCALE_NONE;
         }
+    }
+
+    /**
+     * Returns the adaptive haptics scale that should be applied to the vibrations with
+     * the given usage. When no adaptive scales are available for the usages, then returns 1
+     * indicating no scaling will be applied
+     *
+     * @param usageHint one of VibrationAttributes.USAGE_*
+     * @return The adaptive haptics scale.
+     */
+    public float getAdaptiveHapticsScale(int usageHint) {
+        if (shouldApplyAdaptiveHapticsScale(usageHint)) {
+            return mAdaptiveHapticsScales.get(usageHint);
+        }
+
+        return 1f; // no scaling
     }
 
     /**
@@ -152,9 +170,7 @@ final class VibrationScaler {
             }
 
             // If adaptive haptics scaling is available for this usage, apply it to the segment.
-            if (Flags.adaptiveHapticsEnabled()
-                    && mAdaptiveHapticsScales.size() > 0
-                    && mAdaptiveHapticsScales.contains(usageHint)) {
+            if (shouldApplyAdaptiveHapticsScale(usageHint)) {
                 float adaptiveScale = mAdaptiveHapticsScales.get(usageHint);
                 segment = segment.scaleLinearly(adaptiveScale);
             }
@@ -222,6 +238,10 @@ final class VibrationScaler {
      */
     public void clearAdaptiveHapticsScales() {
         mAdaptiveHapticsScales.clear();
+    }
+
+    private boolean shouldApplyAdaptiveHapticsScale(int usageHint) {
+        return Flags.adaptiveHapticsEnabled() && mAdaptiveHapticsScales.contains(usageHint);
     }
 
     /** Mapping of Vibrator.VIBRATION_INTENSITY_* values to {@link EffectStrength}. */

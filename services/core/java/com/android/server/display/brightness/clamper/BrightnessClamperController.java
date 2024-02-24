@@ -38,6 +38,7 @@ import com.android.server.display.DisplayDeviceConfig.PowerThrottlingConfigData;
 import com.android.server.display.DisplayDeviceConfig.PowerThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.feature.DisplayManagerFlags;
 
@@ -335,6 +336,11 @@ public class BrightnessClamperController {
         @Override
         public float getBrightnessWearBedtimeModeCap() {
             return mDisplayDeviceConfig.getBrightnessCapForWearBedtimeMode();
+        }
+
+        @NonNull
+        public SensorData getTempSensor() {
+            return mDisplayDeviceConfig.getTempSensor();
         }
     }
 }

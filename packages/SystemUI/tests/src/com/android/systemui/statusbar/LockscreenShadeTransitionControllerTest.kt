@@ -18,6 +18,7 @@ import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingOb
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeLockscreenInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
@@ -81,6 +82,8 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         get() = testComponent.disableFlagsRepository
     private val testScope
         get() = testComponent.testScope
+
+    private val qsSceneAdapter = FakeQSSceneAdapter({ mock() })
 
     lateinit var row: ExpandableNotificationRow
 
@@ -189,6 +192,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 splitShadeStateController = ResourcesSplitShadeStateController(),
                 shadeLockscreenInteractorLazy = {shadeLockscreenInteractor},
                 naturalScrollingSettingObserver = naturalScrollingSettingObserver,
+                lazyQSSceneAdapter = { qsSceneAdapter }
             )
 
         transitionController.addCallback(transitionControllerCallback)
@@ -565,6 +569,16 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.dragDownAmount = 10f
 
         verify(shadeLockscreenInteractor).setKeyguardStatusBarAlpha(-1f)
+    }
+
+    @Test
+    fun nullQs_canDragDownFromAdapter() {
+        transitionController.qS = null
+
+        qsSceneAdapter.isQsFullyCollapsed = true
+        assertTrue("Can't drag down on keyguard", transitionController.canDragDown())
+        qsSceneAdapter.isQsFullyCollapsed = false
+        assertFalse("Can drag down when QS is expanded", transitionController.canDragDown())
     }
 
     private fun enableSplitShade() {

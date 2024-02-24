@@ -40,6 +40,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private final Object mLock = new Object();
 
+    private final int mUniqueId;
     @GuardedBy("mLock")
     private final Session2Token mSessionToken;
     @GuardedBy("mLock")
@@ -63,11 +64,13 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             MediaSessionService service,
             Looper handlerLooper,
             int pid,
-            int policies) {
+            int policies,
+            int uniqueId) {
         // The lock is required to prevent `Controller2Callback` from using partially initialized
         // `MediaSession2Record.this`.
         synchronized (mLock) {
             mSessionToken = sessionToken;
+            mUniqueId = uniqueId;
             mService = service;
             mHandlerExecutor = new HandlerExecutor(new Handler(handlerLooper));
             mController = new MediaController2.Builder(service.getContext(), sessionToken)
@@ -94,6 +97,13 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
                                     ForegroundServiceDelegationOptions
                                             .DELEGATION_SERVICE_MEDIA_PLAYBACK)
                             .build();
+        }
+    }
+
+    @Override
+    public int getUniqueId() {
+        synchronized (mLock) {
+            return mUniqueId;
         }
     }
 
@@ -200,6 +210,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     @Override
     public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "uniqueId=" + mUniqueId);
         pw.println(prefix + "token=" + mSessionToken);
         pw.println(prefix + "controller=" + mController);
 
@@ -209,8 +220,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     @Override
     public String toString() {
-        // TODO(jaewan): Also add getId().
-        return getPackageName() + " (userId=" + getUserId() + ")";
+        return getPackageName() + "/" + mUniqueId + " (userId=" + getUserId() + ")";
     }
 
     private class Controller2Callback extends MediaController2.ControllerCallback {

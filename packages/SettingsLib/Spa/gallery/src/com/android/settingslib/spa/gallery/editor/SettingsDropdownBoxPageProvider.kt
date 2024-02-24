@@ -28,16 +28,15 @@ import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.widget.editor.SettingsExposedDropdownMenuBox
+import com.android.settingslib.spa.widget.editor.SettingsDropdownBox
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
-private const val TITLE = "Sample SettingsExposedDropdownMenuBox"
+private const val TITLE = "Sample SettingsDropdownBox"
 
-object SettingsExposedDropdownMenuBoxPageProvider : SettingsPageProvider {
-    override val name = "SettingsExposedDropdownMenuBox"
-    private const val exposedDropdownMenuBoxLabel = "ExposedDropdownMenuBoxLabel"
+object SettingsDropdownBoxPageProvider : SettingsPageProvider {
+    override val name = "SettingsDropdownBox"
 
     override fun getTitle(arguments: Bundle?): String {
         return TITLE
@@ -45,16 +44,42 @@ object SettingsExposedDropdownMenuBoxPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        var selectedItem by remember { mutableIntStateOf(-1) }
-        val options = listOf("item1", "item2", "item3")
         RegularScaffold(title = TITLE) {
-            SettingsExposedDropdownMenuBox(
-                label = exposedDropdownMenuBoxLabel,
-                options = options,
-                selectedOptionIndex = selectedItem,
-                enabled = true,
-                onselectedOptionTextChange = { selectedItem = it })
+            Regular()
+            NotEnabled()
+            Empty()
         }
+    }
+
+    @Composable
+    private fun Regular() {
+        var selectedItem by remember { mutableIntStateOf(-1) }
+        SettingsDropdownBox(
+            label = "SettingsDropdownBox",
+            options = listOf("item1", "item2", "item3"),
+            selectedOptionIndex = selectedItem,
+        ) { selectedItem = it }
+    }
+
+    @Composable
+    private fun NotEnabled() {
+        var selectedItem by remember { mutableIntStateOf(0) }
+        SettingsDropdownBox(
+            label = "Not enabled",
+            options = listOf("item1", "item2", "item3"),
+            enabled = false,
+            selectedOptionIndex = selectedItem,
+        ) { selectedItem = it }
+    }
+
+    @Composable
+    private fun Empty() {
+        var selectedItem by remember { mutableIntStateOf(-1) }
+        SettingsDropdownBox(
+            label = "Empty",
+            options = emptyList(),
+            selectedOptionIndex = selectedItem,
+        ) { selectedItem = it }
     }
 
     fun buildInjectEntry(): SettingsEntryBuilder {
@@ -70,8 +95,8 @@ object SettingsExposedDropdownMenuBoxPageProvider : SettingsPageProvider {
 
 @Preview(showBackground = true)
 @Composable
-private fun SettingsExposedDropdownMenuBoxPagePreview() {
+private fun SettingsDropdownBoxPagePreview() {
     SettingsTheme {
-        SettingsExposedDropdownMenuBoxPageProvider.Page(null)
+        SettingsDropdownBoxPageProvider.Page(null)
     }
 }

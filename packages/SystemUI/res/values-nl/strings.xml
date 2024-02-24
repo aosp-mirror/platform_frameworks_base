@@ -530,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Dit apparaat wordt beheerd door je ouder. Je ouder kan informatie bekijken en beheren, zoals de apps die je gebruikt, je locatie en je schermtijd."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Ontgrendeld gehouden door TrustAgent"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Diefstalbeveiliging\nApparaat vergrendeld, te veel ontgrendelpogingen"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Geluidsinstellingen"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatisch ondertitelen"</string>
@@ -583,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"trillen"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s-volumeknoppen"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Geluid bij gesprekken en meldingen (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> wordt afgespeeld op"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audio wordt afgespeeld op"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Systeem-UI-tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusbalk"</string>
     <string name="demo_mode" msgid="263484519766901593">"Demomodus voor systeemgebruikersinterface"</string>

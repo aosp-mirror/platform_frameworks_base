@@ -18,8 +18,10 @@ package com.android.systemui.volume.dagger
 
 import android.media.session.MediaSessionManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.settingslib.volume.data.repository.LocalMediaRepository
 import com.android.settingslib.volume.data.repository.MediaControllerRepository
 import com.android.settingslib.volume.data.repository.MediaControllerRepositoryImpl
+import com.android.settingslib.volume.domain.interactor.LocalMediaInteractor
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -41,6 +43,19 @@ interface MediaDevicesModule {
     ): LocalMediaRepositoryFactory
 
     companion object {
+
+        @Provides
+        @SysUISingleton
+        fun provideLocalMediaRepository(
+            factory: LocalMediaRepositoryFactory
+        ): LocalMediaRepository = factory.create(null)
+
+        @Provides
+        @SysUISingleton
+        fun provideLocalMediaInteractor(
+            repository: LocalMediaRepository,
+            @Application scope: CoroutineScope,
+        ): LocalMediaInteractor = LocalMediaInteractor(repository, scope)
 
         @Provides
         @SysUISingleton

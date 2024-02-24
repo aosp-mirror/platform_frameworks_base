@@ -692,7 +692,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     long numEntries = mHeadsUpManager.getAllEntries().count();
                     NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
                     mView.setNumHeadsUp(numEntries);
-                    mView.setTopHeadsUpEntry(topEntry);
+                    mView.setTopHeadsUpRow(topEntry != null ? topEntry.getRow() : null);
                     generateHeadsUpAnimation(entry, isHeadsUp);
                 }
             };

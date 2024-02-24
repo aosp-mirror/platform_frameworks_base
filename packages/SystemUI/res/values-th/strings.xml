@@ -530,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"อุปกรณ์นี้จัดการโดยผู้ปกครอง ผู้ปกครองจะดูและจัดการข้อมูลต่างๆ ได้ เช่น แอปที่คุณใช้ ตำแหน่งของคุณ และเวลาอยู่หน้าจอ"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"ปลดล็อกไว้โดย TrustAgent"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"การป้องกันการโจรกรรม\nอุปกรณ์ถูกล็อก ลองปลดล็อกหลายครั้งเกินไป"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g> <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"การตั้งค่าเสียง"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"แสดงคำบรรยายสื่อโดยอัตโนมัติ"</string>
@@ -583,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"สั่น"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"ตัวควบคุมระดับเสียง %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"สายเรียกเข้าและการแจ้งเตือนจะส่งเสียง (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"กำลังเล่น <xliff:g id="LABEL">%s</xliff:g> ใน"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"เสียงจะเล่นต่อไป"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ตัวรับสัญญาณ UI ระบบ"</string>
     <string name="status_bar" msgid="4357390266055077437">"แถบสถานะ"</string>
     <string name="demo_mode" msgid="263484519766901593">"โหมดสาธิต UI ของระบบ"</string>

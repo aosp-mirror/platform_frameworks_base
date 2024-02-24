@@ -464,9 +464,6 @@ class MenuView extends FrameLayout implements
         Bundle fragmentArgs = new Bundle();
         fragmentArgs.putStringArray("targets", targets.toArray(new String[0]));
         args.putBundle(":settings:show_fragment_args", fragmentArgs);
-        // TODO: b/318748373 - The fragment should set its own title using the targets
-        args.putString(
-                ":settings:show_fragment_title", "Accessibility Shortcut");
         intent.replaceExtras(args);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return intent;

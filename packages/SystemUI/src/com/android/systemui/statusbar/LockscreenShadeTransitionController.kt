@@ -31,6 +31,7 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeLockscreenInteractor
 import com.android.systemui.shade.data.repository.ShadeRepository
@@ -84,6 +85,7 @@ constructor(
     private val splitShadeStateController: SplitShadeStateController,
     private val shadeLockscreenInteractorLazy: Lazy<ShadeLockscreenInteractor>,
     naturalScrollingSettingObserver: NaturalScrollingSettingObserver,
+    private val lazyQSSceneAdapter: Lazy<QSSceneAdapter>,
 ) : Dumpable {
     private var pulseHeight: Float = 0f
 
@@ -93,7 +95,11 @@ constructor(
     private var useSplitShade: Boolean = false
     private lateinit var nsslController: NotificationStackScrollLayoutController
     lateinit var centralSurfaces: CentralSurfaces
-    lateinit var qS: QS
+
+    // When in scene container mode, this will be null. In that case, we use the adapter if needed
+    var qS: QS? = null
+    private val isQsFullyCollapsed: Boolean
+        get() = qS?.isFullyCollapsed ?: lazyQSSceneAdapter.get().isQsFullyCollapsed
 
     /** A handler that handles the next keyguard dismiss animation. */
     private var animationHandlerOnKeyguardDismiss: ((Long) -> Unit)? = null
@@ -286,7 +292,8 @@ constructor(
     /** @return true if the interaction is accepted, false if it should be cancelled */
     internal fun canDragDown(): Boolean {
         return (statusBarStateController.state == StatusBarState.KEYGUARD ||
-            nsslController.isInLockedDownShade()) && (qS.isFullyCollapsed || useSplitShade)
+            nsslController.isInLockedDownShade()) &&
+                (isQsFullyCollapsed || useSplitShade)
     }
 
     /** Called by the touch helper when when a gesture has completed all the way and released. */
@@ -410,7 +417,7 @@ constructor(
         get() =
             (statusBarStateController.getState() == StatusBarState.KEYGUARD &&
                 !keyguardBypassController.bypassEnabled &&
-                (qS.isFullyCollapsed || useSplitShade))
+                (isQsFullyCollapsed || useSplitShade))
 
     /** The amount in pixels that the user has dragged down. */
     internal var dragDownAmount = 0f

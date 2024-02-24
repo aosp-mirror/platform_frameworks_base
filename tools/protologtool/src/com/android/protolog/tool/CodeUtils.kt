@@ -16,6 +16,7 @@
 
 package com.android.protolog.tool
 
+import com.android.internal.protolog.common.LogLevel
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.expr.BinaryExpr

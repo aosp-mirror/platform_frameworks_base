@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਪ੍ਰਮਾਣਿਤ ਹੋਇਆ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ਚਿਹਰਾ ਪੁਸ਼ਟੀਕਰਨ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ਚਿਹਰਾ ਪੁਸ਼ਟੀਕਰਨ, ਕਿਰਪਾ ਕਰਕੇ \'ਪੁਸ਼ਟੀ ਕਰੋ\' ਦਬਾਓ"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਸੈੱਟਅੱਪ ਕਰਨ ਲਈ ਸਮਾਂ ਸਮਾਪਤ ਹੋਇਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੰਬੰਧੀ ਕਾਰਵਾਈ ਰੱਦ ਕੀਤੀ ਗਈ"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੰਬੰਧੀ ਕਾਰਵਾਈ ਵਰਤੋਂਕਾਰ ਵੱਲੋਂ ਰੱਦ ਕੀਤੀ ਗਈ"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸਦੀ ਬਜਾਏ ਸਕ੍ਰੀਨ ਲਾਕ ਵਰਤੋ।"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸਦੀ ਬਜਾਏ ਸਕ੍ਰੀਨ ਲਾਕ ਵਰਤੋ।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ਫਿੰਗਰਪ੍ਰਿੰਟ \'ਤੇ ਪ੍ਰਕਿਰਿਆ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"ਕੋਈ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਰਜ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨਹੀਂ ਹੈ"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"ਸੈਂਸਰ ਕੁਝ ਸਮੇਂ ਲਈ ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਮੁਰੰਮਤ ਕਰਨ ਵਾਲੇ ਪ੍ਰਦਾਨਕ ਕੋਲ ਜਾਓ।"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"\'ਪਾਵਰ\' ਬਟਨ ਦਬਾਇਆ ਗਿਆ"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ਉਂਗਲ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>

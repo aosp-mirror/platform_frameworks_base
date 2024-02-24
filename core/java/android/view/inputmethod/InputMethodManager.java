@@ -462,8 +462,8 @@ public final class InputMethodManager {
      * Flag indicating that views from the default home screen ({@link Intent#CATEGORY_HOME}) may
      * act as a handwriting delegator for the delegate editor view. If set, views from the home
      * screen package will be trusted for handwriting delegation, in addition to views in the {@code
-     * delegatorPackageName} passed to {@link #acceptStylusHandwritingDelegation(View, String,
-     * int)}.
+     * delegatorPackageName} passed to
+     * {@link #acceptStylusHandwritingDelegation(View, String, int, Executor, Consumer)} .
      */
     @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
     public static final int HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED = 0x0001;
@@ -2896,6 +2896,8 @@ public final class InputMethodManager {
      * @param delegateView delegate view capable of receiving input via {@link InputConnection}
      * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
      * @param flags {@link #HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED} or {@code 0}
+     * @param executor The executor to run the callback on.
+     * @param callback {@code true>} would be received if delegation was accepted.
      * @return {@code true} if view belongs to allowed delegate package declared in {@link
      *     #prepareStylusHandwritingDelegation(View, String)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View, String)
@@ -2908,13 +2910,16 @@ public final class InputMethodManager {
     // session to the delegate view.
     // @see #startConnectionlessStylusHandwritingForDelegation(View, ResultReceiver,
     //     CursorAnchorInfo, String)
+    //
     @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
-    public boolean acceptStylusHandwritingDelegation(
+    public void acceptStylusHandwritingDelegation(
             @NonNull View delegateView, @NonNull String delegatorPackageName,
-            @HandwritingDelegateFlags int flags) {
+            @HandwritingDelegateFlags int flags, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> callback) {
         Objects.requireNonNull(delegatorPackageName);
 
-        return startStylusHandwritingInternal(delegateView, delegatorPackageName, flags);
+        startStylusHandwritingInternal(
+                delegateView, delegatorPackageName, flags, executor, callback);
     }
 
     /**

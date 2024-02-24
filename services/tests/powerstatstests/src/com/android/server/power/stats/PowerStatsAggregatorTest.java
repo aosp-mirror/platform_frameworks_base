@@ -58,7 +58,7 @@ public class PowerStatsAggregatorTest {
 
     @Before
     public void setup() throws ParseException {
-        mHistory = new BatteryStatsHistory(32, 1024,
+        mHistory = new BatteryStatsHistory(1024,
                 mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock,
                 mMonotonicClock, mock(BatteryStatsHistory.TraceDelegate.class), null);
 

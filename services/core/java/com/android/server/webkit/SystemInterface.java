@@ -43,6 +43,7 @@ public interface SystemInterface {
     public void killPackageDependents(String packageName);
 
     public void enablePackageForAllUsers(Context context, String packageName, boolean enable);
+    public void installExistingPackageForAllUsers(Context context, String packageName);
 
     public boolean systemIsDebuggable();
     public PackageInfo getPackageInfoForProvider(WebViewProviderInfo configInfo)

@@ -19,4 +19,5 @@ package android.service.euicc;
 /** @hide */
 oneway interface IGetAvailableMemoryInBytesCallback {
     void onSuccess(long availableMemoryInBytes);
+    void onUnsupportedOperationException(String message);
 }

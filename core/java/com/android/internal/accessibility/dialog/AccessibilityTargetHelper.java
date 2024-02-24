@@ -111,8 +111,9 @@ public final class AccessibilityTargetHelper {
      * @param context The context of the application.
      * @param shortcutType The shortcut type.
      * @return The list of {@link AccessibilityTarget}.
+     * @hide
      */
-    static List<AccessibilityTarget> getInstalledTargets(Context context,
+    public static List<AccessibilityTarget> getInstalledTargets(Context context,
             @ShortcutType int shortcutType) {
         final List<AccessibilityTarget> targets = new ArrayList<>();
         targets.addAll(getAccessibilityFilteredTargets(context, shortcutType));

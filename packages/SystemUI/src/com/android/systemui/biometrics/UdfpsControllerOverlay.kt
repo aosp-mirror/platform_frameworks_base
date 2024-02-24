@@ -44,6 +44,7 @@ import android.view.accessibility.AccessibilityManager.TouchExplorationStateChan
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.Flags.udfpsViewPerformance
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
@@ -53,10 +54,13 @@ import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayView
 import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -67,7 +71,13 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import dagger.Lazy
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 private const val TAG = "UdfpsControllerOverlay"
 
@@ -82,36 +92,45 @@ const val SETTING_REMOVE_ENROLLMENT_UI = "udfps_overlay_remove_enrollment_ui"
 @ExperimentalCoroutinesApi
 @UiThread
 class UdfpsControllerOverlay @JvmOverloads constructor(
-    private val context: Context,
-    private val inflater: LayoutInflater,
-    private val windowManager: WindowManager,
-    private val accessibilityManager: AccessibilityManager,
-    private val statusBarStateController: StatusBarStateController,
-    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val dialogManager: SystemUIDialogManager,
-    private val dumpManager: DumpManager,
-    private val transitionController: LockscreenShadeTransitionController,
-    private val configurationController: ConfigurationController,
-    private val keyguardStateController: KeyguardStateController,
-    private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
-    private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
-    val requestId: Long,
-    @RequestReason val requestReason: Int,
-    private val controllerCallback: IUdfpsOverlayControllerCallback,
-    private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
-    private val activityTransitionAnimator: ActivityTransitionAnimator,
-    private val primaryBouncerInteractor: PrimaryBouncerInteractor,
-    private val alternateBouncerInteractor: AlternateBouncerInteractor,
-    private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
-    private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
-    private val transitionInteractor: KeyguardTransitionInteractor,
-    private val selectedUserInteractor: SelectedUserInteractor,
-    private val deviceEntryUdfpsTouchOverlayViewModel: Lazy<DeviceEntryUdfpsTouchOverlayViewModel>,
-    private val defaultUdfpsTouchOverlayViewModel: Lazy<DefaultUdfpsTouchOverlayViewModel>,
-    private val shadeInteractor: ShadeInteractor,
-    private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
+        private val context: Context,
+        private val inflater: LayoutInflater,
+        private val windowManager: WindowManager,
+        private val accessibilityManager: AccessibilityManager,
+        private val statusBarStateController: StatusBarStateController,
+        private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
+        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+        private val dialogManager: SystemUIDialogManager,
+        private val dumpManager: DumpManager,
+        private val transitionController: LockscreenShadeTransitionController,
+        private val configurationController: ConfigurationController,
+        private val keyguardStateController: KeyguardStateController,
+        private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
+        private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
+        val requestId: Long,
+        @RequestReason val requestReason: Int,
+        private val controllerCallback: IUdfpsOverlayControllerCallback,
+        private val onTouch: (View, MotionEvent, Boolean) -> Boolean,
+        private val activityTransitionAnimator: ActivityTransitionAnimator,
+        private val primaryBouncerInteractor: PrimaryBouncerInteractor,
+        private val alternateBouncerInteractor: AlternateBouncerInteractor,
+        private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
+        private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
+        private val transitionInteractor: KeyguardTransitionInteractor,
+        private val selectedUserInteractor: SelectedUserInteractor,
+        private val deviceEntryUdfpsTouchOverlayViewModel:
+            Lazy<DeviceEntryUdfpsTouchOverlayViewModel>,
+        private val defaultUdfpsTouchOverlayViewModel: Lazy<DefaultUdfpsTouchOverlayViewModel>,
+        private val shadeInteractor: ShadeInteractor,
+        private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
+        private val powerInteractor: PowerInteractor,
+        @Application private val scope: CoroutineScope,
 ) {
+    private val isFinishedGoingToSleep: Flow<Unit> =
+        powerInteractor.detailedWakefulness
+            .filter { it.internalWakefulnessState == WakefulnessState.ASLEEP }
+            .map { } // map to Unit
+    private var listenForAsleepJob: Job? = null
+    private var addViewRunnable: Runnable? = null
     private var overlayViewLegacy: UdfpsView? = null
         private set
     private var overlayTouchView: UdfpsTouchOverlay? = null
@@ -192,7 +211,8 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                         if (requestReason.isImportantForAccessibility()) {
                             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                         }
-                        windowManager.addView(this, coreLayoutParams.updateDimensions(null))
+
+                        addViewNowOrLater(this, null)
                         when (requestReason) {
                             REASON_AUTH_KEYGUARD ->
                                 UdfpsTouchOverlayBinder.bind(
@@ -225,7 +245,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                         }
 
-                        windowManager.addView(this, coreLayoutParams.updateDimensions(animation))
+                        addViewNowOrLater(this, animation)
                         sensorRect = sensorBounds
                     }
                 }
@@ -255,6 +275,41 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
 
         Log.v(TAG, "showUdfpsOverlay | the overlay is already showing")
         return false
+    }
+
+    private fun addViewNowOrLater(view: View, animation: UdfpsAnimationViewController<*>?) {
+        if (udfpsViewPerformance()) {
+            addViewRunnable = kotlinx.coroutines.Runnable {
+                windowManager.addView(
+                        view,
+                        coreLayoutParams.updateDimensions(animation)
+                )
+            }
+            if (powerInteractor.detailedWakefulness.value.internalWakefulnessState
+                    != WakefulnessState.STARTING_TO_SLEEP) {
+                addViewIfPending()
+            } else {
+                listenForAsleepJob?.cancel()
+                listenForAsleepJob = scope.launch {
+                    isFinishedGoingToSleep.collect {
+                        addViewIfPending()
+                    }
+                }
+            }
+        } else {
+            windowManager.addView(
+                    view,
+                    coreLayoutParams.updateDimensions(animation)
+            )
+        }
+    }
+
+    private fun addViewIfPending() {
+        addViewRunnable?.let {
+            listenForAsleepJob?.cancel()
+            it.run()
+        }
+        addViewRunnable = null
     }
 
     fun inflateUdfpsAnimation(
@@ -368,6 +423,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         overlayViewLegacy = null
         overlayTouchView = null
         overlayTouchListener = null
+        listenForAsleepJob?.cancel()
 
         return wasShowing
     }
@@ -412,7 +468,8 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
             if (!shouldRotate(animation)) {
                 Log.v(
-                    TAG, "Skip rotating UDFPS bounds " + Surface.rotationToString(rot) +
+                    TAG,
+                    "Skip rotating UDFPS bounds " + Surface.rotationToString(rot) +
                         " animation=$animation" +
                         " isGoingToSleep=${keyguardUpdateMonitor.isGoingToSleep}" +
                         " isOccluded=${keyguardStateController.isOccluded}"

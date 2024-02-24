@@ -119,6 +119,16 @@ public class LogModule {
         return factory.create("LSShadeTransitionLog", 50);
     }
 
+    /** */
+    @Provides
+    @SysUISingleton
+    @SensitiveNotificationProtectionLog
+    public static LogBuffer provideSensitiveNotificationProtectionLogBuffer(
+            LogBufferFactory factory
+    ) {
+        return factory.create("SensitiveNotificationProtectionLog", 10);
+    }
+
     /** Provides a logging buffer for shade window messages. */
     @Provides
     @SysUISingleton

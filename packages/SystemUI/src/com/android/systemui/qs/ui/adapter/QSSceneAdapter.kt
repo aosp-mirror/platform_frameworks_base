@@ -84,6 +84,10 @@ interface QSSceneAdapter {
      */
     val qsHeight: Int
 
+    /** Compatibility for use by LockscreenShadeTransitionController. Matches default from [QS] */
+    val isQsFullyCollapsed: Boolean
+        get() = true
+
     sealed interface State {
 
         val isVisible: Boolean
@@ -164,6 +168,10 @@ constructor(
         get() = qsImpl.value?.qqsHeight ?: 0
     override val qsHeight: Int
         get() = qsImpl.value?.qsHeight ?: 0
+
+    // If value is null, there's no QS and therefore it's fully collapsed.
+    override val isQsFullyCollapsed: Boolean
+        get() = qsImpl.value?.isFullyCollapsed ?: true
 
     // Same config changes as in FragmentHostManager
     private val interestingChanges =

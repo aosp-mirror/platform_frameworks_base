@@ -893,8 +893,9 @@ public class DeviceIdleController extends SystemService
             }
             // Fall through when quick doze is not requested.
 
-            if (!mIsOffBody) {
-                // Quick doze was not requested and device is on body so turn the device active.
+            if (!mIsOffBody && !mForceIdle) {
+                // Quick doze wasn't requested, doze wasn't forced and device is on body
+                // so turn the device active.
                 mActiveReason = ACTIVE_REASON_ONBODY;
                 becomeActiveLocked("on_body", Process.myUid());
             }

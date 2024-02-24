@@ -1549,6 +1549,31 @@ public class WebViewUpdateServiceTest {
                         Matchers.anyObject(), Mockito.eq(testPackage), Mockito.eq(true));
     }
 
+    @Test
+    @RequiresFlagsEnabled("android.webkit.update_service_v2")
+    public void testDefaultWebViewPackageInstalling() {
+        String testPackage = "testDefault";
+        WebViewProviderInfo[] packages =
+                new WebViewProviderInfo[] {
+                    new WebViewProviderInfo(
+                            testPackage,
+                            "",
+                            true /* default available */,
+                            false /* fallback */,
+                            null)
+                };
+        setupWithPackages(packages);
+        mTestSystemImpl.setPackageInfo(
+                createPackageInfo(
+                        testPackage, true /* enabled */, true /* valid */, false /* installed */));
+
+        // Check that the boot time logic tries to install the default package.
+        runWebViewBootPreparationOnMainSync();
+        Mockito.verify(mTestSystemImpl)
+                .installExistingPackageForAllUsers(
+                        Matchers.anyObject(), Mockito.eq(testPackage));
+    }
+
     private void testDefaultPackageChosen(PackageInfo packageInfo) {
         WebViewProviderInfo[] packages =
                 new WebViewProviderInfo[] {

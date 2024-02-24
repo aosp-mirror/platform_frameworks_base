@@ -60,6 +60,8 @@ import com.android.wm.shell.windowdecor.viewholder.DesktopModeAppControlsWindowD
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeFocusedWindowDecorationViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeWindowDecorationViewHolder;
 
+import kotlin.Unit;
+
 import java.util.function.Supplier;
 
 /**
@@ -79,6 +81,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
     private View.OnLongClickListener mOnCaptionLongClickListener;
+    private View.OnGenericMotionListener mOnCaptionGenericMotionListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
     private DragDetector mDragDetector;
@@ -152,10 +155,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     void setCaptionListeners(
             View.OnClickListener onCaptionButtonClickListener,
             View.OnTouchListener onCaptionTouchListener,
-            View.OnLongClickListener onLongClickListener) {
+            View.OnLongClickListener onLongClickListener,
+            View.OnGenericMotionListener onGenericMotionListener) {
         mOnCaptionButtonClickListener = onCaptionButtonClickListener;
         mOnCaptionTouchListener = onCaptionTouchListener;
         mOnCaptionLongClickListener = onLongClickListener;
+        mOnCaptionGenericMotionListener = onGenericMotionListener;
     }
 
     void setExclusionRegionListener(ExclusionRegionListener exclusionRegionListener) {
@@ -225,9 +230,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                         mOnCaptionTouchListener,
                         mOnCaptionButtonClickListener,
                         mOnCaptionLongClickListener,
+                        mOnCaptionGenericMotionListener,
                         mAppName,
-                        mAppIconBitmap
-                );
+                        mAppIconBitmap,
+                        () -> {
+                            if (!isMaximizeMenuActive()) {
+                                createMaximizeMenu();
+                            }
+                            return Unit.INSTANCE;
+                        });
             } else {
                 throw new IllegalArgumentException("Unexpected layout resource id");
             }
@@ -548,7 +559,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void createMaximizeMenu() {
         mMaximizeMenu = new MaximizeMenu(mSyncQueue, mRootTaskDisplayAreaOrganizer,
-                mDisplayController, mTaskInfo, mOnCaptionButtonClickListener, mContext,
+                mDisplayController, mTaskInfo, mOnCaptionButtonClickListener,
+                mOnCaptionGenericMotionListener, mOnCaptionTouchListener, mContext,
                 calculateMaximizeMenuPosition(), mSurfaceControlTransactionSupplier);
         mMaximizeMenu.show();
     }
@@ -774,6 +786,22 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     @Override
     int getCaptionViewId() {
         return R.id.desktop_mode_caption;
+    }
+
+    void setAnimatingTaskResize(boolean animatingTaskResize) {
+        if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_focused_window_decor) return;
+        ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
+                .setAnimatingTaskResize(animatingTaskResize);
+    }
+
+    void onMaximizeWindowHoverExit() {
+        ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
+                .onMaximizeWindowHoverExit();
+    }
+
+    void onMaximizeWindowHoverEnter() {
+        ((DesktopModeAppControlsWindowDecorationViewHolder) mWindowDecorViewHolder)
+                .onMaximizeWindowHoverEnter();
     }
 
     @Override
