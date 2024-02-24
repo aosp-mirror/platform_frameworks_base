@@ -76,7 +76,7 @@ class VolumePanelViewModel(
                 VolumePanelState(
                     orientation = configuration.orientation,
                     isVisible = isVisible,
-                    isWideScreen = !resources.getBoolean(R.bool.config_edgeToEdgeBottomSheetDialog),
+                    isLargeScreen = resources.getBoolean(R.bool.volume_panel_is_large_screen),
                 )
             }
             .stateIn(
@@ -85,7 +85,7 @@ class VolumePanelViewModel(
                 VolumePanelState(
                     orientation = resources.configuration.orientation,
                     isVisible = mutablePanelVisibility.value,
-                    isWideScreen = !resources.getBoolean(R.bool.config_edgeToEdgeBottomSheetDialog)
+                    isLargeScreen = resources.getBoolean(R.bool.volume_panel_is_large_screen)
                 ),
             )
     val componentsLayout: Flow<ComponentsLayout> =

@@ -268,10 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ସେଭ କରାଯାଇଛି"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ଡିସକନେକ୍ଟ କରନ୍ତୁ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ଚାଲୁ କରନ୍ତୁ"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"ଆସନ୍ତାକାଲି ସ୍ୱତଃ ପୁଣି ଚାଲୁ ହେବ"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Quick Share, Find My Device ଏବଂ ଡିଭାଇସ ଲୋକେସନ ପରି ଫିଚରଗୁଡ଼ିକ ବ୍ଲୁଟୁଥ ବ୍ୟବହାର କରେ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ବ୍ୟାଟେରୀ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ଅଡିଓ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ହେଡସେଟ୍‍"</string>
@@ -532,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ଏହି ଡିଭାଇସ୍ ଆପଣଙ୍କ ବାପାମାଙ୍କ ଦ୍ୱାରା ପରିଚାଳିତ। ଆପଣଙ୍କ ବାପାମା ଆପଣ ବ୍ୟବହାର କରୁଥିବା ଆପ୍ସ, ଆପଣଙ୍କ ଲୋକେସନ୍ ଓ ସ୍କ୍ରିନ୍ ସମୟ ପରି ସୂଚନା ଦେଖିପାରିବେ ଏବଂ ପରିଚାଳନା କରିପାରିବେ।"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ଦ୍ୱାରା ଅନ୍‌ଲକ୍ ରହିଛି"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"ଥେଫ୍ଟ ସୁରକ୍ଷା\nଡିଭାଇସ ଲକ କରାଯାଇଛି, ଅନେକଗୁଡ଼ିଏ ଅନଲକ ପ୍ରଚେଷ୍ଟା"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ସାଉଣ୍ଡ ସେଟିଂସ୍"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"ସ୍ବଚାଳିତ କ୍ୟାପ୍ସନ୍ ମିଡିଆ"</string>
@@ -541,8 +540,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="sound_settings" msgid="8874581353127418308">"ସାଉଣ୍ଡ ଓ ଭାଇବ୍ରେସନ"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ସେଟିଂସ"</string>
-    <!-- no translation found for volume_panel_captioning_title (5984936949147684357) -->
-    <skip />
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"ଲାଇଭ କେପ୍ସନ"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"ଭଲ୍ୟୁମକୁ ସୁରକ୍ଷିତ ଲେଭେଲକୁ କମ କରାଯାଇଛି"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"ସୁପାରିଶ ଭଲ୍ୟୁମ ଠାରୁ ହେଡଫୋନର ଭଲ୍ୟୁମ ଅଧିକ ଅଛି"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"ଏହି ସପ୍ତାହ ପାଇଁ ହେଡଫୋନର ଭଲ୍ୟୁମ ସୁରକ୍ଷିତ ସୀମାକୁ ଅତିକ୍ରମ କରିଛି"</string>
@@ -586,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ଭାଇବ୍ରେଟ୍"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s ଭଲ୍ୟୁମ୍ ନିୟନ୍ତ୍ରଣ"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତି ପାଇଁ (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)ରେ ରିଙ୍ଗ ହେବ"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g>ରେ ପ୍ଲେ କରାଯାଉଛି"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ଅଡିଓ ପ୍ଲେ ହେବ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ସିଷ୍ଟମ୍ UI ଟ୍ୟୁନର୍‍"</string>
     <string name="status_bar" msgid="4357390266055077437">"ଷ୍ଟାଟସ୍‍ ବାର୍‍"</string>
     <string name="demo_mode" msgid="263484519766901593">"ସିଷ୍ଟମ୍‌ UI ଡେମୋ ମୋଡ୍‌"</string>

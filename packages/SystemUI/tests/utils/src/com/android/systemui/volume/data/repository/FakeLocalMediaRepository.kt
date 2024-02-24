@@ -27,20 +27,19 @@ class FakeLocalMediaRepository : LocalMediaRepository {
 
     private val volumeBySession: MutableMap<String?, Int> = mutableMapOf()
 
-    private val mutableMediaDevices = MutableStateFlow<Collection<MediaDevice>>(emptyList())
-    override val mediaDevices: StateFlow<Collection<MediaDevice>>
+    private val mutableMediaDevices = MutableStateFlow<List<MediaDevice>>(emptyList())
+    override val mediaDevices: StateFlow<List<MediaDevice>>
         get() = mutableMediaDevices.asStateFlow()
 
     private val mutableCurrentConnectedDevice = MutableStateFlow<MediaDevice?>(null)
     override val currentConnectedDevice: StateFlow<MediaDevice?>
         get() = mutableCurrentConnectedDevice.asStateFlow()
 
-    private val mutableRemoteRoutingSessions =
-        MutableStateFlow<Collection<RoutingSession>>(emptyList())
-    override val remoteRoutingSessions: StateFlow<Collection<RoutingSession>>
+    private val mutableRemoteRoutingSessions = MutableStateFlow<List<RoutingSession>>(emptyList())
+    override val remoteRoutingSessions: StateFlow<List<RoutingSession>>
         get() = mutableRemoteRoutingSessions.asStateFlow()
 
-    fun updateMediaDevices(devices: Collection<MediaDevice>) {
+    fun updateMediaDevices(devices: List<MediaDevice>) {
         mutableMediaDevices.value = devices
     }
 

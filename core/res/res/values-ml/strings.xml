@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു, സ്ഥിരീകരിക്കുക അമർത്തുക"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ലഭ്യമല്ല"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ഫിംഗർപ്രിന്റ് സജ്ജീകരിക്കാനാകില്ല"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ഫിംഗർപ്രിന്റ് സജ്ജീകരണം ടൈംഔട്ടായി. വീണ്ടും ശ്രമിക്കുക."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"ഫിംഗർപ്രിന്റിന്റെ പ്രവർത്തനം ഉപയോക്താവ് റദ്ദാക്കി"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"നിരവധി ശ്രമങ്ങൾ. പകരം സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"നിരവധി ശ്രമങ്ങൾ. പകരം സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ഫിംഗർപ്രിന്റ് പ്രോസസ് ചെയ്യാനാകില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"ഫിംഗർപ്രിന്റുകളൊന്നും എൻറോൾ ചെയ്‌തിട്ടില്ല"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസർ ഇല്ല"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"ഫിംഗർപ്രിന്റ് സെൻസർ ഉപയോഗിക്കാനാകില്ല. റിപ്പയർ കേന്ദ്രം സന്ദർശിക്കുക."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"പവർ ബട്ടൺ അമർത്തി"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"ഫിംഗർ <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കുക"</string>

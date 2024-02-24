@@ -26,6 +26,7 @@ import static android.service.notification.NotificationListenerService.REASON_AP
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -46,6 +47,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
@@ -73,6 +75,8 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.service.dreams.IDreamManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
@@ -161,6 +165,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository;
@@ -257,6 +262,8 @@ public class BubblesTest extends SysuiTestCase {
     private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock
     private AuthController mAuthController;
+    @Mock
+    private SensitiveNotificationProtectionController mSensitiveNotificationProtectionController;
 
     private SysUiState mSysUiState;
     private boolean mSysUiStateBubblesExpanded;
@@ -272,6 +279,8 @@ public class BubblesTest extends SysuiTestCase {
     private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverArgumentCaptor;
     @Captor
     private ArgumentCaptor<KeyguardStateController.Callback> mKeyguardStateControllerCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<Runnable> mSensitiveStateChangedListener;
 
     private BubblesManager mBubblesManager;
     private TestableBubbleController mBubbleController;
@@ -594,6 +603,7 @@ public class BubblesTest extends SysuiTestCase {
                 interruptionDecisionProvider,
                 mZenModeController,
                 mLockscreenUserManager,
+                mSensitiveNotificationProtectionController,
                 mCommonNotifCollection,
                 mNotifPipeline,
                 mSysUiState,
@@ -2201,6 +2211,33 @@ public class BubblesTest extends SysuiTestCase {
         mBubbleController.collapseStack();
 
         assertThat(mBubbleController.getLayerView().isExpanded()).isFalse();
+    }
+
+    @DisableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    @Test
+    public void doesNotRegisterSensitiveStateListener() {
+        verifyZeroInteractions(mSensitiveNotificationProtectionController);
+    }
+
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    @Test
+    public void registerSensitiveStateListener() {
+        verify(mSensitiveNotificationProtectionController).registerSensitiveStateListener(any());
+    }
+
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    @Test
+    public void onSensitiveNotificationProtectionStateChanged() {
+        verify(mSensitiveNotificationProtectionController, atLeastOnce())
+                .registerSensitiveStateListener(mSensitiveStateChangedListener.capture());
+
+        when(mSensitiveNotificationProtectionController.isSensitiveStateActive()).thenReturn(true);
+        mSensitiveStateChangedListener.getValue().run();
+        verify(mBubbleController).onSensitiveNotificationProtectionStateChanged(true);
+
+        when(mSensitiveNotificationProtectionController.isSensitiveStateActive()).thenReturn(false);
+        mSensitiveStateChangedListener.getValue().run();
+        verify(mBubbleController).onSensitiveNotificationProtectionStateChanged(false);
     }
 
     /** Creates a bubble using the userId and package. */

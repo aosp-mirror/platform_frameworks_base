@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.content.pm.PackageManagerInternal;
 import android.frameworks.vibrator.ScaleParam;
-import android.frameworks.vibrator.VibrationParam;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -55,8 +54,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -135,7 +132,7 @@ public class VibratorControlServiceTest {
         vibrationScales.put(ScaleParam.TYPE_NOTIFICATION, 0.4f);
 
         mVibratorControlService.onRequestVibrationParamsComplete(token,
-                generateVibrationParams(vibrationScales));
+                VibrationParamGenerator.generateVibrationParams(vibrationScales));
 
         verify(mMockVibrationScaler).updateAdaptiveHapticsScale(USAGE_ALARM, 0.7f);
         verify(mMockVibrationScaler).updateAdaptiveHapticsScale(USAGE_NOTIFICATION, 0.4f);
@@ -162,7 +159,7 @@ public class VibratorControlServiceTest {
         vibrationScales.put(ScaleParam.TYPE_NOTIFICATION, 0.4f);
 
         mVibratorControlService.onRequestVibrationParamsComplete(new Binder(),
-                generateVibrationParams(vibrationScales));
+                VibrationParamGenerator.generateVibrationParams(vibrationScales));
 
         verifyZeroInteractions(mMockVibrationScaler);
     }
@@ -175,7 +172,8 @@ public class VibratorControlServiceTest {
         vibrationScales.put(ScaleParam.TYPE_ALARM, 0.7f);
         vibrationScales.put(ScaleParam.TYPE_NOTIFICATION, 0.4f);
 
-        mVibratorControlService.setVibrationParams(generateVibrationParams(vibrationScales),
+        mVibratorControlService.setVibrationParams(
+                VibrationParamGenerator.generateVibrationParams(vibrationScales),
                 mFakeVibratorController);
 
         verify(mMockVibrationScaler).updateAdaptiveHapticsScale(USAGE_ALARM, 0.7f);
@@ -193,7 +191,8 @@ public class VibratorControlServiceTest {
         vibrationScales.put(ScaleParam.TYPE_ALARM, 0.7f);
         vibrationScales.put(ScaleParam.TYPE_NOTIFICATION, 0.4f);
 
-        mVibratorControlService.setVibrationParams(generateVibrationParams(vibrationScales),
+        mVibratorControlService.setVibrationParams(
+                VibrationParamGenerator.generateVibrationParams(vibrationScales),
                 mFakeVibratorController);
 
         verifyZeroInteractions(mMockVibrationScaler);
@@ -266,28 +265,6 @@ public class VibratorControlServiceTest {
         for (int vibration : vibrations) {
             assertThat(mVibratorControlService.shouldRequestVibrationParams(vibration)).isFalse();
         }
-    }
-
-    private VibrationParam[] generateVibrationParams(SparseArray<Float> vibrationScales) {
-        List<VibrationParam> vibrationParamList = new ArrayList<>();
-        for (int i = 0; i < vibrationScales.size(); i++) {
-            int type = vibrationScales.keyAt(i);
-            float scale = vibrationScales.valueAt(i);
-
-            vibrationParamList.add(generateVibrationParam(type, scale));
-        }
-
-        return vibrationParamList.toArray(new VibrationParam[0]);
-    }
-
-    private VibrationParam generateVibrationParam(int type, float scale) {
-        ScaleParam scaleParam = new ScaleParam();
-        scaleParam.typesMask = type;
-        scaleParam.scale = scale;
-        VibrationParam vibrationParam = new VibrationParam();
-        vibrationParam.setScale(scaleParam);
-
-        return vibrationParam;
     }
 
     private int buildVibrationTypesMask(int... types) {

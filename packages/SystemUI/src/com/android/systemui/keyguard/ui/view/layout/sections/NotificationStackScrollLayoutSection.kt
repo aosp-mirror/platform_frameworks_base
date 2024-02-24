@@ -111,7 +111,7 @@ constructor(
                 sceneContainerFlags,
                 controller,
                 notificationStackSizeCalculator,
-                mainDispatcher,
+                mainImmediateDispatcher = mainDispatcher,
             )
         )
 
@@ -123,6 +123,7 @@ constructor(
                     notificationStackAppearanceViewModel,
                     ambientState,
                     controller,
+                    mainImmediateDispatcher = mainDispatcher,
                 )
             )
         }

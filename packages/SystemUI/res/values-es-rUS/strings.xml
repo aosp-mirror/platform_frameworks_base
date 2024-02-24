@@ -530,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Tu padre o madre administra este dispositivo. Esa persona puede ver y administrar información, como las apps que usas, tu ubicación y el tiempo de uso."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent lo mantiene desbloqueado"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Protección antirrobo\nDispositivo bloqueado; muchos intentos"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Configuración de sonido"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Muestra subtítulos automáticos"</string>
@@ -539,8 +540,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"inhabilitar"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Sonido y vibración"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Configuración"</string>
-    <!-- no translation found for volume_panel_captioning_title (5984936949147684357) -->
-    <skip />
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Subtitulado instantáneo"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Se bajó el volumen a un nivel seguro"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"El volumen de los auriculares se mantuvo elevado por más tiempo del recomendado"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Se excedió el límite seguro de volumen de los auriculares para esta semana"</string>
@@ -584,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrar"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Controles de volumen %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Sonarán las llamadas y notificaciones (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"Reproduciendo <xliff:g id="LABEL">%s</xliff:g> en"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Se reproducirá en"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sintonizador de IU del sistema"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de estado"</string>
     <string name="demo_mode" msgid="263484519766901593">"Modo demostración de la IU del sistema"</string>

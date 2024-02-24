@@ -12481,6 +12481,24 @@ public final class Settings {
         public static void setLocationProviderEnabled(ContentResolver cr,
                 String provider, boolean enabled) {
         }
+
+        /**
+         * List of system components that support restore in a  V-> U OS downgrade but do not have
+         * RestoreAnyVersion set to true. Value set before system restore.
+         * This setting is not B&Rd
+         * List is stored as a comma-separated string of package names e.g. "a,b,c"
+         * @hide
+         */
+        public static final String V_TO_U_RESTORE_ALLOWLIST = "v_to_u_restore_allowlist";
+
+        /**
+         * List of system components that have RestoreAnyVersion set to true but do not support
+         * restore in a  V-> U OS downgrade. Value set before system restore.
+         * This setting is not B&Rd
+         * List is stored as a comma-separated string of package names e.g. "a,b,c"
+         * @hide
+         */
+        public static final String V_TO_U_RESTORE_DENYLIST = "v_to_u_restore_denylist";
     }
 
     /**

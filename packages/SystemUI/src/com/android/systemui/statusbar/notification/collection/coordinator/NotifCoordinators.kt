@@ -53,6 +53,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mediaCoordinator: MediaCoordinator,
         preparationCoordinator: PreparationCoordinator,
         remoteInputCoordinator: RemoteInputCoordinator,
+        rowAlertTimeCoordinator: RowAlertTimeCoordinator,
         rowAppearanceCoordinator: RowAppearanceCoordinator,
         stackCoordinator: StackCoordinator,
         shadeEventCoordinator: ShadeEventCoordinator,
@@ -69,9 +70,7 @@ class NotifCoordinatorsImpl @Inject constructor(
     private val mCoordinators: MutableList<Coordinator> = ArrayList()
     private val mOrderedSections: MutableList<NotifSectioner> = ArrayList()
 
-    /**
-     * Creates all the coordinators.
-     */
+    /** Creates all the coordinators. */
     init {
         // Attach core coordinators.
         mCoreCoordinators.add(dataStoreCoordinator)
@@ -89,6 +88,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(groupCountCoordinator)
         mCoordinators.add(groupWhenCoordinator)
         mCoordinators.add(mediaCoordinator)
+        mCoordinators.add(rowAlertTimeCoordinator)
         mCoordinators.add(rowAppearanceCoordinator)
         mCoordinators.add(stackCoordinator)
         mCoordinators.add(shadeEventCoordinator)

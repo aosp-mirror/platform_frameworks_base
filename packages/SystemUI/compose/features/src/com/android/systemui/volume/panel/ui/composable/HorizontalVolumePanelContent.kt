@@ -51,10 +51,8 @@ fun VolumePanelComposeScope.HorizontalVolumePanelContent(
             verticalArrangement = Arrangement.spacedBy(space = spacing, alignment = Alignment.Top)
         ) {
             for (component in layout.headerComponents) {
-                AnimatedVisibility(component.isVisible) {
-                    with(component.component as ComposeVolumePanelUiComponent) {
-                        Content(Modifier.weight(1f))
-                    }
+                AnimatedVisibility(visible = component.isVisible) {
+                    with(component.component as ComposeVolumePanelUiComponent) { Content(Modifier) }
                 }
             }
             Row(
@@ -62,9 +60,12 @@ fun VolumePanelComposeScope.HorizontalVolumePanelContent(
                 horizontalArrangement = Arrangement.spacedBy(spacing),
             ) {
                 for (component in layout.footerComponents) {
-                    AnimatedVisibility(component.isVisible) {
+                    AnimatedVisibility(
+                        visible = component.isVisible,
+                        modifier = Modifier.weight(1f),
+                    ) {
                         with(component.component as ComposeVolumePanelUiComponent) {
-                            Content(Modifier.weight(1f))
+                            Content(Modifier)
                         }
                     }
                 }

@@ -107,15 +107,20 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         mContext = context;
         mSystemInterface = systemInterface;
         WebViewProviderInfo[] webviewProviders = getWebViewPackages();
+
+        WebViewProviderInfo defaultProvider = null;
         for (WebViewProviderInfo provider : webviewProviders) {
             if (provider.availableByDefault) {
-                mDefaultProvider = provider;
+                defaultProvider = provider;
                 break;
             }
         }
-        // This should be unreachable because the config parser enforces that there is at least one
-        // availableByDefault provider.
-        throw new AndroidRuntimeException("No available by default WebView Provider.");
+        if (defaultProvider == null) {
+            // This should be unreachable because the config parser enforces that there is at least
+            // one availableByDefault provider.
+            throw new AndroidRuntimeException("No available by default WebView Provider.");
+        }
+        mDefaultProvider = defaultProvider;
     }
 
     @Override

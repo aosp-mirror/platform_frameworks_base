@@ -255,6 +255,7 @@ android.view.Display
 android.view.Display$HdrCapabilities
 android.view.Display$Mode
 android.view.DisplayInfo
+android.view.inputmethod.InputBinding
 
 android.hardware.SerialManager
 android.hardware.SerialManagerInternal

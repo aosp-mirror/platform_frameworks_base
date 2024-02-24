@@ -10,6 +10,7 @@ import android.annotation.SystemApi;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
 import android.credentials.GetCredentialResponse;
@@ -29,6 +30,7 @@ import android.os.PooledStringWriter;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.FillRequest;
+import android.service.credentials.CredentialProviderService;
 import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -2258,6 +2260,17 @@ public class AssistStructure implements Parcelable {
                 @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
             mNode.mGetCredentialRequest = request;
             mNode.mGetCredentialCallback = callback;
+            for (CredentialOption option : request.getCredentialOptions()) {
+                ArrayList<AutofillId> ids = option.getCandidateQueryData()
+                        .getParcelableArrayList(
+                                CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId.class);
+                ids = ids != null ? ids : new ArrayList<>();
+                if (!ids.contains(getAutofillId())) {
+                    ids.add(getAutofillId());
+                }
+                option.getCandidateQueryData()
+                        .putParcelableArrayList(CredentialProviderService.EXTRA_AUTOFILL_ID, ids);
+            }
         }
 
         @Override

@@ -667,24 +667,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Impronta autenticata"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Volto autenticato"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Volto autenticato, premi Conferma"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Lettore di impronte digitali non disponibile"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Impossibile configurare l\'impronta"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Timeout configurazione impronta. Riprova."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Operazione associata all\'impronta annullata"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Operazione di autenticazione dell\'impronta annullata dall\'utente"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Troppi tentativi. Usa il blocco schermo."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Troppi tentativi. Usa il blocco schermo."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Impossibile elaborare l\'impronta. Riprova."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Nessuna impronta registrata"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Questo dispositivo non è dotato di sensore di impronte"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sensore temporaneamente disattivato"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Impossibile usare il sensore di impronte digitali. Contatta un fornitore di servizi di riparazione."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Tasto di accensione premuto"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dito <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usa l\'impronta"</string>

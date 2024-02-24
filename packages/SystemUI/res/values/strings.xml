@@ -3129,6 +3129,8 @@
     <!-- [CHAR LIMIT=25] Long label used by Note Task Shortcut -->
     <string name="note_task_shortcut_long_label">Note-taking, <xliff:g id="note_taking_app" example="Note-taking App">%1$s</xliff:g></string>
 
+    <!-- [CHAR LIMIT=NONE] Output switch chip text during broadcasting -->
+    <string name="audio_sharing_description">Sharing audio</string>
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is broadcasting -->
     <string name="broadcasting_description_is_broadcasting">Broadcasting</string>
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, title -->

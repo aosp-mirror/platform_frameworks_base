@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Autenticouse a impresión dixital"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Autenticouse a cara"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Autenticouse a cara, preme Confirmar"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"O hardware de impresión dixital non está dispoñible"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Non se puido configurar a impresión dixital"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Esgotouse o tempo para configurar a impresión dixital. Téntao de novo."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Cancelouse a operación de impresión dixital"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"O usuario cancelou a operación de impresión dixital"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Houbo demasiados intentos. Mellor usa o bloqueo de pantalla."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Demasiados intentos. Mellor usa o bloqueo de pantalla."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Non se pode procesar a impresión dixital Téntao de novo."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Non se rexistrou ningunha impresión dixital"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Este dispositivo non ten sensor de impresión dixital"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"O sensor está desactivado temporalmente"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Non se pode usar o sensor de impresión dixital. Vai a un servizo de reparación."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Premeuse o botón de acendido"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utilizar impresión dixital"</string>
@@ -1003,7 +997,7 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Téntao de novo"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloquea para gozar todas as funcións e datos"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Superouse o número máximo de intentos de desbloqueo facial"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Non hai ningunha SIM"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Non hai SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Non hai ningunha SIM na tableta."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Non hai ningunha SIM no dispositivo Android TV."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Non hai ningunha SIM no teléfono."</string>

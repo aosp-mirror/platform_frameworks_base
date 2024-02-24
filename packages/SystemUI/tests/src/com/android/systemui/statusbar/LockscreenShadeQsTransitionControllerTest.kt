@@ -18,12 +18,13 @@ package com.android.systemui.statusbar
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -43,13 +44,15 @@ class LockscreenShadeQsTransitionControllerTest : SysuiTestCase() {
     @get:Rule val expect: Expect = Expect.create()
 
     @Mock private lateinit var dumpManager: DumpManager
-    @Mock private lateinit var qS: QS
+    private var qS: QS? = null
 
     private lateinit var controller: LockscreenShadeQsTransitionController
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        qS = mock()
+
         setTransitionDistance(TRANSITION_DISTANCE)
         setTransitionDelay(TRANSITION_DELAY)
         setSquishTransitionDistance(SQUISH_TRANSITION_DISTANCE)
@@ -220,12 +223,21 @@ class LockscreenShadeQsTransitionControllerTest : SysuiTestCase() {
 
         controller.dragDownAmount = rawDragAmount
 
-        verify(qS)
+        verify(qS!!)
             .setTransitionToFullShadeProgress(
                 /* isTransitioningToFullShade= */ true,
                 /* transitionFraction= */ controller.qsTransitionFraction,
                 /* squishinessFraction= */ controller.qsSquishTransitionFraction
             )
+    }
+
+    @Test
+    fun nullQS_onDragAmountChanged_doesNotCrash() {
+        qS = null
+
+        val rawDragAmount = 200f
+
+        controller.dragDownAmount = rawDragAmount
     }
 
     private fun setTransitionDistance(value: Int) {

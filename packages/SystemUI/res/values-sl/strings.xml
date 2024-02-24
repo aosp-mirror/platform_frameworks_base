@@ -268,10 +268,8 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Shranjeno"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"prekinitev povezave"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiviranje"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_tomorrow (414836329962473906) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info (8831410009251539988) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Samodejno znova vklopi jutri"</string>
+    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Funkcije, kot sta Hitro deljenje in Poišči mojo napravo, ter lokacija naprave, uporabljajo Bluetooth"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterija na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvok"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Slušalke z mikrofonom"</string>
@@ -532,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"To napravo upravlja tvoj starš. Lahko si ogleda in upravlja podatke, na primer katere aplikacije uporabljaš, tvojo lokacijo in koliko časa uporabljaš napravo."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ohranja odklenjeno"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Zaščita pred krajo\nNaprava je zaklenjena, preveč poskusov odklepanja"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Nastavitve zvoka"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Sam. podnapisi predstavnosti"</string>
@@ -585,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibriranje"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Kontrolniki glasnosti za %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Klici in obvestila bodo pozvonili (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"Predvajanje »<xliff:g id="LABEL">%s</xliff:g>« v"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvok bo predvajan v"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Uglaševalnik uporabniškega vmesnika sistema"</string>
     <string name="status_bar" msgid="4357390266055077437">"Vrstica stanja"</string>
     <string name="demo_mode" msgid="263484519766901593">"Predstavitveni način uporabniškega vmesnika sistema"</string>

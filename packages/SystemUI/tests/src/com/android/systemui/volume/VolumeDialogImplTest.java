@@ -61,6 +61,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 
 import androidx.test.core.view.MotionEventBuilder;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -501,6 +502,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     }
 
     @Test
+    @FlakyTest(bugId = 326204750)
     public void dialogDestroy_removesPostureControllerCallback() {
         verify(mPostureController, never()).removeCallback(any());
         mDialog.destroy();
@@ -799,8 +801,9 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         Log.d(TAG, "teardown: entered");
         setOrientation(mOriginalOrientation);
         Log.d(TAG, "teardown: after setOrientation");
-        mAnimatorTestRule.advanceTimeBy(mLongestHideShowAnimationDuration);
-        Log.d(TAG, "teardown: after advanceTimeBy");
+        // Unclear why we used to do this, and it seems to be a source of flakes
+        // mAnimatorTestRule.advanceTimeBy(mLongestHideShowAnimationDuration);
+        Log.d(TAG, "teardown: skipped advanceTimeBy");
         mTestableLooper.moveTimeForward(mLongestHideShowAnimationDuration);
         Log.d(TAG, "teardown: after moveTimeForward");
         mTestableLooper.processAllMessages();

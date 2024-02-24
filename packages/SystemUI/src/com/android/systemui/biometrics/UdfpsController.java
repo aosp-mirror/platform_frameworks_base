@@ -80,6 +80,7 @@ import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlay
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
@@ -90,6 +91,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -116,6 +118,7 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
+import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
@@ -173,6 +176,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             mDefaultUdfpsTouchOverlayViewModel;
     @NonNull private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     @NonNull private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
+    @NonNull private final PowerInteractor mPowerInteractor;
+    @NonNull private final CoroutineScope mScope;
     @NonNull private final InputManager mInputManager;
     @NonNull private final UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     @NonNull private final SelectedUserInteractor mSelectedUserInteractor;
@@ -296,7 +301,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         mDeviceEntryUdfpsTouchOverlayViewModel,
                         mDefaultUdfpsTouchOverlayViewModel,
                         mShadeInteractor,
-                        mUdfpsOverlayInteractor
+                        mUdfpsOverlayInteractor,
+                        mPowerInteractor,
+                        mScope
                     )));
         }
 
@@ -678,7 +685,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull KeyguardTransitionInteractor keyguardTransitionInteractor,
             Lazy<DeviceEntryUdfpsTouchOverlayViewModel> deviceEntryUdfpsTouchOverlayViewModel,
             Lazy<DefaultUdfpsTouchOverlayViewModel> defaultUdfpsTouchOverlayViewModel,
-            @NonNull UdfpsOverlayInteractor udfpsOverlayInteractor) {
+            @NonNull UdfpsOverlayInteractor udfpsOverlayInteractor,
+            @NonNull PowerInteractor powerInteractor,
+            @Application CoroutineScope scope) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -720,6 +729,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mShadeInteractor = shadeInteractor;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUdfpsOverlayInteractor = udfpsOverlayInteractor;
+        mPowerInteractor = powerInteractor;
+        mScope = scope;
         mInputManager = inputManager;
         mUdfpsKeyguardAccessibilityDelegate = udfpsKeyguardAccessibilityDelegate;
         mSelectedUserInteractor = selectedUserInteractor;

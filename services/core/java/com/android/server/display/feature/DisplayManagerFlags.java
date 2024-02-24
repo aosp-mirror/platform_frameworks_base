@@ -121,6 +121,11 @@ public class DisplayManagerFlags {
             Flags::refreshRateVotingTelemetry
     );
 
+    private final FlagState mSensorBasedBrightnessThrottling = new FlagState(
+            Flags.FLAG_SENSOR_BASED_BRIGHTNESS_THROTTLING,
+            Flags::sensorBasedBrightnessThrottling
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -247,6 +252,10 @@ public class DisplayManagerFlags {
         return mRefreshRateVotingTelemetry.isEnabled();
     }
 
+    public boolean isSensorBasedBrightnessThrottlingEnabled() {
+        return mSensorBasedBrightnessThrottling.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -270,6 +279,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mAutoBrightnessModesFlagState);
         pw.println(" " + mFastHdrTransitions);
         pw.println(" " + mRefreshRateVotingTelemetry);
+        pw.println(" " + mSensorBasedBrightnessThrottling);
     }
 
     private static class FlagState {

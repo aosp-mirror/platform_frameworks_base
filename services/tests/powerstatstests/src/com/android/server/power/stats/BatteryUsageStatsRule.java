@@ -16,6 +16,8 @@
 
 package com.android.server.power.stats;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -28,11 +30,11 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
+import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
-import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -47,6 +49,8 @@ import org.junit.runners.model.Statement;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 @SuppressWarnings("SynchronizeOnNonFinalField")
@@ -59,7 +63,9 @@ public class BatteryUsageStatsRule implements TestRule {
 
     private final PowerProfile mPowerProfile;
     private final MockClock mMockClock = new MockClock();
-    private final File mHistoryDir;
+    private String mTestName;
+    private boolean mCreateTempDirectory;
+    private File mHistoryDir;
     private MockBatteryStatsImpl mBatteryStats;
     private Handler mHandler;
 
@@ -74,34 +80,33 @@ public class BatteryUsageStatsRule implements TestRule {
     private NetworkStats mNetworkStats;
     private boolean[] mSupportedStandardBuckets;
     private String[] mCustomPowerComponentNames;
+    private Throwable mThrowable;
 
     public BatteryUsageStatsRule() {
-        this(0, null);
+        this(0);
     }
 
     public BatteryUsageStatsRule(long currentTime) {
-        this(currentTime, null);
-    }
-
-    public BatteryUsageStatsRule(long currentTime, File historyDir) {
         mHandler = mock(Handler.class);
         mPowerProfile = spy(new PowerProfile());
         mMockClock.currentTime = currentTime;
-        mHistoryDir = historyDir;
-
-        if (!RavenwoodRule.isUnderRavenwood()) {
-            lateInitBatteryStats();
-        }
-
         mCpusByPolicy.put(0, new int[]{0, 1, 2, 3});
         mCpusByPolicy.put(4, new int[]{4, 5, 6, 7});
         mFreqsByPolicy.put(0, new int[]{300000, 1000000, 2000000});
         mFreqsByPolicy.put(4, new int[]{300000, 1000000, 2500000, 3000000});
     }
 
-    private void lateInitBatteryStats() {
+    private void initBatteryStats() {
         if (mBatteryStats != null) return;
 
+        if (mCreateTempDirectory) {
+            try {
+                mHistoryDir = Files.createTempDirectory(mTestName).toFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            clearDirectory();
+        }
         mBatteryStats = new MockBatteryStatsImpl(mMockClock, mHistoryDir, mHandler);
         mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.setCpuScalingPolicies(new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
@@ -132,6 +137,15 @@ public class BatteryUsageStatsRule implements TestRule {
 
     public Handler getHandler() {
         return mHandler;
+    }
+
+    public File getHistoryDir() {
+        return mHistoryDir;
+    }
+
+    public BatteryUsageStatsRule createTempDirectory() {
+        mCreateTempDirectory = true;
+        return this;
     }
 
     public BatteryUsageStatsRule setTestPowerProfile(@XmlRes int xmlId) {
@@ -265,24 +279,49 @@ public class BatteryUsageStatsRule implements TestRule {
 
     @Override
     public Statement apply(Statement base, Description description) {
+        mTestName = description.getClassName() + "#" + description.getMethodName();
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
                 before();
                 base.evaluate();
+                after();
             }
         };
     }
 
     private void before() {
-        lateInitBatteryStats();
+        initBatteryStats();
         HandlerThread bgThread = new HandlerThread("bg thread");
+        bgThread.setUncaughtExceptionHandler((thread, throwable)-> {
+            mThrowable = throwable;
+        });
         bgThread.start();
         mHandler = new Handler(bgThread.getLooper());
         mBatteryStats.setHandler(mHandler);
         mBatteryStats.setOnBatteryInternal(true);
         mBatteryStats.getOnBatteryTimeBase().setRunning(true, 0, 0);
         mBatteryStats.getOnBatteryScreenOffTimeBase().setRunning(!mScreenOn, 0, 0);
+    }
+
+    private void after() throws Throwable {
+        if (mHandler != null) {
+            waitForBackgroundThread();
+        }
+    }
+
+    public void waitForBackgroundThread() throws Throwable {
+        if (mThrowable != null) {
+            throw mThrowable;
+        }
+
+        ConditionVariable done = new ConditionVariable();
+        mHandler.post(done::open);
+        assertThat(done.block(10000)).isTrue();
+
+        if (mThrowable != null) {
+            throw mThrowable;
+        }
     }
 
     public PowerProfile getPowerProfile() {
@@ -296,6 +335,9 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     public MockBatteryStatsImpl getBatteryStats() {
+        if (mBatteryStats == null) {
+            initBatteryStats();
+        }
         return mBatteryStats;
     }
 
@@ -368,5 +410,20 @@ public class BatteryUsageStatsRule implements TestRule {
             }
         }
         return null;
+    }
+
+    public void clearDirectory() {
+        clearDirectory(mHistoryDir);
+    }
+
+    private void clearDirectory(File dir) {
+        if (dir.exists()) {
+            for (File child : dir.listFiles()) {
+                if (child.isDirectory()) {
+                    clearDirectory(child);
+                }
+                child.delete();
+            }
+        }
     }
 }

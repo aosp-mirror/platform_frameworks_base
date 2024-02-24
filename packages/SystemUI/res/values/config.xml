@@ -1010,4 +1010,7 @@
 
     <!--  Whether to use a machine learning model for back gesture falsing. -->
     <bool name="config_useBackGestureML">true</bool>
+
+    <!-- Whether volume panel should use the large screen layout or not -->
+    <bool name="volume_panel_is_large_screen">false</bool>
 </resources>

@@ -12,6 +12,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -38,6 +39,7 @@ class WalletContextualLocationsServiceTest : SysuiTestCase() {
     private var featureFlags = FakeFeatureFlags()
     private lateinit var underTest: WalletContextualLocationsService
     private lateinit var testScope: TestScope
+    private lateinit var testDispatcher: CoroutineDispatcher
     private var listenerRegisteredCount: Int = 0
     private val listener: IWalletCardsUpdatedListener.Stub =
         object : IWalletCardsUpdatedListener.Stub() {
@@ -54,8 +56,8 @@ class WalletContextualLocationsServiceTest : SysuiTestCase() {
         doNothing().whenever(controller).setSuggestionCardIds(anySet())
 
         if (Looper.myLooper() == null) Looper.prepare()
-        val testDispatcher = StandardTestDispatcher()
-        testScope = TestScope()
+        testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
         featureFlags.set(Flags.ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS, true)
         listenerRegisteredCount = 0
         underTest =

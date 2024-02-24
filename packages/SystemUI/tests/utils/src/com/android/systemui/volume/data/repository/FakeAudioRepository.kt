@@ -42,6 +42,7 @@ class FakeAudioRepository : AudioRepository {
         get() = mutableCommunicationDevice.asStateFlow()
 
     private val models: MutableMap<AudioStream, MutableStateFlow<AudioStreamModel>> = mutableMapOf()
+    private val lastAudibleVolumes: MutableMap<AudioStream, Int> = mutableMapOf()
 
     private fun getAudioStreamModelState(
         audioStream: AudioStream
@@ -59,11 +60,8 @@ class FakeAudioRepository : AudioRepository {
             )
         }
 
-    override suspend fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> =
+    override fun getAudioStream(audioStream: AudioStream): Flow<AudioStreamModel> =
         getAudioStreamModelState(audioStream).asStateFlow()
-
-    override suspend fun getCurrentAudioStream(audioStream: AudioStream): AudioStreamModel =
-        getAudioStreamModelState(audioStream).value
 
     override suspend fun setVolume(audioStream: AudioStream, volume: Int) {
         getAudioStreamModelState(audioStream).update { it.copy(volume = volume) }
@@ -72,6 +70,9 @@ class FakeAudioRepository : AudioRepository {
     override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) {
         getAudioStreamModelState(audioStream).update { it.copy(isMuted = isMuted) }
     }
+
+    override suspend fun getLastAudibleVolume(audioStream: AudioStream): Int =
+        lastAudibleVolumes.getOrDefault(audioStream, 0)
 
     fun setMode(newMode: Int) {
         mutableMode.value = newMode
@@ -87,5 +88,9 @@ class FakeAudioRepository : AudioRepository {
 
     fun setAudioStreamModel(model: AudioStreamModel) {
         getAudioStreamModelState(model.audioStream).update { model }
+    }
+
+    fun setLastAudibleVolume(audioStream: AudioStream, volume: Int) {
+        lastAudibleVolumes[audioStream] = volume
     }
 }

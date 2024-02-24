@@ -124,15 +124,6 @@ public abstract class SysUIConcurrencyModule {
     }
 
     /**
-     * Provide a Background-Thread Executor by default.
-     */
-    @Provides
-    @SysUISingleton
-    public static Executor provideExecutor(@Background Looper looper) {
-        return new ExecutorImpl(looper);
-    }
-
-    /**
      * Provide a BroadcastRunning Executor (for sending and receiving broadcasts).
      */
     @Provides
@@ -174,15 +165,6 @@ public abstract class SysUIConcurrencyModule {
     }
 
     /**
-     * Provide a Background-Thread Executor by default.
-     */
-    @Provides
-    @SysUISingleton
-    public static DelayableExecutor provideDelayableExecutor(@Background Looper looper) {
-        return new ExecutorImpl(looper);
-    }
-
-    /**
      * Provide a Background-Thread Executor.
      */
     @Provides
@@ -190,15 +172,6 @@ public abstract class SysUIConcurrencyModule {
     @Background
     public static DelayableExecutor provideBackgroundDelayableExecutor(@Background Looper looper) {
         return new ExecutorImpl(looper);
-    }
-
-    /**
-     * Provide a Background-Thread Executor by default.
-     */
-    @Provides
-    @SysUISingleton
-    public static RepeatableExecutor provideRepeatableExecutor(@Background DelayableExecutor exec) {
-        return new RepeatableExecutorImpl(exec);
     }
 
     /**

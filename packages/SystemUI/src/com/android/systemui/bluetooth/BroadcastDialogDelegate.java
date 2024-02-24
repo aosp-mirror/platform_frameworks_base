@@ -40,6 +40,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.MediaOutputConstants;
 import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.controls.util.MediaDataUtils;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.res.R;
@@ -74,7 +75,7 @@ public class BroadcastDialogDelegate implements SystemUIDialog.Delegate {
     private final SystemUIDialog.Factory mSystemUIDialogFactory;
     private final String mCurrentBroadcastApp;
     private final String mOutputPackageName;
-    private final Executor mExecutor;
+    private final Executor mBgExecutor;
     private boolean mShouldLaunchLeBroadcastDialog;
     private Button mSwitchBroadcast;
 
@@ -159,7 +160,7 @@ public class BroadcastDialogDelegate implements SystemUIDialog.Delegate {
             MediaOutputDialogFactory mediaOutputDialogFactory,
             @Nullable LocalBluetoothManager localBluetoothManager,
             UiEventLogger uiEventLogger,
-            Executor executor,
+            @Background Executor bgExecutor,
             BroadcastSender broadcastSender,
             SystemUIDialog.Factory systemUIDialogFactory,
             @Assisted(CURRENT_BROADCAST_APP) String currentBroadcastApp,
@@ -171,7 +172,7 @@ public class BroadcastDialogDelegate implements SystemUIDialog.Delegate {
         mCurrentBroadcastApp = currentBroadcastApp;
         mOutputPackageName = outputPkgName;
         mUiEventLogger = uiEventLogger;
-        mExecutor = executor;
+        mBgExecutor = bgExecutor;
         mBroadcastSender = broadcastSender;
 
         if (DEBUG) {
@@ -187,7 +188,7 @@ public class BroadcastDialogDelegate implements SystemUIDialog.Delegate {
     @Override
     public void onStart(SystemUIDialog dialog) {
         mDialogs.add(dialog);
-        registerBroadcastCallBack(mExecutor, mBroadcastCallback);
+        registerBroadcastCallBack(mBgExecutor, mBroadcastCallback);
     }
 
     @Override
