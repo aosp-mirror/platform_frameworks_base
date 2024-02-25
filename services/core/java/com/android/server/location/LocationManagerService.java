@@ -463,11 +463,13 @@ public class LocationManagerService extends ILocationManager.Stub implements
                     com.android.internal.R.bool.config_useGnssHardwareProvider);
             AbstractLocationProvider gnssProvider = null;
             if (!useGnssHardwareProvider) {
+                // TODO: Create a separate config_enableGnssLocationOverlay config resource
+                // if we want to selectively enable a GNSS overlay but disable a fused overlay.
                 gnssProvider = ProxyLocationProvider.create(
                         mContext,
                         GPS_PROVIDER,
                         ACTION_GNSS_PROVIDER,
-                        com.android.internal.R.bool.config_useGnssHardwareProvider,
+                        com.android.internal.R.bool.config_enableFusedLocationOverlay,
                         com.android.internal.R.string.config_gnssLocationProviderPackageName);
             }
             if (gnssProvider == null) {

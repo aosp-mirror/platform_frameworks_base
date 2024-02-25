@@ -83,11 +83,13 @@ class FingerprintRepositoryImplTest : SysuiTestCase() {
             val strength by collectLastValue(repository.strength)
             val sensorType by collectLastValue(repository.sensorType)
             val sensorLocations by collectLastValue(repository.sensorLocations)
+            val propertiesInitialized by collectLastValue(repository.propertiesInitialized)
 
-            // Assert default properties.
-            assertThat(sensorId).isEqualTo(-1)
+            // Assert uninitialized properties.
+            assertThat(sensorId).isEqualTo(-2)
             assertThat(strength).isEqualTo(SensorStrength.CONVENIENCE)
             assertThat(sensorType).isEqualTo(FingerprintSensorType.UNKNOWN)
+            assertThat(propertiesInitialized).isEqualTo(false)
 
             val fingerprintProps =
                 listOf(
@@ -129,6 +131,7 @@ class FingerprintRepositoryImplTest : SysuiTestCase() {
             assertThat(sensorId).isEqualTo(1)
             assertThat(strength).isEqualTo(SensorStrength.STRONG)
             assertThat(sensorType).isEqualTo(FingerprintSensorType.REAR)
+            assertThat(propertiesInitialized).isEqualTo(true)
 
             assertThat(sensorLocations?.size).isEqualTo(2)
             assertThat(sensorLocations).containsKey("display_id_1")

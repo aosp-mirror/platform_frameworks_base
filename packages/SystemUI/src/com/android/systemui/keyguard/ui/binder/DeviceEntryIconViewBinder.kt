@@ -22,11 +22,14 @@ import android.content.res.ColorStateList
 import android.util.StateSet
 import android.view.HapticFeedbackConstants
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.view.LongPressHandlingView
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntrySection
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
@@ -51,6 +54,8 @@ object DeviceEntryIconViewBinder {
     @JvmStatic
     fun bind(
         applicationScope: CoroutineScope,
+        keyguardRootView: ConstraintLayout,
+        section: DefaultDeviceEntrySection,
         view: DeviceEntryIconView,
         viewModel: DeviceEntryIconViewModel,
         fgViewModel: DeviceEntryForegroundViewModel,
@@ -75,6 +80,23 @@ object DeviceEntryIconViewBinder {
                     applicationScope.launch { viewModel.onLongPress() }
                 }
             }
+
+        keyguardRootView.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.positionAtUdfpsLocation.collect { supportsUdfps ->
+                        section.removeViews(keyguardRootView)
+                        keyguardRootView.addView(view)
+                        val constraintSet = ConstraintSet().apply { clone(keyguardRootView) }
+                        section.applyConstraintsAfterPropertiesInitialized(
+                            constraintSet,
+                            supportsUdfps,
+                        )
+                        constraintSet.applyTo(keyguardRootView)
+                    }
+                }
+            }
+        }
 
         view.repeatWhenAttached {
             // Repeat on CREATED so that the view will always observe the entire

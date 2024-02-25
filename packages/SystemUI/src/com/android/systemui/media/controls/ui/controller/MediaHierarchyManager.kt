@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
+import com.android.systemui.util.kotlin.BooleanFlowOperators.and
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -583,12 +584,14 @@ constructor(
             UserHandle.USER_ALL
         )
 
-        // Listen to the communal UI state.
+        // Listen to the communal UI state. Make sure that communal UI is showing and hub itself is
+        // available, ie. not disabled and able to be shown.
         coroutineScope.launch {
-            communalInteractor.isCommunalShowing.collect { value ->
-                isCommunalShowing = value
-                updateDesiredLocation(forceNoAnimation = true)
-            }
+            and(communalInteractor.isCommunalShowing, communalInteractor.isCommunalAvailable)
+                .collect { value ->
+                    isCommunalShowing = value
+                    updateDesiredLocation()
+                }
         }
     }
 
@@ -1150,12 +1153,16 @@ constructor(
             when {
                 mediaFlags.isSceneContainerEnabled() -> desiredLocation
                 dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
+
+                // UMO should show in communal unless the shade is expanding or visible.
+                isCommunalShowing && qsExpansion == 0.0f -> LOCATION_COMMUNAL_HUB
                 (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
                 qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
                 onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
                 onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
-                // TODO(b/311234666): revisit logic once interactions between the hub and
-                //  shade/keyguard state are finalized
+
+                // Communal does not have its own StatusBarState so it should always have higher
+                // priority for the UMO over the lockscreen.
                 isCommunalShowing -> LOCATION_COMMUNAL_HUB
                 onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN
                 else -> LOCATION_QQS

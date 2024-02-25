@@ -19,17 +19,23 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.WEATHER_CLOCK_BLUEPRINT_ID
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
+import com.android.systemui.plugins.clocks.ClockConfig
+import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -38,6 +44,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -54,6 +61,8 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var splitShadeStateController: SplitShadeStateController
     @Mock private lateinit var keyguardBlueprintRepository: KeyguardBlueprintRepository
+    @Mock private lateinit var clockInteractor: KeyguardClockInteractor
+    @Mock private lateinit var clockController: ClockController
 
     @Before
     fun setup() {
@@ -61,6 +70,8 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
         testScope = TestScope(StandardTestDispatcher())
         whenever(keyguardBlueprintRepository.configurationChange).thenReturn(configurationFlow)
         whenever(keyguardBlueprintRepository.refreshTransition).thenReturn(refreshTransition)
+        whenever(clockInteractor.currentClock).thenReturn(MutableStateFlow(clockController))
+        clockInteractor.currentClock
 
         underTest =
             KeyguardBlueprintInteractor(
@@ -68,6 +79,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 mContext,
                 splitShadeStateController,
+                clockInteractor,
             )
     }
 
@@ -98,6 +110,77 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
 
             verify(keyguardBlueprintRepository)
                 .applyBlueprint(SplitShadeKeyguardBlueprint.Companion.ID)
+        }
+    }
+
+    @Test
+    fun composeLockscreenOff_DoesAppliesSplitShadeWeatherClockBlueprint() {
+        testScope.runTest {
+            mSetFlagsRule.disableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
+            whenever(clockController.config)
+                .thenReturn(
+                    ClockConfig(
+                        id = "DIGITAL_CLOCK_WEATHER",
+                        name = "clock",
+                        description = "clock",
+                    )
+                )
+            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
+                .thenReturn(true)
+
+            reset(keyguardBlueprintRepository)
+            configurationFlow.tryEmit(Unit)
+            runCurrent()
+
+            verify(keyguardBlueprintRepository, never())
+                .applyBlueprint(SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID)
+        }
+    }
+
+    @Test
+    fun testDoesAppliesSplitShadeWeatherClockBlueprint() {
+        testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
+            whenever(clockController.config)
+                .thenReturn(
+                    ClockConfig(
+                        id = "DIGITAL_CLOCK_WEATHER",
+                        name = "clock",
+                        description = "clock",
+                    )
+                )
+            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
+                .thenReturn(true)
+
+            reset(keyguardBlueprintRepository)
+            configurationFlow.tryEmit(Unit)
+            runCurrent()
+
+            verify(keyguardBlueprintRepository)
+                .applyBlueprint(SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID)
+        }
+    }
+
+    @Test
+    fun testAppliesWeatherClockBlueprint() {
+        testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
+            whenever(clockController.config)
+                .thenReturn(
+                    ClockConfig(
+                        id = "DIGITAL_CLOCK_WEATHER",
+                        name = "clock",
+                        description = "clock",
+                    )
+                )
+            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
+                .thenReturn(false)
+
+            reset(keyguardBlueprintRepository)
+            configurationFlow.tryEmit(Unit)
+            runCurrent()
+
+            verify(keyguardBlueprintRepository).applyBlueprint(WEATHER_CLOCK_BLUEPRINT_ID)
         }
     }
 

@@ -108,7 +108,7 @@ constructor(
 
         fun trim() {
             if (events.size > maxEventsPerFrame) {
-                events.removeFirst()
+                events.removeAt(0)
                 trimmedEvents++
             }
         }
