@@ -26,7 +26,6 @@ import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
@@ -56,7 +55,6 @@ class DefaultDeviceEntrySection
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val authController: AuthController,
     private val windowManager: WindowManager,
     private val context: Context,
@@ -69,6 +67,7 @@ constructor(
     private val falsingManager: Lazy<FalsingManager>,
     private val vibratorHelper: Lazy<VibratorHelper>,
 ) : KeyguardSection() {
+    private var deviceEntryIconView: DeviceEntryIconView? = null
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
 
     override fun addViews(constraintLayout: ConstraintLayout) {
@@ -80,21 +79,22 @@ constructor(
             notificationPanelView.removeView(it)
         }
 
-        val view =
-            if (DeviceEntryUdfpsRefactor.isEnabled) {
+        if (DeviceEntryUdfpsRefactor.isEnabled) {
+            deviceEntryIconView =
                 DeviceEntryIconView(context, null).apply { id = deviceEntryIconViewId }
-            } else {
-                // keyguardBottomAreaRefactor()
-                LockIconView(context, null).apply { id = R.id.lock_icon_view }
-            }
-        constraintLayout.addView(view)
+        } else {
+            // keyguardBottomAreaRefactor()
+            constraintLayout.addView(LockIconView(context, null).apply { id = R.id.lock_icon_view })
+        }
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
         if (DeviceEntryUdfpsRefactor.isEnabled) {
-            constraintLayout.findViewById<DeviceEntryIconView?>(deviceEntryIconViewId)?.let {
+            deviceEntryIconView?.let {
                 DeviceEntryIconViewBinder.bind(
                     applicationScope,
+                    constraintLayout,
+                    this,
                     it,
                     deviceEntryIconViewModel.get(),
                     deviceEntryForegroundViewModel.get(),
@@ -111,7 +111,22 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        val isUdfpsSupported = keyguardUpdateMonitor.isUdfpsSupported
+        if (!DeviceEntryUdfpsRefactor.isEnabled) {
+            applyConstraints(constraintSet, authController.isUdfpsSupported)
+        }
+    }
+
+    fun applyConstraintsAfterPropertiesInitialized(
+        constraintSet: ConstraintSet,
+        isUdfpsSupported: Boolean
+    ) {
+        if (DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()) {
+            return
+        }
+        applyConstraints(constraintSet, isUdfpsSupported)
+    }
+
+    private fun applyConstraints(constraintSet: ConstraintSet, isUdfpsSupported: Boolean) {
         val scaleFactor: Float = authController.scaleFactor
         val mBottomPaddingPx =
             context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)
