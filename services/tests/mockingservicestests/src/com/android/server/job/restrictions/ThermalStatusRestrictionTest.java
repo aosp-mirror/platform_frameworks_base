@@ -28,6 +28,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.job.Flags.FLAG_THERMAL_RESTRICTIONS_TO_FGS_JOBS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,6 +44,10 @@ import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.PowerManager;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.DeviceConfig;
 import android.util.DebugUtils;
 
@@ -54,6 +59,7 @@ import com.android.server.job.controllers.JobStatus;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -77,6 +83,9 @@ public class ThermalStatusRestrictionTest {
     @Mock
     private JobSchedulerService mJobSchedulerService;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     class JobStatusContainer {
         public final JobStatus jobMinPriority;
         public final JobStatus jobLowPriority;
@@ -95,6 +104,9 @@ public class ThermalStatusRestrictionTest {
         public final JobStatus uiRetried;
         public final JobStatus uiRunning;
         public final JobStatus uiRunningLong;
+        public final JobStatus importantWhileForeground;
+        public final JobStatus importantWhileForegroundRunning;
+        public final JobStatus importantWhileForegroundRunningLong;
         public final int[] allJobBiases = {
             JobInfo.BIAS_ADJ_ALWAYS_RUNNING,
             JobInfo.BIAS_ADJ_OFTEN_RUNNING,
@@ -164,6 +176,15 @@ public class ThermalStatusRestrictionTest {
             uiRetried = spy(createJobStatus(jobName, createJobBuilder(15).build()));
             uiRunning = spy(createJobStatus(jobName, createJobBuilder(16).build()));
             uiRunningLong = spy(createJobStatus(jobName, createJobBuilder(17).build()));
+            importantWhileForeground = spy(createJobStatus(jobName, createJobBuilder(18)
+                    .setImportantWhileForeground(true)
+                    .build()));
+            importantWhileForegroundRunning = spy(createJobStatus(jobName, createJobBuilder(20)
+                    .setImportantWhileForeground(true)
+                     .build()));
+            importantWhileForegroundRunningLong = spy(createJobStatus(jobName, createJobBuilder(19)
+                     .setImportantWhileForeground(true)
+                     .build()));
 
             when(ej.shouldTreatAsExpeditedJob()).thenReturn(true);
             when(ejRetried.shouldTreatAsExpeditedJob()).thenReturn(true);
@@ -189,10 +210,16 @@ public class ThermalStatusRestrictionTest {
             when(mJobSchedulerService.isCurrentlyRunningLocked(uiRunningLong)).thenReturn(true);
             when(mJobSchedulerService.isJobInOvertimeLocked(jobLowPriorityRunningLong))
                     .thenReturn(true);
+            when(mJobSchedulerService.isCurrentlyRunningLocked(importantWhileForegroundRunning))
+                    .thenReturn(true);
             when(mJobSchedulerService.isJobInOvertimeLocked(jobHighPriorityRunningLong))
                     .thenReturn(true);
             when(mJobSchedulerService.isJobInOvertimeLocked(ejRunningLong)).thenReturn(true);
             when(mJobSchedulerService.isJobInOvertimeLocked(uiRunningLong)).thenReturn(true);
+            when(mJobSchedulerService.isCurrentlyRunningLocked(importantWhileForegroundRunningLong))
+                    .thenReturn(true);
+            when(mJobSchedulerService.isJobInOvertimeLocked(importantWhileForegroundRunningLong))
+                    .thenReturn(true);
         }
     }
 
@@ -304,6 +331,9 @@ public class ThermalStatusRestrictionTest {
             assertFalse(isJobRestricted(jc.jobHighPriority, jobBias));
             assertFalse(isJobRestricted(jc.jobHighPriorityRunning, jobBias));
             assertFalse(isJobRestricted(jc.jobHighPriorityRunningLong, jobBias));
+            assertFalse(isJobRestricted(jc.importantWhileForeground, jobBias));
+            assertFalse(isJobRestricted(jc.importantWhileForegroundRunning, jobBias));
+            assertFalse(isJobRestricted(jc.importantWhileForegroundRunningLong, jobBias));
             assertFalse(isJobRestricted(jc.ej, jobBias));
             assertFalse(isJobRestricted(jc.ejDowngraded, jobBias));
             assertFalse(isJobRestricted(jc.ejRetried, jobBias));
@@ -340,6 +370,9 @@ public class ThermalStatusRestrictionTest {
             assertFalse(msg, isJobRestricted(jc.jobHighPriority, jobBias));
             assertFalse(msg, isJobRestricted(jc.jobHighPriorityRunning, jobBias));
             assertFalse(msg, isJobRestricted(jc.jobHighPriorityRunningLong, jobBias));
+            assertFalse(msg, isJobRestricted(jc.importantWhileForeground, jobBias));
+            assertFalse(msg, isJobRestricted(jc.importantWhileForegroundRunning, jobBias));
+            assertFalse(msg, isJobRestricted(jc.importantWhileForegroundRunningLong, jobBias));
             assertFalse(msg, isJobRestricted(jc.ej, jobBias));
             assertFalse(msg, isJobRestricted(jc.ejDowngraded, jobBias));
             assertFalse(msg, isJobRestricted(jc.ejRetried, jobBias));
@@ -357,7 +390,8 @@ public class ThermalStatusRestrictionTest {
      * Service and all Thermal states.
      */
     @Test
-    public void testIsJobRestrictedBiasFgs() {
+    @RequiresFlagsDisabled(FLAG_THERMAL_RESTRICTIONS_TO_FGS_JOBS)
+    public void testIsJobRestrictedBiasFgs_flagThermalRestrictionsToFgsJobsDisabled() {
         JobStatusContainer jc =
                 new JobStatusContainer("testIsJobRestrictedBiasFgs", mJobSchedulerService);
 
@@ -384,6 +418,93 @@ public class ThermalStatusRestrictionTest {
             assertFalse(msg, isJobRestricted(jc.uiRetried, jobBias));
             assertFalse(msg, isJobRestricted(jc.uiRunning, jobBias));
             assertFalse(msg, isJobRestricted(jc.uiRunningLong, jobBias));
+        }
+    }
+
+    /**
+     * Test {@link JobSchedulerService#isJobRestricted(JobStatus)} when Job Bias is Foreground
+     * Service and all Thermal states.
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_THERMAL_RESTRICTIONS_TO_FGS_JOBS)
+    public void testIsJobRestrictedBiasFgs_flagThermalRestrictionsToFgsJobsEnabled() {
+        JobStatusContainer jc =
+                new JobStatusContainer("testIsJobRestrictedBiasFgs", mJobSchedulerService);
+        int jobBias = JobInfo.BIAS_FOREGROUND_SERVICE;
+        for (int thermalStatus : jc.thermalStatuses) {
+            String msg = debugTag(jobBias, thermalStatus);
+            mStatusChangedListener.onThermalStatusChanged(thermalStatus);
+            if (thermalStatus >= THERMAL_STATUS_SEVERE) {
+                // Full restrictions on all jobs
+                assertTrue(msg, isJobRestricted(jc.jobMinPriority, jobBias));
+                assertTrue(msg, isJobRestricted(jc.jobLowPriority, jobBias));
+                assertTrue(msg, isJobRestricted(jc.jobLowPriorityRunning, jobBias));
+                assertTrue(msg, isJobRestricted(jc.jobLowPriorityRunningLong, jobBias));
+                assertTrue(msg, isJobRestricted(jc.jobDefaultPriority, jobBias));
+                assertTrue(msg, isJobRestricted(jc.jobHighPriority, jobBias));
+                assertTrue(msg, isJobRestricted(jc.jobHighPriorityRunning, jobBias));
+                assertTrue(msg, isJobRestricted(jc.jobHighPriorityRunningLong, jobBias));
+                assertTrue(msg, isJobRestricted(jc.ej, jobBias));
+                assertTrue(msg, isJobRestricted(jc.ejDowngraded, jobBias));
+                assertTrue(msg, isJobRestricted(jc.ejRetried, jobBias));
+                assertTrue(msg, isJobRestricted(jc.ejRunning, jobBias));
+                assertTrue(msg, isJobRestricted(jc.ejRunningLong, jobBias));
+                assertTrue(msg, isJobRestricted(jc.ui, jobBias));
+                assertTrue(msg, isJobRestricted(jc.uiRetried, jobBias));
+                assertTrue(msg, isJobRestricted(jc.uiRunning, jobBias));
+                assertTrue(msg, isJobRestricted(jc.uiRunningLong, jobBias));
+            } else if (thermalStatus >= THERMAL_STATUS_MODERATE) {
+                // No restrictions on user related jobs
+                assertFalse(msg, isJobRestricted(jc.ui, jobBias));
+                assertFalse(msg, isJobRestricted(jc.uiRetried, jobBias));
+                assertFalse(msg, isJobRestricted(jc.uiRunning, jobBias));
+                assertFalse(msg, isJobRestricted(jc.uiRunningLong, jobBias));
+                // Some restrictions on expedited jobs
+                assertFalse(msg, isJobRestricted(jc.ej, jobBias));
+                assertTrue(msg, isJobRestricted(jc.ejDowngraded, jobBias));
+                assertTrue(msg, isJobRestricted(jc.ejRetried, jobBias));
+                assertFalse(msg, isJobRestricted(jc.ejRunning, jobBias));
+                assertTrue(msg, isJobRestricted(jc.ejRunningLong, jobBias));
+                // Some restrictions on high priority jobs
+                assertTrue(msg, isJobRestricted(jc.jobHighPriority, jobBias));
+                assertFalse(msg, isJobRestricted(jc.jobHighPriorityRunning, jobBias));
+                assertTrue(msg, isJobRestricted(jc.jobHighPriorityRunningLong, jobBias));
+                // Some restructions on important while foreground jobs
+                assertFalse(isJobRestricted(jc.importantWhileForeground, jobBias));
+                assertFalse(isJobRestricted(jc.importantWhileForegroundRunning, jobBias));
+                assertTrue(isJobRestricted(jc.importantWhileForegroundRunningLong, jobBias));
+                // Full restriction on default priority jobs
+                assertTrue(msg, isJobRestricted(jc.jobDefaultPriority, jobBias));
+                // Full restriction on low priority jobs
+                assertTrue(msg, isJobRestricted(jc.jobLowPriority, jobBias));
+                assertTrue(msg, isJobRestricted(jc.jobLowPriorityRunning, jobBias));
+                assertTrue(msg, isJobRestricted(jc.jobLowPriorityRunningLong, jobBias));
+                // Full restriction on min priority jobs
+                assertTrue(msg, isJobRestricted(jc.jobMinPriority, jobBias));
+            } else {
+                // thermalStatus < THERMAL_STATUS_MODERATE
+                // No restrictions on any job type
+                assertFalse(msg, isJobRestricted(jc.ui, jobBias));
+                assertFalse(msg, isJobRestricted(jc.uiRetried, jobBias));
+                assertFalse(msg, isJobRestricted(jc.uiRunning, jobBias));
+                assertFalse(msg, isJobRestricted(jc.uiRunningLong, jobBias));
+                assertFalse(msg, isJobRestricted(jc.ej, jobBias));
+                assertFalse(msg, isJobRestricted(jc.ejDowngraded, jobBias));
+                assertFalse(msg, isJobRestricted(jc.ejRetried, jobBias));
+                assertFalse(msg, isJobRestricted(jc.ejRunning, jobBias));
+                assertFalse(msg, isJobRestricted(jc.ejRunningLong, jobBias));
+                assertFalse(msg, isJobRestricted(jc.jobHighPriority, jobBias));
+                assertFalse(msg, isJobRestricted(jc.jobHighPriorityRunning, jobBias));
+                assertFalse(msg, isJobRestricted(jc.jobHighPriorityRunningLong, jobBias));
+                assertFalse(msg, isJobRestricted(jc.importantWhileForeground, jobBias));
+                assertFalse(msg, isJobRestricted(jc.importantWhileForegroundRunning, jobBias));
+                assertFalse(msg, isJobRestricted(jc.importantWhileForegroundRunningLong, jobBias));
+                assertFalse(msg, isJobRestricted(jc.jobDefaultPriority, jobBias));
+                assertFalse(msg, isJobRestricted(jc.jobLowPriority, jobBias));
+                assertFalse(msg, isJobRestricted(jc.jobLowPriorityRunning, jobBias));
+                assertFalse(msg, isJobRestricted(jc.jobLowPriorityRunningLong, jobBias));
+                assertFalse(msg, isJobRestricted(jc.jobMinPriority, jobBias));
+            }
         }
     }
 

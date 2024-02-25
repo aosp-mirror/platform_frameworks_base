@@ -31,6 +31,7 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.sUptimeMillisClock;
 import static com.android.server.job.Flags.FLAG_BATCH_ACTIVE_BUCKET_JOBS;
 import static com.android.server.job.Flags.FLAG_BATCH_CONNECTIVITY_JOBS_PER_NETWORK;
+import static com.android.server.job.Flags.FLAG_THERMAL_RESTRICTIONS_TO_FGS_JOBS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -74,6 +75,9 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 
 import com.android.server.AppStateTracker;
@@ -122,6 +126,9 @@ public class JobSchedulerServiceTest {
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private ChargingPolicyChangeListener mChargingPolicyChangeListener;
 
@@ -2457,11 +2464,12 @@ public class JobSchedulerServiceTest {
     }
 
     /**
-     * Jobs with foreground service and top app biases must not be restricted. Modify the test
-     * accordingly, if this assumption changes in the future.
+     * Jobs with foreground service and top app biases must not be restricted when the flag is
+     * disabled.
      */
     @Test
-    public void testCheckIfRestricted_highJobBias() {
+    @RequiresFlagsDisabled(FLAG_THERMAL_RESTRICTIONS_TO_FGS_JOBS)
+    public void testCheckIfRestricted_highJobBias_flagThermalRestrictionsToFgsJobsDisabled() {
         JobStatus fgsJob =
                 createJobStatus(
                         "testCheckIfRestrictedJobBiasFgs",
@@ -2469,10 +2477,21 @@ public class JobSchedulerServiceTest {
         JobStatus topAppJob =
                 createJobStatus(
                         "testCheckIfRestrictedJobBiasTopApp",
-                        createJobInfo(1).setBias(JobInfo.BIAS_TOP_APP));
+                        createJobInfo(2).setBias(JobInfo.BIAS_TOP_APP));
 
         synchronized (mService.mLock) {
             assertNull(mService.checkIfRestricted(fgsJob));
+            assertNull(mService.checkIfRestricted(topAppJob));
+        }
+    }
+
+    /** Jobs with top app biases must not be restricted. */
+    @Test
+    public void testCheckIfRestricted_highJobBias() {
+        JobStatus topAppJob = createJobStatus(
+                "testCheckIfRestrictedJobBiasTopApp",
+                createJobInfo(1).setBias(JobInfo.BIAS_TOP_APP));
+        synchronized (mService.mLock) {
             assertNull(mService.checkIfRestricted(topAppJob));
         }
     }
