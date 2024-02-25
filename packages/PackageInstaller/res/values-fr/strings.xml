@@ -76,7 +76,7 @@
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Suppression du clone <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Impossible de désinstaller une application d\'administration de l\'appareil active"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Impossible de désinstaller une application d\'administration de l\'appareil active pour <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Cette application nécessaire pour certains utilisateurs ou profils a été désinstallée pour d\'autres"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Cette application est requise pour certains utilisateurs ou profils et a été désinstallée pour d\'autres"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Impossible de désinstaller l\'application, car elle est nécessaire pour votre profil."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Impossible désinstaller appli, car elle est requise par administrateur appareil."</string>
     <string name="manage_device_administrators" msgid="3092696419363842816">"Gérer les applis d\'administration de l\'appareil"</string>
