@@ -495,10 +495,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         return mBehavior != BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
     }
 
-    private boolean isImmersiveMode() {
-        return mBehavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-    }
-
     public void onConfigurationChanged(Configuration configuration) {
         mEdgeBackGestureHandler.onConfigurationChanged(configuration);
     }
