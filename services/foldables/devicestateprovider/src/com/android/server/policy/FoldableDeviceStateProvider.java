@@ -19,7 +19,7 @@ package com.android.server.policy;
 import static android.hardware.SensorManager.SENSOR_DELAY_FASTEST;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL;
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.TYPE_EXTERNAL;
 
@@ -102,7 +102,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
     @GuardedBy("mLock")
     private Listener mListener = null;
     @GuardedBy("mLock")
-    private int mLastReportedState = INVALID_DEVICE_STATE;
+    private int mLastReportedState = INVALID_DEVICE_STATE_IDENTIFIER;
     @GuardedBy("mLock")
     private SensorEvent mLastHingeAngleSensorEvent = null;
     @GuardedBy("mLock")
@@ -268,7 +268,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
 
     /** Computes the current device state and notifies the listener of a change, if needed. */
     void notifyDeviceStateChangedIfNeeded() {
-        int stateToReport = INVALID_DEVICE_STATE;
+        int stateToReport = INVALID_DEVICE_STATE_IDENTIFIER;
         Listener listener;
         synchronized (mLock) {
             if (mListener == null) {
@@ -277,7 +277,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
 
             listener = mListener;
 
-            int newState = INVALID_DEVICE_STATE;
+            int newState = INVALID_DEVICE_STATE_IDENTIFIER;
             for (int i = 0; i < mOrderedStates.length; i++) {
                 int state = mOrderedStates[i].getIdentifier();
                 if (DEBUG) {
@@ -305,18 +305,18 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
                     break;
                 }
             }
-            if (newState == INVALID_DEVICE_STATE) {
+            if (newState == INVALID_DEVICE_STATE_IDENTIFIER) {
                 Slog.e(TAG, "No declared device states match any of the required conditions.");
                 dumpSensorValues();
             }
 
-            if (newState != INVALID_DEVICE_STATE && newState != mLastReportedState) {
+            if (newState != INVALID_DEVICE_STATE_IDENTIFIER && newState != mLastReportedState) {
                 mLastReportedState = newState;
                 stateToReport = newState;
             }
         }
 
-        if (stateToReport != INVALID_DEVICE_STATE) {
+        if (stateToReport != INVALID_DEVICE_STATE_IDENTIFIER) {
             listener.onStateChanged(stateToReport);
         }
     }
@@ -544,7 +544,7 @@ public final class FoldableDeviceStateProvider implements DeviceStateProvider,
 
                         final int closedDeviceState = deviceState.getIdentifier();
                         final boolean isLastStateClosed = lastState == closedDeviceState
-                                || lastState == INVALID_DEVICE_STATE;
+                                || lastState == INVALID_DEVICE_STATE_IDENTIFIER;
 
                         final boolean shouldBeClosedBecauseTentMode = isLastStateClosed
                                 && hingeAngle >= minClosedAngleDegrees

@@ -16,7 +16,7 @@
 
 package com.android.server.policy;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
 
 import android.annotation.NonNull;
@@ -300,7 +300,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     @GuardedBy("mLock")
     private Listener mListener = null;
     @GuardedBy("mLock")
-    private int mLastReportedState = INVALID_DEVICE_STATE;
+    private int mLastReportedState = INVALID_DEVICE_STATE_IDENTIFIER;
 
     @GuardedBy("mLock")
     private Boolean mIsLidOpen;
@@ -520,13 +520,13 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
     /** Computes the current device state and notifies the listener of a change, if needed. */
     void notifyDeviceStateChangedIfNeeded() {
-        int stateToReport = INVALID_DEVICE_STATE;
+        int stateToReport = INVALID_DEVICE_STATE_IDENTIFIER;
         synchronized (mLock) {
             if (mListener == null) {
                 return;
             }
 
-            int newState = INVALID_DEVICE_STATE;
+            int newState = INVALID_DEVICE_STATE_IDENTIFIER;
             for (int i = 0; i < mOrderedStates.length; i++) {
                 int state = mOrderedStates[i].getIdentifier();
                 if (DEBUG) {
@@ -555,18 +555,18 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                     break;
                 }
             }
-            if (newState == INVALID_DEVICE_STATE) {
+            if (newState == INVALID_DEVICE_STATE_IDENTIFIER) {
                 Slog.e(TAG, "No declared device states match any of the required conditions.");
                 dumpSensorValues();
             }
 
-            if (newState != INVALID_DEVICE_STATE && newState != mLastReportedState) {
+            if (newState != INVALID_DEVICE_STATE_IDENTIFIER && newState != mLastReportedState) {
                 mLastReportedState = newState;
                 stateToReport = newState;
             }
         }
 
-        if (stateToReport != INVALID_DEVICE_STATE) {
+        if (stateToReport != INVALID_DEVICE_STATE_IDENTIFIER) {
             mListener.onStateChanged(stateToReport);
         }
     }

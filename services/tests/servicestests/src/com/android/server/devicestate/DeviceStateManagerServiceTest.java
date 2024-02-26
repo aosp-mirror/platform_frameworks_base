@@ -16,7 +16,7 @@
 
 package com.android.server.devicestate;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
 import static com.android.compatibility.common.util.PollingCheck.waitFor;
 
@@ -206,7 +206,7 @@ public final class DeviceStateManagerServiceTest {
     @Test
     public void baseStateChanged_invalidState() {
         assertThrows(IllegalArgumentException.class,
-                () -> mProvider.setState(INVALID_DEVICE_STATE));
+                () -> mProvider.setState(INVALID_DEVICE_STATE_IDENTIFIER));
 
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
@@ -302,8 +302,8 @@ public final class DeviceStateManagerServiceTest {
         DeviceStateInfo info = mService.getBinderService().getDeviceStateInfo();
 
         assertEquals(info.supportedStates, SUPPORTED_DEVICE_STATES);
-        assertEquals(info.baseState.getIdentifier(), INVALID_DEVICE_STATE);
-        assertEquals(info.currentState.getIdentifier(), INVALID_DEVICE_STATE);
+        assertEquals(info.baseState.getIdentifier(), INVALID_DEVICE_STATE_IDENTIFIER);
+        assertEquals(info.currentState.getIdentifier(), INVALID_DEVICE_STATE_IDENTIFIER);
     }
 
     @Test
@@ -669,7 +669,8 @@ public final class DeviceStateManagerServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> {
             final IBinder token = new Binder();
-            mService.getBinderService().requestState(token, INVALID_DEVICE_STATE, 0 /* flags */);
+            mService.getBinderService().requestState(token, INVALID_DEVICE_STATE_IDENTIFIER,
+                    0 /* flags */);
         });
     }
 
@@ -803,8 +804,8 @@ public final class DeviceStateManagerServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> {
             final IBinder token = new Binder();
-            mService.getBinderService().requestBaseStateOverride(token, INVALID_DEVICE_STATE,
-                    0 /* flags */);
+            mService.getBinderService().requestBaseStateOverride(token,
+                    INVALID_DEVICE_STATE_IDENTIFIER, 0 /* flags */);
         });
     }
 
@@ -899,7 +900,7 @@ public final class DeviceStateManagerServiceTest {
 
     private static final class TestDeviceStatePolicy extends DeviceStatePolicy {
         private final DeviceStateProvider mProvider;
-        private int mLastDeviceStateRequestedToConfigure = INVALID_DEVICE_STATE;
+        private int mLastDeviceStateRequestedToConfigure = INVALID_DEVICE_STATE_IDENTIFIER;
         private boolean mConfigureBlocked = false;
         private Runnable mPendingConfigureCompleteRunnable;
 

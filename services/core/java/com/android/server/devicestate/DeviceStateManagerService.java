@@ -21,6 +21,7 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREG
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
 
@@ -113,7 +114,7 @@ public final class DeviceStateManagerService extends SystemService {
     /** {@link DeviceState} to model an invalid device state */
     // TODO(b/328314031): Investigate how we can remove this constant
     private static final DeviceState INVALID_DEVICE_STATE = new DeviceState(
-            new DeviceState.Configuration.Builder(DeviceStateManager.INVALID_DEVICE_STATE,
+            new DeviceState.Configuration.Builder(INVALID_DEVICE_STATE_IDENTIFIER,
                     "INVALID").build());
 
     private final Object mLock = new Object();
@@ -475,7 +476,7 @@ public final class DeviceStateManagerService extends SystemService {
     private void setRearDisplayStateLocked() {
         int rearDisplayIdentifier = getContext().getResources().getInteger(
                 R.integer.config_deviceStateRearDisplay);
-        if (rearDisplayIdentifier != INVALID_DEVICE_STATE.getIdentifier()) {
+        if (rearDisplayIdentifier != INVALID_DEVICE_STATE_IDENTIFIER) {
             mRearDisplayState = mDeviceStates.get(rearDisplayIdentifier);
         }
     }
