@@ -5364,5 +5364,8 @@
   <java-symbol type="string" name="satellite_notification_how_it_works" />
   <java-symbol type="drawable" name="ic_satellite_alt_24px" />
 
+  <!-- DisplayManager configs. -->
+  <java-symbol type="bool" name="config_evenDimmerEnabled" />
+
   <java-symbol type="bool" name="config_watchlistUseFileHashesCache" />
 </resources>
