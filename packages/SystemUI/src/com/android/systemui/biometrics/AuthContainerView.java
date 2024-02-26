@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
+import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_BIOMETRIC_PROMPT_TRANSITION;
@@ -160,6 +161,8 @@ public class AuthContainerView extends LinearLayout
     private final ImageView mBackgroundView;
     private final ScrollView mBiometricScrollView;
     private final View mPanelView;
+    private final List<FingerprintSensorPropertiesInternal> mFpProps;
+    private final List<FaceSensorPropertiesInternal> mFaceProps;
     private final float mTranslationY;
     @VisibleForTesting @ContainerState int mContainerState = STATE_UNKNOWN;
     private final Set<Integer> mFailedModalities = new HashSet<Integer>();
@@ -374,6 +377,8 @@ public class AuthContainerView extends LinearLayout
         mPromptSelectorInteractorProvider = promptSelectorInteractorProvider;
         mCredentialViewModelProvider = credentialViewModelProvider;
         mPromptViewModel = promptViewModel;
+        mFpProps = fpProps;
+        mFaceProps = faceProps;
 
         showPrompt(config, layoutInflater, promptViewModel,
                 Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),
@@ -521,7 +526,7 @@ public class AuthContainerView extends LinearLayout
     @Override
     public void onOrientationChanged() {
         if (!constraintBp()) {
-            maybeUpdatePositionForUdfps(true /* invalidate */);
+            updatePositionByCapability(true /* invalidate */);
         }
     }
 
@@ -549,7 +554,7 @@ public class AuthContainerView extends LinearLayout
         }
 
         if (!constraintBp()) {
-            maybeUpdatePositionForUdfps(false /* invalidate */);
+            updatePositionByCapability(false /* invalidate */);
         }
 
         if (mConfig.mSkipIntro) {
@@ -615,6 +620,22 @@ public class AuthContainerView extends LinearLayout
         };
     }
 
+    private void updatePositionByCapability(boolean forceInvalidate) {
+        final FingerprintSensorPropertiesInternal fpProp = Utils.findFirstSensorProperties(
+                mFpProps, mConfig.mSensorIds);
+        final FaceSensorPropertiesInternal faceProp = Utils.findFirstSensorProperties(
+                mFaceProps, mConfig.mSensorIds);
+        if (fpProp != null && fpProp.isAnyUdfpsType()) {
+            maybeUpdatePositionForUdfps(forceInvalidate /* invalidate */);
+        }
+        if (faceProp != null && mBiometricView.isFaceOnly()) {
+            alwaysUpdatePositionAtScreenBottom(forceInvalidate /* invalidate */);
+        }
+        if (fpProp != null && fpProp.sensorType == TYPE_POWER_BUTTON) {
+            alwaysUpdatePositionAtScreenBottom(forceInvalidate /* invalidate */);
+        }
+    }
+
     private static boolean shouldUpdatePositionForUdfps(@NonNull View view) {
         if (view instanceof BiometricPromptLayout) {
             // this will force the prompt to align itself on the edge of the screen
@@ -654,6 +675,38 @@ public class AuthContainerView extends LinearLayout
                 break;
 
             case Surface.ROTATION_180:
+            default:
+                Log.e(TAG, "Unsupported display rotation: " + displayRotation);
+                mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
+                setScrollViewGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
+                break;
+        }
+
+        if (invalidate) {
+            mPanelView.invalidateOutline();
+        }
+
+        return true;
+    }
+
+    private boolean alwaysUpdatePositionAtScreenBottom(boolean invalidate) {
+        final Display display = getDisplay();
+        if (display == null) {
+            return false;
+        }
+        if (mBiometricView == null || !shouldUpdatePositionForUdfps(mBiometricView.asView())) {
+            return false;
+        }
+
+        final int displayRotation = display.getRotation();
+        switch (displayRotation) {
+            case Surface.ROTATION_0:
+            case Surface.ROTATION_90:
+            case Surface.ROTATION_270:
+            case Surface.ROTATION_180:
+                mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
+                setScrollViewGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
+                break;
             default:
                 Log.e(TAG, "Unsupported display rotation: " + displayRotation);
                 mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
