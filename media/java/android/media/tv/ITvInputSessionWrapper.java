@@ -519,7 +519,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
 
     @Override
     public void stopPlayback(int mode) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_STOP_PLAYBACK, mode));
+        mCaller.executeOrSendMessage(mCaller.obtainMessageI(DO_STOP_PLAYBACK, mode));
     }
 
     @Override
