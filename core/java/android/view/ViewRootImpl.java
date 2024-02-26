@@ -95,6 +95,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.accessibility.Flags.fixMergedContentChangeEvent;
 import static android.view.accessibility.Flags.forceInvertColor;
 import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
+import static android.view.flags.Flags.toolkitFrameRateTypingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
@@ -1061,9 +1062,6 @@ public final class ViewRootImpl implements ViewParent,
      * the variables below are used to determine whther a dVRR feature should be enabled
      */
 
-    // Used to determine whether to suppress boost on typing
-    private boolean mShouldSuppressBoostOnTyping = false;
-
     /**
      * A temporary object used so relayoutWindow can return the latest SyncSeqId
      * system. The SyncSeqId system was designed to work without synchronous relayout
@@ -1117,10 +1115,12 @@ public final class ViewRootImpl implements ViewParent,
 
     private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
+    private static boolean sToolkitFrameRateTypingReadOnlyFlagValue;
 
     static {
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
         sToolkitMetricsForFrameRateDecisionFlagValue = toolkitMetricsForFrameRateDecision();
+        sToolkitFrameRateTypingReadOnlyFlagValue = toolkitFrameRateTypingReadOnly();
     }
 
     // The latest input event from the gesture that was used to resolve the pointer icon.
@@ -12423,7 +12423,8 @@ public final class ViewRootImpl implements ViewParent,
         boolean desiredAction = motionEventAction == MotionEvent.ACTION_DOWN
                 || motionEventAction == MotionEvent.ACTION_MOVE
                 || motionEventAction == MotionEvent.ACTION_UP;
-        boolean undesiredType = windowType == TYPE_INPUT_METHOD && mShouldSuppressBoostOnTyping;
+        boolean undesiredType = windowType == TYPE_INPUT_METHOD
+                && sToolkitFrameRateTypingReadOnlyFlagValue;
         // use toolkitSetFrameRate flag to gate the change
         return desiredAction && !undesiredType && shouldEnableDvrr()
                 && getFrameRateBoostOnTouchEnabled();
