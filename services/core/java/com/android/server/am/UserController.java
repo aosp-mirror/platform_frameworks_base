@@ -1419,7 +1419,8 @@ class UserController implements Handler.Callback {
 
     private boolean allowBiometricUnlockForPrivateProfile() {
         return android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace();
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     /**

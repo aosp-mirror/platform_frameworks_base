@@ -166,6 +166,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
                     messageBuilder.append(getString(
                             R.string.uninstall_application_text_current_user_clone_profile));
                 } else if (Flags.allowPrivateProfile()
+                        && android.multiuser.Flags.enablePrivateSpaceFeatures()
                         && customUserManager.isPrivateProfile()
                         && customUserManager.isSameProfileGroup(dialogInfo.user, myUserHandle)) {
                     messageBuilder.append(

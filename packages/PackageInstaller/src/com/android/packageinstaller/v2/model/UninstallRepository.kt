@@ -235,7 +235,9 @@ class UninstallRepository(private val context: Context) {
                     messageString = context.getString(
                             R.string.uninstall_application_text_current_user_clone_profile
                     )
-                } else if (Flags.allowPrivateProfile() && customUserManager!!.isPrivateProfile()) {
+                } else if (Flags.allowPrivateProfile()
+                        && android.multiuser.Flags.enablePrivateSpaceFeatures()
+                        && customUserManager!!.isPrivateProfile()) {
                     // TODO(b/324244123): Get these Strings from a User Property API.
                     messageString = context.getString(
                             R.string.uninstall_application_text_current_user_private_profile
