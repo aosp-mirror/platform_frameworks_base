@@ -150,7 +150,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Test
     public void testSnooze() {
         final HeadsUpManager hmp = createHeadsUpManagerPhone();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         hmp.showNotification(entry);
         hmp.snooze();
@@ -161,7 +161,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Test
     public void testSwipedOutNotification() {
         final HeadsUpManager hmp = createHeadsUpManagerPhone();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         hmp.showNotification(entry);
         hmp.addSwipedOutNotification(entry.getKey());
@@ -177,7 +177,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Test
     public void testCanRemoveImmediately_swipedOut() {
         final HeadsUpManager hmp = createHeadsUpManagerPhone();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         hmp.showNotification(entry);
         hmp.addSwipedOutNotification(entry.getKey());
@@ -190,8 +190,10 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Test
     public void testCanRemoveImmediately_notTopEntry() {
         final HeadsUpManager hmp = createHeadsUpManagerPhone();
-        final NotificationEntry earlierEntry = createEntry(/* id = */ 0);
-        final NotificationEntry laterEntry = createEntry(/* id = */ 1);
+        final NotificationEntry earlierEntry =
+                HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
+        final NotificationEntry laterEntry =
+                HeadsUpManagerTestUtil.createEntry(/* id = */ 1, mContext);
         laterEntry.setRow(mRow);
 
         hmp.showNotification(earlierEntry);
@@ -204,7 +206,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Test
     public void testExtendHeadsUp() {
         final HeadsUpManagerPhone hmp = createHeadsUpManagerPhone();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         hmp.showNotification(entry);
         hmp.extendHeadsUp();

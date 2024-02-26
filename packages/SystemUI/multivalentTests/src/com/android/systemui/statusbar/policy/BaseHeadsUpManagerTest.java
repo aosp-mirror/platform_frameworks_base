@@ -212,41 +212,6 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         }
     }
 
-    protected StatusBarNotification createSbn(int id, Notification n) {
-        return new StatusBarNotification(
-                TEST_PACKAGE_NAME /* pkg */,
-                TEST_PACKAGE_NAME,
-                id,
-                null /* tag */,
-                TEST_UID,
-                0 /* initialPid */,
-                n,
-                new UserHandle(ActivityManager.getCurrentUser()),
-                null /* overrideGroupKey */,
-                0 /* postTime */);
-    }
-
-    protected StatusBarNotification createSbn(int id, Notification.Builder n) {
-        return createSbn(id, n.build());
-    }
-
-    protected StatusBarNotification createSbn(int id) {
-        final Notification.Builder b = new Notification.Builder(mContext, "")
-                .setSmallIcon(R.drawable.ic_person)
-                .setContentTitle("Title")
-                .setContentText("Text");
-        return createSbn(id, b);
-    }
-
-    protected NotificationEntry createEntry(int id, Notification n) {
-        return new NotificationEntryBuilder().setSbn(createSbn(id, n)).build();
-    }
-
-    protected NotificationEntry createEntry(int id) {
-        return new NotificationEntryBuilder().setSbn(createSbn(id)).build();
-    }
-
-
     private BaseHeadsUpManager createHeadsUpManager() {
         return new TestableHeadsUpManager(mContext, mLogger, mExecutor, mGlobalSettings,
                 mSystemClock, mAccessibilityMgr, mUiEventLoggerFake);
@@ -257,7 +222,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
                 .setSmallIcon(R.drawable.ic_person)
                 .setFullScreenIntent(mock(PendingIntent.class), /* highPriority */ true)
                 .build();
-        return createEntry(id, notif);
+        return HeadsUpManagerTestUtil.createEntry(id, notif);
     }
 
     private NotificationEntry createStickyForSomeTimeEntry(int id) {
@@ -265,7 +230,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
                 .setSmallIcon(R.drawable.ic_person)
                 .setFlag(FLAG_FSI_REQUESTED_BUT_DENIED, true)
                 .build();
-        return createEntry(id, notif);
+        return HeadsUpManagerTestUtil.createEntry(id, notif);
     }
 
     private PendingIntent createFullScreenIntent() {
@@ -279,7 +244,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
                 .setSmallIcon(R.drawable.ic_person)
                 .setFullScreenIntent(createFullScreenIntent(), /* highPriority */ true)
                 .build();
-        return createEntry(id, notif);
+        return HeadsUpManagerTestUtil.createEntry(id, notif);
     }
 
 
@@ -296,7 +261,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testShowNotification_addsEntry() {
         final BaseHeadsUpManager alm = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         alm.showNotification(entry);
 
@@ -308,7 +273,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testShowNotification_autoDismisses() {
         final BaseHeadsUpManager alm = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         alm.showNotification(entry);
         mSystemClock.advanceTime(TEST_AUTO_DISMISS_TIME * 3 / 2);
@@ -319,7 +284,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testRemoveNotification_removeDeferred() {
         final BaseHeadsUpManager alm = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         alm.showNotification(entry);
 
@@ -332,7 +297,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testRemoveNotification_forceRemove() {
         final BaseHeadsUpManager alm = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         alm.showNotification(entry);
 
@@ -346,7 +311,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     public void testReleaseAllImmediately() {
         final BaseHeadsUpManager alm = createHeadsUpManager();
         for (int i = 0; i < TEST_NUM_NOTIFICATIONS; i++) {
-            final NotificationEntry entry = createEntry(i);
+            final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(i, mContext);
             entry.setRow(mRow);
             alm.showNotification(entry);
         }
@@ -359,7 +324,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testCanRemoveImmediately_notShownLongEnough() {
         final BaseHeadsUpManager alm = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         alm.showNotification(entry);
 
@@ -370,7 +335,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testHunRemovedLogging() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createEntry(/* id = */ 0);
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
         final BaseHeadsUpManager.HeadsUpEntry headsUpEntry = mock(
                 BaseHeadsUpManager.HeadsUpEntry.class);
         headsUpEntry.mEntry = notifEntry;
@@ -413,7 +379,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testShouldHeadsUpBecomePinned_noFSI_false() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         assertFalse(hum.shouldHeadsUpBecomePinned(entry));
     }
@@ -422,7 +388,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testShowNotification_autoDismissesIncludingTouchAcceptanceDelay() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
         useAccessibilityTimeout(false);
 
         hum.showNotification(entry);
@@ -435,7 +401,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testShowNotification_autoDismissesWithDefaultTimeout() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
         useAccessibilityTimeout(false);
 
         hum.showNotification(entry);
@@ -476,7 +442,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testShowNotification_autoDismissesWithAccessibilityTimeout() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
         useAccessibilityTimeout(true);
 
         hum.showNotification(entry);
@@ -504,7 +470,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testRemoveNotification_beforeMinimumDisplayTime() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
         useAccessibilityTimeout(false);
 
         hum.showNotification(entry);
@@ -523,7 +489,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testRemoveNotification_afterMinimumDisplayTime() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
         useAccessibilityTimeout(false);
 
         hum.showNotification(entry);
@@ -541,7 +507,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testRemoveNotification_releaseImmediately() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         hum.showNotification(entry);
 
@@ -555,7 +521,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testIsSticky_rowPinnedAndExpanded_true() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createEntry(/* id = */ 0);
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
         when(mRow.isPinned()).thenReturn(true);
         notifEntry.setRow(mRow);
 
@@ -571,7 +538,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testIsSticky_remoteInputActive_true() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createEntry(/* id = */ 0);
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
 
         hum.showNotification(notifEntry);
 
@@ -607,7 +575,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testIsSticky_false() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createEntry(/* id = */ 0);
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
 
         hum.showNotification(notifEntry);
 
@@ -653,14 +622,14 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
 
         final BaseHeadsUpManager.HeadsUpEntry ongoingCall = hum.new HeadsUpEntry();
         ongoingCall.setEntry(new NotificationEntryBuilder()
-                .setSbn(createSbn(/* id = */ 0,
+                .setSbn(HeadsUpManagerTestUtil.createSbn(/* id = */ 0,
                         new Notification.Builder(mContext, "")
                                 .setCategory(Notification.CATEGORY_CALL)
                                 .setOngoing(true)))
                 .build());
 
         final BaseHeadsUpManager.HeadsUpEntry activeRemoteInput = hum.new HeadsUpEntry();
-        activeRemoteInput.setEntry(createEntry(/* id = */ 1));
+        activeRemoteInput.setEntry(HeadsUpManagerTestUtil.createEntry(/* id = */ 1, mContext));
         activeRemoteInput.mRemoteInputActive = true;
 
         assertThat(ongoingCall.compareTo(activeRemoteInput)).isLessThan(0);
@@ -675,14 +644,14 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         final Person person = new Person.Builder().setName("person").build();
         final PendingIntent intent = mock(PendingIntent.class);
         incomingCall.setEntry(new NotificationEntryBuilder()
-                .setSbn(createSbn(/* id = */ 0,
+                .setSbn(HeadsUpManagerTestUtil.createSbn(/* id = */ 0,
                         new Notification.Builder(mContext, "")
                                 .setStyle(Notification.CallStyle
                                         .forIncomingCall(person, intent, intent))))
                 .build());
 
         final BaseHeadsUpManager.HeadsUpEntry activeRemoteInput = hum.new HeadsUpEntry();
-        activeRemoteInput.setEntry(createEntry(/* id = */ 1));
+        activeRemoteInput.setEntry(HeadsUpManagerTestUtil.createEntry(/* id = */ 1, mContext));
         activeRemoteInput.mRemoteInputActive = true;
 
         assertThat(incomingCall.compareTo(activeRemoteInput)).isLessThan(0);
@@ -712,7 +681,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testSetUserActionMayIndirectlyRemove() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createEntry(/* id = */ 0);
+        final NotificationEntry notifEntry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0,
+                mContext);
 
         hum.showNotification(notifEntry);
 
