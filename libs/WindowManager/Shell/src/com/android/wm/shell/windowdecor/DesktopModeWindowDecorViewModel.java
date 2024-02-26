@@ -28,7 +28,6 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FINAL_FREEFORM_SCALE;
 import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION;
 import static com.android.wm.shell.windowdecor.MoveToDesktopAnimator.DRAG_FREEFORM_SCALE;
 
@@ -824,16 +823,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      * @param scale the amount to scale to relative to the Screen Bounds
      */
     private Rect calculateFreeformBounds(int displayId, float scale) {
+        // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
         final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(displayId);
         final int screenWidth = displayLayout.width();
         final int screenHeight = displayLayout.height();
 
         final float adjustmentPercentage = (1f - scale) / 2;
-        final Rect endBounds = new Rect((int) (screenWidth * adjustmentPercentage),
+        return new Rect((int) (screenWidth * adjustmentPercentage),
                 (int) (screenHeight * adjustmentPercentage),
                 (int) (screenWidth * (adjustmentPercentage + scale)),
                 (int) (screenHeight * (adjustmentPercentage + scale)));
-        return endBounds;
     }
 
     /**
@@ -875,7 +874,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         c -> {
                             c.onDragPositioningEndThroughStatusBar(relevantDecor.mTaskInfo,
                                     calculateFreeformBounds(ev.getDisplayId(),
-                                            FINAL_FREEFORM_SCALE));
+                                            DesktopTasksController
+                                                    .DESKTOP_MODE_INITIAL_BOUNDS_SCALE));
                         });
             }
         });
