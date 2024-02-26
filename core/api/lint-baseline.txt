@@ -391,10 +391,6 @@ DeprecationMismatch: javax.microedition.khronos.egl.EGL10#eglCreatePixmapSurface
     Method javax.microedition.khronos.egl.EGL10.eglCreatePixmapSurface(javax.microedition.khronos.egl.EGLDisplay, javax.microedition.khronos.egl.EGLConfig, Object, int[]): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
 
 
-HiddenAbstractMethod: android.app.Notification.Style#areNotificationsVisiblyDifferent(android.app.Notification.Style):
-    areNotificationsVisiblyDifferent cannot be hidden and abstract when Style has a visible constructor, in case a third-party attempts to subclass it.
-
-
 InvalidNullabilityOverride: android.app.Notification.TvExtender#extend(android.app.Notification.Builder) parameter #0:
     Invalid nullability on parameter `builder` in method `extend`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
 InvalidNullabilityOverride: android.media.midi.MidiUmpDeviceService#onBind(android.content.Intent) parameter #0:
@@ -1465,6 +1461,7 @@ UnflaggedApi: android.graphics.text.PositionedGlyphs#getItalicOverride(int):
     New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getItalicOverride(int)
 UnflaggedApi: android.graphics.text.PositionedGlyphs#getWeightOverride(int):
     New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getWeightOverride(int)
+
 UnflaggedApi: android.hardware.camera2.ExtensionCaptureRequest:
     New API must be flagged with @FlaggedApi: class android.hardware.camera2.ExtensionCaptureRequest
 UnflaggedApi: android.hardware.camera2.ExtensionCaptureRequest#ExtensionCaptureRequest():
