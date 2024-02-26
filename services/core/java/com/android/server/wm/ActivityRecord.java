@@ -353,6 +353,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
+import android.window.ActivityWindowInfo;
 import android.window.ITaskFragmentOrganizer;
 import android.window.RemoteTransition;
 import android.window.SizeConfigurationBuckets;
@@ -519,6 +520,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int mLastReportedDisplayId;
     boolean mLastReportedMultiWindowMode;
     boolean mLastReportedPictureInPictureMode;
+    private final ActivityWindowInfo mLastReportedActivityWindowInfo = new ActivityWindowInfo();
     ActivityRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
     final int requestCode;  // code given by requester (resultTo)
@@ -958,6 +960,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private final Configuration mTmpConfig = new Configuration();
     private final Rect mTmpBounds = new Rect();
+    private final ActivityWindowInfo mTmpActivityWindowInfo = new ActivityWindowInfo();
 
     // Token for targeting this activity for assist purposes.
     final Binder assistToken = new Binder();
@@ -1095,6 +1098,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));
         pw.println(prefix + "mLastReportedConfigurations:");
         mLastReportedConfiguration.dump(pw, prefix + "  ");
+
+        if (Flags.activityWindowInfoFlag()) {
+            pw.print(prefix);
+            pw.print("mLastReportedActivityWindowInfo=");
+            pw.println(mLastReportedActivityWindowInfo);
+        }
 
         pw.print(prefix); pw.print("CurrentConfiguration="); pw.println(getConfiguration());
         if (!getRequestedOverrideConfiguration().equals(EMPTY)) {
@@ -3148,6 +3157,30 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // No such property name.
             return false;
         }
+    }
+
+    /**
+     * This is different from {@link #isEmbedded()}.
+     * {@link #isEmbedded()} is {@code true} when any of the parent {@link TaskFragment} is created
+     * by a {@link android.window.TaskFragmentOrganizer}, while this method is {@code true} when
+     * the parent {@link TaskFragment} is embedded and has bounds override that does not fill the
+     * leaf {@link Task}.
+     */
+    boolean isEmbeddedInHostContainer() {
+        final TaskFragment taskFragment = getOrganizedTaskFragment();
+        return taskFragment != null && taskFragment.isEmbeddedWithBoundsOverride();
+    }
+
+    @NonNull
+    ActivityWindowInfo getActivityWindowInfo() {
+        if (!Flags.activityWindowInfoFlag() || !isAttached()) {
+            return mTmpActivityWindowInfo;
+        }
+        mTmpActivityWindowInfo.set(
+                isEmbeddedInHostContainer(),
+                getTask().getBounds(),
+                getTaskFragment().getBounds());
+        return mTmpActivityWindowInfo;
     }
 
     @Override
@@ -8211,6 +8244,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void setLastReportedConfiguration(@NonNull Configuration global,
             @NonNull Configuration override) {
         mLastReportedConfiguration.setConfiguration(global, override);
+    }
+
+    void setLastReportedActivityWindowInfo(@NonNull ActivityWindowInfo activityWindowInfo) {
+        if (Flags.activityWindowInfoFlag()) {
+            mLastReportedActivityWindowInfo.set(activityWindowInfo);
+        }
     }
 
     @Nullable
