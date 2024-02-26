@@ -348,11 +348,11 @@ public final class CardEmulation {
      * @return whether the change was successful.
      */
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
-    public boolean setDefaultToObserveModeForService(@NonNull ComponentName service,
+    public boolean setShouldDefaultToObserveModeForService(@NonNull ComponentName service,
             boolean enable) {
         try {
-            return sService.setDefaultToObserveModeForService(mContext.getUser().getIdentifier(),
-                    service, enable);
+            return sService.setShouldDefaultToObserveModeForService(
+                    mContext.getUser().getIdentifier(), service, enable);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to reach CardEmulationService.");
         }
