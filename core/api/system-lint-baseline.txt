@@ -509,6 +509,10 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
     Methods must not throw generic exceptions (`java.lang.Throwable`)
 
 
+HiddenAbstractMethod: android.app.Notification.Style#areNotificationsVisiblyDifferent(android.app.Notification.Style):
+    areNotificationsVisiblyDifferent cannot be hidden and abstract when Style has a visible constructor, in case a third-party attempts to subclass it.
+
+
 InvalidNullabilityOverride: android.service.ondeviceintelligence.OnDeviceIntelligenceService#onBind(android.content.Intent) parameter #0:
     Invalid nullability on parameter `intent` in method `onBind`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
 InvalidNullabilityOverride: android.service.ondeviceintelligence.OnDeviceTrustedInferenceService#onBind(android.content.Intent) parameter #0:
