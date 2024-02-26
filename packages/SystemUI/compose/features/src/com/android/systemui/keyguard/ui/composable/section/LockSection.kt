@@ -37,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
@@ -77,16 +78,15 @@ constructor(
                     if (DeviceEntryUdfpsRefactor.isEnabled) {
                         DeviceEntryIconView(context, null).apply {
                             id = R.id.device_entry_icon_view
-                            // TODO: b/326624996 Bind the DeviceEntryIcon
-                            //                            DeviceEntryIconViewBinder.bind(
-                            //                                applicationScope,
-                            //                                this,
-                            //                                deviceEntryIconViewModel.get(),
-                            //                                deviceEntryForegroundViewModel.get(),
-                            //                                deviceEntryBackgroundViewModel.get(),
-                            //                                falsingManager.get(),
-                            //                                vibratorHelper.get(),
-                            //                            )
+                            DeviceEntryIconViewBinder.bind(
+                                applicationScope,
+                                this,
+                                deviceEntryIconViewModel.get(),
+                                deviceEntryForegroundViewModel.get(),
+                                deviceEntryBackgroundViewModel.get(),
+                                falsingManager.get(),
+                                vibratorHelper.get(),
+                            )
                         }
                     } else {
                         // keyguardBottomAreaRefactor()
