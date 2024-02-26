@@ -31,8 +31,11 @@ import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMed
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionManagerRepository
 import com.android.systemui.mediaprojection.taskswitcher.domain.interactor.TaskSwitchInteractor
 import com.android.systemui.mediaprojection.taskswitcher.ui.model.TaskSwitcherNotificationUiState
+import com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel.TaskSwitcherNotificationViewModel.Companion.NOTIFICATION_MAX_SHOW_DURATION
 import com.google.common.truth.Truth.assertThat
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -44,7 +47,8 @@ import org.junit.runner.RunWith
 @SmallTest
 class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
 
-    private val dispatcher = UnconfinedTestDispatcher()
+    private val scheduler = TestCoroutineScheduler()
+    private val dispatcher = UnconfinedTestDispatcher(scheduler)
     private val testScope = TestScope(dispatcher)
 
     private val fakeActivityTaskManager = FakeActivityTaskManager()
@@ -135,6 +139,41 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
 
             assertThat(uiState)
                 .isEqualTo(TaskSwitcherNotificationUiState.Showing(projectedTask, foregroundTask))
+        }
+
+    @Test
+    fun uiState_taskChanged_beforeDelayLimit_stillEmitsShowing() =
+        testScope.runTest {
+            val projectedTask = createTask(taskId = 1)
+            val foregroundTask = createTask(taskId = 2)
+            val uiState by collectLastValue(viewModel.uiState)
+
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
+
+            testScheduler.advanceTimeBy(NOTIFICATION_MAX_SHOW_DURATION - 1.milliseconds)
+            assertThat(uiState)
+                .isEqualTo(TaskSwitcherNotificationUiState.Showing(projectedTask, foregroundTask))
+        }
+
+    @Test
+    fun uiState_taskChanged_afterDelayLimit_emitsNotShowing() =
+        testScope.runTest {
+            val projectedTask = createTask(taskId = 1)
+            val foregroundTask = createTask(taskId = 2)
+            val uiState by collectLastValue(viewModel.uiState)
+
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
+
+            testScheduler.advanceTimeBy(NOTIFICATION_MAX_SHOW_DURATION)
+            assertThat(uiState).isEqualTo(TaskSwitcherNotificationUiState.NotShowing)
         }
 
     @Test
