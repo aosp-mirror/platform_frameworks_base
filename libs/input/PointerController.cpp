@@ -41,6 +41,8 @@ namespace android {
 
 namespace {
 
+static const bool ENABLE_POINTER_CHOREOGRAPHER = input_flags::enable_pointer_choreographer();
+
 const ui::Transform kIdentityTransform;
 
 } // namespace
@@ -224,7 +226,7 @@ void PointerController::setPresentation(Presentation presentation) {
 
     mLocked.presentation = presentation;
 
-    if (input_flags::enable_pointer_choreographer()) {
+    if (ENABLE_POINTER_CHOREOGRAPHER) {
         // When pointer choreographer is enabled, the presentation mode is only set once when the
         // PointerController is constructed, before the display viewport is provided.
         // TODO(b/293587049): Clean up the PointerController interface after pointer choreographer
