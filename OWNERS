@@ -32,6 +32,7 @@ per-file **.bp,**.mk = hansson@google.com, joeo@google.com, lamontjones@google.c
 per-file TestProtoLibraries.bp = file:platform/platform_testing:/libraries/health/OWNERS
 per-file TestProtoLibraries.bp = file:platform/tools/tradefederation:/OWNERS
 
+per-file INPUT_OWNERS = file:/INPUT_OWNERS
 per-file ZYGOTE_OWNERS = file:/ZYGOTE_OWNERS
 per-file SQLITE_OWNERS = file:/SQLITE_OWNERS
 
