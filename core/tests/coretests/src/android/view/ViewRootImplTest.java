@@ -1017,6 +1017,60 @@ public class ViewRootImplTest {
         assertEquals(viewRootImpl.isFrameRatePowerSavingsBalanced(), true);
     }
 
+    /**
+     * Test the TextureView heuristic:
+     * 1. Store the last 3 invalidates time - FT1, FT2, FT3.
+     * 2. If FT2-FT1 > 15ms && FT3-FT2 > 15ms -> vote for NORMAL category
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_applyTextureViewHeuristic() throws InterruptedException {
+        final long delay = 30L;
+
+        TextureView view = new TextureView(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            Display display = wm.getDefaultDisplay();
+            DisplayMetrics metrics = new DisplayMetrics();
+            display.getMetrics(metrics);
+            wmlp.width = (int) (metrics.widthPixels * 0.9);
+            wmlp.height = (int) (metrics.heightPixels * 0.9);
+            wm.addView(view, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_HIGH);
+        });
+
+         // reset the frame rate category counts
+        for (int i = 0; i < 5; i++) {
+            Thread.sleep(delay);
+            sInstrumentation.runOnMainSync(() -> {
+                view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
+                view.invalidate();
+            });
+            sInstrumentation.waitForIdleSync();
+        }
+
+        Thread.sleep(delay);
+        sInstrumentation.runOnMainSync(() -> {
+            view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_DEFAULT);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NORMAL);
+        });
+    }
+
     @Test
     public void forceInvertOffDarkThemeOff_forceDarkModeDisabled() {
         mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);

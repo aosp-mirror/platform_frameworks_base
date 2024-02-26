@@ -1043,7 +1043,7 @@ public final class ViewRootImpl implements ViewParent,
     // time for checking idle status periodically.
     private static final int FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS = 500;
     // time for revaluating the idle status before lowering the frame rate.
-    private static final int FRAME_RATE_IDLENESS_REEVALUATE_TIME = 500;
+    private static final int FRAME_RATE_IDLENESS_REEVALUATE_TIME = 1000;
     // time for evaluating the interval between current time and
     // the time when frame rate was set previously.
     private static final int FRAME_RATE_SETTING_REEVALUATE_TIME = 100;
@@ -6540,6 +6540,7 @@ public final class ViewRootImpl implements ViewParent,
                         mHasInvalidation = false;
                         mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
                                 FRAME_RATE_IDLENESS_REEVALUATE_TIME);
+                        mHasIdledMessage = true;
                     }
                     break;
                 case MSG_REFRESH_POINTER_ICON:
@@ -12368,14 +12369,6 @@ public final class ViewRootImpl implements ViewParent,
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
-
-        if (mPreferredFrameRateCategory != FRAME_RATE_CATEGORY_NO_PREFERENCE && !mHasIdledMessage) {
-            // Check where the display is idled periodically.
-            // If so, set the frame rate category to NO_PREFERENCE
-            mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
-                    FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS);
-            mHasIdledMessage = true;
-        }
     }
 
     private void setPreferredFrameRate(float preferredFrameRate) {
@@ -12389,7 +12382,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                     Trace.traceBegin(
                             Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRate "
-                                + preferredFrameRate);
+                                + preferredFrameRate + " compatibility "
+                                + mFrameRateCompatibility);
                 }
                 mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
                     mFrameRateCompatibility).applyAsyncUnsafe();
@@ -12415,7 +12409,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldSetFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
-        return mSurface.isValid() && mPreferredFrameRate > 0
+        return mSurface.isValid() && mPreferredFrameRate >= 0
                 && shouldEnableDvrr() && !mIsFrameRateConflicted;
     }
 
@@ -12456,6 +12450,7 @@ public final class ViewRootImpl implements ViewParent,
             mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_LOW;
         }
         mHasInvalidation = true;
+        checkIdleness();
     }
 
     /**
@@ -12498,6 +12493,7 @@ public final class ViewRootImpl implements ViewParent,
             mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
                     FRAME_RATE_SETTING_REEVALUATE_TIME);
         }
+        checkIdleness();
     }
 
     /**
@@ -12602,5 +12598,15 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldEnableDvrr() {
         return sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced;
+    }
+
+    private void checkIdleness() {
+        if (!mHasIdledMessage) {
+            // Check where the display is idled periodically.
+            // If so, set the frame rate category to NO_PREFERENCE
+            mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
+                    FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS);
+            mHasIdledMessage = true;
+        }
     }
 }
