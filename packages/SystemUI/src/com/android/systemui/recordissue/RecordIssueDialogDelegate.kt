@@ -40,7 +40,7 @@ import com.android.systemui.flags.Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPR
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.SessionCreationSource
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
-import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate
 import com.android.systemui.qs.tiles.RecordIssueTile
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingService
@@ -65,6 +65,7 @@ constructor(
     private val devicePolicyResolver: dagger.Lazy<ScreenCaptureDevicePolicyResolver>,
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     private val userFileManager: UserFileManager,
+    private val screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate,
     @Assisted private val onStarted: Runnable,
 ) : SystemUIDialog.Delegate {
 
@@ -124,7 +125,7 @@ constructor(
                         .isScreenCaptureCompletelyDisabled(UserHandle.of(userTracker.userId))
             ) {
                 mainExecutor.execute {
-                    ScreenCaptureDisabledDialog(context).show()
+                    screenCaptureDisabledDialogDelegate.createDialog().show()
                     screenRecordSwitch.isChecked = false
                 }
                 return@execute

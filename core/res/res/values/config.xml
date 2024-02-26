@@ -3554,10 +3554,6 @@
     <string name="config_keyguardComponent" translatable="false"
             >com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
 
-    <!-- Screen record dialog component -->
-    <string name="config_screenRecorderComponent" translatable="false"
-            >com.android.systemui/com.android.systemui.screenrecord.ScreenRecordDialog</string>
-
     <!-- The component name of a special dock app that merely launches a dream.
          We don't want to launch this app when docked because it causes an unnecessary
          activity transition.  We just want to start the dream. -->
