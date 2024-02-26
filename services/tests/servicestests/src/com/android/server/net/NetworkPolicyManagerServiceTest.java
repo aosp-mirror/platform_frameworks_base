@@ -205,6 +205,7 @@ import libcore.io.Streams;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.MethodRule;
@@ -2143,12 +2144,14 @@ public class NetworkPolicyManagerServiceTest {
         assertFalse(mService.isUidNetworkingBlocked(UID_E, false));
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainEnabled() throws Exception {
         verify(mNetworkManager).setFirewallChainEnabled(FIREWALL_CHAIN_BACKGROUND, true);
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnProcStateChange() throws Exception {
@@ -2178,6 +2181,7 @@ public class NetworkPolicyManagerServiceTest {
         assertTrue(mService.isUidNetworkingBlocked(UID_A, false));
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnAllowlistChange() throws Exception {
@@ -2216,6 +2220,7 @@ public class NetworkPolicyManagerServiceTest {
         assertFalse(mService.isUidNetworkingBlocked(UID_B, false));
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnTempAllowlistChange() throws Exception {
@@ -2245,6 +2250,7 @@ public class NetworkPolicyManagerServiceTest {
         assertTrue(mService.isUidNetworkingBlocked(UID_A, false));
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testUidObserverFiltersProcStateChanges() throws Exception {
@@ -2307,6 +2313,7 @@ public class NetworkPolicyManagerServiceTest {
         waitForUidEventHandlerIdle();
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testUidObserverFiltersStaleChanges() throws Exception {
@@ -2327,6 +2334,7 @@ public class NetworkPolicyManagerServiceTest {
         waitForUidEventHandlerIdle();
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testUidObserverFiltersCapabilityChanges() throws Exception {
