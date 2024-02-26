@@ -47,6 +47,7 @@ java_library {
     ],
     libs: [
         "framework-minus-apex.ravenwood",
+        "ravenwood-junit",
     ],
     visibility: ["//visibility:private"],
 }

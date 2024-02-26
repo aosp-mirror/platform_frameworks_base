@@ -22,6 +22,13 @@ import com.android.internal.os.RuntimeInit;
 
 import java.io.PrintStream;
 
+/**
+ * Ravenwood "native substitution" class for {@link android.util.Log}.
+ *
+ * {@link android.util.Log} already uses the actual native code and doesn't use this class.
+ * In order to switch to this Java implementation, uncomment the @RavenwoodNativeSubstitutionClass
+ * annotation on {@link android.util.Log}.
+ */
 public class Log_host {
 
     public static boolean isLoggable(String tag, @Level int level) {

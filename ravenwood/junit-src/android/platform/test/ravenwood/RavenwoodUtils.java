@@ -73,9 +73,9 @@ public class RavenwoodUtils {
                     return;
                 }
             }
-            throw new UnsatisfiedLinkError("Library " + libname + " no found in "
+            throw new UnsatisfiedLinkError("Library " + libname + " not found in "
                     + "java.library.path: " + path);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             dumpFiles(System.out);
             throw e;
         }
@@ -96,6 +96,10 @@ public class RavenwoodUtils {
                     listFiles(out, gparent, "");
                 }
             }
+
+            var gparent = new File("../..").getCanonicalFile();
+            out.println("# ../..=" + gparent);
+            listFiles(out, gparent, "");
         } catch (Throwable th) {
             out.println("Error: " + th.toString());
             th.printStackTrace(out);
