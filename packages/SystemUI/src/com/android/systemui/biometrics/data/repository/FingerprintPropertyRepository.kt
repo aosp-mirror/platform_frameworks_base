@@ -51,8 +51,6 @@ import kotlinx.coroutines.withContext
  * There is never more than one instance of the FingerprintProperty at any given time.
  */
 interface FingerprintPropertyRepository {
-    /** Whether the fingerprint properties have been initialized yet. */
-    val propertiesInitialized: StateFlow<Boolean>
 
     /** The id of fingerprint sensor. */
     val sensorId: Flow<Int>
@@ -107,16 +105,7 @@ constructor(
             .stateIn(
                 applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = UNINITIALIZED_PROPS,
-            )
-
-    override val propertiesInitialized: StateFlow<Boolean> =
-        props
-            .map { it != UNINITIALIZED_PROPS }
-            .stateIn(
-                applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = props.value != UNINITIALIZED_PROPS,
+                initialValue = DEFAULT_PROPS,
             )
 
     override val sensorId: Flow<Int> = props.map { it.sensorId }
@@ -135,17 +124,6 @@ constructor(
 
     companion object {
         private const val TAG = "FingerprintPropertyRepositoryImpl"
-        private val UNINITIALIZED_PROPS =
-            FingerprintSensorPropertiesInternal(
-                -2 /* sensorId */,
-                SensorProperties.STRENGTH_CONVENIENCE,
-                0 /* maxEnrollmentsPerUser */,
-                listOf<ComponentInfoInternal>(),
-                FingerprintSensorProperties.TYPE_UNKNOWN,
-                false /* halControlsIllumination */,
-                true /* resetLockoutRequiresHardwareAuthToken */,
-                listOf<SensorLocationInternal>(SensorLocationInternal.DEFAULT)
-            )
         private val DEFAULT_PROPS =
             FingerprintSensorPropertiesInternal(
                 -1 /* sensorId */,
