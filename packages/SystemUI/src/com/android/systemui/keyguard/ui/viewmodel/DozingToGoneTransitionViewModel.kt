@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,44 +17,30 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.FromDozingTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.FromDozingTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Breaks down DOZING->LOCKSCREEN transition into discrete steps for corresponding views to consume.
- */
+/** Breaks down DOZING->GONE transition into discrete steps for corresponding views to consume. */
 @ExperimentalCoroutinesApi
 @SysUISingleton
-class DozingToLockscreenTransitionViewModel
+class DozingToGoneTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
+
     private val transitionAnimation =
         animationFlow.setup(
-            duration = FromDozingTransitionInteractor.TO_LOCKSCREEN_DURATION,
+            duration = TO_GONE_DURATION,
             from = KeyguardState.DOZING,
-            to = KeyguardState.LOCKSCREEN,
+            to = KeyguardState.GONE,
         )
-
-    val shortcutsAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
-            duration = 150.milliseconds,
-            onStep = { it },
-            onCancel = { 0f },
-        )
-
-    val lockscreenAlpha: Flow<Float> = shortcutsAlpha
-
-    val deviceEntryBackgroundViewAlpha: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(1f)
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(1f)
+        transitionAnimation.immediatelyTransitionTo(0f)
 }

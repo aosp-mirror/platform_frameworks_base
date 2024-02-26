@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
@@ -26,11 +23,11 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@ExperimentalCoroutinesApi
 val Kosmos.dreamingToLockscreenTransitionViewModel by Fixture {
     DreamingToLockscreenTransitionViewModel(
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         fromDreamingTransitionInteractor = mock(),
-        deviceEntryUdfpsInteractor = deviceEntryUdfpsInteractor,
         animationFlow = keyguardTransitionAnimationFlow,
     )
 }
