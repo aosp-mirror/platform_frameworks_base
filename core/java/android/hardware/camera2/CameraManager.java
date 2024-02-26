@@ -772,6 +772,16 @@ public final class CameraManager {
                     "CameraDeviceSetup is not supported for Camera ID: " + cameraId);
         }
 
+        return getCameraDeviceSetupUnsafe(cameraId);
+
+    }
+
+    /**
+     * Creates and returns a {@link CameraDeviceSetup} instance without any error checking. To
+     * be used (carefully) by callers who are sure that CameraDeviceSetup instance can be legally
+     * created and don't want to pay the latency cost of calling {@link #getCameraDeviceSetup}.
+     */
+    private CameraDevice.CameraDeviceSetup getCameraDeviceSetupUnsafe(@NonNull String cameraId) {
         return new CameraDeviceSetupImpl(cameraId, /*cameraManager=*/ this, mContext);
     }
 
@@ -857,8 +867,9 @@ public final class CameraManager {
 
             ICameraDeviceUser cameraUser = null;
             CameraDevice.CameraDeviceSetup cameraDeviceSetup = null;
-            if (Flags.cameraDeviceSetup() && isCameraDeviceSetupSupported(cameraId)) {
-                cameraDeviceSetup = getCameraDeviceSetup(cameraId);
+            if (Flags.cameraDeviceSetup()
+                    && CameraDeviceSetupImpl.isCameraDeviceSetupSupported(characteristics)) {
+                cameraDeviceSetup = getCameraDeviceSetupUnsafe(cameraId);
             }
 
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl =
