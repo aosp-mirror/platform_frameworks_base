@@ -93,6 +93,22 @@ genrule {
 }
 
 genrule {
+    name: "checked-protolog.json",
+    srcs: [
+        ":generate-protolog.json",
+        ":services.core.protolog.json",
+    ],
+    cmd: "cp $(location :generate-protolog.json) $(out) && " +
+        "{ ! (diff $(out) $(location :services.core.protolog.json) | grep -q '^<') || " +
+        "{ echo -e '\\n\\n################################################################\\n#\\n" +
+        "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
+        "#  cp $${ANDROID_BUILD_TOP}/$(location :generate-protolog.json) " +
+        "$${ANDROID_BUILD_TOP}/$(location :services.core.protolog.json)\\n#\\n" +
+        "################################################################\\n\\n' >&2 && false; } }",
+    out: ["services.core.protolog.json"],
+}
+
+genrule {
     name: "checked-core.protolog.pb",
     srcs: [
         ":gen-core.protolog.pb",
@@ -177,6 +193,7 @@ java_library_static {
     required: [
         "default_television.xml",
         "gps_debug.conf",
+        "protolog.conf.json.gz",
         "core.protolog.pb",
     ],
 
@@ -276,6 +293,18 @@ java_library_host {
 prebuilt_etc {
     name: "gps_debug.conf",
     src: "java/com/android/server/location/gnss/gps_debug.conf",
+}
+
+genrule {
+    name: "services.core.json.gz",
+    srcs: [":checked-protolog.json"],
+    out: ["services.core.protolog.json.gz"],
+    cmd: "gzip -c < $(in) > $(out)",
+}
+
+prebuilt_etc {
+    name: "protolog.conf.json.gz",
+    src: ":services.core.json.gz",
 }
 
 prebuilt_etc {
