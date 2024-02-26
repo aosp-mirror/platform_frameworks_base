@@ -336,6 +336,14 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     }
                 }
             }
+
+            if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+                RoutingSessionInfo oldSessionInfo = mSessionInfos.get(0);
+                builder.setTransferReason(oldSessionInfo.getTransferReason())
+                        .setTransferInitiator(oldSessionInfo.getTransferInitiatorUserHandle(),
+                                oldSessionInfo.getTransferInitiatorPackageName());
+            }
+
             return builder.setProviderId(mUniqueId).build();
         }
     }
