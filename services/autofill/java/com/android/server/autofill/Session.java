@@ -193,7 +193,6 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -2821,8 +2820,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mSessionFlags.mExpiredResponse = false;
 
         final Parcelable result = data.getParcelable(AutofillManager.EXTRA_AUTHENTICATION_RESULT);
-        final Serializable exception = data.getSerializable(
-                CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION);
+        final GetCredentialException exception = data.getSerializable(
+                CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION,
+                GetCredentialException.class);
 
         final Bundle newClientState = data.getBundle(AutofillManager.EXTRA_CLIENT_STATE);
         if (sDebug) {
@@ -5126,6 +5126,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 toIpcFriendlyResultReceiver(resultReceiver);
 
         Intent metadataIntent = dataset.getCredentialFillInIntent();
+        if (metadataIntent == null) {
+            metadataIntent = new Intent();
+        }
+
         metadataIntent.putExtra(
                 android.credentials.selection.Constants.EXTRA_FINAL_RESPONSE_RECEIVER,
                 ipcFriendlyResultReceiver);

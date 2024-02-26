@@ -211,7 +211,7 @@ class CredentialAutofillService : AutofillService() {
         autofillIdToProvidersMap.forEach { (autofillId, providers) ->
             validFillResponse = processProvidersForAutofillId(
                     filLRequest, autofillId, providers, entryIconMap, fillResponseBuilder,
-                    getCredResponse.pendingIntent)
+                    getCredResponse.intent)
                     .or(validFillResponse)
         }
         if (!validFillResponse) {
@@ -227,7 +227,7 @@ class CredentialAutofillService : AutofillService() {
             providerDataList: ArrayList<GetCredentialProviderData>,
             entryIconMap: Map<String, Icon>,
             fillResponseBuilder: FillResponse.Builder,
-            bottomSheetPendingIntent: PendingIntent?
+            bottomSheetIntent: Intent
     ): Boolean {
         val providerList = GetFlowUtils.toProviderList(
             providerDataList,
@@ -265,6 +265,8 @@ class CredentialAutofillService : AutofillService() {
                 }
             }
         }
+        bottomSheetIntent.putExtra(
+                ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, providerDataList)
         providerDisplayInfo.sortedUserNameToCredentialEntryList.forEach usernameLoop@{
             val primaryEntry = it.sortedCredentialEntryList.first()
             val pendingIntent = primaryEntry.pendingIntent
@@ -324,16 +326,16 @@ class CredentialAutofillService : AutofillService() {
             datasetAdded = true
             i++
 
-            if (i == lastDropdownDatasetIndex && bottomSheetPendingIntent != null) {
-                addDropdownMoreOptionsPresentation(bottomSheetPendingIntent, autofillId,
+            if (i == lastDropdownDatasetIndex) {
+                addDropdownMoreOptionsPresentation(bottomSheetIntent, autofillId,
                         fillResponseBuilder)
             }
         }
         val pinnedSpec = getLastInlinePresentationSpec(inlinePresentationSpecs,
                 inlinePresentationSpecsCount)
-        if (datasetAdded && bottomSheetPendingIntent != null && pinnedSpec != null) {
-            addPinnedInlineSuggestion(bottomSheetPendingIntent, pinnedSpec, autofillId,
-                    fillResponseBuilder, providerDataList)
+        if (datasetAdded && pinnedSpec != null) {
+            addPinnedInlineSuggestion(pinnedSpec, autofillId,
+                    fillResponseBuilder, bottomSheetIntent)
         }
         return datasetAdded
     }
@@ -364,13 +366,14 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun addDropdownMoreOptionsPresentation(
-            bottomSheetPendingIntent: PendingIntent,
+            bottomSheetIntent: Intent,
             autofillId: AutofillId,
             fillResponseBuilder: FillResponse.Builder
     ) {
         val presentationBuilder = Presentations.Builder()
                 .setMenuPresentation(
                         RemoteViewsFactory.createMoreSignInOptionsPresentation(this))
+        val pendingIntent = setUpBottomSheetPendingIntent(bottomSheetIntent)
 
         fillResponseBuilder.addDataset(
                 Dataset.Builder()
@@ -379,7 +382,7 @@ class CredentialAutofillService : AutofillService() {
                                 Field.Builder().setPresentations(
                                         presentationBuilder.build())
                                         .build())
-                        .setAuthentication(bottomSheetPendingIntent.intentSender)
+                        .setAuthentication(pendingIntent.intentSender)
                         .build()
         )
     }
@@ -395,35 +398,39 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun addPinnedInlineSuggestion(
-            bottomSheetPendingIntent: PendingIntent,
             spec: InlinePresentationSpec,
             autofillId: AutofillId,
             fillResponseBuilder: FillResponse.Builder,
-            providerDataList: ArrayList<GetCredentialProviderData>
+            bottomSheetIntent: Intent
     ) {
+        val pendingIntent = setUpBottomSheetPendingIntent(bottomSheetIntent)
+
         val dataSetBuilder = Dataset.Builder()
         val sliceBuilder = InlineSuggestionUi
-                .newContentBuilder(bottomSheetPendingIntent)
+                .newContentBuilder(pendingIntent)
                 .setStartIcon(Icon.createWithResource(this,
                         com.android.credentialmanager.R.drawable.more_horiz_24px))
         val presentationBuilder = Presentations.Builder()
                 .setInlinePresentation(InlinePresentation(
                         sliceBuilder.build().slice, spec, /* pinned= */ true))
 
-        val extrasIntent = Intent()
-        extrasIntent.putExtra(ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, providerDataList)
-
         fillResponseBuilder.addDataset(
                 dataSetBuilder
                         .setField(
                                 autofillId,
                                 Field.Builder().setPresentations(
-                                        presentationBuilder.build())
-                                        .build())
-                        .setAuthentication(bottomSheetPendingIntent.intentSender)
-                        .setCredentialFillInIntent(extrasIntent)
+                                        presentationBuilder.build()
+                                ).build()
+                        )
+                        .setAuthentication(pendingIntent.intentSender)
                         .build()
         )
+    }
+
+    private fun setUpBottomSheetPendingIntent(intent: Intent): PendingIntent {
+        intent.setAction(java.util.UUID.randomUUID().toString())
+        return PendingIntent.getActivity(this, /*requestCode=*/0, intent,
+                PendingIntent.FLAG_MUTABLE, /*options=*/null)
     }
 
     /**

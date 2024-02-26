@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.credentials.Constants;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCandidateCredentialsException;
@@ -114,8 +115,7 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
             return;
         }
 
-        cancelExistingPendingIntent();
-        mPendingIntent = mCredentialManagerUi.createPendingIntentForAutofill(
+        Intent intent = mCredentialManagerUi.createIntentForAutofill(
                 RequestInfo.newGetRequestInfo(
                         mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
                         PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
@@ -129,7 +129,7 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
 
         try {
             invokeClientCallbackSuccess(new GetCandidateCredentialsResponse(
-                    candidateProviderDataList, mPendingIntent));
+                    candidateProviderDataList, intent));
         } catch (RemoteException e) {
             Slog.e(TAG, "Issue while responding to client with error : " + e);
         }
