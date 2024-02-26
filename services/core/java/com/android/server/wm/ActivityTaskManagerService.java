@@ -2505,6 +2505,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         userId = handleIncomingUser(Binder.getCallingPid(), callingUid, userId, "getRecentTasks");
         final boolean allowed = isGetTasksAllowed("getRecentTasks", Binder.getCallingPid(),
                 callingUid);
+        if (!mAmInternal.isUserRunning(userId, ActivityManager.FLAG_AND_UNLOCKED)) {
+            Slog.i(TAG, "User " + userId + " is locked. Cannot load recents");
+            return ParceledListSlice.emptyList();
+        }
+        mRecentTasks.loadRecentTasksIfNeeded(userId);
         synchronized (mGlobalLock) {
             return mRecentTasks.getRecentTasks(maxNum, flags, allowed, userId, callingUid);
         }
@@ -7056,11 +7061,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void loadRecentTasksForUser(int userId) {
-            synchronized (mGlobalLock) {
-                mRecentTasks.loadUserRecentsLocked(userId);
-                // TODO renaming the methods(?)
-                mPackageConfigPersister.loadUserPackages(userId);
-            }
+            // This runs on android.fg thread when the user is unlocking.
+            mRecentTasks.loadRecentTasksIfNeeded(userId);
+            mPackageConfigPersister.loadUserPackages(userId);
         }
 
         @Override
