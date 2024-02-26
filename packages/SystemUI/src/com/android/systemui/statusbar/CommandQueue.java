@@ -615,7 +615,14 @@ public class CommandQueue extends IStatusBar.Stub implements
             args.argi2 = state1;
             args.argi3 = state2;
             args.argi4 = animate ? 1 : 0;
-            mHandler.obtainMessage(MSG_DISABLE, args).sendToTarget();
+            Message msg = mHandler.obtainMessage(MSG_DISABLE, args);
+            if (Looper.myLooper() == mHandler.getLooper()) {
+                // If its the right looper execute immediately so hides can be handled quickly.
+                mHandler.handleMessage(msg);
+                msg.recycle();
+            } else {
+                msg.sendToTarget();
+            }
         }
     }
 
