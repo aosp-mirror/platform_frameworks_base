@@ -27,7 +27,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
@@ -56,14 +55,17 @@ internal class SceneGestureHandler(
         if (isDrivingTransition || force) {
             layoutState.startTransition(newTransition, newTransition.key)
 
-            // Initialize SwipeTransition.swipeSpec. Note that this must be called right after
-            // layoutState.startTransition() is called, because it computes the
-            // layoutState.transformationSpec().
+            // Initialize SwipeTransition.transformationSpec and .swipeSpec. Note that this must be
+            // called right after layoutState.startTransition() is called, because it computes the
+            // current layoutState.transformationSpec().
+            val transformationSpec = layoutState.transformationSpec
+            newTransition.transformationSpec = transformationSpec
             newTransition.swipeSpec =
-                layoutState.transformationSpec.swipeSpec ?: layoutState.transitions.defaultSwipeSpec
+                transformationSpec.swipeSpec ?: layoutState.transitions.defaultSwipeSpec
         } else {
-            // We were not driving the transition and we don't force the update, so the spec won't
-            // be used and it doesn't matter which one we set here.
+            // We were not driving the transition and we don't force the update, so the specs won't
+            // be used and it doesn't matter which ones we set here.
+            newTransition.transformationSpec = TransformationSpec.Empty
             newTransition.swipeSpec = SceneTransitions.DefaultSwipeSpec
         }
 
@@ -285,16 +287,21 @@ internal class SceneGestureHandler(
     ): Pair<Scene, Float> {
         val toScene = swipeTransition._toScene
         val fromScene = swipeTransition._fromScene
-        val absoluteDistance = swipeTransition.distance.absoluteValue
+        val distance = swipeTransition.distance()
 
-        // If the swipe was not committed, don't do anything.
-        if (swipeTransition._currentScene != toScene) {
+        // If the swipe was not committed or if the swipe distance is not computed yet, don't do
+        // anything.
+        if (
+            swipeTransition._currentScene != toScene ||
+                distance == SwipeTransition.DistanceUnspecified
+        ) {
             return fromScene to 0f
         }
 
         // If the offset is past the distance then let's change fromScene so that the user can swipe
         // to the next screen or go back to the previous one.
         val offset = swipeTransition.dragOffset
+        val absoluteDistance = distance.absoluteValue
         return if (offset <= -absoluteDistance && swipes!!.upOrLeftResult?.toScene == toScene.key) {
             toScene to absoluteDistance
         } else if (
@@ -347,16 +354,17 @@ internal class SceneGestureHandler(
 
             // Compute the destination scene (and therefore offset) to settle in.
             val offset = swipeTransition.dragOffset
-            val distance = swipeTransition.distance
+            val distance = swipeTransition.distance()
             var targetScene: Scene
             var targetOffset: Float
             if (
-                shouldCommitSwipe(
-                    offset,
-                    distance,
-                    velocity,
-                    wasCommitted = swipeTransition._currentScene == toScene,
-                )
+                distance != SwipeTransition.DistanceUnspecified &&
+                    shouldCommitSwipe(
+                        offset,
+                        distance,
+                        velocity,
+                        wasCommitted = swipeTransition._currentScene == toScene,
+                    )
             ) {
                 targetScene = toScene
                 targetOffset = distance
@@ -372,7 +380,15 @@ internal class SceneGestureHandler(
                 // We wanted to change to a new scene but we are not allowed to, so we animate back
                 // to the current scene.
                 targetScene = swipeTransition._currentScene
-                targetOffset = if (targetScene == fromScene) 0f else distance
+                targetOffset =
+                    if (targetScene == fromScene) {
+                        0f
+                    } else {
+                        check(distance != SwipeTransition.DistanceUnspecified) {
+                            "distance is equal to ${SwipeTransition.DistanceUnspecified}"
+                        }
+                        distance
+                    }
             }
 
             animateTo(targetScene = targetScene, targetOffset = targetOffset)
@@ -459,22 +475,20 @@ private fun SwipeTransition(
 ): SwipeTransition {
     val upOrLeftResult = swipes.upOrLeftResult
     val downOrRightResult = swipes.downOrRightResult
-    val userActionDistance = result.distance ?: DefaultSwipeDistance
-    val absoluteDistance =
-        with(userActionDistance) {
-            layoutImpl.density.absoluteDistance(fromScene.targetSize, orientation)
+    val isUpOrLeft =
+        when (result) {
+            upOrLeftResult -> true
+            downOrRightResult -> false
+            else -> error("Unknown result $result ($upOrLeftResult $downOrRightResult)")
         }
 
     return SwipeTransition(
         key = result.transitionKey,
         _fromScene = fromScene,
         _toScene = layoutImpl.scene(result.toScene),
-        distance =
-            when (result) {
-                upOrLeftResult -> -absoluteDistance
-                downOrRightResult -> absoluteDistance
-                else -> error("Unknown result $result ($upOrLeftResult $downOrRightResult)")
-            },
+        userActionDistanceScope = layoutImpl.userActionDistanceScope,
+        orientation = orientation,
+        isUpOrLeft = isUpOrLeft,
     )
 }
 
@@ -482,11 +496,9 @@ private class SwipeTransition(
     val key: TransitionKey?,
     val _fromScene: Scene,
     val _toScene: Scene,
-    /**
-     * The signed distance between [fromScene] and [toScene]. It is negative if [fromScene] is above
-     * or to the left of [toScene]
-     */
-    val distance: Float,
+    private val userActionDistanceScope: UserActionDistanceScope,
+    private val orientation: Orientation,
+    private val isUpOrLeft: Boolean,
 ) : TransitionState.Transition(_fromScene.key, _toScene.key) {
     var _currentScene by mutableStateOf(_fromScene)
     override val currentScene: SceneKey
@@ -494,7 +506,16 @@ private class SwipeTransition(
 
     override val progress: Float
         get() {
+            // Important: If we are going to return early because distance is equal to 0, we should
+            // still make sure we read the offset before returning so that the calling code still
+            // subscribes to the offset value.
             val offset = if (isAnimatingOffset) offsetAnimatable.value else dragOffset
+
+            val distance = distance()
+            if (distance == DistanceUnspecified) {
+                return 0f
+            }
+
             return offset / distance
         }
 
@@ -518,8 +539,49 @@ private class SwipeTransition(
     /** Job to check that there is at most one offset animation in progress. */
     private var offsetAnimationJob: Job? = null
 
+    /**
+     * The [TransformationSpecImpl] associated to this transition.
+     *
+     * Note: This is lateinit because this [SwipeTransition] is needed by
+     * [BaseSceneTransitionLayoutState] to compute the [TransitionSpec], and it will be set right
+     * after [BaseSceneTransitionLayoutState.startTransition] is called with this transition.
+     */
+    lateinit var transformationSpec: TransformationSpecImpl
+
     /** The spec to use when animating this transition to either [fromScene] or [toScene]. */
     lateinit var swipeSpec: SpringSpec<Float>
+
+    private var lastDistance = DistanceUnspecified
+
+    /**
+     * The signed distance between [fromScene] and [toScene]. It is negative if [fromScene] is above
+     * or to the left of [toScene].
+     *
+     * Note that this distance can be equal to [DistanceUnspecified] during the first frame of a
+     * transition when the distance depends on the size or position of an element that is composed
+     * in the scene we are going to.
+     */
+    fun distance(): Float {
+        if (lastDistance != DistanceUnspecified) {
+            return lastDistance
+        }
+
+        val absoluteDistance =
+            with(transformationSpec.distance ?: DefaultSwipeDistance) {
+                userActionDistanceScope.absoluteDistance(
+                    _fromScene.targetSize,
+                    orientation,
+                )
+            }
+
+        if (absoluteDistance <= 0f) {
+            return DistanceUnspecified
+        }
+
+        val distance = if (isUpOrLeft) -absoluteDistance else absoluteDistance
+        lastDistance = distance
+        return distance
+    }
 
     /** Ends any previous [offsetAnimationJob] and runs the new [job]. */
     private fun startOffsetAnimation(job: () -> Job) {
@@ -563,6 +625,7 @@ private class SwipeTransition(
         }
         isAnimatingOffset = true
 
+        val animationSpec = transformationSpec
         offsetAnimatable.animateTo(
             targetValue = targetOffset,
             animationSpec = swipeSpec,
@@ -571,10 +634,14 @@ private class SwipeTransition(
 
         finishOffsetAnimation()
     }
+
+    companion object {
+        const val DistanceUnspecified = 0f
+    }
 }
 
 private object DefaultSwipeDistance : UserActionDistance {
-    override fun Density.absoluteDistance(
+    override fun UserActionDistanceScope.absoluteDistance(
         fromSceneSize: IntSize,
         orientation: Orientation,
     ): Float {
