@@ -595,7 +595,7 @@ public class PackageInfoUtils {
         ai.applicationInfo = applicationInfo;
         ai.requiredDisplayCategory = a.getRequiredDisplayCategory();
         ai.setKnownActivityEmbeddingCerts(a.getKnownActivityEmbeddingCerts());
-        assignFieldsComponentInfoParsedMainComponent(ai, a, pkgSetting, userId);
+        assignFieldsComponentInfoParsedMainComponent(ai, a, pkgSetting, state, userId);
         return ai;
     }
 
@@ -658,7 +658,7 @@ public class PackageInfoUtils {
             // Backwards compatibility, coerce to null if empty
             si.metaData = metaData.isEmpty() ? null : metaData;
         }
-        assignFieldsComponentInfoParsedMainComponent(si, s, pkgSetting, userId);
+        assignFieldsComponentInfoParsedMainComponent(si, s, pkgSetting, state, userId);
         return si;
     }
 
@@ -709,7 +709,7 @@ public class PackageInfoUtils {
             pi.metaData = metaData.isEmpty() ? null : metaData;
         }
         pi.applicationInfo = applicationInfo;
-        assignFieldsComponentInfoParsedMainComponent(pi, p, pkgSetting, userId);
+        assignFieldsComponentInfoParsedMainComponent(pi, p, pkgSetting, state, userId);
         return pi;
     }
 
@@ -902,8 +902,13 @@ public class PackageInfoUtils {
 
     private static void assignFieldsComponentInfoParsedMainComponent(
             @NonNull ComponentInfo info, @NonNull ParsedMainComponent component,
-            @NonNull PackageStateInternal pkgSetting, @UserIdInt int userId) {
+            @NonNull PackageStateInternal pkgSetting, @NonNull PackageUserStateInternal state,
+            @UserIdInt int userId) {
         assignFieldsComponentInfoParsedMainComponent(info, component);
+        // overwrite the enabled state with the current user state
+        info.enabled = PackageUserStateUtils.isEnabled(state, info.applicationInfo.enabled,
+                info.enabled, info.name, /* flags */ 0);
+
         Pair<CharSequence, Integer> labelAndIcon =
                 ParsedComponentStateUtils.getNonLocalizedLabelAndIcon(component, pkgSetting,
                         userId);
