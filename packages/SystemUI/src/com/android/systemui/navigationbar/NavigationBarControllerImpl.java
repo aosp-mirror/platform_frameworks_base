@@ -19,6 +19,7 @@ package com.android.systemui.navigationbar;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
+
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 import static com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen;
 import static com.android.wm.shell.Flags.enableTaskbarNavbarUnification;
@@ -28,7 +29,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -70,8 +70,10 @@ import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+
 
 @SysUISingleton
 public class NavigationBarControllerImpl implements
@@ -82,7 +84,7 @@ public class NavigationBarControllerImpl implements
     private static final String TAG = NavigationBarControllerImpl.class.getSimpleName();
 
     private final Context mContext;
-    private final Handler mHandler;
+    private final Executor mExecutor;
     private final NavigationBarComponent.Factory mNavigationBarComponentFactory;
     private final SecureSettings mSecureSettings;
     private final DisplayTracker mDisplayTracker;
@@ -119,7 +121,7 @@ public class NavigationBarControllerImpl implements
             NavigationModeController navigationModeController,
             SysUiState sysUiFlagsContainer,
             CommandQueue commandQueue,
-            @Main Handler mainHandler,
+            @Main Executor mainExecutor,
             ConfigurationController configurationController,
             NavBarHelper navBarHelper,
             TaskbarDelegate taskbarDelegate,
@@ -133,7 +135,7 @@ public class NavigationBarControllerImpl implements
             SecureSettings secureSettings,
             DisplayTracker displayTracker) {
         mContext = context;
-        mHandler = mainHandler;
+        mExecutor = mainExecutor;
         mNavigationBarComponentFactory = navigationBarComponentFactory;
         mSecureSettings = secureSettings;
         mDisplayTracker = displayTracker;
@@ -193,7 +195,7 @@ public class NavigationBarControllerImpl implements
         mNavMode = mode;
         updateAccessibilityButtonModeIfNeeded();
 
-        mHandler.post(() -> {
+        mExecutor.execute(() -> {
             // create/destroy nav bar based on nav mode only in unfolded state
             if (oldMode != mNavMode) {
                 updateNavbarForTaskbar();
