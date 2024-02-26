@@ -410,6 +410,7 @@ static bool load_maps(int pid, stats_t* stats, bool* foundSwapPss)
             stats[sub_heap].swappedOut += usage.swap;
             stats[sub_heap].swappedOutPss += usage.swap_pss;
         }
+        return true;
     };
 
     return meminfo::ForEachVmaFromFile(smaps_path, vma_scan);
