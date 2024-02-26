@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.service.notification.scenarios
 
 import android.app.Instrumentation
-import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.traces.parsers.WindowManagerStateHelper
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.test.platform.app.InstrumentationRegistry
