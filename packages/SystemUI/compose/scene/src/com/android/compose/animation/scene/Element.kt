@@ -39,7 +39,6 @@ import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
@@ -204,6 +203,17 @@ internal class ElementNode(
         measurable: Measurable,
         constraints: Constraints,
     ): MeasureResult {
+        val overscrollScene = layoutImpl.state.currentOverscrollSpec?.scene
+        if (overscrollScene != null && overscrollScene != scene.key) {
+            // There is an overscroll in progress on another scene
+            // By measuring composable elements, Compose can cache relevant information.
+            // This reduces the need for re-measure when users return from an overscroll animation.
+            val placeable = measurable.measure(constraints)
+            return layout(placeable.width, placeable.height) {
+                // We don't want to draw it, no need to place the element.
+            }
+        }
+
         val placeable = measure(layoutImpl, scene, element, sceneState, measurable, constraints)
         return layout(placeable.width, placeable.height) {
             place(layoutImpl, scene, element, sceneState, placeable, placementScope = this)
@@ -253,11 +263,13 @@ private fun shouldDrawElement(
 ): Boolean {
     val transition = layoutImpl.state.currentTransition
 
-    // Always draw the element if there is no ongoing transition or if the element is not shared.
+    // Always draw the element if there is no ongoing transition or if the element is not shared or
+    // if the current scene is the one that is currently over scrolling with [OverscrollSpec].
     if (
         transition == null ||
             transition.fromScene !in element.sceneStates ||
-            transition.toScene !in element.sceneStates
+            transition.toScene !in element.sceneStates ||
+            layoutImpl.state.currentOverscrollSpec?.scene == scene.key
     ) {
         return true
     }
@@ -286,12 +298,14 @@ internal fun shouldDrawOrComposeSharedElement(
     val fromScene = transition.fromScene
     val toScene = transition.toScene
 
-    return scenePicker.sceneDuringTransition(
-        element = element,
-        transition = transition,
-        fromSceneZIndex = layoutImpl.scenes.getValue(fromScene).zIndex,
-        toSceneZIndex = layoutImpl.scenes.getValue(toScene).zIndex,
-    ) == scene
+    val chosenByPicker =
+        scenePicker.sceneDuringTransition(
+            element = element,
+            transition = transition,
+            fromSceneZIndex = layoutImpl.scenes.getValue(fromScene).zIndex,
+            toSceneZIndex = layoutImpl.scenes.getValue(toScene).zIndex,
+        ) == scene
+    return chosenByPicker || layoutImpl.state.currentOverscrollSpec?.scene == scene
 }
 
 private fun isSharedElementEnabled(
@@ -547,6 +561,40 @@ private inline fun <T> computeValue(
         // TODO(b/311600838): Throw an exception instead once layers of disposed elements are not
         // run anymore.
         return idleValue
+    }
+
+    if (transition is TransitionState.HasOverscrollProperties) {
+        val overscroll = layoutImpl.state.currentOverscrollSpec
+        if (overscroll?.scene == scene.key) {
+            val elementSpec = overscroll.transformationSpec.transformations(element.key, scene.key)
+            val propertySpec = transformation(elementSpec) ?: return currentValue()
+            val overscrollState = checkNotNull(if (scene.key == toScene) toState else fromState)
+            val targetValue =
+                propertySpec.transform(
+                    layoutImpl,
+                    scene,
+                    element,
+                    overscrollState,
+                    transition,
+                    idleValue,
+                )
+
+            // Make sure we don't read progress if values are the same and we don't need to
+            // interpolate, so we don't invalidate the phase where this is read.
+            if (targetValue == idleValue) {
+                return targetValue
+            }
+
+            // TODO(b/290184746): Make sure that we don't overflow transformations associated to a
+            // range.
+            val directionSign = if (transition.isUpOrLeft) -1 else 1
+            val overscrollProgress = transition.progress.let { if (it > 1f) it - 1f else it }
+            val progress = directionSign * overscrollProgress
+            val rangeProgress = propertySpec.range?.progress(progress) ?: progress
+
+            // Interpolate between the value at rest and the over scrolled value.
+            return lerp(idleValue, targetValue, rangeProgress)
+        }
     }
 
     // The element is shared: interpolate between the value in fromScene and the value in toScene.

@@ -497,9 +497,11 @@ private class SwipeTransition(
     val _fromScene: Scene,
     val _toScene: Scene,
     private val userActionDistanceScope: UserActionDistanceScope,
-    private val orientation: Orientation,
-    private val isUpOrLeft: Boolean,
-) : TransitionState.Transition(_fromScene.key, _toScene.key) {
+    override val orientation: Orientation,
+    override val isUpOrLeft: Boolean,
+) :
+    TransitionState.Transition(_fromScene.key, _toScene.key),
+    TransitionState.HasOverscrollProperties {
     var _currentScene by mutableStateOf(_fromScene)
     override val currentScene: SceneKey
         get() = _currentScene.key

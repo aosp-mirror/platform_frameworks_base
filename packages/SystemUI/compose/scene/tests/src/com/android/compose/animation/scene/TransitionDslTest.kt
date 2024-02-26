@@ -20,9 +20,11 @@ import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.Orientation
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationRange
+import com.android.compose.animation.scene.transformation.Translate
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -221,6 +223,17 @@ class TransitionDslTest {
                     .swipeSpec
             )
             .isSameInstanceAs(specFromAToC)
+    }
+
+    @Test
+    fun overscrollSpec() {
+        val transitions = transitions {
+            overscroll(TestScenes.SceneA, Orientation.Vertical) { translate(TestElements.Bar) }
+        }
+
+        val overscrollSpec = transitions.overscrollSpecs.single()
+        val transformation = overscrollSpec.transformationSpec.transformations.single()
+        assertThat(transformation).isInstanceOf(Translate::class.java)
     }
 
     companion object {
