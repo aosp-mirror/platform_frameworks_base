@@ -19,8 +19,6 @@ package com.android.systemui.statusbar.policy;
 import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 
 import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
-import static com.android.systemui.util.concurrency.MockExecutorHandlerKt.mockExecutorHandler;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -41,31 +39,23 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Region;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.TestableLooper;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.test.filters.SmallTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.FakeGlobalSettings;
-import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
-import com.android.systemui.util.time.SystemClock;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -83,8 +73,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
 
     private static final String TEST_PACKAGE_NAME = "BaseHeadsUpManagerTest";
 
-    private static final int TEST_TOUCH_ACCEPTANCE_TIME = 200;
-    private static final int TEST_A11Y_AUTO_DISMISS_TIME = 1_000;
+    static final int TEST_TOUCH_ACCEPTANCE_TIME = 200;
+    static final int TEST_A11Y_AUTO_DISMISS_TIME = 1_000;
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
@@ -108,108 +98,6 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
         assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
         assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_A11Y_AUTO_DISMISS_TIME);
-    }
-
-    private final class TestableHeadsUpManager extends BaseHeadsUpManager {
-
-        private HeadsUpEntry mLastCreatedEntry;
-
-        TestableHeadsUpManager(Context context,
-                HeadsUpManagerLogger logger,
-                DelayableExecutor executor,
-                GlobalSettings globalSettings,
-                SystemClock systemClock,
-                AccessibilityManagerWrapper accessibilityManagerWrapper,
-                UiEventLogger uiEventLogger) {
-            super(context, logger, mockExecutorHandler(executor), globalSettings, systemClock,
-                    executor, accessibilityManagerWrapper, uiEventLogger);
-
-            mTouchAcceptanceDelay = TEST_TOUCH_ACCEPTANCE_TIME;
-            mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
-            mStickyForSomeTimeAutoDismissTime = TEST_STICKY_AUTO_DISMISS_TIME;
-
-        }
-
-        @Override
-        protected HeadsUpEntry createHeadsUpEntry() {
-            mLastCreatedEntry = spy(super.createHeadsUpEntry());
-            return mLastCreatedEntry;
-        }
-
-        @Override
-        public int getContentFlag() {
-            return FLAG_CONTENT_VIEW_CONTRACTED;
-        }
-
-        // The following are only implemented by HeadsUpManagerPhone. If you need them, use that.
-        @Override
-        public void addHeadsUpPhoneListener(@NonNull OnHeadsUpPhoneListenerChange listener) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void addSwipedOutNotification(@NonNull String key) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void extendHeadsUp() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Nullable
-        @Override
-        public Region getTouchableRegion() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean isHeadsUpGoingAway() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void onExpandingFinished() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean removeNotification(@NonNull String key, boolean releaseImmediately,
-                boolean animate) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setAnimationStateHandler(@NonNull AnimationStateHandler handler) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setGutsShown(@NonNull NotificationEntry entry, boolean gutsShown) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setHeadsUpGoingAway(boolean headsUpGoingAway) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setRemoteInputActive(@NonNull NotificationEntry entry,
-                boolean remoteInputActive) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setTrackingHeadsUp(boolean tracking) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean shouldSwallowClick(@NonNull String key) {
-            throw new UnsupportedOperationException();
-        }
     }
 
     private BaseHeadsUpManager createHeadsUpManager() {
