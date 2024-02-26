@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.InsetsController.ANIMATION_TYPE_USER;
 import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 
@@ -60,6 +61,7 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
     private float mLastProgress = 0f;
     private boolean mTriggerBack = false;
     private boolean mIsPreCommitAnimationInProgress = false;
+    private int mStartRootScrollY = 0;
 
     public ImeBackAnimationController(ViewRootImpl viewRoot) {
         mInsetsController = viewRoot.getInsetsController();
@@ -96,6 +98,7 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
                     public void onReady(@NonNull WindowInsetsAnimationController controller,
                             @WindowInsets.Type.InsetsType int types) {
                         mWindowInsetsAnimationController = controller;
+                        if (isAdjustPan()) mStartRootScrollY = mViewRoot.mScrollY;
                         if (mIsPreCommitAnimationInProgress) {
                             setPreCommitProgress(mLastProgress);
                         } else {
@@ -146,6 +149,10 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
             float imeHeight = shownY - hiddenY;
             float interpolatedProgress = BACK_GESTURE.getInterpolation(progress);
             int newY = (int) (imeHeight - interpolatedProgress * (imeHeight * PEEK_FRACTION));
+            if (mStartRootScrollY != 0) {
+                mViewRoot.setScrollY(
+                        (int) (mStartRootScrollY * (1 - interpolatedProgress * PEEK_FRACTION)));
+            }
             mWindowInsetsAnimationController.setInsetsAndAlpha(Insets.of(0, 0, 0, newY), 1f,
                     progress);
         }
@@ -199,6 +206,19 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
             mInsetsController.setPredictiveBackImeHideAnimInProgress(true);
             notifyHideIme();
         }
+        if (mStartRootScrollY != 0) {
+            // RootView is panned, ensure that it is scrolled back to the intended scroll position
+            if (triggerBack) {
+                // requesting ime as invisible
+                mInsetsController.setRequestedVisibleTypes(0, ime());
+                // changes the animation state and notifies RootView of changed insets, which
+                // causes it to reset its scrollY to 0f (animated)
+                mInsetsController.onAnimationStateChanged(ime(), /*running*/ true);
+            } else {
+                // This causes RootView to update its scroll back to the panned position
+                mInsetsController.getHost().notifyInsetsChanged();
+            }
+        }
     }
 
     private void notifyHideIme() {
@@ -222,6 +242,7 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
         mTriggerBack = false;
         mIsPreCommitAnimationInProgress = false;
         mInsetsController.setPredictiveBackImeHideAnimInProgress(false);
+        mStartRootScrollY = 0;
     }
 
     private void resetPostCommitAnimator() {
@@ -234,6 +255,11 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
     private boolean isAdjustResize() {
         return (mViewRoot.mWindowAttributes.softInputMode & SOFT_INPUT_MASK_ADJUST)
                 == SOFT_INPUT_ADJUST_RESIZE;
+    }
+
+    private boolean isAdjustPan() {
+        return (mViewRoot.mWindowAttributes.softInputMode & SOFT_INPUT_MASK_ADJUST)
+                == SOFT_INPUT_ADJUST_PAN;
     }
 
     private boolean isHideAnimationInProgress() {

@@ -66,7 +66,12 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
                     "ImeInsetsSourceConsumer#onAnimationFinished",
                     mController.getHost().getInputMethodManager(), null /* icProto */);
         }
-        final boolean insetsChanged = super.onAnimationStateChanged(running);
+        boolean insetsChanged = super.onAnimationStateChanged(running);
+        if (running && !isShowRequested() && mController.isPredictiveBackImeHideAnimInProgress()) {
+            // IME predictive back animation switched from pre-commit to post-commit.
+            insetsChanged |= applyLocalVisibilityOverride();
+        }
+
         if (!isShowRequested()) {
             mIsRequestedVisibleAwaitingLeash = false;
             if (!running && !mHasPendingRequest) {

@@ -5881,6 +5881,13 @@ public final class ViewRootImpl implements ViewParent,
         return handled;
     }
 
+    void setScrollY(int scrollY) {
+        if (mScroller != null) {
+            mScroller.abortAnimation();
+        }
+        mScrollY = scrollY;
+    }
+
     /**
      * @hide
      */
