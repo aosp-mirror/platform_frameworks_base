@@ -31,6 +31,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Choreographer
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.IWindowManager
 import android.view.InputChannel
 import android.view.InputMonitor
 import android.view.InsetsSource
@@ -96,6 +97,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockShellExecutor: ShellExecutor
     @Mock private lateinit var mockRootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock private lateinit var mockShellCommandHandler: ShellCommandHandler
+    @Mock private lateinit var mockWindowManager: IWindowManager
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
         SurfaceControl.Transaction()
@@ -110,10 +112,12 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         shellInit = ShellInit(mockShellExecutor)
         desktopModeWindowDecorViewModel = DesktopModeWindowDecorViewModel(
                 mContext,
+                mockShellExecutor,
                 mockMainHandler,
                 mockMainChoreographer,
                 shellInit,
                 mockShellCommandHandler,
+                mockWindowManager,
                 mockTaskOrganizer,
                 mockDisplayController,
                 mockShellController,
