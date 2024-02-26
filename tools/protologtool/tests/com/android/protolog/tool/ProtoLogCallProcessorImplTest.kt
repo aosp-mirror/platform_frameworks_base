@@ -22,7 +22,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class ProtoLogCallProcessorTest {
+class ProtoLogCallProcessorImplTest {
     private data class LogCall(
         val call: MethodCallExpr,
         val messageString: String,
@@ -32,8 +32,11 @@ class ProtoLogCallProcessorTest {
 
     private val groupMap: MutableMap<String, LogGroup> = mutableMapOf()
     private val calls: MutableList<LogCall> = mutableListOf()
-    private val visitor = ProtoLogCallProcessor("org.example.ProtoLog", "org.example.ProtoLogGroup",
-            groupMap)
+    private val visitor = ProtoLogCallProcessorImpl(
+        "org.example.ProtoLog",
+        "org.example.ProtoLogGroup",
+            groupMap
+    )
     private val processor = object : ProtoLogCallVisitor {
         override fun processCall(
             call: MethodCallExpr,

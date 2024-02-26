@@ -528,17 +528,6 @@ filegroup {
     ],
 }
 
-// common protolog sources without classes that rely on Android SDK
-filegroup {
-    name: "protolog-common-no-android-src",
-    srcs: [
-        ":protolog-common-src",
-    ],
-    exclude_srcs: [
-        "com/android/internal/protolog/common/ProtoLog.java",
-    ],
-}
-
 // PackageManager common
 filegroup {
     name: "framework-pm-common-shared-srcs",
@@ -548,13 +537,20 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "protolog-impl",
+    srcs: [
+        "com/android/internal/protolog/ProtoLogImpl.java",
+    ],
+}
+
 java_library {
     name: "protolog-lib",
     platform_apis: true,
     srcs: [
         "com/android/internal/protolog/ProtoLogImpl.java",
         "com/android/internal/protolog/ProtoLogViewerConfigReader.java",
-        ":protolog-common-src",
+        ":perfetto_trace_javastream_protos",
     ],
 }
 

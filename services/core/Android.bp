@@ -41,16 +41,18 @@ java_library_static {
 genrule {
     name: "services.core.protologsrc",
     srcs: [
+        ":protolog-impl",
         ":protolog-groups",
         ":services.core-sources-am-wm",
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
         "--protolog-class com.android.internal.protolog.common.ProtoLog " +
-        "--protolog-impl-class com.android.internal.protolog.ProtoLogImpl " +
-        "--protolog-cache-class 'com.android.server.wm.ProtoLogCache' " +
         "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
         "--loggroups-jar $(location :protolog-groups) " +
+        "--viewer-config-file-path /etc/core.protolog.pb " +
+        "--legacy-viewer-config-file-path /system/etc/protolog.conf.json.gz " +
+        "--legacy-output-file-path /data/misc/wmtrace/wm_log.winscope " +
         "--output-srcjar $(out) " +
         "$(locations :services.core-sources-am-wm)",
     out: ["services.core.protolog.srcjar"],
@@ -67,25 +69,43 @@ genrule {
         "--protolog-class com.android.internal.protolog.common.ProtoLog " +
         "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
         "--loggroups-jar $(location :protolog-groups) " +
-        "--viewer-conf $(out) " +
+        "--viewer-config-type json " +
+        "--viewer-config $(out) " +
         "$(locations :services.core-sources-am-wm)",
     out: ["services.core.protolog.json"],
 }
 
 genrule {
-    name: "checked-protolog.json",
+    name: "gen-core.protolog.pb",
     srcs: [
-        ":generate-protolog.json",
-        ":services.core.protolog.json",
+        ":protolog-groups",
+        ":services.core-sources-am-wm",
     ],
-    cmd: "cp $(location :generate-protolog.json) $(out) && " +
-        "{ ! (diff $(out) $(location :services.core.protolog.json) | grep -q '^<') || " +
+    tools: ["protologtool"],
+    cmd: "$(location protologtool) generate-viewer-config " +
+        "--protolog-class com.android.internal.protolog.common.ProtoLog " +
+        "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+        "--loggroups-jar $(location :protolog-groups) " +
+        "--viewer-config-type proto " +
+        "--viewer-config $(out) " +
+        "$(locations :services.core-sources-am-wm)",
+    out: ["core.protolog.pb"],
+}
+
+genrule {
+    name: "checked-core.protolog.pb",
+    srcs: [
+        ":gen-core.protolog.pb",
+        ":file-core.protolog.pb",
+    ],
+    cmd: "cp $(location :gen-core.protolog.pb) $(out) && " +
+        "{ ! (diff $(out) $(location :file-core.protolog.pb) | grep -q '^<') || " +
         "{ echo -e '\\n\\n################################################################\\n#\\n" +
         "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
-        "#  cp $${ANDROID_BUILD_TOP}/$(location :generate-protolog.json) " +
-        "$${ANDROID_BUILD_TOP}/$(location :services.core.protolog.json)\\n#\\n" +
+        "#  cp $${ANDROID_BUILD_TOP}/$(location :gen-core.protolog.pb) " +
+        "$${ANDROID_BUILD_TOP}/$(location :file-core.protolog.pb)\\n#\\n" +
         "################################################################\\n\\n' >&2 && false; } }",
-    out: ["services.core.protolog.json"],
+    out: ["core.protolog.pb"],
 }
 
 genrule {
@@ -157,7 +177,7 @@ java_library_static {
     required: [
         "default_television.xml",
         "gps_debug.conf",
-        "protolog.conf.json.gz",
+        "core.protolog.pb",
     ],
 
     static_libs: [
@@ -258,14 +278,7 @@ prebuilt_etc {
     src: "java/com/android/server/location/gnss/gps_debug.conf",
 }
 
-genrule {
-    name: "services.core.json.gz",
-    srcs: [":checked-protolog.json"],
-    out: ["services.core.protolog.json.gz"],
-    cmd: "gzip -c < $(in) > $(out)",
-}
-
 prebuilt_etc {
-    name: "protolog.conf.json.gz",
-    src: ":services.core.json.gz",
+    name: "core.protolog.pb",
+    src: ":checked-core.protolog.pb",
 }

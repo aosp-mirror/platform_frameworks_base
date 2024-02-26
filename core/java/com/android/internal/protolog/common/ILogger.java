@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.protolog.tool
+package com.android.internal.protolog.common;
 
-import com.github.javaparser.ast.CompilationUnit
-
-interface ProtoLogCallProcessor {
-    fun process(
-        code: CompilationUnit,
-        logCallVisitor: ProtoLogCallVisitor?,
-        otherCallVisitor: MethodCallVisitor?,
-        fileName: String
-    ): CompilationUnit
+public interface ILogger {
+    /**
+     * Log a message.
+     * @param message The log message.
+     */
+    void log(String message);
 }

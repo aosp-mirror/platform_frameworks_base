@@ -245,7 +245,6 @@ import android.window.OnBackInvokedCallbackInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
-import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ToBooleanFunction;
@@ -4681,7 +4680,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void onExitAnimationDone() {
-        if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+        if (ProtoLog.isEnabled(WM_DEBUG_ANIM)) {
             final AnimationAdapter animationAdapter = mSurfaceAnimator.getAnimation();
             StringWriter sw = new StringWriter();
             if (animationAdapter != null) {

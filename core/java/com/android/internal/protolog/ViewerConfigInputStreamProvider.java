@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.protolog.tool
+package com.android.internal.protolog;
 
-import com.github.javaparser.ast.CompilationUnit
+import android.util.proto.ProtoInputStream;
 
-interface ProtoLogCallProcessor {
-    fun process(
-        code: CompilationUnit,
-        logCallVisitor: ProtoLogCallVisitor?,
-        otherCallVisitor: MethodCallVisitor?,
-        fileName: String
-    ): CompilationUnit
+public interface ViewerConfigInputStreamProvider {
+    /**
+     * @return a ProtoInputStream.
+     */
+    ProtoInputStream getInputStream();
 }

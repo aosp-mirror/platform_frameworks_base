@@ -113,7 +113,6 @@ import android.window.WindowContainerToken;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
-import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
@@ -3410,7 +3409,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 // ActivityOption#makeCustomAnimation or WindowManager#overridePendingTransition.
                 a.restrictDuration(MAX_APP_TRANSITION_DURATION);
             }
-            if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+            if (ProtoLog.isEnabled(WM_DEBUG_ANIM)) {
                 ProtoLog.i(WM_DEBUG_ANIM, "Loaded animation %s for %s, duration: %d, stack=%s",
                         a, this, ((a != null) ? a.getDuration() : 0), Debug.getCallers(20));
             }
