@@ -18,11 +18,9 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launch
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTransitionProgress
 import com.android.systemui.communal.shared.model.CommunalSceneKey
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -32,13 +30,11 @@ import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flowOn
 
 class GlanceableHubTransitions
 @Inject
 constructor(
-    @Application private val scope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val transitionInteractor: KeyguardTransitionInteractor,
     private val transitionRepository: KeyguardTransitionRepository,
@@ -52,105 +48,101 @@ constructor(
      * externally. The progress is used for both transitions caused by user touch input or by
      * programmatic changes.
      */
-    fun listenForGlanceableHubTransition(
-        transitionName: String,
+    suspend fun listenForGlanceableHubTransition(
         transitionOwnerName: String,
         fromState: KeyguardState,
         toState: KeyguardState,
     ) {
         val toScene =
-            if (toState == KeyguardState.GLANCEABLE_HUB) {
-                CommunalSceneKey.Communal
-            } else {
+            if (fromState == KeyguardState.GLANCEABLE_HUB) {
                 CommunalSceneKey.Blank
+            } else {
+                CommunalSceneKey.Communal
             }
         var transitionId: UUID? = null
-        scope.launch("$transitionOwnerName#$transitionName") {
-            communalInteractor
-                .transitionProgressToScene(toScene)
-                .sample(
-                    transitionInteractor.startedKeyguardTransitionStep.flowOn(bgDispatcher),
-                    ::Pair
-                )
-                .collect { pair ->
-                    val (transitionProgress, lastStartedStep) = pair
 
-                    val id = transitionId
-                    if (id == null) {
-                        // No transition started.
-                        if (
-                            transitionProgress is CommunalTransitionProgress.Transition &&
-                                lastStartedStep.to == fromState
-                        ) {
-                            transitionId =
-                                transitionRepository.startTransition(
-                                    TransitionInfo(
-                                        ownerName = transitionOwnerName,
-                                        from = fromState,
-                                        to = toState,
-                                        animator = null, // transition will be manually controlled
-                                    )
+        communalInteractor
+            .transitionProgressToScene(toScene)
+            .sample(
+                transitionInteractor.startedKeyguardTransitionStep.flowOn(bgDispatcher),
+                ::Pair,
+            )
+            .collect { (transitionProgress, lastStartedStep) ->
+                val id = transitionId
+                if (id == null) {
+                    // No transition started.
+                    if (
+                        transitionProgress is CommunalTransitionProgress.Transition &&
+                            lastStartedStep.to == fromState
+                    ) {
+                        transitionId =
+                            transitionRepository.startTransition(
+                                TransitionInfo(
+                                    ownerName = transitionOwnerName,
+                                    from = fromState,
+                                    to = toState,
+                                    animator = null, // transition will be manually controlled
                                 )
-                        }
-                    } else {
-                        if (lastStartedStep.to != toState) {
-                            return@collect
-                        }
-                        // An existing `id` means a transition is started, and calls to
-                        // `updateTransition` will control it until FINISHED or CANCELED
-                        val nextState: TransitionState
-                        val progressFraction: Float
-                        when (transitionProgress) {
-                            is CommunalTransitionProgress.Idle -> {
-                                if (transitionProgress.scene == toScene) {
-                                    nextState = TransitionState.FINISHED
-                                    progressFraction = 1f
-                                } else {
-                                    nextState = TransitionState.CANCELED
-                                    progressFraction = 0f
-                                }
-                            }
-                            is CommunalTransitionProgress.Transition -> {
-                                nextState = TransitionState.RUNNING
-                                progressFraction = transitionProgress.progress
-                            }
-                            is CommunalTransitionProgress.OtherTransition -> {
-                                // Shouldn't happen but if another transition starts during the
-                                // current one, mark the current one as canceled.
+                            )
+                    }
+                } else {
+                    if (lastStartedStep.to != toState) {
+                        return@collect
+                    }
+                    // An existing `id` means a transition is started, and calls to
+                    // `updateTransition` will control it until FINISHED or CANCELED
+                    val nextState: TransitionState
+                    val progressFraction: Float
+                    when (transitionProgress) {
+                        is CommunalTransitionProgress.Idle -> {
+                            if (transitionProgress.scene == toScene) {
+                                nextState = TransitionState.FINISHED
+                                progressFraction = 1f
+                            } else {
                                 nextState = TransitionState.CANCELED
                                 progressFraction = 0f
                             }
                         }
-                        transitionRepository.updateTransition(
-                            id,
-                            progressFraction,
-                            nextState,
-                        )
-
-                        if (
-                            nextState == TransitionState.CANCELED ||
-                                nextState == TransitionState.FINISHED
-                        ) {
-                            transitionId = null
+                        is CommunalTransitionProgress.Transition -> {
+                            nextState = TransitionState.RUNNING
+                            progressFraction = transitionProgress.progress
                         }
-
-                        // If canceled, just put the state back.
-                        if (nextState == TransitionState.CANCELED) {
-                            transitionRepository.startTransition(
-                                TransitionInfo(
-                                    ownerName = transitionOwnerName,
-                                    from = toState,
-                                    to = fromState,
-                                    animator =
-                                        ValueAnimator().apply {
-                                            interpolator = Interpolators.LINEAR
-                                            duration = 0
-                                        }
-                                )
-                            )
+                        is CommunalTransitionProgress.OtherTransition -> {
+                            // Shouldn't happen but if another transition starts during the
+                            // current one, mark the current one as canceled.
+                            nextState = TransitionState.CANCELED
+                            progressFraction = 0f
                         }
                     }
+                    transitionRepository.updateTransition(
+                        id,
+                        progressFraction,
+                        nextState,
+                    )
+
+                    if (
+                        nextState == TransitionState.CANCELED ||
+                            nextState == TransitionState.FINISHED
+                    ) {
+                        transitionId = null
+                    }
+
+                    // If canceled, just put the state back.
+                    if (nextState == TransitionState.CANCELED) {
+                        transitionRepository.startTransition(
+                            TransitionInfo(
+                                ownerName = transitionOwnerName,
+                                from = toState,
+                                to = fromState,
+                                animator =
+                                    ValueAnimator().apply {
+                                        interpolator = Interpolators.LINEAR
+                                        duration = 0
+                                    }
+                            )
+                        )
+                    }
                 }
-        }
+            }
     }
 }

@@ -36,12 +36,12 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class DreamingToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
+class GlanceableHubToDreamingTransitionViewModelTest : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
 
     val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
-    val underTest by lazy { kosmos.dreamingToGlanceableHubTransitionViewModel }
+    val underTest by lazy { kosmos.glanceableHubToDreamingTransitionViewModel }
 
     @Test
     fun dreamOverlayAlpha() =
@@ -51,9 +51,9 @@ class DreamingToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
 
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
                 listOf(
-                    // Should start running here...
                     step(0f, TransitionState.STARTED),
                     step(0f),
+                    // Should start running here...
                     step(0.1f),
                     step(0.5f),
                     // Up to here...
@@ -62,7 +62,7 @@ class DreamingToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values).hasSize(4)
+            assertThat(values).hasSize(2)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
         }
 
@@ -70,8 +70,8 @@ class DreamingToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
     fun dreamOverlayTranslationX() =
         testScope.runTest {
             configurationRepository.setDimensionPixelSize(
-                R.dimen.dreaming_to_hub_transition_dream_overlay_translation_x,
-                -100
+                R.dimen.hub_to_dreaming_transition_dream_overlay_translation_x,
+                100
             )
 
             val values by collectValues(underTest.dreamOverlayTranslationX)
@@ -95,11 +95,11 @@ class DreamingToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
         state: TransitionState = TransitionState.RUNNING
     ): TransitionStep {
         return TransitionStep(
-            from = KeyguardState.DREAMING,
-            to = KeyguardState.GLANCEABLE_HUB,
+            from = KeyguardState.GLANCEABLE_HUB,
+            to = KeyguardState.DREAMING,
             value = value,
             transitionState = state,
-            ownerName = "DreamingToGlanceableHubTransitionViewModelTest"
+            ownerName = GlanceableHubToDreamingTransitionViewModelTest::class.java.simpleName
         )
     }
 }

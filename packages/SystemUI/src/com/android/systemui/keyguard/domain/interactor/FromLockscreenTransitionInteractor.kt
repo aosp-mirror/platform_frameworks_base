@@ -360,13 +360,13 @@ constructor(
         if (!com.android.systemui.Flags.communalHub()) {
             return
         }
-
-        glanceableHubTransitions.listenForGlanceableHubTransition(
-            transitionName = "listenForLockscreenToGlanceableHub",
-            transitionOwnerName = TAG,
-            fromState = KeyguardState.LOCKSCREEN,
-            toState = KeyguardState.GLANCEABLE_HUB,
-        )
+        scope.launch(mainDispatcher) {
+            glanceableHubTransitions.listenForGlanceableHubTransition(
+                transitionOwnerName = TAG,
+                fromState = KeyguardState.LOCKSCREEN,
+                toState = KeyguardState.GLANCEABLE_HUB,
+            )
+        }
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {

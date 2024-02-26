@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.domain.interactor
+package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.communal.domain.interactor.communalInteractor
-import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
+import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
 
-val Kosmos.glanceableHubTransitions by
+val Kosmos.glanceableHubToDreamingTransitionViewModel by
     Kosmos.Fixture {
-        GlanceableHubTransitions(
-            bgDispatcher = testDispatcher,
-            transitionRepository = keyguardTransitionRepository,
-            transitionInteractor = keyguardTransitionInteractor,
-            communalInteractor = communalInteractor,
+        GlanceableHubToDreamingTransitionViewModel(
+            configurationInteractor = configurationInteractor,
+            animationFlow = keyguardTransitionAnimationFlow,
         )
     }
