@@ -14092,7 +14092,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testProfileUnavailableIntent() throws RemoteException {
-        mSetFlagsRule.enableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.enableFlags(FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         simulateProfileAvailabilityActions(Intent.ACTION_PROFILE_UNAVAILABLE);
         verify(mWorkerHandler).post(any(Runnable.class));
         verify(mSnoozeHelper).clearData(anyInt());
@@ -14101,7 +14102,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testManagedProfileUnavailableIntent() throws RemoteException {
-        mSetFlagsRule.disableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.disableFlags(FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         simulateProfileAvailabilityActions(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         verify(mWorkerHandler).post(any(Runnable.class));
         verify(mSnoozeHelper).clearData(anyInt());
