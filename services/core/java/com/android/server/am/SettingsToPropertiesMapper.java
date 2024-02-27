@@ -126,6 +126,7 @@ public class SettingsToPropertiesMapper {
         "arc_next",
         "avic",
         "bluetooth",
+        "brownout_mitigation_audio",
         "build",
         "biometrics",
         "biometrics_framework",
