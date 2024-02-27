@@ -66,6 +66,19 @@ fun SettingsDialogItem(text: String, enabled: Boolean = true) {
 }
 
 @Composable
+fun SettingsListItem(text: String, enabled: Boolean = true) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .alphaForEnabled(enabled)
+            .padding(vertical = SettingsDimension.paddingTiny),
+        color = MaterialTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.titleMedium,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+@Composable
 fun SettingsBody(
     body: String,
     maxLines: Int = Int.MAX_VALUE,
