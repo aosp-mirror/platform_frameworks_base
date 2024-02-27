@@ -362,12 +362,30 @@ static void init_keyboard(JNIEnv* env, const vector<string>& keyboardPaths) {
 
 using namespace android;
 
+// Called right before aborting by LOG_ALWAYS_FATAL. Print the pending exception.
+void abort_handler(const char* abort_message) {
+    ALOGE("Abort to abort the process...");
+
+    JNIEnv* env = NULL;
+    if (javaVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        ALOGE("vm->GetEnv() failed");
+        return;
+    }
+    if (env->ExceptionOccurred() != NULL) {
+        ALOGE("Pending exception:");
+        env->ExceptionDescribe();
+    }
+    ALOGE("Aborting because: %s", abort_message);
+}
+
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     javaVM = vm;
     JNIEnv* env = nullptr;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
     }
+
+    __android_log_set_aborter(abort_handler);
 
     init_android_graphics();
 
