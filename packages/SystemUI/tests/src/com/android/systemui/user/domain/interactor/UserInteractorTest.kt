@@ -155,6 +155,9 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun createUserInteractor_nonProcessUser_startsSecondaryService() {
+        val userId = Process.myUserHandle().identifier + 1
+        whenever(manager.aliveUsers).thenReturn(listOf(createUserInfo(userId, "abc")))
+
         createUserInteractor(false /* startAsProcessUser */)
         verify(spyContext).startServiceAsUser(any(), any())
     }
@@ -655,9 +658,10 @@ class UserInteractorTest : SysuiTestCase() {
 
     @Test
     fun userSwitchedBroadcast() {
-        createUserInteractor()
         testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
+            whenever(manager.aliveUsers).thenReturn(userInfos)
+            createUserInteractor()
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
@@ -983,6 +987,13 @@ class UserInteractorTest : SysuiTestCase() {
                 .filter { it.info == null }
                 .forEach { action -> assertThat(action.isSwitchToEnabled).isFalse() }
         }
+    }
+
+    @Test
+    fun initWithNoAliveUsers() {
+        whenever(manager.aliveUsers).thenReturn(listOf())
+        createUserInteractor()
+        verify(spyContext, never()).startServiceAsUser(any(), any())
     }
 
     private fun assertUsers(
