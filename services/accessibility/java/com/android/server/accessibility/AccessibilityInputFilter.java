@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static android.view.InputDevice.SOURCE_CLASS_POINTER;
+import static android.view.MotionEvent.ACTION_SCROLL;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 
@@ -425,6 +427,12 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     boolean shouldProcessMultiDeviceEvent(InputEvent event, int policyFlags) {
         if (event instanceof MotionEvent motion) {
+            if (!motion.isFromSource(SOURCE_CLASS_POINTER) || motion.getAction() == ACTION_SCROLL) {
+                // Non-pointer events are focus-dispatched and don't require special logic.
+                // Scroll events are stand-alone and therefore can be considered to not be part of
+                // a stream.
+                return true;
+            }
             // Only allow 1 device to be sending motion events at a time
             // If the event is from an active device, let it through.
             // If the event is not from an active device, only let it through if it starts a new
@@ -481,7 +489,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     private void processMotionEvent(EventStreamState state, MotionEvent event, int policyFlags) {
-        if (!state.shouldProcessScroll() && event.getActionMasked() == MotionEvent.ACTION_SCROLL) {
+        if (!state.shouldProcessScroll() && event.getActionMasked() == ACTION_SCROLL) {
             super.onInputEvent(event, policyFlags);
             return;
         }

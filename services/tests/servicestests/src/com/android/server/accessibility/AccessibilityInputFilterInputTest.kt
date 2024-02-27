@@ -25,6 +25,7 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.DisplayAdjustments
 import android.view.DisplayInfo
 import android.view.IInputFilterHost
+import android.view.InputDevice.SOURCE_JOYSTICK
 import android.view.InputDevice.SOURCE_STYLUS
 import android.view.InputDevice.SOURCE_TOUCHSCREEN
 import android.view.InputEvent
@@ -130,6 +131,8 @@ class AccessibilityInputFilterInputTest {
     private val fromTouchScreen = allOf(withDeviceId(touchDeviceId), withSource(SOURCE_TOUCHSCREEN))
     private val stylusDeviceId = 2
     private val fromStylus = allOf(withDeviceId(stylusDeviceId), withSource(STYLUS_SOURCE))
+    private val joystickDeviceId = 3
+    private val fromJoystick = allOf(withDeviceId(joystickDeviceId), withSource(SOURCE_JOYSTICK))
 
     @Before
     fun setUp() {
@@ -457,6 +460,23 @@ class AccessibilityInputFilterInputTest {
         verifier.assertNoEvents()
     }
 
+    /**
+     * Send some joystick events and ensure they pass through normally.
+     */
+    @Test
+    fun testJoystickEvents() {
+        enableFeatures(ALL_A11Y_FEATURES)
+
+        sendJoystickEvent()
+        verifier.assertReceivedMotion(fromJoystick)
+
+        sendJoystickEvent()
+        verifier.assertReceivedMotion(fromJoystick)
+
+        sendJoystickEvent()
+        verifier.assertReceivedMotion(fromJoystick)
+    }
+
     private fun createStubDisplay(displayId: Int, displayInfo: DisplayInfo): Display {
         val display = Display(DisplayManagerGlobal.getInstance(), displayId,
             displayInfo, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS)
@@ -475,6 +495,11 @@ class AccessibilityInputFilterInputTest {
             assertEquals(downTime, eventTime)
         }
         send(createMotionEvent(action, downTime, eventTime, STYLUS_SOURCE, stylusDeviceId))
+    }
+
+    private fun sendJoystickEvent() {
+        val time = SystemClock.uptimeMillis()
+        send(createMotionEvent(ACTION_MOVE, time, time, SOURCE_JOYSTICK, joystickDeviceId))
     }
 
     private fun send(event: InputEvent) {
