@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.applicationContext
@@ -30,7 +32,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.userSwitcherViewModel
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.time.systemClock
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.bouncerViewModel by Fixture {
     BouncerViewModel(
@@ -47,7 +49,7 @@ val Kosmos.bouncerViewModel by Fixture {
         users = userSwitcherViewModel.users,
         userSwitcherMenu = userSwitcherViewModel.menu,
         actionButton = bouncerActionButtonInteractor.actionButton,
-        clock = systemClock,
         devicePolicyManager = mock(),
+        bouncerMessageViewModel = bouncerMessageViewModel,
     )
 }

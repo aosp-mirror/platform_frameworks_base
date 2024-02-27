@@ -71,34 +71,6 @@ class BouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun pinAuthMethod() =
-        testScope.runTest {
-            val message by collectLastValue(underTest.message)
-
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin
-            )
-            runCurrent()
-            underTest.clearMessage()
-            assertThat(message).isNull()
-
-            underTest.resetMessage()
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
-
-            // Wrong input.
-            assertThat(underTest.authenticate(listOf(9, 8, 7)))
-                .isEqualTo(AuthenticationResult.FAILED)
-            assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
-
-            underTest.resetMessage()
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
-
-            // Correct input.
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
-                .isEqualTo(AuthenticationResult.SUCCEEDED)
-        }
-
-    @Test
     fun pinAuthMethod_sim_skipsAuthentication() =
         testScope.runTest {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
@@ -146,8 +118,6 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun pinAuthMethod_tryAutoConfirm_withoutAutoConfirmPin() =
         testScope.runTest {
-            val message by collectLastValue(underTest.message)
-
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
@@ -156,7 +126,6 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Incomplete input.
             assertThat(underTest.authenticate(listOf(1, 2), tryAutoConfirm = true))
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(message).isNull()
 
             // Correct input.
             assertThat(
@@ -166,28 +135,19 @@ class BouncerInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(message).isNull()
         }
 
     @Test
     fun passwordAuthMethod() =
         testScope.runTest {
-            val message by collectLastValue(underTest.message)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
             runCurrent()
 
-            underTest.resetMessage()
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
-
             // Wrong input.
             assertThat(underTest.authenticate("alohamora".toList()))
                 .isEqualTo(AuthenticationResult.FAILED)
-            assertThat(message).isEqualTo(MESSAGE_WRONG_PASSWORD)
-
-            underTest.resetMessage()
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
 
             // Too short input.
             assertThat(
@@ -201,7 +161,6 @@ class BouncerInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(message).isEqualTo(MESSAGE_WRONG_PASSWORD)
 
             // Correct input.
             assertThat(underTest.authenticate("password".toList()))
@@ -211,13 +170,10 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun patternAuthMethod() =
         testScope.runTest {
-            val message by collectLastValue(underTest.message)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern
             )
             runCurrent()
-            underTest.resetMessage()
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
 
             // Wrong input.
             val wrongPattern =
@@ -231,10 +187,6 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(wrongPattern.size)
                 .isAtLeast(kosmos.fakeAuthenticationRepository.minPatternLength)
             assertThat(underTest.authenticate(wrongPattern)).isEqualTo(AuthenticationResult.FAILED)
-            assertThat(message).isEqualTo(MESSAGE_WRONG_PATTERN)
-
-            underTest.resetMessage()
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
 
             // Too short input.
             val tooShortPattern =
@@ -244,10 +196,6 @@ class BouncerInteractorTest : SysuiTestCase() {
                 )
             assertThat(underTest.authenticate(tooShortPattern))
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(message).isEqualTo(MESSAGE_WRONG_PATTERN)
-
-            underTest.resetMessage()
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
 
             // Correct input.
             assertThat(underTest.authenticate(FakeAuthenticationRepository.PATTERN))
@@ -258,7 +206,6 @@ class BouncerInteractorTest : SysuiTestCase() {
     fun lockoutStarted() =
         testScope.runTest {
             val lockoutStartedEvents by collectValues(underTest.onLockoutStarted)
-            val message by collectLastValue(underTest.message)
 
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
@@ -272,17 +219,14 @@ class BouncerInteractorTest : SysuiTestCase() {
                     .isEqualTo(AuthenticationResult.FAILED)
                 if (times < FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
                     assertThat(lockoutStartedEvents).isEmpty()
-                    assertThat(message).isNotEmpty()
                 }
             }
             assertThat(authenticationInteractor.lockoutEndTimestamp).isNotNull()
             assertThat(lockoutStartedEvents.size).isEqualTo(1)
-            assertThat(message).isNull()
 
             // Advance the time to finish the lockout:
             advanceTimeBy(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS.seconds)
             assertThat(authenticationInteractor.lockoutEndTimestamp).isNull()
-            assertThat(message).isNull()
             assertThat(lockoutStartedEvents.size).isEqualTo(1)
 
             // Trigger lockout again:

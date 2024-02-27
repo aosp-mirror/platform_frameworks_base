@@ -53,6 +53,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,6 +72,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import com.android.compose.PlatformButton
 import com.android.compose.animation.scene.ElementKey
@@ -84,7 +86,9 @@ import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.BouncerMessageViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.MessageViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
@@ -166,7 +170,7 @@ private fun StandardLayout(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 StatusMessage(
-                    viewModel = viewModel,
+                    viewModel = viewModel.message,
                     modifier = Modifier,
                 )
 
@@ -228,7 +232,7 @@ private fun SplitLayout(
             when (authMethod) {
                 is PinBouncerViewModel -> {
                     StatusMessage(
-                        viewModel = viewModel,
+                        viewModel = viewModel.message,
                         modifier = Modifier.align(Alignment.TopCenter),
                     )
 
@@ -241,7 +245,7 @@ private fun SplitLayout(
                 }
                 is PatternBouncerViewModel -> {
                     StatusMessage(
-                        viewModel = viewModel,
+                        viewModel = viewModel.message,
                         modifier = Modifier.align(Alignment.TopCenter),
                     )
 
@@ -280,7 +284,7 @@ private fun SplitLayout(
                         modifier = Modifier.fillMaxWidth().align(Alignment.Center),
                     ) {
                         StatusMessage(
-                            viewModel = viewModel,
+                            viewModel = viewModel.message,
                         )
 
                         OutputArea(viewModel = viewModel, modifier = Modifier.padding(top = 24.dp))
@@ -376,7 +380,7 @@ private fun BesideUserSwitcherLayout(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     StatusMessage(
-                        viewModel = viewModel,
+                        viewModel = viewModel.message,
                     )
 
                     OutputArea(viewModel = viewModel, modifier = Modifier.padding(top = 24.dp))
@@ -441,7 +445,7 @@ private fun BelowUserSwitcherLayout(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 StatusMessage(
-                    viewModel = viewModel,
+                    viewModel = viewModel.message,
                 )
 
                 OutputArea(viewModel = viewModel, modifier = Modifier.padding(top = 24.dp))
@@ -548,26 +552,44 @@ private fun SceneScope.FoldableScene(
 
 @Composable
 private fun StatusMessage(
-    viewModel: BouncerViewModel,
+    viewModel: BouncerMessageViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val message: BouncerViewModel.MessageViewModel by viewModel.message.collectAsState()
+    val message: MessageViewModel? by viewModel.message.collectAsState()
+
+    DisposableEffect(Unit) {
+        viewModel.onShown()
+        onDispose {}
+    }
 
     Crossfade(
         targetState = message,
         label = "Bouncer message",
-        animationSpec = if (message.isUpdateAnimated) tween() else snap(),
+        animationSpec = if (message?.isUpdateAnimated == true) tween() else snap(),
         modifier = modifier.fillMaxWidth(),
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
+    ) { msg ->
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(
-                text = it.text,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            msg?.let {
+                Text(
+                    text = it.text,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 18.sp,
+                    lineHeight = 24.sp,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = it.secondaryText ?: "",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2
+                )
+            }
         }
     }
 }

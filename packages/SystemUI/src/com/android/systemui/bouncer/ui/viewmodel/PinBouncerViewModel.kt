@@ -41,6 +41,7 @@ class PinBouncerViewModel(
     viewModelScope: CoroutineScope,
     interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
+    private val onIntentionalUserInput: () -> Unit,
     private val simBouncerInteractor: SimBouncerInteractor,
     authenticationMethod: AuthenticationMethodModel,
 ) :
@@ -131,11 +132,8 @@ class PinBouncerViewModel(
     /** Notifies that the user clicked on a PIN button with the given digit value. */
     fun onPinButtonClicked(input: Int) {
         val pinInput = mutablePinInput.value
-        if (pinInput.isEmpty()) {
-            interactor.clearMessage()
-        }
 
-        interactor.onIntentionalUserInput()
+        onIntentionalUserInput()
 
         mutablePinInput.value = pinInput.append(input)
         tryAuthenticate(useAutoConfirm = true)
@@ -149,7 +147,6 @@ class PinBouncerViewModel(
     /** Notifies that the user long-pressed the backspace button. */
     fun onBackspaceButtonLongPressed() {
         clearInput()
-        interactor.clearMessage()
     }
 
     /** Notifies that the user clicked the "enter" button. */
@@ -173,7 +170,6 @@ class PinBouncerViewModel(
     /** Resets the sim screen and shows a default message. */
     private fun onResetSimFlow() {
         simBouncerInteractor.resetSimPukUserInput()
-        interactor.resetMessage()
         clearInput()
     }
 

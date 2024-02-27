@@ -16,7 +16,6 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
-import android.content.applicationContext
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.data.repository.bouncerRepository
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
@@ -29,12 +28,10 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 val Kosmos.bouncerInteractor by Fixture {
     BouncerInteractor(
         applicationScope = testScope.backgroundScope,
-        applicationContext = applicationContext,
         repository = bouncerRepository,
         authenticationInteractor = authenticationInteractor,
         deviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor,
         falsingInteractor = falsingInteractor,
         powerInteractor = powerInteractor,
-        simBouncerInteractor = simBouncerInteractor,
     )
 }
