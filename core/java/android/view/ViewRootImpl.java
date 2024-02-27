@@ -3444,7 +3444,10 @@ public final class ViewRootImpl implements ViewParent,
             // other windows to resize/move based on the raw frame of the window, waiting until we
             // can finish laying out this window and get back to the window manager with the
             // ultimately computed insets.
-            insetsPending = computesInternalInsets;
+            insetsPending = computesInternalInsets
+                    // If this window provides insets via params, its insets source frame can be
+                    // updated directly without waiting for WindowSession#setInsets.
+                    && mWindowAttributes.providedInsets == null;
 
             if (mSurfaceHolder != null) {
                 mSurfaceHolder.mSurfaceLock.lock();
