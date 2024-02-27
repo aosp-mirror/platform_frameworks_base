@@ -18,6 +18,8 @@ package com.android.server.pm;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.content.pm.PackageManager.APP_METADATA_SOURCE_APK;
+import static android.content.pm.PackageManager.APP_METADATA_SOURCE_UNKNOWN;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
@@ -596,7 +598,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final String RANDOM_DIR_PREFIX = "~~";
     static final char RANDOM_CODEPATH_PREFIX = '-';
 
-    static final String APP_METADATA_FILE_NAME = "app.metadata";
+    public static final String APP_METADATA_FILE_NAME = "app.metadata";
+    public static final String APP_METADATA_FILE_IN_APK_PATH = "assets/" + APP_METADATA_FILE_NAME;
 
     static final int DEFAULT_FILE_ACCESS_MODE = 0644;
 
@@ -5227,15 +5230,30 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         new PackageManager.NameNotFoundException(packageName));
             }
             String filePath = ps.getAppMetadataFilePath();
-            if (filePath != null) {
-                File file = new File(filePath);
-                try {
-                    return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-                } catch (FileNotFoundException e) {
+            if (filePath == null) {
+                return null;
+            }
+            File file = new File(filePath);
+            if (Flags.aslInApkAppMetadataSource() && !file.exists()
+                    && ps.getAppMetadataSource() == APP_METADATA_SOURCE_APK) {
+                String apkPath = ps.getPkg().getSplits().get(0).getPath();
+                if (!PackageManagerServiceUtils.extractAppMetadataFromApk(apkPath, file)) {
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                    synchronized (mLock) {
+                        PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
+                        pkgSetting.setAppMetadataFilePath(null);
+                        pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_UNKNOWN);
+                    }
                     return null;
                 }
             }
-            return null;
+            try {
+                return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+            } catch (FileNotFoundException e) {
+                return null;
+            }
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.GET_APP_METADATA)

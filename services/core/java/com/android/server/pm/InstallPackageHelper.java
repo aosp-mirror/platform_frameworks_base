@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 import static android.content.pm.Flags.disallowSdkLibsToBeApps;
+import static android.content.pm.PackageManager.APP_METADATA_SOURCE_APK;
+import static android.content.pm.PackageManager.APP_METADATA_SOURCE_INSTALLER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
@@ -43,11 +45,11 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
+import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
-import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
@@ -2225,10 +2227,16 @@ final class InstallPackageHelper {
                 if (appMetadataFile.exists()) {
                     ps.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
                     if (Flags.aslInApkAppMetadataSource()) {
-                        ps.setAppMetadataSource(PackageManager.APP_METADATA_SOURCE_INSTALLER);
+                        ps.setAppMetadataSource(APP_METADATA_SOURCE_INSTALLER);
                     }
                 } else {
-                    ps.setAppMetadataFilePath(null);
+                    if (Flags.aslInApkAppMetadataSource()
+                            && parsedPackage.isAppMetadataFileInApk()) {
+                        ps.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
+                        ps.setAppMetadataSource(APP_METADATA_SOURCE_APK);
+                    } else {
+                        ps.setAppMetadataFilePath(null);
+                    }
                 }
             }
             if (installRequest.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
