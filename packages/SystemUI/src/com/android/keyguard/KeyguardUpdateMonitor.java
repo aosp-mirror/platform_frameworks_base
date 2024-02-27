@@ -311,7 +311,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final List<Integer> ABSENT_SIM_STATE_LIST = Arrays.asList(
             TelephonyManager.SIM_STATE_ABSENT,
             TelephonyManager.SIM_STATE_UNKNOWN,
-            TelephonyManager.SIM_STATE_NOT_READY);
+            TelephonyManager.SIM_STATE_NOT_READY,
+            TelephonyManager.SIM_STATE_CARD_IO_ERROR);
 
     private final Context mContext;
     private final UserTracker mUserTracker;
@@ -3823,6 +3824,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             data.slotId = slotId;
         }
         if ((changed || becameAbsent)) {
+            mLogger.d("call on registered onSimStateChanged callbacks");
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
