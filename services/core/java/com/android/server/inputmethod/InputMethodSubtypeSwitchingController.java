@@ -167,6 +167,7 @@ final class InputMethodSubtypeSwitchingController {
 
         final ArrayList<InputMethodInfo> imis = settings.getEnabledInputMethodList();
         if (imis.isEmpty()) {
+            Slog.w(TAG, "Enabled input method list is empty.");
             return new ArrayList<>();
         }
         if (isScreenLocked && includeAuxiliarySubtypes) {
