@@ -30,6 +30,7 @@ import android.view.MotionEvent
 import android.view.Surface
 import android.view.Surface.Rotation
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -368,8 +369,12 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
                     lastSleepReason = WakeSleepReason.OTHER,
                 )
                 runCurrent()
+
+                // WHEN a request comes to show the view
                 controllerOverlay.show(udfpsController, overlayParams)
                 runCurrent()
+
+                // THEN the view does not get added immediately
                 verify(windowManager, never()).addView(any(), any())
 
                 // we hide to end the job that listens for the finishedGoingToSleep signal
@@ -393,12 +398,31 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
                     lastSleepReason = WakeSleepReason.OTHER,
                 )
                 runCurrent()
+
+                // WHEN a request comes to show the view
                 controllerOverlay.show(udfpsController, overlayParams)
                 runCurrent()
+
+                // THEN view isn't added yet
                 verify(windowManager, never()).addView(any(), any())
 
                 // we hide to end the job that listens for the finishedGoingToSleep signal
                 controllerOverlay.hide()
+            }
+        }
+
+    @Test
+    fun neverRemoveViewThatHasNotBeenAdded() =
+        testScope.runTest {
+            withReasonSuspend(REASON_AUTH_KEYGUARD) {
+                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
+                controllerOverlay.show(udfpsController, overlayParams)
+                val view = controllerOverlay.getTouchOverlay()
+                view?.let {
+                    // parent is null, signalling that the view was never added
+                    whenever(view.parent).thenReturn(null)
+                }
+                verify(windowManager, never()).removeView(eq(view))
             }
         }
 
@@ -418,20 +442,26 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
                     lastSleepReason = WakeSleepReason.OTHER,
                 )
                 runCurrent()
+
+                // WHEN a request comes to show the view
                 controllerOverlay.show(udfpsController, overlayParams)
                 runCurrent()
+
+                // THEN the view does not get added immediately
                 verify(windowManager, never()).addView(any(), any())
 
+                // WHEN the device finishes transitioning to AOD
                 keyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
                     testScope = this,
                 )
-            }
+                runCurrent()
 
-            runCurrent()
-            verify(windowManager)
-                .addView(eq(controllerOverlay.getTouchOverlay()), layoutParamsCaptor.capture())
+                // THEN the view gets added
+                verify(windowManager)
+                    .addView(eq(controllerOverlay.getTouchOverlay()), layoutParamsCaptor.capture())
+            }
         }
 
     private fun showUdfpsOverlay() {
@@ -459,6 +489,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     private fun hideUdfpsOverlay() {
         val didShow = controllerOverlay.show(udfpsController, overlayParams)
         val view = controllerOverlay.getTouchOverlay()
+        view?.let { whenever(view.parent).thenReturn(mock(ViewGroup::class.java)) }
         val didHide = controllerOverlay.hide()
 
         verify(windowManager).removeView(eq(view))
