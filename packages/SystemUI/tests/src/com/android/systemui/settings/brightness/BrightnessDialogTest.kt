@@ -23,6 +23,7 @@ import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManagerPolicyConstants.EXTRA_FROM_BRIGHTNESS_KEY
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
 import com.android.systemui.SysuiTestCase
@@ -183,6 +184,7 @@ class BrightnessDialogTest : SysuiTestCase() {
     }
 
     @OptIn(FlowPreview::class)
+    @FlakyTest(bugId = 326186573)
     @Test
     fun testFinishOnQSExpanded() = runTest {
         val isQSExpanded = MutableStateFlow(false)

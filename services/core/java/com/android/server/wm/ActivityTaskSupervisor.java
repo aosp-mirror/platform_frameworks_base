@@ -138,6 +138,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
+import android.window.ActivityWindowInfo;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -909,6 +910,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 final Configuration overrideConfig = r.getMergedOverrideConfiguration();
                 r.setLastReportedConfiguration(procConfig, overrideConfig);
 
+                final ActivityWindowInfo activityWindowInfo = r.getActivityWindowInfo();
+                r.setLastReportedActivityWindowInfo(activityWindowInfo);
+
                 logIfTransactionTooLarge(r.intent, r.getSavedState());
 
                 final TaskFragment organizedTaskFragment = r.getOrganizedTaskFragment();
@@ -931,7 +935,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         results, newIntents, r.takeSceneTransitionInfo(), isTransitionForward,
                         proc.createProfilerInfoIfNeeded(), r.assistToken, activityClientController,
                         r.shareableActivityToken, r.getLaunchedFromBubble(), fragmentToken,
-                        r.initialCallerInfoAccessToken);
+                        r.initialCallerInfoAccessToken, activityWindowInfo);
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;

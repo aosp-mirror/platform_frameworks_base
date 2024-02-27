@@ -163,6 +163,14 @@ interface TransformationSpec {
      */
     val swipeSpec: SpringSpec<Float>?
 
+    /**
+     * The distance it takes for this transition to animate from 0% to 100% when it is driven by a
+     * [UserAction].
+     *
+     * If `null`, a default distance will be used that depends on the [UserAction] performed.
+     */
+    val distance: UserActionDistance?
+
     /** The list of [Transformation] applied to elements during this transition. */
     val transformations: List<Transformation>
 
@@ -171,6 +179,7 @@ interface TransformationSpec {
             TransformationSpecImpl(
                 progressSpec = snap(),
                 swipeSpec = null,
+                distance = null,
                 transformations = emptyList(),
             )
         internal val EmptyProvider = { Empty }
@@ -193,6 +202,7 @@ internal class TransitionSpecImpl(
                 TransformationSpecImpl(
                     progressSpec = reverse.progressSpec,
                     swipeSpec = reverse.swipeSpec,
+                    distance = reverse.distance,
                     transformations = reverse.transformations.map { it.reversed() }
                 )
             }
@@ -209,6 +219,7 @@ internal class TransitionSpecImpl(
 internal class TransformationSpecImpl(
     override val progressSpec: AnimationSpec<Float>,
     override val swipeSpec: SpringSpec<Float>?,
+    override val distance: UserActionDistance?,
     override val transformations: List<Transformation>,
 ) : TransformationSpec {
     private val cache = mutableMapOf<ElementKey, MutableMap<SceneKey, ElementTransformations>>()

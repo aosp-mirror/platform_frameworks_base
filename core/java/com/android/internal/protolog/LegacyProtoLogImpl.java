@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,11 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ILogger;
+import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogDataType;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.util.TraceBuffer;
 
 import java.io.File;
@@ -48,52 +51,49 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-
 /**
  * A service for the ProtoLog logging system.
  */
-public class BaseProtoLogImpl {
-    protected static final TreeMap<String, IProtoLogGroup> LOG_GROUPS = new TreeMap<>();
+public class LegacyProtoLogImpl implements IProtoLog {
+    private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
 
-    /**
-     * A runnable to update the cached output of {@link #isEnabled}.
-     *
-     * Must be invoked after every action that could change the result of {@link #isEnabled}, eg.
-     * starting / stopping proto log, or enabling / disabling log groups.
-     */
-    public static Runnable sCacheUpdater = () -> { };
-
-    protected static void addLogGroupEnum(IProtoLogGroup[] config) {
-        for (IProtoLogGroup group : config) {
-            LOG_GROUPS.put(group.name(), group);
-        }
-    }
-
+    private static final int BUFFER_CAPACITY = 1024 * 1024;
+    private static final int PER_CHUNK_SIZE = 1024;
     private static final String TAG = "ProtoLog";
     private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
     static final String PROTOLOG_VERSION = "1.0.0";
     private static final int DEFAULT_PER_CHUNK_SIZE = 0;
 
     private final File mLogFile;
-    private final String mViewerConfigFilename;
+    private final String mLegacyViewerConfigFilename;
     private final TraceBuffer mBuffer;
-    protected final ProtoLogViewerConfigReader mViewerConfig;
+    private final LegacyProtoLogViewerConfigReader mViewerConfig;
     private final int mPerChunkSize;
 
     private boolean mProtoLogEnabled;
     private boolean mProtoLogEnabledLockFree;
     private final Object mProtoLogEnabledLock = new Object();
 
-    @VisibleForTesting
-    public enum LogLevel {
-        DEBUG, VERBOSE, INFO, WARN, ERROR, WTF
+    public LegacyProtoLogImpl(String outputFile, String viewerConfigFilename) {
+        this(new File(outputFile), viewerConfigFilename, BUFFER_CAPACITY,
+                new LegacyProtoLogViewerConfigReader(), PER_CHUNK_SIZE);
+    }
+
+    public LegacyProtoLogImpl(File file, String viewerConfigFilename, int bufferCapacity,
+            LegacyProtoLogViewerConfigReader viewerConfig, int perChunkSize) {
+        mLogFile = file;
+        mBuffer = new TraceBuffer(bufferCapacity);
+        mLegacyViewerConfigFilename = viewerConfigFilename;
+        mViewerConfig = viewerConfig;
+        mPerChunkSize = perChunkSize;
     }
 
     /**
      * Main log method, do not call directly.
      */
     @VisibleForTesting
-    public void log(LogLevel level, IProtoLogGroup group, int messageHash, int paramsMask,
+    @Override
+    public void log(LogLevel level, IProtoLogGroup group, long messageHash, int paramsMask,
             @Nullable String messageString, Object[] args) {
         if (group.isLogToProto()) {
             logToProto(messageHash, paramsMask, args);
@@ -103,7 +103,7 @@ public class BaseProtoLogImpl {
         }
     }
 
-    private void logToLogcat(String tag, LogLevel level, int messageHash,
+    private void logToLogcat(String tag, LogLevel level, long messageHash,
             @Nullable String messageString, Object[] args) {
         String message = null;
         if (messageString == null) {
@@ -157,7 +157,7 @@ public class BaseProtoLogImpl {
         }
     }
 
-    private void logToProto(int messageHash, int paramsMask, Object[] args) {
+    private void logToProto(long messageHash, int paramsMask, Object[] args) {
         if (!isProtoEnabled()) {
             return;
         }
@@ -219,20 +219,6 @@ public class BaseProtoLogImpl {
         }
     }
 
-    public BaseProtoLogImpl(File file, String viewerConfigFilename, int bufferCapacity,
-            ProtoLogViewerConfigReader viewerConfig) {
-        this(file, viewerConfigFilename, bufferCapacity, viewerConfig, DEFAULT_PER_CHUNK_SIZE);
-    }
-
-    public BaseProtoLogImpl(File file, String viewerConfigFilename, int bufferCapacity,
-            ProtoLogViewerConfigReader viewerConfig, int perChunkSize) {
-        mLogFile = file;
-        mBuffer = new TraceBuffer(bufferCapacity);
-        mViewerConfigFilename = viewerConfigFilename;
-        mViewerConfig = viewerConfig;
-        mPerChunkSize = perChunkSize;
-    }
-
     /**
      * Starts the logging a circular proto buffer.
      *
@@ -248,7 +234,6 @@ public class BaseProtoLogImpl {
             mProtoLogEnabled = true;
             mProtoLogEnabledLockFree = true;
         }
-        sCacheUpdater.run();
     }
 
     /**
@@ -274,7 +259,6 @@ public class BaseProtoLogImpl {
                 throw new IllegalStateException("logging enabled while waiting for flush.");
             }
         }
-        sCacheUpdater.run();
     }
 
     /**
@@ -284,11 +268,11 @@ public class BaseProtoLogImpl {
         return mProtoLogEnabledLockFree;
     }
 
-    protected int setLogging(boolean setTextLogging, boolean value, PrintWriter pw,
+    private int setLogging(boolean setTextLogging, boolean value, ILogger logger,
             String... groups) {
         for (int i = 0; i < groups.length; i++) {
             String group = groups[i];
-            IProtoLogGroup g = LOG_GROUPS.get(group);
+            IProtoLogGroup g = mLogGroups.get(group);
             if (g != null) {
                 if (setTextLogging) {
                     g.setLogToLogcat(value);
@@ -296,11 +280,10 @@ public class BaseProtoLogImpl {
                     g.setLogToProto(value);
                 }
             } else {
-                logAndPrintln(pw, "No IProtoLogGroup named " + group);
+                logger.log("No IProtoLogGroup named " + group);
                 return -1;
             }
         }
-        sCacheUpdater.run();
         return 0;
     }
 
@@ -330,6 +313,7 @@ public class BaseProtoLogImpl {
         while ((arg = shell.getNextArg()) != null) {
             args.add(arg);
         }
+        final ILogger logger = (msg) -> logAndPrintln(pw, msg);
         String[] groups = args.toArray(new String[args.size()]);
         switch (cmd) {
             case "start":
@@ -342,14 +326,14 @@ public class BaseProtoLogImpl {
                 logAndPrintln(pw, getStatus());
                 return 0;
             case "enable":
-                return setLogging(false, true, pw, groups);
+                return setLogging(false, true, logger, groups);
             case "enable-text":
-                mViewerConfig.loadViewerConfig(pw, mViewerConfigFilename);
-                return setLogging(true, true, pw, groups);
+                mViewerConfig.loadViewerConfig(logger, mLegacyViewerConfigFilename);
+                return setLogging(true, true, logger, groups);
             case "disable":
-                return setLogging(false, false, pw, groups);
+                return setLogging(false, false, logger, groups);
             case "disable-text":
-                return setLogging(true, false, pw, groups);
+                return setLogging(true, false, logger, groups);
             default:
                 return unknownCommand(pw);
         }
@@ -362,12 +346,12 @@ public class BaseProtoLogImpl {
         return "ProtoLog status: "
                 + ((isProtoEnabled()) ? "Enabled" : "Disabled")
                 + "\nEnabled log groups: \n  Proto: "
-                + LOG_GROUPS.values().stream().filter(
-                    it -> it.isEnabled() && it.isLogToProto())
+                + mLogGroups.values().stream().filter(
+                        it -> it.isEnabled() && it.isLogToProto())
                 .map(IProtoLogGroup::name).collect(Collectors.joining(" "))
                 + "\n  Logcat: "
-                + LOG_GROUPS.values().stream().filter(
-                    it -> it.isEnabled() && it.isLogToLogcat())
+                + mLogGroups.values().stream().filter(
+                        it -> it.isEnabled() && it.isLogToLogcat())
                 .map(IProtoLogGroup::name).collect(Collectors.joining(" "))
                 + "\nLogging definitions loaded: " + mViewerConfig.knownViewerStringsNumber();
     }
@@ -392,6 +376,27 @@ public class BaseProtoLogImpl {
             pw.println(msg);
             pw.flush();
         }
+    }
+
+    /**
+     * Start text logging
+     * @param groups Groups to start text logging for
+     * @param logger A logger to write status updates to
+     * @return status code
+     */
+    public int startLoggingToLogcat(String[] groups, ILogger logger) {
+        mViewerConfig.loadViewerConfig(logger, mLegacyViewerConfigFilename);
+        return setLogging(true /* setTextLogging */, true, logger, groups);
+    }
+
+    /**
+     * Stop text logging
+     * @param groups Groups to start text logging for
+     * @param logger A logger to write status updates to
+     * @return status code
+     */
+    public int stopLoggingToLogcat(String[] groups, ILogger logger) {
+        return setLogging(true /* setTextLogging */, false, logger, groups);
     }
 }
 

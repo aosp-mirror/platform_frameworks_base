@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
+import android.window.ActivityWindowInfo;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -124,6 +125,7 @@ public class ObjectPoolTests {
         final int deviceId = 3;
         final IBinder taskFragmentToken = new Binder();
         final IBinder initialCallerInfoAccessToken = new Binder();
+        final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
 
         testRecycle(() -> new LaunchActivityItemBuilder(
                 activityToken, intent, activityInfo)
@@ -142,6 +144,7 @@ public class ObjectPoolTests {
                 .setTaskFragmentToken(taskFragmentToken)
                 .setDeviceId(deviceId)
                 .setInitialCallerInfoAccessToken(initialCallerInfoAccessToken)
+                .setActivityWindowInfo(activityWindowInfo)
                 .build());
     }
 

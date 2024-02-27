@@ -96,8 +96,17 @@ internal class SceneTransitionLayoutImpl(
                 ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>()
                     .also { _sharedValues = it }
 
+    // TODO(b/317958526): Lazily allocate scene gesture handlers the first time they are needed.
     private val horizontalGestureHandler: SceneGestureHandler
     private val verticalGestureHandler: SceneGestureHandler
+
+    private var _userActionDistanceScope: UserActionDistanceScope? = null
+    internal val userActionDistanceScope: UserActionDistanceScope
+        get() =
+            _userActionDistanceScope
+                ?: UserActionDistanceScopeImpl(layoutImpl = this).also {
+                    _userActionDistanceScope = it
+                }
 
     init {
         updateScenes(builder)

@@ -18,16 +18,15 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.graphics.Point
-import android.testing.TestableLooper
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
@@ -52,9 +51,9 @@ import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
 @RunWith(JUnit4::class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class DefaultDeviceEntrySectionTest : SysuiTestCase() {
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var authController: AuthController
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var windowManager: WindowManager
     @Mock private lateinit var notificationPanelView: NotificationPanelView
@@ -62,12 +61,11 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     @Mock private lateinit var lockIconViewController: LockIconViewController
     @Mock private lateinit var falsingManager: FalsingManager
     private lateinit var underTest: DefaultDeviceEntrySection
-    private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
+
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
 
         featureFlags =
@@ -75,6 +73,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
         underTest =
             DefaultDeviceEntrySection(
                 TestScope().backgroundScope,
+                keyguardUpdateMonitor,
                 authController,
                 windowManager,
                 context,
@@ -92,7 +91,6 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     @Test
     fun addViewsConditionally_migrateFlagOn() {
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isGreaterThan(0)
@@ -104,9 +102,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
-
-        // No views are added initially because fingerprint properties aren't initialized yet.
-        assertThat(constraintLayout.childCount).isEqualTo(0)
+        assertThat(constraintLayout.childCount).isGreaterThan(0)
     }
 
     @Test
@@ -134,7 +130,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     fun applyConstraints_udfps_refactor_on() {
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val cs = ConstraintSet()
-        underTest.applyConstraintsAfterPropertiesInitialized(cs, false)
+        underTest.applyConstraints(cs)
 
         val constraint = cs.getConstraint(R.id.device_entry_icon_view)
 

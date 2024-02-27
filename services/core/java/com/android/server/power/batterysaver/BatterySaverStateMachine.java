@@ -167,6 +167,9 @@ public class BatterySaverStateMachine {
     /** Config flag to track if battery saver's sticky behaviour is disabled. */
     private final boolean mBatterySaverStickyBehaviourDisabled;
 
+    /** Config flag to track if "Battery Saver turned off" notification is enabled. */
+    private final boolean mBatterySaverTurnedOffNotificationEnabled;
+
     /**
      * Whether or not to end sticky battery saver upon reaching a level specified by
      * {@link #mSettingBatterySaverStickyAutoDisableThreshold}.
@@ -250,6 +253,8 @@ public class BatterySaverStateMachine {
 
         mBatterySaverStickyBehaviourDisabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled);
+        mBatterySaverTurnedOffNotificationEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_batterySaverTurnedOffNotificationEnabled);
         mDynamicPowerSavingsDefaultDisableThreshold = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_dynamicPowerSavingsDefaultDisableThreshold);
     }
@@ -858,6 +863,9 @@ public class BatterySaverStateMachine {
 
     @VisibleForTesting
     void triggerStickyDisabledNotification() {
+        if (!mBatterySaverTurnedOffNotificationEnabled) {
+            return;
+        }
         // The current lock is the PowerManager lock, which sits very low in the service lock
         // hierarchy. We shouldn't call out to NotificationManager with the PowerManager lock.
         runOnBgThread(() -> {
@@ -997,6 +1005,8 @@ public class BatterySaverStateMachine {
             ipw.println(mSettingBatterySaverTriggerThreshold);
             ipw.print("mBatterySaverStickyBehaviourDisabled=");
             ipw.println(mBatterySaverStickyBehaviourDisabled);
+            ipw.print("mBatterySaverTurnedOffNotificationEnabled=");
+            ipw.println(mBatterySaverTurnedOffNotificationEnabled);
 
             ipw.print("mDynamicPowerSavingsDefaultDisableThreshold=");
             ipw.println(mDynamicPowerSavingsDefaultDisableThreshold);

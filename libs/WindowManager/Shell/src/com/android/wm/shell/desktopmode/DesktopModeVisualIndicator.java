@@ -22,8 +22,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
-import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FINAL_FREEFORM_SCALE;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.RectEvaluator;
@@ -389,7 +387,8 @@ public class DesktopModeVisualIndicator {
                             layout.width() - padding,
                             layout.height() - padding);
                 case TO_DESKTOP_INDICATOR:
-                    final float adjustmentPercentage = 1f - FINAL_FREEFORM_SCALE;
+                    final float adjustmentPercentage = 1f
+                            - DesktopTasksController.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
                     return new Rect((int) (adjustmentPercentage * layout.width() / 2),
                             (int) (adjustmentPercentage * layout.height() / 2),
                             (int) (layout.width() - (adjustmentPercentage * layout.width() / 2)),

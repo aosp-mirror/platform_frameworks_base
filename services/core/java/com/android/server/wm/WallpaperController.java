@@ -58,7 +58,6 @@ import android.window.ScreenCapture;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
@@ -336,7 +335,7 @@ class WallpaperController {
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
             token.setVisibility(false);
-            if (ProtoLogImpl.isEnabled(WM_DEBUG_WALLPAPER) && token.isVisible()) {
+            if (ProtoLog.isEnabled(WM_DEBUG_WALLPAPER) && token.isVisible()) {
                 ProtoLog.d(WM_DEBUG_WALLPAPER,
                         "Hiding wallpaper %s from %s target=%s prev=%s callers=%s",
                         token, winGoingAway, mWallpaperTarget, mPrevWallpaperTarget,

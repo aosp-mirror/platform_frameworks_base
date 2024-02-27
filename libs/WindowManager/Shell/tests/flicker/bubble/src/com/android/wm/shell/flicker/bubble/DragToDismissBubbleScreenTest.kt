@@ -19,11 +19,11 @@ package com.android.wm.shell.flicker.bubble
 import android.content.Context
 import android.graphics.Point
 import android.platform.test.annotations.Presubmit
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.subject.layers.LayersTraceSubject
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.test.uiautomator.By

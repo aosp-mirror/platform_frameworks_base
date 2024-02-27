@@ -72,8 +72,8 @@ public class ProtoLogViewerConfigReaderTest {
             + "}\n";
 
 
-    private ProtoLogViewerConfigReader
-            mConfig = new ProtoLogViewerConfigReader();
+    private LegacyProtoLogViewerConfigReader
+            mConfig = new LegacyProtoLogViewerConfigReader();
     private File mTestViewerConfig;
 
     @Before
@@ -98,7 +98,7 @@ public class ProtoLogViewerConfigReaderTest {
 
     @Test
     public void loadViewerConfig() {
-        mConfig.loadViewerConfig(null, mTestViewerConfig.getAbsolutePath());
+        mConfig.loadViewerConfig(msg -> {}, mTestViewerConfig.getAbsolutePath());
         assertEquals("Test completed successfully: %b", mConfig.getViewerString(70933285));
         assertEquals("Test 2", mConfig.getViewerString(1352021864));
         assertEquals("Window %s is already added", mConfig.getViewerString(409412266));
@@ -107,7 +107,7 @@ public class ProtoLogViewerConfigReaderTest {
 
     @Test
     public void loadViewerConfig_invalidFile() {
-        mConfig.loadViewerConfig(null, "/tmp/unknown/file/does/not/exist");
+        mConfig.loadViewerConfig(msg -> {}, "/tmp/unknown/file/does/not/exist");
         // No exception is thrown.
         assertNull(mConfig.getViewerString(1));
     }

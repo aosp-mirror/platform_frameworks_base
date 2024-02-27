@@ -17,10 +17,10 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
-import android.tools.device.traces.parsers.WindowManagerStateHelper
-import android.tools.device.traces.parsers.toFlickerComponent
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.parsers.WindowManagerStateHelper
+import android.tools.traces.parsers.toFlickerComponent
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.Until

@@ -19,12 +19,14 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
@@ -38,6 +40,7 @@ class DreamingToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
 
+    val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
     val underTest by lazy { kosmos.dreamingToGlanceableHubTransitionViewModel }
 
     @Test
@@ -66,7 +69,12 @@ class DreamingToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun dreamOverlayTranslationX() =
         testScope.runTest {
-            val values by collectValues(underTest.dreamOverlayTranslationX(100))
+            configurationRepository.setDimensionPixelSize(
+                R.dimen.dreaming_to_hub_transition_dream_overlay_translation_x,
+                -100
+            )
+
+            val values by collectValues(underTest.dreamOverlayTranslationX)
             assertThat(values).isEmpty()
 
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(

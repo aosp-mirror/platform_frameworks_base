@@ -11969,6 +11969,16 @@ public final class Settings {
                 "accessibility_pinch_to_zoom_anywhere_enabled";
 
         /**
+         * For magnification feature where panning can be controlled with a single finger.
+         *
+         * If true, you can pan using a single finger gesture.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SINGLE_FINGER_PANNING_ENABLED =
+                "accessibility_single_finger_panning_enabled";
+
+        /**
          * Controls magnification capability. Accessibility magnification is capable of at least one
          * of the magnification modes.
          *

@@ -40,7 +40,6 @@ import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.DreamLog
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.CrossFadeHelper
-import com.android.systemui.statusbar.policy.ConfigurationController
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.launch
@@ -55,7 +54,6 @@ constructor(
     private val mOverlayStateController: DreamOverlayStateController,
     @Named(DreamOverlayModule.DREAM_BLUR_RADIUS) private val mDreamBlurRadius: Int,
     private val dreamOverlayViewModel: DreamOverlayViewModel,
-    private val configController: ConfigurationController,
     @Named(DreamOverlayModule.DREAM_IN_BLUR_ANIMATION_DURATION)
     private val mDreamInBlurAnimDurationMs: Long,
     @Named(DreamOverlayModule.DREAM_IN_COMPLICATIONS_ANIMATION_DURATION)

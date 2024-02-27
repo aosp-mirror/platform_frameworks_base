@@ -137,7 +137,6 @@ import android.view.animation.TranslateAnimation;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
-import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -248,7 +247,7 @@ public class AppTransition implements Dump {
         mHandler = new Handler(service.mH.getLooper());
         mDisplayContent = displayContent;
         mTransitionAnimation = new TransitionAnimation(
-                context, ProtoLogImpl.isEnabled(WM_DEBUG_ANIM), TAG);
+                context, ProtoLog.isEnabled(WM_DEBUG_ANIM), TAG);
 
         mGridLayoutRecentsEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
 

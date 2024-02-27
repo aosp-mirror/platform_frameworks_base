@@ -20,6 +20,7 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToDreamingTransitionViewModel
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,16 +34,16 @@ class DreamOverlayViewModel
 @Inject
 constructor(
     configurationInteractor: ConfigurationInteractor,
-    private val toGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
+    toGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
+    fromGlanceableHubTransitionInteractor: GlanceableHubToDreamingTransitionViewModel,
     private val toLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
 ) {
 
     val dreamOverlayTranslationX: Flow<Float> =
-        configurationInteractor
-            .dimensionPixelSize(R.dimen.dream_overlay_exit_x_offset)
-            .flatMapLatest { px: Int ->
-                toGlanceableHubTransitionViewModel.dreamOverlayTranslationX(px)
-            }
+        merge(
+            toGlanceableHubTransitionViewModel.dreamOverlayTranslationX,
+            fromGlanceableHubTransitionInteractor.dreamOverlayTranslationX,
+        )
 
     val dreamOverlayTranslationY: Flow<Float> =
         configurationInteractor
@@ -55,6 +56,7 @@ constructor(
         merge(
             toLockscreenTransitionViewModel.dreamOverlayAlpha,
             toGlanceableHubTransitionViewModel.dreamOverlayAlpha,
+            fromGlanceableHubTransitionInteractor.dreamOverlayAlpha,
         )
 
     val transitionEnded = toLockscreenTransitionViewModel.transitionEnded

@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -40,6 +41,7 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.window.ActivityWindowInfo;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -180,6 +182,9 @@ public class TransactionParcelTests {
         bundle.putParcelable("data", new ParcelableData(1));
         final PersistableBundle persistableBundle = new PersistableBundle();
         persistableBundle.putInt("k", 4);
+        final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
+        activityWindowInfo.set(true /* isEmbedded */, new Rect(0, 0, 500, 1000),
+                new Rect(0, 0, 500, 500));
 
         final LaunchActivityItem item = new LaunchActivityItemBuilder(
                 activityToken, intent, activityInfo)
@@ -198,6 +203,7 @@ public class TransactionParcelTests {
                 .setShareableActivityToken(new Binder())
                 .setTaskFragmentToken(new Binder())
                 .setInitialCallerInfoAccessToken(new Binder())
+                .setActivityWindowInfo(activityWindowInfo)
                 .build();
 
         writeAndPrepareForReading(item);

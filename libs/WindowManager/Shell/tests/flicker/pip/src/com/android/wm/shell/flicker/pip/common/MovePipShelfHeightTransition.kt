@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.pip.common
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.Rotation
-import android.tools.common.flicker.subject.region.RegionSubject
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.Rotation
+import android.tools.flicker.subject.region.RegionSubject
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
 import com.android.wm.shell.flicker.utils.Direction
 import org.junit.Test

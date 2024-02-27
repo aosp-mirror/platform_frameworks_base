@@ -4123,6 +4123,7 @@
   <java-symbol type="bool" name="config_batterySaverSupported" />
   <java-symbol type="string" name="config_batterySaverDeviceSpecificConfig" />
   <java-symbol type="bool" name="config_batterySaverStickyBehaviourDisabled" />
+  <java-symbol type="bool" name="config_batterySaverTurnedOffNotificationEnabled" />
   <java-symbol type="integer" name="config_dynamicPowerSavingsDefaultDisableThreshold" />
   <java-symbol type="string" name="config_batterySaverScheduleProvider" />
   <java-symbol type="string" name="config_powerSaveModeChangedListenerPackage" />
@@ -5362,6 +5363,9 @@
   <java-symbol type="string" name="satellite_notification_open_message" />
   <java-symbol type="string" name="satellite_notification_how_it_works" />
   <java-symbol type="drawable" name="ic_satellite_alt_24px" />
+
+  <!-- DisplayManager configs. -->
+  <java-symbol type="bool" name="config_evenDimmerEnabled" />
 
   <java-symbol type="bool" name="config_watchlistUseFileHashesCache" />
 </resources>

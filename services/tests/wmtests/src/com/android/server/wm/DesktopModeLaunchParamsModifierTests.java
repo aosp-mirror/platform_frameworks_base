@@ -20,8 +20,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 
+import static com.android.server.wm.DesktopModeLaunchParamsModifier.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
@@ -30,6 +30,7 @@ import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -113,9 +114,14 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
     public void testUsesDefaultBounds() {
         final Task task = new TaskBuilder(mSupervisor).setActivityType(
                 ACTIVITY_TYPE_STANDARD).build();
+        final int displayHeight = 1600;
+        final int displayWidth = 2560;
+        task.getDisplayArea().setBounds(new Rect(0, 0, displayWidth, displayHeight));
+        final int desiredWidth = (int) (displayWidth * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int desiredHeight = (int) (displayHeight * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         assertEquals(RESULT_DONE, new CalculateRequestBuilder().setTask(task).calculate());
-        assertEquals(dpiToPx(task, 840), mResult.mBounds.width());
-        assertEquals(dpiToPx(task, 630), mResult.mBounds.height());
+        assertEquals(desiredWidth, mResult.mBounds.width());
+        assertEquals(desiredHeight, mResult.mBounds.height());
     }
 
     @Test
@@ -129,11 +135,6 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
         assertEquals(RESULT_DONE, new CalculateRequestBuilder().setTask(task).calculate());
         assertEquals(mockTaskDisplayArea, mResult.mPreferredTaskDisplayArea);
         assertEquals(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode);
-    }
-
-    private int dpiToPx(Task task, int dpi) {
-        float density = (float) task.getConfiguration().densityDpi / DENSITY_DEFAULT;
-        return (int) (dpi * density + 0.5f);
     }
 
     private class CalculateRequestBuilder {

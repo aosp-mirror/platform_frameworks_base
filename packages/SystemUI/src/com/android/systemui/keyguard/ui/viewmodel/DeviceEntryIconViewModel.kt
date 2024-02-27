@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.animation.FloatEvaluator
 import android.animation.IntEvaluator
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntrySourceInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
@@ -35,10 +34,11 @@ import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -60,7 +60,6 @@ constructor(
     private val keyguardViewController: Lazy<KeyguardViewController>,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val deviceEntrySourceInteractor: DeviceEntrySourceInteractor,
-    private val fingerprintPropertyInteractor: FingerprintPropertyInteractor,
 ) {
     private val intEvaluator = IntEvaluator()
     private val floatEvaluator = FloatEvaluator()
@@ -179,16 +178,21 @@ constructor(
             }
         }
 
-    /** Whether the device entry icon should be positioned at the location of UDFPS. */
-    val positionAtUdfpsLocation: Flow<Boolean> =
-        fingerprintPropertyInteractor.propertiesInitialized.flatMapLatest { initialized ->
-            if (initialized) {
-                fingerprintPropertyInteractor.isUdfps
+    private val isUnlocked: Flow<Boolean> =
+        deviceEntryInteractor.isUnlocked.flatMapLatest { isUnlocked ->
+            if (!isUnlocked) {
+                flowOf(false)
             } else {
-                // Don't update the position of the icon until properties are initialized.
-                emptyFlow()
+                flow {
+                    // delay in case device ends up transitioning away from the lock screen;
+                    // we don't want to animate to the unlocked icon and just let the
+                    // icon fade with the transition to GONE
+                    delay(UNLOCKED_DELAY_MS)
+                    emit(true)
+                }
             }
         }
+
     val iconType: Flow<DeviceEntryIconView.IconType> =
         combine(
             deviceEntryUdfpsInteractor.isListeningForUdfps,
@@ -240,6 +244,10 @@ constructor(
             DeviceEntryIconView.IconType.FINGERPRINT ->
                 DeviceEntryIconView.AccessibilityHintType.NONE
         }
+    }
+
+    companion object {
+        const val UNLOCKED_DELAY_MS = 50L
     }
 }
 

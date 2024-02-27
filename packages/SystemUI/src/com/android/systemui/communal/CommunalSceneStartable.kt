@@ -88,7 +88,6 @@ constructor(
         val docked = dockManager.isDocked
 
         return when {
-            to == KeyguardState.DREAMING -> CommunalSceneKey.Blank
             docked && to == KeyguardState.LOCKSCREEN && from != KeyguardState.GLANCEABLE_HUB -> {
                 CommunalSceneKey.Communal
             }
