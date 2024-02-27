@@ -1902,9 +1902,7 @@ public class UserManager {
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
-    // TODO (b/325886480): update the flag to
-    // "com.android.net.thread.platform.flags.Flags.FLAG_THREAD_USER_RESTRICTION_ENABLED"
-    @FlaggedApi("com.android.net.thread.flags.thread_user_restriction_enabled")
+    @FlaggedApi(com.android.net.thread.platform.flags.Flags.FLAG_THREAD_USER_RESTRICTION_ENABLED)
     public static final String DISALLOW_THREAD_NETWORK = "no_thread_network";
 
     /**

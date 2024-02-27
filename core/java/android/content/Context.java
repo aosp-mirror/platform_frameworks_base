@@ -4787,9 +4787,7 @@ public abstract class Context {
      * @see android.net.thread.ThreadNetworkManager
      * @hide
      */
-    // TODO (b/325886480): update the flag to
-    // "com.android.net.thread.platform.flags.Flags.FLAG_THREAD_ENABLED_PLATFORM"
-    @FlaggedApi("com.android.net.thread.flags.thread_enabled_platform")
+    @FlaggedApi(com.android.net.thread.platform.flags.Flags.FLAG_THREAD_ENABLED_PLATFORM)
     @SystemApi
     public static final String THREAD_NETWORK_SERVICE = "thread_network";
 
