@@ -784,10 +784,10 @@ public final class InputManager {
      *
      * @hide
      */
-    @Nullable
-    public String getKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
-            @UserIdInt int userId, @NonNull InputMethodInfo imeInfo,
-            @Nullable InputMethodSubtype imeSubtype) {
+    @NonNull
+    public KeyboardLayoutSelectionResult getKeyboardLayoutForInputDevice(
+            @NonNull InputDeviceIdentifier identifier, @UserIdInt int userId,
+            @NonNull InputMethodInfo imeInfo, @Nullable InputMethodSubtype imeSubtype) {
         try {
             return mIm.getKeyboardLayoutForInputDevice(identifier, userId, imeInfo, imeSubtype);
         } catch (RemoteException ex) {
