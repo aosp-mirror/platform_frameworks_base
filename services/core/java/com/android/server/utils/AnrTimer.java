@@ -767,7 +767,7 @@ public class AnrTimer<V> implements AutoCloseable {
      * Return true if the native timers are supported.  Native timers are supported if the method
      * nativeAnrTimerSupported() can be executed and it returns true.
      */
-    private static boolean nativeTimersSupported() {
+    public static boolean nativeTimersSupported() {
         try {
             return nativeAnrTimerSupported();
         } catch (java.lang.UnsatisfiedLinkError e) {
