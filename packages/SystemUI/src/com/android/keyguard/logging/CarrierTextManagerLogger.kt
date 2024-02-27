@@ -94,6 +94,20 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
         )
     }
 
+    fun logSimStateChangedCallback(subId: Int, slotId: Int, simState: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                // subId is always a very small int, and we've run out of integers for log buffer
+                long1 = subId.toLong()
+                int1 = slotId
+                int2 = simState
+            },
+            { "onSimStateChangedCallback: subId=$long1 slotId=$int1 simState=$int2" }
+        )
+    }
+
     /**
      * Used to log the starting point for _why_ the carrier text is updating. In order to keep us
      * from holding on to too many objects, we'll just use simple ints for reasons here
@@ -113,7 +127,7 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
     companion object {
         const val REASON_REFRESH_CARRIER_INFO = 1
         const val REASON_ON_TELEPHONY_CAPABLE = 2
-        const val REASON_ON_SIM_STATE_CHANGED = 3
+        const val REASON_SIM_ERROR_STATE_CHANGED = 3
         const val REASON_ACTIVE_DATA_SUB_CHANGED = 4
 
         @Retention(AnnotationRetention.SOURCE)
@@ -122,7 +136,7 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
                 [
                     REASON_REFRESH_CARRIER_INFO,
                     REASON_ON_TELEPHONY_CAPABLE,
-                    REASON_ON_SIM_STATE_CHANGED,
+                    REASON_SIM_ERROR_STATE_CHANGED,
                     REASON_ACTIVE_DATA_SUB_CHANGED,
                 ]
         )
@@ -132,7 +146,7 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
             when (this) {
                 REASON_REFRESH_CARRIER_INFO -> "REFRESH_CARRIER_INFO"
                 REASON_ON_TELEPHONY_CAPABLE -> "ON_TELEPHONY_CAPABLE"
-                REASON_ON_SIM_STATE_CHANGED -> "SIM_STATE_CHANGED"
+                REASON_SIM_ERROR_STATE_CHANGED -> "SIM_ERROR_STATE_CHANGED"
                 REASON_ACTIVE_DATA_SUB_CHANGED -> "ACTIVE_DATA_SUB_CHANGED"
                 else -> "unknown"
             }
