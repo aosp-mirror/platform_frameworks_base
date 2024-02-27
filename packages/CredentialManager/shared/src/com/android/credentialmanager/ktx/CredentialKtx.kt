@@ -127,10 +127,10 @@ private fun getCredentialOptionInfoList(
                     userName = credentialEntry.username.toString(),
                     displayName = credentialEntry.displayName?.toString(),
                     icon = credentialEntry.icon.loadDrawable(context),
-                    shouldTintIcon = credentialEntry.isDefaultIcon,
+                    shouldTintIcon = credentialEntry.hasDefaultIcon,
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
-                            credentialEntry.autoSelectAllowedFromOption,
+                            credentialEntry.isAutoSelectAllowedFromOption,
                 )
                 )
             }
@@ -148,10 +148,10 @@ private fun getCredentialOptionInfoList(
                     userName = credentialEntry.username.toString(),
                     displayName = credentialEntry.displayName?.toString(),
                     icon = credentialEntry.icon.loadDrawable(context),
-                    shouldTintIcon = credentialEntry.isDefaultIcon,
+                    shouldTintIcon = credentialEntry.hasDefaultIcon,
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
-                            credentialEntry.autoSelectAllowedFromOption,
+                            credentialEntry.isAutoSelectAllowedFromOption,
                 )
                 )
             }
@@ -170,10 +170,10 @@ private fun getCredentialOptionInfoList(
                     userName = credentialEntry.title.toString(),
                     displayName = credentialEntry.subtitle?.toString(),
                     icon = credentialEntry.icon.loadDrawable(context),
-                    shouldTintIcon = credentialEntry.isDefaultIcon,
+                    shouldTintIcon = credentialEntry.hasDefaultIcon,
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
-                            credentialEntry.autoSelectAllowedFromOption,
+                            credentialEntry.isAutoSelectAllowedFromOption,
                 )
                 )
             }
