@@ -56,6 +56,7 @@ public class CarrierTextController extends ViewController<CarrierText> {
                 .setDebugLocationString(mView.getDebugLocation())
                 .build();
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mCarrierTextManager.setListening(mCarrierTextCallback);
     }
 
     @Override
@@ -65,12 +66,8 @@ public class CarrierTextController extends ViewController<CarrierText> {
     }
 
     @Override
-    protected void onViewAttached() {
-        mCarrierTextManager.setListening(mCarrierTextCallback);
-    }
+    protected void onViewAttached() {}
 
     @Override
-    protected void onViewDetached() {
-        mCarrierTextManager.setListening(null);
-    }
+    protected void onViewDetached() {}
 }
