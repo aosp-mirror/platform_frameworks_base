@@ -282,10 +282,7 @@ class AggregatedMobileDataStatsPuller {
             Slog.d(TAG,
                     "pullDataBytesTransferLocked() done. results count " + pulledData.size());
         }
-        if (!pulledData.isEmpty()) {
-            return StatsManager.PULL_SUCCESS;
-        }
-        return StatsManager.PULL_SKIP;
+        return StatsManager.PULL_SUCCESS;
     }
 
     private static boolean isEmpty(NetworkStats stats) {
