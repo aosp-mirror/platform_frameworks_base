@@ -230,6 +230,7 @@ android_library {
         extra_check_modules: ["SystemUILintChecker"],
         warning_checks: ["MissingApacheLicenseDetector"],
     },
+    skip_jarjar_repackage: true,
 }
 
 filegroup {
