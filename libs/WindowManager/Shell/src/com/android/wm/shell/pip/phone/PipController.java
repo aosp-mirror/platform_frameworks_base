@@ -976,8 +976,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG,
                 hotseatKeepClearArea);
         onDisplayRotationChangedNotInPip(mContext, launcherRotation);
+        // cache current min/max size
+        Point minSize = mPipBoundsState.getMinSize();
+        Point maxSize = mPipBoundsState.getMaxSize();
+        mPipBoundsState.updateMinMaxSize(pictureInPictureParams.getAspectRatioFloat());
         final Rect entryBounds = mPipTaskOrganizer.startSwipePipToHome(componentName, activityInfo,
                 pictureInPictureParams);
+        // restore min/max size, as this is referenced later in OnDisplayChangingListener and needs
+        // to reflect the pre-rotation state for it to work
+        mPipBoundsState.setMinSize(minSize.x, minSize.y);
+        mPipBoundsState.setMaxSize(maxSize.x, maxSize.y);
         // sync mPipBoundsState with the newly calculated bounds.
         mPipBoundsState.setNormalBounds(entryBounds);
         return entryBounds;
