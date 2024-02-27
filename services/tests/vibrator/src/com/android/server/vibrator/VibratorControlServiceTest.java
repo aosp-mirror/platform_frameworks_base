@@ -67,6 +67,7 @@ public class VibratorControlServiceTest {
     @Mock
     private PackageManagerInternal mPackageManagerInternalMock;
 
+    private TestLooper mTestLooper;
     private FakeVibratorController mFakeVibratorController;
     private VibratorControlService mVibratorControlService;
     private VibrationSettings mVibrationSettings;
@@ -74,6 +75,7 @@ public class VibratorControlServiceTest {
 
     @Before
     public void setUp() throws Exception {
+        mTestLooper = new TestLooper();
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName("", ""));
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
@@ -83,7 +85,7 @@ public class VibratorControlServiceTest {
         mVibrationSettings = new VibrationSettings(
                 ApplicationProvider.getApplicationContext(), new Handler(testLooper.getLooper()));
 
-        mFakeVibratorController = new FakeVibratorController();
+        mFakeVibratorController = new FakeVibratorController(mTestLooper.getLooper());
         mVibratorControlService = new VibratorControlService(new VibratorControllerHolder(),
                 mMockVibrationScaler, mVibrationSettings, mLock);
     }
@@ -108,13 +110,13 @@ public class VibratorControlServiceTest {
     @Test
     public void testUnregisterVibratorController_providingAnInvalidController_ignoresRequest()
             throws RemoteException {
-        FakeVibratorController fakeController1 = new FakeVibratorController();
-        FakeVibratorController fakeController2 = new FakeVibratorController();
-        mVibratorControlService.registerVibratorController(fakeController1);
-        mVibratorControlService.unregisterVibratorController(fakeController2);
+        FakeVibratorController controller1 = new FakeVibratorController(mTestLooper.getLooper());
+        FakeVibratorController controller2 = new FakeVibratorController(mTestLooper.getLooper());
+        mVibratorControlService.registerVibratorController(controller1);
+        mVibratorControlService.unregisterVibratorController(controller2);
 
         verifyZeroInteractions(mMockVibrationScaler);
-        assertThat(fakeController1.isLinkedToDeath).isTrue();
+        assertThat(controller1.isLinkedToDeath).isTrue();
     }
 
     @Test
