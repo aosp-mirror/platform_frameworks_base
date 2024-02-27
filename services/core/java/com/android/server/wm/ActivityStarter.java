@@ -1548,6 +1548,8 @@ class ActivityStarter {
                 result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
                         startFlags, options, inTask, inTaskFragment, balVerdict,
                         intentGrants, realCallingUid);
+            } catch (Exception ex) {
+                Slog.e(TAG, "Exception on startActivityInner", ex);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
                 startedActivityRootTask = handleStartResult(r, options, result, newTransition,
