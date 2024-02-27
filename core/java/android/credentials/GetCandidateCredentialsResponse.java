@@ -18,7 +18,7 @@ package android.credentials;
 
 import android.annotation.Hide;
 import android.annotation.NonNull;
-import android.app.PendingIntent;
+import android.content.Intent;
 import android.credentials.selection.GetCredentialProviderData;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -39,32 +39,22 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
     @NonNull
     private final List<GetCredentialProviderData> mCandidateProviderDataList;
 
-    private final PendingIntent mPendingIntent;
+    @NonNull
+    private final Intent mIntent;
 
     /**
      * @hide
      */
     @Hide
     public GetCandidateCredentialsResponse(
-            GetCredentialResponse getCredentialResponse
-    ) {
-        mCandidateProviderDataList = null;
-        mPendingIntent = null;
-    }
-
-    /**
-     * @hide
-     */
-    @Hide
-    public GetCandidateCredentialsResponse(
-            List<GetCredentialProviderData> candidateProviderDataList,
-            PendingIntent pendingIntent
+            @NonNull List<GetCredentialProviderData> candidateProviderDataList,
+            @NonNull Intent intent
     ) {
         Preconditions.checkCollectionNotEmpty(
                 candidateProviderDataList,
                 /*valueName=*/ "candidateProviderDataList");
         mCandidateProviderDataList = new ArrayList<>(candidateProviderDataList);
-        mPendingIntent = pendingIntent;
+        mIntent = intent;
     }
 
     /**
@@ -81,8 +71,9 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
      *
      * @hide
      */
-    public PendingIntent getPendingIntent() {
-        return mPendingIntent;
+    @NonNull
+    public Intent getIntent() {
+        return mIntent;
     }
 
     protected GetCandidateCredentialsResponse(Parcel in) {
@@ -91,14 +82,13 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
         mCandidateProviderDataList = candidateProviderDataList;
 
         AnnotationValidations.validate(NonNull.class, null, mCandidateProviderDataList);
-
-        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
+        mIntent = in.readTypedObject(Intent.CREATOR);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(mCandidateProviderDataList);
-        dest.writeTypedObject(mPendingIntent, flags);
+        dest.writeTypedObject(mIntent, flags);
     }
 
     @Override
