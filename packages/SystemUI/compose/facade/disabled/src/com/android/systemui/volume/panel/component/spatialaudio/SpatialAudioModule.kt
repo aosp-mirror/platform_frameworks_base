@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.shared.model
+package com.android.systemui.volume.panel.component.spatialaudio
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import dagger.Module
 
-object VolumePanelComponents {
-
-    const val MEDIA_OUTPUT: VolumePanelComponentKey = "media_output"
-    const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
-    const val VOLUME_SLIDERS: VolumePanelComponentKey = "volume_sliders"
-    const val CAPTIONING: VolumePanelComponentKey = "captioning"
-    const val SPATIAL_AUDIO: VolumePanelComponentKey = "spatial_audio"
-    const val ANC: VolumePanelComponentKey = "anc"
-}
+@Module interface SpatialAudioModule

@@ -18,16 +18,16 @@ package com.android.settingslib.media.domain.interactor
 
 import android.media.AudioDeviceAttributes
 import com.android.settingslib.media.data.repository.SpatializerRepository
-import kotlinx.coroutines.flow.StateFlow
 
 class SpatializerInteractor(private val repository: SpatializerRepository) {
 
-    /** Checks if head tracking is available. */
-    val isHeadTrackingAvailable: StateFlow<Boolean>
-        get() = repository.isHeadTrackingAvailable
-
+    /** Checks if spatial audio is available. */
     suspend fun isSpatialAudioAvailable(audioDeviceAttributes: AudioDeviceAttributes): Boolean =
         repository.isSpatialAudioAvailableForDevice(audioDeviceAttributes)
+
+    /** Checks if head tracking is available. */
+    suspend fun isHeadTrackingAvailable(audioDeviceAttributes: AudioDeviceAttributes): Boolean =
+        repository.isHeadTrackingAvailableForDevice(audioDeviceAttributes)
 
     /** Checks if spatial audio is enabled for the [audioDeviceAttributes]. */
     suspend fun isSpatialAudioEnabled(audioDeviceAttributes: AudioDeviceAttributes): Boolean =

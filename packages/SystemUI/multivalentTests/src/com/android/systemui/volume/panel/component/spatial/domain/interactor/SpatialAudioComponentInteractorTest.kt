@@ -82,7 +82,7 @@ class SpatialAudioComponentInteractorTest : SysuiTestCase() {
                 ),
                 true
             )
-            spatializerRepository.setIsHeadTrackingAvailable(true)
+            spatializerRepository.defaultHeadTrackingAvailable = true
 
             underTest =
                 SpatialAudioComponentInteractor(

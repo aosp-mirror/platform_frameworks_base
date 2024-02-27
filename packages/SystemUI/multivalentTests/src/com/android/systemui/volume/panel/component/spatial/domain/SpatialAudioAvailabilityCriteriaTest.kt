@@ -78,7 +78,7 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 localMediaRepository.updateCurrentConnectedDevice(bluetoothMediaDevice)
-                spatializerRepository.setIsHeadTrackingAvailable(false)
+                spatializerRepository.defaultHeadTrackingAvailable = false
                 spatializerRepository.defaultSpatialAudioAvailable = false
 
                 val isAvailable by collectLastValue(underTest.isAvailable())
@@ -94,7 +94,7 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 localMediaRepository.updateCurrentConnectedDevice(bluetoothMediaDevice)
-                spatializerRepository.setIsHeadTrackingAvailable(false)
+                spatializerRepository.defaultHeadTrackingAvailable = false
                 spatializerRepository.defaultSpatialAudioAvailable = true
 
                 val isAvailable by collectLastValue(underTest.isAvailable())
@@ -110,7 +110,7 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 localMediaRepository.updateCurrentConnectedDevice(bluetoothMediaDevice)
-                spatializerRepository.setIsHeadTrackingAvailable(true)
+                spatializerRepository.defaultHeadTrackingAvailable = true
                 spatializerRepository.defaultSpatialAudioAvailable = true
 
                 val isAvailable by collectLastValue(underTest.isAvailable())
@@ -125,7 +125,7 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
     fun spatialAudio_headTracking_noDevice_unavailable() {
         with(kosmos) {
             testScope.runTest {
-                spatializerRepository.setIsHeadTrackingAvailable(true)
+                spatializerRepository.defaultHeadTrackingAvailable = true
                 spatializerRepository.defaultSpatialAudioAvailable = true
 
                 val isAvailable by collectLastValue(underTest.isAvailable())
