@@ -102,8 +102,8 @@ internal class SceneTransitionLayoutImpl(
                     .also { _sharedValues = it }
 
     // TODO(b/317958526): Lazily allocate scene gesture handlers the first time they are needed.
-    private val horizontalGestureHandler: SceneGestureHandler
-    private val verticalGestureHandler: SceneGestureHandler
+    private val horizontalDraggableHandler: DraggableHandlerImpl
+    private val verticalDraggableHandler: DraggableHandlerImpl
 
     private var _userActionDistanceScope: UserActionDistanceScope? = null
     internal val userActionDistanceScope: UserActionDistanceScope
@@ -116,27 +116,27 @@ internal class SceneTransitionLayoutImpl(
     init {
         updateScenes(builder)
 
-        // SceneGestureHandler must wait for the scenes to be initialized, in order to access the
+        // DraggableHandlerImpl must wait for the scenes to be initialized, in order to access the
         // current scene (required for SwipeTransition).
-        horizontalGestureHandler =
-            SceneGestureHandler(
+        horizontalDraggableHandler =
+            DraggableHandlerImpl(
                 layoutImpl = this,
                 orientation = Orientation.Horizontal,
                 coroutineScope = coroutineScope,
             )
 
-        verticalGestureHandler =
-            SceneGestureHandler(
+        verticalDraggableHandler =
+            DraggableHandlerImpl(
                 layoutImpl = this,
                 orientation = Orientation.Vertical,
                 coroutineScope = coroutineScope,
             )
     }
 
-    internal fun gestureHandler(orientation: Orientation): SceneGestureHandler =
+    internal fun draggableHandler(orientation: Orientation): DraggableHandlerImpl =
         when (orientation) {
-            Orientation.Vertical -> verticalGestureHandler
-            Orientation.Horizontal -> horizontalGestureHandler
+            Orientation.Vertical -> verticalDraggableHandler
+            Orientation.Horizontal -> horizontalDraggableHandler
         }
 
     internal fun scene(key: SceneKey): Scene {
@@ -192,8 +192,8 @@ internal class SceneTransitionLayoutImpl(
                 // Handle horizontal and vertical swipes on this layout.
                 // Note: order here is important and will give a slight priority to the vertical
                 // swipes.
-                .swipeToScene(horizontalGestureHandler)
-                .swipeToScene(verticalGestureHandler)
+                .swipeToScene(horizontalDraggableHandler)
+                .swipeToScene(verticalDraggableHandler)
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
