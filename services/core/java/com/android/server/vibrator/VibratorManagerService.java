@@ -416,14 +416,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @Override // Binder call
-    public void performHapticFeedback(
-            int uid, int deviceId, String opPkg, int constant, boolean always, String reason) {
+    public void performHapticFeedback(int uid, int deviceId, String opPkg, int constant,
+            boolean always, String reason, boolean fromIme) {
         // Note that the `performHapticFeedback` method does not take a token argument from the
         // caller, and instead, uses this service as the token. This is to mitigate performance
         // impact that would otherwise be caused due to marshal latency. Haptic feedback effects are
         // short-lived, so we don't need to cancel when the process dies.
         performHapticFeedbackInternal(
-                uid, deviceId, opPkg, constant, always, reason, /* token= */ this);
+                uid, deviceId, opPkg, constant, always, reason, /* token= */ this, fromIme);
     }
 
     /**
@@ -435,7 +435,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @Nullable
     HalVibration performHapticFeedbackInternal(
             int uid, int deviceId, String opPkg, int constant, boolean always, String reason,
-            IBinder token) {
+            IBinder token, boolean fromIme) {
         HapticFeedbackVibrationProvider hapticVibrationProvider = getHapticVibrationProvider();
         if (hapticVibrationProvider == null) {
             Slog.w(TAG, "performHapticFeedback; haptic vibration provider not ready.");
@@ -449,7 +449,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         CombinedVibration combinedVibration = CombinedVibration.createParallel(effect);
         VibrationAttributes attrs =
                 hapticVibrationProvider.getVibrationAttributesForHapticFeedback(
-                        constant, /* bypassVibrationIntensitySetting= */ always);
+                        constant, /* bypassVibrationIntensitySetting= */ always, fromIme);
         VibratorFrameworkStatsLogger.logPerformHapticsFeedbackIfKeyboard(uid, constant);
         return vibrateWithoutPermissionCheck(uid, deviceId, opPkg, combinedVibration, attrs,
                 "performHapticFeedback: " + reason, token);
@@ -2300,7 +2300,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             HalVibration vib = performHapticFeedbackInternal(Binder.getCallingUid(),
                     Context.DEVICE_ID_DEFAULT, SHELL_PACKAGE_NAME, constant,
                     /* always= */ commonOptions.force, /* reason= */ commonOptions.description,
-                    deathBinder);
+                    deathBinder, false /* fromIme */);
             maybeWaitOnVibration(vib, commonOptions);
 
             return 0;

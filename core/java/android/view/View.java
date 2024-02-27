@@ -25,6 +25,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
@@ -28371,15 +28372,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         final boolean always = (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0;
+        boolean fromIme = false;
+        if (mAttachInfo.mViewRootImpl != null) {
+            fromIme = mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD;
+        }
         if (Flags.useVibratorHapticFeedback()) {
             if (!mAttachInfo.canPerformHapticFeedback()) {
                 return false;
             }
             getSystemVibrator().performHapticFeedback(
-                    feedbackConstant, always, "View#performHapticFeedback");
+                    feedbackConstant, always, "View#performHapticFeedback", fromIme);
             return true;
         }
-        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, always);
+        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, always, fromIme);
     }
 
     private Vibrator getSystemVibrator() {
@@ -31422,7 +31427,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         interface Callbacks {
             void playSoundEffect(int effectId);
-            boolean performHapticFeedback(int effectId, boolean always);
+            boolean performHapticFeedback(int effectId, boolean always, boolean fromIme);
         }
 
         /**

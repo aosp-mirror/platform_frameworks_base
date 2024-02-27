@@ -1072,7 +1072,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * Call from application to perform haptic feedback on its window.
      */
     public boolean performHapticFeedback(int uid, String packageName, int effectId,
-            boolean always, String reason);
+            boolean always, String reason, boolean fromIme);
 
     /**
      * Called when we have started keeping the screen on because a window
