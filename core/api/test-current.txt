@@ -1518,6 +1518,7 @@ package android.graphics.fonts {
 package android.hardware {
 
   public final class SensorPrivacyManager {
+    method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setCameraPrivacyAllowlist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
     method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacyState(int, int, int);
   }

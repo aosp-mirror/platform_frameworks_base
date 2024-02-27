@@ -4689,7 +4689,7 @@ package android.hardware {
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void addSensorPrivacyListener(@NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public void addSensorPrivacyListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.SensorPrivacyManager.OnSensorPrivacyChangedListener);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean areAnySensorPrivacyTogglesEnabled(int);
-    method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @NonNull @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public java.util.Map<java.lang.String,java.lang.Boolean> getCameraPrivacyAllowlist();
+    method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @NonNull @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public java.util.List<java.lang.String> getCameraPrivacyAllowlist();
     method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public int getSensorPrivacyState(int, int);
     method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean isCameraPrivacyEnabled(@NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY) public boolean isSensorPrivacyEnabled(int);
@@ -4710,6 +4710,12 @@ package android.hardware {
     method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") public int getState();
     method public int getToggleType();
     method public boolean isEnabled();
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") public static class SensorPrivacyManager.StateTypes {
+    field public static final int DISABLED = 2; // 0x2
+    field public static final int ENABLED = 1; // 0x1
+    field public static final int ENABLED_EXCEPT_ALLOWLISTED_APPS = 3; // 0x3
   }
 
 }
