@@ -1538,6 +1538,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public void setOpenCloseListener(OpenCloseListener openCloseListener) {
+        SceneContainerFlag.assertInLegacyMode();
         mOpenCloseListener = openCloseListener;
     }
 
