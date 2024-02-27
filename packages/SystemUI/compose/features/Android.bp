@@ -44,4 +44,5 @@ android_library {
     ],
 
     kotlincflags: ["-Xjvm-default=all"],
+    skip_jarjar_repackage: true,
 }
