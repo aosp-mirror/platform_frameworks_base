@@ -1618,15 +1618,13 @@
         <!-- Data (photo, file, account) upload/download, backup/restore, import/export, fetch,
             transfer over network between device and cloud.
 
-            <p><b>THIS TYPE IS DEPRECATED.</b>
-            <p><em>Note: For apps with <code>targetSdkVersion</code>
-            {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and above, this type should
-            <b>NOT</b> be used: calling
-            {@link android.app.Service#startForeground(int, android.app.Notification, int)}
-            with this type on devices running
-            {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} is still allowed, but it may
-            throw an {@link android.app.InvalidForegroundServiceTypeException} in future platform
-            releases.</em>
+            <p>For apps with <code>targetSdkVersion</code>
+            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, this type should NOT
+            be used: calling
+            {@link android.app.Service#startForeground(int, android.app.Notification, int)} with
+            this type on devices running {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
+            is still allowed, but calling it with this type on devices running future platform
+            releases may get a {@link android.app.InvalidForegroundServiceTypeException}.
         -->
         <flag name="dataSync" value="0x01" />
         <!-- Music, video, news or other media play.
