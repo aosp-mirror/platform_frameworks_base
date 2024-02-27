@@ -38,12 +38,12 @@ public class ScriptC extends Script {
     private static final String TAG = "ScriptC";
 
     /**
-     * In targetSdkVersion 35 and above, Renderscript's ScriptC stops being supported
+     * In targetSdkVersion 36 and above, Renderscript's ScriptC stops being supported
      * and an exception is thrown when the class is instantiated.
-     * In targetSdkVersion 34 and below, Renderscript's ScriptC still works.
+     * In targetSdkVersion 35 and below, Renderscript's ScriptC still works.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = 35)
+    @EnabledAfter(targetSdkVersion = 36)
     private static final long RENDERSCRIPT_SCRIPTC_DEPRECATION_CHANGE_ID = 297019750L;
 
     /**
@@ -113,9 +113,9 @@ public class ScriptC extends Script {
             throw new UnsupportedOperationException(s);
         }
 
-        // Throw an exception if the target API is 35 or above
+        // Throw an exception if the target API is 36 or above
         String message =
-                "ScriptC scripts are not supported when targeting an API Level >= 35. Please refer "
+                "ScriptC scripts are not supported when targeting an API Level >= 36. Please refer "
                     + "to https://developer.android.com/guide/topics/renderscript/migration-guide "
                     + "for proposed alternatives.";
         Slog.w(TAG, message);
