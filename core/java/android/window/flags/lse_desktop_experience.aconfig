@@ -7,3 +7,10 @@ flag {
     bug: "320350734"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_desktop_windowing_mode"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing"
+    bug: "304778354"
+}
