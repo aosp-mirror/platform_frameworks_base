@@ -806,6 +806,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     @Override
     public void startIntent(PendingIntent intent, int userId1, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                "startIntent(): intent=%s user=%d fillInIntent=%s position=%d", intent, userId1,
+                fillInIntent, position);
         // Flag this as a no-user-action launch to prevent sending user leaving event to the current
         // top activity since it's going to be put into another side of the split. This prevents the
         // current top activity from going into pip mode due to user leaving event.
@@ -824,6 +827,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 .map(recentTasks -> recentTasks.findTaskInBackground(component, userId1))
                 .orElse(null);
         if (taskInfo != null) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "Found suitable background task=%s", taskInfo);
             if (ENABLE_SHELL_TRANSITIONS) {
                 mStageCoordinator.startTask(taskInfo.taskId, position, options);
             } else {
