@@ -9958,6 +9958,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @hide
+     */
+    public void onGetCredentialException(String errorType, String errorMsg) {
+        if (getCredentialManagerCallback() == null) {
+            Log.w(AUTOFILL_LOG_TAG, "onGetCredentialException called but no callback found");
+            return;
+        }
+        getCredentialManagerCallback().onError(new GetCredentialException(errorType, errorMsg));
+    }
+
+    /**
      * Gets the unique, logical identifier of this view in the activity, for autofill purposes.
      *
      * <p>The autofill id is created on demand, unless it is explicitly set by
