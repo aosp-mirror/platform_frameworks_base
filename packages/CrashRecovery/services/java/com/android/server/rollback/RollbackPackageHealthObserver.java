@@ -75,6 +75,9 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
 
+    private static final String PROP_DISABLE_HIGH_IMPACT_ROLLBACK_FLAG =
+            "persist.device_config.configuration.disable_high_impact_rollback";
+
     private final Context mContext;
     private final Handler mHandler;
     private final ApexManager mApexManager;
@@ -605,6 +608,10 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
             // Apply all available low impact rollbacks.
             mHandler.post(() -> rollbackAllLowImpact(availableRollbacks, rollbackReason));
         } else if (minRollbackImpactLevel == PackageManager.ROLLBACK_USER_IMPACT_HIGH) {
+            // Check disable_high_impact_rollback device config before performing rollback
+            if (SystemProperties.getBoolean(PROP_DISABLE_HIGH_IMPACT_ROLLBACK_FLAG, false)) {
+                return;
+            }
             // Rollback one package at a time. If that doesn't resolve the issue, rollback
             // next with same impact level.
             mHandler.post(() -> rollbackHighImpact(availableRollbacks, rollbackReason));
@@ -718,7 +725,9 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
                 impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_70;
                 break;
             case PackageManager.ROLLBACK_USER_IMPACT_HIGH:
-                impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_90;
+                if (!SystemProperties.getBoolean(PROP_DISABLE_HIGH_IMPACT_ROLLBACK_FLAG, false)) {
+                    impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_90;
+                }
                 break;
             default:
                 impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
