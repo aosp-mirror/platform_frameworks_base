@@ -16,7 +16,6 @@
 
 package com.android.settingslib.media;
 
-import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -31,6 +30,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+
+import java.util.Collections;
 
 @RunWith(RobolectricTestRunner.class)
 public class MediaManagerTest {
@@ -59,7 +60,7 @@ public class MediaManagerTest {
     public void dispatchDeviceListAdded_registerCallback_shouldDispatchCallback() {
         mMediaManager.registerCallback(mCallback);
 
-        mMediaManager.dispatchDeviceListAdded();
+        mMediaManager.dispatchDeviceListAdded(Collections.emptyList());
 
         verify(mCallback).onDeviceListAdded(any());
     }
@@ -68,9 +69,9 @@ public class MediaManagerTest {
     public void dispatchDeviceListRemoved_registerCallback_shouldDispatchCallback() {
         mMediaManager.registerCallback(mCallback);
 
-        mMediaManager.dispatchDeviceListRemoved(mMediaManager.mMediaDevices);
+        mMediaManager.dispatchDeviceListRemoved(Collections.emptyList());
 
-        verify(mCallback).onDeviceListRemoved(mMediaManager.mMediaDevices);
+        verify(mCallback).onDeviceListRemoved(Collections.emptyList());
     }
 
     @Test
@@ -80,24 +81,6 @@ public class MediaManagerTest {
         mMediaManager.dispatchConnectedDeviceChanged(TEST_ID);
 
         verify(mCallback).onConnectedDeviceChanged(TEST_ID);
-    }
-
-    @Test
-    public void findMediaDevice_idExist_shouldReturnMediaDevice() {
-        mMediaManager.mMediaDevices.add(mDevice);
-
-        final MediaDevice device = mMediaManager.findMediaDevice(TEST_ID);
-
-        assertThat(device.getId()).isEqualTo(mDevice.getId());
-    }
-
-    @Test
-    public void findMediaDevice_idNotExist_shouldReturnNull() {
-        mMediaManager.mMediaDevices.add(mDevice);
-
-        final MediaDevice device = mMediaManager.findMediaDevice("123");
-
-        assertThat(device).isNull();
     }
 
     @Test
