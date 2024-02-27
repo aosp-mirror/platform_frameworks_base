@@ -161,6 +161,9 @@ import java.util.zip.ZipOutputStream;
 public class LauncherAppsService extends SystemService {
     private static final String WM_TRACE_DIR = "/data/misc/wmtrace/";
     private static final String VC_FILE_SUFFIX = ".vc";
+    // TODO(b/310027945): Update the intent name.
+    private static final String PS_SETTINGS_INTENT =
+            "com.android.settings.action.PRIVATE_SPACE_SETUP_FLOW";
 
     private static final Set<PosixFilePermission> WM_TRACE_FILE_PERMISSIONS = Set.of(
             PosixFilePermission.OWNER_WRITE,
@@ -1772,6 +1775,27 @@ public class LauncherAppsService extends SystemService {
                 }
 
                 return buildIntentSenderForUser(packageInfoIntent, user);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public @Nullable IntentSender getPrivateSpaceSettingsIntent() {
+            if (!canAccessHiddenProfile(getCallingUid(), getCallingPid())) {
+                Slog.e(TAG, "Caller cannot access hidden profiles");
+                return null;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                Intent psSettingsIntent = new Intent(PS_SETTINGS_INTENT);
+                psSettingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                final PendingIntent pi = PendingIntent.getActivity(mContext,
+                        /* requestCode */ 0,
+                        psSettingsIntent,
+                        PendingIntent.FLAG_IMMUTABLE | FLAG_UPDATE_CURRENT);
+                return pi == null ? null : pi.getIntentSender();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
