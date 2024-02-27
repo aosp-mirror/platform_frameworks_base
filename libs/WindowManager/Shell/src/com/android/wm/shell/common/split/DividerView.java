@@ -75,7 +75,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private SurfaceControlViewHost mViewHost;
     private DividerHandleView mHandle;
     private DividerRoundedCorner mCorners;
-    private View mBackground;
     private int mTouchElevation;
 
     private VelocityTracker mVelocityTracker;
