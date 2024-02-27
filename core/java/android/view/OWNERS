@@ -102,6 +102,7 @@ per-file ISurfaceControlViewHost*.aidl = file:/services/core/java/com/android/se
 per-file IWindow*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RemoteAnimation*.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file RemoteAnimation*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
+per-file ScreenRecordingCallbacks.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *SurfaceControl*.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file SurfaceControl*.aidl = file:/services/core/java/com/android/server/wm/OWNERS
 per-file SurfaceSession.java = file:/services/core/java/com/android/server/wm/OWNERS
