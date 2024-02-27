@@ -31,10 +31,10 @@ import kotlinx.coroutines.flow.emptyFlow
  */
 @SysUISingleton
 class NoopDeviceEntryFaceAuthInteractor @Inject constructor() : DeviceEntryFaceAuthInteractor {
-    override val authenticationStatus: Flow<FaceAuthenticationStatus>
-        get() = emptyFlow()
-    override val detectionStatus: Flow<FaceDetectionStatus>
-        get() = emptyFlow()
+    override val authenticationStatus: Flow<FaceAuthenticationStatus> = emptyFlow()
+    override val detectionStatus: Flow<FaceDetectionStatus> = emptyFlow()
+    override val lockedOut: Flow<Boolean> = emptyFlow()
+    override val authenticated: Flow<Boolean> = emptyFlow()
 
     override fun canFaceAuthRun(): Boolean = false
 
