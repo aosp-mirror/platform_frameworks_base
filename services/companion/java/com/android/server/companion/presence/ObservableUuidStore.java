@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.presence;
 
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -22,10 +22,10 @@ import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
-import static com.android.server.companion.DataStoreUtils.createStorageFileForUser;
-import static com.android.server.companion.DataStoreUtils.isEndOfTag;
-import static com.android.server.companion.DataStoreUtils.isStartOfTag;
-import static com.android.server.companion.DataStoreUtils.writeToFileSafely;
+import static com.android.server.companion.utils.DataStoreUtils.createStorageFileForUser;
+import static com.android.server.companion.utils.DataStoreUtils.isEndOfTag;
+import static com.android.server.companion.utils.DataStoreUtils.isStartOfTag;
+import static com.android.server.companion.utils.DataStoreUtils.writeToFileSafely;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -57,6 +57,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * This store manages the cache and disk data for observable uuids.
+ */
 public class ObservableUuidStore {
     private static final String TAG = "CDM_ObservableUuidStore";
     private static final String FILE_NAME = "observing_uuids_presence.xml";
@@ -84,9 +87,9 @@ public class ObservableUuidStore {
     }
 
     /**
-     * Remove the observable uuid from the disk.
+     * Remove the observable uuid.
      */
-    void removeObservableUuid(@UserIdInt int userId, ParcelUuid uuid, String packageName) {
+    public void removeObservableUuid(@UserIdInt int userId, ParcelUuid uuid, String packageName) {
         List<ObservableUuid> cachedObservableUuids;
 
         synchronized (mLock) {
@@ -101,7 +104,10 @@ public class ObservableUuidStore {
         mExecutor.execute(() -> writeObservableUuidToStore(userId, cachedObservableUuids));
     }
 
-    void writeObservableUuid(@UserIdInt int userId, ObservableUuid uuid) {
+    /**
+     * Write the observable uuid.
+     */
+    public void writeObservableUuid(@UserIdInt int userId, ObservableUuid uuid) {
         Slog.i(TAG, "Writing uuid=" + uuid.getUuid() + " to store.");
 
         List<ObservableUuid> cachedObservableUuids;
