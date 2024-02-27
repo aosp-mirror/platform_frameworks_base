@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar.policy;
 
 import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.util.concurrency.MockExecutorHandlerKt.mockExecutorHandler;
@@ -26,10 +26,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -39,11 +39,9 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
-import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
-import com.android.systemui.statusbar.policy.BaseHeadsUpManagerTest;
-import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
+import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -61,7 +59,7 @@ import org.mockito.junit.MockitoRule;
 import kotlinx.coroutines.flow.StateFlowKt;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Rule public MockitoRule rule = MockitoJUnit.rule();
@@ -152,7 +150,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Test
     public void testSnooze() {
         final HeadsUpManager hmp = createHeadsUpManagerPhone();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         hmp.showNotification(entry);
         hmp.snooze();
@@ -163,7 +161,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Test
     public void testSwipedOutNotification() {
         final HeadsUpManager hmp = createHeadsUpManagerPhone();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         hmp.showNotification(entry);
         hmp.addSwipedOutNotification(entry.getKey());
@@ -179,7 +177,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Test
     public void testCanRemoveImmediately_swipedOut() {
         final HeadsUpManager hmp = createHeadsUpManagerPhone();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         hmp.showNotification(entry);
         hmp.addSwipedOutNotification(entry.getKey());
@@ -192,8 +190,10 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Test
     public void testCanRemoveImmediately_notTopEntry() {
         final HeadsUpManager hmp = createHeadsUpManagerPhone();
-        final NotificationEntry earlierEntry = createEntry(/* id = */ 0);
-        final NotificationEntry laterEntry = createEntry(/* id = */ 1);
+        final NotificationEntry earlierEntry =
+                HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
+        final NotificationEntry laterEntry =
+                HeadsUpManagerTestUtil.createEntry(/* id = */ 1, mContext);
         laterEntry.setRow(mRow);
 
         hmp.showNotification(earlierEntry);
@@ -206,7 +206,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Test
     public void testExtendHeadsUp() {
         final HeadsUpManagerPhone hmp = createHeadsUpManagerPhone();
-        final NotificationEntry entry = createEntry(/* id = */ 0);
+        final NotificationEntry entry = HeadsUpManagerTestUtil.createEntry(/* id = */ 0, mContext);
 
         hmp.showNotification(entry);
         hmp.extendHeadsUp();
