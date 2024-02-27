@@ -356,19 +356,34 @@ public class PackageArchiver {
     }
 
     void clearArchiveState(String packageName, int userId) {
+        final PackageSetting ps;
         synchronized (mPm.mLock) {
-            PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
-            if (ps != null) {
-                ps.setArchiveState(/* archiveState= */ null, userId);
-            }
+            ps = mPm.mSettings.getPackageLPr(packageName);
         }
-        File iconsDir = getIconsDir(packageName, userId);
+        clearArchiveState(ps, userId);
+    }
+
+    void clearArchiveState(PackageSetting ps, int userId) {
+        synchronized (mPm.mLock) {
+            if (ps == null || ps.getUserStateOrDefault(userId).getArchiveState() == null) {
+                // No archive states to clear
+                return;
+            }
+            if (DEBUG) {
+                Slog.e(TAG, "Clearing archive states for " + ps.getPackageName());
+            }
+            ps.setArchiveState(/* archiveState= */ null, userId);
+        }
+        File iconsDir = getIconsDir(ps.getPackageName(), userId);
         if (!iconsDir.exists()) {
+            if (DEBUG) {
+                Slog.e(TAG, "Icons are already deleted at " + iconsDir.getAbsolutePath());
+            }
             return;
         }
         // TODO(b/319238030) Move this into installd.
         if (!FileUtils.deleteContentsAndDir(iconsDir)) {
-            Slog.e(TAG, "Failed to clean up archive files for " + packageName);
+            Slog.e(TAG, "Failed to clean up archive files for " + ps.getPackageName());
         } else {
             if (DEBUG) {
                 Slog.e(TAG, "Deleted icons at " + iconsDir.getAbsolutePath());
