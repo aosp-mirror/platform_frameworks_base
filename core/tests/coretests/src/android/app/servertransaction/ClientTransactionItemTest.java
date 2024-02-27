@@ -40,6 +40,7 @@ import android.util.ArrayMap;
 import android.util.MergedConfiguration;
 import android.view.IWindow;
 import android.view.InsetsState;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.WindowContext;
 import android.window.WindowContextInfo;
@@ -116,7 +117,8 @@ public class ClientTransactionItemTest {
     public void testActivityRelaunchItem_getContextToUpdate() {
         final ActivityRelaunchItem item = ActivityRelaunchItem
                 .obtain(mActivityToken, null /* pendingResults */, null  /* pendingNewIntents */,
-                        0 /* configChange */, mMergedConfiguration, false /* preserveWindow */);
+                        0 /* configChange */, mMergedConfiguration, false /* preserveWindow */,
+                        new ActivityWindowInfo());
         final Context context = item.getContextToUpdate(mHandler);
 
         assertEquals(mActivity, context);
