@@ -781,7 +781,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     }
 
                     updateAlternateBouncerShowing(mAlternateBouncerInteractor.show());
-                    setKeyguardMessage(message, null);
+                    setKeyguardMessage(message, null, null);
                     return;
                 }
 
@@ -1444,11 +1444,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /** Display security message to relevant KeyguardMessageArea. */
-    public void setKeyguardMessage(String message, ColorStateList colorState) {
+    public void setKeyguardMessage(String message, ColorStateList colorState,
+            BiometricSourceType biometricSourceType) {
         if (mAlternateBouncerInteractor.isVisibleState()) {
             if (mKeyguardMessageAreaController != null) {
                 DeviceEntryUdfpsRefactor.assertInLegacyMode();
-                mKeyguardMessageAreaController.setMessage(message);
+                mKeyguardMessageAreaController.setMessage(message, biometricSourceType);
             }
         } else {
             mPrimaryBouncerInteractor.showMessage(message, colorState);

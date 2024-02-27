@@ -593,7 +593,7 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
         mController.getKeyguardCallback().onBiometricError(FACE_ERROR_TIMEOUT,
                 "A message", BiometricSourceType.FACE);
 
-        verify(mStatusBarKeyguardViewManager).setKeyguardMessage(eq(message), any());
+        verify(mStatusBarKeyguardViewManager).setKeyguardMessage(eq(message), any(), any());
     }
 
     @Test
@@ -608,7 +608,8 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
         mController.getKeyguardCallback().onBiometricError(FACE_ERROR_TIMEOUT,
                 "A message", BiometricSourceType.FACE);
 
-        verify(mStatusBarKeyguardViewManager, never()).setKeyguardMessage(eq(message), any());
+        verify(mStatusBarKeyguardViewManager, never()).setKeyguardMessage(
+                eq(message), any(), any());
     }
 
     @Test
@@ -1331,7 +1332,9 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
         verify(mStatusBarKeyguardViewManager)
                 .setKeyguardMessage(
                         eq(mContext.getString(R.string.keyguard_face_unlock_unavailable)),
-                        any());
+                        any(),
+                        any()
+                );
     }
 
     @Test
@@ -1469,6 +1472,71 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
                 "lockout error");
         verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
                 mContext.getString(R.string.keyguard_suggest_fingerprint));
+    }
+
+    @Test
+    public void faceErrorMessageDroppedBecauseFingerprintMessageShowing() {
+        createController();
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricHelp(BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                "fp not recognized", BiometricSourceType.FINGERPRINT);
+        clearInvocations(mRotateTextViewController);
+
+        onFaceLockoutError("lockout");
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+    }
+
+    @Test
+    public void faceUnlockedMessageShowsEvenWhenFingerprintMessageShowing() {
+        createController();
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricHelp(BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                "fp not recognized", BiometricSourceType.FINGERPRINT);
+        clearInvocations(mRotateTextViewController);
+
+        when(mKeyguardUpdateMonitor.getIsFaceAuthenticated()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()))
+                .thenReturn(true);
+        mController.getKeyguardCallback().onBiometricAuthenticated(0,
+                BiometricSourceType.FACE, false);
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                mContext.getString(R.string.keyguard_face_successful_unlock));
+    }
+
+    @Test
+    public void onTrustAgentErrorMessageDroppedBecauseFingerprintMessageShowing() {
+        createController();
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricHelp(BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                "fp not recognized", BiometricSourceType.FINGERPRINT);
+        clearInvocations(mRotateTextViewController);
+
+        mKeyguardUpdateMonitorCallback.onTrustAgentErrorMessage("testMessage");
+        verifyNoMessage(INDICATION_TYPE_TRUST);
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+    }
+
+    @Test
+    public void trustGrantedMessageShowsEvenWhenFingerprintMessageShowing() {
+        createController();
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricHelp(BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                "fp not recognized", BiometricSourceType.FINGERPRINT);
+        clearInvocations(mRotateTextViewController);
+
+        // GIVEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+
+        // WHEN the showTrustGranted method is called
+        final String trustGrantedMsg = "testing trust granted message after fp message";
+        mController.getKeyguardCallback().onTrustGrantedForCurrentUser(
+                false, false, new TrustGrantFlags(0), trustGrantedMsg);
+
+        // THEN verify the trust granted message shows
+        verifyIndicationMessage(
+                INDICATION_TYPE_TRUST,
+                trustGrantedMsg);
     }
 
     private void screenIsTurningOn() {
