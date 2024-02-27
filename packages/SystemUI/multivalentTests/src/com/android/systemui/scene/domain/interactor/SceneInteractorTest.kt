@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.scene.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -31,6 +33,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
@@ -274,5 +277,19 @@ class SceneInteractorTest : SysuiTestCase() {
 
             underTest.setVisible(true, "reason")
             assertThat(isVisible).isTrue()
+        }
+
+    @Test
+    fun isVisible_duringRemoteUserInteraction_forcedVisible() =
+        testScope.runTest {
+            underTest.setVisible(false, "reason")
+            val isVisible by collectLastValue(underTest.isVisible)
+            assertThat(isVisible).isFalse()
+            underTest.onRemoteUserInteractionStarted("reason")
+            assertThat(isVisible).isTrue()
+
+            underTest.onUserInteractionFinished()
+
+            assertThat(isVisible).isFalse()
         }
 }
