@@ -411,7 +411,8 @@ abstract class DetectorSession {
                 audioFormat,
                 options,
                 callback,
-                /* shouldCloseAudioStreamWithDelayOnDetect= */ true);
+                /* shouldCloseAudioStreamWithDelayOnDetect= */ true,
+                /* shouldCheckPermissionsAndAppOpsOnDetected= */ true);
     }
 
     void startListeningFromWearableLocked(
@@ -481,12 +482,29 @@ abstract class DetectorSession {
                         return null;
                     }
                 };
+        /*
+         * By setting shouldCheckPermissionsAndAppOpsOnDetected to false, when the audio
+         * stream is sent from the sandboxed HotwordDetectionService to the non-sandboxed
+         * VoiceInteractionService as a result of second-stage hotword detection, audio-related
+         * permissions will not be checked against the VoiceInteractionService and the AppOpsManager
+         * will not be notified of the data flow to the VoiceInteractionService. These checks are
+         * not performed because the audio stream here originates from a remotely connected wearable
+         * device. It does not originate from the microphone of the device where this code runs on,
+         * or a microphone directly controlled by this system. Permission checks are expected to
+         * happen on the remote wearable device. From the perspective of this system, the audio
+         * stream is data received from an external source.
+         *
+         * Not notifying AppOpsManager allows this device's microphone indicator to remain off when
+         * this data flow happens. It avoids confusion since the audio does not originate from
+         * this device. The wearable is expected to turn on its own microphone indicator.
+         */
         handleExternalSourceHotwordDetectionLocked(
                 audioStream,
                 audioFormat,
                 options,
                 voiceInteractionCallback,
-                /* shouldCloseAudioStreamWithDelayOnDetect= */ false);
+                /* shouldCloseAudioStreamWithDelayOnDetect= */ false,
+                /* shouldCheckPermissionsAndAppOpsOnDetected= */ false);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -495,7 +513,8 @@ abstract class DetectorSession {
             AudioFormat audioFormat,
             @Nullable PersistableBundle options,
             IMicrophoneHotwordDetectionVoiceInteractionCallback callback,
-            boolean shouldCloseAudioStreamWithDelayOnDetect) {
+            boolean shouldCloseAudioStreamWithDelayOnDetect,
+            boolean shouldCheckPermissionsAndAppOpsOnDetected) {
         if (DEBUG) {
             Slog.d(TAG, "#handleExternalSourceHotwordDetectionLocked");
         }
@@ -631,36 +650,39 @@ abstract class DetectorSession {
                                                     EXTERNAL_HOTWORD_CLEANUP_MILLIS,
                                                     TimeUnit.MILLISECONDS);
                                         }
-                                        try {
-                                            enforcePermissionsForDataDelivery();
-                                        } catch (SecurityException e) {
-                                            Slog.w(
-                                                    TAG,
-                                                    "Ignoring #onDetected due to a "
-                                                            + "SecurityException",
-                                                    e);
-                                            HotwordMetricsLogger.writeDetectorEvent(
-                                                    getDetectorType(),
-                                                    EXTERNAL_SOURCE_DETECT_SECURITY_EXCEPTION,
-                                                    mVoiceInteractionServiceUid);
+                                        if (shouldCheckPermissionsAndAppOpsOnDetected) {
                                             try {
-                                                callback.onHotwordDetectionServiceFailure(
+                                                enforcePermissionsForDataDelivery();
+                                            } catch (SecurityException e) {
+                                                Slog.w(
+                                                        TAG,
+                                                        "Ignoring #onDetected due to a "
+                                                                + "SecurityException",
+                                                        e);
+                                                HotwordMetricsLogger.writeDetectorEvent(
+                                                        getDetectorType(),
+                                                        EXTERNAL_SOURCE_DETECT_SECURITY_EXCEPTION,
+                                                        mVoiceInteractionServiceUid);
+                                                try {
+                                                    callback.onHotwordDetectionServiceFailure(
                                                         new HotwordDetectionServiceFailure(
                                                                 ONDETECTED_GOT_SECURITY_EXCEPTION,
                                                                 "Security exception occurs in "
                                                                         + "#onDetected method"));
-                                            } catch (RemoteException e1) {
-                                                notifyOnDetectorRemoteException();
-                                                throw e1;
+                                                } catch (RemoteException e1) {
+                                                    notifyOnDetectorRemoteException();
+                                                    throw e1;
+                                                }
+                                                return;
                                             }
-                                            return;
                                         }
                                         HotwordDetectedResult newResult;
                                         try {
                                             newResult =
-                                                    mHotwordAudioStreamCopier
-                                                            .startCopyingAudioStreams(
-                                                                    triggerResult);
+                                                mHotwordAudioStreamCopier
+                                                    .startCopyingAudioStreams(
+                                                        triggerResult,
+                                                        shouldCheckPermissionsAndAppOpsOnDetected);
                                         } catch (IOException e) {
                                             Slog.w(
                                                     TAG,

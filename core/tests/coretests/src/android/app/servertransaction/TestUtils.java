@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.util.MergedConfiguration;
+import android.window.ActivityWindowInfo;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
@@ -134,6 +135,8 @@ class TestUtils {
         private IBinder mTaskFragmentToken;
         @Nullable
         private IBinder mInitialCallerInfoAccessToken;
+        @NonNull
+        private ActivityWindowInfo mActivityWindowInfo = new ActivityWindowInfo();
 
         LaunchActivityItemBuilder(@NonNull IBinder activityToken, @NonNull Intent intent,
                 @NonNull ActivityInfo info) {
@@ -260,6 +263,13 @@ class TestUtils {
         }
 
         @NonNull
+        LaunchActivityItemBuilder setActivityWindowInfo(
+                @NonNull ActivityWindowInfo activityWindowInfo) {
+            mActivityWindowInfo.set(activityWindowInfo);
+            return this;
+        }
+
+        @NonNull
         LaunchActivityItem build() {
             return LaunchActivityItem.obtain(mActivityToken, mIntent, mIdent, mInfo,
                     mCurConfig, mOverrideConfig, mDeviceId, mReferrer, mVoiceInteractor,
@@ -267,7 +277,7 @@ class TestUtils {
                     mActivityOptions != null ? mActivityOptions.getSceneTransitionInfo() : null,
                     mIsForward, mProfilerInfo, mAssistToken, null /* activityClientController */,
                     mShareableActivityToken, mLaunchedFromBubble, mTaskFragmentToken,
-                    mInitialCallerInfoAccessToken);
+                    mInitialCallerInfoAccessToken, mActivityWindowInfo);
         }
     }
 }

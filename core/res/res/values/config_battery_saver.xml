@@ -33,6 +33,9 @@
     <!-- Whether or not battery saver should be "sticky" when manually enabled. -->
     <bool name="config_batterySaverStickyBehaviourDisabled">false</bool>
 
+    <!-- Whether to enable "Battery Saver turned off" notification. -->
+    <bool name="config_batterySaverTurnedOffNotificationEnabled">true</bool>
+
     <!-- Config flag to track default disable threshold for Dynamic power savings enabled battery saver. -->
     <integer name="config_dynamicPowerSavingsDefaultDisableThreshold">80</integer>
 

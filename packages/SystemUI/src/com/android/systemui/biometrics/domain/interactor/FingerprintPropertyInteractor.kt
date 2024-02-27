@@ -25,7 +25,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -40,7 +39,6 @@ constructor(
     configurationInteractor: ConfigurationInteractor,
     displayStateInteractor: DisplayStateInteractor,
 ) {
-    val propertiesInitialized: StateFlow<Boolean> = repository.propertiesInitialized
     val isUdfps: Flow<Boolean> = repository.sensorType.map { it.isUdfps() }
 
     /**

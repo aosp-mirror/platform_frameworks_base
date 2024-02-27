@@ -18,6 +18,8 @@ package android.tracing.perfetto;
 
 import android.util.proto.ProtoInputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Templated base class meant to be derived by embedders to create a custom data
  * source.
@@ -87,7 +89,8 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      *
      * NOTE: Should only be called from native side.
      */
-    protected TlsStateType createTlsState(CreateTlsStateArgs<DataSourceInstanceType> args) {
+    @VisibleForTesting
+    public TlsStateType createTlsState(CreateTlsStateArgs<DataSourceInstanceType> args) {
         return null;
     }
 

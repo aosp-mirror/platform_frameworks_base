@@ -578,45 +578,136 @@ public class BatteryStatsImplTest {
 
         // First wakelock, acquired once, not currently held
         mMockClock.realtime = 1000;
-        mBatteryStatsImpl.noteStartWakeLocked(10100, 100, null, "wakeLock1", null,
-                BatteryStats.WAKE_TYPE_PARTIAL, false);
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10100, 100, null, "wakeLock1", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
 
         mMockClock.realtime = 3000;
-        mBatteryStatsImpl.noteStopWakeLocked(10100, 100, null, "wakeLock1", null,
-                BatteryStats.WAKE_TYPE_PARTIAL);
+        mBatteryStatsImpl.noteStopWakeLocked(
+                10100, 100, null, "wakeLock1", null, BatteryStats.WAKE_TYPE_PARTIAL);
 
         // Second wakelock, acquired twice, still held
         mMockClock.realtime = 4000;
-        mBatteryStatsImpl.noteStartWakeLocked(10200, 101, null, "wakeLock2", null,
-                BatteryStats.WAKE_TYPE_PARTIAL, false);
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10200, 101, null, "wakeLock2", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
 
         mMockClock.realtime = 5000;
-        mBatteryStatsImpl.noteStopWakeLocked(10200, 101, null, "wakeLock2", null,
-                BatteryStats.WAKE_TYPE_PARTIAL);
+        mBatteryStatsImpl.noteStopWakeLocked(
+                10200, 101, null, "wakeLock2", null, BatteryStats.WAKE_TYPE_PARTIAL);
 
         mMockClock.realtime = 6000;
-        mBatteryStatsImpl.noteStartWakeLocked(10200, 101, null, "wakeLock2", null,
-                BatteryStats.WAKE_TYPE_PARTIAL, false);
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10200, 101, null, "wakeLock2", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        // Third and fourth wakelocks, overlapped with each other.
+        mMockClock.realtime = 7000;
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10300, 102, null, "wakeLock3", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
+
+        mMockClock.realtime = 8000;
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10400, 103, null, "wakeLock4", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
 
         mMockClock.realtime = 9000;
+        mBatteryStatsImpl.noteStopWakeLocked(
+                10400, 103, null, "wakeLock4", null, BatteryStats.WAKE_TYPE_PARTIAL);
 
-        List<WakeLockStats.WakeLock> wakeLockStats =
-                mBatteryStatsImpl.getWakeLockStats().getWakeLocks();
-        assertThat(wakeLockStats).hasSize(2);
+        mMockClock.realtime = 10000;
+        mBatteryStatsImpl.noteStartWakeLocked(
+                10400, 104, null, "wakeLock5", null, BatteryStats.WAKE_TYPE_PARTIAL, false);
 
-        WakeLockStats.WakeLock wakeLock1 = wakeLockStats.stream()
-                .filter(wl -> wl.uid == 10100 && wl.name.equals("wakeLock1")).findFirst().get();
+        mMockClock.realtime = 11000;
+        mBatteryStatsImpl.noteStopWakeLocked(
+                10400, 104, null, "wakeLock5", null, BatteryStats.WAKE_TYPE_PARTIAL);
 
-        assertThat(wakeLock1.timesAcquired).isEqualTo(1);
-        assertThat(wakeLock1.timeHeldMs).isEqualTo(0);  // Not currently held
-        assertThat(wakeLock1.totalTimeHeldMs).isEqualTo(2000); // 3000-1000
+        mMockClock.realtime = 12000;
+        mBatteryStatsImpl.noteStopWakeLocked(
+                10300, 102, null, "wakeLock3", null, BatteryStats.WAKE_TYPE_PARTIAL);
 
-        WakeLockStats.WakeLock wakeLock2 = wakeLockStats.stream()
-                .filter(wl -> wl.uid == 10200 && wl.name.equals("wakeLock2")).findFirst().get();
+        mMockClock.realtime = 13000;
 
-        assertThat(wakeLock2.timesAcquired).isEqualTo(2);
-        assertThat(wakeLock2.timeHeldMs).isEqualTo(3000);  // 9000-6000
-        assertThat(wakeLock2.totalTimeHeldMs).isEqualTo(4000); // (5000-4000) + (9000-6000)
+        // Verify un-aggregated wakelocks.
+        WakeLockStats wakeLockStats = mBatteryStatsImpl.getWakeLockStats();
+        List<WakeLockStats.WakeLock> wakeLockList = wakeLockStats.getWakeLocks();
+        assertThat(wakeLockList).hasSize(4);
+
+        WakeLockStats.WakeLock wakeLock1 = getWakeLockFromList(wakeLockList, 10100, "wakeLock1");
+        assertThat(wakeLock1.isAggregated).isFalse();
+        assertThat(wakeLock1.totalWakeLockData.timesAcquired).isEqualTo(1);
+        assertThat(wakeLock1.totalWakeLockData.timeHeldMs).isEqualTo(0); // Not currently held
+        assertThat(wakeLock1.totalWakeLockData.totalTimeHeldMs).isEqualTo(2000); // 3000-1000
+
+        WakeLockStats.WakeLock wakeLock3 = getWakeLockFromList(wakeLockList, 10300, "wakeLock3");
+        assertThat(wakeLock3.isAggregated).isFalse();
+        assertThat(wakeLock3.totalWakeLockData.timesAcquired).isEqualTo(1);
+        assertThat(wakeLock3.totalWakeLockData.timeHeldMs).isEqualTo(0); // Not currently held
+        // (8000-7000)/2 + (9000-8000)/3 + (10000-9000)/2 + (11000-10000)/3 + (12000-11000)/2
+        assertThat(wakeLock3.totalWakeLockData.totalTimeHeldMs).isEqualTo(2166);
+
+        WakeLockStats.WakeLock wakeLock4 = getWakeLockFromList(wakeLockList, 10400, "wakeLock4");
+        assertThat(wakeLock4.isAggregated).isFalse();
+        assertThat(wakeLock4.totalWakeLockData.timesAcquired).isEqualTo(1);
+        assertThat(wakeLock4.totalWakeLockData.timeHeldMs).isEqualTo(0); // Not currently held
+        assertThat(wakeLock4.totalWakeLockData.totalTimeHeldMs).isEqualTo(333); // (9000-8000)/3
+
+        WakeLockStats.WakeLock wakeLock5 = getWakeLockFromList(wakeLockList, 10400, "wakeLock5");
+        assertThat(wakeLock5.isAggregated).isFalse();
+        assertThat(wakeLock5.totalWakeLockData.timesAcquired).isEqualTo(1);
+        assertThat(wakeLock5.totalWakeLockData.timeHeldMs).isEqualTo(0); // Not currently held
+        assertThat(wakeLock5.totalWakeLockData.totalTimeHeldMs).isEqualTo(333); // (11000-10000)/3
+
+        // Verify aggregated wakelocks.
+        List<WakeLockStats.WakeLock> aggregatedWakeLockList =
+                wakeLockStats.getAggregatedWakeLocks();
+        assertThat(aggregatedWakeLockList).hasSize(4);
+
+        WakeLockStats.WakeLock aggregatedWakeLock1 =
+                getAggregatedWakeLockFromList(aggregatedWakeLockList, 10100);
+        assertThat(aggregatedWakeLock1.isAggregated).isTrue();
+        assertThat(aggregatedWakeLock1.totalWakeLockData.timesAcquired).isEqualTo(1);
+        // Not currently held
+        assertThat(aggregatedWakeLock1.totalWakeLockData.timeHeldMs).isEqualTo(0);
+        // 3000-1000
+        assertThat(aggregatedWakeLock1.totalWakeLockData.totalTimeHeldMs).isEqualTo(2000);
+
+        WakeLockStats.WakeLock aggregatedWakeLock2 =
+                getAggregatedWakeLockFromList(aggregatedWakeLockList, 10200);
+        assertThat(aggregatedWakeLock2.isAggregated).isTrue();
+        assertThat(aggregatedWakeLock2.totalWakeLockData.timesAcquired).isEqualTo(2);
+        assertThat(aggregatedWakeLock2.totalWakeLockData.timeHeldMs).isEqualTo(7000); // 13000-6000
+        // (5000-4000) + (13000-6000)
+        assertThat(aggregatedWakeLock2.totalWakeLockData.totalTimeHeldMs)
+                .isEqualTo(8000);
+
+        WakeLockStats.WakeLock aggregatedWakeLock3 =
+                getAggregatedWakeLockFromList(aggregatedWakeLockList, 10300);
+        assertThat(aggregatedWakeLock3.isAggregated).isTrue();
+        assertThat(aggregatedWakeLock3.totalWakeLockData.timesAcquired).isEqualTo(1);
+        // Not currently held
+        assertThat(aggregatedWakeLock3.totalWakeLockData.timeHeldMs).isEqualTo(0);
+        // 12000-7000
+        assertThat(aggregatedWakeLock3.totalWakeLockData.totalTimeHeldMs).isEqualTo(5000);
+
+        WakeLockStats.WakeLock aggregatedWakeLock4 =
+                getAggregatedWakeLockFromList(aggregatedWakeLockList, 10400);
+        assertThat(aggregatedWakeLock4.isAggregated).isTrue();
+        assertThat(aggregatedWakeLock4.totalWakeLockData.timesAcquired).isEqualTo(2);
+        // Not currently held
+        assertThat(aggregatedWakeLock4.totalWakeLockData.timeHeldMs).isEqualTo(0);
+        assertThat(aggregatedWakeLock4.totalWakeLockData.totalTimeHeldMs)
+                .isEqualTo(2000); // (9000-8000) + (11000-10000)
+    }
+
+    private WakeLockStats.WakeLock getAggregatedWakeLockFromList(
+            List<WakeLockStats.WakeLock> wakeLockList, final int uid) {
+        return getWakeLockFromList(wakeLockList, uid, WakeLockStats.WakeLock.NAME_AGGREGATED);
+    }
+
+    private WakeLockStats.WakeLock getWakeLockFromList(
+            List<WakeLockStats.WakeLock> wakeLockList, final int uid, final String name) {
+        return wakeLockList.stream()
+            .filter(wl -> wl.uid == uid && wl.name.equals(name))
+            .findFirst()
+            .get();
     }
 
     @Test

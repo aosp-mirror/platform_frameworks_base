@@ -72,6 +72,7 @@ import android.util.Pair;
 import android.util.Size;
 import android.util.SparseArray;
 import android.view.WindowMetrics;
+import android.window.ActivityWindowInfo;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOperation;
@@ -2864,9 +2865,25 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     @Override
     public boolean isActivityEmbedded(@NonNull Activity activity) {
+        Objects.requireNonNull(activity);
         synchronized (mLock) {
+            if (Flags.activityWindowInfoFlag()) {
+                final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
+                return activityWindowInfo != null && activityWindowInfo.isEmbedded();
+            }
             return mPresenter.isActivityEmbedded(activity.getActivityToken());
         }
+    }
+
+    @Nullable
+    private static ActivityWindowInfo getActivityWindowInfo(@NonNull Activity activity) {
+        if (activity.isFinishing()) {
+            return null;
+        }
+        final ActivityThread.ActivityClientRecord record =
+                ActivityThread.currentActivityThread()
+                        .getActivityClient(activity.getActivityToken());
+        return record != null ? record.getActivityWindowInfo() : null;
     }
 
     /**

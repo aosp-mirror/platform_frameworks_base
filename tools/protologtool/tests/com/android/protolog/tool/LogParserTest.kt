@@ -35,7 +35,7 @@ import java.util.Locale
 class LogParserTest {
     private val configParser: ViewerConfigParser = mock(ViewerConfigParser::class.java)
     private val parser = LogParser(configParser)
-    private var config: MutableMap<Int, ViewerConfigParser.ConfigEntry> = mutableMapOf()
+    private var config: MutableMap<Long, ViewerConfigParser.ConfigEntry> = mutableMapOf()
     private var outStream: OutputStream = ByteArrayOutputStream()
     private var printStream: PrintStream = PrintStream(outStream)
     private val dateFormat = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)

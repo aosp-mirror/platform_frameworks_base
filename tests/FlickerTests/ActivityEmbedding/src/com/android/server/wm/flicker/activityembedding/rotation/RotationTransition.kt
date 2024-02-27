@@ -17,9 +17,9 @@
 package com.android.server.wm.flicker.activityembedding.rotation
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.traces.component.ComponentNameMatcher
 import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.Test

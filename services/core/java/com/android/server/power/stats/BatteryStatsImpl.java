@@ -1591,32 +1591,76 @@ public class BatteryStatsImpl extends BatteryStats {
     @Override
     public WakeLockStats getWakeLockStats() {
         final long realtimeMs = mClock.elapsedRealtime();
-        final long realtimeUs = realtimeMs * 1000;
         List<WakeLockStats.WakeLock> uidWakeLockStats = new ArrayList<>();
+        List<WakeLockStats.WakeLock> uidAggregatedWakeLockStats = new ArrayList<>();
         for (int i = mUidStats.size() - 1; i >= 0; i--) {
             final Uid uid = mUidStats.valueAt(i);
+
+            // Converts unaggregated wakelocks.
             final ArrayMap<String, ? extends BatteryStats.Uid.Wakelock> wakelockStats =
                     uid.mWakelockStats.getMap();
             for (int j = wakelockStats.size() - 1; j >= 0; j--) {
                 final String name = wakelockStats.keyAt(j);
                 final Uid.Wakelock wakelock = (Uid.Wakelock) wakelockStats.valueAt(j);
-                final DualTimer timer = wakelock.mTimerPartial;
-                if (timer != null) {
-                    final long totalTimeLockHeldMs =
-                            timer.getTotalTimeLocked(realtimeUs, STATS_SINCE_CHARGED) / 1000;
-                    if (totalTimeLockHeldMs != 0) {
-                        uidWakeLockStats.add(
-                                new WakeLockStats.WakeLock(uid.getUid(), name,
-                                        timer.getCountLocked(STATS_SINCE_CHARGED),
-                                        totalTimeLockHeldMs,
-                                        timer.isRunningLocked()
-                                                ? timer.getCurrentDurationMsLocked(realtimeMs)
-                                                : 0));
-                    }
+                final WakeLockStats.WakeLock wakeLockItem =
+                        createWakeLock(uid, name, /* isAggregated= */ false, wakelock.mTimerPartial,
+                                realtimeMs);
+                if (wakeLockItem != null) {
+                    uidWakeLockStats.add(wakeLockItem);
                 }
             }
+
+            // Converts aggregated wakelocks.
+            final WakeLockStats.WakeLock aggregatedWakeLockItem =
+                    createWakeLock(
+                    uid,
+                    WakeLockStats.WakeLock.NAME_AGGREGATED,
+                    /* isAggregated= */ true,
+                    uid.mAggregatedPartialWakelockTimer,
+                    realtimeMs);
+            if (aggregatedWakeLockItem != null) {
+                uidAggregatedWakeLockStats.add(aggregatedWakeLockItem);
+            }
         }
-        return new WakeLockStats(uidWakeLockStats);
+        return new WakeLockStats(uidWakeLockStats, uidAggregatedWakeLockStats);
+    }
+
+    // Returns a valid {@code WakeLockStats.WakeLock} or null.
+    private WakeLockStats.WakeLock createWakeLock(
+            Uid uid, String name, boolean isAggregated, DualTimer timer, final long realtimeMs) {
+        if (timer == null) {
+            return null;
+        }
+        // Uses the primary timer for total wakelock data and used the sub timer for background
+        // wakelock data.
+        final WakeLockStats.WakeLockData totalWakeLockData = createWakeLockData(timer, realtimeMs);
+        final WakeLockStats.WakeLockData backgroundWakeLockData =
+                createWakeLockData(timer.getSubTimer(), realtimeMs);
+
+        return WakeLockStats.WakeLock.isDataValid(totalWakeLockData, backgroundWakeLockData)
+                ? new WakeLockStats.WakeLock(
+                uid.getUid(),
+                name,
+                isAggregated,
+                totalWakeLockData,
+                backgroundWakeLockData) : null;
+    }
+
+    @NonNull
+    private WakeLockStats.WakeLockData createWakeLockData(
+            DurationTimer timer, final long realtimeMs) {
+        if (timer == null) {
+            return WakeLockStats.WakeLockData.EMPTY;
+        }
+        final long totalTimeLockHeldMs =
+                timer.getTotalTimeLocked(realtimeMs * 1000, STATS_SINCE_CHARGED) / 1000;
+        if (totalTimeLockHeldMs == 0) {
+            return WakeLockStats.WakeLockData.EMPTY;
+        }
+        return new WakeLockStats.WakeLockData(
+            timer.getCountLocked(STATS_SINCE_CHARGED),
+            totalTimeLockHeldMs,
+            timer.isRunningLocked() ? timer.getCurrentDurationMsLocked(realtimeMs) : 0);
     }
 
     @Override

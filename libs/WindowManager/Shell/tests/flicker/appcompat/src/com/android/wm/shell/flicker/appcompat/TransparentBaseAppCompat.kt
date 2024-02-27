@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.appcompat
 
 import android.content.Context
-import android.tools.device.flicker.legacy.FlickerTestData
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.helpers.FIND_TIMEOUT
-import android.tools.device.traces.parsers.toFlickerComponent
+import android.tools.flicker.legacy.FlickerTestData
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.helpers.FIND_TIMEOUT
+import android.tools.traces.parsers.toFlickerComponent
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until

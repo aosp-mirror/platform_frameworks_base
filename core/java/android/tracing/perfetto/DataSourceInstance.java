@@ -16,6 +16,8 @@
 
 package android.tracing.perfetto;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * @hide
  */
@@ -66,7 +68,8 @@ public abstract class DataSourceInstance implements AutoCloseable {
      * Only required to be called when instance was retrieved with
      * `DataSource#getDataSourceInstanceLocked`.
      */
-    public final void release() {
+    @VisibleForTesting
+    public void release() {
         mDataSource.releaseDataSourceInstance(mInstanceIndex);
     }
 

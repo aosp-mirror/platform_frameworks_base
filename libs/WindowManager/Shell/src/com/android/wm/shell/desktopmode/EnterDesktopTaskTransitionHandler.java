@@ -54,8 +54,6 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     private final Transitions mTransitions;
     private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
 
-    // The size of the screen after drag relative to the fullscreen size
-    public static final float FINAL_FREEFORM_SCALE = 0.6f;
     public static final int FREEFORM_ANIMATION_DURATION = 336;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();

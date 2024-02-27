@@ -101,7 +101,19 @@ public class ScriptC extends Script {
         setID(id);
     }
 
-    private static void throwExceptionIfSDKTooHigh() {
+    private static void throwExceptionIfScriptCUnsupported() {
+        // Checks that this device actually does have an ABI that supports ScriptC.
+        //
+        // For an explanation as to why `System.loadLibrary` is used, see discussion at
+        // https://android-review.googlesource.com/c/platform/frameworks/base/+/2957974/comment/2f908b80_a05292ee
+        try {
+            System.loadLibrary("RS");
+        } catch (UnsatisfiedLinkError e) {
+            String s = "This device does not have an ABI that supports ScriptC.";
+            throw new UnsupportedOperationException(s);
+        }
+
+        // Throw an exception if the target API is 35 or above
         String message =
                 "ScriptC scripts are not supported when targeting an API Level >= 35. Please refer "
                     + "to https://developer.android.com/guide/topics/renderscript/migration-guide "
@@ -113,7 +125,7 @@ public class ScriptC extends Script {
     }
 
     private static synchronized long internalCreate(RenderScript rs, Resources resources, int resourceID) {
-        throwExceptionIfSDKTooHigh();
+        throwExceptionIfScriptCUnsupported();
         byte[] pgm;
         int pgmLength;
         InputStream is = resources.openRawResource(resourceID);
@@ -150,7 +162,7 @@ public class ScriptC extends Script {
 
     private static synchronized long internalStringCreate(RenderScript rs, String resName, byte[] bitcode) {
         //        Log.v(TAG, "Create script for resource = " + resName);
-        throwExceptionIfSDKTooHigh();
+        throwExceptionIfScriptCUnsupported();
         return rs.nScriptCCreate(resName, RenderScript.getCachePath(), bitcode, bitcode.length);
     }
 }

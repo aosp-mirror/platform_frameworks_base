@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.appcompat
 
 import android.content.Context
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTestData
-import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.FlickerTestData
+import android.tools.flicker.legacy.LegacyFlickerTest
 import com.android.server.wm.flicker.helpers.LetterboxAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.wm.shell.flicker.BaseTest

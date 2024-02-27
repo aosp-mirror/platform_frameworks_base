@@ -24,15 +24,15 @@ import static java.io.File.createTempFile;
 import static java.nio.file.Files.createTempDirectory;
 
 import android.internal.perfetto.protos.PerfettoTrace;
-import android.tools.common.ScenarioBuilder;
-import android.tools.common.Tag;
-import android.tools.common.io.TraceType;
-import android.tools.device.traces.TraceConfig;
-import android.tools.device.traces.TraceConfigs;
-import android.tools.device.traces.io.ResultReader;
-import android.tools.device.traces.io.ResultWriter;
-import android.tools.device.traces.monitors.PerfettoTraceMonitor;
-import android.tools.device.traces.monitors.TraceMonitor;
+import android.tools.ScenarioBuilder;
+import android.tools.Tag;
+import android.tools.io.TraceType;
+import android.tools.traces.TraceConfig;
+import android.tools.traces.TraceConfigs;
+import android.tools.traces.io.ResultReader;
+import android.tools.traces.io.ResultWriter;
+import android.tools.traces.monitors.PerfettoTraceMonitor;
+import android.tools.traces.monitors.TraceMonitor;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
