@@ -616,7 +616,7 @@ fun validMobileEvent(
     dataType: SignalIcon.MobileIconGroup? = THREE_G,
     subId: Int? = 1,
     carrierId: Int? = UNKNOWN_CARRIER_ID,
-    inflateStrength: Boolean? = false,
+    inflateStrength: Boolean = false,
     activity: Int? = null,
     carrierNetworkChange: Boolean = false,
     roaming: Boolean = false,
