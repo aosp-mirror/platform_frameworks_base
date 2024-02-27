@@ -167,6 +167,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // List of packages that have RestoreAnyVersion set to true but do not support  V-> U downgrade.
     private List<String> mVToUDenylist;
 
+    // Whether we have already initialised the V to U allowlist/denylist
+    private Boolean mAreVToUListsSet = false;
+
     // Key/value: bookkeeping about staged data and files for agent access
     private File mBackupDataName;
     private File mStageName;
@@ -235,18 +238,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                         backupManagerService.getAgentTimeoutParameters(),
                         "Timeout parameters cannot be null");
         mBackupEligibilityRules = backupEligibilityRules;
-        mVToUAllowlist =
-            createVToUList(
-                Settings.Secure.getStringForUser(
-                    backupManagerService.getContext().getContentResolver(),
-                    Settings.Secure.V_TO_U_RESTORE_ALLOWLIST,
-                    mUserId));
-        mVToUDenylist =
-            createVToUList(
-                Settings.Secure.getStringForUser(
-                    backupManagerService.getContext().getContentResolver(),
-                    Settings.Secure.V_TO_U_RESTORE_DENYLIST,
-                    mUserId));
 
         if (targetPackage != null) {
             // Single package restore
@@ -661,7 +652,23 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 // installed.  If the app has not declared that it is prepared to
                 // handle this case, we do not attempt the restore.
                 if (mIsSystemRestore
-                    && isVToUDowngrade(mPmAgent.getSourceSdk(), android.os.Build.VERSION.SDK_INT)) {
+                        && isVToUDowngrade(mPmAgent.getSourceSdk(),
+                        android.os.Build.VERSION.SDK_INT)) {
+                    if (!mAreVToUListsSet) {
+                        mVToUAllowlist =
+                                createVToUList(
+                                        Settings.Secure.getStringForUser(
+                                            backupManagerService.getContext().getContentResolver(),
+                                            Settings.Secure.V_TO_U_RESTORE_ALLOWLIST,
+                                            mUserId));
+                        mVToUDenylist =
+                                createVToUList(
+                                        Settings.Secure.getStringForUser(
+                                            backupManagerService.getContext().getContentResolver(),
+                                            Settings.Secure.V_TO_U_RESTORE_DENYLIST,
+                                            mUserId));
+                        mAreVToUListsSet = true;
+                    }
                     if (isPackageEligibleForVToURestore(mCurrentPackage)) {
                         Slog.i(TAG, "Package " + pkgName
                                 + " is eligible for V to U downgrade scenario");
