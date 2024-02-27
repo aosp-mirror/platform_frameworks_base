@@ -36,10 +36,10 @@ import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Test
 import org.junit.runner.RunWith
 
 @ExperimentalCoroutinesApi
