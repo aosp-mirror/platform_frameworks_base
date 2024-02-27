@@ -77,6 +77,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
             return TransformationSpecImpl(
                 progressSpec = impl.spec,
                 swipeSpec = impl.swipeSpec,
+                distance = impl.distance,
                 transformations = impl.transformations,
             )
         }
@@ -91,6 +92,7 @@ internal class TransitionBuilderImpl : TransitionBuilder {
     val transformations = mutableListOf<Transformation>()
     override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
     override var swipeSpec: SpringSpec<Float>? = null
+    override var distance: UserActionDistance? = null
 
     private var range: TransformationRange? = null
     private var reversed = false

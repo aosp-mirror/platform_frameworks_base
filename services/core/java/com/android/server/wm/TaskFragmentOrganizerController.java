@@ -1197,16 +1197,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
     }
 
-    // TODO(b/204399167): change to push the embedded state to the client side
     @Override
     public boolean isActivityEmbedded(IBinder activityToken) {
         synchronized (mGlobalLock) {
             final ActivityRecord activity = ActivityRecord.forTokenLocked(activityToken);
-            if (activity == null) {
-                return false;
-            }
-            final TaskFragment taskFragment = activity.getOrganizedTaskFragment();
-            return taskFragment != null && taskFragment.isEmbeddedWithBoundsOverride();
+            return activity != null
+                    ? activity.isEmbeddedInHostContainer()
+                    : false;
         }
     }
 

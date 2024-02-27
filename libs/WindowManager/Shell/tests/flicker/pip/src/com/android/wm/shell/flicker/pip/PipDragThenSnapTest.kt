@@ -17,12 +17,12 @@
 package com.android.wm.shell.flicker.pip
 
 import android.graphics.Rect
-import android.tools.common.Rotation
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
+import android.tools.Rotation
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.flicker.rules.RemoveAllTasksButHomeRule
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.setRotation

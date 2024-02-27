@@ -22,13 +22,6 @@ data class UserActionResult(
     val toScene: SceneKey,
 
     /**
-     * The distance the action takes to animate from 0% to 100%.
-     *
-     * If `null`, a default distance will be used depending on the [UserAction] performed.
-     */
-    val distance: UserActionDistance? = null,
-
-    /**
      * The key of the transition that should be used, if a specific one should be used.
      *
      * If `null`, the transition used will be the corresponding transition from the collection

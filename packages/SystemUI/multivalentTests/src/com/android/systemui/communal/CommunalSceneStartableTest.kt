@@ -93,25 +93,6 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun deviceDreaming_forceBlankScene() =
-        with(kosmos) {
-            testScope.runTest {
-                val scene by collectLastValue(communalInteractor.desiredScene)
-
-                communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
-
-                fakeKeyguardTransitionRepository.sendTransitionSteps(
-                    from = KeyguardState.GLANCEABLE_HUB,
-                    to = KeyguardState.DREAMING,
-                    testScope = this
-                )
-
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
-            }
-        }
-
-    @Test
     fun deviceDocked_forceCommunalScene() =
         with(kosmos) {
             testScope.runTest {
@@ -125,13 +106,6 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                     testScope = this
                 )
                 assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
-
-                fakeKeyguardTransitionRepository.sendTransitionSteps(
-                    from = KeyguardState.GLANCEABLE_HUB,
-                    to = KeyguardState.DREAMING,
-                    testScope = this
-                )
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
             }
         }
 

@@ -18,13 +18,12 @@ package com.android.protolog.tool
 
 import com.android.internal.protolog.common.LogLevel
 import com.android.json.stream.JsonReader
-import com.android.protolog.tool.ViewerConfigBuilder.LogCall
+import com.android.protolog.tool.ProtoLogTool.LogCall
+import java.io.StringReader
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.mockito.Mockito
-import java.io.StringReader
 
-class ViewerConfigBuilderTest {
+class ViewerConfigJsonBuilderTest {
     companion object {
         private val TAG1 = "WM_TEST"
         private val TAG2 = "WM_DEBUG"
@@ -39,20 +38,22 @@ class ViewerConfigBuilderTest {
         private const val PATH = "/tmp/test.java"
     }
 
-    private val configBuilder = ViewerConfigBuilder(Mockito.mock(ProtoLogCallProcessor::class.java))
+    private val configBuilder = ViewerConfigJsonBuilder()
 
-    private fun parseConfig(json: String): Map<Int, ViewerConfigParser.ConfigEntry> {
+    private fun parseConfig(json: String): Map<Long, ViewerConfigParser.ConfigEntry> {
         return ViewerConfigParser().parseConfig(JsonReader(StringReader(json)))
     }
 
     @Test
     fun processClass() {
-        configBuilder.addLogCalls(listOf(
+        val logCallRegistry = ProtoLogTool.LogCallRegistry()
+        logCallRegistry.addLogCalls(listOf(
                 LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH),
                 LogCall(TEST2.messageString, LogLevel.DEBUG, GROUP2, PATH),
-                LogCall(TEST3.messageString, LogLevel.ERROR, GROUP3, PATH)).withContext())
+                LogCall(TEST3.messageString, LogLevel.ERROR, GROUP3, PATH)))
 
-        val parsedConfig = parseConfig(configBuilder.build())
+        val parsedConfig = parseConfig(
+            configBuilder.build(logCallRegistry.getStatements()).toString(Charsets.UTF_8))
         assertEquals(3, parsedConfig.size)
         assertEquals(TEST1, parsedConfig[CodeUtils.hash(PATH,
 	           TEST1.messageString, LogLevel.INFO, GROUP1)])
@@ -64,32 +65,16 @@ class ViewerConfigBuilderTest {
 
     @Test
     fun processClass_nonUnique() {
-        configBuilder.addLogCalls(listOf(
+        val logCallRegistry = ProtoLogTool.LogCallRegistry()
+        logCallRegistry.addLogCalls(listOf(
                 LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH),
                 LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH),
-                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH)).withContext())
+                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH)))
 
-        val parsedConfig = parseConfig(configBuilder.build())
+        val parsedConfig = parseConfig(
+            configBuilder.build(logCallRegistry.getStatements()).toString(Charsets.UTF_8))
         assertEquals(1, parsedConfig.size)
         assertEquals(TEST1, parsedConfig[CodeUtils.hash(PATH, TEST1.messageString,
-            	   LogLevel.INFO, GROUP1)])
+            LogLevel.INFO, GROUP1)])
     }
-
-    @Test
-    fun processClass_disabled() {
-        configBuilder.addLogCalls(listOf(
-                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH),
-                LogCall(TEST2.messageString, LogLevel.DEBUG, GROUP_DISABLED, PATH),
-                LogCall(TEST3.messageString, LogLevel.ERROR, GROUP_TEXT_DISABLED, PATH))
-                .withContext())
-
-        val parsedConfig = parseConfig(configBuilder.build())
-        assertEquals(2, parsedConfig.size)
-        assertEquals(TEST1, parsedConfig[CodeUtils.hash(
-                PATH, TEST1.messageString, LogLevel.INFO, GROUP1)])
-        assertEquals(TEST3, parsedConfig[CodeUtils.hash(
-                PATH, TEST3.messageString, LogLevel.ERROR, GROUP_TEXT_DISABLED)])
-    }
-
-    private fun List<LogCall>.withContext() = map { it to ParsingContext() }
 }

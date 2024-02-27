@@ -25,7 +25,6 @@ import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 
 /**
@@ -60,7 +59,7 @@ constructor(
             if (udfpsEnrolledAndEnabled) {
                 transitionAnimation.immediatelyTransitionTo(1f)
             } else {
-                emptyFlow()
+                transitionAnimation.immediatelyTransitionTo(0f)
             }
         }
 }

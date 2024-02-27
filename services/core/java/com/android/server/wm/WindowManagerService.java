@@ -327,8 +327,8 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
+import com.android.internal.protolog.LegacyProtoLogImpl;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -6701,7 +6701,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void dumpLogStatus(PrintWriter pw) {
         pw.println("WINDOW MANAGER LOGGING (dumpsys window logging)");
-        pw.println(ProtoLogImpl.getSingleInstance().getStatus());
+        if (android.tracing.Flags.perfettoProtolog()) {
+            pw.println("Deprecated legacy command. Use Perfetto commands instead.");
+            return;
+        }
+        ((LegacyProtoLogImpl) ProtoLog.getSingleInstance()).getStatus();
     }
 
     private void dumpSessionsLocked(PrintWriter pw) {

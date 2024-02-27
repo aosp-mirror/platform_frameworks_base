@@ -17,7 +17,7 @@
 package com.android.wm.shell.flicker.pip.tv
 
 import android.app.Instrumentation
-import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiObject2

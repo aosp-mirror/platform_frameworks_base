@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @SysUISingleton
 class FakeFingerprintPropertyRepository @Inject constructor() : FingerprintPropertyRepository {
-    override val propertiesInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     private val _sensorId: MutableStateFlow<Int> = MutableStateFlow(-1)
     override val sensorId = _sensorId.asStateFlow()
@@ -51,7 +50,6 @@ class FakeFingerprintPropertyRepository @Inject constructor() : FingerprintPrope
         sensorType: FingerprintSensorType,
         sensorLocations: Map<String, SensorLocationInternal>
     ) {
-        propertiesInitialized.value = true
         _sensorId.value = sensorId
         _strength.value = strength
         _sensorType.value = sensorType

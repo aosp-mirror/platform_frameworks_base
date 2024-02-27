@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,7 +44,7 @@ import org.junit.runners.Parameterized
  * ```
  *     1. All assertions are inherited from [AutoEnterPipOnGoToHomeTest]
  *     2. Part of the test setup occurs automatically via
- *        [android.tools.device.flicker.legacy.runner.TransitionRunner],
+ *        [android.tools.flicker.legacy.runner.TransitionRunner],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
  * ```

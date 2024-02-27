@@ -18,13 +18,13 @@
 
 package com.android.wm.shell.flicker.utils
 
-import android.tools.common.Rotation
-import android.tools.common.datatypes.Region
-import android.tools.common.flicker.subject.layers.LayerTraceEntrySubject
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.common.traces.component.IComponentMatcher
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.helpers.WindowUtils
+import android.tools.Rotation
+import android.tools.datatypes.Region
+import android.tools.flicker.subject.layers.LayerTraceEntrySubject
+import android.tools.flicker.subject.layers.LayersTraceSubject
+import android.tools.traces.component.IComponentMatcher
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.helpers.WindowUtils
 
 fun LegacyFlickerTest.appPairsDividerIsVisibleAtEnd() {
     assertLayersEnd { this.isVisible(APP_PAIR_SPLIT_DIVIDER_COMPONENT) }

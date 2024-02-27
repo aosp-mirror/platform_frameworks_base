@@ -117,6 +117,9 @@ flag {
     namespace: "enterprise"
     description: "Exempt the default sms app of the context user for suspension when calling setPersonalAppsSuspended"
     bug: "309183330"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

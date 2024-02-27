@@ -88,6 +88,10 @@ public class PolicySizeVerifier {
      * Throw if Parcelable contains any string that's too long to be serialized.
      */
     public static void enforceMaxParcelableFieldsLength(Parcelable parcelable) {
+        // TODO(b/326662716) rework to protect against infinite recursion.
+        if (true) {
+            return;
+        }
         Class<?> clazz = parcelable.getClass();
 
         Field[] fields = clazz.getDeclaredFields();

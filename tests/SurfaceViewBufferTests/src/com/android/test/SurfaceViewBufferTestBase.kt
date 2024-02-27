@@ -18,8 +18,8 @@ package com.android.test
 import android.app.Instrumentation
 import android.graphics.Point
 import android.provider.Settings
-import android.tools.common.datatypes.Size
-import android.tools.common.flicker.subject.layers.LayerSubject
+import android.tools.datatypes.Size
+import android.tools.flicker.subject.layers.LayerSubject
 import androidx.test.InstrumentationRegistry
 import org.junit.After
 import org.junit.Before

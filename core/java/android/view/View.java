@@ -5649,9 +5649,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private int mInfrequentUpdateCount = 0;
     private long mLastUpdateTimeMillis = 0;
-    private long mMinusOneFrameIntervalMillis = 0;
-    private long mMinusTwoFrameIntervalMillis = 0;
-    private int mLastFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
+    /**
+     * @hide
+     */
+    protected long mMinusOneFrameIntervalMillis = 0;
+    /**
+     * @hide
+     */
+    protected long mMinusTwoFrameIntervalMillis = 0;
+    private int mLastFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
 
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public static final float REQUESTED_FRAME_RATE_CATEGORY_DEFAULT = Float.NaN;
@@ -33612,7 +33618,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return (float) viewSize / screenSize;
     }
 
-    private int calculateFrameRateCategory(float sizePercentage) {
+    /**
+     * Used to calculate the frame rate category of a View.
+     *
+     * @hide
+     */
+    protected int calculateFrameRateCategory(float sizePercentage) {
         if (mMinusTwoFrameIntervalMillis + mMinusOneFrameIntervalMillis
                 < INFREQUENT_UPDATE_INTERVAL_MILLIS) {
             if (sizePercentage <= FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD) {
@@ -33746,7 +33757,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
         mMinusOneFrameIntervalMillis = timeIntervalMillis;
 
-        mLastUpdateTimeMillis = currentTimeMillis;
+        if (mMinusOneFrameIntervalMillis - mMinusTwoFrameIntervalMillis >= 30
+                && timeIntervalMillis < 2) {
+            return;
+        }
         if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
             mInfrequentUpdateCount = mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS
                         ? mInfrequentUpdateCount : mInfrequentUpdateCount + 1;
