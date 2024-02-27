@@ -1081,6 +1081,7 @@ public final class InputMethodManager {
                     }
                     final boolean startInput;
                     synchronized (mH) {
+                        mImeDispatcher.clear();
                         if (getBindSequenceLocked() != sequence) {
                             return;
                         }
