@@ -100,7 +100,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
                         getRequestSession.mClientRequest,
-                        providerInfo);
+                        providerInfo, getRequestSession.mHybridService);
         if (filteredRequest != null) {
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
                     new HashMap<>();
@@ -136,7 +136,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
                         getRequestSession.mClientRequest,
-                        providerInfo);
+                        providerInfo, getRequestSession.mHybridService);
         if (filteredRequest != null) {
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
                     new HashMap<>();
@@ -186,9 +186,19 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     private static android.credentials.GetCredentialRequest filterOptions(
             List<String> providerCapabilities,
             android.credentials.GetCredentialRequest clientRequest,
-            CredentialProviderInfo info
-    ) {
+            CredentialProviderInfo info,
+            String hybridService) {
         Slog.i(TAG, "Filtering request options for: " + info.getComponentName());
+        if (android.credentials.flags.Flags.hybridFilterFixEnabled()) {
+            ComponentName hybridComponentName = ComponentName.unflattenFromString(hybridService);
+            if (hybridComponentName != null && hybridComponentName
+                    .equals(info.getComponentName())) {
+                Slog.i(TAG, "Skipping filtering of options for hybrid service");
+                return clientRequest;
+            }
+            Slog.w(TAG, "Could not parse hybrid service while filtering options");
+        }
+
         List<CredentialOption> filteredOptions = new ArrayList<>();
         for (CredentialOption option : clientRequest.getCredentialOptions()) {
             if (providerCapabilities.contains(option.getType())
