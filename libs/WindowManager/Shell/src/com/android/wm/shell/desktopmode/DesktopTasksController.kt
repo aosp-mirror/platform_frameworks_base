@@ -62,7 +62,6 @@ import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.annotations.ExternalThread
 import com.android.wm.shell.common.annotations.ShellMainThread
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
-import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
 import com.android.wm.shell.draganddrop.DragAndDropController
@@ -405,21 +404,7 @@ class DesktopTasksController(
                     splitScreenController.getStageOfTask(taskInfo.taskId),
                     EXIT_REASON_DESKTOP_MODE
             )
-            getOtherSplitTask(taskInfo.taskId)?.let { otherTaskInfo ->
-                wct.removeTask(otherTaskInfo.token)
-            }
         }
-    }
-
-    private fun getOtherSplitTask(taskId: Int): RunningTaskInfo? {
-        val remainingTaskPosition: Int =
-                if (splitScreenController.getSplitPosition(taskId)
-                        == SPLIT_POSITION_BOTTOM_OR_RIGHT) {
-                    SPLIT_POSITION_TOP_OR_LEFT
-                } else {
-                    SPLIT_POSITION_BOTTOM_OR_RIGHT
-                }
-        return splitScreenController.getTaskInfo(remainingTaskPosition)
     }
 
     /**

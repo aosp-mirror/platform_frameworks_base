@@ -368,7 +368,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     // been added, so they must be added here
                     mWindowDecorByTaskId.get(mTaskId).addCaptionInset(wct);
                     mDesktopTasksController.get().moveToDesktop(mTaskId, wct);
-                    closeOtherSplitTask(mTaskId);
                 }
                 decoration.closeHandleMenu();
             } else if (id == R.id.fullscreen_button) {
@@ -1039,12 +1038,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 .getSplitPosition(taskId) == SPLIT_POSITION_BOTTOM_OR_RIGHT
                 ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT;
         return mSplitScreenController.getTaskInfo(remainingTaskPosition);
-    }
-
-    private void closeOtherSplitTask(int taskId) {
-        if (isTaskInSplitScreen(taskId)) {
-            mTaskOperations.closeTask(getOtherSplitTask(taskId).token);
-        }
     }
 
     private boolean isTaskInSplitScreen(int taskId) {

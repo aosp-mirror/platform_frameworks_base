@@ -54,6 +54,7 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASO
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_FINISHED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DESKTOP_MODE;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DEVICE_FOLDED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_FULLSCREEN_SHORTCUT;
@@ -1572,6 +1573,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 // The device is folded
             case EXIT_REASON_FULLSCREEN_SHORTCUT:
                 // User has used a keyboard shortcut to go back to fullscreen from split
+            case EXIT_REASON_DESKTOP_MODE:
+                // One of the children enters desktop mode
                 return true;
             default:
                 return false;
