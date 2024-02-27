@@ -16,9 +16,12 @@
 
 package com.android.server.display.brightness;
 
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
+
 import static org.junit.Assert.assertEquals;
 
 import android.hardware.display.BrightnessInfo;
+import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -39,6 +42,7 @@ public final class BrightnessEventTest {
         mBrightnessEvent.setReason(
                 getReason(BrightnessReason.REASON_DOZE, BrightnessReason.MODIFIER_LOW_POWER));
         mBrightnessEvent.setPhysicalDisplayId("test");
+        mBrightnessEvent.setDisplayState(Display.STATE_ON);
         mBrightnessEvent.setLux(100.0f);
         mBrightnessEvent.setPreThresholdLux(150.0f);
         mBrightnessEvent.setTime(System.currentTimeMillis());
@@ -55,6 +59,7 @@ public final class BrightnessEventTest {
         mBrightnessEvent.setAdjustmentFlags(0);
         mBrightnessEvent.setAutomaticBrightnessEnabled(true);
         mBrightnessEvent.setDisplayBrightnessStrategyName(DISPLAY_BRIGHTNESS_STRATEGY_NAME);
+        mBrightnessEvent.setAutoBrightnessMode(AUTO_BRIGHTNESS_MODE_IDLE);
     }
 
     @Test
@@ -69,20 +74,20 @@ public final class BrightnessEventTest {
     public void testToStringWorksAsExpected() {
         String actualString = mBrightnessEvent.toString(false);
         String expectedString =
-                "BrightnessEvent: disp=1, physDisp=test, brt=0.6, initBrt=25.0, rcmdBrt=0.6,"
-                + " preBrt=NaN, lux=100.0, preLux=150.0, hbmMax=0.62, hbmMode=off, rbcStrength=-1,"
-                + " thrmMax=0.65, powerFactor=0.2, wasShortTermModelActive=true, flags=,"
-                + " reason=doze [ low_pwr ], autoBrightness=true, strategy="
-                        + DISPLAY_BRIGHTNESS_STRATEGY_NAME;
+                "BrightnessEvent: disp=1, physDisp=test, displayState=ON, brt=0.6, initBrt=25.0,"
+                + " rcmdBrt=0.6, preBrt=NaN, lux=100.0, preLux=150.0, hbmMax=0.62, hbmMode=off,"
+                + " rbcStrength=-1, thrmMax=0.65, powerFactor=0.2, wasShortTermModelActive=true,"
+                + " flags=, reason=doze [ low_pwr ], autoBrightness=true, strategy="
+                        + DISPLAY_BRIGHTNESS_STRATEGY_NAME + ", autoBrightnessMode=idle";
         assertEquals(expectedString, actualString);
     }
 
     @Test
     public void testFlagsToString() {
         mBrightnessEvent.reset();
-        mBrightnessEvent.setFlags(mBrightnessEvent.getFlags() | BrightnessEvent.FLAG_IDLE_CURVE);
+        mBrightnessEvent.setFlags(mBrightnessEvent.getFlags() | BrightnessEvent.FLAG_RBC);
         String actualString = mBrightnessEvent.flagsToString();
-        String expectedString = "idle_curve ";
+        String expectedString = "rbc ";
         assertEquals(expectedString, actualString);
     }
 
@@ -90,10 +95,10 @@ public final class BrightnessEventTest {
     public void testFlagsToString_multipleFlags() {
         mBrightnessEvent.reset();
         mBrightnessEvent.setFlags(mBrightnessEvent.getFlags()
-                    | BrightnessEvent.FLAG_IDLE_CURVE
+                    | BrightnessEvent.FLAG_RBC
                     | BrightnessEvent.FLAG_LOW_POWER_MODE);
         String actualString = mBrightnessEvent.flagsToString();
-        String expectedString = "idle_curve low_power_mode ";
+        String expectedString = "rbc low_power_mode ";
         assertEquals(expectedString, actualString);
     }
 

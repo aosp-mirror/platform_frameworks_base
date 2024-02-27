@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
@@ -37,7 +39,6 @@ import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
-import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
@@ -1378,7 +1379,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Switch to doze auto-brightness mode if needed
         if (mFlags.areAutoBrightnessModesEnabled() && mAutomaticBrightnessController != null
                 && !mAutomaticBrightnessController.isInIdleMode()) {
-            setAutomaticScreenBrightnessMode(Display.isDozeState(state)
+            mAutomaticBrightnessController.switchMode(mPowerRequest.policy == POLICY_DOZE
                     ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT);
         }
 
@@ -1464,6 +1465,22 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // Controller.
             brightnessState = clampScreenBrightness(brightnessState);
             mAutomaticBrightnessStrategy.setAutoBrightnessApplied(false);
+        }
+
+        // If there's an offload session and auto-brightness is on, we need to set the initial doze
+        // brightness using the doze auto-brightness curve before the offload session starts
+        // controlling the brightness.
+        if (Float.isNaN(brightnessState) && mFlags.areAutoBrightnessModesEnabled()
+                && mFlags.isDisplayOffloadEnabled()
+                && mPowerRequest.policy == POLICY_DOZE
+                && mDisplayOffloadSession != null
+                && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
+            rawBrightnessState = mAutomaticBrightnessController
+                    .getAutomaticScreenBrightnessBasedOnLastObservedLux(mTempBrightnessEvent);
+            if (BrightnessUtils.isValidBrightnessValue(rawBrightnessState)) {
+                brightnessState = clampScreenBrightness(rawBrightnessState);
+                mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_INITIAL);
+            }
         }
 
         // Use default brightness when dozing unless overridden.
@@ -1618,7 +1635,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             // if doze or suspend state is requested, we want to finish brightnes animation fast
             // to allow state animation to start
-            if (mPowerRequest.policy == DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE
+            if (mPowerRequest.policy == POLICY_DOZE
                     && (mPowerRequest.dozeScreenState == Display.STATE_UNKNOWN  // dozing
                     || mPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND
                     || mPowerRequest.dozeScreenState == Display.STATE_ON_SUSPEND)) {
@@ -1706,6 +1723,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mTempBrightnessEvent.setTime(System.currentTimeMillis());
         mTempBrightnessEvent.setBrightness(brightnessState);
         mTempBrightnessEvent.setPhysicalDisplayId(mUniqueDisplayId);
+        mTempBrightnessEvent.setDisplayState(state);
         mTempBrightnessEvent.setReason(mBrightnessReason);
         mTempBrightnessEvent.setHbmMax(mBrightnessRangeController.getCurrentBrightnessMax());
         mTempBrightnessEvent.setHbmMode(mBrightnessRangeController.getHighBrightnessMode());
@@ -2879,7 +2897,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     (flags & BrightnessEvent.FLAG_INVALID_LUX) > 0,
                     (flags & BrightnessEvent.FLAG_DOZE_SCALE) > 0,
                     (flags & BrightnessEvent.FLAG_USER_SET) > 0,
-                    (flags & BrightnessEvent.FLAG_IDLE_CURVE) > 0,
+                    event.getAutoBrightnessMode() == AUTO_BRIGHTNESS_MODE_IDLE,
                     (flags & BrightnessEvent.FLAG_LOW_POWER_MODE) > 0);
         }
     }
