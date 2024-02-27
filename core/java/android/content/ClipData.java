@@ -169,6 +169,8 @@ import java.util.List;
  */
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ClipData implements Parcelable {
+    private static final String TAG = "ClipData";
+
     static final String[] MIMETYPES_TEXT_PLAIN = new String[] {
         ClipDescription.MIMETYPE_TEXT_PLAIN };
     static final String[] MIMETYPES_TEXT_HTML = new String[] {
@@ -476,7 +478,6 @@ public class ClipData implements Parcelable {
          * @return Returns the item's textual representation.
          */
 //BEGIN_INCLUDE(coerceToText)
-        @android.ravenwood.annotation.RavenwoodThrow
         public CharSequence coerceToText(Context context) {
             // If this Item has an explicit textual value, simply return that.
             CharSequence text = getText();
@@ -484,13 +485,20 @@ public class ClipData implements Parcelable {
                 return text;
             }
 
+            // Gracefully handle cases where resolver isn't available
+            ContentResolver resolver = null;
+            try {
+                resolver = context.getContentResolver();
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to obtain ContentResolver: " + e);
+            }
+
             // If this Item has a URI value, try using that.
             Uri uri = getUri();
-            if (uri != null) {
+            if (uri != null && resolver != null) {
                 // First see if the URI can be opened as a plain text stream
                 // (of any sub-type).  If so, this is the best textual
                 // representation for it.
-                final ContentResolver resolver = context.getContentResolver();
                 AssetFileDescriptor descr = null;
                 FileInputStream stream = null;
                 InputStreamReader reader = null;
@@ -499,7 +507,7 @@ public class ClipData implements Parcelable {
                         // Ask for a stream of the desired type.
                         descr = resolver.openTypedAssetFileDescriptor(uri, "text/*", null);
                     } catch (SecurityException e) {
-                        Log.w("ClipData", "Failure opening stream", e);
+                        Log.w(TAG, "Failure opening stream", e);
                     } catch (FileNotFoundException|RuntimeException e) {
                         // Unable to open content URI as text...  not really an
                         // error, just something to ignore.
@@ -519,7 +527,7 @@ public class ClipData implements Parcelable {
                             return builder.toString();
                         } catch (IOException e) {
                             // Something bad has happened.
-                            Log.w("ClipData", "Failure loading text", e);
+                            Log.w(TAG, "Failure loading text", e);
                             return e.toString();
                         }
                     }
@@ -528,7 +536,8 @@ public class ClipData implements Parcelable {
                     IoUtils.closeQuietly(stream);
                     IoUtils.closeQuietly(reader);
                 }
-
+            }
+            if (uri != null) {
                 // If we couldn't open the URI as a stream, use the URI itself as a textual
                 // representation (but not for "content", "android.resource" or "file" schemes).
                 final String scheme = uri.getScheme();
@@ -704,7 +713,7 @@ public class ClipData implements Parcelable {
                         }
 
                     } catch (SecurityException e) {
-                        Log.w("ClipData", "Failure opening stream", e);
+                        Log.w(TAG, "Failure opening stream", e);
 
                     } catch (FileNotFoundException e) {
                         // Unable to open content URI as text...  not really an
@@ -712,7 +721,7 @@ public class ClipData implements Parcelable {
 
                     } catch (IOException e) {
                         // Something bad has happened.
-                        Log.w("ClipData", "Failure loading text", e);
+                        Log.w(TAG, "Failure loading text", e);
                         return Html.escapeHtml(e.toString());
 
                     } finally {
@@ -1123,7 +1132,7 @@ public class ClipData implements Parcelable {
      *
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodThrow
+    @android.ravenwood.annotation.RavenwoodKeep
     public void prepareToLeaveProcess(boolean leavingPackage) {
         // Assume that callers are going to be granting permissions
         prepareToLeaveProcess(leavingPackage, Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -1134,7 +1143,7 @@ public class ClipData implements Parcelable {
      *
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodThrow
+    @android.ravenwood.annotation.RavenwoodReplace
     public void prepareToLeaveProcess(boolean leavingPackage, int intentFlags) {
         final int size = mItems.size();
         for (int i = 0; i < size; i++) {
@@ -1152,6 +1161,11 @@ public class ClipData implements Parcelable {
                 }
             }
         }
+    }
+
+    /** @hide */
+    public void prepareToLeaveProcess$ravenwood(boolean leavingPackage, int intentFlags) {
+        // No process boundaries on Ravenwood; ignored
     }
 
     /** {@hide} */

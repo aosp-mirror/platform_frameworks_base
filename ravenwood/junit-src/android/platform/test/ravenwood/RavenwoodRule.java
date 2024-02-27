@@ -121,6 +121,8 @@ public class RavenwoodRule implements TestRule {
     int mUid = NOBODY_UID;
     int mPid = sNextPid.getAndIncrement();
 
+    String mPackageName;
+
     boolean mProvideMainThread = false;
 
     final RavenwoodSystemProperties mSystemProperties = new RavenwoodSystemProperties();
@@ -154,6 +156,15 @@ public class RavenwoodRule implements TestRule {
          */
         public Builder setProcessApp() {
             mRule.mUid = FIRST_APPLICATION_UID;
+            return this;
+        }
+
+        /**
+         * Configure the identity of this process to be the given package name for the duration
+         * of the test. Has no effect on non-Ravenwood environments.
+         */
+        public Builder setPackageName(/* @NonNull */ String packageName) {
+            mRule.mPackageName = Objects.requireNonNull(packageName);
             return this;
         }
 

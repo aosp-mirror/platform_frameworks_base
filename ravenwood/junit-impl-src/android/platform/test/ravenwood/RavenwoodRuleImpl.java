@@ -110,13 +110,16 @@ public class RavenwoodRuleImpl {
 
         ActivityManager.init$ravenwood(rule.mCurrentUser);
 
+        final HandlerThread main;
         if (rule.mProvideMainThread) {
-            final HandlerThread main = new HandlerThread(MAIN_THREAD_NAME);
+            main = new HandlerThread(MAIN_THREAD_NAME);
             main.start();
             Looper.setMainLooperForTest(main.getLooper());
+        } else {
+            main = null;
         }
 
-        rule.mContext = new RavenwoodContext();
+        rule.mContext = new RavenwoodContext(rule.mPackageName, main);
         rule.mInstrumentation = new Instrumentation();
         rule.mInstrumentation.basicInit(rule.mContext);
         InstrumentationRegistry.registerInstance(rule.mInstrumentation, Bundle.EMPTY);
