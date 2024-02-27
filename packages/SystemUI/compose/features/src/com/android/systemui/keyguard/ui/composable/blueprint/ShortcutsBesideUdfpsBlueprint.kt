@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSect
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
 import com.android.systemui.keyguard.ui.composable.section.DefaultClockSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
+import com.android.systemui.keyguard.ui.composable.section.MediaCarouselSection
 import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.SmartSpaceSection
@@ -63,6 +64,7 @@ constructor(
     private val ambientIndicationSectionOptional: Optional<AmbientIndicationSection>,
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
+    private val mediaCarouselSection: MediaCarouselSection,
     private val clockInteractor: KeyguardClockInteractor,
 ) : ComposableLockscreenSceneBlueprint {
 
@@ -115,7 +117,9 @@ constructor(
                             with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
                         }
 
-                        if (viewModel.areNotificationsVisible) {
+                        with(mediaCarouselSection) { MediaCarousel() }
+
+                        if (viewModel.areNotificationsVisible(resources = resources)) {
                             with(notificationSection) {
                                 Notifications(
                                     modifier = Modifier.fillMaxWidth().weight(weight = 1f)
