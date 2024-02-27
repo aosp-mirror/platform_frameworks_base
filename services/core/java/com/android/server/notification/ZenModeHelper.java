@@ -1285,8 +1285,8 @@ public class ZenModeHelper {
      */
     private static void updateZenDeviceEffects(ZenRule zenRule,
             @Nullable ZenDeviceEffects newEffects, boolean isFromApp, boolean updateBitmask) {
+        // Same as with ZenPolicy, supplying null effects means keeping the previous ones.
         if (newEffects == null) {
-            zenRule.zenDeviceEffects = null;
             return;
         }
 
