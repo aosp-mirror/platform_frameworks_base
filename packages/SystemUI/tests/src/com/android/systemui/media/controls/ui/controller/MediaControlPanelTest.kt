@@ -1247,7 +1247,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
+    @RequiresFlagsEnabled(com.android.settingslib.flags.Flags.FLAG_LEGACY_LE_AUDIO_SHARING)
     fun bindBroadcastButton() {
         initMediaViewHolderMocks()
         initDeviceMediaData(true, APP_NAME)
