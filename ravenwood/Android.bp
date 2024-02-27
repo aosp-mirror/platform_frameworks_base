@@ -86,6 +86,21 @@ java_library {
     jarjar_rules: ":ravenwood-services-jarjar-rules",
 }
 
+// Separated out from ravenwood-junit-impl since it needs to compile
+// against `module_current`
+java_library {
+    name: "ravenwood-junit-impl-flag",
+    srcs: [
+        "junit-flag-src/**/*.java",
+    ],
+    sdk_version: "module_current",
+    libs: [
+        "junit",
+        "flag-junit",
+    ],
+    visibility: ["//visibility:public"],
+}
+
 // Carefully compiles against only test_current to support tests that
 // want to verify they're unbundled.  The "impl" library above is what
 // ships inside the Ravenwood environment to actually drive any API
@@ -95,10 +110,12 @@ java_library {
     srcs: [
         "junit-src/**/*.java",
         "junit-stub-src/**/*.java",
+        "junit-flag-src/**/*.java",
     ],
     sdk_version: "test_current",
     libs: [
         "junit",
+        "flag-junit",
     ],
     visibility: ["//visibility:public"],
 }
