@@ -813,6 +813,18 @@ public class MagnificationConnectionManagerTest {
                 anyBoolean());
     }
 
+    @Test
+    public void onFullscreenMagnificationActivationChanged_hasConnection_notifyActivatedState()
+            throws RemoteException {
+        mMagnificationConnectionManager.setConnection(mMockConnection.getConnection());
+
+        mMagnificationConnectionManager
+                .onFullscreenMagnificationActivationChanged(TEST_DISPLAY, /* activated= */ true);
+
+        verify(mMockConnection.getConnection())
+                .onFullscreenMagnificationActivationChanged(eq(TEST_DISPLAY), eq(true));
+    }
+
     private MotionEvent generatePointersDownEvent(PointF[] pointersLocation) {
         final int len = pointersLocation.length;
 
