@@ -96,7 +96,7 @@ constructor(
     }
 
     override fun instantCollapseShade() {
-        // TODO(b/315921512) add support for instant transition
+        // TODO(b/325602936) add support for instant transition
         sceneInteractor.changeScene(
             getCollapseDestinationScene(),
             "hide shade",
@@ -131,6 +131,11 @@ constructor(
                 animateCollapseShadeInternal()
             }
         }
+    }
+
+    override fun collapseWithDuration(animationDuration: Int) {
+        // TODO(b/300258424) inline this. The only caller uses the default duration.
+        animateCollapseShade()
     }
 
     private fun animateCollapseShadeInternal() {
