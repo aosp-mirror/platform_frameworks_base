@@ -17,6 +17,8 @@
 package com.android.keyguard
 
 import android.testing.TestableLooper
+import android.view.KeyEvent
+import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -25,8 +27,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
+import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor
-import com.android.systemui.Flags as AconfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
@@ -36,12 +38,17 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
@@ -49,6 +56,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import com.android.systemui.Flags as AconfigFlags
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -77,6 +85,7 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     private lateinit var mKeyguardMessageAreaController:
         KeyguardMessageAreaController<BouncerKeyguardMessageArea>
     @Mock private lateinit var postureController: DevicePostureController
+    @Captor private lateinit var keyListenerArgumentCaptor: ArgumentCaptor<View.OnKeyListener>
 
     private lateinit var keyguardPasswordViewController: KeyguardPasswordViewController
 
@@ -170,5 +179,35 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     fun testMessageIsSetWhenReset() {
         keyguardPasswordViewController.resetState()
         verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_password)
+    }
+
+    @Test
+    fun testSpaceKeyDoesNotSubmitPassword() {
+        keyguardPasswordViewController.onViewAttached()
+        verify(passwordEntry).setOnKeyListener(keyListenerArgumentCaptor.capture())
+
+        val eventHandled =
+            keyListenerArgumentCaptor.value.onKey(keyguardPasswordView,
+                KeyEvent.KEYCODE_SPACE,
+                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SPACE))
+
+        assertFalse("Unlock attempted.", eventHandled)
+    }
+
+    @Test
+    fun testEnterKeySubmitsPassword() {
+        val password = mock<LockscreenCredential>()
+        `when`(keyguardPasswordView.enteredCredential).thenReturn(password)
+        `when`(password.size()).thenReturn(4)
+        `when`(password.duplicate()).thenReturn(password)
+        keyguardPasswordViewController.onViewAttached()
+        verify(passwordEntry).setOnKeyListener(keyListenerArgumentCaptor.capture())
+
+        val eventHandled =
+            keyListenerArgumentCaptor.value.onKey(keyguardPasswordView,
+                KeyEvent.KEYCODE_ENTER,
+                KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+
+        assertTrue("Unlock not attempted.", eventHandled)
     }
 }
