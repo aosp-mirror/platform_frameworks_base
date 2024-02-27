@@ -18,8 +18,6 @@ package com.android.systemui.biometrics.ui.binder
 
 import android.content.Context
 import android.content.res.Resources
-import android.content.res.Resources.Theme
-import android.graphics.Paint
 import android.hardware.biometrics.PromptContentItem
 import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptContentItemPlainText
@@ -27,14 +25,17 @@ import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptVerticalListContentView
 import android.text.SpannableString
 import android.text.Spanned
+import android.text.TextPaint
 import android.text.style.BulletSpan
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewTreeObserver
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.lifecycleScope
+import com.android.settingslib.Utils
 import com.android.systemui.biometrics.ui.BiometricPromptLayout
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -45,36 +46,38 @@ import kotlinx.coroutines.launch
 
 /** Sub-binder for [BiometricPromptLayout.customized_view_container]. */
 object BiometricCustomizedViewBinder {
-    fun bind(customizedViewContainer: LinearLayout, spaceAbove: Space, viewModel: PromptViewModel) {
-        customizedViewContainer.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch {
-                    val contentView: PromptContentView? = viewModel.contentView.first()
+    fun bind(customizedViewContainer: LinearLayout, viewModel: PromptViewModel) {
+        customizedViewContainer.repeatWhenAttached { containerView ->
+            lifecycleScope.launch {
+                val contentView: PromptContentView? = viewModel.contentView.first()
+                if (contentView == null) {
+                    containerView.visibility = View.GONE
+                    return@launch
+                }
 
-                    if (contentView != null) {
-                        val context = customizedViewContainer.context
-                        customizedViewContainer.addView(contentView.toView(context))
-                        customizedViewContainer.visibility = View.VISIBLE
-                        spaceAbove.visibility = View.VISIBLE
-                    } else {
-                        customizedViewContainer.visibility = View.GONE
-                        spaceAbove.visibility = View.GONE
+                containerView.width { containerWidth ->
+                    if (containerWidth == 0) {
+                        return@width
                     }
+                    (containerView as LinearLayout).addView(
+                        contentView.toView(containerView.context, containerWidth)
+                    )
+                    containerView.visibility = View.VISIBLE
                 }
             }
         }
     }
 }
 
-private fun PromptContentView.toView(context: Context): View {
-    val resources = context.resources
+private fun PromptContentView.toView(context: Context, containerViewWidth: Int): View {
     val inflater = LayoutInflater.from(context)
     when (this) {
         is PromptVerticalListContentView -> {
             val contentView =
                 inflater.inflate(R.layout.biometric_prompt_content_layout, null) as LinearLayout
 
-            val descriptionView = contentView.requireViewById<TextView>(R.id.customized_view_title)
+            val descriptionView =
+                contentView.requireViewById<TextView>(R.id.customized_view_description)
             if (!description.isNullOrEmpty()) {
                 descriptionView.text = description
             } else {
@@ -83,13 +86,36 @@ private fun PromptContentView.toView(context: Context): View {
 
             // Show two column by default, once there is an item exceeding max lines, show single
             // item instead.
-            val showTwoColumn = listItems.all { !it.doesExceedMaxLinesIfTwoColumn(resources) }
+            val showTwoColumn =
+                listItems.all { !it.doesExceedMaxLinesIfTwoColumn(context, containerViewWidth) }
             var currRowView = createNewRowLayout(inflater)
             for (item in listItems) {
-                val itemView = item.toView(resources, inflater, context.theme)
+                val itemView = item.toView(context, inflater)
+                // If this item will be in the first row (contentView only has description view) and
+                // description is empty, remove top padding of this item.
+                if (contentView.childCount == 1 && description.isNullOrEmpty()) {
+                    itemView.setPadding(
+                        itemView.paddingLeft,
+                        0,
+                        itemView.paddingRight,
+                        itemView.paddingBottom
+                    )
+                }
                 currRowView.addView(itemView)
 
-                if (!showTwoColumn || currRowView.childCount == 2) {
+                // If this is the first item in the current row, add space behind it.
+                if (currRowView.childCount == 1 && showTwoColumn) {
+                    currRowView.addSpaceView(
+                        context.resources.getDimensionPixelSize(
+                            R.dimen.biometric_prompt_content_space_width_between_items
+                        ),
+                        MATCH_PARENT
+                    )
+                }
+
+                // If there are already two items (plus the space view) in the current row, or it
+                // should be one column, start a new row
+                if (currRowView.childCount == 3 || !showTwoColumn) {
                     contentView.addView(currRowView)
                     currRowView = createNewRowLayout(inflater)
                 }
@@ -110,9 +136,15 @@ private fun createNewRowLayout(inflater: LayoutInflater): LinearLayout {
     return inflater.inflate(R.layout.biometric_prompt_content_row_layout, null) as LinearLayout
 }
 
+private fun LinearLayout.addSpaceView(width: Int, height: Int) {
+    addView(Space(context), LinearLayout.LayoutParams(width, height))
+}
+
 private fun PromptContentItem.doesExceedMaxLinesIfTwoColumn(
-    resources: Resources,
+    context: Context,
+    containerViewWidth: Int,
 ): Boolean {
+    val resources = context.resources
     val passedInText: String =
         when (this) {
             is PromptContentItemPlainText -> text
@@ -125,32 +157,26 @@ private fun PromptContentItem.doesExceedMaxLinesIfTwoColumn(
     when (this) {
         is PromptContentItemPlainText,
         is PromptContentItemBulletedText -> {
-            val dialogMargin =
-                resources.getDimensionPixelSize(R.dimen.biometric_dialog_border_padding)
-            val halfDialogWidth =
-                Resources.getSystem().displayMetrics.widthPixels / 2 - dialogMargin
-            val containerPadding =
-                resources.getDimensionPixelSize(
-                    R.dimen.biometric_prompt_content_container_padding_horizontal
-                )
-            val contentPadding =
+            val contentViewPadding =
                 resources.getDimensionPixelSize(R.dimen.biometric_prompt_content_padding_horizontal)
             val listItemPadding = getListItemPadding(resources)
-            val maxWidth = halfDialogWidth - containerPadding - contentPadding - listItemPadding
+            val maxWidth = containerViewWidth / 2 - contentViewPadding - listItemPadding
 
-            val text = "$passedInText"
-            val textSize =
-                resources.getDimensionPixelSize(
-                    R.dimen.biometric_prompt_content_list_item_text_size
+            val paint = TextPaint()
+            val attributes =
+                context.obtainStyledAttributes(
+                    R.style.TextAppearance_AuthCredential_ContentViewListItem,
+                    intArrayOf(android.R.attr.textSize)
                 )
-            val paint = Paint()
-            paint.textSize = textSize.toFloat()
+            paint.textSize = attributes.getDimensionPixelSize(0, 0).toFloat()
+            val textWidth = paint.measureText(passedInText)
+            attributes.recycle()
 
             val maxLines =
                 resources.getInteger(
                     R.integer.biometric_prompt_content_list_item_max_lines_if_two_column
                 )
-            val numLines = ceil(paint.measureText(text).toDouble() / maxWidth).toInt()
+            val numLines = ceil(textWidth / maxWidth).toInt()
             return numLines > maxLines
         }
         else -> {
@@ -160,10 +186,10 @@ private fun PromptContentItem.doesExceedMaxLinesIfTwoColumn(
 }
 
 private fun PromptContentItem.toView(
-    resources: Resources,
+    context: Context,
     inflater: LayoutInflater,
-    theme: Theme,
 ): TextView {
+    val resources = context.resources
     val textView =
         inflater.inflate(R.layout.biometric_prompt_content_row_item_text_view, null) as TextView
     val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
@@ -178,7 +204,7 @@ private fun PromptContentItem.toView(
             val span =
                 BulletSpan(
                     getListItemBulletGapWidth(resources),
-                    getListItemBulletColor(resources, theme),
+                    getListItemBulletColor(context),
                     getListItemBulletRadius(resources)
                 )
             bulletedText.setSpan(span, 0 /* start */, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -194,8 +220,8 @@ private fun PromptContentItem.toView(
 private fun PromptContentItem.getListItemPadding(resources: Resources): Int {
     var listItemPadding =
         resources.getDimensionPixelSize(
-            R.dimen.biometric_prompt_content_list_item_padding_horizontal
-        ) * 2
+            R.dimen.biometric_prompt_content_space_width_between_items
+        ) / 2
     when (this) {
         is PromptContentItemPlainText -> {}
         is PromptContentItemBulletedText -> {
@@ -215,5 +241,20 @@ private fun getListItemBulletRadius(resources: Resources): Int =
 private fun getListItemBulletGapWidth(resources: Resources): Int =
     resources.getDimensionPixelSize(R.dimen.biometric_prompt_content_list_item_bullet_gap_width)
 
-private fun getListItemBulletColor(resources: Resources, theme: Theme): Int =
-    resources.getColor(R.color.biometric_prompt_content_list_item_bullet_color, theme)
+private fun getListItemBulletColor(context: Context): Int =
+    Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.materialColorOnSurface)
+
+private fun <T : View> T.width(function: (Int) -> Unit) {
+    if (width == 0)
+        viewTreeObserver.addOnGlobalLayoutListener(
+            object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    if (measuredWidth > 0) {
+                        viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    }
+                    function(measuredWidth)
+                }
+            }
+        )
+    else function(measuredWidth)
+}

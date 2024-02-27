@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (C) 2023 The Android Open Source Project
+  ~ Copyright (C) 2024 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,15 +13,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/customized_view"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    style="@style/AuthCredentialContentLayoutStyle">
 
-    <TextView
-        android:id="@+id/customized_view_description"
-        style="@style/TextAppearance.AuthCredential.ContentViewDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+<shape
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:shape="rectangle">
+    <solid android:color="?androidprv:attr/materialColorSurfaceContainerHigh"/>
+    <corners android:radius="@dimen/biometric_prompt_content_corner_radius"/>
+</shape>
