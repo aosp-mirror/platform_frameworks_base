@@ -191,11 +191,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     public boolean shouldBubbleUp(NotificationEntry entry) {
         final StatusBarNotification sbn = entry.getSbn();
 
-        if (!canAlertCommon(entry, true)) {
+        if (!canAlertCommon(entry, false)) {
             return false;
         }
 
-        if (!canAlertAwakeCommon(entry, true)) {
+        if (!canAlertAwakeCommon(entry, false)) {
             return false;
         }
 
