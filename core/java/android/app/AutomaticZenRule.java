@@ -705,7 +705,15 @@ public final class AutomaticZenRule implements Parcelable {
         }
 
         /**
-         * Sets the component (service or activity) that owns this rule.
+         * Sets the component name of the
+         * {@link android.service.notification.ConditionProviderService} that manages this rule
+         * (but note that {@link android.service.notification.ConditionProviderService} is
+         * deprecated in favor of using {@link NotificationManager#setAutomaticZenRuleState} to
+         * notify the system about the state of your rule).
+         *
+         * <p>This is exclusive with {@link #setConfigurationActivity}; rules where a configuration
+         * activity is set will not use the component set here to determine whether the rule
+         * should be active.
          */
         public @NonNull Builder setOwner(@Nullable ComponentName owner) {
             mOwner = owner;
@@ -743,6 +751,11 @@ public final class AutomaticZenRule implements Parcelable {
          * information about this rule and/or allows them to configure it. This is required to be
          * non-null for rules that are not backed by a
          * {@link android.service.notification.ConditionProviderService}.
+         *
+         * <p>This is exclusive with {@link #setOwner}; rules where a configuration
+         * activity is set will not use the
+         * {@link android.service.notification.ConditionProviderService} supplied there to determine
+         * whether the rule should be active.
          */
         public @NonNull Builder setConfigurationActivity(
                 @Nullable ComponentName configurationActivity) {
