@@ -56,6 +56,7 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_OTHER;
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
 import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
+import static android.view.inputmethod.Flags.ctrlShiftShortcut;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -400,9 +401,14 @@ public class InputMethodService extends AbstractInputMethodService {
     private long mStylusHwSessionsTimeout = STYLUS_HANDWRITING_IDLE_TIMEOUT_MS;
     private Runnable mStylusWindowIdleTimeoutRunnable;
     private long mStylusWindowIdleTimeoutForTest;
-    /** Tracks last {@link MotionEvent#getToolType(int)} used for {@link MotionEvent#ACTION_DOWN}.
+    /**
+     * Tracks last {@link MotionEvent#getToolType(int)} used for {@link MotionEvent#ACTION_DOWN}.
      **/
     private int mLastUsedToolType;
+    /**
+     * Tracks the ctrl+shift shortcut
+     **/
+    private boolean mUsingCtrlShiftShortcut = false;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -3612,7 +3618,8 @@ public class InputMethodService extends AbstractInputMethodService {
             // any KeyEvent keyDown should reset last toolType.
             updateEditorToolTypeInternal(MotionEvent.TOOL_TYPE_UNKNOWN);
         }
-        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             final ExtractEditText eet = getExtractEditTextIfVisible();
             if (eet != null && eet.handleBackInTextActionModeIfNeeded(event)) {
                 return true;
@@ -3622,7 +3629,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 return true;
             }
             return false;
-        } else if (event.getKeyCode() == KeyEvent.KEYCODE_SPACE && KeyEvent.metaStateHasModifiers(
+        } else if (keyCode == KeyEvent.KEYCODE_SPACE && KeyEvent.metaStateHasModifiers(
                 event.getMetaState() & ~KeyEvent.META_SHIFT_MASK, KeyEvent.META_CTRL_ON)) {
             if (mDecorViewVisible && mWindowVisible) {
                 int direction = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
@@ -3631,6 +3638,24 @@ public class InputMethodService extends AbstractInputMethodService {
                 return true;
             }
         }
+
+        // Check if this may be a ctrl+shift shortcut
+        if (ctrlShiftShortcut()) {
+            if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
+                    || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
+                // Potentially Ctrl+Shift shortcut if Ctrl is currently pressed
+                mUsingCtrlShiftShortcut = KeyEvent.metaStateHasModifiers(
+                    event.getMetaState() & ~KeyEvent.META_SHIFT_MASK, KeyEvent.META_CTRL_ON);
+            } else if (keyCode == KeyEvent.KEYCODE_CTRL_LEFT
+                    || keyCode == KeyEvent.KEYCODE_CTRL_RIGHT) {
+                // Potentially Ctrl+Shift shortcut if Shift is currently pressed
+                mUsingCtrlShiftShortcut = KeyEvent.metaStateHasModifiers(
+                    event.getMetaState() & ~KeyEvent.META_CTRL_MASK, KeyEvent.META_SHIFT_ON);
+            } else {
+                mUsingCtrlShiftShortcut = false;
+            }
+        }
+
         return doMovementKey(keyCode, event, MOVEMENT_DOWN);
     }
 
@@ -3672,7 +3697,27 @@ public class InputMethodService extends AbstractInputMethodService {
      * them to perform navigation in the underlying application.
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+        if (ctrlShiftShortcut()) {
+            if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
+                    || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT
+                    || keyCode == KeyEvent.KEYCODE_CTRL_LEFT
+                    || keyCode == KeyEvent.KEYCODE_CTRL_RIGHT) {
+                if (mUsingCtrlShiftShortcut
+                        && event.hasNoModifiers()) {
+                    mUsingCtrlShiftShortcut = false;
+                    if (mDecorViewVisible && mWindowVisible) {
+                        // Move to the next IME
+                        switchToNextInputMethod(false /* onlyCurrentIme */);
+                        // TODO(b/332937629): Make the event stream consistent again
+                        return true;
+                    }
+                }
+            } else {
+                mUsingCtrlShiftShortcut = false;
+            }
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             final ExtractEditText eet = getExtractEditTextIfVisible();
             if (eet != null && eet.handleBackInTextActionModeIfNeeded(event)) {
                 return true;
@@ -3680,7 +3725,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (event.isTracking() && !event.isCanceled()) {
                 return handleBack(true);
             }
-        } else if (event.getKeyCode() == KeyEvent.KEYCODE_SPACE) {
+        } else if (keyCode == KeyEvent.KEYCODE_SPACE) {
             if (event.isTracking() && !event.isCanceled()) {
                 return true;
             }
