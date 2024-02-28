@@ -59,6 +59,7 @@ import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
@@ -315,11 +316,12 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                     return false;
                 }
                 // TODO(b/290391688): Also update the session data with task stack changes
-                pd.dragSession = new DragSession(ActivityTaskManager.getInstance(),
+                InstanceId loggerSessionId = mLogger.logStart(event);
+                pd.activeDragCount++;
+                pd.dragSession = new DragSession(mContext, ActivityTaskManager.getInstance(),
                         mDisplayController.getDisplayLayout(displayId), event.getClipData());
                 pd.dragSession.update();
-                pd.activeDragCount++;
-                pd.dragLayout.prepare(pd.dragSession, mLogger.logStart(pd.dragSession));
+                pd.dragLayout.prepare(pd.dragSession, loggerSessionId);
                 setDropTargetWindowVisibility(pd, View.VISIBLE);
                 notifyListeners(l -> {
                     l.onDragStarted();

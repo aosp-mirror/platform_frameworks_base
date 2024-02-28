@@ -216,7 +216,8 @@ class DragState {
         mIsClosing = true;
         // Unregister the input interceptor.
         if (mInputInterceptor != null) {
-            if (DEBUG_DRAG) Slog.d(TAG_WM, "Unregistering drag input channel");
+            if (DEBUG_DRAG)
+                Slog.d(TAG_WM, "unregistering drag input channel");
 
             // Input channel should be disposed on the thread where the input is being handled.
             mDragDropController.sendHandlerMessage(
@@ -226,7 +227,9 @@ class DragState {
 
         // Send drag end broadcast if drag start has been sent.
         if (mDragInProgress) {
-            if (DEBUG_DRAG) Slog.d(TAG_WM, "Broadcasting DRAG_ENDED");
+            if (DEBUG_DRAG) {
+                Slog.d(TAG_WM, "broadcasting DRAG_ENDED");
+            }
             for (WindowState ws : mNotifiedWindows) {
                 float x = 0;
                 float y = 0;
@@ -245,7 +248,6 @@ class DragState {
                         x, y, mThumbOffsetX, mThumbOffsetY, null, null, null, dragSurface, null,
                         mDragResult);
                 try {
-                    if (DEBUG_DRAG) Slog.d(TAG_WM, "Sending DRAG_ENDED to " + ws);
                     ws.mClient.dispatchDragEvent(event);
                 } catch (RemoteException e) {
                     Slog.w(TAG_WM, "Unable to drag-end window " + ws);
@@ -362,7 +364,7 @@ class DragState {
             return false;
         }
 
-        if (DEBUG_DRAG) Slog.d(TAG_WM, "Sending DROP to " + touchedWin);
+        if (DEBUG_DRAG) Slog.d(TAG_WM, "sending DROP to " + touchedWin);
 
         final IBinder clientToken = touchedWin.mClient.asBinder();
         final DragEvent event = createDropEvent(x, y, touchedWin, false /* includePrivateInfo */);
@@ -458,7 +460,7 @@ class DragState {
      */
     CompletableFuture<Void> register(Display display) {
         display.getRealSize(mDisplaySize);
-        if (DEBUG_DRAG) Slog.d(TAG_WM, "Registering drag input channel");
+        if (DEBUG_DRAG) Slog.d(TAG_WM, "registering drag input channel");
         if (mInputInterceptor != null) {
             Slog.e(TAG_WM, "Duplicate register of drag input channel");
             return completedFuture(null);
@@ -487,7 +489,7 @@ class DragState {
                 mSourceUserId, UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
 
         if (DEBUG_DRAG) {
-            Slog.d(TAG_WM, "Broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
+            Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
         final boolean containsAppExtras = containsApplicationExtras(mDataDescription);

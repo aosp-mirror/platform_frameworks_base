@@ -22,8 +22,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.content.pm.ActivityInfo.CONFIG_ASSETS_PATHS;
 import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
-import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -40,15 +38,12 @@ import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.view.DragEvent;
 import android.view.SurfaceControl;
-import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.widget.LinearLayout;
@@ -70,8 +65,7 @@ import java.util.ArrayList;
 /**
  * Coordinates the visible drop targets for the current drag within a single display.
  */
-public class DragLayout extends LinearLayout
-        implements ViewTreeObserver.OnComputeInternalInsetsListener {
+public class DragLayout extends LinearLayout {
 
     // While dragging the status bar is hidden.
     private static final int HIDE_STATUS_BAR_FLAGS = StatusBarManager.DISABLE_NOTIFICATION_ICONS
@@ -96,9 +90,7 @@ public class DragLayout extends LinearLayout
 
     private int mDisplayMargin;
     private int mDividerSize;
-    private int mLaunchIntentEdgeMargin;
     private Insets mInsets = Insets.NONE;
-    private Region mTouchableRegion;
 
     private boolean mIsShowing;
     private boolean mHasDropped;
@@ -114,11 +106,10 @@ public class DragLayout extends LinearLayout
         mStatusBarManager = context.getSystemService(StatusBarManager.class);
         mLastConfiguration.setTo(context.getResources().getConfiguration());
 
-        final Resources res = context.getResources();
-        mDisplayMargin = res.getDimensionPixelSize(R.dimen.drop_layout_display_margin);
-        mDividerSize = res.getDimensionPixelSize(R.dimen.split_divider_bar_width);
-        mLaunchIntentEdgeMargin =
-                res.getDimensionPixelSize(R.dimen.drag_launchable_intent_edge_margin);
+        mDisplayMargin = context.getResources().getDimensionPixelSize(
+                R.dimen.drop_layout_display_margin);
+        mDividerSize = context.getResources().getDimensionPixelSize(
+                R.dimen.split_divider_bar_width);
 
         // Always use LTR because we assume dropZoneView1 is on the left and 2 is on the right when
         // showing the highlight.
@@ -138,66 +129,6 @@ public class DragLayout extends LinearLayout
         setOrientation(mIsLeftRightSplit ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
         updateContainerMargins(mIsLeftRightSplit);
     }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mTouchableRegion = Region.obtain();
-        getViewTreeObserver().addOnComputeInternalInsetsListener(this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
-        mTouchableRegion.recycle();
-    }
-
-    @Override
-    public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo inOutInfo) {
-        if (mSession != null && mSession.launchableIntent != null) {
-            inOutInfo.touchableRegion.set(mTouchableRegion);
-            inOutInfo.setTouchableInsets(TOUCHABLE_INSETS_REGION);
-        }
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        updateTouchableRegion();
-    }
-
-    /**
-     * Updates the touchable region, this should be called after any configuration changes have
-     * been applied.
-     */
-    private void updateTouchableRegion() {
-        mTouchableRegion.setEmpty();
-        if (mSession != null && mSession.launchableIntent != null) {
-            final int width = getMeasuredWidth();
-            final int height = getMeasuredHeight();
-            if (mIsLeftRightSplit) {
-                mTouchableRegion.union(
-                        new Rect(0, 0, mInsets.left + mLaunchIntentEdgeMargin, height));
-                mTouchableRegion.union(
-                        new Rect(width - mInsets.right - mLaunchIntentEdgeMargin, 0, width,
-                                height));
-            } else {
-                mTouchableRegion.union(
-                        new Rect(0, 0, width, mInsets.top + mLaunchIntentEdgeMargin));
-                mTouchableRegion.union(
-                        new Rect(0, height - mInsets.bottom - mLaunchIntentEdgeMargin, width,
-                                height));
-            }
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
-                    "Updating drag layout width=%d height=%d touchable region=%s",
-                    width, height, mTouchableRegion);
-
-            // Reapply insets to update the touchable region
-            requestApplyInsets();
-        }
-    }
-
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
@@ -233,7 +164,6 @@ public class DragLayout extends LinearLayout
             mDropZoneView2.onThemeChange();
         }
         mLastConfiguration.setTo(newConfig);
-        requestLayout();
     }
 
     private void updateContainerMarginsForSingleTask() {
@@ -312,7 +242,6 @@ public class DragLayout extends LinearLayout
             mSplitScreenController.getStageBounds(topOrLeftBounds, bottomOrRightBounds);
             updateDropZoneSizes(topOrLeftBounds, bottomOrRightBounds);
         }
-        requestLayout();
     }
 
     private void updateDropZoneSizesForSingleTask() {
@@ -463,7 +392,7 @@ public class DragLayout extends LinearLayout
         mHasDropped = true;
 
         // Process the drop
-        mPolicy.handleDrop(mCurrentTarget);
+        mPolicy.handleDrop(mCurrentTarget, event.getClipData());
 
         // Start animating the drop UI out with the drag surface
         hide(event, dropCompleteCallback);
@@ -576,7 +505,5 @@ public class DragLayout extends LinearLayout
         pw.println(innerPrefix + "mIsShowing=" + mIsShowing);
         pw.println(innerPrefix + "mHasDropped=" + mHasDropped);
         pw.println(innerPrefix + "mCurrentTarget=" + mCurrentTarget);
-        pw.println(innerPrefix + "mInsets=" + mInsets);
-        pw.println(innerPrefix + "mTouchableRegion=" + mTouchableRegion);
     }
 }
