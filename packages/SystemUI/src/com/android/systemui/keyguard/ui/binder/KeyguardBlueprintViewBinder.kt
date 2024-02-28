@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlin.math.max
 import kotlinx.coroutines.launch
@@ -127,6 +128,7 @@ constructor(
                         runTransition(constraintLayout, transition, Config.DEFAULT) {
                             // Add and remove views of sections that are not contained by the other.
                             blueprint.replaceViews(prevBluePrint, constraintLayout)
+                            logAlphaVisibilityOfAppliedConstraintSet(cs, clockViewModel)
                             cs.applyTo(constraintLayout)
                         }
 
@@ -153,6 +155,7 @@ constructor(
                             ),
                             transition,
                         ) {
+                            logAlphaVisibilityOfAppliedConstraintSet(cs, clockViewModel)
                             cs.applyTo(constraintLayout)
                         }
                         Trace.endSection()
@@ -204,5 +207,24 @@ constructor(
             runningTransitions.remove(transition)
             apply()
         }
+    }
+
+    private fun logAlphaVisibilityOfAppliedConstraintSet(
+        cs: ConstraintSet,
+        viewModel: KeyguardClockViewModel
+    ) {
+        if (!DEBUG || viewModel.clock == null) return
+        val smallClockViewId = R.id.lockscreen_clock_view
+        val largeClockViewId = viewModel.clock!!.largeClock.layout.views[0].id
+        Log.i(
+            TAG,
+            "applyCsToSmallClock: vis=${cs.getVisibility(smallClockViewId)} " +
+                "alpha=${cs.getConstraint(smallClockViewId).propertySet}"
+        )
+        Log.i(
+            TAG,
+            "applyCsToLargeClock: vis=${cs.getVisibility(largeClockViewId)} " +
+                "alpha=${cs.getConstraint(largeClockViewId).propertySet}"
+        )
     }
 }
