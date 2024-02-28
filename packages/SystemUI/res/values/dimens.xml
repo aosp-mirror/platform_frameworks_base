@@ -1742,12 +1742,18 @@
     <dimen name="communal_grid_height">630dp</dimen>
     <!-- Number of columns for each communal card -->
     <integer name="communal_grid_columns_per_card">6</integer>
-    <!-- Width of area on right edge of screen in which swipes will open the communal hub -->
-    <dimen name="communal_right_edge_swipe_region_width">16dp</dimen>
+
+    <!-- The width of the swipe target to initiate opening or closing communal hub. -->
+    <dimen name="communal_gesture_initiation_width">68dp</dimen>
+
+    <!-- TODO(b/322549765): unify with communal_gesture_initiation_width -->
+    <!-- Width of area on right edge of screen in which swipes will open the communal hub when on
+    the lockscreen -->
+    <dimen name="communal_right_edge_swipe_region_width">40dp</dimen>
     <!-- Height of area at top of communal hub where swipes should open the notification shade -->
-    <dimen name="communal_top_edge_swipe_region_height">32dp</dimen>
+    <dimen name="communal_top_edge_swipe_region_height">68dp</dimen>
     <!-- Height of area at bottom of communal hub where swipes should open the bouncer -->
-    <dimen name="communal_bottom_edge_swipe_region_height">32dp</dimen>
+    <dimen name="communal_bottom_edge_swipe_region_height">68dp</dimen>
 
     <dimen name="drag_and_drop_icon_size">70dp</dimen>
 
@@ -1818,9 +1824,6 @@
     <dimen name="dream_overlay_complication_shadow_padding">2dp</dimen>
     <dimen name="dream_overlay_complication_smartspace_padding">24dp</dimen>
     <dimen name="dream_overlay_complication_smartspace_max_width">408dp</dimen>
-
-    <!-- The width of the swipe target to initiate opening communal hub over dreams. -->
-    <dimen name="communal_gesture_initiation_width">48dp</dimen>
 
     <!-- The position of the end guide, which dream overlay complications can align their start with
          if their end is aligned with the parent end. Represented as the percentage over from the

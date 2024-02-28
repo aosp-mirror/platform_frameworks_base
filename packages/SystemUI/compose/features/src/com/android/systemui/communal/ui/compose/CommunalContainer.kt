@@ -9,7 +9,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.dimensionResource
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.FixedSizeEdgeDetector
@@ -29,6 +29,7 @@ import com.android.systemui.communal.shared.model.ObservableCommunalTransitionSt
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.res.R
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
 
@@ -91,7 +92,10 @@ fun CommunalContainer(
     SceneTransitionLayout(
         state = sceneTransitionLayoutState,
         modifier = modifier.fillMaxSize().allowGestures(allowed = touchesAllowed),
-        swipeSourceDetector = FixedSizeEdgeDetector(ContainerDimensions.EdgeSwipeSize),
+        swipeSourceDetector =
+            FixedSizeEdgeDetector(
+                dimensionResource(id = R.dimen.communal_gesture_initiation_width)
+            ),
     ) {
         scene(
             TransitionSceneKey.Blank,
@@ -166,8 +170,4 @@ fun ObservableTransitionState.toModel(): ObservableCommunalTransitionState {
                 isUserInputOngoing = isUserInputOngoing,
             )
     }
-}
-
-object ContainerDimensions {
-    val EdgeSwipeSize = 40.dp
 }
