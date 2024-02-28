@@ -33757,8 +33757,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
         mMinusOneFrameIntervalMillis = timeIntervalMillis;
 
-        if (mMinusOneFrameIntervalMillis - mMinusTwoFrameIntervalMillis >= 30
-                && timeIntervalMillis < 2) {
+        mLastUpdateTimeMillis = currentTimeMillis;
+        if (mMinusTwoFrameIntervalMillis >= 30 && timeIntervalMillis < 2) {
             return;
         }
         if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
