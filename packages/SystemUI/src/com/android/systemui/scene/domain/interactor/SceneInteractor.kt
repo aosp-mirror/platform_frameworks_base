@@ -31,6 +31,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -121,7 +122,21 @@ constructor(
             )
 
     /** Whether the scene container is visible. */
-    val isVisible: StateFlow<Boolean> = repository.isVisible
+    val isVisible: StateFlow<Boolean> =
+        combine(
+                repository.isVisible,
+                repository.isRemoteUserInteractionOngoing,
+            ) { isVisible, isRemoteUserInteractionOngoing ->
+                isVisibleInternal(
+                    raw = isVisible,
+                    isRemoteUserInteractionOngoing = isRemoteUserInteractionOngoing,
+                )
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = isVisibleInternal()
+            )
 
     /**
      * Returns the keys of all scenes in the container.
@@ -164,7 +179,14 @@ constructor(
         repository.changeScene(toScene, transitionKey)
     }
 
-    /** Sets the visibility of the container. */
+    /**
+     * Sets the visibility of the container.
+     *
+     * Please do not call this from outside of the scene framework. If you are trying to force the
+     * visibility to visible or invisible, prefer making changes to the existing caller of this
+     * method or to upstream state used to calculate [isVisible]; for an example of the latter,
+     * please see [onRemoteUserInteractionStarted] and [onUserInteractionFinished].
+     */
     fun setVisible(isVisible: Boolean, loggingReason: String) {
         val wasVisible = repository.isVisible.value
         if (wasVisible == isVisible) {
@@ -180,11 +202,43 @@ constructor(
     }
 
     /**
+     * Notifies that a remote user interaction has begun.
+     *
+     * This is a user interaction that originates outside of the UI of the scene container and
+     * possibly outside of the System UI process itself.
+     *
+     * As an example, consider the dragging that can happen in the launcher that expands the shade.
+     * This is a user interaction that begins remotely (as it starts in the launcher process) and is
+     * then rerouted by window manager to System UI. While the user interaction definitely continues
+     * within the System UI process and code, it also originates remotely.
+     */
+    fun onRemoteUserInteractionStarted(loggingReason: String) {
+        logger.logRemoteUserInteractionStarted(loggingReason)
+        repository.isRemoteUserInteractionOngoing.value = true
+    }
+
+    /**
+     * Notifies that the current user interaction (internally or remotely started, see
+     * [onRemoteUserInteractionStarted]) has finished.
+     */
+    fun onUserInteractionFinished() {
+        logger.logUserInteractionFinished()
+        repository.isRemoteUserInteractionOngoing.value = false
+    }
+
+    /**
      * Binds the given flow so the system remembers it.
      *
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
         repository.setTransitionState(transitionState)
+    }
+
+    private fun isVisibleInternal(
+        raw: Boolean = repository.isVisible.value,
+        isRemoteUserInteractionOngoing: Boolean = repository.isRemoteUserInteractionOngoing.value,
+    ): Boolean {
+        return raw || isRemoteUserInteractionOngoing
     }
 }

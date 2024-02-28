@@ -95,6 +95,26 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
+    fun logRemoteUserInteractionStarted(
+        reason: String,
+    ) {
+        logBuffer.log(
+            tag = TAG,
+            level = LogLevel.INFO,
+            messageInitializer = { str1 = reason },
+            messagePrinter = { "remote user interaction started, reason: $str3" },
+        )
+    }
+
+    fun logUserInteractionFinished() {
+        logBuffer.log(
+            tag = TAG,
+            level = LogLevel.INFO,
+            messageInitializer = {},
+            messagePrinter = { "user interaction finished" },
+        )
+    }
+
     companion object {
         private const val TAG = "SceneFramework"
     }
