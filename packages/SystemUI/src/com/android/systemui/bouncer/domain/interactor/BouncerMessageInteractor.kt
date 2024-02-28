@@ -33,15 +33,17 @@ import com.android.systemui.bouncer.shared.model.Message
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.user.data.repository.UserRepository
-import com.android.systemui.util.kotlin.Quint
+import com.android.systemui.util.kotlin.Sextuple
+import com.android.systemui.util.kotlin.combine
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -56,6 +58,7 @@ private const val REBOOT_MAINLINE_UPDATE = "reboot,mainline_update"
 private const val TAG = "BouncerMessageInteractor"
 
 /** Handles business logic for the primary bouncer message area. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class BouncerMessageInteractor
 @Inject
@@ -63,23 +66,24 @@ constructor(
     private val repository: BouncerMessageRepository,
     private val userRepository: UserRepository,
     private val countDownTimerUtil: CountDownTimerUtil,
-    private val updateMonitor: KeyguardUpdateMonitor,
+    updateMonitor: KeyguardUpdateMonitor,
     trustRepository: TrustRepository,
     biometricSettingsRepository: BiometricSettingsRepository,
     private val systemPropertiesHelper: SystemPropertiesHelper,
     primaryBouncerInteractor: PrimaryBouncerInteractor,
     @Application private val applicationScope: CoroutineScope,
     private val facePropertyRepository: FacePropertyRepository,
-    deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
+    private val deviceEntryFingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
     faceAuthRepository: DeviceEntryFaceAuthRepository,
     private val securityModel: KeyguardSecurityModel,
 ) {
 
-    private val isFingerprintAuthCurrentlyAllowed =
-        deviceEntryFingerprintAuthRepository.isLockedOut
-            .isFalse()
-            .and(biometricSettingsRepository.isFingerprintAuthCurrentlyAllowed)
-            .stateIn(applicationScope, SharingStarted.Eagerly, false)
+    private val isFingerprintAuthCurrentlyAllowedOnBouncer =
+        deviceEntryFingerprintAuthInteractor.isFingerprintCurrentlyAllowedOnBouncer.stateIn(
+            applicationScope,
+            SharingStarted.Eagerly,
+            false
+        )
 
     private val currentSecurityMode
         get() = securityModel.getSecurityMode(currentUserId)
@@ -99,13 +103,13 @@ constructor(
                         BiometricSourceType.FACE ->
                             BouncerMessageStrings.incorrectFaceInput(
                                     currentSecurityMode.toAuthModel(),
-                                    isFingerprintAuthCurrentlyAllowed.value
+                                    isFingerprintAuthCurrentlyAllowedOnBouncer.value
                                 )
                                 .toMessage()
                         else ->
                             BouncerMessageStrings.defaultMessage(
                                     currentSecurityMode.toAuthModel(),
-                                    isFingerprintAuthCurrentlyAllowed.value
+                                    isFingerprintAuthCurrentlyAllowedOnBouncer.value
                                 )
                                 .toMessage()
                     }
@@ -144,11 +148,12 @@ constructor(
                 biometricSettingsRepository.authenticationFlags,
                 trustRepository.isCurrentUserTrustManaged,
                 isAnyBiometricsEnabledAndEnrolled,
-                deviceEntryFingerprintAuthRepository.isLockedOut,
+                deviceEntryFingerprintAuthInteractor.isLockedOut,
                 faceAuthRepository.isLockedOut,
-                ::Quint
+                isFingerprintAuthCurrentlyAllowedOnBouncer,
+                ::Sextuple
             )
-            .map { (flags, _, biometricsEnrolledAndEnabled, fpLockedOut, faceLockedOut) ->
+            .map { (flags, _, biometricsEnrolledAndEnabled, fpLockedOut, faceLockedOut, _) ->
                 val isTrustUsuallyManaged = trustRepository.isCurrentUserTrustUsuallyManaged.value
                 val trustOrBiometricsAvailable =
                     (isTrustUsuallyManaged || biometricsEnrolledAndEnabled)
@@ -193,14 +198,14 @@ constructor(
                     } else {
                         BouncerMessageStrings.faceLockedOut(
                                 currentSecurityMode.toAuthModel(),
-                                isFingerprintAuthCurrentlyAllowed.value
+                                isFingerprintAuthCurrentlyAllowedOnBouncer.value
                             )
                             .toMessage()
                     }
                 } else if (flags.isSomeAuthRequiredAfterAdaptiveAuthRequest) {
                     BouncerMessageStrings.authRequiredAfterAdaptiveAuthRequest(
                             currentSecurityMode.toAuthModel(),
-                            isFingerprintAuthCurrentlyAllowed.value
+                            isFingerprintAuthCurrentlyAllowedOnBouncer.value
                         )
                         .toMessage()
                 } else if (
@@ -209,19 +214,19 @@ constructor(
                 ) {
                     BouncerMessageStrings.nonStrongAuthTimeout(
                             currentSecurityMode.toAuthModel(),
-                            isFingerprintAuthCurrentlyAllowed.value
+                            isFingerprintAuthCurrentlyAllowedOnBouncer.value
                         )
                         .toMessage()
                 } else if (isTrustUsuallyManaged && flags.someAuthRequiredAfterUserRequest) {
                     BouncerMessageStrings.trustAgentDisabled(
                             currentSecurityMode.toAuthModel(),
-                            isFingerprintAuthCurrentlyAllowed.value
+                            isFingerprintAuthCurrentlyAllowedOnBouncer.value
                         )
                         .toMessage()
                 } else if (isTrustUsuallyManaged && flags.someAuthRequiredAfterTrustAgentExpired) {
                     BouncerMessageStrings.trustAgentDisabled(
                             currentSecurityMode.toAuthModel(),
-                            isFingerprintAuthCurrentlyAllowed.value
+                            isFingerprintAuthCurrentlyAllowedOnBouncer.value
                         )
                         .toMessage()
                 } else if (trustOrBiometricsAvailable && flags.isInUserLockdown) {
@@ -265,7 +270,7 @@ constructor(
         repository.setMessage(
             BouncerMessageStrings.incorrectSecurityInput(
                     currentSecurityMode.toAuthModel(),
-                    isFingerprintAuthCurrentlyAllowed.value
+                    isFingerprintAuthCurrentlyAllowedOnBouncer.value
                 )
                 .toMessage()
         )
@@ -274,14 +279,22 @@ constructor(
     fun setFingerprintAcquisitionMessage(value: String?) {
         if (!Flags.revampedBouncerMessages()) return
         repository.setMessage(
-            defaultMessage(currentSecurityMode, value, isFingerprintAuthCurrentlyAllowed.value)
+            defaultMessage(
+                currentSecurityMode,
+                value,
+                isFingerprintAuthCurrentlyAllowedOnBouncer.value
+            )
         )
     }
 
     fun setFaceAcquisitionMessage(value: String?) {
         if (!Flags.revampedBouncerMessages()) return
         repository.setMessage(
-            defaultMessage(currentSecurityMode, value, isFingerprintAuthCurrentlyAllowed.value)
+            defaultMessage(
+                currentSecurityMode,
+                value,
+                isFingerprintAuthCurrentlyAllowedOnBouncer.value
+            )
         )
     }
 
@@ -289,7 +302,11 @@ constructor(
         if (!Flags.revampedBouncerMessages()) return
 
         repository.setMessage(
-            defaultMessage(currentSecurityMode, value, isFingerprintAuthCurrentlyAllowed.value)
+            defaultMessage(
+                currentSecurityMode,
+                value,
+                isFingerprintAuthCurrentlyAllowedOnBouncer.value
+            )
         )
     }
 
@@ -297,7 +314,7 @@ constructor(
         get() =
             BouncerMessageStrings.defaultMessage(
                     currentSecurityMode.toAuthModel(),
-                    isFingerprintAuthCurrentlyAllowed.value
+                    isFingerprintAuthCurrentlyAllowedOnBouncer.value
                 )
                 .toMessage()
 
@@ -354,11 +371,6 @@ open class CountDownTimerUtil @Inject constructor() {
 
 private fun Flow<Boolean>.or(anotherFlow: Flow<Boolean>) =
     this.combine(anotherFlow) { a, b -> a || b }
-
-private fun Flow<Boolean>.and(anotherFlow: Flow<Boolean>) =
-    this.combine(anotherFlow) { a, b -> a && b }
-
-private fun Flow<Boolean>.isFalse() = this.map { !it }
 
 private fun defaultMessage(
     securityMode: SecurityMode,

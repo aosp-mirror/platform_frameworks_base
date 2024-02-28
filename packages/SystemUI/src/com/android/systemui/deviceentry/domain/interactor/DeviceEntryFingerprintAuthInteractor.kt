@@ -29,6 +29,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -72,4 +74,14 @@ constructor(
      */
     val isSensorUnderDisplay =
         fingerprintPropertyRepository.sensorType.map(FingerprintSensorType::isUdfps)
+
+    /** Whether fingerprint authentication is currently allowed while on the bouncer. */
+    val isFingerprintCurrentlyAllowedOnBouncer =
+        isSensorUnderDisplay.flatMapLatest { sensorBelowDisplay ->
+            if (sensorBelowDisplay) {
+                flowOf(false)
+            } else {
+                isFingerprintAuthCurrentlyAllowed
+            }
+        }
 }
