@@ -23,6 +23,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,6 +40,7 @@ constructor(
     private val interactor: KeyguardBlueprintInteractor,
     private val authController: AuthController,
     val longPress: KeyguardLongPressViewModel,
+    val splitShadeStateController: SplitShadeStateController,
 ) {
     private val clockSize = clockInteractor.clockSize
 
@@ -46,8 +48,10 @@ constructor(
         get() = authController.isUdfpsSupported
     val isLargeClockVisible: Boolean
         get() = clockSize.value == KeyguardClockSwitch.LARGE
-    val areNotificationsVisible: Boolean
-        get() = !isLargeClockVisible
+    fun areNotificationsVisible(resources: Resources): Boolean {
+        return !isLargeClockVisible ||
+            splitShadeStateController.shouldUseSplitNotificationShade(resources)
+    }
 
     fun getSmartSpacePaddingTop(resources: Resources): Int {
         return if (isLargeClockVisible) {

@@ -35,11 +35,13 @@ import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSect
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
 import com.android.systemui.keyguard.ui.composable.section.DefaultClockSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
+import com.android.systemui.keyguard.ui.composable.section.MediaCarouselSection
 import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.SmartSpaceSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
+import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
@@ -63,6 +65,7 @@ constructor(
     private val ambientIndicationSectionOptional: Optional<AmbientIndicationSection>,
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
+    private val mediaCarouselSection: MediaCarouselSection,
     private val clockInteractor: KeyguardClockInteractor,
 ) : ComposableLockscreenSceneBlueprint {
 
@@ -112,10 +115,16 @@ constructor(
 
                         if (viewModel.isLargeClockVisible) {
                             Spacer(modifier = Modifier.weight(weight = 1f))
-                            with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
+                            with(clockSection) {
+                                LargeClock(
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
                         }
 
-                        if (viewModel.areNotificationsVisible) {
+                        with(mediaCarouselSection) { MediaCarousel() }
+
+                        if (viewModel.areNotificationsVisible(resources = resources)) {
                             with(notificationSection) {
                                 Notifications(
                                     modifier = Modifier.fillMaxWidth().weight(weight = 1f)
