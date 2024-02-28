@@ -27,11 +27,11 @@ import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.server.companion.CompanionDeviceManagerService.getFirstAssociationIdForUser;
 import static com.android.server.companion.CompanionDeviceManagerService.getLastAssociationIdForUser;
-import static com.android.server.companion.DataStoreUtils.createStorageFileForUser;
-import static com.android.server.companion.DataStoreUtils.fileToByteArray;
-import static com.android.server.companion.DataStoreUtils.isEndOfTag;
-import static com.android.server.companion.DataStoreUtils.isStartOfTag;
-import static com.android.server.companion.DataStoreUtils.writeToFileSafely;
+import static com.android.server.companion.utils.DataStoreUtils.createStorageFileForUser;
+import static com.android.server.companion.utils.DataStoreUtils.fileToByteArray;
+import static com.android.server.companion.utils.DataStoreUtils.isEndOfTag;
+import static com.android.server.companion.utils.DataStoreUtils.isStartOfTag;
+import static com.android.server.companion.utils.DataStoreUtils.writeToFileSafely;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -51,6 +51,7 @@ import android.util.Xml;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.companion.utils.DataStoreUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

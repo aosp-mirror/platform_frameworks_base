@@ -43,8 +43,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.server.companion.AssociationStore;
-import com.android.server.companion.ObservableUuid;
-import com.android.server.companion.ObservableUuidStore;
 
 import java.io.PrintWriter;
 import java.util.HashSet;
