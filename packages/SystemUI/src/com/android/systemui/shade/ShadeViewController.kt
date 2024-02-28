@@ -31,12 +31,6 @@ import java.util.function.Consumer
  * @see NotificationPanelViewController
  */
 interface ShadeViewController {
-    /** Expand the shade either animated or instantly. */
-    fun expand(animate: Boolean)
-
-    /** Animates to an expanded shade with QS expanded. If the shade starts expanded, expands QS. */
-    fun expandToQs()
-
     /** Returns whether the shade is expanding or collapsing itself or quick settings. */
     val isExpandingOrCollapsing: Boolean
 
