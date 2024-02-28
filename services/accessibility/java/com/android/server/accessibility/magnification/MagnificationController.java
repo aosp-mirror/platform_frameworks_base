@@ -50,6 +50,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.window.flags.Flags;
 
 import java.util.concurrent.Executor;
 
@@ -586,6 +587,11 @@ public class MagnificationController implements MagnificationConnectionManager.C
 
     @Override
     public void onFullScreenMagnificationActivationState(int displayId, boolean activated) {
+        if (Flags.magnificationAlwaysDrawFullscreenBorder()) {
+            getMagnificationConnectionManager()
+                    .onFullscreenMagnificationActivationChanged(displayId, activated);
+        }
+
         if (activated) {
             synchronized (mLock) {
                 mFullScreenModeEnabledTimeArray.put(displayId, SystemClock.uptimeMillis());

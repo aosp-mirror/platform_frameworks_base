@@ -981,12 +981,12 @@ public class WallpaperManager {
     /**
      * <strong> Important note: </strong>
      * <ul>
-     *     <li>Up to version S, this method requires the
+     *     <li>Up to Android 12, this method requires the
      *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     <li>Starting in Android 13, directly accessing the wallpaper is not possible anymore,
      *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
+     *     (some versions of Android 13 may throw a {@code SecurityException}).</li>
+     *     <li>From Android 14, this method should not be used
      *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
@@ -1265,12 +1265,12 @@ public class WallpaperManager {
     /**
      * <strong> Important note: </strong>
      * <ul>
-     *     <li>Up to version S, this method requires the
+     *     <li>Up to Android 12, this method requires the
      *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     <li>Starting in Android 13, directly accessing the wallpaper is not possible anymore,
      *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
+     *     (some versions of Android 13 may throw a {@code SecurityException}).</li>
+     *     <li>From Android 14, this method should not be used
      *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
@@ -1318,12 +1318,12 @@ public class WallpaperManager {
     /**
      * <strong> Important note: </strong>
      * <ul>
-     *     <li>Up to version S, this method requires the
+     *     <li>Up to Android 12, this method requires the
      *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     <li>Starting in Android 13, directly accessing the wallpaper is not possible anymore,
      *     instead the default wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
+     *     (some versions of Android 13 may throw a {@code SecurityException}).</li>
+     *     <li>From Android 14, this method should not be used
      *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
@@ -1677,12 +1677,12 @@ public class WallpaperManager {
     /**
      * <strong> Important note: </strong>
      * <ul>
-     *     <li>Up to version S, this method requires the
+     *     <li>Up to Android 12, this method requires the
      *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
-     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     <li>Starting in Android 13, directly accessing the wallpaper is not possible anymore,
      *     instead the default system wallpaper is returned
-     *     (some versions of T may throw a {@code SecurityException}).</li>
-     *     <li>From version U, this method should not be used
+     *     (some versions of Android 13 may throw a {@code SecurityException}).</li>
+     *     <li>From Android 14, this method should not be used
      *     and will always throw a {@code SecurityException}.</li>
      *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
      *     can still access the real wallpaper on all versions. </li>
@@ -1904,14 +1904,14 @@ public class WallpaperManager {
      * caller doesn't have the appropriate permissions, this returns {@code null}.
      *
      * <p>
-     * Before Android U, this method requires the
+     * For devices running Android 13 or earlier, this method requires the
      * {@link android.Manifest.permission#QUERY_ALL_PACKAGES} permission.
      * </p>
      *
      * <p>
-     * Starting from Android U, in order to use this, apps should declare a {@code <queries>} tag
-     * with the action {@code "android.service.wallpaper.WallpaperService"}. Otherwise,
-     * this method will return {@code null} if the caller doesn't otherwise have
+     * For devices running Android 14 or later, in order to use this, apps should declare a
+     * {@code <queries>} tag with the action {@code "android.service.wallpaper.WallpaperService"}.
+     * Otherwise, this method will return {@code null} if the caller doesn't otherwise have
      * <a href="{@docRoot}training/package-visibility">visibility</a> of the wallpaper package.
      * </p>
      */

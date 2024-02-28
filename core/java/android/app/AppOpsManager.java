@@ -7800,7 +7800,7 @@ public class AppOpsManager {
         }
         final List<AppOpsManager.PackageOps> result;
         try {
-            result =  mService.getPackagesForOpsForDevice(opCodes, persistentDeviceId);
+            result = mService.getPackagesForOpsForDevice(opCodes, persistentDeviceId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8272,14 +8272,24 @@ public class AppOpsManager {
                 cb = new IAppOpsCallback.Stub() {
                     public void opChanged(int op, int uid, String packageName,
                             String persistentDeviceId) {
-                        if (callback instanceof OnOpChangedInternalListener) {
-                            ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName,
-                                persistentDeviceId);
-                        }
-                        if (sAppOpInfos[op].name != null) {
-
-                            callback.onOpChanged(sAppOpInfos[op].name, packageName,
-                                    UserHandle.getUserId(uid), persistentDeviceId);
+                        if (Flags.deviceAwarePermissionApisEnabled()) {
+                            if (callback instanceof OnOpChangedInternalListener) {
+                                ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName,
+                                        persistentDeviceId);
+                            }
+                            if (sAppOpInfos[op].name != null) {
+                                callback.onOpChanged(sAppOpInfos[op].name, packageName,
+                                        UserHandle.getUserId(uid), persistentDeviceId);
+                            }
+                        } else {
+                            if (callback instanceof OnOpChangedInternalListener) {
+                                ((OnOpChangedInternalListener) callback).onOpChanged(op,
+                                        packageName);
+                            }
+                            if (sAppOpInfos[op].name != null) {
+                                callback.onOpChanged(sAppOpInfos[op].name, packageName,
+                                        UserHandle.getUserId(uid));
+                            }
                         }
                     }
                 };
@@ -8940,6 +8950,8 @@ public class AppOpsManager {
      *
      * @hide
      */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
     public int noteOpNoThrow(int op, @NonNull AttributionSource attributionSource,
             @Nullable String message) {
         return noteOpNoThrow(op, attributionSource.getUid(), attributionSource.getPackageName(),

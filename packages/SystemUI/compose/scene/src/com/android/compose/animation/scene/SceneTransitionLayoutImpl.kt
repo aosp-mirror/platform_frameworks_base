@@ -25,8 +25,13 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ApproachLayoutModifierNode
+import androidx.compose.ui.layout.ApproachMeasureScope
 import androidx.compose.ui.layout.LookaheadScope
-import androidx.compose.ui.layout.intermediateLayout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
@@ -181,7 +186,6 @@ internal class SceneTransitionLayoutImpl(
     }
 
     @Composable
-    @OptIn(ExperimentalComposeUiApi::class)
     internal fun Content(modifier: Modifier) {
         Box(
             modifier
@@ -190,37 +194,7 @@ internal class SceneTransitionLayoutImpl(
                 // swipes.
                 .swipeToScene(horizontalGestureHandler)
                 .swipeToScene(verticalGestureHandler)
-                // Animate the size of this layout.
-                .intermediateLayout { measurable, constraints ->
-                    // Measure content normally.
-                    val placeable = measurable.measure(constraints)
-
-                    val width: Int
-                    val height: Int
-                    val transition = state.currentTransition
-                    if (transition == null) {
-                        width = placeable.width
-                        height = placeable.height
-                    } else {
-                        // Interpolate the size.
-                        val fromSize = scene(transition.fromScene).targetSize
-                        val toSize = scene(transition.toScene).targetSize
-
-                        // Optimization: make sure we don't read state.progress if fromSize ==
-                        // toSize to avoid running this code every frame when the layout size does
-                        // not change.
-                        if (fromSize == toSize) {
-                            width = fromSize.width
-                            height = fromSize.height
-                        } else {
-                            val size = lerp(fromSize, toSize, transition.progress)
-                            width = size.width.coerceAtLeast(0)
-                            height = size.height.coerceAtLeast(0)
-                        }
-                    }
-
-                    layout(width, height) { placeable.place(0, 0) }
-                }
+                .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
                 val scenesToCompose =
@@ -261,5 +235,56 @@ internal class SceneTransitionLayoutImpl(
 
     internal fun setScenesTargetSizeForTest(size: IntSize) {
         scenes.values.forEach { it.targetSize = size }
+    }
+}
+
+private data class LayoutElement(private val layoutImpl: SceneTransitionLayoutImpl) :
+    ModifierNodeElement<LayoutNode>() {
+    override fun create(): LayoutNode = LayoutNode(layoutImpl)
+
+    override fun update(node: LayoutNode) {
+        node.layoutImpl = layoutImpl
+    }
+}
+
+private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
+    Modifier.Node(), ApproachLayoutModifierNode {
+    override fun isMeasurementApproachComplete(lookaheadSize: IntSize): Boolean {
+        return layoutImpl.state.currentTransition == null
+    }
+
+    @ExperimentalComposeUiApi
+    override fun ApproachMeasureScope.approachMeasure(
+        measurable: Measurable,
+        constraints: Constraints,
+    ): MeasureResult {
+        // Measure content normally.
+        val placeable = measurable.measure(constraints)
+
+        val width: Int
+        val height: Int
+        val transition = layoutImpl.state.currentTransition
+        if (transition == null) {
+            width = placeable.width
+            height = placeable.height
+        } else {
+            // Interpolate the size.
+            val fromSize = layoutImpl.scene(transition.fromScene).targetSize
+            val toSize = layoutImpl.scene(transition.toScene).targetSize
+
+            // Optimization: make sure we don't read state.progress if fromSize ==
+            // toSize to avoid running this code every frame when the layout size does
+            // not change.
+            if (fromSize == toSize) {
+                width = fromSize.width
+                height = fromSize.height
+            } else {
+                val size = lerp(fromSize, toSize, transition.progress)
+                width = size.width.coerceAtLeast(0)
+                height = size.height.coerceAtLeast(0)
+            }
+        }
+
+        return layout(width, height) { placeable.place(0, 0) }
     }
 }

@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
 import android.view.SurfaceControl;
+import android.window.ActivityWindowInfo;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.WindowContext;
 import android.window.WindowContextInfo;
@@ -232,12 +233,15 @@ public abstract class ClientTransactionHandler {
      * @param config New configuration applied to the activity.
      * @param preserveWindow Whether the activity should try to reuse the window it created,
      *                        including the decor view after the relaunch.
+     * @param activityWindowInfo Window information about the relaunched Activity.
      * @return An initialized instance of {@link ActivityThread.ActivityClientRecord} to use during
      *         relaunch, or {@code null} if relaunch cancelled.
      */
-    public abstract ActivityClientRecord prepareRelaunchActivity(IBinder token,
-            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            int configChanges, MergedConfiguration config, boolean preserveWindow);
+    public abstract ActivityClientRecord prepareRelaunchActivity(@NonNull IBinder token,
+            @Nullable List<ResultInfo> pendingResults,
+            @Nullable List<ReferrerIntent> pendingNewIntents, int configChanges,
+            @NonNull MergedConfiguration config, boolean preserveWindow,
+            @NonNull ActivityWindowInfo activityWindowInfo);
 
     /**
      * Perform activity relaunch.
@@ -245,7 +249,7 @@ public abstract class ClientTransactionHandler {
      * @param pendingActions Pending actions to be used on later stages of activity transaction.
      * */
     public abstract void handleRelaunchActivity(@NonNull ActivityClientRecord r,
-            PendingTransactionActions pendingActions);
+            @NonNull PendingTransactionActions pendingActions);
 
     /**
      * Report that relaunch request was handled.

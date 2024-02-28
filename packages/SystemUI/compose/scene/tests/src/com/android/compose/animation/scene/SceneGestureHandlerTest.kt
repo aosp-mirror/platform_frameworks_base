@@ -52,7 +52,7 @@ class SceneGestureHandlerTest {
         private val testScope: MonotonicClockTestScope,
     ) {
         var canChangeScene: (SceneKey) -> Boolean = { true }
-        private val layoutState =
+        val layoutState =
             MutableSceneTransitionLayoutStateImpl(
                 SceneA,
                 EmptyTestTransitions,
@@ -931,5 +931,29 @@ class SceneGestureHandlerTest {
 
         advanceUntilIdle()
         assertIdle(SceneB)
+    }
+
+    @Test
+    fun scrollFromIdleWithNoTargetScene_shouldUseOverscrollSpecIfAvailable() = runGestureTest {
+        layoutState.transitions = transitions {
+            overscroll(SceneC, Orientation.Vertical) { fade(TestElements.Foo) }
+        }
+        // Start at scene C.
+        navigateToSceneC()
+
+        val scene = layoutState.transitionState.currentScene
+        // We should have overscroll spec for scene C
+        assertThat(layoutState.transitions.overscrollSpec(scene, Orientation.Vertical)).isNotNull()
+        assertThat(layoutState.currentOverscrollSpec).isNull()
+
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
+        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
+
+        // We scrolled down, under scene C there is nothing, so we can use the overscroll spec
+        assertThat(layoutState.currentOverscrollSpec).isNotNull()
+        assertThat(layoutState.currentOverscrollSpec?.scene).isEqualTo(SceneC)
+        val transition = layoutState.currentTransition
+        assertThat(transition).isNotNull()
+        assertThat(transition!!.progress).isEqualTo(-0.1f)
     }
 }

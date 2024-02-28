@@ -467,17 +467,11 @@ public class PipTouchHandler {
     }
 
     private void updatePinchResizeSizeConstraints(float aspectRatio) {
-        final int minWidth, minHeight, maxWidth, maxHeight;
-
-        minWidth = mSizeSpecSource.getMinSize(aspectRatio).getWidth();
-        minHeight = mSizeSpecSource.getMinSize(aspectRatio).getHeight();
-        maxWidth = mSizeSpecSource.getMaxSize(aspectRatio).getWidth();
-        maxHeight = mSizeSpecSource.getMaxSize(aspectRatio).getHeight();
-
-        mPipResizeGestureHandler.updateMinSize(minWidth, minHeight);
-        mPipResizeGestureHandler.updateMaxSize(maxWidth, maxHeight);
-        mPipBoundsState.setMaxSize(maxWidth, maxHeight);
-        mPipBoundsState.setMinSize(minWidth, minHeight);
+        mPipBoundsState.updateMinMaxSize(aspectRatio);
+        mPipResizeGestureHandler.updateMinSize(mPipBoundsState.getMinSize().x,
+                mPipBoundsState.getMinSize().y);
+        mPipResizeGestureHandler.updateMaxSize(mPipBoundsState.getMaxSize().x,
+                mPipBoundsState.getMaxSize().y);
     }
 
     /**

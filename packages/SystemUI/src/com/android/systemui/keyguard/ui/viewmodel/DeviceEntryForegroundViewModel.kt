@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -70,12 +71,13 @@ constructor(
 
     // While dozing, the display can show the AOD UI; show the AOD udfps when dozing
     private val useAodIconVariant: Flow<Boolean> =
-        combine(isShowingAodOrDozing, deviceEntryUdfpsInteractor.isUdfpsSupported) {
-                isTransitionToAodOrDozing,
-                isUdfps ->
-                isTransitionToAodOrDozing && isUdfps
+        deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest { udfspEnrolled ->
+            if (udfspEnrolled) {
+                isShowingAodOrDozing.distinctUntilChanged()
+            } else {
+                flowOf(false)
             }
-            .distinctUntilChanged()
+        }
 
     private val padding: Flow<Int> =
         deviceEntryUdfpsInteractor.isUdfpsSupported.flatMapLatest { udfpsSupported ->

@@ -304,9 +304,9 @@ final class AccessibilityController {
     Surface forceShowMagnifierSurface(int displayId) {
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
-            displayMagnifier.mMagnifedViewport.mWindow.setAlpha(DisplayMagnifier.MagnifiedViewport
+            displayMagnifier.mMagnifiedViewport.mWindow.setAlpha(DisplayMagnifier.MagnifiedViewport
                     .ViewportWindow.AnimationController.MAX_ALPHA);
-            return displayMagnifier.mMagnifedViewport.mWindow.mSurface;
+            return displayMagnifier.mMagnifiedViewport.mWindow.mSurface;
         }
         return null;
     }
@@ -463,6 +463,10 @@ final class AccessibilityController {
     }
 
     void drawMagnifiedRegionBorderIfNeeded(int displayId) {
+        if (Flags.magnificationAlwaysDrawFullscreenBorder()) {
+            return;
+        }
+
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
             mAccessibilityTracing.logTrace(
                     TAG + ".drawMagnifiedRegionBorderIfNeeded",
@@ -614,7 +618,7 @@ final class AccessibilityController {
 
         private final Context mDisplayContext;
         private final WindowManagerService mService;
-        private final MagnifiedViewport mMagnifedViewport;
+        private final MagnifiedViewport mMagnifiedViewport;
         private final Handler mHandler;
         private final DisplayContent mDisplayContent;
         private final Display mDisplay;
@@ -649,7 +653,8 @@ final class AccessibilityController {
             mDisplayContent = displayContent;
             mDisplay = display;
             mHandler = new MyHandler(mService.mH.getLooper());
-            mMagnifedViewport = new MagnifiedViewport();
+            mMagnifiedViewport = Flags.magnificationAlwaysDrawFullscreenBorder()
+                    ? null : new MagnifiedViewport();
             mAccessibilityTracing =
                     AccessibilityController.getAccessibilityControllerInternal(mService);
             mLongAnimationDuration = mDisplayContext.getResources().getInteger(
@@ -692,7 +697,9 @@ final class AccessibilityController {
                 mMagnificationSpec.clear();
             }
 
-            mMagnifedViewport.setShowMagnifiedBorderIfNeeded();
+            if (!Flags.magnificationAlwaysDrawFullscreenBorder()) {
+                mMagnifiedViewport.setShowMagnifiedBorderIfNeeded();
+            }
         }
 
         void setFullscreenMagnificationActivated(boolean activated) {
@@ -701,8 +708,10 @@ final class AccessibilityController {
                         FLAGS_MAGNIFICATION_CALLBACK, "activated=" + activated);
             }
             mIsFullscreenMagnificationActivated = activated;
-            mMagnifedViewport.setMagnifiedRegionBorderShown(activated, true);
-            mMagnifedViewport.showMagnificationBoundsIfNeeded();
+            if (!Flags.magnificationAlwaysDrawFullscreenBorder()) {
+                mMagnifiedViewport.setMagnifiedRegionBorderShown(activated, true);
+                mMagnifiedViewport.showMagnificationBoundsIfNeeded();
+            }
         }
 
         boolean isFullscreenMagnificationActivated() {
@@ -737,7 +746,9 @@ final class AccessibilityController {
             }
 
             recomputeBounds();
-            mMagnifedViewport.onDisplaySizeChanged();
+            if (!Flags.magnificationAlwaysDrawFullscreenBorder()) {
+                mMagnifiedViewport.onDisplaySizeChanged();
+            }
             mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_DISPLAY_SIZE_CHANGED);
         }
 
@@ -901,7 +912,10 @@ final class AccessibilityController {
             if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
                 mAccessibilityTracing.logTrace(LOG_TAG + ".destroy", FLAGS_MAGNIFICATION_CALLBACK);
             }
-            mMagnifedViewport.destroyWindow();
+
+            if (!Flags.magnificationAlwaysDrawFullscreenBorder()) {
+                mMagnifiedViewport.destroyWindow();
+            }
         }
 
         void drawMagnifiedRegionBorderIfNeeded() {
@@ -909,7 +923,10 @@ final class AccessibilityController {
                 mAccessibilityTracing.logTrace(LOG_TAG + ".drawMagnifiedRegionBorderIfNeeded",
                         FLAGS_MAGNIFICATION_CALLBACK);
             }
-            mMagnifedViewport.drawWindowIfNeeded();
+
+            if (!Flags.magnificationAlwaysDrawFullscreenBorder()) {
+                mMagnifiedViewport.drawWindowIfNeeded();
+            }
         }
 
         void recomputeBounds() {
@@ -1006,14 +1023,16 @@ final class AccessibilityController {
             }
             visibleWindows.clear();
 
-            mMagnifedViewport.intersectWithDrawBorderInset(screenWidth, screenHeight);
-
+            if (!Flags.magnificationAlwaysDrawFullscreenBorder()) {
+                mMagnifiedViewport.intersectWithDrawBorderInset(screenWidth, screenHeight);
+            }
 
             final boolean magnifiedChanged =
                     !mOldMagnificationRegion.equals(mMagnificationRegion);
             if (magnifiedChanged) {
-                mMagnifedViewport.updateBorderDrawingStatus(screenWidth, screenHeight);
-
+                if (!Flags.magnificationAlwaysDrawFullscreenBorder()) {
+                    mMagnifiedViewport.updateBorderDrawingStatus(screenWidth, screenHeight);
+                }
                 mOldMagnificationRegion.set(mMagnificationRegion);
                 final SomeArgs args = SomeArgs.obtain();
                 args.arg1 = Region.obtain(mMagnificationRegion);
@@ -1070,7 +1089,9 @@ final class AccessibilityController {
         }
 
         void dump(PrintWriter pw, String prefix) {
-            mMagnifedViewport.dump(pw, prefix);
+            if (!Flags.magnificationAlwaysDrawFullscreenBorder()) {
+                mMagnifiedViewport.dump(pw, prefix);
+            }
         }
 
         private final class MagnifiedViewport {
@@ -1079,7 +1100,7 @@ final class AccessibilityController {
             private final int mHalfBorderWidth;
             private final int mDrawBorderInset;
 
-            private final ViewportWindow mWindow;
+            @Nullable private final ViewportWindow mWindow;
 
             private boolean mFullRedrawNeeded;
 
@@ -1138,9 +1159,9 @@ final class AccessibilityController {
             void onDisplaySizeChanged() {
                 // If fullscreen magnification is activated, hide the border immediately so
                 // the user does not see strange artifacts during display size changed caused by
-                // rotation or folding/unfolding the device. In the rotation case, the screenshot
-                // used for rotation already has the border. After the rotation is complete
-                // we will show the border.
+                // rotation or folding/unfolding the device. In the rotation case, the
+                // screenshot used for rotation already has the border. After the rotation is
+                // completed we will show the border.
                 if (isFullscreenMagnificationActivated()) {
                     setMagnifiedRegionBorderShown(false, false);
                     final long delay = (long) (mLongAnimationDuration
@@ -1173,6 +1194,8 @@ final class AccessibilityController {
                 mWindow.dump(pw, prefix);
             }
 
+            // TODO(291891390): Remove this class when we clean up the flag
+            //  magnificationAlwaysDrawFullscreenBorder
             private final class ViewportWindow implements Runnable {
                 private static final String SURFACE_TITLE = "Magnification Overlay";
 
@@ -1467,6 +1490,9 @@ final class AccessibilityController {
             public static final int MESSAGE_NOTIFY_MAGNIFICATION_REGION_CHANGED = 1;
             public static final int MESSAGE_NOTIFY_USER_CONTEXT_CHANGED = 3;
             public static final int MESSAGE_NOTIFY_DISPLAY_SIZE_CHANGED = 4;
+
+            // TODO(291891390): Remove this field when we clean up the flag
+            //  magnificationAlwaysDrawFullscreenBorder
             public static final int MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED = 5;
             public static final int MESSAGE_NOTIFY_IME_WINDOW_VISIBILITY_CHANGED = 6;
 
@@ -1495,7 +1521,9 @@ final class AccessibilityController {
                     case MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED : {
                         synchronized (mService.mGlobalLock) {
                             if (isFullscreenMagnificationActivated()) {
-                                mMagnifedViewport.setMagnifiedRegionBorderShown(true, true);
+                                if (!Flags.magnificationAlwaysDrawFullscreenBorder()) {
+                                    mMagnifiedViewport.setMagnifiedRegionBorderShown(true, true);
+                                }
                                 mService.scheduleAnimationLocked();
                             }
                         }

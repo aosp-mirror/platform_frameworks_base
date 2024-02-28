@@ -39,18 +39,18 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * ContactKeysManager provides access to the provider of end-to-end encryption contact keys.
- * It manages two types of keys - {@link ContactKey} and {@link SelfKey}.
+ * E2eeContactKeysManager provides access to the provider of end-to-end encryption contact keys.
+ * It manages two types of keys - {@link E2eeContactKey} and {@link E2eeSelfKey}.
  * <ul>
  * <li>
- * A {@link ContactKey} is a public key associated with a contact. It's used to end-to-end
+ * A {@link E2eeContactKey} is a public key associated with a contact. It's used to end-to-end
  * encrypt the communications between a user and the contact. This API allows operations on
- * {@link ContactKey}s to insert/update, remove, change the verification state, and retrieving
+ * {@link E2eeContactKey}s to insert/update, remove, change the verification state, and retrieving
  * keys (either created by or visible to the caller app).
  * </li>
  * <li>
- * A {@link SelfKey} is a key for this device, so the key represents the owner of the device.
- * This API allows operations on {@link SelfKey}s to insert/update, remove, and retrieving
+ * A {@link E2eeSelfKey} is a key for this device, so the key represents the owner of the device.
+ * This API allows operations on {@link E2eeSelfKey}s to insert/update, remove, and retrieving
  * self keys (either created by or visible to the caller app).
  * </li>
  * </ul>
@@ -65,29 +65,30 @@ import java.util.Objects;
  * </li>
  * <li>
  * accountId - the app-specified identifier for the account for which the contact key can be used.
- * Usually a phone number.
+ * Using different account IDs allows for multiple key entries representing the same user.
+ * For most apps this would be a phone number.
  * </li>
  * </ul>
  * Contact keys also use lookupKey which is an opaque value used to identify a contact in
  * ContactsProvider.
  */
 @FlaggedApi(Flags.FLAG_USER_KEYS)
-public final class ContactKeysManager {
+public final class E2eeContactKeysManager {
     /**
-     * The authority for the contact keys provider.
+     * The authority for the end-to-end encryption contact keys provider.
      * @hide
      */
     public static final String AUTHORITY = "com.android.contactkeys.contactkeysprovider";
 
     /**
-     * A content:// style uri to the authority for the contact keys provider.
+     * A content:// style uri to the authority for the end-to-end encryption contact keys provider.
      * @hide
      */
     @NonNull
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
     /**
-     * Maximum size of a contact key.
+     * Maximum size of an end-to-end encryption contact key.
      */
     private static final int MAX_KEY_SIZE_BYTES = 5000;
 
@@ -100,14 +101,15 @@ public final class ContactKeysManager {
     private final ContentResolver mContentResolver;
 
     /** @hide */
-    public ContactKeysManager(@NonNull Context context) {
+    public E2eeContactKeysManager(@NonNull Context context) {
         Objects.requireNonNull(context);
         mContentResolver = context.getContentResolver();
     }
 
     /**
-     * Inserts a new entry into the contact keys table or updates one if it already exists.
-     * The inserted/updated contact key is owned by the caller app.
+     * Inserts a new entry into the end-to-end encryption contact keys table or updates one if it
+     * already exists.
+     * The inserted/updated end-to-end encryption contact key is owned by the caller app.
      *
      * @param lookupKey value that references the contact
      * @param deviceId an app-specified identifier for the device
@@ -115,76 +117,77 @@ public final class ContactKeysManager {
      * @param keyValue the raw bytes for the key (max size is {@link #getMaxKeySizeBytes} bytes)
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
-    public void updateOrInsertContactKey(@NonNull String lookupKey,
+    public void updateOrInsertE2eeContactKey(@NonNull String lookupKey,
             @NonNull String deviceId,
             @NonNull String accountId,
             @NonNull byte[] keyValue) {
         validateKeyLength(keyValue);
 
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
-        extras.putByteArray(ContactKeys.KEY_VALUE, Objects.requireNonNull(keyValue));
+        extras.putString(E2eeContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putByteArray(E2eeContactKeys.KEY_VALUE, Objects.requireNonNull(keyValue));
 
         nullSafeCall(mContentResolver,
-                ContactKeys.UPDATE_OR_INSERT_CONTACT_KEY_METHOD, extras);
+                E2eeContactKeys.UPDATE_OR_INSERT_CONTACT_KEY_METHOD, extras);
     }
 
     /**
-     * Retrieves a contact key entry given the lookup key, device ID, accountId and inferred
-     * caller package name.
+     * Retrieves an end-to-end encryption contact key entry given the lookup key, device ID,
+     * accountId and inferred caller package name.
      *
      * @param lookupKey the value that references the contact
      * @param deviceId an app-specified identifier for the device
      * @param accountId an app-specified identifier for the account
      *
-     * @return a {@link ContactKey} object containing the contact key information,
+     * @return a {@link E2eeContactKey} object containing the contact key information,
      * or null if no contact key is found.
      */
     @RequiresPermission(android.Manifest.permission.READ_CONTACTS)
     @Nullable
-    public ContactKey getContactKey(
+    public E2eeContactKey getE2eeContactKey(
             @NonNull String lookupKey,
             @NonNull String deviceId,
             @NonNull String accountId) {
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putString(E2eeContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
 
         Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.GET_CONTACT_KEY_METHOD, extras);
+                E2eeContactKeys.GET_CONTACT_KEY_METHOD, extras);
 
         if (response == null) {
             return null;
         }
-        return response.getParcelable(ContactKeys.KEY_CONTACT_KEY, ContactKey.class);
+        return response.getParcelable(E2eeContactKeys.KEY_CONTACT_KEY, E2eeContactKey.class);
     }
 
     /**
-     * Retrieves all contact key entries that belong to apps visible to the caller.
+     * Retrieves all end-to-end encryption contact key entries that belong to apps visible to
+     * the caller.
      * The keys will be stripped of deviceId, timeUpdated and keyValue data.
      *
      * @param lookupKey the value that references the contact
      *
-     * @return a list of {@link ContactKey} objects containing the contact key
+     * @return a list of {@link E2eeContactKey} objects containing the contact key
      * information, or an empty list if no keys are found.
      */
     @RequiresPermission(android.Manifest.permission.READ_CONTACTS)
     @NonNull
-    public List<ContactKey> getAllContactKeys(@NonNull String lookupKey) {
+    public List<E2eeContactKey> getAllE2eeContactKeys(@NonNull String lookupKey) {
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(E2eeContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
 
         Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.GET_ALL_CONTACT_KEYS_METHOD, extras);
+                E2eeContactKeys.GET_ALL_CONTACT_KEYS_METHOD, extras);
 
         if (response == null) {
             return new ArrayList<>();
         }
-        List<ContactKey> value = response.getParcelableArrayList(ContactKeys.KEY_CONTACT_KEYS,
-                ContactKey.class);
+        List<E2eeContactKey> value = response.getParcelableArrayList(
+                E2eeContactKeys.KEY_CONTACT_KEYS, E2eeContactKey.class);
         if (value == null) {
             return new ArrayList<>();
         }
@@ -192,27 +195,28 @@ public final class ContactKeysManager {
     }
 
     /**
-     * Retrieves all contact key entries for a given lookupKey that belong to the caller app.
+     * Retrieves all end-to-end encryption contact key entries for a given lookupKey that belong to
+     * the caller app.
      *
      * @param lookupKey the value that references the contact
      *
-     * @return a list of {@link ContactKey} objects containing the contact key
-     * information, or an empty list if no keys are found.
+     * @return a list of {@link E2eeContactKey} objects containing the end-to-end encryption
+     * contact key information, or an empty list if no keys are found.
      */
     @RequiresPermission(android.Manifest.permission.READ_CONTACTS)
     @NonNull
-    public List<ContactKey> getOwnerContactKeys(@NonNull String lookupKey) {
+    public List<E2eeContactKey> getOwnerE2eeContactKeys(@NonNull String lookupKey) {
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(E2eeContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
 
         Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.GET_OWNER_CONTACT_KEYS_METHOD, extras);
+                E2eeContactKeys.GET_OWNER_CONTACT_KEYS_METHOD, extras);
 
         if (response == null) {
             return new ArrayList<>();
         }
-        List<ContactKey> value = response.getParcelableArrayList(ContactKeys.KEY_CONTACT_KEYS,
-                ContactKey.class);
+        List<E2eeContactKey> value = response.getParcelableArrayList(
+                E2eeContactKeys.KEY_CONTACT_KEYS, E2eeContactKey.class);
         if (value == null) {
             return new ArrayList<>();
         }
@@ -220,7 +224,8 @@ public final class ContactKeysManager {
     }
 
     /**
-     * Updates a contact key entry's local verification state that belongs to the caller app.
+     * Updates an end-to-end encryption contact key entry's local verification state that belongs
+     * to the caller app.
      *
      * @param lookupKey the value that references the contact
      * @param deviceId an app-specified identifier for the device
@@ -230,27 +235,27 @@ public final class ContactKeysManager {
      * @return true if the entry was updated, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
-    public boolean updateContactKeyLocalVerificationState(@NonNull String lookupKey,
+    public boolean updateE2eeContactKeyLocalVerificationState(@NonNull String lookupKey,
             @NonNull String deviceId,
             @NonNull String accountId,
             @VerificationState int localVerificationState) {
         validateVerificationState(localVerificationState);
 
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
-        extras.putInt(ContactKeys.LOCAL_VERIFICATION_STATE, localVerificationState);
+        extras.putString(E2eeContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putInt(E2eeContactKeys.LOCAL_VERIFICATION_STATE, localVerificationState);
 
         Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.UPDATE_CONTACT_KEY_LOCAL_VERIFICATION_STATE_METHOD, extras);
+                E2eeContactKeys.UPDATE_CONTACT_KEY_LOCAL_VERIFICATION_STATE_METHOD, extras);
 
-        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+        return response != null && response.getBoolean(E2eeContactKeys.KEY_UPDATED_ROWS);
     }
 
     /**
-     * Updates a contact key entry's local verification state that belongs to the app identified
-     * by ownerPackageName.
+     * Updates an end-to-end encryption contact key entry's local verification state that belongs
+     * to the app identified by ownerPackageName.
      *
      * @param lookupKey the value that references the contact
      * @param deviceId an app-specified identifier for the device
@@ -266,7 +271,7 @@ public final class ContactKeysManager {
     @RequiresPermission(allOf = {
             android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS,
             android.Manifest.permission.WRITE_CONTACTS})
-    public boolean updateContactKeyLocalVerificationState(@NonNull String lookupKey,
+    public boolean updateE2eeContactKeyLocalVerificationState(@NonNull String lookupKey,
             @NonNull String deviceId,
             @NonNull String accountId,
             @NonNull String ownerPackageName,
@@ -274,20 +279,22 @@ public final class ContactKeysManager {
         validateVerificationState(localVerificationState);
 
         final Bundle extras = new Bundle();
-        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
-        extras.putString(ContactKeys.OWNER_PACKAGE_NAME, Objects.requireNonNull(ownerPackageName));
-        extras.putInt(ContactKeys.LOCAL_VERIFICATION_STATE, localVerificationState);
+        extras.putString(E2eeContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putString(E2eeContactKeys.OWNER_PACKAGE_NAME,
+                Objects.requireNonNull(ownerPackageName));
+        extras.putInt(E2eeContactKeys.LOCAL_VERIFICATION_STATE, localVerificationState);
 
         final Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.UPDATE_CONTACT_KEY_LOCAL_VERIFICATION_STATE_METHOD, extras);
+                E2eeContactKeys.UPDATE_CONTACT_KEY_LOCAL_VERIFICATION_STATE_METHOD, extras);
 
-        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+        return response != null && response.getBoolean(E2eeContactKeys.KEY_UPDATED_ROWS);
     }
 
     /**
-     * Updates a contact key entry's remote verification state that belongs to the caller app.
+     * Updates an end-to-end encryption contact key entry's remote verification state that belongs
+     * to the caller app.
      *
      * @param lookupKey the value that references the contact
      * @param deviceId an app-specified identifier for the device
@@ -297,27 +304,27 @@ public final class ContactKeysManager {
      * @return true if the entry was updated, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
-    public boolean updateContactKeyRemoteVerificationState(@NonNull String lookupKey,
+    public boolean updateE2eeContactKeyRemoteVerificationState(@NonNull String lookupKey,
             @NonNull String deviceId,
             @NonNull String accountId,
             @VerificationState int remoteVerificationState) {
         validateVerificationState(remoteVerificationState);
 
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
-        extras.putInt(ContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
+        extras.putString(E2eeContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putInt(E2eeContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
 
         Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.UPDATE_CONTACT_KEY_REMOTE_VERIFICATION_STATE_METHOD, extras);
+                E2eeContactKeys.UPDATE_CONTACT_KEY_REMOTE_VERIFICATION_STATE_METHOD, extras);
 
-        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+        return response != null && response.getBoolean(E2eeContactKeys.KEY_UPDATED_ROWS);
     }
 
     /**
-     * Updates a contact key entry's remote verification state that belongs to the app identified
-     * by ownerPackageName.
+     * Updates an end-to-end encryption contact key entry's remote verification state that belongs
+     * to the app identified by ownerPackageName.
      *
      * @param lookupKey the value that references the contact
      * @param deviceId an app-specified identifier for the device
@@ -333,7 +340,7 @@ public final class ContactKeysManager {
     @RequiresPermission(allOf = {
             android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS,
             android.Manifest.permission.WRITE_CONTACTS})
-    public boolean updateContactKeyRemoteVerificationState(@NonNull String lookupKey,
+    public boolean updateE2eeContactKeyRemoteVerificationState(@NonNull String lookupKey,
             @NonNull String deviceId,
             @NonNull String accountId,
             @NonNull String ownerPackageName,
@@ -341,18 +348,18 @@ public final class ContactKeysManager {
         validateVerificationState(remoteVerificationState);
 
         final Bundle extras = new Bundle();
-        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
-        extras.putString(ContactKeys.OWNER_PACKAGE_NAME, Objects.requireNonNull(ownerPackageName));
-        extras.putInt(ContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
+        extras.putString(E2eeContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putString(E2eeContactKeys.OWNER_PACKAGE_NAME,
+                Objects.requireNonNull(ownerPackageName));
+        extras.putInt(E2eeContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
 
         final Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.UPDATE_CONTACT_KEY_REMOTE_VERIFICATION_STATE_METHOD, extras);
+                E2eeContactKeys.UPDATE_CONTACT_KEY_REMOTE_VERIFICATION_STATE_METHOD, extras);
 
-        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+        return response != null && response.getBoolean(E2eeContactKeys.KEY_UPDATED_ROWS);
     }
-
 
     private static void validateVerificationState(int verificationState) {
         if (verificationState != VERIFICATION_STATE_UNVERIFIED
@@ -364,7 +371,7 @@ public final class ContactKeysManager {
     }
 
     /**
-     * Removes a contact key entry that belongs to the caller app.
+     * Removes an end-to-end encryption contact key entry that belongs to the caller app.
      *
      * @param lookupKey the value that references the contact
      * @param deviceId an app-specified identifier for the device
@@ -373,22 +380,23 @@ public final class ContactKeysManager {
      * @return true if the entry was removed, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
-    public boolean removeContactKey(@NonNull String lookupKey,
+    public boolean removeE2eeContactKey(@NonNull String lookupKey,
             @NonNull String deviceId,
             @NonNull String accountId) {
         final Bundle extras = new Bundle();
-        extras.putString(ContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putString(E2eeContactKeys.LOOKUP_KEY, Objects.requireNonNull(lookupKey));
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
 
         final Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.REMOVE_CONTACT_KEY_METHOD, extras);
+                E2eeContactKeys.REMOVE_CONTACT_KEY_METHOD, extras);
 
-        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+        return response != null && response.getBoolean(E2eeContactKeys.KEY_UPDATED_ROWS);
     }
 
     /**
-     * Inserts a new entry into the self keys table or updates one if it already exists.
+     * Inserts a new entry into the end-to-end encryption self keys table or updates one if it
+     * already exists.
 
      * @param deviceId an app-specified identifier for the device
      * @param accountId an app-specified identifier for the account
@@ -397,20 +405,20 @@ public final class ContactKeysManager {
      * @return true if the entry was added or updated, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
-    public boolean updateOrInsertSelfKey(@NonNull String deviceId,
+    public boolean updateOrInsertE2eeSelfKey(@NonNull String deviceId,
             @NonNull String accountId,
             @NonNull byte[] keyValue) {
         validateKeyLength(keyValue);
 
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
-        extras.putByteArray(ContactKeys.KEY_VALUE, Objects.requireNonNull(keyValue));
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putByteArray(E2eeContactKeys.KEY_VALUE, Objects.requireNonNull(keyValue));
 
         Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.UPDATE_OR_INSERT_SELF_KEY_METHOD, extras);
+                E2eeContactKeys.UPDATE_OR_INSERT_SELF_KEY_METHOD, extras);
 
-        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+        return response != null && response.getBoolean(E2eeContactKeys.KEY_UPDATED_ROWS);
     }
 
     private static void validateKeyLength(byte[] keyValue) {
@@ -422,7 +430,7 @@ public final class ContactKeysManager {
     }
 
     /**
-     * Updates a self key entry's remote verification state.
+     * Updates an end-to-end encryption self key entry's remote verification state.
      *
      * @param deviceId an app-specified identifier for the device
      * @param accountId an app-specified identifier for the account
@@ -431,25 +439,25 @@ public final class ContactKeysManager {
      * @return true if the entry was updated, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
-    public boolean updateSelfKeyRemoteVerificationState(@NonNull String deviceId,
+    public boolean updateE2eeSelfKeyRemoteVerificationState(@NonNull String deviceId,
             @NonNull String accountId,
             @VerificationState int remoteVerificationState) {
         validateVerificationState(remoteVerificationState);
 
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
-        extras.putInt(ContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putInt(E2eeContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
 
         Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.UPDATE_SELF_KEY_REMOTE_VERIFICATION_STATE_METHOD, extras);
+                E2eeContactKeys.UPDATE_SELF_KEY_REMOTE_VERIFICATION_STATE_METHOD, extras);
 
-        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+        return response != null && response.getBoolean(E2eeContactKeys.KEY_UPDATED_ROWS);
     }
 
     /**
-     * Updates a self key entry's remote verification state that belongs to the app identified
-     * by ownerPackageName.
+     * Updates an end-to-end encryption self key entry's remote verification state that belongs to
+     * the app identified by ownerPackageName.
      *
      * @param deviceId an app-specified identifier for the device
      * @param accountId an app-specified identifier for the account
@@ -464,77 +472,79 @@ public final class ContactKeysManager {
     @RequiresPermission(allOf = {
             android.Manifest.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS,
             android.Manifest.permission.WRITE_CONTACTS})
-    public boolean updateSelfKeyRemoteVerificationState(@NonNull String deviceId,
+    public boolean updateE2eeSelfKeyRemoteVerificationState(@NonNull String deviceId,
             @NonNull String accountId,
             @NonNull String ownerPackageName,
             @VerificationState int remoteVerificationState) {
         validateVerificationState(remoteVerificationState);
 
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
-        extras.putString(ContactKeys.OWNER_PACKAGE_NAME, Objects.requireNonNull(ownerPackageName));
-        extras.putInt(ContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putString(E2eeContactKeys.OWNER_PACKAGE_NAME,
+                Objects.requireNonNull(ownerPackageName));
+        extras.putInt(E2eeContactKeys.REMOTE_VERIFICATION_STATE, remoteVerificationState);
 
         Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.UPDATE_SELF_KEY_REMOTE_VERIFICATION_STATE_METHOD, extras);
+                E2eeContactKeys.UPDATE_SELF_KEY_REMOTE_VERIFICATION_STATE_METHOD, extras);
 
-        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+        return response != null && response.getBoolean(E2eeContactKeys.KEY_UPDATED_ROWS);
     }
 
     /**
-     * Maximum size of a contact key.
+     * Maximum size of an end-to-end encryption contact key.
      */
     public static int getMaxKeySizeBytes() {
         return MAX_KEY_SIZE_BYTES;
     }
 
     /**
-     * Returns a self key entry given the deviceId and the inferred package name of the caller.
+     * Returns an end-to-end encryption self key entry given the deviceId and the inferred package
+     * name of the caller.
      *
      * @param deviceId an app-specified identifier for the device
      * @param accountId an app-specified identifier for the account
      *
-     * @return a {@link SelfKey} object containing the self key information, or null if no self key
-     * is found.
+     * @return a {@link E2eeSelfKey} object containing the end-to-end encryption self key
+     * information, or null if no self key is found.
      */
     @RequiresPermission(android.Manifest.permission.READ_CONTACTS)
     @Nullable
-    public SelfKey getSelfKey(@NonNull String deviceId,
+    public E2eeSelfKey getE2eeSelfKey(@NonNull String deviceId,
             @NonNull String accountId) {
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
 
         Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.GET_SELF_KEY_METHOD, extras);
+                E2eeContactKeys.GET_SELF_KEY_METHOD, extras);
 
         if (response == null) {
             return null;
         }
-        return response.getParcelable(ContactKeys.KEY_CONTACT_KEY, SelfKey.class);
+        return response.getParcelable(E2eeContactKeys.KEY_CONTACT_KEY, E2eeSelfKey.class);
     }
 
     /**
-     * Returns all self key entries that belong to apps visible to the caller.
+     * Returns all end-to-end encryption self key entries that belong to apps visible to the caller.
      * The keys will be stripped of deviceId, timeUpdated and keyValue data.
      *
-     * @return a list of {@link SelfKey} objects containing the self key information, or
-     * an empty list if no keys are found.
+     * @return a list of {@link E2eeSelfKey} objects containing the end-to-end encryption self key
+     * information, or an empty list if no self keys are found.
      */
     @RequiresPermission(android.Manifest.permission.READ_CONTACTS)
     @NonNull
-    public List<SelfKey> getAllSelfKeys() {
+    public List<E2eeSelfKey> getAllE2eeSelfKeys() {
         Bundle extras = new Bundle();
 
-        Bundle response = nullSafeCall(mContentResolver, ContactKeys.GET_ALL_SELF_KEYS_METHOD,
+        Bundle response = nullSafeCall(mContentResolver, E2eeContactKeys.GET_ALL_SELF_KEYS_METHOD,
                 extras);
 
         if (response == null) {
             return new ArrayList<>();
         }
-        List<SelfKey> value = response.getParcelableArrayList(ContactKeys.KEY_CONTACT_KEYS,
-                SelfKey.class);
+        List<E2eeSelfKey> value = response.getParcelableArrayList(E2eeContactKeys.KEY_CONTACT_KEYS,
+                E2eeSelfKey.class);
         if (value == null) {
             return new ArrayList<>();
         }
@@ -542,24 +552,24 @@ public final class ContactKeysManager {
     }
 
     /**
-     * Returns all self key entries that are owned by the caller app.
+     * Returns all end-to-end encryption self key entries that are owned by the caller app.
      *
-     * @return a list of {@link SelfKey} objects containing the self key information, or
-     * an empty list if no keys are found.
+     * @return a list of {@link E2eeSelfKey} objects containing the end-to-end encryption self key
+     * information, or an empty list if no self keys are found.
      */
     @RequiresPermission(android.Manifest.permission.READ_CONTACTS)
     @NonNull
-    public List<SelfKey> getOwnerSelfKeys() {
+    public List<E2eeSelfKey> getOwnerE2eeSelfKeys() {
         Bundle extras = new Bundle();
 
-        Bundle response = nullSafeCall(mContentResolver, ContactKeys.GET_OWNER_SELF_KEYS_METHOD,
+        Bundle response = nullSafeCall(mContentResolver, E2eeContactKeys.GET_OWNER_SELF_KEYS_METHOD,
                 extras);
 
         if (response == null) {
             return new ArrayList<>();
         }
-        List<SelfKey> value = response.getParcelableArrayList(ContactKeys.KEY_CONTACT_KEYS,
-                SelfKey.class);
+        List<E2eeSelfKey> value = response.getParcelableArrayList(E2eeContactKeys.KEY_CONTACT_KEYS,
+                E2eeSelfKey.class);
         if (value == null) {
             return new ArrayList<>();
         }
@@ -567,24 +577,24 @@ public final class ContactKeysManager {
     }
 
     /**
-     * Removes a self key entry given the deviceId and the inferred package name of the caller.
-
+     * Removes an end-to-end encryption self key entry given the deviceId and the inferred
+     * package name of the caller.
      * @param deviceId an app-specified identifier for the device
      * @param accountId an app-specified identifier for the account
      *
      * @return true if the entry was removed, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
-    public boolean removeSelfKey(@NonNull String deviceId,
+    public boolean removeE2eeSelfKey(@NonNull String deviceId,
             @NonNull String accountId) {
         Bundle extras = new Bundle();
-        extras.putString(ContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
-        extras.putString(ContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
+        extras.putString(E2eeContactKeys.DEVICE_ID, Objects.requireNonNull(deviceId));
+        extras.putString(E2eeContactKeys.ACCOUNT_ID, Objects.requireNonNull(accountId));
 
         Bundle response = nullSafeCall(mContentResolver,
-                ContactKeys.REMOVE_SELF_KEY_METHOD, extras);
+                E2eeContactKeys.REMOVE_SELF_KEY_METHOD, extras);
 
-        return response != null && response.getBoolean(ContactKeys.KEY_UPDATED_ROWS);
+        return response != null && response.getBoolean(E2eeContactKeys.KEY_UPDATED_ROWS);
     }
 
     private Bundle nullSafeCall(@NonNull ContentResolver resolver, @NonNull String method,
@@ -622,9 +632,9 @@ public final class ContactKeysManager {
     public static final int VERIFICATION_STATE_VERIFIED = 2;
 
     /** @hide */
-    public static final class ContactKeys {
+    public static final class E2eeContactKeys {
 
-        private ContactKeys() {}
+        private E2eeContactKeys() {}
 
         /**
          * <p>
@@ -636,14 +646,16 @@ public final class ContactKeysManager {
 
         /**
          * <p>
-         * An app-specified identifier for the device for which the contact key can be used.
+         * An app-specified identifier for the device for which the end-to-end encryption
+         * contact key can be used.
          * </p>
          */
         public static final String DEVICE_ID = "device_id";
 
         /**
          * <p>
-         * An app-specified identifier for the account for which the contact key can be used.
+         * An app-specified identifier for the account for which the end-to-end encryption
+         * contact key can be used.
          * Usually a phone number.
          * </p>
          */
@@ -718,29 +730,32 @@ public final class ContactKeysManager {
         public static final String GET_CONTACT_KEY_METHOD = "getContactKey";
 
         /**
-         * The method to invoke in order to retrieve all contact keys.
+         * The method to invoke in order to retrieve all end-to-end encryption contact keys.
          */
         public static final String GET_ALL_CONTACT_KEYS_METHOD = "getAllContactKeys";
 
         /**
-         * The method to invoke in order to retrieve contact keys that belong to the caller.
+         * The method to invoke in order to retrieve end-to-end encryption contact keys that belong
+         * to the caller.
          */
         public static final String GET_OWNER_CONTACT_KEYS_METHOD = "getOwnerContactKeys";
 
         /**
-         * The method to invoke in order to update a contact key local verification state.
+         * The method to invoke in order to update an end-to-end encryption contact key local
+         * verification state.
          */
         public static final String UPDATE_CONTACT_KEY_LOCAL_VERIFICATION_STATE_METHOD =
                 "updateContactKeyLocalVerificationState";
 
         /**
-         * The method to invoke in order to update a contact key remote verification state.
+         * The method to invoke in order to update an end-to-end encryption contact key remote
+         * verification state.
          */
         public static final String UPDATE_CONTACT_KEY_REMOTE_VERIFICATION_STATE_METHOD =
                 "updateContactKeyRemoteVerificationState";
 
         /**
-         * The method to invoke in order to remove a contact key.
+         * The method to invoke in order to remove a end-to-end encryption contact key.
          */
         public static final String REMOVE_CONTACT_KEY_METHOD = "removeContactKey";
 
@@ -776,12 +791,12 @@ public final class ContactKeysManager {
         public static final String REMOVE_SELF_KEY_METHOD = "removeSelfKey";
 
         /**
-         * Key in the incoming Bundle for all the contact keys.
+         * Key in the incoming Bundle for all the end-to-end encryption contact keys.
          */
         public static final String KEY_CONTACT_KEYS = "key_contact_keys";
 
         /**
-         * Key in the incoming Bundle for a single contact key.
+         * Key in the incoming Bundle for a single end-to-end encryption contact key.
          */
         public static final String KEY_CONTACT_KEY = "key_contact_key";
 
@@ -790,18 +805,19 @@ public final class ContactKeysManager {
          */
         public static final String KEY_UPDATED_ROWS = "key_updated_rows";
     }
-
     /**
      * A parcelable class encapsulating other users' end to end encrypted contact key.
      */
-    public static final class ContactKey implements Parcelable {
+    public static final class E2eeContactKey implements Parcelable {
         /**
-         * An app-specified identifier for the device for which the contact key can be used.
+         * An app-specified identifier for the device for which the end-to-end encryption
+         * contact key can be used.
          */
         private final String mDeviceId;
 
         /**
-         * An app-specified identifier for the account for which the contact key can be used.
+         * An app-specified identifier for the account for which the end-to-end encryption
+         * contact key can be used.
          * Usually a phone number.
          */
         private final String mAccountId;
@@ -851,7 +867,7 @@ public final class ContactKeysManager {
         /**
          * @hide
          */
-        public ContactKey(@Nullable String deviceId, @NonNull String accountId,
+        public E2eeContactKey(@Nullable String deviceId, @NonNull String accountId,
                 @NonNull String ownerPackageName, long timeUpdated, @Nullable byte[] keyValue,
                 @VerificationState int localVerificationState,
                 @VerificationState int remoteVerificationState,
@@ -870,8 +886,10 @@ public final class ContactKeysManager {
         }
 
         /**
-         * Gets the app-specified identifier for the device for which the contact key can be used.
-         * Returns null if the app doesn't have the required visibility into the contact key.
+         * Gets the app-specified identifier for the device for which the end-to-end encryption
+         * contact key can be used.
+         * Returns null if the app doesn't have the required visibility into
+         * the end-to-end encryption contact key.
          *
          * @return An app-specified identifier for the device.
          */
@@ -881,7 +899,8 @@ public final class ContactKeysManager {
         }
 
         /**
-         * Gets the app-specified identifier for the account for which the contact key can be used.
+         * Gets the app-specified identifier for the account for which the end-to-end encryption
+         * contact key can be used.
          * Usually a phone number.
          *
          * @return An app-specified identifier for the account.
@@ -903,7 +922,7 @@ public final class ContactKeysManager {
 
         /**
          * Gets the timestamp at which the key was updated. Returns -1 if the app doesn't have the
-         * required visibility into the contact key.
+         * required visibility into the end-to-end encryption contact key.
          *
          * @return The timestamp at which the key was updated in the System.currentTimeMillis()
          * base.
@@ -914,7 +933,8 @@ public final class ContactKeysManager {
 
         /**
          * Gets the raw bytes for the key.
-         * Returns null if the app doesn't have the required visibility into the contact key.
+         * Returns null if the app doesn't have the required visibility into
+         * the end-to-end encryption contact key.
          *
          * @return A copy of the raw bytes for the key.
          */
@@ -984,7 +1004,7 @@ public final class ContactKeysManager {
             if (obj == null) return false;
             if (obj == this) return true;
 
-            if (!(obj instanceof ContactKey toCompare)) {
+            if (!(obj instanceof E2eeContactKey toCompare)) {
                 return false;
             }
 
@@ -1023,10 +1043,10 @@ public final class ContactKeysManager {
         }
 
         @NonNull
-        public static final Creator<ContactKey> CREATOR =
+        public static final Creator<E2eeContactKey> CREATOR =
                 new Creator<>() {
                     @Override
-                    public ContactKey createFromParcel(Parcel source) {
+                    public E2eeContactKey createFromParcel(Parcel source) {
                         String deviceId = source.readString8();
                         String accountId = source.readString8();
                         String ownerPackageName = source.readString8();
@@ -1044,14 +1064,14 @@ public final class ContactKeysManager {
                         String displayName = source.readString8();
                         String number = source.readString8();
                         String address = source.readString8();
-                        return new ContactKey(deviceId, accountId, ownerPackageName,
+                        return new E2eeContactKey(deviceId, accountId, ownerPackageName,
                                 timeUpdated, keyValue, localVerificationState,
                                 remoteVerificationState, displayName, number, address);
                     }
 
                     @Override
-                    public ContactKey[] newArray(int size) {
-                        return new ContactKey[size];
+                    public E2eeContactKey[] newArray(int size) {
+                        return new E2eeContactKey[size];
                     }
                 };
     }
@@ -1059,14 +1079,16 @@ public final class ContactKeysManager {
     /**
      * A parcelable class encapsulating self end to end encrypted contact key.
      */
-    public static final class SelfKey implements Parcelable {
+    public static final class E2eeSelfKey implements Parcelable {
         /**
-         * An app-specified identifier for the device for which the contact key can be used.
+         * An app-specified identifier for the device for which the end-to-end encryption
+         * contact key can be used.
          */
         private final String mDeviceId;
 
         /**
-         * An app-specified identifier for the account for which the contact key can be used.
+         * An app-specified identifier for the account for which the end-to-end encryption
+         * contact key can be used.
          * Usually a phone number.
          */
         private final String mAccountId;
@@ -1096,7 +1118,7 @@ public final class ContactKeysManager {
         /**
          * @hide
          */
-        public SelfKey(@Nullable String deviceId, @NonNull String accountId,
+        public E2eeSelfKey(@Nullable String deviceId, @NonNull String accountId,
                 @NonNull String ownerPackageName, long timeUpdated, @Nullable byte[] keyValue,
                 @VerificationState int remoteVerificationState) {
             this.mDeviceId = deviceId;
@@ -1108,8 +1130,10 @@ public final class ContactKeysManager {
         }
 
         /**
-         * Gets the app-specified identifier for the device for which the contact key can be used.
-         * Returns null if the app doesn't have the required visibility into the contact key.
+         * Gets the app-specified identifier for the device for which the end-to-end encryption
+         * contact key can be used.
+         * Returns null if the app doesn't have the required visibility into
+         * the end-to-end encryption contact key.
          *
          * @return An app-specified identifier for the device.
          */
@@ -1119,7 +1143,8 @@ public final class ContactKeysManager {
         }
 
         /**
-         * Gets the app-specified identifier for the account for which the contact key can be used.
+         * Gets the app-specified identifier for the account for which the end-to-end encryption
+         * contact key can be used.
          * Usually a phone number.
          *
          * @return An app-specified identifier for the device.
@@ -1141,7 +1166,7 @@ public final class ContactKeysManager {
 
         /**
          * Gets the timestamp at which the key was updated. Returns -1 if the app doesn't have the
-         * required visibility into the contact key.
+         * required visibility into the end-to-end encryption contact key.
          *
          * @return The timestamp at which the key was updated in the System.currentTimeMillis()
          * base.
@@ -1152,7 +1177,8 @@ public final class ContactKeysManager {
 
         /**
          * Gets the raw bytes for the key.
-         * Returns null if the app doesn't have the required visibility into the contact key.
+         * Returns null if the app doesn't have the required visibility into
+         * the end-to-end encryption contact key.
          *
          * @return A copy of the raw bytes for the key.
          */
@@ -1182,7 +1208,7 @@ public final class ContactKeysManager {
             if (obj == null) return false;
             if (obj == this) return true;
 
-            if (!(obj instanceof SelfKey toCompare)) {
+            if (!(obj instanceof E2eeSelfKey toCompare)) {
                 return false;
             }
 
@@ -1213,10 +1239,10 @@ public final class ContactKeysManager {
         }
 
         @NonNull
-        public static final Creator<SelfKey> CREATOR =
+        public static final Creator<E2eeSelfKey> CREATOR =
                 new Creator<>() {
                     @Override
-                    public SelfKey createFromParcel(Parcel source) {
+                    public E2eeSelfKey createFromParcel(Parcel source) {
                         String deviceId = source.readString8();
                         String accountId = source.readString8();
                         String ownerPackageName = source.readString8();
@@ -1230,13 +1256,13 @@ public final class ContactKeysManager {
                             keyValue = null;
                         }
                         int remoteVerificationState = source.readInt();
-                        return new SelfKey(deviceId, accountId, ownerPackageName,
+                        return new E2eeSelfKey(deviceId, accountId, ownerPackageName,
                                 timeUpdated, keyValue, remoteVerificationState);
                     }
 
                     @Override
-                    public SelfKey[] newArray(int size) {
-                        return new SelfKey[size];
+                    public E2eeSelfKey[] newArray(int size) {
+                        return new E2eeSelfKey[size];
                     }
                 };
     }

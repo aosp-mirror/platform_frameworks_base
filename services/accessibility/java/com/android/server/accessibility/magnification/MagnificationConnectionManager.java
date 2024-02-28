@@ -674,6 +674,23 @@ public class MagnificationConnectionManager implements
     }
 
     /**
+     * Notify Fullscreen magnification activation changes.
+     */
+    public boolean onFullscreenMagnificationActivationChanged(int displayId, boolean activated) {
+        synchronized (mLock) {
+            waitForConnectionIfNeeded();
+            if (mConnectionWrapper == null) {
+                Slog.w(TAG,
+                        "onFullscreenMagnificationActivationChanged mConnectionWrapper is null. "
+                                + "mConnectionState=" + connectionStateToString(mConnectionState));
+                return false;
+            }
+            return mConnectionWrapper
+                    .onFullscreenMagnificationActivationChanged(displayId, activated);
+        }
+    }
+
+    /**
      * Calculates the number of fingers in the window.
      *
      * @param displayId The logical display id.
@@ -1267,15 +1284,7 @@ public class MagnificationConnectionManager implements
             float centerY, float magnificationFrameOffsetRatioX,
             float magnificationFrameOffsetRatioY,
             MagnificationAnimationCallback animationCallback) {
-        // Wait for the connection with a timeout.
-        final long endMillis = SystemClock.uptimeMillis() + WAIT_CONNECTION_TIMEOUT_MILLIS;
-        while (mConnectionState == CONNECTING && (SystemClock.uptimeMillis() < endMillis)) {
-            try {
-                mLock.wait(endMillis - SystemClock.uptimeMillis());
-            } catch (InterruptedException ie) {
-                /* ignore */
-            }
-        }
+        waitForConnectionIfNeeded();
         if (mConnectionWrapper == null) {
             Slog.w(TAG,
                     "enableWindowMagnificationInternal mConnectionWrapper is null. "
@@ -1316,5 +1325,17 @@ public class MagnificationConnectionManager implements
             float positionY, MagnificationAnimationCallback animationCallback) {
         return mConnectionWrapper != null && mConnectionWrapper.moveWindowMagnifierToPosition(
                 displayId, positionX, positionY, animationCallback);
+    }
+
+    private void waitForConnectionIfNeeded() {
+        // Wait for the connection with a timeout.
+        final long endMillis = SystemClock.uptimeMillis() + WAIT_CONNECTION_TIMEOUT_MILLIS;
+        while (mConnectionState == CONNECTING && (SystemClock.uptimeMillis() < endMillis)) {
+            try {
+                mLock.wait(endMillis - SystemClock.uptimeMillis());
+            } catch (InterruptedException ie) {
+                /* ignore */
+            }
+        }
     }
 }

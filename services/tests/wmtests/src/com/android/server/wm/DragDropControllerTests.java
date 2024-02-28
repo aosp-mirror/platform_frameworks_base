@@ -42,6 +42,7 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -541,7 +542,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUnhandledDragListenerNotCalledForNormalDrags() throws RemoteException {
+    public void testUnhandledDragNotCalledForNormalDrags() throws RemoteException {
         assumeTrue(com.android.window.flags.Flags.delegateUnhandledDrags());
 
         final IGlobalDragListener listener = mock(IGlobalDragListener.class);
@@ -552,15 +553,16 @@ public class DragDropControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUnhandledDragListenerReceivesUnhandledDropOverWindow() {
+    public void testUnhandledDragReceivesUnhandledDropOverWindow() {
         assumeTrue(com.android.window.flags.Flags.delegateUnhandledDrags());
 
         final IGlobalDragListener listener = mock(IGlobalDragListener.class);
         doReturn(mock(Binder.class)).when(listener).asBinder();
         mTarget.setGlobalDragListener(listener);
         final int invalidXY = 100_000;
-        startDrag(View.DRAG_FLAG_GLOBAL, ClipData.newPlainText("label", "Test"), () -> {
-            // Notify the unhandled drag listener
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG,
+                ClipData.newPlainText("label", "Test"), () -> {
+            // Trigger an unhandled drop and verify the global drag listener was called
             mTarget.reportDropWindow(mWindow.mInputChannelToken, invalidXY, invalidXY);
             mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
             mTarget.reportDropResult(mWindow.mClient, false);
@@ -575,15 +577,16 @@ public class DragDropControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUnhandledDragListenerReceivesUnhandledDropOverNoValidWindow() {
+    public void testUnhandledDragReceivesUnhandledDropOverNoValidWindow() {
         assumeTrue(com.android.window.flags.Flags.delegateUnhandledDrags());
 
         final IGlobalDragListener listener = mock(IGlobalDragListener.class);
         doReturn(mock(Binder.class)).when(listener).asBinder();
         mTarget.setGlobalDragListener(listener);
         final int invalidXY = 100_000;
-        startDrag(View.DRAG_FLAG_GLOBAL, ClipData.newPlainText("label", "Test"), () -> {
-            // Notify the unhandled drag listener
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG,
+                ClipData.newPlainText("label", "Test"), () -> {
+            // Trigger an unhandled drop and verify the global drag listener was called
             mTarget.reportDropWindow(mock(IBinder.class), invalidXY, invalidXY);
             mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
             mTarget.onUnhandledDropCallback(true);
@@ -597,15 +600,38 @@ public class DragDropControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUnhandledDragListenerCallbackTimeout() {
+    public void testUnhandledDragDoesNotReceiveUnhandledDropWithoutDragFlag() {
         assumeTrue(com.android.window.flags.Flags.delegateUnhandledDrags());
 
         final IGlobalDragListener listener = mock(IGlobalDragListener.class);
         doReturn(mock(Binder.class)).when(listener).asBinder();
         mTarget.setGlobalDragListener(listener);
         final int invalidXY = 100_000;
-        startDrag(View.DRAG_FLAG_GLOBAL, ClipData.newPlainText("label", "Test"), () -> {
-            // Notify the unhandled drag listener
+        startDrag(View.DRAG_FLAG_GLOBAL,
+                ClipData.newPlainText("label", "Test"), () -> {
+                    // Trigger an unhandled drop and verify the global drag listener was not called
+                    mTarget.reportDropWindow(mock(IBinder.class), invalidXY, invalidXY);
+                    mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
+                    mToken = null;
+                    try {
+                        verify(listener, never()).onUnhandledDrop(any(), any());
+                    } catch (RemoteException e) {
+                        fail("Failed to verify unhandled drop: " + e);
+                    }
+                });
+    }
+
+    @Test
+    public void testUnhandledDragCallbackTimeout() {
+        assumeTrue(com.android.window.flags.Flags.delegateUnhandledDrags());
+
+        final IGlobalDragListener listener = mock(IGlobalDragListener.class);
+        doReturn(mock(Binder.class)).when(listener).asBinder();
+        mTarget.setGlobalDragListener(listener);
+        final int invalidXY = 100_000;
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG,
+                ClipData.newPlainText("label", "Test"), () -> {
+            // Trigger an unhandled drop and verify the global drag listener was called
             mTarget.reportDropWindow(mock(IBinder.class), invalidXY, invalidXY);
             mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
 

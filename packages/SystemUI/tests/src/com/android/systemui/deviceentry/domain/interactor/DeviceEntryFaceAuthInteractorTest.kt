@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.keyguardUpdateMonitor
 import com.android.keyguard.trustManager
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.CameraInfo
 import com.android.systemui.biometrics.data.repository.FaceSensorInfo
 import com.android.systemui.biometrics.data.repository.facePropertyRepository
 import com.android.systemui.biometrics.shared.model.LockoutMode
@@ -488,6 +489,47 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
             runCurrent()
 
             verify(trustManager).clearAllBiometricRecognized(eq(BiometricSourceType.FACE), anyInt())
+        }
+
+    @Test
+    fun faceAuthIsRequestedWhenAuthIsRunningWhileCameraInfoChanged() =
+        testScope.runTest {
+            facePropertyRepository.setCameraIno(null)
+            underTest.start()
+
+            faceAuthRepository.requestAuthenticate(
+                FaceAuthUiEvent.FACE_AUTH_UPDATED_KEYGUARD_VISIBILITY_CHANGED,
+                true
+            )
+            facePropertyRepository.setCameraIno(CameraInfo("0", "1", null))
+
+            runCurrent()
+            assertThat(faceAuthRepository.runningAuthRequest.value)
+                .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_CAMERA_AVAILABLE_CHANGED, true))
+        }
+
+    @Test
+    fun faceAuthIsNotRequestedWhenNoAuthRunningWhileCameraInfoChanged() =
+        testScope.runTest {
+            facePropertyRepository.setCameraIno(null)
+            underTest.start()
+
+            facePropertyRepository.setCameraIno(CameraInfo("0", "1", null))
+
+            runCurrent()
+            assertThat(faceAuthRepository.runningAuthRequest.value).isNull()
+        }
+
+    @Test
+    fun faceAuthIsNotRequestedWhenAuthIsRunningWhileCameraInfoIsNull() =
+        testScope.runTest {
+            facePropertyRepository.setCameraIno(null)
+            underTest.start()
+
+            facePropertyRepository.setCameraIno(null)
+
+            runCurrent()
+            assertThat(faceAuthRepository.runningAuthRequest.value).isNull()
         }
 
     companion object {

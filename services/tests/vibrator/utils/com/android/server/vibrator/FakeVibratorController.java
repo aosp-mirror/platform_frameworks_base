@@ -18,7 +18,10 @@ package com.android.server.vibrator;
 
 import android.annotation.NonNull;
 import android.frameworks.vibrator.IVibratorController;
+import android.frameworks.vibrator.VibrationParam;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.VibrationAttributes;
 
@@ -28,17 +31,42 @@ import android.os.VibrationAttributes;
  */
 public final class FakeVibratorController extends IVibratorController.Stub {
 
+    private final Handler mHandler;
+    private VibratorControlService mVibratorControlService;
+    private VibrationParam[] mRequestResult = new VibrationParam[0];
+
     public boolean isLinkedToDeath = false;
     public boolean didRequestVibrationParams = false;
     public int requestVibrationType = VibrationAttributes.USAGE_UNKNOWN;
     public long requestTimeoutInMillis = 0;
 
+    public FakeVibratorController(Looper looper) {
+        mHandler = new Handler(looper);
+    }
+
+    public void setVibratorControlService(VibratorControlService service) {
+        mVibratorControlService = service;
+    }
+
+    public void setRequestResult(VibrationParam... params) {
+        mRequestResult = params;
+    }
+
     @Override
-    public void requestVibrationParams(int vibrationType, long timeoutInMillis, IBinder iBinder)
+    public void requestVibrationParams(int vibrationType, long timeoutInMillis, IBinder token)
             throws RemoteException {
         didRequestVibrationParams = true;
         requestVibrationType = vibrationType;
         requestTimeoutInMillis = timeoutInMillis;
+        mHandler.post(() -> {
+            if (mVibratorControlService != null) {
+                try {
+                    mVibratorControlService.onRequestVibrationParamsComplete(token, mRequestResult);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     @Override

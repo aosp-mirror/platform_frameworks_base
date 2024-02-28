@@ -18,7 +18,7 @@ package com.android.systemui.media.controls.ui.controller;
 
 import static android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS;
 
-import static com.android.systemui.Flags.legacyLeAudioSharing;
+import static com.android.settingslib.flags.Flags.legacyLeAudioSharing;
 import static com.android.systemui.media.controls.shared.model.SmartspaceMediaDataKt.NUM_REQUIRED_RECOMMENDATIONS;
 
 import android.animation.Animator;

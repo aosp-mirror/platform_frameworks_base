@@ -159,7 +159,7 @@ android_app {
         "android.content.pm.flags-aconfig",
         "android.provider.flags-aconfig",
         "camera_platform_flags",
-        "com.android.net.flags-aconfig",
+        "android.net.platform.flags-aconfig",
         "com.android.window.flags.window-aconfig",
     ],
 }

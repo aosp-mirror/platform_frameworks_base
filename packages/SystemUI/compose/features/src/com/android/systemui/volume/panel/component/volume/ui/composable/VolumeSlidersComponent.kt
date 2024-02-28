@@ -26,6 +26,7 @@ import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.Sl
 import com.android.systemui.volume.panel.component.volume.ui.viewmodel.AudioVolumeComponentViewModel
 import com.android.systemui.volume.panel.ui.composable.ComposeVolumePanelUiComponent
 import com.android.systemui.volume.panel.ui.composable.VolumePanelComposeScope
+import com.android.systemui.volume.panel.ui.composable.isPortrait
 import javax.inject.Inject
 
 class VolumeSlidersComponent
@@ -50,7 +51,7 @@ constructor(
             ColumnVolumeSliders(
                 viewModels = sliderViewModels,
                 sliderColors = PlatformSliderDefaults.defaultPlatformSliderColors(),
-                isExpandable = true,
+                isExpandable = isPortrait,
                 modifier = modifier.fillMaxWidth(),
             )
         }

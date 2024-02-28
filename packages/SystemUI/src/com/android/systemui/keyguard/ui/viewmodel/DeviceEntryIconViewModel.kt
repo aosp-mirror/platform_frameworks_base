@@ -37,6 +37,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -206,6 +207,7 @@ constructor(
                 DeviceEntryIconView.IconType.LOCK
             }
         }
+    val isVisible: Flow<Boolean> = deviceEntryViewAlpha.map { it > 0f }.distinctUntilChanged()
     val isLongPressEnabled: Flow<Boolean> =
         combine(
             iconType,
@@ -217,6 +219,7 @@ constructor(
                 DeviceEntryIconView.IconType.FINGERPRINT -> false
             }
         }
+
     val accessibilityDelegateHint: Flow<DeviceEntryIconView.AccessibilityHintType> =
         combine(iconType, isLongPressEnabled) { deviceEntryStatus, longPressEnabled ->
             if (longPressEnabled) {
