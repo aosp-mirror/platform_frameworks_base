@@ -295,12 +295,7 @@ class MobileIconInteractorImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
-    private val numberOfLevels: StateFlow<Int> =
-        connectionRepository.numberOfLevels.stateIn(
-            scope,
-            SharingStarted.WhileSubscribed(),
-            connectionRepository.numberOfLevels.value,
-        )
+    private val numberOfLevels: StateFlow<Int> = connectionRepository.numberOfLevels
 
     override val isDataConnected: StateFlow<Boolean> =
         connectionRepository.dataConnectionState
