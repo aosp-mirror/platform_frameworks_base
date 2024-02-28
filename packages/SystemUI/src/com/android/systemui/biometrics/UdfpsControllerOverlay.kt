@@ -31,6 +31,7 @@ import android.hardware.biometrics.BiometricRequestConstants.RequestReason
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.os.Build
 import android.os.RemoteException
+import android.os.Trace
 import android.provider.Settings
 import android.util.Log
 import android.util.RotationUtils
@@ -58,9 +59,9 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -125,11 +126,15 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val powerInteractor: PowerInteractor,
         @Application private val scope: CoroutineScope,
 ) {
-    private val isFinishedGoingToSleep: Flow<Unit> =
-        powerInteractor.detailedWakefulness
-            .filter { it.internalWakefulnessState == WakefulnessState.ASLEEP }
+    private val currentStateUpdatedToOffAodOrDozing: Flow<Unit> =
+        transitionInteractor.currentKeyguardState
+            .filter {
+                it == KeyguardState.OFF ||
+                    it == KeyguardState.AOD ||
+                    it == KeyguardState.DOZING
+            }
             .map { } // map to Unit
-    private var listenForAsleepJob: Job? = null
+    private var listenForCurrentKeyguardState: Job? = null
     private var addViewRunnable: Runnable? = null
     private var overlayViewLegacy: UdfpsView? = null
         private set
@@ -280,18 +285,19 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     private fun addViewNowOrLater(view: View, animation: UdfpsAnimationViewController<*>?) {
         if (udfpsViewPerformance()) {
             addViewRunnable = kotlinx.coroutines.Runnable {
+                Trace.setCounter("UdfpsAddView", 1)
                 windowManager.addView(
                         view,
                         coreLayoutParams.updateDimensions(animation)
                 )
             }
-            if (powerInteractor.detailedWakefulness.value.internalWakefulnessState
-                    != WakefulnessState.STARTING_TO_SLEEP) {
+            if (powerInteractor.detailedWakefulness.value.isAwake()) {
+                // Device is awake, so we add the view immediately.
                 addViewIfPending()
             } else {
-                listenForAsleepJob?.cancel()
-                listenForAsleepJob = scope.launch {
-                    isFinishedGoingToSleep.collect {
+                listenForCurrentKeyguardState?.cancel()
+                listenForCurrentKeyguardState = scope.launch {
+                    currentStateUpdatedToOffAodOrDozing.collect {
                         addViewIfPending()
                     }
                 }
@@ -306,7 +312,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
 
     private fun addViewIfPending() {
         addViewRunnable?.let {
-            listenForAsleepJob?.cancel()
+            listenForCurrentKeyguardState?.cancel()
             it.run()
         }
         addViewRunnable = null
@@ -412,7 +418,14 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             udfpsDisplayModeProvider.disable(null)
         }
         getTouchOverlay()?.apply {
-            windowManager.removeView(this)
+            if (udfpsViewPerformance()) {
+                if (this.parent != null) {
+                    windowManager.removeView(this)
+                }
+                Trace.setCounter("UdfpsAddView", 0)
+            } else {
+                windowManager.removeView(this)
+            }
             setOnTouchListener(null)
             setOnHoverListener(null)
             overlayTouchListener?.let {
@@ -423,7 +436,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         overlayViewLegacy = null
         overlayTouchView = null
         overlayTouchListener = null
-        listenForAsleepJob?.cancel()
+        listenForCurrentKeyguardState?.cancel()
 
         return wasShowing
     }

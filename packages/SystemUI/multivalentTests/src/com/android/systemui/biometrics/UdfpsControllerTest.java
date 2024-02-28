@@ -63,6 +63,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -233,6 +234,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
     private IUdfpsOverlayController mOverlayController;
+    @Captor
+    private ArgumentCaptor<View> mViewCaptor;
     @Captor
     private ArgumentCaptor<UdfpsView.OnTouchListener> mTouchListenerCaptor;
     @Captor
@@ -550,8 +553,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
                                     mOpticalProps.sensorId,
                                     BiometricRequestConstants.REASON_ENROLL_ENROLLING,
                                     mUdfpsOverlayControllerCallback);
+
                             mFgExecutor.runAllReady();
-                            verify(mWindowManager).addView(any(), any());
+                            verify(mWindowManager).addView(mViewCaptor.capture(), any());
+                            when(mViewCaptor.getValue().getParent())
+                                    .thenReturn(mock(ViewGroup.class));
 
                             // Update overlay parameters.
                             reset(mWindowManager);
