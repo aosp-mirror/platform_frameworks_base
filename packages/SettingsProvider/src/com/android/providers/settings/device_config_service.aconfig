@@ -25,3 +25,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "load_apex_aconfig_protobufs"
+    namespace: "core_experiments_team_internal"
+    description: "When enabled, loads aconfig default values in apex flag protobufs into DeviceConfig on boot."
+    bug: "327383546"
+    is_fixed_read_only: true
+}
