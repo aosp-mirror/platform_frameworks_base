@@ -68,6 +68,7 @@ public class TemporaryBrightnessStrategy implements DisplayBrightnessStrategy {
     /**
      * Dumps the state of this class.
      */
+    @Override
     public void dump(PrintWriter writer) {
         writer.println("TemporaryBrightnessStrategy:");
         writer.println("  mTemporaryScreenBrightness:" + mTemporaryScreenBrightness);
