@@ -36,7 +36,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -64,7 +64,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private val shadeRepository = FakeShadeRepository()
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val transitionState: MutableStateFlow<ObservableTransitionState> =
-        MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Gone))
+        MutableStateFlow(ObservableTransitionState.Idle(Scenes.Gone))
 
     private val underTest by lazy {
         KeyguardInteractor(
@@ -250,8 +250,8 @@ class KeyguardInteractorTest : SysuiTestCase() {
             underTest.setAnimateDozingTransitions(true)
             transitionState.value =
                 ObservableTransitionState.Transition(
-                    fromScene = SceneKey.Gone,
-                    toScene = SceneKey.Lockscreen,
+                    fromScene = Scenes.Gone,
+                    toScene = Scenes.Lockscreen,
                     progress = flowOf(0f),
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),

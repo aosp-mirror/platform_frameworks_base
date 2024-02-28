@@ -25,7 +25,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.init.NotificationsController
@@ -77,12 +77,12 @@ constructor(
                 .map { state ->
                     when (state) {
                         is ObservableTransitionState.Idle ->
-                            state.scene == SceneKey.Shade || state.scene == SceneKey.Lockscreen
+                            state.scene == Scenes.Shade || state.scene == Scenes.Lockscreen
                         is ObservableTransitionState.Transition ->
-                            state.toScene == SceneKey.Shade ||
-                                state.toScene == SceneKey.Lockscreen ||
-                                state.fromScene == SceneKey.Shade ||
-                                state.fromScene == SceneKey.Lockscreen
+                            state.toScene == Scenes.Shade ||
+                                state.toScene == Scenes.Lockscreen ||
+                                state.fromScene == Scenes.Shade ||
+                                state.fromScene == Scenes.Lockscreen
                     }
                 }
                 .distinctUntilChanged()

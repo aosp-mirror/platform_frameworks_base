@@ -1,10 +1,10 @@
 package com.android.systemui.scene.ui.composable
 
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 
-val Lockscreen = SceneKey.Lockscreen.asComposeAware()
-val Bouncer = SceneKey.Bouncer.asComposeAware()
-val Shade = SceneKey.Shade.asComposeAware()
-val QuickSettings = SceneKey.QuickSettings.asComposeAware()
-val Gone = SceneKey.Gone.asComposeAware()
-val Communal = SceneKey.Communal.asComposeAware()
+val Lockscreen = Scenes.Lockscreen.asComposeAware()
+val Bouncer = Scenes.Bouncer.asComposeAware()
+val Shade = Scenes.Shade.asComposeAware()
+val QuickSettings = Scenes.QuickSettings.asComposeAware()
+val Gone = Scenes.Gone.asComposeAware()
+val Communal = Scenes.Communal.asComposeAware()

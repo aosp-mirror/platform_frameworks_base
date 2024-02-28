@@ -53,9 +53,9 @@ class SceneDataSourceDelegatorTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
             underTest.setDelegate(null)
-            assertThat(currentScene).isNotEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isNotEqualTo(Scenes.Bouncer)
 
-            underTest.changeScene(toScene = SceneKey.Bouncer)
+            underTest.changeScene(toScene = Scenes.Bouncer)
 
             assertThat(currentScene).isEqualTo(initialSceneKey)
         }
@@ -71,11 +71,11 @@ class SceneDataSourceDelegatorTest : SysuiTestCase() {
     fun currentScene_withDelegate_changesScenes() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
-            assertThat(currentScene).isNotEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isNotEqualTo(Scenes.Bouncer)
 
-            underTest.changeScene(toScene = SceneKey.Bouncer)
+            underTest.changeScene(toScene = Scenes.Bouncer)
 
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test
@@ -83,8 +83,8 @@ class SceneDataSourceDelegatorTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
 
-            fakeSceneDataSource.changeScene(toScene = SceneKey.Bouncer)
+            fakeSceneDataSource.changeScene(toScene = Scenes.Bouncer)
 
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 }

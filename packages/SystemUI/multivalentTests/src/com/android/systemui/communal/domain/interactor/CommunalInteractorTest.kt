@@ -53,7 +53,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
@@ -661,7 +661,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes with the flag doesn't have any impact
-            sceneInteractor.changeScene(SceneKey.Communal, loggingReason = "")
+            sceneInteractor.changeScene(Scenes.Communal, loggingReason = "")
             runCurrent()
             assertThat(isCommunalShowing).isFalse()
 
@@ -692,12 +692,12 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes (with the flag) to communal sets the value to true
-            sceneInteractor.changeScene(SceneKey.Communal, loggingReason = "")
+            sceneInteractor.changeScene(Scenes.Communal, loggingReason = "")
             runCurrent()
             assertThat(isCommunalShowing).isTrue()
 
             // Verify scene changes (with the flag) to lockscreen sets the value to false
-            sceneInteractor.changeScene(SceneKey.Lockscreen, loggingReason = "")
+            sceneInteractor.changeScene(Scenes.Lockscreen, loggingReason = "")
             runCurrent()
             assertThat(isCommunalShowing).isFalse()
         }

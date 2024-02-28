@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,7 +54,7 @@ constructor(
                 when (state) {
                     is ObservableTransitionState.Idle ->
                         flowOf(
-                            if (state.scene != SceneKey.Gone) {
+                            if (state.scene != Scenes.Gone) {
                                 // When resting on a non-Gone scene, the panel is fully expanded.
                                 1f
                             } else {
@@ -64,7 +65,7 @@ constructor(
                         )
                     is ObservableTransitionState.Transition ->
                         when {
-                            state.fromScene == SceneKey.Gone ->
+                            state.fromScene == Scenes.Gone ->
                                 if (state.toScene.isExpandable()) {
                                     // Moving from Gone to a scene that can animate-expand has a
                                     // panel
@@ -77,7 +78,7 @@ constructor(
                                     // the panel fully expanded.
                                     flowOf(1f)
                                 }
-                            state.toScene == SceneKey.Gone ->
+                            state.toScene == Scenes.Gone ->
                                 if (state.fromScene.isExpandable()) {
                                     // Moving to Gone from a scene that can animate-expand has a
                                     // panel
@@ -99,6 +100,6 @@ constructor(
         }
 
     private fun SceneKey.isExpandable(): Boolean {
-        return this == SceneKey.Shade || this == SceneKey.QuickSettings
+        return this == Scenes.Shade || this == Scenes.QuickSettings
     }
 }

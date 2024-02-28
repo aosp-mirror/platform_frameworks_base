@@ -23,7 +23,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,8 +53,8 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
                     ObservableTransitionState.Transition(
-                        fromScene = SceneKey.QuickSettings,
-                        toScene = SceneKey.Shade,
+                        fromScene = Scenes.QuickSettings,
+                        toScene = Scenes.Shade,
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -76,8 +76,8 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
                     ObservableTransitionState.Transition(
-                        fromScene = SceneKey.QuickSettings,
-                        toScene = SceneKey.Gone,
+                        fromScene = Scenes.QuickSettings,
+                        toScene = Scenes.Gone,
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -99,8 +99,8 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
                     ObservableTransitionState.Transition(
-                        fromScene = SceneKey.QuickSettings,
-                        toScene = SceneKey.Gone,
+                        fromScene = Scenes.QuickSettings,
+                        toScene = Scenes.Gone,
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(true),

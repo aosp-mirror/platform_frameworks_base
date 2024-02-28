@@ -27,7 +27,7 @@ import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -51,12 +51,12 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
         assertThat(underTest.allSceneKeys())
             .isEqualTo(
                 listOf(
-                    SceneKey.QuickSettings,
-                    SceneKey.Shade,
-                    SceneKey.Lockscreen,
-                    SceneKey.Bouncer,
-                    SceneKey.Gone,
-                    SceneKey.Communal,
+                    Scenes.QuickSettings,
+                    Scenes.Shade,
+                    Scenes.Lockscreen,
+                    Scenes.Bouncer,
+                    Scenes.Gone,
+                    Scenes.Communal,
                 )
             )
     }
@@ -66,17 +66,17 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val underTest = kosmos.sceneContainerRepository
             val currentScene by collectLastValue(underTest.currentScene)
-            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
-            underTest.changeScene(SceneKey.Shade)
-            assertThat(currentScene).isEqualTo(SceneKey.Shade)
+            underTest.changeScene(Scenes.Shade)
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
         }
 
     @Test(expected = IllegalStateException::class)
     fun changeScene_noSuchSceneInContainer_throws() {
-        kosmos.sceneKeys = listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
+        kosmos.sceneKeys = listOf(Scenes.QuickSettings, Scenes.Lockscreen)
         val underTest = kosmos.sceneContainerRepository
-        underTest.changeScene(SceneKey.Shade)
+        underTest.changeScene(Scenes.Shade)
     }
 
     @Test
@@ -111,7 +111,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
             val underTest = kosmos.sceneContainerRepository
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(SceneKey.Lockscreen)
+                    ObservableTransitionState.Idle(Scenes.Lockscreen)
                 )
             underTest.setTransitionState(transitionState)
             val reflectedTransitionState by collectLastValue(underTest.transitionState)
@@ -120,8 +120,8 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
             val progress = MutableStateFlow(1f)
             transitionState.value =
                 ObservableTransitionState.Transition(
-                    fromScene = SceneKey.Lockscreen,
-                    toScene = SceneKey.Shade,
+                    fromScene = Scenes.Lockscreen,
+                    toScene = Scenes.Shade,
                     progress = progress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),

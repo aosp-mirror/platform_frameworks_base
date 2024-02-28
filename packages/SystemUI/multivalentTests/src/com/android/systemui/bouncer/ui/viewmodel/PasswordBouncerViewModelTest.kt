@@ -34,6 +34,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
@@ -93,7 +94,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
             assertThat(message?.text).isEqualTo(ENTER_YOUR_PASSWORD)
             assertThat(password).isEmpty()
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
             assertThat(underTest.authenticationMethod).isEqualTo(AuthenticationMethodModel.Password)
         }
 
@@ -125,7 +126,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
             assertThat(message?.text).isEmpty()
             assertThat(password).isEqualTo("password")
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test
@@ -163,7 +164,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Password
             )
             kosmos.fakeDeviceEntryRepository.setUnlocked(false)
-            switchToScene(SceneKey.Bouncer)
+            switchToScene(Scenes.Bouncer)
 
             // No input entered.
 
@@ -209,14 +210,14 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             assertThat(password).isEqualTo("password")
 
             // The user doesn't confirm the password, but navigates back to the lockscreen instead.
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
 
             // The user navigates to the bouncer again.
-            switchToScene(SceneKey.Bouncer)
+            switchToScene(Scenes.Bouncer)
 
             // Ensure the previously-entered password is not shown.
             assertThat(password).isEmpty()
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test
@@ -330,8 +331,8 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
     private fun TestScope.switchToScene(toScene: SceneKey) {
         val currentScene by collectLastValue(sceneInteractor.currentScene)
-        val bouncerShown = currentScene != SceneKey.Bouncer && toScene == SceneKey.Bouncer
-        val bouncerHidden = currentScene == SceneKey.Bouncer && toScene != SceneKey.Bouncer
+        val bouncerShown = currentScene != Scenes.Bouncer && toScene == Scenes.Bouncer
+        val bouncerHidden = currentScene == Scenes.Bouncer && toScene != Scenes.Bouncer
         sceneInteractor.changeScene(toScene, "reason")
         if (bouncerShown) underTest.onShown()
         if (bouncerHidden) underTest.onHidden()
@@ -345,7 +346,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             AuthenticationMethodModel.Password
         )
         kosmos.fakeDeviceEntryRepository.setUnlocked(false)
-        switchToScene(SceneKey.Bouncer)
+        switchToScene(Scenes.Bouncer)
     }
 
     private suspend fun TestScope.setLockout(

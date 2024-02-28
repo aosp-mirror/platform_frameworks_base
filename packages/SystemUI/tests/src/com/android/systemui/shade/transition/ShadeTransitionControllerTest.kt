@@ -22,6 +22,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.FakeSceneDataSource
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.shade.STATE_OPENING
 import com.android.systemui.shade.ShadeExpansionChangeEvent
@@ -117,13 +118,13 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
             setUnlocked(true)
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(SceneKey.Gone)
+                    ObservableTransitionState.Idle(Scenes.Gone)
                 )
             sceneInteractor.setTransitionState(transitionState)
 
-            changeScene(SceneKey.Gone, transitionState)
+            changeScene(Scenes.Gone, transitionState)
             val currentScene by collectLastValue(sceneInteractor.currentScene)
-            assertThat(currentScene).isEqualTo(SceneKey.Gone)
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
 
             assertThat(latestChangeEvent)
                 .isEqualTo(
@@ -135,7 +136,7 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
                     )
                 )
 
-            changeScene(SceneKey.Shade, transitionState) { progress ->
+            changeScene(Scenes.Shade, transitionState) { progress ->
                 assertThat(latestChangeEvent)
                     .isEqualTo(
                         ShadeExpansionChangeEvent(

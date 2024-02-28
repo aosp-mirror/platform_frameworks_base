@@ -46,7 +46,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
@@ -191,7 +191,7 @@ constructor(
         flow { emit(sceneContainerFlags.isEnabled()) }
             .flatMapLatest { sceneContainerEnabled ->
                 if (sceneContainerEnabled) {
-                    sceneInteractor.currentScene.map { it == SceneKey.Communal }
+                    sceneInteractor.currentScene.map { it == Scenes.Communal }
                 } else {
                     desiredScene.map { it == CommunalSceneKey.Communal }
                 }

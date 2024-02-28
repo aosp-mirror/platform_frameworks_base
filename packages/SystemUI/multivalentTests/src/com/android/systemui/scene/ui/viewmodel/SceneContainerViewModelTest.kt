@@ -30,7 +30,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
@@ -89,20 +89,20 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     fun sceneTransition() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
-            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
-            fakeSceneDataSource.changeScene(SceneKey.Shade)
+            fakeSceneDataSource.changeScene(Scenes.Shade)
 
-            assertThat(currentScene).isEqualTo(SceneKey.Shade)
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
         }
 
     @Test
     fun canChangeScene_whenAllowed_switchingFromGone_returnsTrue() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
-            fakeSceneDataSource.changeScene(toScene = SceneKey.Gone)
+            fakeSceneDataSource.changeScene(toScene = Scenes.Gone)
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.Gone)
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
 
             sceneContainerConfig.sceneKeys
                 .filter { it != currentScene }
@@ -117,9 +117,9 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     fun canChangeScene_whenAllowed_switchingFromLockscreen_returnsTrue() =
         testScope.runTest {
             val currentScene by collectLastValue(underTest.currentScene)
-            fakeSceneDataSource.changeScene(toScene = SceneKey.Lockscreen)
+            fakeSceneDataSource.changeScene(toScene = Scenes.Lockscreen)
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
             sceneContainerConfig.sceneKeys
                 .filter { it != currentScene }
@@ -135,15 +135,15 @@ class SceneContainerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             falsingManager.setIsFalseTouch(true)
             val currentScene by collectLastValue(underTest.currentScene)
-            fakeSceneDataSource.changeScene(toScene = SceneKey.Lockscreen)
+            fakeSceneDataSource.changeScene(toScene = Scenes.Lockscreen)
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
             sceneContainerConfig.sceneKeys
                 .filter { it != currentScene }
                 .filter {
                     // Moving to the Communal scene is not currently falsing protected.
-                    it != SceneKey.Communal
+                    it != Scenes.Communal
                 }
                 .forEach { toScene ->
                     assertWithMessage("Protected scene $toScene not properly protected")
@@ -157,14 +157,14 @@ class SceneContainerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             falsingManager.setIsFalseTouch(true)
             val currentScene by collectLastValue(underTest.currentScene)
-            fakeSceneDataSource.changeScene(toScene = SceneKey.Lockscreen)
+            fakeSceneDataSource.changeScene(toScene = Scenes.Lockscreen)
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
             sceneContainerConfig.sceneKeys
                 .filter {
                     // Moving to the Communal scene is not currently falsing protected.
-                    it == SceneKey.Communal
+                    it == Scenes.Communal
                 }
                 .forEach { toScene ->
                     assertWithMessage("Unprotected scene $toScene is incorrectly protected")
@@ -178,9 +178,9 @@ class SceneContainerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             falsingManager.setIsFalseTouch(true)
             val currentScene by collectLastValue(underTest.currentScene)
-            fakeSceneDataSource.changeScene(toScene = SceneKey.Gone)
+            fakeSceneDataSource.changeScene(toScene = Scenes.Gone)
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.Gone)
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
 
             sceneContainerConfig.sceneKeys
                 .filter { it != currentScene }

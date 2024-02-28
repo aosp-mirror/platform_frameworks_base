@@ -63,6 +63,7 @@ import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.settings.FakeDisplayTracker
@@ -287,19 +288,19 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     }
 
     @Test
-    fun startsInLockscreenScene() = testScope.runTest { assertCurrentScene(SceneKey.Lockscreen) }
+    fun startsInLockscreenScene() = testScope.runTest { assertCurrentScene(Scenes.Lockscreen) }
 
     @Test
     fun clickLockButtonAndEnterCorrectPin_unlocksDevice() =
         testScope.runTest {
-            emulateUserDrivenTransition(SceneKey.Bouncer)
+            emulateUserDrivenTransition(Scenes.Bouncer)
 
             fakeSceneDataSource.pause()
             enterPin()
             emulatePendingTransitionProgress(
                 expectedVisible = false,
             )
-            assertCurrentScene(SceneKey.Gone)
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
@@ -307,7 +308,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val upDestinationSceneKey by
                 collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
-            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Bouncer)
+            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
             )
@@ -317,7 +318,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             emulatePendingTransitionProgress(
                 expectedVisible = false,
             )
-            assertCurrentScene(SceneKey.Gone)
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
@@ -327,7 +328,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
             val upDestinationSceneKey by
                 collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
-            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Gone)
+            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
             )
@@ -338,13 +339,13 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val upDestinationSceneKey by collectLastValue(shadeSceneViewModel.upDestinationSceneKey)
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
 
             // Emulate a user swipe to the shade scene.
-            emulateUserDrivenTransition(to = SceneKey.Shade)
-            assertCurrentScene(SceneKey.Shade)
+            emulateUserDrivenTransition(to = Scenes.Shade)
+            assertCurrentScene(Scenes.Shade)
 
-            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Lockscreen)
+            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Lockscreen)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
             )
@@ -356,17 +357,17 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             val upDestinationSceneKey by collectLastValue(shadeSceneViewModel.upDestinationSceneKey)
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
             assertThat(deviceEntryInteractor.canSwipeToEnter.value).isTrue()
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
 
             // Emulate a user swipe to dismiss the lockscreen.
-            emulateUserDrivenTransition(to = SceneKey.Gone)
-            assertCurrentScene(SceneKey.Gone)
+            emulateUserDrivenTransition(to = Scenes.Gone)
+            assertCurrentScene(Scenes.Gone)
 
             // Emulate a user swipe to the shade scene.
-            emulateUserDrivenTransition(to = SceneKey.Shade)
-            assertCurrentScene(SceneKey.Shade)
+            emulateUserDrivenTransition(to = Scenes.Shade)
+            assertCurrentScene(Scenes.Shade)
 
-            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Gone)
+            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
             )
@@ -377,10 +378,10 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = false)
             putDeviceToSleep(instantlyLockDevice = false)
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
 
             wakeUpDevice()
-            assertCurrentScene(SceneKey.Gone)
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
@@ -388,45 +389,45 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
             putDeviceToSleep(instantlyLockDevice = false)
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
 
             wakeUpDevice()
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     @Test
     fun deviceGoesToSleep_switchesToLockscreen() =
         testScope.runTest {
             unlockDevice()
-            assertCurrentScene(SceneKey.Gone)
+            assertCurrentScene(Scenes.Gone)
 
             putDeviceToSleep()
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     @Test
     fun deviceGoesToSleep_wakeUp_unlock() =
         testScope.runTest {
             unlockDevice()
-            assertCurrentScene(SceneKey.Gone)
+            assertCurrentScene(Scenes.Gone)
             putDeviceToSleep()
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
             wakeUpDevice()
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
 
             unlockDevice()
-            assertCurrentScene(SceneKey.Gone)
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
     fun deviceWakesUpWhileUnlocked_dismissesLockscreen() =
         testScope.runTest {
             unlockDevice()
-            assertCurrentScene(SceneKey.Gone)
+            assertCurrentScene(Scenes.Gone)
             putDeviceToSleep(instantlyLockDevice = false)
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
             wakeUpDevice()
-            assertCurrentScene(SceneKey.Gone)
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
@@ -435,20 +436,20 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             unlockDevice()
             val upDestinationSceneKey by
                 collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
-            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Gone)
+            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
     fun deviceGoesToSleep_withLockTimeout_staysOnLockscreen() =
         testScope.runTest {
             unlockDevice()
-            assertCurrentScene(SceneKey.Gone)
+            assertCurrentScene(Scenes.Gone)
             putDeviceToSleep(instantlyLockDevice = false)
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
 
             // Pretend like the timeout elapsed and now lock the device.
             lockDevice()
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     @Test
@@ -457,7 +458,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             setAuthMethod(AuthenticationMethodModel.Password)
             val upDestinationSceneKey by
                 collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
-            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Bouncer)
+            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
             )
@@ -466,7 +467,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             dismissIme()
 
             emulatePendingTransitionProgress()
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     @Test
@@ -475,7 +476,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             setAuthMethod(AuthenticationMethodModel.Password)
             val upDestinationSceneKey by
                 collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
-            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Bouncer)
+            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(to = upDestinationSceneKey)
 
             val bouncerActionButton by collectLastValue(bouncerViewModel.actionButton)
@@ -495,7 +496,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             startPhoneCall()
             val upDestinationSceneKey by
                 collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
-            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Bouncer)
+            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(to = upDestinationSceneKey)
 
             val bouncerActionButton by collectLastValue(bouncerViewModel.actionButton)
@@ -513,7 +514,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.None)
             introduceLockedSim()
-            assertCurrentScene(SceneKey.Bouncer)
+            assertCurrentScene(Scenes.Bouncer)
         }
 
     @Test
@@ -523,7 +524,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             introduceLockedSim()
             emulatePendingTransitionProgress(expectedVisible = true)
             enterSimPin(authMethodAfterSimUnlock = AuthenticationMethodModel.None)
-            assertCurrentScene(SceneKey.Gone)
+            assertCurrentScene(Scenes.Gone)
         }
 
     @Test
@@ -533,7 +534,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             introduceLockedSim()
             emulatePendingTransitionProgress(expectedVisible = true)
             enterSimPin(authMethodAfterSimUnlock = AuthenticationMethodModel.Pin)
-            assertCurrentScene(SceneKey.Lockscreen)
+            assertCurrentScene(Scenes.Lockscreen)
         }
 
     @Test
@@ -657,7 +658,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         assertThat(sceneContainerViewModel.currentScene.value).isEqualTo(to)
 
         bouncerSceneJob =
-            if (to == SceneKey.Bouncer) {
+            if (to == Scenes.Bouncer) {
                 testScope.backgroundScope.launch {
                     bouncerViewModel.authMethodViewModel.collect {
                         // Do nothing. Need this to turn this otherwise cold flow, hot.
@@ -688,7 +689,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         sceneInteractor.changeScene(to, "reason")
 
         emulatePendingTransitionProgress(
-            expectedVisible = to != SceneKey.Gone,
+            expectedVisible = to != Scenes.Gone,
         )
     }
 
@@ -715,7 +716,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .that(deviceEntryInteractor.isUnlocked.value)
             .isFalse()
 
-        emulateUserDrivenTransition(SceneKey.Bouncer)
+        emulateUserDrivenTransition(Scenes.Bouncer)
         fakeSceneDataSource.pause()
         enterPin()
         // This repository state is not changed by the AuthInteractor, it relies on
@@ -729,7 +730,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     /**
      * Enters the correct PIN in the bouncer UI.
      *
-     * Asserts that the current scene is [SceneKey.Bouncer] and that the current bouncer UI is a PIN
+     * Asserts that the current scene is [Scenes.Bouncer] and that the current bouncer UI is a PIN
      * before proceeding.
      *
      * Does not assert that the device is locked or unlocked.
@@ -737,7 +738,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private fun TestScope.enterPin() {
         assertWithMessage("Cannot enter PIN when not on the Bouncer scene!")
             .that(getCurrentSceneInUi())
-            .isEqualTo(SceneKey.Bouncer)
+            .isEqualTo(Scenes.Bouncer)
         val authMethodViewModel by collectLastValue(bouncerViewModel.authMethodViewModel)
         assertWithMessage("Cannot enter PIN when not using a PIN authentication method!")
             .that(authMethodViewModel)
@@ -754,7 +755,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     /**
      * Enters the correct PIN in the sim bouncer UI.
      *
-     * Asserts that the current scene is [SceneKey.Bouncer] and that the current bouncer UI is a PIN
+     * Asserts that the current scene is [Scenes.Bouncer] and that the current bouncer UI is a PIN
      * before proceeding.
      *
      * Does not assert that the device is locked or unlocked.
@@ -764,7 +765,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     ) {
         assertWithMessage("Cannot enter PIN when not on the Bouncer scene!")
             .that(getCurrentSceneInUi())
-            .isEqualTo(SceneKey.Bouncer)
+            .isEqualTo(Scenes.Bouncer)
         val authMethodViewModel by collectLastValue(bouncerViewModel.authMethodViewModel)
         assertWithMessage("Cannot enter PIN when not using a PIN authentication method!")
             .that(authMethodViewModel)

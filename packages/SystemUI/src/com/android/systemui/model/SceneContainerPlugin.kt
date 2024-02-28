@@ -21,6 +21,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
@@ -67,11 +68,11 @@ constructor(
          */
         val EvaluatorByFlag =
             mapOf<Int, (SceneKey) -> Boolean>(
-                SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to { it != SceneKey.Gone },
-                SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED to { it == SceneKey.Shade },
-                SYSUI_STATE_QUICK_SETTINGS_EXPANDED to { it == SceneKey.QuickSettings },
-                SYSUI_STATE_BOUNCER_SHOWING to { it == SceneKey.Bouncer },
-                SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING to { it == SceneKey.Lockscreen },
+                SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to { it != Scenes.Gone },
+                SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED to { it == Scenes.Shade },
+                SYSUI_STATE_QUICK_SETTINGS_EXPANDED to { it == Scenes.QuickSettings },
+                SYSUI_STATE_BOUNCER_SHOWING to { it == Scenes.Bouncer },
+                SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING to { it == Scenes.Lockscreen },
             )
     }
 }

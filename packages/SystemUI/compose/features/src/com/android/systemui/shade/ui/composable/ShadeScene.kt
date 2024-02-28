@@ -58,6 +58,7 @@ import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.scene.ui.composable.ComposableScene
@@ -109,7 +110,7 @@ constructor(
     private val mediaCarouselController: MediaCarouselController,
     @Named(QUICK_QS_PANEL) private val mediaHost: MediaHost,
 ) : ComposableScene {
-    override val key = SceneKey.Shade
+    override val key = Scenes.Shade
 
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         viewModel.upDestinationSceneKey
@@ -145,7 +146,7 @@ constructor(
     ): Map<UserAction, UserActionResult> {
         return mapOf(
             UserAction.Swipe(Direction.UP) to UserActionResult(up),
-            UserAction.Swipe(Direction.DOWN) to UserActionResult(SceneKey.QuickSettings),
+            UserAction.Swipe(Direction.DOWN) to UserActionResult(Scenes.QuickSettings),
         )
     }
 }

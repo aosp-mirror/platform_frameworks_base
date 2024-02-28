@@ -26,6 +26,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.recents.utilities.Utilities
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -56,45 +57,45 @@ class ShadeBackActionInteractorImplTest : SysuiTestCase() {
     @Test
     fun animateCollapseQs_notOnQs() =
         testScope.runTest {
-            setScene(SceneKey.Shade)
+            setScene(Scenes.Shade)
             underTest.animateCollapseQs(true)
             runCurrent()
-            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Shade)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Shade)
         }
 
     @Test
     fun animateCollapseQs_fullyCollapse_entered() =
         testScope.runTest {
             enterDevice()
-            setScene(SceneKey.QuickSettings)
+            setScene(Scenes.QuickSettings)
             underTest.animateCollapseQs(true)
             runCurrent()
-            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Gone)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
         }
 
     @Test
     fun animateCollapseQs_fullyCollapse_locked() =
         testScope.runTest {
             deviceEntryRepository.setUnlocked(false)
-            setScene(SceneKey.QuickSettings)
+            setScene(Scenes.QuickSettings)
             underTest.animateCollapseQs(true)
             runCurrent()
-            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Lockscreen)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
     fun animateCollapseQs_notFullyCollapse() =
         testScope.runTest {
-            setScene(SceneKey.QuickSettings)
+            setScene(Scenes.QuickSettings)
             underTest.animateCollapseQs(false)
             runCurrent()
-            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Shade)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Shade)
         }
 
     private fun enterDevice() {
         deviceEntryRepository.setUnlocked(true)
         testScope.runCurrent()
-        setScene(SceneKey.Gone)
+        setScene(Scenes.Gone)
     }
 
     private fun setScene(key: SceneKey) {

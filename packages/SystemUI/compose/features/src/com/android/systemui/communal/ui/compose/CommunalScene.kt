@@ -22,7 +22,7 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.scene.ui.composable.ComposableScene
@@ -38,12 +38,12 @@ class CommunalScene
 constructor(
     private val viewModel: CommunalViewModel,
 ) : ComposableScene {
-    override val key = SceneKey.Communal
+    override val key = Scenes.Communal
 
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         MutableStateFlow<Map<UserAction, UserActionResult>>(
                 mapOf(
-                    UserAction.Swipe(Direction.RIGHT) to UserActionResult(SceneKey.Lockscreen),
+                    UserAction.Swipe(Direction.RIGHT) to UserActionResult(Scenes.Lockscreen),
                 )
             )
             .asStateFlow()

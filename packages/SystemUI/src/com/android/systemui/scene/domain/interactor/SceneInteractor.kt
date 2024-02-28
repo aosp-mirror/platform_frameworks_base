@@ -23,6 +23,7 @@ import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKey
 import com.android.systemui.util.kotlin.pairwiseBy
 import javax.inject.Inject
@@ -160,7 +161,7 @@ constructor(
         loggingReason: String,
         transitionKey: TransitionKey? = null,
     ) {
-        check(toScene != SceneKey.Gone || deviceUnlockedInteractor.isDeviceUnlocked.value) {
+        check(toScene != Scenes.Gone || deviceUnlockedInteractor.isDeviceUnlocked.value) {
             "Cannot change to the Gone scene while the device is locked. Logging reason for scene" +
                 " change was: $loggingReason"
         }

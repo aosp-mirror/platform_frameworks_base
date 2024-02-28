@@ -28,7 +28,7 @@ import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.scene.ui.composable.ComposableScene
@@ -52,13 +52,13 @@ constructor(
     private val viewModel: BouncerViewModel,
     private val dialogFactory: BouncerDialogFactory,
 ) : ComposableScene {
-    override val key = SceneKey.Bouncer
+    override val key = Scenes.Bouncer
 
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         MutableStateFlow(
                 mapOf(
-                    UserAction.Back to UserActionResult(SceneKey.Lockscreen),
-                    UserAction.Swipe(Direction.DOWN) to UserActionResult(SceneKey.Lockscreen),
+                    UserAction.Back to UserActionResult(Scenes.Lockscreen),
+                    UserAction.Swipe(Direction.DOWN) to UserActionResult(Scenes.Lockscreen),
                 )
             )
             .asStateFlow()

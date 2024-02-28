@@ -26,6 +26,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.ShadeTouchLog
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.CollapseShadeInstantly
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
@@ -121,7 +122,7 @@ constructor(
             // release focus immediately to kick off focus change transition
             notificationShadeWindowController.setNotificationShadeFocusable(false)
             notificationStackScrollLayout.cancelExpandHelper()
-            sceneInteractor.changeScene(SceneKey.Shade, "ShadeController.animateExpandShade")
+            sceneInteractor.changeScene(Scenes.Shade, "ShadeController.animateExpandShade")
             if (delayed) {
                 scope.launch {
                     delay(125)
@@ -143,9 +144,9 @@ constructor(
 
     private fun getCollapseDestinationScene(): SceneKey {
         return if (deviceEntryInteractor.isDeviceEntered.value) {
-            SceneKey.Gone
+            Scenes.Gone
         } else {
-            SceneKey.Lockscreen
+            Scenes.Lockscreen
         }
     }
 
@@ -183,11 +184,11 @@ constructor(
     }
 
     override fun expandToNotifications() {
-        sceneInteractor.changeScene(SceneKey.Shade, "ShadeController.animateExpandShade")
+        sceneInteractor.changeScene(Scenes.Shade, "ShadeController.animateExpandShade")
     }
 
     override fun expandToQs() {
-        sceneInteractor.changeScene(SceneKey.QuickSettings, "ShadeController.animateExpandQs")
+        sceneInteractor.changeScene(Scenes.QuickSettings, "ShadeController.animateExpandQs")
     }
 
     override fun setVisibilityListener(listener: ShadeVisibilityListener) {
@@ -237,7 +238,7 @@ constructor(
     }
 
     override fun isExpandedVisible(): Boolean {
-        return sceneInteractor.currentScene.value != SceneKey.Gone
+        return sceneInteractor.currentScene.value != Scenes.Gone
     }
 
     override fun onStatusBarTouch(event: MotionEvent) {

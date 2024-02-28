@@ -22,7 +22,7 @@ import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInte
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.flag.SceneContainerFlagsModule
 import com.android.systemui.scene.shared.model.SceneContainerConfig
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -67,14 +67,14 @@ interface SceneContainerFrameworkModule {
                 // last one is top-most.
                 sceneKeys =
                     listOf(
-                        SceneKey.Gone,
-                        SceneKey.Communal,
-                        SceneKey.Lockscreen,
-                        SceneKey.Bouncer,
-                        SceneKey.QuickSettings,
-                        SceneKey.Shade,
+                        Scenes.Gone,
+                        Scenes.Communal,
+                        Scenes.Lockscreen,
+                        Scenes.Bouncer,
+                        Scenes.QuickSettings,
+                        Scenes.Shade,
                     ),
-                initialSceneKey = SceneKey.Lockscreen,
+                initialSceneKey = Scenes.Lockscreen,
             )
         }
     }
