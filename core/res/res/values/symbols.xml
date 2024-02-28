@@ -5372,4 +5372,6 @@
   <java-symbol type="string" name="config_defaultContextualSearchKey" />
   <java-symbol type="string" name="config_defaultContextualSearchEnabled" />
   <java-symbol type="string" name="config_defaultContextualSearchLegacyEnabled" />
+
+  <java-symbol type="string" name="unarchival_session_app_label" />
 </resources>
