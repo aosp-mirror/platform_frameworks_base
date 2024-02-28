@@ -31,6 +31,7 @@ import com.android.internal.app.IVisualQueryRecognitionStatusListener;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.systemui.assist.domain.interactor.AssistInteractor;
 import com.android.systemui.assist.ui.DefaultUiController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -149,6 +150,7 @@ public class AssistManager {
     private final SecureSettings mSecureSettings;
     private final SelectedUserInteractor mSelectedUserInteractor;
     private final ActivityManager mActivityManager;
+    private final AssistInteractor mInteractor;
 
     private final DeviceProvisionedController mDeviceProvisionedController;
 
@@ -192,7 +194,8 @@ public class AssistManager {
             DisplayTracker displayTracker,
             SecureSettings secureSettings,
             SelectedUserInteractor selectedUserInteractor,
-            ActivityManager activityManager) {
+            ActivityManager activityManager,
+            AssistInteractor interactor) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
@@ -206,6 +209,7 @@ public class AssistManager {
         mSecureSettings = secureSettings;
         mSelectedUserInteractor = selectedUserInteractor;
         mActivityManager = activityManager;
+        mInteractor = interactor;
 
         registerVoiceInteractionSessionListener();
         registerVisualQueryRecognitionStatusListener();
@@ -314,6 +318,7 @@ public class AssistManager {
                 assistComponent,
                 legacyDeviceState);
         logStartAssistLegacy(legacyInvocationType, legacyDeviceState);
+        mInteractor.onAssistantStarted(legacyInvocationType);
         startAssistInternal(args, assistComponent, isService);
     }
 

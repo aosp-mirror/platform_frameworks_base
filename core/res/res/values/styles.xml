@@ -1468,7 +1468,7 @@ please see styles_device_defaults.xml.
         <item name="pointerIconHand">@drawable/pointer_hand_vector_icon</item>
         <item name="pointerIconContextMenu">@drawable/pointer_context_menu_vector_icon</item>
         <item name="pointerIconHelp">@drawable/pointer_help_vector_icon</item>
-        <item name="pointerIconWait">@drawable/pointer_wait_icon</item>
+        <item name="pointerIconWait">@drawable/pointer_wait_vector_icon</item>
         <item name="pointerIconCell">@drawable/pointer_cell_vector_icon</item>
         <item name="pointerIconCrosshair">@drawable/pointer_crosshair_vector_icon</item>
         <item name="pointerIconText">@drawable/pointer_text_vector_icon</item>

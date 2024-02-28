@@ -82,7 +82,7 @@ public class PendingIntentResultHandler {
         if (resultData == null) {
             return null;
         }
-        return resultData.getParcelableExtra(
+        return resultData.getSerializableExtra(
                 CredentialProviderService.EXTRA_CREATE_CREDENTIAL_EXCEPTION,
                 CreateCredentialException.class);
     }
@@ -94,7 +94,7 @@ public class PendingIntentResultHandler {
         if (resultData == null) {
             return null;
         }
-        return resultData.getParcelableExtra(
+        return resultData.getSerializableExtra(
                 CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION,
                 GetCredentialException.class);
     }

@@ -45,6 +45,7 @@ android_library {
         "androidx.core_core-ktx",
         "androidx.annotation_annotation",
         "SystemUIShaderLib",
+        "WindowManager-Shell-shared",
         "animationlib",
     ],
 

@@ -18,6 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -72,24 +73,23 @@ interface SceneTransitionsBuilder {
         key: TransitionKey? = null,
         builder: TransitionBuilder.() -> Unit = {},
     ): TransitionSpec
+
+    /**
+     * Define the animation to be played when the [scene] is overscrolled in the given
+     * [orientation].
+     *
+     * The overscroll animation always starts from a progress of 0f, and reaches 1f when moving the
+     * [distance] down/right, -1f when moving in the opposite direction.
+     */
+    fun overscroll(
+        scene: SceneKey,
+        orientation: Orientation,
+        builder: OverscrollBuilder.() -> Unit = {},
+    ): OverscrollSpec
 }
 
 @TransitionDsl
-interface TransitionBuilder : PropertyTransformationBuilder {
-    /**
-     * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
-     * the transition is triggered (i.e. it is not gesture-based).
-     */
-    var spec: AnimationSpec<Float>
-
-    /**
-     * The [SpringSpec] used to animate the associated transition progress when the transition was
-     * started by a swipe and is now animating back to a scene because the user lifted their finger.
-     *
-     * If `null`, then the [SceneTransitionsBuilder.defaultSwipeSpec] will be used.
-     */
-    var swipeSpec: SpringSpec<Float>?
-
+interface OverscrollBuilder : PropertyTransformationBuilder {
     /**
      * The distance it takes for this transition to animate from 0% to 100% when it is driven by a
      * [UserAction].
@@ -117,6 +117,23 @@ interface TransitionBuilder : PropertyTransformationBuilder {
         end: Float? = null,
         builder: PropertyTransformationBuilder.() -> Unit,
     )
+}
+
+@TransitionDsl
+interface TransitionBuilder : OverscrollBuilder, PropertyTransformationBuilder {
+    /**
+     * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
+     * the transition is triggered (i.e. it is not gesture-based).
+     */
+    var spec: AnimationSpec<Float>
+
+    /**
+     * The [SpringSpec] used to animate the associated transition progress when the transition was
+     * started by a swipe and is now animating back to a scene because the user lifted their finger.
+     *
+     * If `null`, then the [SceneTransitionsBuilder.defaultSwipeSpec] will be used.
+     */
+    var swipeSpec: SpringSpec<Float>?
 
     /**
      * Define a timestamp-based range for the transformations inside [builder].

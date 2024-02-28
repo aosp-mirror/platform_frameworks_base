@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.view.View.DRAG_FLAG_GLOBAL;
 import static android.view.View.DRAG_FLAG_GLOBAL_SAME_APPLICATION;
+import static android.view.View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG;
 
 import static com.android.input.flags.Flags.enablePointerChoreographer;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
@@ -373,8 +374,11 @@ class DragDropController {
     boolean notifyUnhandledDrop(DragEvent dropEvent, String reason) {
         final boolean isLocalDrag =
                 (mDragState.mFlags & (DRAG_FLAG_GLOBAL_SAME_APPLICATION | DRAG_FLAG_GLOBAL)) == 0;
+        final boolean shouldDelegateUnhandledDrag =
+                (mDragState.mFlags & DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG) != 0;
         if (!com.android.window.flags.Flags.delegateUnhandledDrags()
                 || mGlobalDragListener == null
+                || !shouldDelegateUnhandledDrag
                 || isLocalDrag) {
             // Skip if the flag is disabled, there is no unhandled-drag listener, or if this is a
             // purely local drag

@@ -1085,7 +1085,7 @@
     <!-- [CHAR_LIMIT=NONE] Label for charging on hold on main page of settings -->
     <string name="power_charging_on_hold_settings_home_page"><xliff:g id="level">%1$s</xliff:g> - Charging on hold to protect battery</string>
     <!-- [CHAR_LIMIT=NONE] Label for incompatible charging accessory on main page of settings -->
-    <string name="power_incompatible_charging_settings_home_page"><xliff:g id="level">%1$s</xliff:g> - Checking charging accessory</string>
+    <string name="power_incompatible_charging_settings_home_page"><xliff:g id="level">%1$s</xliff:g> - Check charging accessory</string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery discharging -->
     <string name="power_remaining_duration_only">About <xliff:g id="time_remaining">%1$s</xliff:g> left</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->

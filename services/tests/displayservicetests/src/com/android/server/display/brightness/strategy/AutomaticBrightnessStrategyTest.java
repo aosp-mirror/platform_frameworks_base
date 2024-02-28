@@ -359,10 +359,16 @@ public class AutomaticBrightnessStrategyTest {
                 AutomaticBrightnessController.class);
         when(automaticBrightnessController.getAutomaticScreenBrightness(any(BrightnessEvent.class)))
                 .thenReturn(automaticScreenBrightness);
+        when(automaticBrightnessController.getAutomaticScreenBrightnessBasedOnLastObservedLux(
+                any(BrightnessEvent.class)))
+                .thenReturn(automaticScreenBrightness);
         mAutomaticBrightnessStrategy.setAutomaticBrightnessController(
                 automaticBrightnessController);
         assertEquals(automaticScreenBrightness,
                 mAutomaticBrightnessStrategy.getAutomaticScreenBrightness(
+                        new BrightnessEvent(DISPLAY_ID)), 0.0f);
+        assertEquals(automaticScreenBrightness,
+                mAutomaticBrightnessStrategy.getAutomaticScreenBrightnessBasedOnLastObservedLux(
                         new BrightnessEvent(DISPLAY_ID)), 0.0f);
     }
 

@@ -3490,8 +3490,7 @@ public final class InputMethodManager {
             return false;
         }
         mServedView = mNextServedView;
-        if (initiationWithoutInputConnection() && mServedView.onCheckIsTextEditor()
-                && mServedView.isHandwritingDelegate()) {
+        if (initiationWithoutInputConnection() && mServedView.isHandwritingDelegate()) {
             mServedView.getViewRootImpl().getHandwritingInitiator().onDelegateViewFocused(
                     mServedView);
         }

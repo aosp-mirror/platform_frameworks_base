@@ -3460,13 +3460,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (!mMagnificationController.supportWindowMagnification()) {
             return;
         }
-        final boolean connect = (userState.isShortcutMagnificationEnabledLocked()
+
+        final boolean shortcutEnabled = (userState.isShortcutMagnificationEnabledLocked()
                 || userState.isMagnificationSingleFingerTripleTapEnabledLocked()
                 || (Flags.enableMagnificationMultipleFingerMultipleTapGesture()
-                && userState.isMagnificationTwoFingerTripleTapEnabledLocked()))
-                && (userState.getMagnificationCapabilitiesLocked()
-                != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)
+                    && userState.isMagnificationTwoFingerTripleTapEnabledLocked()));
+
+        final boolean createConnectionForCurrentCapability =
+                com.android.window.flags.Flags.magnificationAlwaysDrawFullscreenBorder()
+                        || (userState.getMagnificationCapabilitiesLocked()
+                                != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        final boolean connect = (shortcutEnabled && createConnectionForCurrentCapability)
                 || userHasMagnificationServicesLocked(userState);
+
         getMagnificationConnectionManager().requestConnection(connect);
     }
 

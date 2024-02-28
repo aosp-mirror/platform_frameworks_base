@@ -99,7 +99,11 @@ public final class NavigationBarView extends FrameLayout {
 
         mDeadZone = new android.inputmethodservice.navigationbar.DeadZone(this);
 
-        getImeSwitchButton().setOnClickListener(view -> view.getContext()
+        getBackButton().setLongClickable(false);
+
+        final ButtonDispatcher imeSwitchButton = getImeSwitchButton();
+        imeSwitchButton.setLongClickable(false);
+        imeSwitchButton.setOnClickListener(view -> view.getContext()
                 .getSystemService(InputMethodManager.class).showInputMethodPicker());
     }
 

@@ -27,6 +27,9 @@ import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
+import static com.android.server.pm.PackageInstallerSession.APP_METADATA_FILE_ACCESS_MODE;
+import static com.android.server.pm.PackageInstallerSession.getAppMetadataSizeLimit;
+import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_IN_APK_PATH;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
@@ -142,6 +145,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Class containing helper methods for the PackageManagerService.
@@ -1557,6 +1562,35 @@ public class PackageManagerServiceUtils {
      */
     public static boolean isInstalledByAdb(String initiatingPackageName) {
         return initiatingPackageName == null || SHELL_PACKAGE_NAME.equals(initiatingPackageName);
+    }
+
+    /**
+     * Extract the app.metadata file from apk.
+     */
+    public static boolean extractAppMetadataFromApk(String apkPath, File appMetadataFile) {
+        boolean found = false;
+        try (ZipInputStream zipInputStream =
+                     new ZipInputStream(new FileInputStream(new File(apkPath)))) {
+            ZipEntry zipEntry = null;
+            while ((zipEntry = zipInputStream.getNextEntry()) != null) {
+                if (zipEntry.getName().equals(APP_METADATA_FILE_IN_APK_PATH)) {
+                    found = true;
+                    try (FileOutputStream out = new FileOutputStream(appMetadataFile)) {
+                        FileUtils.copy(zipInputStream, out);
+                    }
+                    if (appMetadataFile.length() > getAppMetadataSizeLimit()) {
+                        appMetadataFile.delete();
+                        return false;
+                    }
+                    Os.chmod(appMetadataFile.getAbsolutePath(), APP_METADATA_FILE_ACCESS_MODE);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, e.getMessage());
+            return false;
+        }
+        return found;
     }
 
     public static void linkFilesToOldDirs(@NonNull Installer installer,

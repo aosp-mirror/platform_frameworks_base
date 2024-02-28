@@ -497,9 +497,11 @@ private class SwipeTransition(
     val _fromScene: Scene,
     val _toScene: Scene,
     private val userActionDistanceScope: UserActionDistanceScope,
-    private val orientation: Orientation,
-    private val isUpOrLeft: Boolean,
-) : TransitionState.Transition(_fromScene.key, _toScene.key) {
+    override val orientation: Orientation,
+    override val isUpOrLeft: Boolean,
+) :
+    TransitionState.Transition(_fromScene.key, _toScene.key),
+    TransitionState.HasOverscrollProperties {
     var _currentScene by mutableStateOf(_fromScene)
     override val currentScene: SceneKey
         get() = _currentScene.key
@@ -789,14 +791,21 @@ internal class SceneNestedScrollHandler(
             )
 
         fun hasNextScene(amount: Float): Boolean {
-            val fromScene = layoutImpl.scene(layoutState.transitionState.currentScene)
+            val transitionState = layoutState.transitionState
+            val scene = transitionState.currentScene
+            val fromScene = layoutImpl.scene(scene)
             val nextScene =
                 when {
                     amount < 0f -> fromScene.userActions[actionUpOrLeft]
                     amount > 0f -> fromScene.userActions[actionDownOrRight]
                     else -> null
                 }
-            return nextScene != null
+            if (nextScene != null) return true
+
+            if (transitionState !is TransitionState.Idle) return false
+
+            val overscrollSpec = layoutImpl.state.transitions.overscrollSpec(scene, orientation)
+            return overscrollSpec != null
         }
 
         val source = this

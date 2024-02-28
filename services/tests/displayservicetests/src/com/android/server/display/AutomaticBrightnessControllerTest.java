@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
@@ -1015,5 +1016,35 @@ public class AutomaticBrightnessControllerTest {
         mClock.fastForward(1500);
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 500));
         assertEquals(500, mController.getAmbientLux(), EPSILON);
+    }
+
+    @Test
+    public void testBrightnessBasedOnLastObservedLux() throws Exception {
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Set up system to return 0.3f as a brightness value
+        float lux = 100.0f;
+        // Brightness as float (from 0.0f to 1.0f)
+        float normalizedBrightness = 0.3f;
+        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux)).thenReturn(lux);
+        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
+        when(mBrightnessMappingStrategy.getBrightness(eq(lux), eq(null), anyInt()))
+                .thenReturn(normalizedBrightness);
+        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessThrottler.isThrottled()).thenReturn(true);
+
+        // Send a new sensor value, disable the sensor and verify
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
+        mController.configure(AUTO_BRIGHTNESS_DISABLED, /* configuration= */ null,
+                /* brightness= */ 0, /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT,
+                /* shouldResetShortTermModel= */ true);
+        assertEquals(normalizedBrightness,
+                mController.getAutomaticScreenBrightnessBasedOnLastObservedLux(
+                        /* brightnessEvent= */ null), EPSILON);
     }
 }

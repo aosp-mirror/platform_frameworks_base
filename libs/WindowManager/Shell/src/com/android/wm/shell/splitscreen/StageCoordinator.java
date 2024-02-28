@@ -3396,6 +3396,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 final int stageType = isMainStage ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 prepareExitSplitScreen(stageType, wct);
+                clearSplitPairedInRecents(EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW);
                 mSplitTransitions.startDismissTransition(wct, StageCoordinator.this, stageType,
                         EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW);
                 Log.w(TAG, splitFailureMessage("onNoLongerSupportMultiWindow",

@@ -5998,9 +5998,11 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    public ActivityClientRecord prepareRelaunchActivity(IBinder token,
-            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            int configChanges, MergedConfiguration config, boolean preserveWindow) {
+    public ActivityClientRecord prepareRelaunchActivity(@NonNull IBinder token,
+            @Nullable List<ResultInfo> pendingResults,
+            @Nullable List<ReferrerIntent> pendingNewIntents, int configChanges,
+            @NonNull MergedConfiguration config, boolean preserveWindow,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
         ActivityClientRecord target = null;
         boolean scheduleRelaunch = false;
 
@@ -6041,14 +6043,15 @@ public final class ActivityThread extends ClientTransactionHandler
             target.createdConfig = config.getGlobalConfiguration();
             target.overrideConfig = config.getOverrideConfiguration();
             target.pendingConfigChanges |= configChanges;
+            target.mActivityWindowInfo = activityWindowInfo;
         }
 
         return scheduleRelaunch ? target : null;
     }
 
     @Override
-    public void handleRelaunchActivity(ActivityClientRecord tmp,
-            PendingTransactionActions pendingActions) {
+    public void handleRelaunchActivity(@NonNull ActivityClientRecord tmp,
+            @NonNull PendingTransactionActions pendingActions) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -6128,7 +6131,8 @@ public final class ActivityThread extends ClientTransactionHandler
         r.activity.mChangingConfigurations = true;
 
         handleRelaunchActivityInner(r, configChanges, tmp.pendingResults, tmp.pendingIntents,
-                pendingActions, tmp.startsNotResumed, tmp.overrideConfig, "handleRelaunchActivity");
+                pendingActions, tmp.startsNotResumed, tmp.overrideConfig, tmp.mActivityWindowInfo,
+                "handleRelaunchActivity");
     }
 
     void scheduleRelaunchActivity(IBinder token) {
@@ -6183,7 +6187,8 @@ public final class ActivityThread extends ClientTransactionHandler
                 r.overrideConfig);
         final ActivityRelaunchItem activityRelaunchItem = ActivityRelaunchItem.obtain(
                 r.token, null /* pendingResults */, null /* pendingIntents */,
-                0 /* configChanges */, mergedConfiguration, r.mPreserveWindow);
+                0 /* configChanges */, mergedConfiguration, r.mPreserveWindow,
+                r.getActivityWindowInfo());
         // Make sure to match the existing lifecycle state in the end of the transaction.
         final ActivityLifecycleItem lifecycleRequest =
                 TransactionExecutorHelper.getLifecycleRequestForCurrentState(r);
@@ -6194,10 +6199,12 @@ public final class ActivityThread extends ClientTransactionHandler
         executeTransaction(transaction);
     }
 
-    private void handleRelaunchActivityInner(ActivityClientRecord r, int configChanges,
-            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingIntents,
-            PendingTransactionActions pendingActions, boolean startsNotResumed,
-            Configuration overrideConfig, String reason) {
+    private void handleRelaunchActivityInner(@NonNull ActivityClientRecord r, int configChanges,
+            @Nullable List<ResultInfo> pendingResults,
+            @Nullable List<ReferrerIntent> pendingIntents,
+            @NonNull PendingTransactionActions pendingActions, boolean startsNotResumed,
+            @NonNull Configuration overrideConfig, @NonNull ActivityWindowInfo activityWindowInfo,
+            @NonNull String reason) {
         // Preserve last used intent, it may be set from Activity#setIntent().
         final Intent customIntent = r.activity.mIntent;
         // Need to ensure state is saved.
@@ -6230,6 +6237,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         r.startsNotResumed = startsNotResumed;
         r.overrideConfig = overrideConfig;
+        r.mActivityWindowInfo = activityWindowInfo;
 
         handleLaunchActivity(r, pendingActions, mLastReportedDeviceId, customIntent);
     }

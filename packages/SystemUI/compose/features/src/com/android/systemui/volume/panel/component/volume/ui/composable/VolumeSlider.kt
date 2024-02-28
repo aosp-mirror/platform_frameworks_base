@@ -41,7 +41,7 @@ fun VolumeSlider(
     modifier: Modifier = Modifier,
     sliderColors: PlatformSliderColors,
 ) {
-    var value by remember { mutableFloatStateOf(state.value) }
+    var value by remember(state.value) { mutableFloatStateOf(state.value) }
     PlatformSlider(
         modifier = modifier,
         value = value,

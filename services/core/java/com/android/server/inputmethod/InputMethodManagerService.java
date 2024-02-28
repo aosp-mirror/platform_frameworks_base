@@ -2193,7 +2193,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    // TODO(b/314150112): Move this method to InputMethodBindingController
+    // TODO(b/325515685): Move this method to InputMethodBindingController
     /**
      * Hide the IME if the removed user is the current user.
      */

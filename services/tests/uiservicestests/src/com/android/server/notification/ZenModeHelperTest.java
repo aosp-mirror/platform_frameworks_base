@@ -4420,13 +4420,13 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @EnableFlags(Flags.FLAG_MODES_API)
     public void updateAutomaticZenRule_nullDeviceEffectsUpdate() {
         // Adds a starting rule with empty zen policies and device effects
+        ZenDeviceEffects zde = new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build();
         AutomaticZenRule azrBase = new AutomaticZenRule.Builder(NAME, CONDITION_ID)
-                .setDeviceEffects(new ZenDeviceEffects.Builder().build())
+                .setDeviceEffects(zde)
                 .build();
         // Adds the rule using the app, to avoid having any user modified bits set.
         String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
                 azrBase, UPDATE_ORIGIN_APP, "reason", Process.SYSTEM_UID);
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(ruleId);
 
         AutomaticZenRule azr = new AutomaticZenRule.Builder(azrBase)
                 // Sets Device Effects to null
@@ -4437,10 +4437,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // user modified, it can be updated.
         mZenModeHelper.updateAutomaticZenRule(ruleId, azr, UPDATE_ORIGIN_APP, "reason",
                 Process.SYSTEM_UID);
-        rule = mZenModeHelper.getAutomaticZenRule(ruleId);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(ruleId);
 
-        // When AZR's ZenDeviceEffects is null, the updated rule's device effects will be null.
-        assertThat(rule.getDeviceEffects()).isNull();
+        // When AZR's ZenDeviceEffects is null, the updated rule's device effects are kept.
+        assertThat(rule.getDeviceEffects()).isEqualTo(zde);
     }
 
     @Test

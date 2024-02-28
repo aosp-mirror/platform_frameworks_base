@@ -131,6 +131,14 @@ public class MagnificationConnectionWrapperTest {
     }
 
     @Test
+    public void onFullscreenMagnificationActivationChanged() throws RemoteException {
+        mConnectionWrapper
+                .onFullscreenMagnificationActivationChanged(TEST_DISPLAY, /* activated= */ true);
+        verify(mConnection)
+                .onFullscreenMagnificationActivationChanged(eq(TEST_DISPLAY), eq(true));
+    }
+
+    @Test
     public void setMirrorWindowCallback() throws RemoteException {
         mConnectionWrapper.setConnectionCallback(mCallback);
         verify(mConnection).setConnectionCallback(mCallback);

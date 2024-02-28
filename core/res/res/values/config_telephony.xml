@@ -73,6 +73,11 @@
     <bool name="auto_data_switch_ping_test_before_switch">true</bool>
     <java-symbol type="bool" name="auto_data_switch_ping_test_before_switch" />
 
+    <!-- TODO: remove after V -->
+    <!-- Boolean indicating whether allow to use a roaming nonDDS if user enabled its roaming. -->
+    <bool name="auto_data_switch_allow_roaming">true</bool>
+    <java-symbol type="bool" name="auto_data_switch_allow_roaming" />
+
     <!-- Define the tolerated gap of score for auto data switch decision, larger than which the
          device will switch to the SIM with higher score. The score is used in conjunction with the
          score table defined in

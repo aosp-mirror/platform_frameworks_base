@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 import static android.content.pm.Flags.disallowSdkLibsToBeApps;
+import static android.content.pm.PackageManager.APP_METADATA_SOURCE_APK;
+import static android.content.pm.PackageManager.APP_METADATA_SOURCE_INSTALLER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
@@ -43,11 +45,11 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
+import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
-import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
@@ -701,7 +703,7 @@ final class InstallPackageHelper {
                     pkgSetting.setUninstallReason(PackageManager.UNINSTALL_REASON_UNKNOWN, userId);
                     pkgSetting.setFirstInstallTime(System.currentTimeMillis(), userId);
                     // Clear any existing archive state.
-                    mPm.mInstallerService.mPackageArchiver.clearArchiveState(packageName, userId);
+                    mPm.mInstallerService.mPackageArchiver.clearArchiveState(pkgSetting, userId);
                     mPm.mSettings.writePackageRestrictionsLPr(userId);
                     mPm.mSettings.writeKernelMappingLPr(pkgSetting);
                     installed = true;
@@ -829,7 +831,8 @@ final class InstallPackageHelper {
 
         if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
 
-        if (request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED && doRestore) {
+        final boolean succeeded = request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED;
+        if (succeeded && doRestore) {
             // Pass responsibility to the Backup Manager.  It will perform a
             // restore if appropriate, then pass responsibility back to the
             // Package Manager to run the post-install observer callbacks
@@ -843,8 +846,25 @@ final class InstallPackageHelper {
         // need to be snapshotted or restored for the package.
         //
         // TODO(narayan): Get this working for cases where userId == UserHandle.USER_ALL.
-        if (request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED && !doRestore && update) {
+        if (succeeded && !doRestore && update) {
             doRestore = performRollbackManagerRestore(userId, token, request);
+        }
+
+        if (succeeded && !request.hasPostInstallRunnable()) {
+            boolean hasNeverBeenRestored =
+                    packageSetting != null && packageSetting.isPendingRestore();
+            request.setPostInstallRunnable(() -> {
+                // Permissions should be restored on each user that has the app installed for the
+                // first time, unless it's an unarchive install for an archived app, in which case
+                // the permissions should be restored on each user that has the app updated.
+                int[] userIdsToRestorePermissions = hasNeverBeenRestored
+                        ? request.getUpdateBroadcastUserIds()
+                        : request.getFirstTimeBroadcastUserIds();
+                for (int restorePermissionUserId : userIdsToRestorePermissions) {
+                    mPm.restorePermissionsAndUpdateRolesForNewUserInstall(request.getName(),
+                            restorePermissionUserId);
+                }
+            });
         }
 
         if (doRestore) {
@@ -2207,10 +2227,16 @@ final class InstallPackageHelper {
                 if (appMetadataFile.exists()) {
                     ps.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
                     if (Flags.aslInApkAppMetadataSource()) {
-                        ps.setAppMetadataSource(PackageManager.APP_METADATA_SOURCE_INSTALLER);
+                        ps.setAppMetadataSource(APP_METADATA_SOURCE_INSTALLER);
                     }
                 } else {
-                    ps.setAppMetadataFilePath(null);
+                    if (Flags.aslInApkAppMetadataSource()
+                            && parsedPackage.isAppMetadataFileInApk()) {
+                        ps.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
+                        ps.setAppMetadataSource(APP_METADATA_SOURCE_APK);
+                    } else {
+                        ps.setAppMetadataFilePath(null);
+                    }
                 }
             }
             if (installRequest.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
@@ -2327,7 +2353,7 @@ final class InstallPackageHelper {
                                 installerPackageName);
                     }
                     // Clear any existing archive state.
-                    mPm.mInstallerService.mPackageArchiver.clearArchiveState(pkgName, userId);
+                    mPm.mInstallerService.mPackageArchiver.clearArchiveState(ps, userId);
                 } else if (allUsers != null) {
                     // The caller explicitly specified INSTALL_ALL_USERS flag.
                     // Thus, updating the settings to install the app for all users.
@@ -2351,7 +2377,7 @@ final class InstallPackageHelper {
                                         installerPackageName);
                             }
                             // Clear any existing archive state.
-                            mPm.mInstallerService.mPackageArchiver.clearArchiveState(pkgName,
+                            mPm.mInstallerService.mPackageArchiver.clearArchiveState(ps,
                                     currentUserId);
                         } else {
                             ps.setInstalled(false, currentUserId);
@@ -2851,7 +2877,6 @@ final class InstallPackageHelper {
             mPm.notifyInstantAppPackageInstalled(request.getPkg().getPackageName(),
                     request.getNewUsers());
 
-            request.populateBroadcastUsers();
             final int[] firstUserIds = request.getFirstTimeBroadcastUserIds();
 
             if (request.getPkg().getStaticSharedLibraryName() == null) {
@@ -2862,12 +2887,6 @@ final class InstallPackageHelper {
                     mPm.mRequiredPermissionControllerPackage, mPm.mRequiredVerifierPackages,
                     mPm.mRequiredInstallerPackage,
                     /* packageSender= */ mPm, launchedForRestore, killApp, update, archived);
-
-            // Work that needs to happen on first install within each user
-            for (int userId : firstUserIds) {
-                mPm.restorePermissionsAndUpdateRolesForNewUserInstall(packageName,
-                        userId);
-            }
 
             if (request.isAllNewUsers() && !update) {
                 mPm.notifyPackageAdded(packageName, request.getAppId());

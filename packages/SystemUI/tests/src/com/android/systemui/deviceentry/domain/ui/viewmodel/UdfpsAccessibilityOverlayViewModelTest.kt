@@ -27,7 +27,7 @@ import com.android.systemui.deviceentry.data.ui.viewmodel.deviceEntryUdfpsAccess
 import com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -39,6 +39,7 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 
@@ -52,7 +53,7 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
         }
     private val deviceEntryIconTransition = kosmos.fakeDeviceEntryIconViewModelTransition
     private val testScope = kosmos.testScope
-    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val biometricSettingsRepository = kosmos.fakeBiometricSettingsRepository
     private val accessibilityRepository = kosmos.fakeAccessibilityRepository
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
@@ -85,22 +86,12 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
             setupVisibleStateOnLockscreen()
 
             // AOD
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.AOD,
-                    value = 0f,
-                    transitionState = TransitionState.STARTED,
-                )
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.AOD,
+                this,
             )
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.AOD,
-                    value = 1f,
-                    transitionState = TransitionState.FINISHED,
-                )
-            )
+            runCurrent()
             assertThat(visible).isFalse()
         }
     fun fpNotRunning_overlayNotVisible() =
@@ -129,6 +120,7 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
 
         // Listening for UDFPS
         fingerprintPropertyRepository.supportsUdfps()
+        biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
         deviceEntryFingerprintAuthRepository.setIsRunning(true)
         deviceEntryRepository.setUnlocked(false)
 

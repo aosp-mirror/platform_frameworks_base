@@ -16,7 +16,6 @@
 
 package com.android.systemui.volume.panel.ui.composable
 
-import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -111,15 +110,24 @@ private fun VolumePanelComposeScope.Components(
     layout: ComponentsLayout,
     modifier: Modifier = Modifier
 ) {
-    var columnModifier = modifier.widthIn(max = 800.dp)
-    if (!isLargeScreen && orientation != Configuration.ORIENTATION_PORTRAIT) {
-        columnModifier = columnModifier.heightIn(max = 332.dp)
-    }
-    Column(modifier = columnModifier, verticalArrangement = Arrangement.spacedBy(padding)) {
-        if (orientation == Configuration.ORIENTATION_PORTRAIT || isLargeScreen) {
-            VerticalVolumePanelContent(layout)
+    val arrangement =
+        if (isLargeScreen) {
+            Arrangement.spacedBy(20.dp)
         } else {
-            HorizontalVolumePanelContent(layout)
+            if (isPortrait) Arrangement.spacedBy(padding) else Arrangement.spacedBy(4.dp)
+        }
+    Column(
+        modifier = modifier.widthIn(max = 800.dp),
+        verticalArrangement = arrangement,
+    ) {
+        val contentModifier = Modifier
+        if (isPortrait || isLargeScreen) {
+            VerticalVolumePanelContent(modifier = contentModifier, layout = layout)
+        } else {
+            HorizontalVolumePanelContent(
+                modifier = contentModifier.heightIn(max = 212.dp),
+                layout = layout
+            )
         }
         BottomBar(layout = layout, modifier = Modifier)
     }
