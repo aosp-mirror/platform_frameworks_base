@@ -554,15 +554,11 @@ fun CredentialEntryRow(
         if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
         else null,
         entryHeadlineText = username,
-        entrySecondLineText = if (
-            credentialEntryInfo.credentialType == CredentialType.PASSWORD) {
-            "••••••••••••"
-        } else {
-            val itemsToDisplay = listOf(
+        entrySecondLineText = listOf(
                 displayName,
                 credentialEntryInfo.credentialTypeDisplayName,
                 credentialEntryInfo.providerDisplayName
-            ).filterNot(TextUtils::isEmpty)
+        ).filterNot(TextUtils::isEmpty).let { itemsToDisplay ->
             if (itemsToDisplay.isEmpty()) null
             else itemsToDisplay.joinToString(
                 separator = stringResource(R.string.get_dialog_sign_in_type_username_separator)
