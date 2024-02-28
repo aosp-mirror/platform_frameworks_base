@@ -16,15 +16,21 @@
 
 package com.android.server.voiceinteraction;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
@@ -41,6 +47,7 @@ import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.ModelParams;
@@ -84,6 +91,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
+import android.window.ScreenCapture;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -110,7 +118,9 @@ import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.policy.AppOpsPolicy;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.wm.ActivityAssistInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -127,6 +137,19 @@ public class VoiceInteractionManagerService extends SystemService {
     static final String TAG = "VoiceInteractionManager";
     static final boolean DEBUG = false;
 
+    /** Static constants used by Contextual Search helper. */
+    private static final String CS_KEY_FLAG_SECURE_FOUND =
+            "com.android.contextualsearch.flag_secure_found";
+    private static final String CS_KEY_FLAG_SCREENSHOT =
+            "com.android.contextualsearch.screenshot";
+    private static final String CS_KEY_FLAG_IS_MANAGED_PROFILE_VISIBLE =
+            "com.android.contextualsearch.is_managed_profile_visible";
+    private static final String CS_KEY_FLAG_VISIBLE_PACKAGE_NAMES =
+            "com.android.contextualsearch.visible_package_names";
+    private static final String CS_INTENT_FILTER =
+            "com.android.contextualsearch.LAUNCH";
+
+
     final Context mContext;
     final ContentResolver mResolver;
     // Can be overridden for testing purposes
@@ -135,6 +158,8 @@ public class VoiceInteractionManagerService extends SystemService {
     final ActivityManagerInternal mAmInternal;
     final ActivityTaskManagerInternal mAtmInternal;
     final UserManagerInternal mUserManagerInternal;
+    final WindowManagerInternal mWmInternal;
+    final DevicePolicyManagerInternal mDpmInternal;
     final ArrayMap<Integer, VoiceInteractionManagerServiceStub.SoundTriggerSession>
             mLoadedKeyphraseIds = new ArrayMap<>();
     ShortcutServiceInternal mShortcutServiceInternal;
@@ -156,7 +181,10 @@ public class VoiceInteractionManagerService extends SystemService {
                 LocalServices.getService(ActivityManagerInternal.class));
         mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
-
+        mWmInternal = Objects.requireNonNull(
+                LocalServices.getService(WindowManagerInternal.class));
+        mDpmInternal = Objects.requireNonNull(
+                LocalServices.getService(DevicePolicyManagerInternal.class));
         LegacyPermissionManagerInternal permissionManagerInternal = LocalServices.getService(
                 LegacyPermissionManagerInternal.class);
         permissionManagerInternal.setVoiceInteractionPackagesProvider(
@@ -1019,6 +1047,56 @@ public class VoiceInteractionManagerService extends SystemService {
         public boolean showSessionFromSession(@NonNull IBinder token, @Nullable Bundle sessionArgs,
                 int flags, @Nullable String attributionTag) {
             synchronized (this) {
+                final String csKey = mContext.getResources()
+                        .getString(R.string.config_defaultContextualSearchKey);
+                final String csEnabledKey = mContext.getResources()
+                        .getString(R.string.config_defaultContextualSearchEnabled);
+
+                // If the request is for Contextual Search, process it differently
+                if (sessionArgs != null && sessionArgs.containsKey(csKey)) {
+                    if (sessionArgs.getBoolean(csEnabledKey, true)) {
+                        // If Contextual Search is enabled, try to follow that path.
+                        Intent launchIntent = getContextualSearchIntent(sessionArgs);
+                        if (launchIntent != null) {
+                            // Hand over to contextual search helper.
+                            Slog.d(TAG, "Handed over to contextual search helper.");
+                            final long caller = Binder.clearCallingIdentity();
+                            try {
+                                return startContextualSearch(launchIntent);
+                            } finally {
+                                Binder.restoreCallingIdentity(caller);
+                            }
+                        }
+                    }
+
+                    // Since we are here, Contextual Search helper couldn't handle the request.
+                    final String visEnabledKey = mContext.getResources()
+                            .getString(R.string.config_defaultContextualSearchLegacyEnabled);
+                    if (sessionArgs.getBoolean(visEnabledKey, true)) {
+                        // If visEnabledKey is set to true (or absent), we try following VIS path.
+                        String csPkgName = mContext.getResources()
+                                .getString(R.string.config_defaultContextualSearchPackageName);
+                        if (!csPkgName.equals(getCurInteractor(
+                                Binder.getCallingUserHandle().getIdentifier()).getPackageName())) {
+                            // Check if the interactor can handle Contextual Search.
+                            // If not, return failure.
+                            Slog.w(TAG, "Contextual Search not supported yet. Returning failure.");
+                            return false;
+                        }
+                    } else {
+                        // If visEnabledKey is set to false AND the request was for Contextual
+                        // Search, return false.
+                        return false;
+                    }
+                    // Given that we haven't returned yet, we can say that
+                    // - Contextual Search Helper couldn't handle the request
+                    // - VIS path for Contextual Search is enabled
+                    // - The current interactor supports Contextual Search.
+                    // Hence, we will proceed with the VIS path.
+                    Slog.d(TAG, "Contextual search not supported yet. Proceeding with VIS.");
+
+                }
+
                 if (mImpl == null) {
                     Slog.w(TAG, "showSessionFromSession without running voice interaction service");
                     return false;
@@ -2644,6 +2722,70 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
         };
+
+        private Intent getContextualSearchIntent(Bundle args) {
+            String csPkgName = mContext.getResources()
+                    .getString(R.string.config_defaultContextualSearchPackageName);
+            if (csPkgName.isEmpty()) {
+                // Return null if csPackageName is not specified.
+                return null;
+            }
+            Intent launchIntent = new Intent(CS_INTENT_FILTER);
+            launchIntent.setPackage(csPkgName);
+            ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(
+                    launchIntent, PackageManager.MATCH_FACTORY_ONLY);
+            if (resolveInfo == null) {
+                return null;
+            }
+            launchIntent.setComponent(resolveInfo.getComponentInfo().getComponentName());
+            launchIntent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION
+                    | FLAG_ACTIVITY_NO_USER_ACTION);
+            launchIntent.putExtras(args);
+            boolean isAssistDataAllowed = mAtmInternal.isAssistDataAllowed();
+            final List<ActivityAssistInfo> records = mAtmInternal.getTopVisibleActivities();
+            ArrayList<String> visiblePackageNames = new ArrayList<>();
+            boolean isManagedProfileVisible = false;
+            for (ActivityAssistInfo record: records) {
+                // Add the package name to the list only if assist data is allowed.
+                if (isAssistDataAllowed) {
+                    visiblePackageNames.add(record.getComponentName().getPackageName());
+                }
+                if (mDpmInternal.isUserOrganizationManaged(record.getUserId())) {
+                    isManagedProfileVisible = true;
+                }
+            }
+            final ScreenCapture.ScreenshotHardwareBuffer shb = mWmInternal.takeAssistScreenshot();
+            final Bitmap bm = shb != null ? shb.asBitmap() : null;
+            // Now that everything is fetched, putting it in the launchIntent.
+            if (bm != null) {
+                launchIntent.putExtra(CS_KEY_FLAG_SECURE_FOUND, shb.containsSecureLayers());
+                // Only put the screenshot if assist data is allowed
+                if (isAssistDataAllowed) {
+                    launchIntent.putExtra(CS_KEY_FLAG_SCREENSHOT, bm.asShared());
+                }
+            }
+            launchIntent.putExtra(CS_KEY_FLAG_IS_MANAGED_PROFILE_VISIBLE, isManagedProfileVisible);
+            // Only put the list of visible package names if assist data is allowed
+            if (isAssistDataAllowed) {
+                launchIntent.putExtra(CS_KEY_FLAG_VISIBLE_PACKAGE_NAMES, visiblePackageNames);
+            }
+
+            return launchIntent;
+        }
+
+        @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
+        private boolean startContextualSearch(Intent launchIntent) {
+            // Contextual search starts with a frozen screen - so we launch without
+            // any system animations or starting window.
+            final ActivityOptions opts = ActivityOptions.makeCustomTaskAnimation(mContext,
+                    /* enterResId= */ 0, /* exitResId= */ 0, null, null, null);
+            opts.setDisableStartingWindow(true);
+            int resultCode = mAtmInternal.startActivityWithScreenshot(launchIntent,
+                    mContext.getPackageName(), Binder.getCallingUid(), Binder.getCallingPid(), null,
+                    opts.toBundle(), Binder.getCallingUserHandle().getIdentifier());
+            return resultCode == ActivityManager.START_SUCCESS;
+        }
+
     }
 
     /**

@@ -5368,4 +5368,8 @@
   <java-symbol type="bool" name="config_evenDimmerEnabled" />
 
   <java-symbol type="bool" name="config_watchlistUseFileHashesCache" />
+  <java-symbol type="string" name="config_defaultContextualSearchPackageName" />
+  <java-symbol type="string" name="config_defaultContextualSearchKey" />
+  <java-symbol type="string" name="config_defaultContextualSearchEnabled" />
+  <java-symbol type="string" name="config_defaultContextualSearchLegacyEnabled" />
 </resources>

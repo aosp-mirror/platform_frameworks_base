@@ -6967,4 +6967,16 @@
 
     <!-- Whether to use file hashes cache in watchlist-->
     <bool name="config_watchlistUseFileHashesCache">false</bool>
+
+    <!-- Name of the package responsible to handle Contextual Search. -->
+    <string name="config_defaultContextualSearchPackageName" translatable="false" />
+
+    <!-- The key containing the entrypoint for Contextual Search. -->
+    <string name="config_defaultContextualSearchKey" translatable="false" />
+
+    <!-- The key containing the branching boolean for Contextual Search. -->
+    <string name="config_defaultContextualSearchEnabled" translatable="false" />
+
+    <!-- The key containing the branching boolean for legacy Search. -->
+    <string name="config_defaultContextualSearchLegacyEnabled" translatable="false" />
 </resources>
