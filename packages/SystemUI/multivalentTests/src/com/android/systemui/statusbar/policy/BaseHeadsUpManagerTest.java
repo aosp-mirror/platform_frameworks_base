@@ -53,6 +53,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.FakeGlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -140,6 +141,12 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
             when(mAccessibilityMgr.getRecommendedTimeoutMillis(anyInt(), anyInt())).then(
                     i -> i.getArgument(0));
         }
+    }
+
+    @Override
+    public void SysuiSetup() throws Exception {
+        super.SysuiSetup();
+        mSetFlagsRule.disableFlags(NotificationThrottleHun.FLAG_NAME);
     }
 
     @Test

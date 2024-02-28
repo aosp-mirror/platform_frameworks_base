@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -136,6 +137,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
 
     @Before
     public void setUp() {
+        mSetFlagsRule.disableFlags(NotificationThrottleHun.FLAG_NAME);
+
         when(mShadeInteractor.isAnyExpanded()).thenReturn(StateFlowKt.MutableStateFlow(false));
         final AccessibilityManagerWrapper accessibilityMgr =
                 mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
