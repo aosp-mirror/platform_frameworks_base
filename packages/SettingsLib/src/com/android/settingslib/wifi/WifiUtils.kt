@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.wifi
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
@@ -22,14 +23,23 @@ import android.icu.text.MessageFormat
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus
+import android.net.wifi.WifiManager
 import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.android.settingslib.R
 import com.android.settingslib.flags.Flags.newStatusBarIcons
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 
 
 open class WifiUtils {
@@ -145,7 +155,6 @@ open class WifiUtils {
                 )
             }
         }
-
 
         @JvmStatic
         fun buildLoggingSummary(accessPoint: AccessPoint, config: WifiConfiguration?): String {
@@ -458,5 +467,40 @@ open class WifiUtils {
             arguments["count"] = connectedDevices
             return msgFormat.format(arguments)
         }
+
+        @JvmStatic
+        fun checkWepAllowed(
+            context: Context,
+            lifecycleOwner: LifecycleOwner,
+            ssid: String,
+            onAllowed: () -> Unit,
+        ) {
+            lifecycleOwner.lifecycleScope.launch {
+                val wifiManager = context.getSystemService(WifiManager::class.java) ?: return@launch
+                if (wifiManager.queryWepAllowed()) {
+                    onAllowed()
+                } else {
+                    val intent = Intent(Intent.ACTION_MAIN).apply {
+                        component = ComponentName(
+                            "com.android.settings",
+                            "com.android.settings.network.WepNetworkDialogActivity"
+                        )
+                        putExtra(SSID, ssid)
+                    }
+                    context.startActivity(intent)
+                }
+            }
+        }
+
+        private suspend fun WifiManager.queryWepAllowed(): Boolean =
+            withContext(Dispatchers.Default) {
+                suspendCancellableCoroutine { continuation ->
+                    queryWepAllowed(Dispatchers.Default.asExecutor()) {
+                        continuation.resume(it)
+                    }
+                }
+            }
+
+        const val SSID = "ssid"
     }
 }
