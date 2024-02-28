@@ -317,9 +317,6 @@ package android.app {
   }
 
   public class ComponentOptions {
-    field public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1; // 0x1
-    field public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2; // 0x2
-    field public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0; // 0x0
   }
 
   public class DownloadManager {

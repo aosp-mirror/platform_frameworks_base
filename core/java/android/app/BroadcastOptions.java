@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.ActivityOptions.BackgroundActivityStartMode;
+
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -1132,7 +1134,8 @@ public class BroadcastOptions extends ComponentOptions {
     @SystemApi
     @NonNull
     @Override // to narrow down the return type
-    public BroadcastOptions setPendingIntentBackgroundActivityStartMode(int state) {
+    public BroadcastOptions setPendingIntentBackgroundActivityStartMode(
+            @BackgroundActivityStartMode int state) {
         super.setPendingIntentBackgroundActivityStartMode(state);
         return this;
     }
