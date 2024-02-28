@@ -237,11 +237,8 @@ class CredentialAutofillService : AutofillService() {
         if (providerList.isEmpty()) {
             return false
         }
-        var totalEntryCount = 0
-        providerList.forEach { provider ->
-            totalEntryCount += provider.credentialEntryList.size
-        }
         val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerList)
+        var totalEntryCount = providerDisplayInfo.sortedUserNameToCredentialEntryList.size
         val inlineSuggestionsRequest = filLRequest.inlineSuggestionsRequest
         val inlineMaxSuggestedCount = inlineSuggestionsRequest?.maxSuggestionCount ?: 0
         val inlinePresentationSpecs = inlineSuggestionsRequest?.inlinePresentationSpecs
