@@ -101,10 +101,6 @@
     <dimen name="split_divider_bar_width">10dp</dimen>
     <dimen name="split_divider_corner_size">42dp</dimen>
 
-    <!-- The distance from the edge of the screen to invoke splitscreen when the user is dragging
-         an intent that can be launched into split. -->
-    <dimen name="drag_launchable_intent_edge_margin">48dp</dimen>
-
     <!-- One-Handed Mode -->
     <!-- Threshold for dragging distance to enable one-handed mode -->
     <dimen name="gestures_onehanded_drag_threshold">20dp</dimen>
