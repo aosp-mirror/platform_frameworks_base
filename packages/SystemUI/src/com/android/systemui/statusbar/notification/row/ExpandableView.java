@@ -275,15 +275,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         return getHeight();
     }
 
-    /**
-     * Sets the notification as dimmed. The default implementation does nothing.
-     *
-     * @param dimmed Whether the notification should be dimmed.
-     * @param fade Whether an animation should be played to change the state.
-     */
-    public void setDimmed(boolean dimmed, boolean fade) {
-    }
-
     public boolean isRemoved() {
         return false;
     }

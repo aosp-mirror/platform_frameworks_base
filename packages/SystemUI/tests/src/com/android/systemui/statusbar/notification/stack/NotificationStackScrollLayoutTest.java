@@ -307,14 +307,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNotDimmedOnKeyguard() {
-        when(mBarState.getState()).thenReturn(StatusBarState.SHADE);
-        mStackScroller.setDimmed(true /* dimmed */, false /* animate */);
-        mStackScroller.setDimmed(true /* dimmed */, true /* animate */);
-        assertFalse(mStackScroller.isDimmed());
-    }
-
-    @Test
     public void updateEmptyView_dndSuppressing() {
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
 

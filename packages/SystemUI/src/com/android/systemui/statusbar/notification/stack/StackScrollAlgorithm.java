@@ -369,13 +369,11 @@ public class StackScrollAlgorithm {
     /** Updates the dimmed and hiding sensitive states of the children. */
     private void updateDimmedAndHideSensitive(AmbientState ambientState,
             StackScrollAlgorithmState algorithmState) {
-        boolean dimmed = ambientState.isDimmed();
         boolean hideSensitive = ambientState.isHideSensitive();
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState childViewState = child.getViewState();
-            childViewState.dimmed = dimmed;
             childViewState.hideSensitive = hideSensitive;
         }
     }

@@ -207,8 +207,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private ScrimView mNotificationsScrim;
     private ScrimView mScrimBehind;
 
-    private Runnable mScrimBehindChangeRunnable;
-
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DozeParameters mDozeParameters;
@@ -414,11 +412,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         behindScrim.enableBottomEdgeConcave(mClipsQsScrim);
         mNotificationsScrim.enableRoundedCorners(true);
-
-        if (mScrimBehindChangeRunnable != null) {
-            mScrimBehind.setChangeRunnable(mScrimBehindChangeRunnable, mMainExecutor);
-            mScrimBehindChangeRunnable = null;
-        }
 
         final ScrimState[] states = ScrimState.values();
         for (int i = 0; i < states.length; i++) {
@@ -1540,16 +1533,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         // Just calling View#postOnAnimation isn't enough because the frame might not have reached
         // the display yet. A timeout is the safest solution.
         mScrimBehind.postOnAnimationDelayed(callback, 32 /* delayMillis */);
-    }
-
-    public void setScrimBehindChangeRunnable(Runnable changeRunnable) {
-        // TODO: remove this. This is necessary because of an order-of-operations limitation.
-        // The fix is to move more of these class into @SysUISingleton.
-        if (mScrimBehind == null) {
-            mScrimBehindChangeRunnable = changeRunnable;
-        } else {
-            mScrimBehind.setChangeRunnable(changeRunnable, mMainExecutor);
-        }
     }
 
     private void updateThemeColors() {

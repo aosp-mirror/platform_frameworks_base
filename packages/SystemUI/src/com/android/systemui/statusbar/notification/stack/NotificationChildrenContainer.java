@@ -795,7 +795,6 @@ public class NotificationChildrenContainer extends ViewGroup
             } else {
                 childState.setZTranslation(0);
             }
-            childState.dimmed = parentState.dimmed;
             childState.hideSensitive = parentState.hideSensitive;
             childState.belowSpeedBump = parentState.belowSpeedBump;
             childState.clipTopAmount = 0;
