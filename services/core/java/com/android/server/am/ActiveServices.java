@@ -372,6 +372,15 @@ public final class ActiveServices {
     @Overridable
     public static final long FGS_BOOT_COMPLETED_RESTRICTIONS = 296558535L;
 
+    /**
+     * Disables foreground service background starts in System Alert Window for all types
+     * unless it already has a System Overlay Window.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = VERSION_CODES.VANILLA_ICE_CREAM)
+    @Overridable
+    public static final long FGS_SAW_RESTRICTIONS = 319471980L;
+
     final ActivityManagerService mAm;
 
     // Maximum number of services that we allow to start in the background
@@ -8526,10 +8535,31 @@ public final class ActiveServices {
             }
         }
 
+        // The flag being enabled isn't enough to deny background start: we need to also check
+        // if there is a system alert UI present.
         if (ret == REASON_DENIED) {
-            if (mAm.mAtmInternal.hasSystemAlertWindowPermission(callingUid, callingPid,
-                    callingPackage)) {
-                ret = REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
+            // Flag check: are we disabling SAW FGS background starts?
+            final boolean shouldDisableSaw = Flags.fgsDisableSaw()
+                    && CompatChanges.isChangeEnabled(FGS_BOOT_COMPLETED_RESTRICTIONS, callingUid);
+            if (shouldDisableSaw) {
+                final ProcessRecord processRecord = mAm
+                        .getProcessRecordLocked(targetService.processName,
+                        targetService.appInfo.uid);
+                if (processRecord != null) {
+                    if (processRecord.mState.hasOverlayUi()) {
+                        if (mAm.mAtmInternal.hasSystemAlertWindowPermission(callingUid, callingPid,
+                                callingPackage)) {
+                            ret = REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
+                        }
+                    }
+                } else {
+                    Slog.e(TAG, "Could not find process record for SAW check");
+                }
+            } else {
+                if (mAm.mAtmInternal.hasSystemAlertWindowPermission(callingUid, callingPid,
+                        callingPackage)) {
+                    ret = REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
+                }
             }
         }
 
