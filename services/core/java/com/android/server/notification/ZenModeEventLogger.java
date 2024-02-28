@@ -32,6 +32,7 @@ import android.app.NotificationManager;
 import android.content.pm.PackageManager;
 import android.os.Process;
 import android.service.notification.DNDPolicyProto;
+import android.service.notification.ZenAdapters;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ConfigChangeOrigin;
 import android.service.notification.ZenModeConfig.ZenRule;
@@ -591,9 +592,11 @@ class ZenModeEventLogger {
                 // This applies to both call and message senders, but not conversation senders,
                 // where they use the same enum values.
                 proto.write(DNDPolicyProto.ALLOW_CALLS_FROM,
-                        ZenModeConfig.getZenPolicySenders(mNewPolicy.allowCallsFrom()));
+                        ZenAdapters.notificationPolicySendersToZenPolicyPeopleType(
+                                mNewPolicy.allowCallsFrom()));
                 proto.write(DNDPolicyProto.ALLOW_MESSAGES_FROM,
-                        ZenModeConfig.getZenPolicySenders(mNewPolicy.allowMessagesFrom()));
+                        ZenAdapters.notificationPolicySendersToZenPolicyPeopleType(
+                                mNewPolicy.allowMessagesFrom()));
                 proto.write(DNDPolicyProto.ALLOW_CONVERSATIONS_FROM,
                         mNewPolicy.allowConversationsFrom());
 
