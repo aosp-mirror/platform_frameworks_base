@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.controls.domain.interactor
 
+import android.R
+import android.graphics.drawable.Icon
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -103,11 +105,12 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
             kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
 
+            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
             val userMediaRecommendation =
                 SmartspaceMediaData(
                     targetId = KEY_MEDIA_SMARTSPACE,
                     isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(context),
+                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
                 )
             val userMedia = MediaData().copy(active = false)
 
@@ -131,11 +134,12 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
             kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
 
+            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
             val mediaRecommendation =
                 SmartspaceMediaData(
                     targetId = KEY_MEDIA_SMARTSPACE,
                     isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(context),
+                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
                 )
 
             mediaFilterRepository.setRecommendation(mediaRecommendation)
@@ -158,11 +162,12 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
             kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
 
+            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
             val mediaRecommendation =
                 SmartspaceMediaData(
                     targetId = KEY_MEDIA_SMARTSPACE,
                     isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(context),
+                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
                 )
 
             mediaFilterRepository.setRecommendation(mediaRecommendation)
