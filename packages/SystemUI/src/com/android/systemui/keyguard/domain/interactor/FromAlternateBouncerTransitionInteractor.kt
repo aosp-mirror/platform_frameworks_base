@@ -31,8 +31,8 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -62,7 +62,6 @@ constructor(
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    @FlowPreview
     private fun listenForAlternateBouncerToLockscreenHubAodOrDozing() {
         scope.launch {
             keyguardInteractor.alternateBouncerShowing
@@ -71,7 +70,7 @@ constructor(
                 // happening prematurely.
                 // This should eventually be removed in favor of
                 // [KeyguardTransitionInteractor#startDismissKeyguardTransition]
-                .sample(150L)
+                .onEach { delay(150L) }
                 .sampleCombine(
                     keyguardInteractor.primaryBouncerShowing,
                     startedKeyguardTransitionStep,
