@@ -21,5 +21,8 @@ license {
 java_binary {
     name: "telecom",
     wrapper: "telecom.sh",
-    srcs: ["**/*.java"],
+    srcs: [
+        ":telecom-shell-commands-src",
+        "**/*.java",
+    ],
 }
