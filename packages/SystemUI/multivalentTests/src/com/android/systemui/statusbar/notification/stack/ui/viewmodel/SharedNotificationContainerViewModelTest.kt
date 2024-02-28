@@ -701,6 +701,32 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             assertThat(fadeIn).isEqualTo(false)
         }
 
+    @Test
+    fun shadeCollapseFadeIn_doesNotRunIfTransitioningToAod() =
+        testScope.runTest {
+            val fadeIn by collectLastValue(underTest.shadeCollapseFadeIn)
+
+            // Start on lockscreen without the shade
+            underTest.setShadeCollapseFadeInComplete(false)
+            showLockscreen()
+            assertThat(fadeIn).isEqualTo(false)
+
+            // ... then the shade expands
+            showLockscreenWithShadeExpanded()
+            assertThat(fadeIn).isEqualTo(false)
+
+            // ... then user hits power to go to AOD
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.AOD,
+                testScope,
+            )
+            // ... followed by a shade collapse
+            showLockscreen()
+            // ... does not trigger a fade in
+            assertThat(fadeIn).isEqualTo(false)
+        }
+
     private suspend fun TestScope.showLockscreen() {
         shadeRepository.setLockscreenShadeExpansion(0f)
         shadeRepository.setQsExpansion(0f)
