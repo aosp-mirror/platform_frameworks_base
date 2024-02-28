@@ -10418,7 +10418,6 @@ package android.nfc.cardemulation {
   @FlaggedApi("android.nfc.enable_nfc_mainline") public final class ApduServiceInfo implements android.os.Parcelable {
     ctor @FlaggedApi("android.nfc.enable_nfc_mainline") public ApduServiceInfo(@NonNull android.content.pm.PackageManager, @NonNull android.content.pm.ResolveInfo, boolean) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method @FlaggedApi("android.nfc.nfc_read_polling_loop") public void addPollingLoopFilter(@NonNull String, boolean);
-    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean defaultToObserveMode();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public int describeContents();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void dump(@NonNull android.os.ParcelFileDescriptor, @NonNull java.io.PrintWriter, @NonNull String[]);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void dumpDebug(@NonNull android.util.proto.ProtoOutputStream);
@@ -10448,9 +10447,10 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean requiresUnlock();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void resetOffHostSecureElement();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setCategoryOtherServiceEnabled(boolean);
-    method @FlaggedApi("android.nfc.nfc_observe_mode") public void setDefaultToObserveMode(boolean);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setDynamicAidGroup(@NonNull android.nfc.cardemulation.AidGroup);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setOffHostSecureElement(@NonNull String);
+    method @FlaggedApi("android.nfc.nfc_observe_mode") public void setShouldDefaultToObserveMode(boolean);
+    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean shouldDefaultToObserveMode();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void writeToParcel(@NonNull android.os.Parcel, int);
     field @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.ApduServiceInfo> CREATOR;
   }

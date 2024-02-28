@@ -160,7 +160,7 @@
     <!-- @FlaggedApi("android.view.inputmethod.connectionless_handwriting") -->
     <public name="supportsConnectionlessStylusHandwriting" />
     <!-- @FlaggedApi("android.nfc.Flags.FLAG_OBSERVE_MODE") -->
-    <public name="defaultToObserveMode"/>
+    <public name="shouldDefaultToObserveMode"/>
     <!-- @FlaggedApi("android.security.asm_restrictions_enabled") -->
     <public name="allowCrossUidActivitySwitchFromBelow"/>
     <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
