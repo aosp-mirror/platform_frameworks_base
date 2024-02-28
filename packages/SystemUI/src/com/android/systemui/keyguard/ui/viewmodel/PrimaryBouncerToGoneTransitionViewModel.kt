@@ -60,6 +60,22 @@ constructor(
     private var leaveShadeOpen: Boolean = false
     private var willRunDismissFromKeyguard: Boolean = false
 
+    val notificationAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStart = {
+                leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
+                willRunDismissFromKeyguard = primaryBouncerInteractor.willRunDismissFromKeyguard()
+            },
+            onStep = {
+                if (willRunDismissFromKeyguard || leaveShadeOpen) {
+                    1f
+                } else {
+                    1f - it
+                }
+            },
+        )
+
     /** Bouncer container alpha */
     val bouncerAlpha: Flow<Float> =
         if (featureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
@@ -94,6 +110,7 @@ constructor(
         } else {
             createLockscreenAlpha(primaryBouncerInteractor::willRunDismissFromKeyguard)
         }
+
     private fun createLockscreenAlpha(willRunAnimationOnKeyguard: () -> Boolean): Flow<Float> {
         return transitionAnimation.sharedFlow(
             duration = 50.milliseconds,
