@@ -20,7 +20,7 @@ import com.android.hoststubgen.asm.toJvmClassName
 
 /**
  * Filter to apply a policy to classes extending or implementing a class,
- * either directly or indirectly. (with a breadth first search.)
+ * either directly or indirectly.
  *
  * The policy won't apply to the super class itself.
  */
@@ -42,7 +42,7 @@ class SubclassFilter(
     }
 
     /**
-     * Find a policy for a class with a breadth-first search.
+     * Find a policy for a class.
      */
     private fun findPolicyForClass(className: String): FilterPolicyWithReason? {
         val cn = classes.findClass(className) ?: return null
