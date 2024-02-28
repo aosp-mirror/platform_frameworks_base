@@ -239,8 +239,20 @@ public class PhoneStatusBarView extends FrameLayout {
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         layoutParams.height = mStatusBarHeight - waterfallTopInset;
+        updateSystemIconsContainerHeight();
         updatePaddings();
         setLayoutParams(layoutParams);
+    }
+
+    private void updateSystemIconsContainerHeight() {
+        View systemIconsContainer = findViewById(R.id.system_icons);
+        ViewGroup.LayoutParams layoutParams = systemIconsContainer.getLayoutParams();
+        int newSystemIconsHeight =
+                getResources().getDimensionPixelSize(R.dimen.status_bar_system_icons_height);
+        if (layoutParams.height != newSystemIconsHeight) {
+            layoutParams.height = newSystemIconsHeight;
+            systemIconsContainer.setLayoutParams(layoutParams);
+        }
     }
 
     private void updatePaddings() {
