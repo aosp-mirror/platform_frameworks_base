@@ -3823,6 +3823,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             data.slotId = slotId;
         }
         if ((changed || becameAbsent)) {
+            mLogger.d("onSimStateChanged callbacks invoked with subId: " + subId + " slotId: "
+                    + slotId + " state: " + state);
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
