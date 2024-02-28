@@ -256,7 +256,7 @@ public final class WMShell implements
         });
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
-            public void goToFullscreenFromSplit() {
+            public void moveFocusedTaskToFullscreen(int displayId) {
                 splitScreen.goToFullscreenFromSplit();
             }
         });
@@ -360,6 +360,12 @@ public final class WMShell implements
             @Override
             public void enterDesktop(int displayId) {
                 desktopMode.enterDesktop(displayId);
+            }
+        });
+        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
+            @Override
+            public void moveFocusedTaskToFullscreen(int displayId) {
+                desktopMode.moveFocusedTaskToFullscreen(displayId);
             }
         });
     }
