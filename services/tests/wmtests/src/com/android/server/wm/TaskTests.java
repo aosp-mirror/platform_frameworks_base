@@ -1823,6 +1823,66 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
+    public void testAssignChildLayers_boostedDecorSurfacePlacement() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task =  new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord unembeddedActivity = task.getTopMostActivity();
+
+        final TaskFragment fragment1 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment fragment2 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final SurfaceControl.Transaction t = task.getSyncTransaction();
+        final SurfaceControl.Transaction clientTransaction = mock(SurfaceControl.Transaction.class);
+
+        doNothing().when(task).sendTaskFragmentParentInfoChangedIfNeeded();
+        spyOn(unembeddedActivity);
+        spyOn(fragment1);
+        spyOn(fragment2);
+
+        doReturn(true).when(unembeddedActivity).isUid(task.effectiveUid);
+        doReturn(true).when(fragment1).isAllowedToBeEmbeddedInTrustedMode();
+        doReturn(false).when(fragment2).isAllowedToBeEmbeddedInTrustedMode();
+        doReturn(true).when(fragment1).isVisible();
+
+        task.moveOrCreateDecorSurfaceFor(fragment1);
+
+        clearInvocations(t);
+        clearInvocations(unembeddedActivity);
+        clearInvocations(fragment1);
+        clearInvocations(fragment2);
+
+        // The decor surface should be placed above all the windows when boosted and the cover
+        // surface should show.
+        task.setDecorSurfaceBoosted(fragment1, true /* isBoosted */, clientTransaction);
+
+        verify(unembeddedActivity).assignLayer(t, 0);
+        verify(fragment1).assignLayer(t, 1);
+        verify(fragment2).assignLayer(t, 2);
+        verify(t).setLayer(task.mDecorSurfaceContainer.mContainerSurface, 3);
+
+        verify(t).setVisibility(task.mDecorSurfaceContainer.mContainerSurface, true);
+        verify(t).merge(clientTransaction);
+
+        clearInvocations(t);
+        clearInvocations(unembeddedActivity);
+        clearInvocations(fragment1);
+        clearInvocations(fragment2);
+
+        // The decor surface should be placed just above the owner TaskFragment and the cover
+        // surface should hide.
+        task.moveOrCreateDecorSurfaceFor(fragment1);
+        task.setDecorSurfaceBoosted(fragment1, false /* isBoosted */, clientTransaction);
+
+        verify(unembeddedActivity).assignLayer(t, 0);
+        verify(fragment1).assignLayer(t, 1);
+        verify(t).setLayer(task.mDecorSurfaceContainer.mContainerSurface, 2);
+        verify(fragment2).assignLayer(t, 3);
+
+        verify(t).setVisibility(task.mDecorSurfaceContainer.mContainerSurface, true);
+        verify(t).merge(clientTransaction);
+
+    }
+
+    @Test
     public void testMoveTaskFragmentsToBottomIfNeeded() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
