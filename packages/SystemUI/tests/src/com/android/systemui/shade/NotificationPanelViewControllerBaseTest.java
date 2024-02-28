@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import android.annotation.IdRes;
 import android.content.ContentResolver;
@@ -213,7 +214,6 @@ import java.util.List;
 import java.util.Optional;
 
 import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.flow.StateFlowKt;
 import kotlinx.coroutines.test.TestScope;
 
 public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
@@ -409,10 +409,10 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 new ShadeAnimationRepository(), mShadeRepository);
         mPowerInteractor = keyguardInteractorDeps.getPowerInteractor();
         when(mKeyguardTransitionInteractor.isInTransitionToStateWhere(any())).thenReturn(
-                StateFlowKt.MutableStateFlow(false));
+                MutableStateFlow(false));
         DeviceEntryUdfpsInteractor deviceEntryUdfpsInteractor =
                 mock(DeviceEntryUdfpsInteractor.class);
-        when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(emptyFlow());
+        when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(MutableStateFlow(false));
 
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),

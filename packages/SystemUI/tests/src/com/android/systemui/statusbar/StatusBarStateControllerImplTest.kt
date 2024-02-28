@@ -54,6 +54,7 @@ import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -69,7 +70,7 @@ import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -85,9 +86,8 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
-import com.android.systemui.scene.shared.model.Scenes
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -155,7 +155,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 { kosmos.sceneInteractor },
             )
 
-        whenever(deviceEntryUdfpsInteractor.isUdfpsSupported).thenReturn(emptyFlow())
+        whenever(deviceEntryUdfpsInteractor.isUdfpsSupported).thenReturn(MutableStateFlow(false))
         shadeInteractor =
             ShadeInteractorImpl(
                 testScope.backgroundScope,

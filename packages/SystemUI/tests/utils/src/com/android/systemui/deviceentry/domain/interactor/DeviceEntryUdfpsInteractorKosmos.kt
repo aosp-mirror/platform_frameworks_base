@@ -18,7 +18,7 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
-import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
+import com.android.systemui.biometrics.domain.interactor.fingerprintPropertyInteractor
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.kosmos.Kosmos
@@ -27,7 +27,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.deviceEntryUdfpsInteractor by Fixture {
     DeviceEntryUdfpsInteractor(
-        fingerprintPropertyRepository = fingerprintPropertyRepository,
+        fingerprintPropertyInteractor = fingerprintPropertyInteractor,
         fingerprintAuthRepository = deviceEntryFingerprintAuthRepository,
         biometricSettingsRepository = biometricSettingsRepository,
     )
