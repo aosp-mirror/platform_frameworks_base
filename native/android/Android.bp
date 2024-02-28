@@ -98,6 +98,7 @@ cc_library_shared {
         "libpowermanager",
         "android.hardware.configstore@1.0",
         "android.hardware.configstore-utils",
+        "android.os.flags-aconfig-cc",
         "libnativedisplay",
     ],
 
