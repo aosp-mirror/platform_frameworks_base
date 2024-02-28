@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 
 import com.android.graphics.hwui.flags.Flags;
@@ -98,11 +99,11 @@ public class Matrix44 {
     /**
      * Gets the value at the matrix's row and column.
      *
-     * @param row An integer from 0 to 4 indicating the row of the value to get
-     * @param col An integer from 0 to 4 indicating the column of the value to get
+     * @param row An integer from 0 to 3 indicating the row of the value to get
+     * @param col An integer from 0 to 3 indicating the column of the value to get
      */
     @FlaggedApi(Flags.FLAG_MATRIX_44)
-    public float get(int row, int col) {
+    public float get(@IntRange(from = 0, to = 3) int row, @IntRange(from = 0, to = 3) int col) {
         if (row >= 0 && row < 4 && col >= 0 && col < 4) {
             return mBackingArray[row * 4 + col];
         }
@@ -112,12 +113,13 @@ public class Matrix44 {
     /**
      * Sets the value at the matrix's row and column to the provided value.
      *
-     * @param row An integer from 0 to 4 indicating the row of the value to change
-     * @param col An integer from 0 to 4 indicating the column of the value to change
+     * @param row An integer from 0 to 3 indicating the row of the value to change
+     * @param col An integer from 0 to 3 indicating the column of the value to change
      * @param val The value the element at the specified index will be set to
      */
     @FlaggedApi(Flags.FLAG_MATRIX_44)
-    public void set(int row, int col, float val) {
+    public void set(@IntRange(from = 0, to = 3) int row, @IntRange(from = 0, to = 3) int col,
+            float val) {
         if (row >= 0 && row < 4 && col >= 0 && col < 4) {
             mBackingArray[row * 4 + col] = val;
         } else {
