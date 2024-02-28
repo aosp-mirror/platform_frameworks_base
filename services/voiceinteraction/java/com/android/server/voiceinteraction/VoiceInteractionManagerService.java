@@ -58,7 +58,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.PermissionEnforcer;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
@@ -68,7 +67,6 @@ import android.os.SharedMemory;
 import android.os.ShellCallback;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.permission.flags.Flags;
 import android.provider.Settings;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
@@ -1288,17 +1286,6 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
-        // Enforce permissions that are flag controlled. The flag value decides if the permission
-        // should be enforced.
-        private void initAndVerifyDetector_enforcePermissionWithFlags() {
-            PermissionEnforcer enforcer = mContext.getSystemService(PermissionEnforcer.class);
-            if (Flags.voiceActivationPermissionApis()) {
-                enforcer.enforcePermission(
-                        android.Manifest.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO,
-                        getCallingPid(), getCallingUid());
-            }
-        }
-
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
         @Override
         public void initAndVerifyDetector(
@@ -1308,13 +1295,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 @NonNull IBinder token,
                 IHotwordRecognitionStatusCallback callback,
                 int detectorType) {
-            // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
-            // {@link #initAndVerifyDetector(Identity,  PersistableBundle, ShareMemory, IBinder,
-            // IHotwordRecognitionStatusCallback, int)}
-            // and replace with the permission RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully
-            // launched.
             super.initAndVerifyDetector_enforcePermission();
-            initAndVerifyDetector_enforcePermissionWithFlags();
 
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();

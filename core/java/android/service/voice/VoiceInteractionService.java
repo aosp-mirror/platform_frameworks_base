@@ -520,7 +520,7 @@ public class VoiceInteractionService extends Service {
             @NonNull String keyphrase, @SuppressLint("UseIcu") @NonNull Locale locale,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AlwaysOnHotwordDetector.Callback callback) {
-        // TODO(b/269080850): Resolve AndroidFrameworkRequiresPermission lint warning
+        // TODO (b/269080850): Resolve AndroidFrameworkRequiresPermission lint warning
 
         Objects.requireNonNull(keyphrase);
         Objects.requireNonNull(locale);
@@ -546,10 +546,6 @@ public class VoiceInteractionService extends Service {
             @NonNull SoundTrigger.ModuleProperties moduleProperties,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AlwaysOnHotwordDetector.Callback callback) {
-        // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
-        // {@link #createAlwaysOnHotwordDetectorForTest(String, Locale,
-        // SoundTrigger.ModuleProperties, AlwaysOnHotwordDetector.Callback)} and replace with the
-        // permission RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully launched.
 
         Objects.requireNonNull(keyphrase);
         Objects.requireNonNull(locale);
@@ -616,11 +612,6 @@ public class VoiceInteractionService extends Service {
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
             @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
-        // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
-        // {@link #createAlwaysOnHotwordDetector(String, Locale, PersistableBundle, SharedMemory,
-        // AlwaysOnHotwordDetector.Callback)} and replace with the permission
-        // RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully launched.
-
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
                 /* supportHotwordDetectionService= */ true, options, sharedMemory,
                 /* modulProperties */ null, /* executor= */ null, callback);
@@ -672,11 +663,7 @@ public class VoiceInteractionService extends Service {
             @Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AlwaysOnHotwordDetector.Callback callback) {
-        // TODO(b/269080850): Resolve AndroidFrameworkRequiresPermission lint warning
-        // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
-        // {@link #createAlwaysOnHotwordDetector(String, Locale, PersistableBundle, SharedMemory,
-        // Executor, AlwaysOnHotwordDetector.Callback)} and replace with the permission
-        // RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully launched.
+        // TODO (b/269080850): Resolve AndroidFrameworkRequiresPermission lint warning
 
         Objects.requireNonNull(keyphrase);
         Objects.requireNonNull(locale);
@@ -703,10 +690,6 @@ public class VoiceInteractionService extends Service {
             @NonNull SoundTrigger.ModuleProperties moduleProperties,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AlwaysOnHotwordDetector.Callback callback) {
-        // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
-        // {@link #createAlwaysOnHotwordDetectorForTest(String, Locale, PersistableBundle,
-        // SharedMemory, SoundTrigger.ModuleProperties, Executor, AlwaysOnHotwordDetector.Callback)}
-        // and replace with the permission RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully launched.
 
         Objects.requireNonNull(keyphrase);
         Objects.requireNonNull(locale);
