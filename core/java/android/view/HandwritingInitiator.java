@@ -188,8 +188,7 @@ public class HandwritingInitiator {
                 // check whether the stylus we are tracking goes up.
                 if (mState != null) {
                     mState.mShouldInitHandwriting = false;
-                    if (!mState.mHasInitiatedHandwriting
-                            && !mState.mHasPreparedHandwritingDelegation) {
+                    if (!mState.mHandled) {
                         // The user just did a click, long click or another stylus gesture,
                         // show hover icon again for the connected view.
                         mShowHoverIconForConnectedView = true;
@@ -204,16 +203,14 @@ public class HandwritingInitiator {
                 // Either we've already tried to initiate handwriting, or the ongoing MotionEvent
                 // sequence is considered to be tap, long-click or other gestures.
                 if (!mState.mShouldInitHandwriting || mState.mExceedHandwritingSlop) {
-                    return mState.mHasInitiatedHandwriting
-                            || mState.mHasPreparedHandwritingDelegation;
+                    return mState.mHandled;
                 }
 
                 final long timeElapsed =
                         motionEvent.getEventTime() - mState.mStylusDownTimeInMillis;
                 if (timeElapsed > mHandwritingTimeoutInMillis) {
                     mState.mShouldInitHandwriting = false;
-                    return mState.mHasInitiatedHandwriting
-                            || mState.mHasPreparedHandwritingDelegation;
+                    return mState.mHandled;
                 }
 
                 final int pointerIndex = motionEvent.findPointerIndex(mState.mStylusPointerId);
@@ -246,7 +243,7 @@ public class HandwritingInitiator {
                         }
                     }
                 }
-                return mState.mHasInitiatedHandwriting || mState.mHasPreparedHandwritingDelegation;
+                return mState.mHandled;
         }
         return false;
     }
@@ -382,7 +379,7 @@ public class HandwritingInitiator {
     @VisibleForTesting
     public void startHandwriting(@NonNull View view) {
         mImm.startStylusHandwriting(view);
-        mState.mHasInitiatedHandwriting = true;
+        mState.mHandled = true;
         mState.mShouldInitHandwriting = false;
         mShowHoverIconForConnectedView = false;
         if (view instanceof TextView) {
@@ -402,13 +399,12 @@ public class HandwritingInitiator {
             mImm.startConnectionlessStylusHandwritingForDelegation(
                     view, getCursorAnchorInfoForConnectionless(view), delegatePackageName,
                     view::post, new DelegationCallback(view, delegatePackageName));
-            mState.mHasInitiatedHandwriting = true;
             mState.mShouldInitHandwriting = false;
         } else {
             mImm.prepareStylusHandwritingDelegation(view, delegatePackageName);
             view.getHandwritingDelegatorCallback().run();
-            mState.mHasPreparedHandwritingDelegation = true;
         }
+        mState.mHandled = true;
     }
 
     /**
@@ -455,7 +451,7 @@ public class HandwritingInitiator {
 
     private void onDelegationAccepted(View view) {
         if (mState != null) {
-            mState.mHasInitiatedHandwriting = true;
+            mState.mHandled = true;
             mState.mShouldInitHandwriting = false;
         }
         if (view instanceof TextView) {
@@ -795,12 +791,12 @@ public class HandwritingInitiator {
          * This boolean will be set to false, and it won't request to start handwriting.
          */
         private boolean mShouldInitHandwriting;
-        /**
-         * Whether handwriting mode has already been initiated for the current MotionEvent sequence.
-         */
-        private boolean mHasInitiatedHandwriting;
 
-        private boolean mHasPreparedHandwritingDelegation;
+        /**
+         * Whether the current MotionEvent sequence has been handled by the handwriting initiator,
+         * either by initiating handwriting mode, or by preparing handwriting delegation.
+         */
+        private boolean mHandled;
 
         /**
          * Whether the current ongoing stylus MotionEvent sequence already exceeds the
@@ -838,8 +834,7 @@ public class HandwritingInitiator {
             mStylusDownY = motionEvent.getY(actionIndex);
 
             mShouldInitHandwriting = true;
-            mHasInitiatedHandwriting = false;
-            mHasPreparedHandwritingDelegation = false;
+            mHandled = false;
             mExceedHandwritingSlop = false;
         }
     }
@@ -1052,8 +1047,6 @@ public class HandwritingInitiator {
                     // Fall back to the old delegation flow
                     mImm.prepareStylusHandwritingDelegation(mView, mDelegatePackageName);
                     mView.getHandwritingDelegatorCallback().run();
-                    mState.mHasInitiatedHandwriting = false;
-                    mState.mHasPreparedHandwritingDelegation = true;
                     break;
             }
         }
