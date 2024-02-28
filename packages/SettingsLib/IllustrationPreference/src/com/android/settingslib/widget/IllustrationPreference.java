@@ -34,6 +34,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.RawRes;
+import androidx.annotation.StringRes;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
@@ -216,13 +217,23 @@ public class IllustrationPreference extends Preference {
      * To set content description of the {@link Illustration Preference}. This can use for talkback
      * environment if developer wants to have a customization content.
      *
-     * @param contentDescription The resource id of the content description.
+     * @param contentDescription The CharSequence of the content description.
      */
     public void setContentDescription(CharSequence contentDescription) {
         if (!TextUtils.equals(mContentDescription, contentDescription)) {
             mContentDescription = contentDescription;
             notifyChanged();
         }
+    }
+
+    /**
+     * To set content description of the {@link Illustration Preference}. This can use for talkback
+     * environment if developer wants to have a customization content.
+     *
+     * @param contentDescriptionResId The resource id of the content description.
+     */
+    public void setContentDescription(@StringRes int contentDescriptionResId) {
+        setContentDescription(getContext().getText(contentDescriptionResId));
     }
 
     /**
