@@ -169,7 +169,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_TILE_SERVICE_REQUEST_LISTENING_STATE = 68 << MSG_SHIFT;
     private static final int MSG_SHOW_REAR_DISPLAY_DIALOG = 69 << MSG_SHIFT;
     private static final int MSG_MOVE_FOCUSED_TASK_TO_FULLSCREEN = 70 << MSG_SHIFT;
-    private static final int MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP = 71 << MSG_SHIFT;
+    private static final int MSG_MOVE_FOCUSED_TASK_TO_STAGE_SPLIT = 71 << MSG_SHIFT;
     private static final int MSG_SHOW_MEDIA_OUTPUT_SWITCHER = 72 << MSG_SHIFT;
     private static final int MSG_TOGGLE_TASKBAR = 73 << MSG_SHIFT;
     private static final int MSG_SETTING_CHANGED = 74 << MSG_SHIFT;
@@ -503,9 +503,9 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void moveFocusedTaskToFullscreen(int displayId) {}
 
         /**
-         * @see IStatusBar#enterStageSplitFromRunningApp
+         * @see IStatusBar#moveFocusedTaskToStageSplit
          */
-        default void enterStageSplitFromRunningApp(boolean leftOrTop) {}
+        default void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {}
 
         /**
          * @see IStatusBar#showMediaOutputSwitcher
@@ -1338,10 +1338,13 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void enterStageSplitFromRunningApp(boolean leftOrTop) {
+    public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP,
-                    leftOrTop).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = displayId;
+            args.argi2 = leftOrTop ? 1 : 0;
+            mHandler.obtainMessage(MSG_MOVE_FOCUSED_TASK_TO_STAGE_SPLIT,
+                    args).sendToTarget();
         }
     }
 
@@ -1907,11 +1910,15 @@ public class CommandQueue extends IStatusBar.Stub implements
                     }
                     break;
                 }
-                case MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP:
+                case MSG_MOVE_FOCUSED_TASK_TO_STAGE_SPLIT: {
+                    args = (SomeArgs) msg.obj;
+                    int displayId = args.argi1;
+                    boolean leftOrTop = args.argi2 != 0;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).enterStageSplitFromRunningApp((Boolean) msg.obj);
+                        mCallbacks.get(i).moveFocusedTaskToStageSplit(displayId, leftOrTop);
                     }
                     break;
+                }
                 case MSG_SHOW_MEDIA_OUTPUT_SWITCHER:
                     args = (SomeArgs) msg.obj;
                     String clientPackageName = (String) args.arg1;

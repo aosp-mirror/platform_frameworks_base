@@ -3523,7 +3523,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 if (firstDown && event.isMetaPressed()) {
                     if (event.isCtrlPressed()) {
-                        enterStageSplitFromRunningApp(true /* leftOrTop */);
+                        moveFocusedTaskToStageSplit(getTargetDisplayIdForKeyEvent(event),
+                                true /* leftOrTop */);
                         logKeyboardSystemsEvent(event, KeyboardLogEvent.SPLIT_SCREEN_NAVIGATION);
                     } else {
                         logKeyboardSystemsEvent(event, KeyboardLogEvent.BACK);
@@ -3534,7 +3535,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
-                    enterStageSplitFromRunningApp(false /* leftOrTop */);
+                    moveFocusedTaskToStageSplit(getTargetDisplayIdForKeyEvent(event),
+                            false /* leftOrTop */);
                     logKeyboardSystemsEvent(event, KeyboardLogEvent.SPLIT_SCREEN_NAVIGATION);
                     return true;
                 }
@@ -4387,10 +4389,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void enterStageSplitFromRunningApp(boolean leftOrTop) {
+    private void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
-            statusbar.enterStageSplitFromRunningApp(leftOrTop);
+            statusbar.moveFocusedTaskToStageSplit(displayId, leftOrTop);
         }
     }
 

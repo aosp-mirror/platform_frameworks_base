@@ -361,11 +361,13 @@ public final class WMShell implements
             public void enterDesktop(int displayId) {
                 desktopMode.enterDesktop(displayId);
             }
-        });
-        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
             public void moveFocusedTaskToFullscreen(int displayId) {
                 desktopMode.moveFocusedTaskToFullscreen(displayId);
+            }
+            @Override
+            public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
+                desktopMode.moveFocusedTaskToStageSplit(displayId, leftOrTop);
             }
         });
     }
