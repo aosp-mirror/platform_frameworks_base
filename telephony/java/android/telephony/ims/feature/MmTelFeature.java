@@ -549,13 +549,19 @@ public class MmTelFeature extends ImsFeature {
         public static final int CAPABILITY_TYPE_SMS = 1 << 3;
 
         /**
-         * This MmTelFeature supports Call Composer (section 2.4 of RC.20)
+         * This MmTelFeature supports Call Composer (section 2.4 of RC.20). This is the superset
+         * Call Composer, meaning that all subset types of Call Composers must be enabled when this
+         * capability is enabled
          */
         public static final int CAPABILITY_TYPE_CALL_COMPOSER = 1 << 4;
 
 
         /**
-         * This MmTelFeature supports Business-only Call Composer
+         * This MmTelFeature supports Business-only Call Composer. This is a subset of
+         * {@code CAPABILITY_TYPE_CALL_COMPOSER} that only supports business related
+         * information for calling (e.g. information to signal if the call is a business call) in
+         * the SIP header.  When enabling {@code CAPABILITY_TYPE_CALL_COMPOSER}, the
+         * {@code CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY} capability must also be enabled.
          */
         @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
         public static final int CAPABILITY_TYPE_CALL_COMPOSER_BUSINESS_ONLY = 1 << 5;
