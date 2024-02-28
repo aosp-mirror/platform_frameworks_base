@@ -1551,7 +1551,7 @@ public class WebViewUpdateServiceTest {
 
     @Test
     @RequiresFlagsEnabled("android.webkit.update_service_v2")
-    public void testDefaultWebViewPackageInstalling() {
+    public void testDefaultWebViewPackageInstallingDuringStartUp() {
         String testPackage = "testDefault";
         WebViewProviderInfo[] packages =
                 new WebViewProviderInfo[] {
@@ -1569,6 +1569,68 @@ public class WebViewUpdateServiceTest {
 
         // Check that the boot time logic tries to install the default package.
         runWebViewBootPreparationOnMainSync();
+        Mockito.verify(mTestSystemImpl)
+                .installExistingPackageForAllUsers(
+                        Matchers.anyObject(), Mockito.eq(testPackage));
+    }
+
+    @Test
+    @RequiresFlagsEnabled("android.webkit.update_service_v2")
+    public void testDefaultWebViewPackageInstallingAfterStartUp() {
+        String testPackage = "testDefault";
+        WebViewProviderInfo[] packages =
+                new WebViewProviderInfo[] {
+                    new WebViewProviderInfo(
+                            testPackage,
+                            "",
+                            true /* default available */,
+                            false /* fallback */,
+                            null)
+                };
+        checkCertainPackageUsedAfterWebViewBootPreparation(testPackage, packages);
+
+        // uninstall the default package.
+        mTestSystemImpl.setPackageInfo(
+                createPackageInfo(
+                        testPackage, true /* enabled */, true /* valid */, false /* installed */));
+        mWebViewUpdateServiceImpl.packageStateChanged(testPackage,
+                WebViewUpdateService.PACKAGE_REMOVED, 0);
+
+        // Check that we try to re-install the default package.
+        Mockito.verify(mTestSystemImpl)
+                .installExistingPackageForAllUsers(
+                        Matchers.anyObject(), Mockito.eq(testPackage));
+    }
+
+    /**
+     * Ensures that adding a new user for which the current WebView package is uninstalled triggers
+     * the repair logic.
+     */
+    @Test
+    @RequiresFlagsEnabled("android.webkit.update_service_v2")
+    public void testAddingNewUserWithDefaultdPackageNotInstalled() {
+        String testPackage = "testDefault";
+        WebViewProviderInfo[] packages =
+                new WebViewProviderInfo[] {
+                    new WebViewProviderInfo(
+                            testPackage,
+                            "",
+                            true /* default available */,
+                            false /* fallback */,
+                            null)
+                };
+        checkCertainPackageUsedAfterWebViewBootPreparation(testPackage, packages);
+
+        // Add new user with the default package not installed.
+        int newUser = 100;
+        mTestSystemImpl.addUser(newUser);
+        mTestSystemImpl.setPackageInfoForUser(newUser,
+                createPackageInfo(testPackage, true /* enabled */, true /* valid */,
+                        false /* installed */));
+
+        mWebViewUpdateServiceImpl.handleNewUser(newUser);
+
+        // Check that we try to re-install the default package for all users.
         Mockito.verify(mTestSystemImpl)
                 .installExistingPackageForAllUsers(
                         Matchers.anyObject(), Mockito.eq(testPackage));
