@@ -139,7 +139,6 @@ public abstract class InfoMediaManager extends MediaManager {
         }
     }
 
-    @Override
     public void startScan() {
         mMediaDevices.clear();
         startScanOnRouter();
@@ -156,7 +155,6 @@ public abstract class InfoMediaManager extends MediaManager {
         }
     }
 
-    @Override
     public abstract void stopScan();
 
     protected abstract void startScanOnRouter();
