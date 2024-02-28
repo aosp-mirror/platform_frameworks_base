@@ -24,3 +24,5 @@ per-file Background*Start* = set noparent
 per-file Background*Start* = file:/BAL_OWNERS
 per-file Background*Start* = ogunwale@google.com, louischang@google.com
 
+# File related to activity callers
+per-file ActivityCallerState.java = file:/core/java/android/app/COMPONENT_CALLER_OWNERS
