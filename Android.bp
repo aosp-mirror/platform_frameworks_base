@@ -509,6 +509,7 @@ java_library {
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+    jarjar_prefix: "com.android.internal.hidden_from_bootclasspath",
 }
 
 java_library {

@@ -83,6 +83,7 @@ per-file ArtModuleServiceManager.java = file:platform/art:/OWNERS
 
 # PerformanceHintManager
 per-file PerformanceHintManager.java = file:/ADPF_OWNERS
+per-file WorkDuration.java = file:/ADPF_OWNERS
 
 # IThermal interfaces
 per-file IThermal* = file:/THERMAL_OWNERS
@@ -95,3 +96,6 @@ per-file *SecurityStateManager* = file:/SECURITY_STATE_OWNERS
 # SystemConfig
 per-file ISystemConfig.aidl = file:/PACKAGE_MANAGER_OWNERS
 per-file SystemConfigManager.java = file:/PACKAGE_MANAGER_OWNERS
+
+# ProfilingService
+per-file ProfilingServiceManager.java = file:/PERFORMANCE_OWNERS

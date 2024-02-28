@@ -31,6 +31,7 @@ per-file Service* = file:/services/core/java/com/android/server/am/OWNERS
 per-file SystemServiceRegistry.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file *UserSwitchObserver* = file:/services/core/java/com/android/server/am/OWNERS
 per-file *UiAutomation* = file:/services/accessibility/OWNERS
+per-file *UiAutomation* = file:/core/java/android/permission/OWNERS
 per-file GameManager* = file:/GAME_MANAGER_OWNERS
 per-file GameMode* = file:/GAME_MANAGER_OWNERS
 per-file GameState* = file:/GAME_MANAGER_OWNERS
@@ -54,6 +55,13 @@ per-file IBackupAgent.aidl = file:/services/backup/OWNERS
 # Broadcasts
 per-file Broadcast* = file:/BROADCASTS_OWNERS
 per-file ReceiverInfo* = file:/BROADCASTS_OWNERS
+
+# ComponentCaller
+per-file ComponentCaller.java = file:COMPONENT_CALLER_OWNERS
+
+# GrammaticalInflectionManager
+per-file *GrammaticalInflection* = file:/services/core/java/com/android/server/grammaticalinflection/OWNERS
+per-file grammatical_inflection_manager.aconfig = file:/services/core/java/com/android/server/grammaticalinflection/OWNERS
 
 # KeyguardManager
 per-file KeyguardManager.java = file:/services/core/java/com/android/server/locksettings/OWNERS

@@ -341,8 +341,10 @@ final class ProcessServiceRecord {
         mHasAboveClient = false;
         for (int i = mConnections.size() - 1; i >= 0; i--) {
             ConnectionRecord cr = mConnections.valueAt(i);
-            if (cr.binding.service.app.mServices != this
-                    && cr.hasFlag(Context.BIND_ABOVE_CLIENT)) {
+
+            final boolean isSameProcess = cr.binding.service.app != null
+                    && cr.binding.service.app.mServices == this;
+            if (!isSameProcess && cr.hasFlag(Context.BIND_ABOVE_CLIENT)) {
                 mHasAboveClient = true;
                 break;
             }

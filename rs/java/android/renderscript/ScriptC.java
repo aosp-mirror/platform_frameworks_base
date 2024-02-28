@@ -38,12 +38,12 @@ public class ScriptC extends Script {
     private static final String TAG = "ScriptC";
 
     /**
-     * In targetSdkVersion 35 and above, Renderscript's ScriptC stops being supported
+     * In targetSdkVersion 36 and above, Renderscript's ScriptC stops being supported
      * and an exception is thrown when the class is instantiated.
-     * In targetSdkVersion 34 and below, Renderscript's ScriptC still works.
+     * In targetSdkVersion 35 and below, Renderscript's ScriptC still works.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = 35)
+    @EnabledAfter(targetSdkVersion = 36)
     private static final long RENDERSCRIPT_SCRIPTC_DEPRECATION_CHANGE_ID = 297019750L;
 
     /**
@@ -101,9 +101,21 @@ public class ScriptC extends Script {
         setID(id);
     }
 
-    private static void throwExceptionIfSDKTooHigh() {
+    private static void throwExceptionIfScriptCUnsupported() {
+        // Checks that this device actually does have an ABI that supports ScriptC.
+        //
+        // For an explanation as to why `System.loadLibrary` is used, see discussion at
+        // https://android-review.googlesource.com/c/platform/frameworks/base/+/2957974/comment/2f908b80_a05292ee
+        try {
+            System.loadLibrary("RS");
+        } catch (UnsatisfiedLinkError e) {
+            String s = "This device does not have an ABI that supports ScriptC.";
+            throw new UnsupportedOperationException(s);
+        }
+
+        // Throw an exception if the target API is 36 or above
         String message =
-                "ScriptC scripts are not supported when targeting an API Level >= 35. Please refer "
+                "ScriptC scripts are not supported when targeting an API Level >= 36. Please refer "
                     + "to https://developer.android.com/guide/topics/renderscript/migration-guide "
                     + "for proposed alternatives.";
         Slog.w(TAG, message);
@@ -113,7 +125,7 @@ public class ScriptC extends Script {
     }
 
     private static synchronized long internalCreate(RenderScript rs, Resources resources, int resourceID) {
-        throwExceptionIfSDKTooHigh();
+        throwExceptionIfScriptCUnsupported();
         byte[] pgm;
         int pgmLength;
         InputStream is = resources.openRawResource(resourceID);
@@ -150,7 +162,7 @@ public class ScriptC extends Script {
 
     private static synchronized long internalStringCreate(RenderScript rs, String resName, byte[] bitcode) {
         //        Log.v(TAG, "Create script for resource = " + resName);
-        throwExceptionIfSDKTooHigh();
+        throwExceptionIfScriptCUnsupported();
         return rs.nScriptCCreate(resName, RenderScript.getCachePath(), bitcode, bitcode.length);
     }
 }

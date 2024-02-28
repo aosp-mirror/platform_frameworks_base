@@ -62,3 +62,10 @@ flag {
     description: "Flag for NFC set discovery tech API"
     bug: "300351519"
 }
+
+flag {
+    name: "nfc_vendor_cmd"
+    namespace: "nfc"
+    description: "Enable NFC vendor command support"
+    bug: "289879306"
+}

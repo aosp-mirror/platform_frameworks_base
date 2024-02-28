@@ -39,6 +39,7 @@ using vintf::CompatibilityMatrix;
 using vintf::HalManifest;
 using vintf::Level;
 using vintf::SchemaType;
+using vintf::SepolicyVersion;
 using vintf::to_string;
 using vintf::toXml;
 using vintf::Version;
@@ -139,7 +140,7 @@ static jstring android_os_VintfObject_getPlatformSepolicyVersion(JNIEnv* env, jc
         return nullptr;
     }
 
-    Version latest;
+    SepolicyVersion latest;
     for (const auto& range : versions) {
         latest = std::max(latest, range.maxVer());
     }

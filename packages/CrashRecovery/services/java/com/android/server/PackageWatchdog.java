@@ -33,18 +33,18 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
+import android.sysprop.CrashRecoveryProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.BackgroundThread;
 import android.util.LongArrayQueue;
-import android.util.MathUtils;
 import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -100,13 +100,15 @@ public class PackageWatchdog {
     public static final int FAILURE_REASON_EXPLICIT_HEALTH_CHECK = 2;
     public static final int FAILURE_REASON_APP_CRASH = 3;
     public static final int FAILURE_REASON_APP_NOT_RESPONDING = 4;
+    public static final int FAILURE_REASON_BOOT_LOOP = 5;
 
     @IntDef(prefix = { "FAILURE_REASON_" }, value = {
             FAILURE_REASON_UNKNOWN,
             FAILURE_REASON_NATIVE_CRASH,
             FAILURE_REASON_EXPLICIT_HEALTH_CHECK,
             FAILURE_REASON_APP_CRASH,
-            FAILURE_REASON_APP_NOT_RESPONDING
+            FAILURE_REASON_APP_NOT_RESPONDING,
+            FAILURE_REASON_BOOT_LOOP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FailureReasons {}
@@ -128,17 +130,8 @@ public class PackageWatchdog {
 
     @VisibleForTesting
     static final int DEFAULT_BOOT_LOOP_TRIGGER_COUNT = 5;
+    @VisibleForTesting
     static final long DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS = TimeUnit.MINUTES.toMillis(10);
-
-    // These properties track individual system server boot events, and are reset once the boot
-    // threshold is met, or the boot loop trigger window is exceeded between boot events.
-    private static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
-    private static final String PROP_RESCUE_BOOT_START = "sys.rescue_boot_start";
-
-    // These properties track multiple calls made to observers tracking boot loops. They are reset
-    // when the de-escalation window is exceeded between boot events.
-    private static final String PROP_BOOT_MITIGATION_WINDOW_START = "sys.boot_mitigation_start";
-    private static final String PROP_BOOT_MITIGATION_COUNT = "sys.boot_mitigation_count";
 
     private long mNumberOfNativeCrashPollsRemaining;
 
@@ -551,7 +544,7 @@ public class PackageWatchdog {
         mNumberOfNativeCrashPollsRemaining--;
         // Check if native watchdog reported a crash
         if ("1".equals(SystemProperties.get("sys.init.updatable_crashing"))) {
-            // We rollback everything available when crash is unattributable
+            // We rollback all available low impact rollbacks when crash is unattributable
             onPackageFailure(Collections.EMPTY_LIST, FAILURE_REASON_NATIVE_CRASH);
             // we stop polling after an attempt to execute rollback, regardless of whether the
             // attempt succeeds or not
@@ -581,6 +574,7 @@ public class PackageWatchdog {
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_30,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_50,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_70,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_90,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_100})
     public @interface PackageHealthObserverImpact {
         /** No action to take. */
@@ -591,6 +585,7 @@ public class PackageWatchdog {
         int USER_IMPACT_LEVEL_30 = 30;
         int USER_IMPACT_LEVEL_50 = 50;
         int USER_IMPACT_LEVEL_70 = 70;
+        int USER_IMPACT_LEVEL_90 = 90;
         /* Action has high user impact, a last resort, user of a device will be very frustrated. */
         int USER_IMPACT_LEVEL_100 = 100;
     }
@@ -1702,42 +1697,45 @@ public class PackageWatchdog {
             setCount(0);
         }
 
-        private int getCount() {
-            return SystemProperties.getInt(PROP_RESCUE_BOOT_COUNT, 0);
+        protected int getCount() {
+            return CrashRecoveryProperties.rescueBootCount().orElse(0);
         }
 
-        private void setCount(int count) {
-            SystemProperties.set(PROP_RESCUE_BOOT_COUNT, Integer.toString(count));
+        protected void setCount(int count) {
+            CrashRecoveryProperties.rescueBootCount(count);
         }
 
         public long getStart() {
-            return SystemProperties.getLong(PROP_RESCUE_BOOT_START, 0);
+            return CrashRecoveryProperties.rescueBootStart().orElse(0L);
         }
 
         public int getMitigationCount() {
-            return SystemProperties.getInt(PROP_BOOT_MITIGATION_COUNT, 0);
+            return CrashRecoveryProperties.bootMitigationCount().orElse(0);
         }
 
         public void setStart(long start) {
-            setPropertyStart(PROP_RESCUE_BOOT_START, start);
+            CrashRecoveryProperties.rescueBootStart(getStartTime(start));
         }
 
         public void setMitigationStart(long start) {
-            setPropertyStart(PROP_BOOT_MITIGATION_WINDOW_START, start);
+            CrashRecoveryProperties.bootMitigationStart(getStartTime(start));
         }
 
         public long getMitigationStart() {
-            return SystemProperties.getLong(PROP_BOOT_MITIGATION_WINDOW_START, 0);
+            return CrashRecoveryProperties.bootMitigationStart().orElse(0L);
         }
 
         public void setMitigationCount(int count) {
-            SystemProperties.set(PROP_BOOT_MITIGATION_COUNT, Integer.toString(count));
+            CrashRecoveryProperties.bootMitigationCount(count);
         }
 
-        public void setPropertyStart(String property, long start) {
+        private static long constrain(long amount, long low, long high) {
+            return amount < low ? low : (amount > high ? high : amount);
+        }
+
+        public long getStartTime(long start) {
             final long now = mSystemClock.uptimeMillis();
-            final long newStart = MathUtils.constrain(start, 0, now);
-            SystemProperties.set(property, Long.toString(newStart));
+            return constrain(start, 0, now);
         }
 
         public void saveMitigationCountToMetadata() {

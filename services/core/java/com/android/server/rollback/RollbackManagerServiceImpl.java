@@ -954,7 +954,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         ApplicationInfo appInfo = pkgInfo.applicationInfo;
         return rollback.enableForPackage(packageName, newPackage.getVersionCode(),
                 pkgInfo.getLongVersionCode(), isApex, appInfo.sourceDir,
-                appInfo.splitSourceDirs, rollbackDataPolicy);
+                appInfo.splitSourceDirs, rollbackDataPolicy, session.rollbackImpactLevel);
     }
 
     @ExtThread
@@ -1212,13 +1212,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         rollback.makeAvailable();
         mPackageHealthObserver.notifyRollbackAvailable(rollback.info);
 
-        // TODO(zezeozue): Provide API to explicitly start observing instead
-        // of doing this for all rollbacks. If we do this for all rollbacks,
-        // should document in PackageInstaller.SessionParams#setEnableRollback
-        // After enabling and committing any rollback, observe packages and
-        // prepare to rollback if packages crashes too frequently.
-        mPackageHealthObserver.startObservingHealth(rollback.getPackageNames(),
-                mRollbackLifetimeDurationInMillis);
+        if (Flags.recoverabilityDetection()) {
+            if (rollback.info.getRollbackImpactLevel() == PackageManager.ROLLBACK_USER_IMPACT_LOW) {
+                // TODO(zezeozue): Provide API to explicitly start observing instead
+                // of doing this for all rollbacks. If we do this for all rollbacks,
+                // should document in PackageInstaller.SessionParams#setEnableRollback
+                // After enabling and committing any rollback, observe packages and
+                // prepare to rollback if packages crashes too frequently.
+                mPackageHealthObserver.startObservingHealth(rollback.getPackageNames(),
+                        mRollbackLifetimeDurationInMillis);
+            }
+        } else {
+            mPackageHealthObserver.startObservingHealth(rollback.getPackageNames(),
+                    mRollbackLifetimeDurationInMillis);
+        }
         runExpiration();
     }
 
