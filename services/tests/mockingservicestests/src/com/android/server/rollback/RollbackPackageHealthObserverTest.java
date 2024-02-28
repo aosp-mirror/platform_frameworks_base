@@ -25,6 +25,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -42,6 +44,7 @@ import android.content.rollback.RollbackManager;
 import android.crashrecovery.flags.Flags;
 import android.os.Handler;
 import android.os.MessageQueue;
+import android.os.SystemProperties;
 import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -65,6 +68,7 @@ import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -90,7 +94,7 @@ public class RollbackPackageHealthObserverTest {
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-
+    private HashMap<String, String> mSystemSettingsMap;
     private MockitoSession mSession;
     private static final String APP_A = "com.package.a";
     private static final String APP_B = "com.package.b";
@@ -98,6 +102,9 @@ public class RollbackPackageHealthObserverTest {
     private static final long VERSION_CODE = 1L;
     private static final long VERSION_CODE_2 = 2L;
     private static final String LOG_TAG = "RollbackPackageHealthObserverTest";
+
+    private static final String PROP_DISABLE_HIGH_IMPACT_ROLLBACK_FLAG =
+            "persist.device_config.configuration.disable_high_impact_rollback";
 
     private SystemConfig mSysConfig;
 
@@ -111,11 +118,34 @@ public class RollbackPackageHealthObserverTest {
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
                 .spyStatic(PackageWatchdog.class)
+                .spyStatic(SystemProperties.class)
                 .startMocking();
+        mSystemSettingsMap = new HashMap<>();
 
         // Mock PackageWatchdog
         doAnswer((Answer<PackageWatchdog>) invocationOnMock -> mMockPackageWatchdog)
                 .when(() -> PackageWatchdog.getInstance(mMockContext));
+
+        // Mock SystemProperties setter and various getters
+        doAnswer((Answer<Void>) invocationOnMock -> {
+                    String key = invocationOnMock.getArgument(0);
+                    String value = invocationOnMock.getArgument(1);
+
+                    mSystemSettingsMap.put(key, value);
+                    return null;
+                }
+        ).when(() -> SystemProperties.set(anyString(), anyString()));
+
+        doAnswer((Answer<Boolean>) invocationOnMock -> {
+                    String key = invocationOnMock.getArgument(0);
+                    boolean defaultValue = invocationOnMock.getArgument(1);
+
+                    String storedValue = mSystemSettingsMap.get(key);
+                    return storedValue == null ? defaultValue : Boolean.parseBoolean(storedValue);
+                }
+        ).when(() -> SystemProperties.getBoolean(anyString(), anyBoolean()));
+
+        SystemProperties.set(PROP_DISABLE_HIGH_IMPACT_ROLLBACK_FLAG, Boolean.toString(false));
     }
 
     @After
@@ -609,6 +639,32 @@ public class RollbackPackageHealthObserverTest {
                 observer.onBootLoop(1));
     }
 
+    @Test
+    public void onBootLoop_impactLevelHighDisableHighImpactRollback_onePackage()
+            throws PackageManager.NameNotFoundException {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        SystemProperties.set(PROP_DISABLE_HIGH_IMPACT_ROLLBACK_FLAG, Boolean.toString(true));
+        VersionedPackage appAFrom = new VersionedPackage(APP_A, VERSION_CODE_2);
+        VersionedPackage appATo = new VersionedPackage(APP_A, VERSION_CODE);
+        PackageRollbackInfo packageRollbackInfo = new PackageRollbackInfo(appAFrom, appATo,
+                null, null, false, false,
+                null);
+        RollbackInfo rollbackInfo1 = new RollbackInfo(1, List.of(packageRollbackInfo),
+                false, null, 111,
+                PackageManager.ROLLBACK_USER_IMPACT_HIGH);
+        RollbackPackageHealthObserver observer =
+                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+
+        when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
+        // Make the rollbacks available
+        when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of(rollbackInfo1));
+        when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
+        when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
+
+        assertEquals(PackageWatchdog.PackageHealthObserverImpact.USER_IMPACT_LEVEL_0,
+                observer.onBootLoop(1));
+    }
+
     /**
      * When the rollback impact level is manual only return user impact level 0. (User impact level
      * 0 is ignored by package watchdog)
@@ -922,6 +978,50 @@ public class RollbackPackageHealthObserverTest {
                 argument.capture(), any(), any());
         // Rollback APP_A because it is first alphabetically
         assertThat(argument.getAllValues()).isEqualTo(List.of(rollbackId2));
+    }
+
+    /**
+     * Don't roll back if kill switch is enabled.
+     */
+    @Test
+    public void executeBootLoopMitigation_impactLevelHighKillSwitchTrue_rollbackHigh()
+            throws PackageManager.NameNotFoundException {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
+        SystemProperties.set(PROP_DISABLE_HIGH_IMPACT_ROLLBACK_FLAG, Boolean.toString(true));
+        int rollbackId1 = 1;
+        VersionedPackage appBFrom = new VersionedPackage(APP_B, VERSION_CODE_2);
+        VersionedPackage appBTo = new VersionedPackage(APP_B, VERSION_CODE);
+        PackageRollbackInfo packageRollbackInfoB = new PackageRollbackInfo(appBFrom, appBTo,
+                null, null , false, false,
+                null);
+        RollbackInfo rollbackInfo1 = new RollbackInfo(rollbackId1, List.of(packageRollbackInfoB),
+                false, null, 111,
+                PackageManager.ROLLBACK_USER_IMPACT_HIGH);
+        int rollbackId2 = 2;
+        VersionedPackage appAFrom = new VersionedPackage(APP_A, VERSION_CODE_2);
+        VersionedPackage appATo = new VersionedPackage(APP_A, VERSION_CODE);
+        PackageRollbackInfo packageRollbackInfoA = new PackageRollbackInfo(appAFrom, appATo,
+                null, null , false, false,
+                null);
+        RollbackInfo rollbackInfo2 = new RollbackInfo(rollbackId2, List.of(packageRollbackInfoA),
+                false, null, 111,
+                PackageManager.ROLLBACK_USER_IMPACT_HIGH);
+        RollbackPackageHealthObserver observer =
+                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+        ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
+
+        when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
+        // Make the rollbacks available
+        when(mRollbackManager.getAvailableRollbacks()).thenReturn(
+                List.of(rollbackInfo1, rollbackInfo2));
+        when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
+        when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
+
+        observer.executeBootLoopMitigation(1);
+        waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
+
+        verify(mRollbackManager, never()).commitRollback(
+                argument.capture(), any(), any());
     }
 
     private void waitForIdleHandler(Handler handler, Duration timeout) {
