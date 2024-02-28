@@ -228,7 +228,7 @@ public class AudioPolicyConfig implements Parcelable {
         }
     }
 
-    private void setMixRegistration(@NonNull final AudioMix mix) {
+    protected void setMixRegistration(@NonNull final AudioMix mix) {
         if (!mRegistrationId.isEmpty()) {
             if ((mix.getRouteFlags() & AudioMix.ROUTE_FLAG_LOOP_BACK) ==
                     AudioMix.ROUTE_FLAG_LOOP_BACK) {
@@ -246,7 +246,9 @@ public class AudioPolicyConfig implements Parcelable {
     @GuardedBy("mMixes")
     protected void add(@NonNull ArrayList<AudioMix> mixes) {
         for (AudioMix mix : mixes) {
-            setMixRegistration(mix);
+            if (mix.getRegistration() == null || mix.getRegistration().isEmpty()) {
+                setMixRegistration(mix);
+            }
             mMixes.add(mix);
         }
     }
