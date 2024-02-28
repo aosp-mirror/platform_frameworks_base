@@ -1052,32 +1052,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             biometricSettingsRepository.setIsFaceAuthCurrentlyAllowed(true)
             faceAuthenticateIsCalled()
         }
-    @Test
-    fun authFailedCallAfterAuthLockedOutErrorShouldBeIgnored() =
-        testScope.runTest {
-            initCollectors()
-            allPreconditionsToRunFaceAuthAreTrue()
-            runCurrent()
-            assertThat(canFaceAuthRun()).isTrue()
-
-            underTest.requestAuthenticate(FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED, false)
-            runCurrent()
-
-            faceAuthenticateIsCalled()
-            authenticationCallback.value.onAuthenticationError(
-                FACE_ERROR_LOCKOUT_PERMANENT,
-                "Too many attempts, face not available"
-            )
-
-            val lockoutError = authStatus() as ErrorFaceAuthenticationStatus
-            assertThat(lockedOut()).isTrue()
-            assertThat(lockoutError.isLockoutError()).isTrue()
-
-            authenticationCallback.value.onAuthenticationFailed()
-            runCurrent()
-
-            assertThat(authStatus()).isEqualTo(lockoutError)
-        }
 
     private suspend fun TestScope.testGatingCheckForFaceAuth(
         gatingCheckModifier: suspend () -> Unit

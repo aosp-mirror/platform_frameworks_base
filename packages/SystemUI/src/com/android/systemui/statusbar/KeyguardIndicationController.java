@@ -1228,6 +1228,13 @@ public class KeyguardIndicationController {
                     && msgId != BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
             final boolean faceAuthFailed = biometricSourceType == FACE
                     && msgId == BIOMETRIC_HELP_FACE_NOT_RECOGNIZED; // ran through matcher & failed
+            if (faceAuthFailed && mFaceLockedOutThisAuthSession) {
+                mKeyguardLogger.logBiometricMessage(
+                        "skipped showing faceAuthFailed message due to lockout",
+                        msgId,
+                        helpString);
+                return;
+            }
             final boolean fpAuthFailed = biometricSourceType == FINGERPRINT
                     && msgId == BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED; // ran matcher & failed
             final boolean isUnlockWithFingerprintPossible = canUnlockWithFingerprint();

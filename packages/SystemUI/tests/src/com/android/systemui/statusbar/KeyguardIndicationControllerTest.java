@@ -92,6 +92,21 @@ import java.util.Set;
 @TestableLooper.RunWithLooper
 public class KeyguardIndicationControllerTest extends KeyguardIndicationControllerBaseTest {
     @Test
+    public void afterFaceLockout_skipShowingFaceNotRecognized() {
+        createController();
+        onFaceLockoutError("lockout");
+        verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE, "lockout");
+        clearInvocations(mRotateTextViewController);
+
+        // WHEN face sends an onBiometricHelp BIOMETRIC_HELP_FACE_NOT_RECOGNIZED (face fail)
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                BIOMETRIC_HELP_FACE_NOT_RECOGNIZED,
+                "Face not recognized",
+                BiometricSourceType.FACE);
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE); // no updated message
+    }
+
+    @Test
     public void createController_setIndicationAreaAgain_destroysPreviousRotateTextViewController() {
         // GIVEN a controller with a mocked rotate text view controlller
         final KeyguardIndicationRotateTextViewController mockedRotateTextViewController =
@@ -1242,7 +1257,7 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
     public void onBiometricFailed_resetFaceHelpMessageDeferral() {
         createController();
 
-        // WHEN face sends an onBiometricHelp BIOMETRIC_HELP_FACE_NOT_RECOGNIZED
+        // WHEN face sends an onBiometricAuthFailed
         mKeyguardUpdateMonitorCallback.onBiometricAuthFailed(BiometricSourceType.FACE);
 
         // THEN face help message deferral is reset
