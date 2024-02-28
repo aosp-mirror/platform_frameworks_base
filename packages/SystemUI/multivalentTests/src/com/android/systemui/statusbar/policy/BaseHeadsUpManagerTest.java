@@ -71,16 +71,12 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
-    private static final String TEST_PACKAGE_NAME = "BaseHeadsUpManagerTest";
-
     static final int TEST_TOUCH_ACCEPTANCE_TIME = 200;
     static final int TEST_A11Y_AUTO_DISMISS_TIME = 1_000;
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
     @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
-
-    private static final int TEST_UID = 0;
 
     protected static final int TEST_MINIMUM_DISPLAY_TIME = 400;
     protected static final int TEST_AUTO_DISMISS_TIME = 600;
