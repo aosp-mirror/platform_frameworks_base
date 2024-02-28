@@ -18535,7 +18535,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_GET_LAST_KNOWN_CELL_IDENTITY)
     @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_LAST_KNOWN_CELL_ID})
     public @Nullable CellIdentity getLastKnownCellIdentity() {
