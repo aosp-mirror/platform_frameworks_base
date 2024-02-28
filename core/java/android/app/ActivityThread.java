@@ -717,7 +717,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     }
                     activity.mMainThread.handleActivityConfigurationChanged(
                             ActivityClientRecord.this, overrideConfig, newDisplayId,
-                            false /* alwaysReportChange */);
+                            mActivityWindowInfo, false /* alwaysReportChange */);
                 }
 
                 @Override
@@ -6659,11 +6659,12 @@ public final class ActivityThread extends ClientTransactionHandler
     /**
      * Sets the supplied {@code overrideConfig} as pending for the {@code token}. Calling
      * this method prevents any calls to
-     * {@link #handleActivityConfigurationChanged(ActivityClientRecord, Configuration, int)} from
-     * processing any configurations older than {@code overrideConfig}.
+     * {@link #handleActivityConfigurationChanged(ActivityClientRecord, Configuration, int,
+     * ActivityWindowInfo)} from processing any configurations older than {@code overrideConfig}.
      */
     @Override
-    public void updatePendingActivityConfiguration(IBinder token, Configuration overrideConfig) {
+    public void updatePendingActivityConfiguration(@NonNull IBinder token,
+            @NonNull Configuration overrideConfig) {
         synchronized (mPendingOverrideConfigs) {
             final Configuration pendingOverrideConfig = mPendingOverrideConfigs.get(token);
             if (pendingOverrideConfig != null
@@ -6680,9 +6681,10 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    public void handleActivityConfigurationChanged(ActivityClientRecord r,
-            @NonNull Configuration overrideConfig, int displayId) {
-        handleActivityConfigurationChanged(r, overrideConfig, displayId,
+    public void handleActivityConfigurationChanged(@NonNull ActivityClientRecord r,
+            @NonNull Configuration overrideConfig, int displayId,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
+        handleActivityConfigurationChanged(r, overrideConfig, displayId, activityWindowInfo,
                 // This is the only place that uses alwaysReportChange=true. The entry point should
                 // be from ActivityConfigurationChangeItem or MoveToDisplayItem, so the server side
                 // has confirmed the activity should handle the configuration instead of relaunch.
@@ -6700,9 +6702,11 @@ public final class ActivityThread extends ClientTransactionHandler
      * @param overrideConfig Activity override config.
      * @param displayId Id of the display where activity was moved to, -1 if there was no move and
      *                  value didn't change.
+     * @param activityWindowInfo the window info of the given activity.
      */
-    void handleActivityConfigurationChanged(ActivityClientRecord r,
-            @NonNull Configuration overrideConfig, int displayId, boolean alwaysReportChange) {
+    void handleActivityConfigurationChanged(@NonNull ActivityClientRecord r,
+            @NonNull Configuration overrideConfig, int displayId,
+            @NonNull ActivityWindowInfo activityWindowInfo, boolean alwaysReportChange) {
         synchronized (mPendingOverrideConfigs) {
             final Configuration pendingOverrideConfig = mPendingOverrideConfigs.get(r.token);
             if (overrideConfig.isOtherSeqNewer(pendingOverrideConfig)) {
@@ -6735,6 +6739,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
         // Perform updates.
         r.overrideConfig = overrideConfig;
+        r.mActivityWindowInfo = activityWindowInfo;
+        // TODO(b/287582673): notify on ActivityWindowInfo change
         final ViewRootImpl viewRoot = r.activity.mDecor != null
             ? r.activity.mDecor.getViewRootImpl() : null;
 

@@ -1456,7 +1456,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mSizeConfigurations = sizeConfigurations;
     }
 
-    private void scheduleActivityMovedToDisplay(int displayId, Configuration config) {
+    private void scheduleActivityMovedToDisplay(int displayId, @NonNull Configuration config,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
         if (!attachedToProcess()) {
             ProtoLog.w(WM_DEBUG_SWITCH, "Can't report activity moved "
                     + "to display - client not running, activityRecord=%s, displayId=%d",
@@ -1469,7 +1470,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     config);
 
             mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    MoveToDisplayItem.obtain(token, displayId, config));
+                    MoveToDisplayItem.obtain(token, displayId, config, activityWindowInfo));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -9799,8 +9800,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Update last reported values.
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
+        final ActivityWindowInfo newActivityWindowInfo = getActivityWindowInfo();
 
         setLastReportedConfiguration(getProcessGlobalConfiguration(), newMergedOverrideConfig);
+        setLastReportedActivityWindowInfo(newActivityWindowInfo);
 
         if (mState == INITIALIZING) {
             // No need to relaunch or schedule new config for activity that hasn't been launched
@@ -9817,7 +9820,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // There are no significant differences, so we won't relaunch but should still deliver
             // the new configuration to the client process.
             if (displayChanged) {
-                scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig);
+                scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig,
+                        newActivityWindowInfo);
             } else {
                 scheduleConfigurationChanged(newMergedOverrideConfig);
             }
@@ -9884,7 +9888,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // changes is always sent to all processes when they happen so it can just use whatever
         // system level configuration it last got.
         if (displayChanged) {
-            scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig);
+            scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig,
+                    newActivityWindowInfo);
         } else {
             scheduleConfigurationChanged(newMergedOverrideConfig);
         }
