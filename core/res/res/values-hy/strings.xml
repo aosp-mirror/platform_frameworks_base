@@ -1576,8 +1576,8 @@
     <string name="storage_internal" msgid="8490227947584914460">"Ներքին ընդհանուր կրիչ"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD քարտ"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"SD քարտ <xliff:g id="MANUFACTURER">%s</xliff:g>-ից"</string>
-    <string name="storage_usb_drive" msgid="448030813201444573">"USB սարքավար"</string>
-    <string name="storage_usb_drive_label" msgid="6631740655876540521">"USB սարքավար <xliff:g id="MANUFACTURER">%s</xliff:g>-ից"</string>
+    <string name="storage_usb_drive" msgid="448030813201444573">"USB կրիչ"</string>
+    <string name="storage_usb_drive_label" msgid="6631740655876540521">"USB կրիչ <xliff:g id="MANUFACTURER">%s</xliff:g>-ից"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB կրիչ"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Խմբագրել"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Զգուշացում թրաֆիկի օգտագործման մասին"</string>
