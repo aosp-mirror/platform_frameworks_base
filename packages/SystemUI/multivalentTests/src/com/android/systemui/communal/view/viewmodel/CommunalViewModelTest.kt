@@ -184,9 +184,9 @@ class CommunalViewModelTest : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.Smartspace::class.java)
             assertThat(communalContent?.get(1)).isInstanceOf(CommunalContentModel.Umo::class.java)
             assertThat(communalContent?.get(2))
-                .isInstanceOf(CommunalContentModel.Widget::class.java)
+                .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(3))
-                .isInstanceOf(CommunalContentModel.Widget::class.java)
+                .isInstanceOf(CommunalContentModel.WidgetContent::class.java)
             assertThat(communalContent?.get(4))
                 .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
         }
