@@ -61,5 +61,6 @@ interface NotifInflater {
         val showSnooze: Boolean,
         val isChildInGroup: Boolean = false,
         val isGroupSummary: Boolean = false,
+        val needsRedaction: Boolean,
     )
 }

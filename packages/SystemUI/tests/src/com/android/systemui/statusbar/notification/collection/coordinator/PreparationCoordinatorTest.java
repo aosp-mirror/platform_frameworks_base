@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.notification.collection.provider.SectionSt
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewBarn;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
@@ -107,6 +108,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private IStatusBarService mService;
     @Mock private BindEventManagerImpl mBindEventManagerImpl;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+    @Mock private SensitiveNotificationProtectionController mSensitiveNotifProtectionController;
     @Mock private Handler mHandler;
     @Mock private SecureSettings mSecureSettings;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
@@ -128,6 +130,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mHandler,
                 mSecureSettings,
                 mLockscreenUserManager,
+                mSensitiveNotifProtectionController,
                 mSectionStyleProvider,
                 mUserTracker,
                 mGroupMembershipManager
