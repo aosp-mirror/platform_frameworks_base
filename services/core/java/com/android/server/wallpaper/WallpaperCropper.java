@@ -357,15 +357,30 @@ public class WallpaperCropper {
      * Given some suggested crops, find cropHints for all orientations of the default display.
      */
     SparseArray<Rect> getDefaultCrops(SparseArray<Rect> suggestedCrops, Point bitmapSize) {
-        SparseArray<Rect> result = new SparseArray<>();
-        // add missing cropHints for all orientation of the default display
+
         SparseArray<Point> defaultDisplaySizes = mWallpaperDisplayHelper.getDefaultDisplaySizes();
         boolean rtl = TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
                 == View.LAYOUT_DIRECTION_RTL;
+
+        // adjust existing entries for the default display
+        SparseArray<Rect> adjustedSuggestedCrops = new SparseArray<>();
         for (int i = 0; i < defaultDisplaySizes.size(); i++) {
             int orientation = defaultDisplaySizes.keyAt(i);
             Point displaySize = defaultDisplaySizes.valueAt(i);
-            Rect newCrop = getCrop(displaySize, bitmapSize, suggestedCrops, rtl);
+            Rect suggestedCrop = suggestedCrops.get(orientation);
+            if (suggestedCrop != null) {
+                adjustedSuggestedCrops.put(orientation,
+                        getCrop(displaySize, bitmapSize, suggestedCrops, rtl));
+            }
+        }
+
+        // add missing cropHints for all orientation of the default display
+        SparseArray<Rect> result = adjustedSuggestedCrops.clone();
+        for (int i = 0; i < defaultDisplaySizes.size(); i++) {
+            int orientation = defaultDisplaySizes.keyAt(i);
+            if (result.contains(orientation)) continue;
+            Point displaySize = defaultDisplaySizes.valueAt(i);
+            Rect newCrop = getCrop(displaySize, bitmapSize, adjustedSuggestedCrops, rtl);
             result.put(orientation, newCrop);
         }
         return result;
