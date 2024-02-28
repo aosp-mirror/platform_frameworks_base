@@ -36,8 +36,21 @@ public class DragUtils {
      * Returns whether we can handle this particular drag.
      */
     public static boolean canHandleDrag(DragEvent event) {
-        return event.getClipData().getItemCount() > 0
-                && (isAppDrag(event.getClipDescription()));
+        if (event.getClipData().getItemCount() <= 0) {
+            // No clip data, ignore this drag
+            return false;
+        }
+        if (isAppDrag(event.getClipDescription())) {
+            // Clip data contains an app drag initiated from SysUI, handle it
+            return true;
+        }
+        if (com.android.window.flags.Flags.delegateUnhandledDrags()
+                && getLaunchIntent(event) != null) {
+            // Clip data contains a launchable intent drag, handle it
+            return true;
+        }
+        // Otherwise ignore
+        return false;
     }
 
     /**
