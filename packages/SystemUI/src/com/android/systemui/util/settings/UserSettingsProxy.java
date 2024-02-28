@@ -25,7 +25,10 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
 
+import com.android.app.tracing.TraceUtils;
 import com.android.systemui.settings.UserTracker;
+
+import kotlin.Unit;
 
 /**
  * Used to interact with per-user Settings.Secure and Settings.System settings (but not
@@ -123,8 +126,16 @@ public interface UserSettingsProxy extends SettingsProxy {
     default void registerContentObserverForUser(
             Uri uri, boolean notifyForDescendants, ContentObserver settingsObserver,
             int userHandle) {
-        getContentResolver().registerContentObserver(
-                uri, notifyForDescendants, settingsObserver, getRealUserHandle(userHandle));
+        TraceUtils.trace(
+                () -> {
+                    // The limit for trace tags length is 127 chars, which leaves us 90 for Uri.
+                    return "USP#registerObserver#[" + uri.toString() + "]";
+                }, () -> {
+                    getContentResolver().registerContentObserver(
+                            uri, notifyForDescendants, settingsObserver,
+                            getRealUserHandle(userHandle));
+                    return Unit.INSTANCE;
+                });
     }
 
     /**
