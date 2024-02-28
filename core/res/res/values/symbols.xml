@@ -5394,4 +5394,7 @@
 
   <!-- Whether desktop mode is supported on the current device  -->
   <java-symbol type="bool" name="config_isDesktopModeSupported" />
+
+  <!-- Frame rate compatibility value for Wallpaper -->
+  <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />
 </resources>

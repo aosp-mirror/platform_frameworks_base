@@ -106,6 +106,7 @@ import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.ScreenCapture;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.HandlerCaller;
@@ -1283,8 +1284,14 @@ public abstract class WallpaperService extends Service {
                                     .build();
                             SurfaceControl.Transaction transaction =
                                     new SurfaceControl.Transaction();
+                            final int frameRateCompat = getResources().getInteger(
+                                    R.integer.config_wallpaperFrameRateCompatibility);
+                            if (DEBUG) {
+                                Log.d(TAG, "Set frame rate compatibility value for Wallpaper: "
+                                        + frameRateCompat);
+                            }
                             transaction.setDefaultFrameRateCompatibility(mBbqSurfaceControl,
-                                Surface.FRAME_RATE_COMPATIBILITY_MIN).apply();
+                                    frameRateCompat).apply();
                         }
                         // Propagate transform hint from WM, so we can use the right hint for the
                         // first frame.
