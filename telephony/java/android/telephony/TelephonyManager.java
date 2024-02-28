@@ -15023,7 +15023,7 @@ public class TelephonyManager {
     @FlaggedApi(android.permission.flags.Flags.FLAG_GET_EMERGENCY_ROLE_HOLDER_API_ENABLED)
     @NonNull
     @SystemApi
-    public String getEmergencyAssistancePackage() {
+    public String getEmergencyAssistancePackageName() {
         if (!isEmergencyAssistanceEnabled() || !isVoiceCapable()) {
             throw new IllegalStateException("isEmergencyAssistanceEnabled() is false or device"
                 + " not voice capable.");
