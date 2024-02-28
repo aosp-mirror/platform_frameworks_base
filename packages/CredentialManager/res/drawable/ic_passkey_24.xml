@@ -13,16 +13,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<vector
-    android:alpha="0.8"
-    android:height="24dp"
-    android:viewportHeight="24"
-    android:viewportWidth="24"
-    android:width="24dp"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-  <path android:fillColor="#4C463C" android:fillType="evenOdd" android:pathData="M22.18,14.09C22.18,15.364 21.408,16.459 20.306,16.931L21.247,17.872L20.219,18.9L21.247,19.928L19.068,22.107L18.099,21.138L18.099,17.017C16.878,16.604 16,15.45 16,14.09C16,12.383 17.383,11 19.09,11C20.796,11 22.18,12.383 22.18,14.09ZM20.692,14.091C20.692,14.976 19.975,15.693 19.09,15.693C18.205,15.693 17.488,14.976 17.488,14.091C17.488,13.206 18.205,12.488 19.09,12.488C19.975,12.488 20.692,13.206 20.692,14.091Z"/>
-  <path android:fillColor="#4C463C" android:pathData="M14.978,8.476C14.978,10.865 13.041,12.802 10.652,12.802C8.263,12.802 6.326,10.865 6.326,8.476C6.326,6.087 8.263,4.15 10.652,4.15C13.041,4.15 14.978,6.087 14.978,8.476Z"/>
-  <path android:fillColor="#4C463C" android:pathData="M2,19.263C2,16.39 7.762,14.937 10.652,14.937C11.782,14.937 13.353,15.16 14.845,15.602C15.177,16.491 15.804,17.236 16.607,17.717V21.454H2V19.263Z"/>
+<!--LINT.IfChange-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="24dp"
+        android:height="24dp"
+        android:viewportWidth="960"
+        android:viewportHeight="960">
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M120,800L120,688Q120,654 137.5,625.5Q155,597 184,582Q246,551 310,535.5Q374,520 440,520Q460,520 480,521.5Q500,523 520,526Q516,584 541,635.5Q566,687 614,720L614,800L120,800ZM760,920L700,860L700,674Q656,661 628,624.5Q600,588 600,540Q600,482 641,441Q682,400 740,400Q798,400 839,441Q880,482 880,540Q880,585 854.5,620Q829,655 790,670L840,720L780,780L840,840L760,920ZM440,480Q374,480 327,433Q280,386 280,320Q280,254 327,207Q374,160 440,160Q506,160 553,207Q600,254 600,320Q600,386 553,433Q506,480 440,480ZM740,560Q757,560 768.5,548.5Q780,537 780,520Q780,503 768.5,491.5Q757,480 740,480Q723,480 711.5,491.5Q700,503 700,520Q700,537 711.5,548.5Q723,560 740,560Z"/>
 </vector>
+<!--LINT.ThenChange(/packages/CredentialManager/shared/res/drawable/ic_passkey_24.xml)-->
