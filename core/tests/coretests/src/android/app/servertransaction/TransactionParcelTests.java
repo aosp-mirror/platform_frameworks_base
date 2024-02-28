@@ -220,8 +220,11 @@ public class TransactionParcelTests {
         // Write to parcel
         Configuration overrideConfig = new Configuration();
         overrideConfig.assetsSeq = 5;
+        final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
+        activityWindowInfo.set(true /* isEmbedded */, new Rect(0, 0, 500, 1000),
+                new Rect(0, 0, 500, 500));
         ActivityRelaunchItem item = ActivityRelaunchItem.obtain(mActivityToken, resultInfoList(),
-                referrerIntentList(), 35, mergedConfig(), true);
+                referrerIntentList(), 35, mergedConfig(), true, activityWindowInfo);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert

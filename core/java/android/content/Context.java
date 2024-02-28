@@ -83,6 +83,7 @@ import android.os.StatFs;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.provider.E2eeContactKeysManager;
 import android.provider.MediaStore;
 import android.telephony.TelephonyRegistryManager;
 import android.util.AttributeSet;
@@ -4815,9 +4816,7 @@ public abstract class Context {
      * @see android.net.thread.ThreadNetworkManager
      * @hide
      */
-    // TODO (b/325886480): update the flag to
-    // "com.android.net.thread.platform.flags.Flags.FLAG_THREAD_ENABLED_PLATFORM"
-    @FlaggedApi("com.android.net.thread.flags.thread_enabled_platform")
+    @FlaggedApi(com.android.net.thread.platform.flags.Flags.FLAG_THREAD_ENABLED_PLATFORM)
     @SystemApi
     public static final String THREAD_NETWORK_SERVICE = "thread_network";
 
@@ -6566,10 +6565,10 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.provider.ContactKeysManager} to managing contact keys.
+     * {@link E2eeContactKeysManager} to managing contact keys.
      *
      * @see #getSystemService(String)
-     * @see android.provider.ContactKeysManager
+     * @see E2eeContactKeysManager
      */
     @FlaggedApi(android.provider.Flags.FLAG_USER_KEYS)
     public static final String CONTACT_KEYS_SERVICE = "contact_keys";

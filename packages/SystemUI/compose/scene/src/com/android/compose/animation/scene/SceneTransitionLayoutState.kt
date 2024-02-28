@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -221,6 +222,23 @@ sealed interface TransitionState {
                 isTransitioning(from = other, to = scene)
         }
     }
+
+    interface HasOverscrollProperties {
+        /**
+         * The position of the [TransitionState.Transition.toScene].
+         *
+         * Used to understand the direction of the overscroll.
+         */
+        val isUpOrLeft: Boolean
+
+        /**
+         * The relative orientation between [TransitionState.Transition.fromScene] and
+         * [TransitionState.Transition.toScene].
+         *
+         * Used to understand the orientation of the overscroll.
+         */
+        val orientation: Orientation
+    }
 }
 
 internal abstract class BaseSceneTransitionLayoutState(
@@ -236,6 +254,25 @@ internal abstract class BaseSceneTransitionLayoutState(
      * sense only if [transitionState] is a [TransitionState.Transition].
      */
     internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
+
+    private var fromOverscrollSpec: OverscrollSpecImpl? = null
+    private var toOverscrollSpec: OverscrollSpecImpl? = null
+
+    /**
+     * @return the overscroll [OverscrollSpecImpl] if it is defined for the current
+     *   [transitionState] and we are currently over scrolling.
+     */
+    internal val currentOverscrollSpec: OverscrollSpecImpl?
+        get() {
+            val transition = currentTransition ?: return null
+            if (transition !is TransitionState.HasOverscrollProperties) return null
+            val progress = transition.progress
+            return when {
+                progress < 0f -> fromOverscrollSpec
+                progress > 1f -> toOverscrollSpec
+                else -> null
+            }
+        }
 
     private val activeTransitionLinks = mutableMapOf<StateLink, LinkedTransition>()
 
@@ -266,10 +303,13 @@ internal abstract class BaseSceneTransitionLayoutState(
         transitionKey: TransitionKey?,
     ) {
         // Compute the [TransformationSpec] when the transition starts.
+        val fromScene = transition.fromScene
+        val toScene = transition.toScene
+        val orientation = (transition as? TransitionState.HasOverscrollProperties)?.orientation
         transformationSpec =
-            transitions
-                .transitionSpec(transition.fromScene, transition.toScene, key = transitionKey)
-                .transformationSpec()
+            transitions.transitionSpec(fromScene, toScene, key = transitionKey).transformationSpec()
+        fromOverscrollSpec = orientation?.let { transitions.overscrollSpec(fromScene, it) }
+        toOverscrollSpec = orientation?.let { transitions.overscrollSpec(toScene, it) }
         cancelActiveTransitionLinks()
         setupTransitionLinks(transition)
         transitionState = transition

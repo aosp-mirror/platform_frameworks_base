@@ -177,3 +177,10 @@ flag {
     description: "Enable the sensitive notifications toggle to be visible in the Private space settings page"
     bug: "317067050"
 }
+
+flag {
+    name: "enable_private_space_intent_redirection"
+    namespace: "profile_experiences"
+    description: "Enable Private Space telephony and SMS intent redirection to the main user"
+    bug: "325576602"
+}

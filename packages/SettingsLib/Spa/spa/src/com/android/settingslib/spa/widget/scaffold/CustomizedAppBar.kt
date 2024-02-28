@@ -180,7 +180,7 @@ private class TopAppBarColors(
      * @param colorTransitionFraction a `0.0` to `1.0` value that represents a color transition
      * percentage
      */
-    @Composable
+    @Stable
     fun containerColor(colorTransitionFraction: Float): Color {
         return lerp(
             containerColor,
@@ -519,7 +519,7 @@ private fun TopAppBarLayout(
                 0
             }
 
-        val layoutHeight = if (heightPx.isNaN()) 0 else heightPx.roundToInt()
+        val layoutHeight = if (heightPx > 0) heightPx.roundToInt() else 0
 
         layout(constraints.maxWidth, layoutHeight) {
             // Navigation icon

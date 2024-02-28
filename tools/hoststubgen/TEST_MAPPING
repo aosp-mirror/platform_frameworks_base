@@ -1,6 +1,7 @@
 {
   "presubmit": [
-    { "name": "tiny-framework-dump-test" },
+    // TODO(b/326897452): Reenable after JDK 21 switch.
+    // { "name": "tiny-framework-dump-test" },
     { "name": "hoststubgentest" },
     { "name": "hoststubgen-invoke-test" }
   ],

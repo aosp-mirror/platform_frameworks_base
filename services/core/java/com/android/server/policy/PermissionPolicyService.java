@@ -237,7 +237,7 @@ public final class PermissionPolicyService extends SystemService {
         mAppOpsCallback = new IAppOpsCallback.Stub() {
             public void opChanged(int op, int uid, @Nullable String packageName,
                     String persistentDeviceId) {
-                if (Objects.equals(persistentDeviceId,
+                if (!Objects.equals(persistentDeviceId,
                         VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT)) {
                     return;
                 }

@@ -274,7 +274,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     widgetConfigurator: WidgetConfigurator?,
 ) {
     var gridModifier =
-        Modifier.align(Alignment.CenterStart).onGloballyPositioned { setGridCoordinates(it) }
+        Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
     var list = communalContent
     var dragDropState: GridDragDropState? = null
     if (viewModel.isEditMode && viewModel is CommunalEditModeViewModel) {
@@ -309,8 +309,8 @@ private fun BoxScope.CommunalHubLazyGrid(
         state = gridState,
         rows = GridCells.Fixed(CommunalContentSize.FULL.span),
         contentPadding = contentPadding,
-        horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
-        verticalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
+        horizontalArrangement = Arrangement.spacedBy(32.dp),
+        verticalArrangement = Arrangement.spacedBy(32.dp),
     ) {
         items(
             count = list.size,
@@ -681,19 +681,20 @@ private fun WidgetContent(
     Box(
         modifier = modifier,
     ) {
-        val paddingInPx = with(LocalDensity.current) { CardOutlineWidth.toPx().toInt() }
+        val paddingInPx =
+            if (selected) with(LocalDensity.current) { CardOutlineWidth.toPx().toInt() } else 0
         AndroidView(
             modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
             factory = { context ->
-                val view =
-                    model.appWidgetHost
-                        .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
-                        .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
+                model.appWidgetHost
+                    .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
+                    .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
+            },
+            update = { view ->
                 // Remove the extra padding applied to AppWidgetHostView to allow widgets to
                 // occupy the entire box. The added padding is now adjusted to leave only sufficient
                 // space for displaying the outline around the box when the widget is selected.
                 view.setPadding(paddingInPx)
-                view
             },
             // For reusing composition in lazy lists.
             onReset = {},
@@ -795,7 +796,7 @@ private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier)
 @Composable
 private fun gridContentPadding(isEditMode: Boolean, toolbarSize: IntSize?): PaddingValues {
     if (!isEditMode || toolbarSize == null) {
-        return PaddingValues(horizontal = Dimensions.Spacing)
+        return PaddingValues(start = 48.dp, end = 48.dp, top = Dimensions.GridTopSpacing)
     }
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
@@ -858,12 +859,13 @@ data class ContentPaddingInPx(val start: Float, val top: Float) {
 }
 
 object Dimensions {
-    val CardWidth = 464.dp
-    val CardHeightFull = 630.dp
-    val CardHeightHalf = 307.dp
-    val CardHeightThird = 199.dp
+    val CardWidth = 424.dp
+    val CardHeightFull = 596.dp
+    val CardHeightHalf = 282.dp
+    val CardHeightThird = 177.33.dp
     val CardOutlineWidth = 3.dp
-    val GridHeight = CardHeightFull
+    val GridTopSpacing = 72.dp
+    val GridHeight = CardHeightFull + GridTopSpacing
     val Spacing = 16.dp
 
     // The sizing/padding of the toolbar in glanceable hub edit mode

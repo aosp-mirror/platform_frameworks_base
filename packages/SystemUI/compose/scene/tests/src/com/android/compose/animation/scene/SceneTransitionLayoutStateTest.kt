@@ -16,6 +16,8 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
@@ -388,5 +390,119 @@ class SceneTransitionLayoutStateTest {
         childState.startTransition(childTransition, null)
         assertThat(childState.isTransitioning(SceneA, SceneB)).isTrue()
         assertThat(parentState.isTransitioning(SceneC, SceneD)).isFalse()
+    }
+
+    private fun startOverscrollableTransistionFromAtoB(
+        progress: () -> Float,
+        sceneTransitions: SceneTransitions,
+    ): MutableSceneTransitionLayoutStateImpl {
+        val state =
+            MutableSceneTransitionLayoutStateImpl(
+                SceneA,
+                sceneTransitions,
+            )
+        state.startTransition(
+            object :
+                TransitionState.Transition(SceneA, SceneB),
+                TransitionState.HasOverscrollProperties {
+                override val currentScene: SceneKey = SceneA
+                override val progress: Float
+                    get() = progress()
+
+                override val isInitiatedByUserInput: Boolean = false
+                override val isUserInputOngoing: Boolean = false
+                override val isUpOrLeft: Boolean = false
+                override val orientation: Orientation = Orientation.Vertical
+            },
+            transitionKey = null
+        )
+        assertThat(state.isTransitioning()).isTrue()
+        return state
+    }
+
+    @Test
+    fun overscrollDsl_definedForToScene() = runMonotonicClockTest {
+        val progress = mutableStateOf(0f)
+        val state =
+            startOverscrollableTransistionFromAtoB(
+                progress = { progress.value },
+                sceneTransitions =
+                    transitions {
+                        overscroll(SceneB, Orientation.Vertical) { fade(TestElements.Foo) }
+                    }
+            )
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        // overscroll for SceneA is NOT defined
+        progress.value = -0.1f
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        // scroll from SceneA to SceneB
+        progress.value = 0.5f
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        progress.value = 1f
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        // overscroll for SceneB is defined
+        progress.value = 1.1f
+        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentOverscrollSpec?.scene).isEqualTo(SceneB)
+    }
+
+    @Test
+    fun overscrollDsl_definedForFromScene() = runMonotonicClockTest {
+        val progress = mutableStateOf(0f)
+        val state =
+            startOverscrollableTransistionFromAtoB(
+                progress = { progress.value },
+                sceneTransitions =
+                    transitions {
+                        overscroll(SceneA, Orientation.Vertical) { fade(TestElements.Foo) }
+                    }
+            )
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        // overscroll for SceneA is defined
+        progress.value = -0.1f
+        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentOverscrollSpec?.scene).isEqualTo(SceneA)
+
+        // scroll from SceneA to SceneB
+        progress.value = 0.5f
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        progress.value = 1f
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        // overscroll for SceneB is NOT defined
+        progress.value = 1.1f
+        assertThat(state.currentOverscrollSpec).isNull()
+    }
+
+    @Test
+    fun overscrollDsl_notDefinedScenes() = runMonotonicClockTest {
+        val progress = mutableStateOf(0f)
+        val state =
+            startOverscrollableTransistionFromAtoB(
+                progress = { progress.value },
+                sceneTransitions = transitions {}
+            )
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        // overscroll for SceneA is NOT defined
+        progress.value = -0.1f
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        // scroll from SceneA to SceneB
+        progress.value = 0.5f
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        progress.value = 1f
+        assertThat(state.currentOverscrollSpec).isNull()
+
+        // overscroll for SceneB is NOT defined
+        progress.value = 1.1f
+        assertThat(state.currentOverscrollSpec).isNull()
     }
 }

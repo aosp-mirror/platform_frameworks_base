@@ -21,7 +21,9 @@ import androidx.compose.animation.core.DurationBasedAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
 import com.android.compose.animation.scene.transformation.AnchoredSize
@@ -41,13 +43,18 @@ internal fun transitionsImpl(
     builder: SceneTransitionsBuilder.() -> Unit,
 ): SceneTransitions {
     val impl = SceneTransitionsBuilderImpl().apply(builder)
-    return SceneTransitions(impl.defaultSwipeSpec, impl.transitionSpecs)
+    return SceneTransitions(
+        impl.defaultSwipeSpec,
+        impl.transitionSpecs,
+        impl.transitionOverscrollSpecs
+    )
 }
 
 private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     override var defaultSwipeSpec: SpringSpec<Float> = SceneTransitions.DefaultSwipeSpec
 
     val transitionSpecs = mutableListOf<TransitionSpecImpl>()
+    val transitionOverscrollSpecs = mutableListOf<OverscrollSpecImpl>()
 
     override fun to(
         to: SceneKey,
@@ -64,6 +71,25 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
         builder: TransitionBuilder.() -> Unit
     ): TransitionSpec {
         return transition(from = from, to = to, key = key, builder)
+    }
+
+    override fun overscroll(
+        scene: SceneKey,
+        orientation: Orientation,
+        builder: OverscrollBuilder.() -> Unit
+    ): OverscrollSpec {
+        fun transformationSpec(): TransformationSpecImpl {
+            val impl = OverscrollBuilderImpl().apply(builder)
+            return TransformationSpecImpl(
+                progressSpec = snap(),
+                swipeSpec = null,
+                distance = impl.distance,
+                transformations = impl.transformations,
+            )
+        }
+        val spec = OverscrollSpecImpl(scene, orientation, transformationSpec())
+        transitionOverscrollSpecs.add(spec)
+        return spec
     }
 
     private fun transition(
@@ -88,28 +114,11 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     }
 }
 
-internal class TransitionBuilderImpl : TransitionBuilder {
+internal open class OverscrollBuilderImpl : OverscrollBuilder {
     val transformations = mutableListOf<Transformation>()
-    override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
-    override var swipeSpec: SpringSpec<Float>? = null
-    override var distance: UserActionDistance? = null
-
     private var range: TransformationRange? = null
-    private var reversed = false
-    private val durationMillis: Int by lazy {
-        val spec = spec
-        if (spec !is DurationBasedAnimationSpec) {
-            error("timestampRange {} can only be used with a DurationBasedAnimationSpec")
-        }
-
-        spec.vectorize(Float.VectorConverter).durationMillis
-    }
-
-    override fun reversed(builder: TransitionBuilder.() -> Unit) {
-        reversed = true
-        builder()
-        reversed = false
-    }
+    protected var reversed = false
+    override var distance: UserActionDistance? = null
 
     override fun fractionRange(
         start: Float?,
@@ -119,28 +128,6 @@ internal class TransitionBuilderImpl : TransitionBuilder {
         range = TransformationRange(start, end)
         builder()
         range = null
-    }
-
-    override fun sharedElement(matcher: ElementMatcher, enabled: Boolean) {
-        transformations.add(SharedElementTransformation(matcher, enabled))
-    }
-
-    override fun timestampRange(
-        startMillis: Int?,
-        endMillis: Int?,
-        builder: PropertyTransformationBuilder.() -> Unit
-    ) {
-        if (startMillis != null && (startMillis < 0 || startMillis > durationMillis)) {
-            error("invalid start value: startMillis=$startMillis durationMillis=$durationMillis")
-        }
-
-        if (endMillis != null && (endMillis < 0 || endMillis > durationMillis)) {
-            error("invalid end value: endMillis=$startMillis durationMillis=$durationMillis")
-        }
-
-        val start = startMillis?.let { it.toFloat() / durationMillis }
-        val end = endMillis?.let { it.toFloat() / durationMillis }
-        fractionRange(start, end, builder)
     }
 
     private fun transformation(transformation: PropertyTransformation<*>) {
@@ -195,5 +182,47 @@ internal class TransitionBuilderImpl : TransitionBuilder {
         anchorHeight: Boolean,
     ) {
         transformation(AnchoredSize(matcher, anchor, anchorWidth, anchorHeight))
+    }
+}
+
+internal class TransitionBuilderImpl : OverscrollBuilderImpl(), TransitionBuilder {
+    override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
+    override var swipeSpec: SpringSpec<Float>? = null
+    override var distance: UserActionDistance? = null
+    private val durationMillis: Int by lazy {
+        val spec = spec
+        if (spec !is DurationBasedAnimationSpec) {
+            error("timestampRange {} can only be used with a DurationBasedAnimationSpec")
+        }
+
+        spec.vectorize(Float.VectorConverter).durationMillis
+    }
+
+    override fun reversed(builder: TransitionBuilder.() -> Unit) {
+        reversed = true
+        builder()
+        reversed = false
+    }
+
+    override fun sharedElement(matcher: ElementMatcher, enabled: Boolean) {
+        transformations.add(SharedElementTransformation(matcher, enabled))
+    }
+
+    override fun timestampRange(
+        startMillis: Int?,
+        endMillis: Int?,
+        builder: PropertyTransformationBuilder.() -> Unit
+    ) {
+        if (startMillis != null && (startMillis < 0 || startMillis > durationMillis)) {
+            error("invalid start value: startMillis=$startMillis durationMillis=$durationMillis")
+        }
+
+        if (endMillis != null && (endMillis < 0 || endMillis > durationMillis)) {
+            error("invalid end value: endMillis=$startMillis durationMillis=$durationMillis")
+        }
+
+        val start = startMillis?.let { it.toFloat() / durationMillis }
+        val end = endMillis?.let { it.toFloat() / durationMillis }
+        fractionRange(start, end, builder)
     }
 }

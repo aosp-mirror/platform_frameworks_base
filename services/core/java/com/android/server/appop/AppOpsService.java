@@ -661,8 +661,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         @NonNull OpEntry createEntryLocked(String persistentDeviceId) {
             // TODO(b/308201969): Update this method when we introduce disk persistence of events
             // for accesses on external devices.
-            final ArrayMap<String, AttributedOp> attributedOps = mDeviceAttributedOps.get(
+            ArrayMap<String, AttributedOp> attributedOps = mDeviceAttributedOps.get(
                     persistentDeviceId);
+            if (attributedOps == null) {
+                attributedOps = new ArrayMap<>();
+            }
+
             final ArrayMap<String, AppOpsManager.AttributedOpEntry> attributionEntries =
                     new ArrayMap<>(attributedOps.size());
             for (int i = 0; i < attributedOps.size(); i++) {
@@ -680,8 +684,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         @NonNull OpEntry createSingleAttributionEntryLocked(@Nullable String attributionTag) {
             // TODO(b/308201969): Update this method when we introduce disk persistence of events
             // for accesses on external devices.
-            final ArrayMap<String, AttributedOp> attributedOps = mDeviceAttributedOps.get(
+            ArrayMap<String, AttributedOp> attributedOps = mDeviceAttributedOps.get(
                     PERSISTENT_DEVICE_ID_DEFAULT);
+            if (attributedOps == null) {
+                attributedOps = new ArrayMap<>();
+            }
+
             final ArrayMap<String, AttributedOpEntry> attributionEntries = new ArrayMap<>(1);
             if (attributedOps.get(attributionTag) != null) {
                 attributionEntries.put(attributionTag,

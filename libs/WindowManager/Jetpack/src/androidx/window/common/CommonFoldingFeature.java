@@ -126,7 +126,7 @@ public final class CommonFoldingFeature {
      * @see #FEATURE_PATTERN
      * @return {@link List} of {@link CommonFoldingFeature}.
      */
-    static List<CommonFoldingFeature> parseListFromString(@NonNull String value,
+    public static List<CommonFoldingFeature> parseListFromString(@NonNull String value,
             @State int hingeState) {
         List<CommonFoldingFeature> features = new ArrayList<>();
         String[] featureStrings =  value.split(";");

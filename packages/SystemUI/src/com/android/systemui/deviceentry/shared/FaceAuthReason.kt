@@ -31,6 +31,7 @@ import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.ALTERNATE
 import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.ASSISTANT_VISIBILITY_CHANGED
 import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.AUTH_REQUEST_DURING_CANCELLATION
 import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.BIOMETRIC_ENABLED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.CAMERA_AVAILABLE_CHANGED
 import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.CAMERA_LAUNCHED
 import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.DEVICE_WOKEN_UP_ON_REACH_GESTURE
 import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.DISPLAY_OFF
@@ -130,6 +131,7 @@ private object InternalFaceAuthReasons {
         "Face auth stopped because non strong biometric allowed changed"
     const val POSTURE_CHANGED = "Face auth started/stopped due to device posture changed."
     const val DISPLAY_OFF = "Face auth stopped due to display state OFF."
+    const val CAMERA_AVAILABLE_CHANGED = "Face auth started due to the available camera changed"
 }
 
 /**
@@ -221,7 +223,9 @@ constructor(private val id: Int, val reason: String, var extraInfo: Int = 0) :
     @UiEvent(doc = NON_STRONG_BIOMETRIC_ALLOWED_CHANGED)
     FACE_AUTH_NON_STRONG_BIOMETRIC_ALLOWED_CHANGED(1256, NON_STRONG_BIOMETRIC_ALLOWED_CHANGED),
     @UiEvent(doc = ACCESSIBILITY_ACTION) FACE_AUTH_ACCESSIBILITY_ACTION(1454, ACCESSIBILITY_ACTION),
-    @UiEvent(doc = DISPLAY_OFF) FACE_AUTH_DISPLAY_OFF(1461, DISPLAY_OFF);
+    @UiEvent(doc = DISPLAY_OFF) FACE_AUTH_DISPLAY_OFF(1461, DISPLAY_OFF),
+    @UiEvent(doc = CAMERA_AVAILABLE_CHANGED)
+    FACE_AUTH_CAMERA_AVAILABLE_CHANGED(1623, CAMERA_AVAILABLE_CHANGED);
 
     override fun getId(): Int = this.id
 

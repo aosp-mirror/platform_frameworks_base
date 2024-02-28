@@ -528,6 +528,13 @@ filegroup {
     ],
 }
 
+java_library {
+    name: "protolog-group",
+    srcs: [
+        "com/android/internal/protolog/common/IProtoLogGroup.java",
+    ],
+}
+
 // PackageManager common
 filegroup {
     name: "framework-pm-common-shared-srcs",

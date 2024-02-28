@@ -17,8 +17,10 @@
 package com.android.systemui.communal.widgets
 
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.pm.UserInfo
+import android.os.Bundle
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -33,8 +35,8 @@ import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,6 +45,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -91,7 +94,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
                         any<Int>(),
                         any<UserHandle>(),
                         any<ComponentName>(),
-                        nullable()
+                        any<Bundle>(),
                     )
                 )
                 .thenReturn(true)
@@ -100,8 +103,14 @@ class CommunalWidgetHostTest : SysuiTestCase() {
             val result = underTest.allocateIdAndBindWidget(provider)
 
             verify(appWidgetHost).allocateAppWidgetId()
-            verify(appWidgetManager).bindAppWidgetIdIfAllowed(widgetId, user, provider, null)
+            val bundle =
+                withArgCaptor<Bundle> {
+                    verify(appWidgetManager)
+                        .bindAppWidgetIdIfAllowed(eq(widgetId), eq(user), eq(provider), capture())
+                }
             assertThat(result).isEqualTo(widgetId)
+            assertThat(bundle.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY))
+                .isEqualTo(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
         }
 
     @Test
@@ -117,7 +126,7 @@ class CommunalWidgetHostTest : SysuiTestCase() {
                         any<Int>(),
                         any<UserHandle>(),
                         any<ComponentName>(),
-                        nullable()
+                        any<Bundle>()
                     )
                 )
                 .thenReturn(true)
@@ -126,8 +135,14 @@ class CommunalWidgetHostTest : SysuiTestCase() {
             val result = underTest.allocateIdAndBindWidget(provider, user)
 
             verify(appWidgetHost).allocateAppWidgetId()
-            verify(appWidgetManager).bindAppWidgetIdIfAllowed(widgetId, user, provider, null)
+            val bundle =
+                withArgCaptor<Bundle> {
+                    verify(appWidgetManager)
+                        .bindAppWidgetIdIfAllowed(eq(widgetId), eq(user), eq(provider), capture())
+                }
             assertThat(result).isEqualTo(widgetId)
+            assertThat(bundle.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY))
+                .isEqualTo(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
         }
 
     @Test
@@ -144,14 +159,15 @@ class CommunalWidgetHostTest : SysuiTestCase() {
                         any<Int>(),
                         any<UserHandle>(),
                         any<ComponentName>(),
-                        nullable()
+                        any<Bundle>()
                     )
                 )
                 .thenReturn(false)
             val result = underTest.allocateIdAndBindWidget(provider, user)
 
             verify(appWidgetHost).allocateAppWidgetId()
-            verify(appWidgetManager).bindAppWidgetIdIfAllowed(widgetId, user, provider, null)
+            verify(appWidgetManager)
+                .bindAppWidgetIdIfAllowed(eq(widgetId), eq(user), eq(provider), any())
             verify(appWidgetHost).deleteAppWidgetId(widgetId)
             assertThat(result).isNull()
         }

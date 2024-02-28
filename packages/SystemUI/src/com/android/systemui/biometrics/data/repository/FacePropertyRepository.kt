@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
@@ -64,13 +65,16 @@ interface FacePropertyRepository {
 
     /** The current face sensor location in current device rotation */
     val sensorLocation: StateFlow<Point?>
+
+    /** The info of current available camera. */
+    val cameraInfo: StateFlow<CameraInfo?>
 }
 
 /** Describes a biometric sensor */
 data class FaceSensorInfo(val id: Int, val strength: SensorStrength)
 
 /** Data class for camera info */
-private data class CameraInfo(
+data class CameraInfo(
     /** The logical id of the camera */
     val cameraId: String,
     /** The physical id of the camera */
@@ -124,7 +128,7 @@ constructor(
     private val cameraInfoList: List<CameraInfo> = loadCameraInfoList()
     private var currentPhysicalCameraId: String? = null
 
-    private val defaultSensorLocation: StateFlow<Point?> =
+    override val cameraInfo: StateFlow<CameraInfo?> =
         ConflatedCallbackFlow.conflatedCallbackFlow {
                 val callback =
                     object : CameraManager.AvailabilityCallback() {
@@ -142,7 +146,7 @@ constructor(
                                     physicalCameraId == it.cameraPhysicalId
                                 }
                             trySendWithFailureLogging(
-                                cameraInfo?.cameraLocation,
+                                cameraInfo,
                                 TAG,
                                 "Update face sensor location to $cameraInfo."
                             )
@@ -168,7 +172,7 @@ constructor(
                                     }
                                 currentPhysicalCameraId = cameraInfo?.cameraPhysicalId
                                 trySendWithFailureLogging(
-                                    cameraInfo?.cameraLocation,
+                                    cameraInfo,
                                     TAG,
                                     "Update face sensor location to $cameraInfo."
                                 )
@@ -181,8 +185,16 @@ constructor(
             .stateIn(
                 applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue =
-                    if (cameraInfoList.isNotEmpty()) cameraInfoList[0].cameraLocation else null
+                initialValue = if (cameraInfoList.isNotEmpty()) cameraInfoList[0] else null
+            )
+
+    private val defaultSensorLocation: StateFlow<Point?> =
+        cameraInfo
+            .map { it?.cameraLocation }
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = null
             )
 
     override val sensorLocation: StateFlow<Point?> =

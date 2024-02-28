@@ -49,6 +49,7 @@ import android.window.TransitionInfo;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.RemoteAnimationTargetCompat;
 import com.android.wm.shell.shared.TransitionUtil;
 
 import org.junit.Before;

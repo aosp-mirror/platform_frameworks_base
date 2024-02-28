@@ -1893,7 +1893,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // Check that we aren't reparenting to the same root task that the task is already in
         if (prevRootTask != null && prevRootTask.mTaskId == rootTaskId) {
             Slog.w(TAG, "Can not reparent to same root task, task=" + task
-                    + " already in rootTaskId=" + rootTaskId);
+                    + " already in rootTaskId=" + rootTaskId + " by " + Debug.getCallers(8));
             return prevRootTask;
         }
 

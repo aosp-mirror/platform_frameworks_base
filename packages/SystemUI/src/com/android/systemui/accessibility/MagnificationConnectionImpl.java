@@ -47,6 +47,12 @@ class MagnificationConnectionImpl extends IMagnificationConnection.Stub {
     }
 
     @Override
+    public void onFullscreenMagnificationActivationChanged(int displayId, boolean activated) {
+        mHandler.post(() -> mMagnification
+                .onFullscreenMagnificationActivationChanged(displayId, activated));
+    }
+
+    @Override
     public void enableWindowMagnification(int displayId, float scale, float centerX, float centerY,
             float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
             IRemoteMagnificationAnimationCallback callback) {

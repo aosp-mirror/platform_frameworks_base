@@ -24,7 +24,10 @@ package {
 
 android_test {
     name: "WMShellUnitTests",
-
+    defaults: [
+        // For ExtendedMockito dependencies.
+        "modules-utils-testable-device-config-defaults",
+    ],
     srcs: [
         "**/*.java",
         "**/*.kt",

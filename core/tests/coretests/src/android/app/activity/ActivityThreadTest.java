@@ -65,6 +65,7 @@ import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.View;
+import android.window.ActivityWindowInfo;
 import android.window.WindowContextInfo;
 import android.window.WindowTokenClientController;
 
@@ -839,7 +840,7 @@ public class ActivityThreadTest {
         final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(
                 activity.getActivityToken(), null, null, 0,
                 new MergedConfiguration(currentConfig, currentConfig),
-                false /* preserveWindow */);
+                false /* preserveWindow */, new ActivityWindowInfo());
         final ResumeActivityItem resumeStateRequest =
                 ResumeActivityItem.obtain(activity.getActivityToken(), true /* isForward */,
                         false /* shouldSendCompatFakeFocus*/);
