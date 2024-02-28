@@ -220,7 +220,7 @@ public class HandwritingInitiator {
                     mState.mExceedHandwritingSlop = true;
                     View candidateView = findBestCandidateView(mState.mStylusDownX,
                             mState.mStylusDownY, /* isHover */ false);
-                    if (candidateView != null) {
+                    if (candidateView != null && candidateView.isEnabled()) {
                         if (candidateView == getConnectedOrFocusedView()) {
                             if (!mInitiateWithoutConnection && !candidateView.hasFocus()) {
                                 requestFocusWithoutReveal(candidateView);
