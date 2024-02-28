@@ -4,7 +4,7 @@ flag {
     name: "batch_active_bucket_jobs"
     namespace: "backstage_power"
     description: "Include jobs in the ACTIVE bucket in the job batching effort. Don't let them run as freely as they're ready."
-    bug: "299329948"
+    bug: "326607666"
 }
 
 flag {
