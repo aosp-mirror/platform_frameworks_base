@@ -61,7 +61,7 @@ android_test {
         "libstaticjvmtiagent",
     ],
 
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
 
     plugins: ["dagger2-compiler"],
 

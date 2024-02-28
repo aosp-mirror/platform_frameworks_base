@@ -213,8 +213,8 @@
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"اختيار ملف شخصي"</string>
-    <string name="category_personal" msgid="6236798763159385225">"التطبيقات الشخصية"</string>
-    <string name="category_work" msgid="4014193632325996115">"تطبيقات العمل"</string>
+    <string name="category_personal" msgid="6236798763159385225">"الحسابات الشخصية"</string>
+    <string name="category_work" msgid="4014193632325996115">"حسابات العمل"</string>
     <string name="category_clone" msgid="1554511758987195974">"استنساخ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"خيارات المطورين"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"تفعيل خيارات المطورين"</string>

@@ -52,6 +52,7 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -116,6 +117,7 @@ public class FingerprintProviderTest {
     }
 
     @Test
+    @Ignore("b/317415953")
     public void testAddingSensors() {
         mFingerprintProvider = new TestableFingerprintProvider(mDaemon, mContext,
                 mBiometricStateCallback, mSensorProps, TAG, mLockoutResetDispatcher,

@@ -1,0 +1,20 @@
+<user id="100"
+    serialNumber="0"
+    flags="3091"
+    type="android.os.usertype.full.SYSTEM"
+    created="0"
+    lastLoggedIn="0"
+    lastLoggedInFingerprint="0"
+    profileBadge="0">
+  <restrictions no_oem_unlock="true" />
+  <device_policy_local_restrictions>
+    <restrictions_user user_id="0">
+      <restrictions no_camera="true" />
+    </restrictions_user>
+    <restrictions_user user_id="100">
+      <restrictions no_camera="true" />
+      <restrictions no_install_unknown_sources="true" />
+    </restrictions_user>
+  </device_policy_local_restrictions>
+  <ignorePrepareStorageErrors>false</ignorePrepareStorageErrors>
+</user>
