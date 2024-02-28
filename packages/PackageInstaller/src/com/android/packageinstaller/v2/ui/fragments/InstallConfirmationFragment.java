@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -94,6 +95,7 @@ public class InstallConfirmationFragment extends DialogFragment {
             viewToEnable = dialogView.requireViewById(R.id.install_confirm_question);
         }
         viewToEnable.setVisibility(View.VISIBLE);
+        viewToEnable.setMovementMethod(new ScrollingMovementMethod());
 
         return mDialog;
     }
