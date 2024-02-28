@@ -67,6 +67,7 @@ import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.DumpUtils;
@@ -112,7 +113,7 @@ public final class DreamManagerService extends SystemService {
     private final Object mLock = new Object();
 
     private final Context mContext;
-    private final DreamHandler mHandler;
+    private final Handler mHandler;
     private final DreamController mController;
     private final PowerManager mPowerManager;
     private final PowerManagerInternal mPowerManagerInternal;
@@ -211,9 +212,14 @@ public final class DreamManagerService extends SystemService {
     }
 
     public DreamManagerService(Context context) {
+        this(context, new DreamHandler(FgThread.get().getLooper()));
+    }
+
+    @VisibleForTesting
+    DreamManagerService(Context context, Handler handler) {
         super(context);
         mContext = context;
-        mHandler = new DreamHandler(FgThread.get().getLooper());
+        mHandler = handler;
         mController = new DreamController(context, mHandler, mControllerListener);
 
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
@@ -244,7 +250,6 @@ public final class DreamManagerService extends SystemService {
                 com.android.internal.R.bool.config_keepDreamingWhenUnplugging);
         mDreamsDisabledByAmbientModeSuppressionConfig = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_dreamsDisabledByAmbientModeSuppressionConfig);
-
     }
 
     @Override
