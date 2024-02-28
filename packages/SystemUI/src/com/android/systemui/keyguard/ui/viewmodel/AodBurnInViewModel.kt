@@ -28,10 +28,6 @@ import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
-import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
-import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
-import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
-import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
@@ -47,7 +43,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 
 /**
@@ -127,17 +122,9 @@ constructor(
         params: BurnInParameters,
     ): Flow<BurnInModel> {
         return combine(
-            merge(
-                    keyguardTransitionInteractor.transition(GONE, AOD).map { it.value },
-                    keyguardTransitionInteractor.transition(AOD, PRIMARY_BOUNCER).map {
-                        1f - it.value
-                    },
-                    keyguardTransitionInteractor.transition(ALTERNATE_BOUNCER, AOD).map {
-                        it.value
-                    },
-                    keyguardTransitionInteractor.dozeAmountTransition.map { it.value },
-                )
-                .map { dozeAmount -> Interpolators.FAST_OUT_SLOW_IN.getInterpolation(dozeAmount) },
+            keyguardTransitionInteractor.dozeAmountTransition.map {
+                Interpolators.FAST_OUT_SLOW_IN.getInterpolation(it.value)
+            },
             burnInInteractor.keyguardBurnIn,
         ) { interpolated, burnIn ->
             val useScaleOnly =
