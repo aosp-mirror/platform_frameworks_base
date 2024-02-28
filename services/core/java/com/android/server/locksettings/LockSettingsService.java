@@ -1875,9 +1875,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void onPostPasswordChanged(LockscreenCredential newCredential, int userHandle) {
-        updatePasswordHistory(newCredential, userHandle);
-        mContext.getSystemService(TrustManager.class).reportEnabledTrustAgentsChanged(userHandle);
+    private void onPostPasswordChanged(LockscreenCredential newCredential, int userId) {
+        updatePasswordHistory(newCredential, userId);
+        mContext.getSystemService(TrustManager.class).reportEnabledTrustAgentsChanged(userId);
+        sendMainUserCredentialChangedNotificationIfNeeded(userId);
     }
 
     /**
@@ -3062,7 +3063,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         setCurrentLskfBasedProtectorId(newProtectorId, userId);
         LockPatternUtils.invalidateCredentialTypeCache();
         synchronizeUnifiedChallengeForProfiles(userId, profilePasswords);
-        sendMainUserCredentialChangedNotificationIfNeeded(userId);
 
         setUserPasswordMetrics(credential, userId);
         mUnifiedProfilePasswordCache.removePassword(userId);
