@@ -35,7 +35,6 @@ import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
@@ -52,9 +51,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Assert.assertThrows
-import org.junit.Assume.assumeTrue
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -305,13 +302,5 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, CONTAINER_HEIGHT.toFloat(), 0)
         private val MOVE_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
         private val UP_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
-
-        @BeforeClass
-        @JvmStatic
-        fun beforeClass() {
-            // Glanceable hub requires Compose, no point running any of these tests if compose isn't
-            // enabled.
-            assumeTrue(ComposeFacade.isComposeAvailable())
-        }
     }
 }

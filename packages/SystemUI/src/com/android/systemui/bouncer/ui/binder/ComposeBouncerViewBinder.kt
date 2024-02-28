@@ -1,15 +1,17 @@
 package com.android.systemui.bouncer.ui.binder
 
 import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.compose.theme.PlatformTheme
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
+import com.android.systemui.bouncer.ui.composable.BouncerContent
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import kotlinx.coroutines.flow.collectLatest
@@ -27,12 +29,11 @@ object ComposeBouncerViewBinder {
         viewMediatorCallback: ViewMediatorCallback?,
     ) {
         view.addView(
-            ComposeFacade.createBouncer(
-                view.context,
-                viewModel,
-                dialogFactory,
-            )
+            ComposeView(view.context).apply {
+                setContent { PlatformTheme { BouncerContent(viewModel, dialogFactory) } }
+            }
         )
+
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {

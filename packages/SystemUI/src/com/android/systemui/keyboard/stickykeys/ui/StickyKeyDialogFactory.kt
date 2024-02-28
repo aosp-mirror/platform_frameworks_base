@@ -26,9 +26,9 @@ import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
 import android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
 import android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL
 import androidx.activity.ComponentDialog
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyboard.stickykeys.ui.view.createStickyKeyIndicatorView
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -48,7 +48,7 @@ constructor(
         return ComponentDialog(context, R.style.Theme_SystemUI_Dialog).apply {
             // because we're requesting window feature it must be called before setting content
             window?.setStickyKeyWindowAttributes()
-            setContentView(ComposeFacade.createStickyKeysIndicatorContent(context, viewModel))
+            setContentView(createStickyKeyIndicatorView(context, viewModel))
         }
     }
 

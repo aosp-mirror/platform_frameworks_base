@@ -11,7 +11,6 @@ import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.Flags.COMPOSE_BOUNCER_ENABLED
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
@@ -60,11 +59,7 @@ constructor(
     private val composeBouncerDependencies: Lazy<ComposeBouncerDependencies>,
 ) {
     fun bind(view: ViewGroup) {
-        if (
-            COMPOSE_BOUNCER_ENABLED &&
-                composeBouncerFlags.isOnlyComposeBouncerEnabled() &&
-                ComposeFacade.isComposeAvailable()
-        ) {
+        if (COMPOSE_BOUNCER_ENABLED && composeBouncerFlags.isOnlyComposeBouncerEnabled()) {
             val deps = composeBouncerDependencies.get()
             ComposeBouncerViewBinder.bind(
                 view,

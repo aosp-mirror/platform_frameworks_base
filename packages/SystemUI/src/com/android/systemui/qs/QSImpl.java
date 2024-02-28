@@ -47,7 +47,6 @@ import com.android.app.animation.Interpolators;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ShadeInterpolation;
-import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -301,8 +300,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     private void bindFooterActionsView(View root) {
         LinearLayout footerActionsView = root.findViewById(R.id.qs_footer_actions);
 
-        if (!mFeatureFlags.isEnabled(Flags.COMPOSE_QS_FOOTER_ACTIONS)
-                || !ComposeFacade.INSTANCE.isComposeAvailable()) {
+        if (!mFeatureFlags.isEnabled(Flags.COMPOSE_QS_FOOTER_ACTIONS)) {
             Log.d(TAG, "Binding the View implementation of the QS footer actions");
             mFooterActionsView = footerActionsView;
             mFooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
@@ -312,7 +310,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
         // Compose is available, so let's use the Compose implementation of the footer actions.
         Log.d(TAG, "Binding the Compose implementation of the QS footer actions");
-        View composeView = ComposeFacade.INSTANCE.createFooterActionsView(root.getContext(),
+        View composeView = QSUtils.createFooterActionsView(root.getContext(),
                 mQSFooterActionsViewModel, mListeningAndVisibilityLifecycleOwner);
         mFooterActionsView = composeView;
 
