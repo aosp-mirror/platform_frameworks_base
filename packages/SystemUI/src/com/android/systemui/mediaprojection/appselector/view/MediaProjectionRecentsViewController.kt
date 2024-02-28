@@ -26,12 +26,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.systemui.res.R
+import com.android.systemui.Flags.pssAppSelectorAbruptExitFix
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorScope
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.view.RecentTasksAdapter.RecentTaskClickListener
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider.TaskPreviewSizeListener
+import com.android.systemui.res.R
 import com.android.systemui.util.recycler.HorizontalSpacerItemDecoration
 import javax.inject.Inject
 
@@ -122,14 +123,7 @@ constructor(
 
     override fun onRecentAppClicked(task: RecentTask, view: View) {
         val launchCookie = LaunchCookie()
-        val activityOptions =
-            ActivityOptions.makeScaleUpAnimation(
-                view,
-                /* startX= */ 0,
-                /* startY= */ 0,
-                view.width,
-                view.height
-            )
+        val activityOptions = createAnimation(task, view)
         activityOptions.pendingIntentBackgroundActivityStartMode =
             MODE_BACKGROUND_ACTIVITY_START_ALLOWED
         activityOptions.setLaunchCookie(launchCookie)
@@ -138,6 +132,28 @@ constructor(
         activityTaskManager.startActivityFromRecents(task.taskId, activityOptions.toBundle())
         resultHandler.returnSelectedApp(launchCookie)
     }
+
+    private fun createAnimation(task: RecentTask, view: View): ActivityOptions =
+        if (pssAppSelectorAbruptExitFix() && task.isForegroundTask) {
+            // When the selected task is in the foreground, the scale up animation doesn't work.
+            // We fallback to the default close animation.
+            ActivityOptions.makeCustomTaskAnimation(
+                view.context,
+                /* enterResId= */ 0,
+                /* exitResId= */ com.android.internal.R.anim.resolver_close_anim,
+                /* handler = */ null,
+                /* startedListener = */ null,
+                /* finishedListener = */ null
+            )
+        } else {
+            ActivityOptions.makeScaleUpAnimation(
+                view,
+                /* startX= */ 0,
+                /* startY= */ 0,
+                view.width,
+                view.height
+            )
+        }
 
     override fun onTaskSizeChanged(size: Rect) {
         views?.recentsContainer?.setTaskHeightSize()
