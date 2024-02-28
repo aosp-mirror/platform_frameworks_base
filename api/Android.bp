@@ -122,6 +122,7 @@ combined_apis {
         "framework-nfc",
         "framework-ondevicepersonalization",
         "framework-pdf",
+        "framework-pdf-v",
         "framework-permission",
         "framework-permission-s",
         "framework-scheduling",
@@ -310,7 +311,7 @@ packages_to_document = [
 // classpath (or sources) somehow.
 stubs_defaults {
     name: "android-non-updatable-stubs-defaults",
-    defaults: ["framework-minus-apex-aconfig-declarations"],
+    aconfig_declarations: ["framework-minus-apex-aconfig-declarations"],
     srcs: [":android-non-updatable-stub-sources"],
     sdk_version: "none",
     system_modules: "none",
@@ -374,7 +375,10 @@ stubs_defaults {
     previous_api: ":android.api.public.latest",
     merge_annotations_dirs: ["metalava-manual"],
     defaults_visibility: ["//frameworks/base/api"],
-    visibility: ["//frameworks/base/api"],
+    visibility: [
+        "//frameworks/base/api",
+        "//frameworks/base/core/api",
+    ],
 }
 
 // We resolve dependencies on APIs in modules by depending on a prebuilt of the whole

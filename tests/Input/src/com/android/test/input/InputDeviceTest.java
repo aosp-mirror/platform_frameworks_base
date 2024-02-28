@@ -51,6 +51,7 @@ public class InputDeviceTest {
         assertEquals(device.getName(), outDevice.getName());
         assertEquals(device.getVendorId(), outDevice.getVendorId());
         assertEquals(device.getProductId(), outDevice.getProductId());
+        assertEquals(device.getDeviceBus(), outDevice.getDeviceBus());
         assertEquals(device.getDescriptor(), outDevice.getDescriptor());
         assertEquals(device.isExternal(), outDevice.isExternal());
         assertEquals(device.getSources(), outDevice.getSources());
@@ -79,6 +80,7 @@ public class InputDeviceTest {
                 .setName("Test Device " + DEVICE_ID)
                 .setVendorId(44)
                 .setProductId(45)
+                .setDeviceBus(3)
                 .setDescriptor("descriptor")
                 .setExternal(true)
                 .setSources(InputDevice.SOURCE_HDMI)

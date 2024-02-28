@@ -1031,6 +1031,7 @@ SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
 
     if (dirty->isEmpty()) {
         dirty->setIWH(frame.width(), frame.height());
+        return *dirty;
     }
 
     // At this point dirty is the area of the window to update. However,

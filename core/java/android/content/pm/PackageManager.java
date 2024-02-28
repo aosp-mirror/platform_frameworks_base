@@ -1429,6 +1429,44 @@ public abstract class PackageManager {
     public static final int ROLLBACK_DATA_POLICY_RETAIN = 2;
 
     /** @hide */
+    @IntDef(prefix = {"ROLLBACK_USER_IMPACT_"}, value = {
+            ROLLBACK_USER_IMPACT_LOW,
+            ROLLBACK_USER_IMPACT_HIGH,
+            ROLLBACK_USER_IMPACT_ONLY_MANUAL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RollbackImpactLevel {}
+
+    /**
+     * Rollback will be performed automatically in response to native crashes on startup or
+     * persistent service crashes. More suitable for apps that do not store any user data.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_RECOVERABILITY_DETECTION)
+    public static final int ROLLBACK_USER_IMPACT_LOW = 0;
+
+    /**
+     * Rollback will be performed automatically only when the device is found to be unrecoverable.
+     * More suitable for apps that store user data and have higher impact on user.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_RECOVERABILITY_DETECTION)
+    public static final int ROLLBACK_USER_IMPACT_HIGH = 1;
+
+    /**
+     * Rollback will not be performed automatically. It can be triggered externally.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_RECOVERABILITY_DETECTION)
+    public static final int ROLLBACK_USER_IMPACT_ONLY_MANUAL = 2;
+
+    /** @hide */
     @IntDef(flag = true, prefix = { "INSTALL_" }, value = {
             INSTALL_REPLACE_EXISTING,
             INSTALL_ALLOW_TEST,
@@ -3718,7 +3756,7 @@ public abstract class PackageManager {
      * The device is capable of communicating with other devices via
      * <a href="https://www.threadgroup.org">Thread</a> networking protocol.
      */
-    @FlaggedApi("com.android.net.thread.flags.thread_enabled")
+    @FlaggedApi(com.android.net.thread.platform.flags.Flags.FLAG_THREAD_ENABLED_PLATFORM)
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_THREAD_NETWORK = "android.hardware.thread_network";
 

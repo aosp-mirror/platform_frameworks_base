@@ -298,7 +298,7 @@ package android {
     field public static final String RECOVER_KEYSTORE = "android.permission.RECOVER_KEYSTORE";
     field public static final String REGISTER_CALL_PROVIDER = "android.permission.REGISTER_CALL_PROVIDER";
     field public static final String REGISTER_CONNECTION_MANAGER = "android.permission.REGISTER_CONNECTION_MANAGER";
-    field @FlaggedApi("com.android.net.flags.register_nsd_offload_engine") public static final String REGISTER_NSD_OFFLOAD_ENGINE = "android.permission.REGISTER_NSD_OFFLOAD_ENGINE";
+    field @FlaggedApi("android.net.platform.flags.register_nsd_offload_engine") public static final String REGISTER_NSD_OFFLOAD_ENGINE = "android.permission.REGISTER_NSD_OFFLOAD_ENGINE";
     field public static final String REGISTER_SIM_SUBSCRIPTION = "android.permission.REGISTER_SIM_SUBSCRIPTION";
     field public static final String REGISTER_STATS_PULL_ATOM = "android.permission.REGISTER_STATS_PULL_ATOM";
     field public static final String REMOTE_DISPLAY_PROVIDER = "android.permission.REMOTE_DISPLAY_PROVIDER";
@@ -357,7 +357,7 @@ package android {
     field public static final String SYSTEM_APPLICATION_OVERLAY = "android.permission.SYSTEM_APPLICATION_OVERLAY";
     field public static final String SYSTEM_CAMERA = "android.permission.SYSTEM_CAMERA";
     field public static final String TETHER_PRIVILEGED = "android.permission.TETHER_PRIVILEGED";
-    field @FlaggedApi("com.android.net.thread.flags.thread_enabled") public static final String THREAD_NETWORK_PRIVILEGED = "android.permission.THREAD_NETWORK_PRIVILEGED";
+    field @FlaggedApi("com.android.net.thread.platform.flags.thread_enabled_platform") public static final String THREAD_NETWORK_PRIVILEGED = "android.permission.THREAD_NETWORK_PRIVILEGED";
     field public static final String TIS_EXTENSION_INTERFACE = "android.permission.TIS_EXTENSION_INTERFACE";
     field public static final String TOGGLE_AUTOMOTIVE_PROJECTION = "android.permission.TOGGLE_AUTOMOTIVE_PROJECTION";
     field public static final String TRIGGER_LOST_MODE = "android.permission.TRIGGER_LOST_MODE";
@@ -3482,7 +3482,7 @@ package android.content {
     field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final String TETHERING_SERVICE = "tethering";
-    field @FlaggedApi("com.android.net.thread.flags.thread_enabled") public static final String THREAD_NETWORK_SERVICE = "thread_network";
+    field @FlaggedApi("com.android.net.thread.platform.flags.thread_enabled_platform") public static final String THREAD_NETWORK_SERVICE = "thread_network";
     field public static final String TIME_MANAGER_SERVICE = "time_manager";
     field public static final String TRANSLATION_MANAGER_SERVICE = "translation";
     field public static final String UI_TRANSLATION_SERVICE = "ui_translation";
@@ -3860,6 +3860,7 @@ package android.content.pm {
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
     method public void setRequestDowngrade(boolean);
+    method @FlaggedApi("android.content.pm.recoverability_detection") @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void setRollbackImpactLevel(int);
     method @FlaggedApi("android.content.pm.rollback_lifetime") @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void setRollbackLifetimeMillis(long);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();
   }
@@ -4023,6 +4024,9 @@ package android.content.pm {
     field public static final int ROLLBACK_DATA_POLICY_RESTORE = 0; // 0x0
     field public static final int ROLLBACK_DATA_POLICY_RETAIN = 2; // 0x2
     field public static final int ROLLBACK_DATA_POLICY_WIPE = 1; // 0x1
+    field @FlaggedApi("android.content.pm.recoverability_detection") public static final int ROLLBACK_USER_IMPACT_HIGH = 1; // 0x1
+    field @FlaggedApi("android.content.pm.recoverability_detection") public static final int ROLLBACK_USER_IMPACT_LOW = 0; // 0x0
+    field @FlaggedApi("android.content.pm.recoverability_detection") public static final int ROLLBACK_USER_IMPACT_ONLY_MANUAL = 2; // 0x2
     field public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN = 0; // 0x0
     field public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE = 1; // 0x1
     field public static final int SYSTEM_APP_STATE_INSTALLED = 2; // 0x2

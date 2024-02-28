@@ -106,13 +106,13 @@ public class PackageDynamicCodeLoadingTests {
     }
 
     @Test
-    public void testRecord_changeUserForFile_throws() {
+    public void testRecord_changeUserForFile_ignored() {
         Entry entry1 = new Entry("owning.package1", "/path/file1", 'D', 10, "loading.package1");
         Entry entry2 = new Entry("owning.package1", "/path/file1", 'D', 20, "loading.package1");
 
         PackageDynamicCodeLoading info = makePackageDcl(entry1);
 
-        assertThrows(() -> record(info, entry2));
+        assertThat(record(info, entry2)).isFalse();
         assertHasEntries(info, entry1);
     }
 

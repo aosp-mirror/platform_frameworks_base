@@ -18,6 +18,7 @@ package com.android.server.net;
 
 import static android.Manifest.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS;
 import static android.Manifest.permission.NETWORK_STACK;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
@@ -58,9 +59,11 @@ import static android.net.NetworkPolicyManager.ALLOWED_REASON_SYSTEM;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_TOP;
 import static android.net.NetworkPolicyManager.BACKGROUND_THRESHOLD_STATE;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
+import static android.net.NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
+import static android.net.NetworkPolicyManager.TOP_THRESHOLD_STATE;
 import static android.net.NetworkPolicyManager.allowedReasonsToString;
 import static android.net.NetworkPolicyManager.blockedReasonsToString;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
@@ -88,6 +91,7 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
+import static com.android.server.net.NetworkPolicyManagerService.UID_MSG_STATE_CHANGED;
 import static com.android.server.net.NetworkPolicyManagerService.UidBlockedState.getEffectiveBlockedReasons;
 import static com.android.server.net.NetworkPolicyManagerService.normalizeTemplate;
 
@@ -145,6 +149,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicy;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
@@ -196,8 +201,6 @@ import com.android.server.LocalServices;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.usage.AppStandbyInternal;
 
-import com.google.common.util.concurrent.AbstractFuture;
-
 import libcore.io.Streams;
 
 import org.junit.After;
@@ -241,10 +244,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -1619,6 +1620,12 @@ public class NetworkPolicyManagerServiceTest {
         verify(mActivityManagerInternal).notifyNetworkPolicyRulesUpdated(UID_A, procStateSeq);
     }
 
+    private void callAndWaitOnUidGone(int uid) throws Exception {
+        // The disabled argument is used only for ephemeral apps and does not matter here.
+        mUidObserver.onUidGone(uid, false /* disabled */);
+        waitForUidEventHandlerIdle();
+    }
+
     private void callAndWaitOnUidStateChanged(int uid, int procState, long procStateSeq)
             throws Exception {
         callAndWaitOnUidStateChanged(uid, procState, procStateSeq,
@@ -2149,7 +2156,6 @@ public class NetworkPolicyManagerServiceTest {
         verify(mNetworkManager).setFirewallChainEnabled(FIREWALL_CHAIN_BACKGROUND, true);
     }
 
-
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnProcStateChange() throws Exception {
@@ -2244,6 +2250,157 @@ public class NetworkPolicyManagerServiceTest {
         verify(mNetworkManager).setFirewallUidRule(FIREWALL_CHAIN_BACKGROUND, UID_A,
                 FIREWALL_RULE_DEFAULT);
         assertTrue(mService.isUidNetworkingBlocked(UID_A, false));
+    }
+
+    private boolean isUidState(int uid, int procState, int procStateSeq, int capability) {
+        final NetworkPolicyManager.UidState uidState = mService.getUidStateForTest(uid);
+        if (uidState == null) {
+            return false;
+        }
+        return uidState.uid == uid && uidState.procStateSeq == procStateSeq
+                && uidState.procState == procState && uidState.capability == capability;
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
+    public void testUidObserverFiltersProcStateChanges() throws Exception {
+        int testProcStateSeq = 0;
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // First callback for uid.
+            callOnUidStatechanged(UID_A, BACKGROUND_THRESHOLD_STATE + 1, testProcStateSeq++,
+                    PROCESS_CAPABILITY_NONE);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // Doesn't cross the background threshold.
+            callOnUidStatechanged(UID_A, BACKGROUND_THRESHOLD_STATE, testProcStateSeq++,
+                    PROCESS_CAPABILITY_NONE);
+            assertFalse(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // Crosses the background threshold.
+            callOnUidStatechanged(UID_A, BACKGROUND_THRESHOLD_STATE - 1, testProcStateSeq++,
+                    PROCESS_CAPABILITY_NONE);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // Doesn't cross the foreground threshold.
+            callOnUidStatechanged(UID_A, FOREGROUND_THRESHOLD_STATE + 1, testProcStateSeq++,
+                    PROCESS_CAPABILITY_NONE);
+            assertFalse(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // Crosses the foreground threshold.
+            callOnUidStatechanged(UID_A, FOREGROUND_THRESHOLD_STATE, testProcStateSeq++,
+                    PROCESS_CAPABILITY_NONE);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // Doesn't cross the top threshold.
+            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE + 1, testProcStateSeq++,
+                    PROCESS_CAPABILITY_NONE);
+            assertFalse(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // Crosses the top threshold.
+            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+                    PROCESS_CAPABILITY_NONE);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // Doesn't cross any other threshold.
+            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE - 1, testProcStateSeq++,
+                    PROCESS_CAPABILITY_NONE);
+            assertFalse(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
+    public void testUidObserverFiltersStaleChanges() throws Exception {
+        final int testProcStateSeq = 51;
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // First callback for uid.
+            callOnUidStatechanged(UID_B, BACKGROUND_THRESHOLD_STATE + 100, testProcStateSeq,
+                    PROCESS_CAPABILITY_NONE);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // Stale callback because the procStateSeq is smaller.
+            callOnUidStatechanged(UID_B, BACKGROUND_THRESHOLD_STATE - 100, testProcStateSeq - 10,
+                    PROCESS_CAPABILITY_NONE);
+            assertFalse(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
+    public void testUidObserverFiltersCapabilityChanges() throws Exception {
+        int testProcStateSeq = 0;
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // First callback for uid.
+            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+                    PROCESS_CAPABILITY_NONE);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // The same process-state with one network capability added.
+            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+                    PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // The same process-state with another network capability added.
+            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+                    PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
+                            | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // The same process-state with all capabilities, but no change in network capabilities.
+            callOnUidStatechanged(UID_A, TOP_THRESHOLD_STATE, testProcStateSeq++,
+                    PROCESS_CAPABILITY_ALL);
+            assertFalse(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+    }
+
+    @Test
+    public void testUidStateChangeAfterUidGone() throws Exception {
+        final int testProcStateSeq = 51;
+        final int testProcState = PROCESS_STATE_IMPORTANT_FOREGROUND;
+
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // First callback for uid.
+            callOnUidStatechanged(UID_B, testProcState, testProcStateSeq, PROCESS_CAPABILITY_NONE);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        assertTrue(isUidState(UID_B, testProcState, testProcStateSeq, PROCESS_CAPABILITY_NONE));
+
+        callAndWaitOnUidGone(UID_B);
+        try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
+            // Even though the procState is the same, the uid had exited - so this should be
+            // processed as a fresh callback.
+            callOnUidStatechanged(UID_B, testProcState, testProcStateSeq + 1,
+                    PROCESS_CAPABILITY_NONE);
+            assertTrue(mService.mUidEventHandler.hasMessages(UID_MSG_STATE_CHANGED));
+        }
+        waitForUidEventHandlerIdle();
+        assertTrue(isUidState(UID_B, testProcState, testProcStateSeq + 1, PROCESS_CAPABILITY_NONE));
     }
 
     @Test
@@ -2557,17 +2714,6 @@ public class NetworkPolicyManagerServiceTest {
 
     private void verifyAdvisePersistThreshold() throws Exception {
         verify(mStatsManager).setDefaultGlobalAlert(anyLong());
-    }
-
-    private static class TestAbstractFuture<T> extends AbstractFuture<T> {
-        @Override
-        public T get() throws InterruptedException, ExecutionException {
-            try {
-                return get(5, TimeUnit.SECONDS);
-            } catch (TimeoutException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     private static void assertTimeEquals(long expected, long actual) {

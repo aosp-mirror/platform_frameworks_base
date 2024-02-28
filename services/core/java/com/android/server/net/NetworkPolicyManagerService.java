@@ -26,6 +26,8 @@ import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManager.isProcStateConsideredInteraction;
 import static android.app.ActivityManager.printCapabilitiesSummary;
@@ -85,8 +87,10 @@ import static android.net.NetworkPolicyManager.ALLOWED_REASON_POWER_SAVE_EXCEPT_
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_SYSTEM;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_TOP;
+import static android.net.NetworkPolicyManager.BACKGROUND_THRESHOLD_STATE;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
+import static android.net.NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
@@ -97,6 +101,7 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_REJECT_RESTRICTED_MODE;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.SUBSCRIPTION_OVERRIDE_UNMETERED;
+import static android.net.NetworkPolicyManager.TOP_THRESHOLD_STATE;
 import static android.net.NetworkPolicyManager.allowedReasonsToString;
 import static android.net.NetworkPolicyManager.blockedReasonsToString;
 import static android.net.NetworkPolicyManager.isProcStateAllowedNetworkWhileBackground;
@@ -468,7 +473,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     private static final int MSG_PROCESS_BACKGROUND_TRANSITIONING_UIDS = 24;
 
-    private static final int UID_MSG_STATE_CHANGED = 100;
+    @VisibleForTesting
+    static final int UID_MSG_STATE_CHANGED = 100;
     private static final int UID_MSG_GONE = 101;
 
     private static final String PROP_SUB_PLAN_OWNER = "persist.sys.sub_plan_owner";
@@ -720,7 +726,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Map of uid -> UidStateCallbackInfo objects holding the data received from
      * {@link IUidObserver#onUidStateChanged(int, int, long, int)} callbacks. In order to avoid
      * creating a new object for every callback received, we hold onto the object created for each
-     * uid and reuse it.
+     * uid and reuse it until the uid stays alive.
      *
      * Note that the lock used for accessing this object should not be used for anything else and we
      * should not be acquiring new locks or doing any heavy work while this lock is held since this
@@ -791,6 +797,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static @NonNull Clock getDefaultClock() {
         return new BestClock(ZoneOffset.UTC, SystemClock.currentNetworkTimeClock(),
                 Clock.systemUTC());
+    }
+
+    @VisibleForTesting
+    UidState getUidStateForTest(int uid) {
+        synchronized (mUidRulesFirstLock) {
+            return mUidState.get(uid);
+        }
     }
 
     static class Dependencies {
@@ -1074,8 +1087,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 final int cutpoint = mBackgroundNetworkRestricted ? PROCESS_STATE_UNKNOWN
                         : NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE;
-                // TODO (b/319728914): Filter out the unnecessary changes when using no cutpoint.
-
                 mActivityManagerInternal.registerNetworkPolicyUidObserver(mUidObserver, changes,
                         cutpoint, "android");
                 mNetworkManager.registerObserver(mAlertObserver);
@@ -1184,6 +1195,51 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     final private IUidObserver mUidObserver = new UidObserver() {
+
+        /**
+         * Returns whether the uid state change information is relevant for the service. If the
+         * state information does not lead to any change in the network rules, it can safely be
+         * ignored.
+         */
+        @GuardedBy("mUidStateCallbackInfos")
+        private boolean isUidStateChangeRelevant(UidStateCallbackInfo previousInfo,
+                int newProcState, long newProcStateSeq, int newCapability) {
+            if (previousInfo.procStateSeq == -1) {
+                // No previous record. Always process the first state change callback.
+                return true;
+            }
+            if (newProcStateSeq <= previousInfo.procStateSeq) {
+                // Stale callback. Ignore.
+                return false;
+            }
+            final int previousProcState = previousInfo.procState;
+            if (mBackgroundNetworkRestricted && (previousProcState >= BACKGROUND_THRESHOLD_STATE)
+                    != (newProcState >= BACKGROUND_THRESHOLD_STATE)) {
+                // Proc-state change crossed BACKGROUND_THRESHOLD_STATE: Network rules for the
+                // BACKGROUND chain may change.
+                return true;
+            }
+            if ((previousProcState <= TOP_THRESHOLD_STATE)
+                    != (newProcState <= TOP_THRESHOLD_STATE)) {
+                // Proc-state change crossed TOP_THRESHOLD_STATE: Network rules for the
+                // LOW_POWER_STANDBY chain may change.
+                return true;
+            }
+            if ((previousProcState <= FOREGROUND_THRESHOLD_STATE)
+                    != (newProcState <= FOREGROUND_THRESHOLD_STATE)) {
+                // Proc-state change crossed FOREGROUND_THRESHOLD_STATE: Network rules for many
+                // different chains may change.
+                return true;
+            }
+            final int networkCapabilities = PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
+                    | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
+            if ((previousInfo.capability & networkCapabilities)
+                    != (newCapability & networkCapabilities)) {
+                return true;
+            }
+            return false;
+        }
+
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
                 @ProcessCapability int capability) {
             synchronized (mUidStateCallbackInfos) {
@@ -1192,18 +1248,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     callbackInfo = new UidStateCallbackInfo();
                     mUidStateCallbackInfos.put(uid, callbackInfo);
                 }
-                if (callbackInfo.procStateSeq == -1 || procStateSeq > callbackInfo.procStateSeq) {
+                if (isUidStateChangeRelevant(callbackInfo, procState, procStateSeq, capability)) {
                     callbackInfo.update(uid, procState, procStateSeq, capability);
-                }
-                if (!callbackInfo.isPending) {
-                    mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED, callbackInfo)
-                            .sendToTarget();
-                    callbackInfo.isPending = true;
+                    if (!callbackInfo.isPending) {
+                        mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED, callbackInfo)
+                                .sendToTarget();
+                        callbackInfo.isPending = true;
+                    }
                 }
             }
         }
 
         @Override public void onUidGone(int uid, boolean disabled) {
+            synchronized (mUidStateCallbackInfos) {
+                mUidStateCallbackInfos.remove(uid);
+            }
+            // TODO: b/327058756 - Remove any pending UID_MSG_STATE_CHANGED on the handler.
             mUidEventHandler.obtainMessage(UID_MSG_GONE, uid, 0).sendToTarget();
         }
     };
@@ -5847,7 +5907,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     void handleUidGone(int uid) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidGone");
         try {
-            boolean updated;
+            final boolean updated;
             synchronized (mUidRulesFirstLock) {
                 updated = removeUidStateUL(uid);
             }
