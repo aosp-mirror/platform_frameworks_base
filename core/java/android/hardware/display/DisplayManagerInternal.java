@@ -778,6 +778,16 @@ public abstract class DisplayManagerInternal {
          */
         float[] getAutoBrightnessLuxLevels(int mode);
 
+        /**
+         * @return The current brightness setting
+         */
+        float getBrightness();
+
+        /**
+         * @return The brightness value that is used when the device is in doze
+         */
+        float getDozeBrightness();
+
         /** Returns whether displayoffload supports the given display state. */
         static boolean isSupportedOffloadState(int displayState) {
             return Display.isSuspendedState(displayState);

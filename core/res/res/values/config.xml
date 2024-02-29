@@ -1608,7 +1608,10 @@
     <fraction name="config_autoBrightnessAdjustmentMaxGamma">300%</fraction>
 
     <!-- If we allow automatic adjustment of screen brightness while dozing, how many times we want
-         to reduce it to preserve the battery. Value of 100% means no scaling. -->
+         to reduce it to preserve the battery. Value of 100% means no scaling. Not used if there is
+         a designated auto-brightness doze mapping defined in Display Device Config.
+         Also used to scale the brightness for the doze mode when auto-brightness is disabled if
+         there is an offload session present. -->
     <fraction name="config_screenAutoBrightnessDozeScaleFactor">100%</fraction>
 
     <!-- When the screen is turned on, the previous estimate of the ambient light level at the time

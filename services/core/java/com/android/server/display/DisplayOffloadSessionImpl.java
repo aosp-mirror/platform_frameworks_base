@@ -113,4 +113,14 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
     }
+
+    @Override
+    public float getBrightness() {
+        return mDisplayPowerController.getScreenBrightnessSetting();
+    }
+
+    @Override
+    public float getDozeBrightness() {
+        return mDisplayPowerController.getDozeBrightnessForOffload();
+    }
 }
