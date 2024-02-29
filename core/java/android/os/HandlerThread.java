@@ -19,6 +19,8 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import java.util.concurrent.Executor;
+
 /**
  * A {@link Thread} that has a {@link Looper}.
  * The {@link Looper} can then be used to create {@link Handler}s.
@@ -30,7 +32,8 @@ public class HandlerThread extends Thread {
     int mPriority;
     int mTid = -1;
     Looper mLooper;
-    private @Nullable Handler mHandler;
+    private volatile @Nullable Handler mHandler;
+    private volatile @Nullable Executor mExecutor;
 
     public HandlerThread(String name) {
         super(name);
@@ -128,6 +131,18 @@ public class HandlerThread extends Thread {
             mHandler = new Handler(getLooper());
         }
         return mHandler;
+    }
+
+    /**
+     * @return a shared {@link Executor} associated with this thread
+     * @hide
+     */
+    @NonNull
+    public Executor getThreadExecutor() {
+        if (mExecutor == null) {
+            mExecutor = new HandlerExecutor(getThreadHandler());
+        }
+        return mExecutor;
     }
 
     /**

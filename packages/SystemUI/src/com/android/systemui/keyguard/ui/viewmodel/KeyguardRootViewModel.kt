@@ -74,6 +74,10 @@ constructor(
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
+    private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
+    private val goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
+    private val lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
+    private val lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
     private val lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
     private val lockscreenToGlanceableHubTransitionViewModel:
         LockscreenToGlanceableHubTransitionViewModel,
@@ -133,17 +137,24 @@ constructor(
     fun alpha(viewState: ViewStateAccessor): Flow<Float> {
         return combine(
                 communalInteractor.isIdleOnCommunal,
-                keyguardTransitionInteractor.transitionValue(GONE).onStart { emit(0f) },
+                keyguardTransitionInteractor
+                    .transitionValue(GONE)
+                    .map { it == 1f }
+                    .onStart { emit(false) }
+                    .distinctUntilChanged(),
                 // The transitions are mutually exclusive, so they are safe to merge to get the last
                 // value emitted by any of them. Do not add flows that cannot make this guarantee.
                 merge(
-                        aodAlphaViewModel.alpha,
                         alphaOnShadeExpansion,
                         keyguardInteractor.dismissAlpha.filterNotNull(),
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToLockscreenTransitionViewModel.lockscreenAlpha,
                         glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
+                        goneToAodTransitionViewModel.enterFromTopAnimationAlpha,
+                        goneToDozingTransitionViewModel.lockscreenAlpha,
+                        lockscreenToAodTransitionViewModel.lockscreenAlpha(viewState),
+                        lockscreenToDozingTransitionViewModel.lockscreenAlpha,
                         lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
                         lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
                         lockscreenToGoneTransitionViewModel.lockscreenAlpha(viewState),
@@ -156,8 +167,8 @@ constructor(
                         primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,
                     )
                     .onStart { emit(1f) }
-            ) { isIdleOnCommunal, goneValue, alpha ->
-                if (isIdleOnCommunal || goneValue == 1f) {
+            ) { isIdleOnCommunal, gone, alpha ->
+                if (isIdleOnCommunal || gone) {
                     // Keyguard should not show while the communal hub is fully visible. This check
                     // is added since at the moment, closing the notification shade will cause the
                     // keyguard alpha to be set back to 1. Also ensure keyguard is never visible

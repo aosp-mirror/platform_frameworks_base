@@ -31,39 +31,39 @@ import androidx.compose.ui.unit.IntSize
  * Configures the swipeable behavior of a [SceneTransitionLayout] depending on the current state.
  */
 @Stable
-internal fun Modifier.swipeToScene(gestureHandler: SceneGestureHandler): Modifier {
-    return this.then(SwipeToSceneElement(gestureHandler))
+internal fun Modifier.swipeToScene(draggableHandler: DraggableHandlerImpl): Modifier {
+    return this.then(SwipeToSceneElement(draggableHandler))
 }
 
 private data class SwipeToSceneElement(
-    val gestureHandler: SceneGestureHandler,
+    val draggableHandler: DraggableHandlerImpl,
 ) : ModifierNodeElement<SwipeToSceneNode>() {
-    override fun create(): SwipeToSceneNode = SwipeToSceneNode(gestureHandler)
+    override fun create(): SwipeToSceneNode = SwipeToSceneNode(draggableHandler)
 
     override fun update(node: SwipeToSceneNode) {
-        node.gestureHandler = gestureHandler
+        node.draggableHandler = draggableHandler
     }
 }
 
 private class SwipeToSceneNode(
-    gestureHandler: SceneGestureHandler,
+    draggableHandler: DraggableHandlerImpl,
 ) : DelegatingNode(), PointerInputModifierNode {
     private val delegate =
         delegate(
             MultiPointerDraggableNode(
-                orientation = gestureHandler.orientation,
+                orientation = draggableHandler.orientation,
                 enabled = ::enabled,
                 startDragImmediately = ::startDragImmediately,
-                onDragStarted = gestureHandler.draggable::onDragStarted,
-                onDragDelta = gestureHandler.draggable::onDelta,
-                onDragStopped = gestureHandler.draggable::onDragStopped,
+                onDragStarted = draggableHandler::onDragStarted,
             )
         )
 
-    var gestureHandler: SceneGestureHandler = gestureHandler
+    private var _draggableHandler = draggableHandler
+    var draggableHandler: DraggableHandlerImpl
+        get() = _draggableHandler
         set(value) {
-            if (value != field) {
-                field = value
+            if (_draggableHandler != value) {
+                _draggableHandler = value
 
                 // Make sure to update the delegate orientation. Note that this will automatically
                 // reset the underlying pointer input handler, so previous gestures will be
@@ -81,12 +81,12 @@ private class SwipeToSceneNode(
     override fun onCancelPointerInput() = delegate.onCancelPointerInput()
 
     private fun enabled(): Boolean {
-        return gestureHandler.isDrivingTransition ||
-            currentScene().shouldEnableSwipes(gestureHandler.orientation)
+        return draggableHandler.isDrivingTransition ||
+            currentScene().shouldEnableSwipes(delegate.orientation)
     }
 
     private fun currentScene(): Scene {
-        val layoutImpl = gestureHandler.layoutImpl
+        val layoutImpl = draggableHandler.layoutImpl
         return layoutImpl.scene(layoutImpl.state.transitionState.currentScene)
     }
 
@@ -98,12 +98,12 @@ private class SwipeToSceneNode(
     private fun startDragImmediately(startedPosition: Offset): Boolean {
         // Immediately start the drag if the user can't swipe in the other direction and the gesture
         // handler can intercept it.
-        return !canOppositeSwipe() && gestureHandler.shouldImmediatelyIntercept(startedPosition)
+        return !canOppositeSwipe() && draggableHandler.shouldImmediatelyIntercept(startedPosition)
     }
 
     private fun canOppositeSwipe(): Boolean {
         val oppositeOrientation =
-            when (gestureHandler.orientation) {
+            when (draggableHandler.orientation) {
                 Orientation.Vertical -> Orientation.Horizontal
                 Orientation.Horizontal -> Orientation.Vertical
             }

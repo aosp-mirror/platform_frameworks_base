@@ -177,7 +177,7 @@ public class ClientTransactionItemTest {
     @Test
     public void testMoveToDisplayItem_getContextToUpdate() {
         final MoveToDisplayItem item = MoveToDisplayItem
-                .obtain(mActivityToken, DEFAULT_DISPLAY, mConfiguration);
+                .obtain(mActivityToken, DEFAULT_DISPLAY, mConfiguration, new ActivityWindowInfo());
         final Context context = item.getContextToUpdate(mHandler);
 
         assertEquals(mActivity, context);

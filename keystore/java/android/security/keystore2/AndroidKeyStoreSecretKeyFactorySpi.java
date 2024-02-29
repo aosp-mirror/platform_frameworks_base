@@ -93,6 +93,7 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         long userAuthenticationValidityDurationSeconds = 0;
         boolean userAuthenticationRequired = true;
         boolean userAuthenticationValidWhileOnBody = false;
+        boolean unlockedDeviceRequired = false;
         boolean trustedUserPresenceRequired = false;
         boolean trustedUserConfirmationRequired = false;
         int remainingUsageCount = KeyProperties.UNRESTRICTED_USAGE_COUNT;
@@ -184,6 +185,9 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                                     + userAuthenticationValidityDurationSeconds + " seconds");
                         }
                         break;
+                    case KeymasterDefs.KM_TAG_UNLOCKED_DEVICE_REQUIRED:
+                        unlockedDeviceRequired = true;
+                        break;
                     case KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY:
                         userAuthenticationValidWhileOnBody =
                                 KeyStore2ParameterUtils.isSecureHardware(a.securityLevel);
@@ -257,6 +261,7 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                         : keymasterSwEnforcedUserAuthenticators,
                 userAuthenticationRequirementEnforcedBySecureHardware,
                 userAuthenticationValidWhileOnBody,
+                unlockedDeviceRequired,
                 trustedUserPresenceRequired,
                 invalidatedByBiometricEnrollment,
                 trustedUserConfirmationRequired,

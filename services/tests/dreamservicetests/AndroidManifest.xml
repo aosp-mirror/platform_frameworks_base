@@ -21,6 +21,7 @@
     Insert permissions here. eg:
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
     <application android:debuggable="true"
                  android:testOnly="true">

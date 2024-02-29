@@ -369,12 +369,6 @@ object Flags {
     @Keep
     val WM_BUBBLE_BAR = sysPropBooleanFlag("persist.wm.debug.bubble_bar", default = false)
 
-    // TODO(b/260271148): Tracking bug
-    @Keep
-    @JvmField
-    val WM_DESKTOP_WINDOWING_2 =
-        sysPropBooleanFlag("persist.wm.debug.desktop_mode_2", default = false)
-
     // TODO(b/254513207): Tracking Bug to delete
     @Keep
     @JvmField

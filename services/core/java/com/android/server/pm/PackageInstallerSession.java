@@ -964,7 +964,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private boolean isEmergencyInstallerEnabled(String packageName, Computer snapshot) {
         final PackageStateInternal ps = snapshot.getPackageStateInternal(packageName);
-        if (ps == null || ps.getPkg() == null || !ps.isSystem()) {
+        if (ps == null || ps.getPkg() == null) {
             return false;
         }
         String emergencyInstaller = ps.getPkg().getEmergencyInstaller();

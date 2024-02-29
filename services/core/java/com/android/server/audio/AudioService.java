@@ -12528,6 +12528,16 @@ public class AudioService extends IAudioService.Stub
             if (app == null) {
                 return AudioManager.ERROR;
             }
+            if (android.media.audiopolicy.Flags.audioMixOwnership()) {
+                for (AudioMix mix : policyConfig.getMixes()) {
+                    if (!app.getMixes().contains(mix)) {
+                        Slog.e(TAG,
+                                "removeMixForPolicy attempted to unregister AudioMix(es) not "
+                                        + "belonging to the AudioPolicy");
+                        return AudioManager.ERROR;
+                    }
+                }
+            }
             return app.removeMixes(policyConfig.getMixes()) == AudioSystem.SUCCESS
                 ? AudioManager.SUCCESS : AudioManager.ERROR;
         }
@@ -13306,7 +13316,13 @@ public class AudioService extends IAudioService.Stub
             }
             final long identity = Binder.clearCallingIdentity();
             try {
-                mAudioSystem.registerPolicyMixes(mMixes, false);
+                if (android.media.audiopolicy.Flags.audioMixOwnership()) {
+                    synchronized (mMixes) {
+                        removeMixes(new ArrayList(mMixes));
+                    }
+                } else {
+                    mAudioSystem.registerPolicyMixes(mMixes, false);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -13350,6 +13366,17 @@ public class AudioService extends IAudioService.Stub
 
         int addMixes(@NonNull ArrayList<AudioMix> mixes) {
             synchronized (mMixes) {
+                if (android.media.audiopolicy.Flags.audioMixOwnership()) {
+                    for (AudioMix mix : mixes) {
+                        setMixRegistration(mix);
+                    }
+
+                    int result = mAudioSystem.registerPolicyMixes(mixes, true);
+                    if (result == AudioSystem.SUCCESS) {
+                        this.add(mixes);
+                    }
+                    return result;
+                }
                 this.add(mixes);
                 return mAudioSystem.registerPolicyMixes(mixes, true);
             }

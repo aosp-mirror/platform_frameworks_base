@@ -224,9 +224,11 @@ public interface StatusBarManagerInternal {
     void showRearDisplayDialog(int currentBaseState);
 
     /**
-     * Called when requested to go to fullscreen from the active split app.
+     * Called when requested to go to fullscreen from the focused app.
+     *
+     * @param displayId of the current display.
      */
-    void goToFullscreenFromSplit();
+    void moveFocusedTaskToFullscreen(int displayId);
 
     /**
      * Enters stage split from a current running app.

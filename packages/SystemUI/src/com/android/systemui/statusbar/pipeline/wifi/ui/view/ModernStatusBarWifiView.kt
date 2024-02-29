@@ -20,6 +20,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.ImageView
+import com.android.settingslib.flags.Flags.newStatusBarIcons
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarView
@@ -57,7 +60,18 @@ class ModernStatusBarWifiView(
         ): ModernStatusBarWifiView {
             return (LayoutInflater.from(context).inflate(R.layout.new_status_bar_wifi_group, null)
                     as ModernStatusBarWifiView)
-                .also { it.initView(slot) { WifiViewBinder.bind(it, wifiViewModel) } }
+                .also {
+                    // Flag-specific configuration
+                    if (newStatusBarIcons()) {
+                        // The newer asset does not embed whitespace around it, and is therefore
+                        // rectangular. Use wrap_content for the width in this case
+                        val iconView = it.requireViewById<ImageView>(R.id.wifi_signal)
+                        val lp = iconView.layoutParams
+                        lp.width = ViewGroup.LayoutParams.WRAP_CONTENT
+                    }
+
+                    it.initView(slot) { WifiViewBinder.bind(it, wifiViewModel) }
+                }
         }
     }
 }

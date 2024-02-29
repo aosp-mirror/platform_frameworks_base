@@ -231,7 +231,10 @@ public final class KeyboardMetricsCollector {
         DESKTOP_MODE(
                 FrameworkStatsLog
                         .KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__DESKTOP_MODE,
-                "DESKTOP_MODE");
+                "DESKTOP_MODE"),
+        MULTI_WINDOW_NAVIGATION(FrameworkStatsLog
+                .KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__MULTI_WINDOW_NAVIGATION,
+                "MULTIWINDOW_NAVIGATION");
 
 
         private final int mValue;

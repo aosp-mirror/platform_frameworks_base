@@ -55,3 +55,5 @@ class android.content.Context stub
     method getSystemService (Ljava/lang/Class;)Ljava/lang/Object; stub
 class android.content.pm.PackageManager stub
     method <init> ()V stub
+class android.text.ClipboardManager stub
+    method <init> ()V stub

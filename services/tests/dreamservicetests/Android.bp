@@ -18,6 +18,11 @@ android_test {
         "mockito-target-minus-junit4",
         "services.core",
         "mockingservicestests-utils-mockito",
+        "servicestests-utils",
+    ],
+
+    defaults: [
+        "modules-utils-testable-device-config-defaults",
     ],
 
     platform_apis: true,

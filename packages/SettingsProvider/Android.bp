@@ -60,6 +60,7 @@ android_test {
         // because this test is not an instrumentation test. (because the target runs in the system process.)
         "SettingsProviderLib",
         "androidx.test.rules",
+        "device_config_service_flags_java",
         "flag-junit",
         "junit",
         "libaconfig_java_proto_lite",

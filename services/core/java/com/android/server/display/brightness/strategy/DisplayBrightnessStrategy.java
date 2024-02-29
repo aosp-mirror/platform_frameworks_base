@@ -21,6 +21,8 @@ import android.hardware.display.DisplayManagerInternal;
 
 import com.android.server.display.DisplayBrightnessState;
 
+import java.io.PrintWriter;
+
 /**
  * Decides the DisplayBrighntessState that the display should change to based on strategy-specific
  * logic within each implementation. Clamping should be done outside of DisplayBrightnessStrategy if
@@ -40,4 +42,10 @@ public interface DisplayBrightnessStrategy {
      */
     @NonNull
     String getName();
+
+    /**
+     * Dumps the state of the Strategy
+     * @param writer
+     */
+    void dump(PrintWriter writer);
 }

@@ -20,9 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -91,19 +89,6 @@ public class WifiMacAddressPreferenceControllerTest {
         assertWithMessage("Intent filter should contain expected intents")
                 .that(mController.getConnectivityIntents())
                 .asList().containsAtLeastElementsIn(expectedIntents);
-    }
-
-    @Test
-    public void updateConnectivity_notAvailable_notCalled() {
-        boolean mCalled = false;
-        mController = spy(new ConcreteWifiMacAddressPreferenceController(mContext, mLifecycle) {
-            @Override
-            public boolean isAvailable() {
-                return false;
-            }
-        });
-        mController.displayPreference(mScreen);
-        verify(mController, never()).updateConnectivity();
     }
 
     @Test

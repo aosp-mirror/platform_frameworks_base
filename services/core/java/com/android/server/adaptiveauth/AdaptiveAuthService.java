@@ -32,8 +32,10 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockSettingsStateListener;
@@ -57,6 +59,8 @@ public class AdaptiveAuthService extends SystemService {
     private static final int MSG_REPORT_BIOMETRIC_AUTH_ATTEMPT = 2;
     private static final int AUTH_SUCCESS = 1;
     private static final int AUTH_FAILURE = 0;
+    private static final int TYPE_PRIMARY_AUTH = 0;
+    private static final int TYPE_BIOMETRIC_AUTH = 1;
 
     private final LockPatternUtils mLockPatternUtils;
     private final LockSettingsInternal mLockSettings;
@@ -67,6 +71,7 @@ public class AdaptiveAuthService extends SystemService {
     private final UserManagerInternal mUserManager;
     @VisibleForTesting
     final SparseIntArray mFailedAttemptsForUser = new SparseIntArray();
+    private final SparseLongArray mLastLockedTimestamp = new SparseLongArray();
 
     public AdaptiveAuthService(Context context) {
         this(context, new LockPatternUtils(context));
@@ -170,7 +175,7 @@ public class AdaptiveAuthService extends SystemService {
             Slog.d(TAG, "handleReportPrimaryAuthAttempt: success=" + success
                     + ", userId=" + userId);
         }
-        reportAuthAttempt(success, userId);
+        reportAuthAttempt(TYPE_PRIMARY_AUTH, success, userId);
     }
 
     private void handleReportBiometricAuthAttempt(boolean success, int userId) {
@@ -178,13 +183,24 @@ public class AdaptiveAuthService extends SystemService {
             Slog.d(TAG, "handleReportBiometricAuthAttempt: success=" + success
                     + ", userId=" + userId);
         }
-        reportAuthAttempt(success, userId);
+        reportAuthAttempt(TYPE_BIOMETRIC_AUTH, success, userId);
     }
 
-    private void reportAuthAttempt(boolean success, int userId) {
+    private void reportAuthAttempt(int authType, boolean success, int userId) {
         if (success) {
             // Deleting the entry effectively resets the counter of failed attempts for the user
             mFailedAttemptsForUser.delete(userId);
+
+            // Collect metrics if the device was locked by adaptive auth before
+            if (mLastLockedTimestamp.indexOfKey(userId) >= 0) {
+                final long lastLockedTime = mLastLockedTimestamp.get(userId);
+                collectTimeElapsedSinceLastLocked(
+                        lastLockedTime, SystemClock.elapsedRealtime(), authType);
+
+                // Remove the entry for the last locked time because a successful auth just happened
+                // and metrics have been collected
+                mLastLockedTimestamp.delete(userId);
+            }
             return;
         }
 
@@ -208,6 +224,34 @@ public class AdaptiveAuthService extends SystemService {
 
         //TODO: additionally consider the trust signal before locking device
         lockDevice(userId);
+    }
+
+    private static void collectTimeElapsedSinceLastLocked(long lastLockedTime, long authTime,
+            int authType) {
+        final int unlockType =  switch (authType) {
+            case TYPE_PRIMARY_AUTH -> FrameworkStatsLog
+                    .ADAPTIVE_AUTH_UNLOCK_AFTER_LOCK_REPORTED__UNLOCK_TYPE__PRIMARY_AUTH;
+            case TYPE_BIOMETRIC_AUTH -> FrameworkStatsLog
+                    .ADAPTIVE_AUTH_UNLOCK_AFTER_LOCK_REPORTED__UNLOCK_TYPE__BIOMETRIC_AUTH;
+            default -> FrameworkStatsLog
+                    .ADAPTIVE_AUTH_UNLOCK_AFTER_LOCK_REPORTED__UNLOCK_TYPE__UNKNOWN;
+        };
+
+        if (DEBUG) {
+            Slog.d(TAG, "collectTimeElapsedSinceLastLockedForUser: "
+                    + "lastLockedTime=" + lastLockedTime
+                    + ", authTime=" + authTime
+                    + ", unlockType=" + unlockType);
+        }
+
+        // This usually shouldn't happen, and just check out of an abundance of caution
+        if (lastLockedTime > authTime) {
+            return;
+        }
+
+        // Log to statsd
+        FrameworkStatsLog.write(FrameworkStatsLog.ADAPTIVE_AUTH_UNLOCK_AFTER_LOCK_REPORTED,
+                lastLockedTime, authTime, unlockType);
     }
 
     /**
@@ -234,5 +278,9 @@ public class AdaptiveAuthService extends SystemService {
 
         // Lock the device
         mWindowManager.lockNow();
+
+        // Record the time that the device is locked by adaptive auth to collect metrics when the
+        // next successful primary or biometric auth happens
+        mLastLockedTimestamp.put(userId, SystemClock.elapsedRealtime());
     }
 }

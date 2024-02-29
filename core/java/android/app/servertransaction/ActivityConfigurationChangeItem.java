@@ -29,6 +29,7 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
+import android.window.ActivityWindowInfo;
 
 import java.util.Objects;
 
@@ -49,11 +50,13 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     }
 
     @Override
-    public void execute(@NonNull ClientTransactionHandler client, @Nullable ActivityClientRecord r,
+    public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
             @NonNull PendingTransactionActions pendingActions) {
         // TODO(lifecycler): detect if PIP or multi-window mode changed and report it here.
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
-        client.handleActivityConfigurationChanged(r, mConfiguration, INVALID_DISPLAY);
+        client.handleActivityConfigurationChanged(r, mConfiguration, INVALID_DISPLAY,
+                // TODO(b/287582673): add ActivityWindowInfo
+                new ActivityWindowInfo());
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 

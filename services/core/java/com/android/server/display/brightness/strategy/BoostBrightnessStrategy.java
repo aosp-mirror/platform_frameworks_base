@@ -23,6 +23,8 @@ import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
 
+import java.io.PrintWriter;
+
 /**
  * Manages the brightness of the display when the system brightness boost is requested.
  */
@@ -48,4 +50,7 @@ public class BoostBrightnessStrategy implements DisplayBrightnessStrategy {
     public String getName() {
         return "BoostBrightnessStrategy";
     }
+
+    @Override
+    public void dump(PrintWriter writer) {}
 }

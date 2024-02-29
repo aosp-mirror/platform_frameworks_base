@@ -18,20 +18,12 @@ package com.android.wm.shell.desktopmode;
 
 import android.os.SystemProperties;
 
-import com.android.wm.shell.Flags;
+import com.android.window.flags.Flags;
 
 /**
  * Constants for desktop mode feature
  */
 public class DesktopModeStatus {
-
-    private static final boolean ENABLE_DESKTOP_WINDOWING = Flags.enableDesktopWindowing();
-
-    /**
-     * Flag to indicate whether desktop mode proto is available on the device
-     */
-    private static final boolean IS_PROTO2_ENABLED = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode_2", false);
 
     /**
      * Flag to indicate whether task resizing is veiled.
@@ -75,16 +67,10 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_use_rounded_corners", true);
 
     /**
-     * Return {@code true} is desktop windowing proto 2 is enabled
+     * Return {@code true} if desktop windowing is enabled
      */
     public static boolean isEnabled() {
-        // Check for aconfig flag first
-        if (ENABLE_DESKTOP_WINDOWING) {
-            return true;
-        }
-        // Fall back to sysprop flag
-        // TODO(b/304778354): remove sysprop once desktop aconfig flag supports dynamic overriding
-        return IS_PROTO2_ENABLED;
+        return Flags.enableDesktopWindowingMode();
     }
 
     /**

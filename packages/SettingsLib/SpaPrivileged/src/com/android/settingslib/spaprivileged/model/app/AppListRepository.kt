@@ -26,6 +26,7 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.ResolveInfo
 import android.os.SystemProperties
+import android.util.Log
 import com.android.internal.R
 import com.android.settingslib.spaprivileged.framework.common.userManager
 import kotlinx.coroutines.async
@@ -85,19 +86,24 @@ class AppListRepositoryImpl(
         userId: Int,
         loadInstantApps: Boolean,
         matchAnyUserForAdmin: Boolean,
-    ): List<ApplicationInfo> = coroutineScope {
-        val hiddenSystemModulesDeferred = async { packageManager.getHiddenSystemModules() }
-        val hideWhenDisabledPackagesDeferred = async {
-            context.resources.getStringArray(R.array.config_hideWhenDisabled_packageNames)
-        }
-        val installedApplicationsAsUser =
-            getInstalledApplications(userId, matchAnyUserForAdmin)
+    ): List<ApplicationInfo> = try {
+        coroutineScope {
+            val hiddenSystemModulesDeferred = async { packageManager.getHiddenSystemModules() }
+            val hideWhenDisabledPackagesDeferred = async {
+                context.resources.getStringArray(R.array.config_hideWhenDisabled_packageNames)
+            }
+            val installedApplicationsAsUser =
+                getInstalledApplications(userId, matchAnyUserForAdmin)
 
-        val hiddenSystemModules = hiddenSystemModulesDeferred.await()
-        val hideWhenDisabledPackages = hideWhenDisabledPackagesDeferred.await()
-        installedApplicationsAsUser.filter { app ->
-            app.isInAppList(loadInstantApps, hiddenSystemModules, hideWhenDisabledPackages)
+            val hiddenSystemModules = hiddenSystemModulesDeferred.await()
+            val hideWhenDisabledPackages = hideWhenDisabledPackagesDeferred.await()
+            installedApplicationsAsUser.filter { app ->
+                app.isInAppList(loadInstantApps, hiddenSystemModules, hideWhenDisabledPackages)
+            }
         }
+    } catch (e: Exception) {
+        Log.e(TAG, "loadApps failed", e)
+        emptyList()
     }
 
     private suspend fun getInstalledApplications(
@@ -210,6 +216,8 @@ class AppListRepositoryImpl(
     }
 
     companion object {
+        private const val TAG = "AppListRepository"
+
         private fun ApplicationInfo.isInAppList(
             showInstantApps: Boolean,
             hiddenSystemModules: Set<String>,

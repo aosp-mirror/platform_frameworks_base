@@ -242,13 +242,17 @@ public class BubbleBarLayerView extends FrameLayout
     }
 
     /** Removes the given {@code bubble}. */
-    public void removeBubble(Bubble bubble) {
+    public void removeBubble(Bubble bubble, Runnable endAction) {
+        Runnable cleanUp = () -> {
+            bubble.cleanupViews();
+            endAction.run();
+        };
         if (mBubbleData.getBubbles().isEmpty()) {
             // we're removing the last bubble. collapse the expanded view and cleanup bubble views
             // at the end.
-            collapse(bubble::cleanupViews);
+            collapse(cleanUp);
         } else {
-            bubble.cleanupViews();
+            cleanUp.run();
         }
     }
 
@@ -264,6 +268,9 @@ public class BubbleBarLayerView extends FrameLayout
      */
     public void collapse(@Nullable Runnable endAction) {
         if (!mIsExpanded) {
+            if (endAction != null) {
+                endAction.run();
+            }
             return;
         }
         mIsExpanded = false;

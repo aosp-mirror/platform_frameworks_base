@@ -39,6 +39,7 @@ import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import androidx.credentials.provider.RemoteEntry
 import com.android.credentialmanager.IS_AUTO_SELECTED_KEY
+import com.android.credentialmanager.R
 import com.android.credentialmanager.model.get.ActionEntryInfo
 import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
@@ -127,10 +128,10 @@ private fun getCredentialOptionInfoList(
                     userName = credentialEntry.username.toString(),
                     displayName = credentialEntry.displayName?.toString(),
                     icon = credentialEntry.icon.loadDrawable(context),
-                    shouldTintIcon = credentialEntry.isDefaultIcon,
+                    shouldTintIcon = credentialEntry.hasDefaultIcon,
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
-                            credentialEntry.autoSelectAllowedFromOption,
+                            credentialEntry.isAutoSelectAllowedFromOption,
                 )
                 )
             }
@@ -147,11 +148,13 @@ private fun getCredentialOptionInfoList(
                     credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
                     userName = credentialEntry.username.toString(),
                     displayName = credentialEntry.displayName?.toString(),
-                    icon = credentialEntry.icon.loadDrawable(context),
-                    shouldTintIcon = credentialEntry.isDefaultIcon,
+                    icon = if (credentialEntry.hasDefaultIcon)
+                        context.getDrawable(R.drawable.ic_passkey_24)
+                    else credentialEntry.icon.loadDrawable(context),
+                    shouldTintIcon = credentialEntry.hasDefaultIcon,
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
-                            credentialEntry.autoSelectAllowedFromOption,
+                            credentialEntry.isAutoSelectAllowedFromOption,
                 )
                 )
             }
@@ -170,10 +173,10 @@ private fun getCredentialOptionInfoList(
                     userName = credentialEntry.title.toString(),
                     displayName = credentialEntry.subtitle?.toString(),
                     icon = credentialEntry.icon.loadDrawable(context),
-                    shouldTintIcon = credentialEntry.isDefaultIcon,
+                    shouldTintIcon = credentialEntry.hasDefaultIcon,
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
-                            credentialEntry.autoSelectAllowedFromOption,
+                            credentialEntry.isAutoSelectAllowedFromOption,
                 )
                 )
             }

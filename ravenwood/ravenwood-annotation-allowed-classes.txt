@@ -186,6 +186,7 @@ android.os.WorkSource
 android.content.ClipData
 android.content.ClipData$Item
 android.content.ClipDescription
+android.content.ClipboardManager
 android.content.ComponentName
 android.content.ContentUris
 android.content.ContentValues

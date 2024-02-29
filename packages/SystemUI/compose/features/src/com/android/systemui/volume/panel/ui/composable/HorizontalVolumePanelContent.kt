@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +37,7 @@ fun VolumePanelComposeScope.HorizontalVolumePanelContent(
     val spacing = 20.dp
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(space = spacing)) {
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(spacing)
         ) {
             for (component in layout.contentComponents) {
@@ -46,7 +48,7 @@ fun VolumePanelComposeScope.HorizontalVolumePanelContent(
         }
 
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(space = spacing, alignment = Alignment.Top)
         ) {
             for (component in layout.headerComponents) {

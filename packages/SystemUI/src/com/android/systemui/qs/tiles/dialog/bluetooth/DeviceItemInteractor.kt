@@ -133,7 +133,7 @@ constructor(
                 bluetoothTileDialogRepository.cachedDevices
                     .mapNotNull { cachedDevice ->
                         deviceItemFactoryList
-                            .firstOrNull { it.isFilterMatched(cachedDevice, audioManager) }
+                            .firstOrNull { it.isFilterMatched(context, cachedDevice, audioManager) }
                             ?.create(context, cachedDevice)
                     }
                     .sort(displayPriority, bluetoothAdapter?.mostRecentlyConnectedDevices)
