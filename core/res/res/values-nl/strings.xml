@@ -1986,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Werk-apps hervatten?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Hervatten"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Noodgeval"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Schermvergrendeling instellen"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Schermvergrendeling instellen"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Als je je privéruimte wilt gebruiken, stel je een schermvergrendeling op dit apparaat in"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App is niet beschikbaar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is momenteel niet beschikbaar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> niet beschikbaar"</string>
@@ -2359,7 +2362,7 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Hiermee kan een bijbehorende app services op de voorgrond vanuit de achtergrond starten."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Microfoon is beschikbaar"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Microfoon is geblokkeerd"</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Kan niet spiegelen naar scherm"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Kan niet mirroren naar scherm"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Gebruik een andere kabel en probeer het opnieuw"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Je apparaat is te warm en kan pas naar het scherm mirroren als het is afgekoeld"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
