@@ -147,7 +147,7 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         testScope.runTest { useCredentialAndReset(Utils.CREDENTIAL_PIN) }
 
     @Test
-    fun usePattermCredentialAndReset() =
+    fun usePatternCredentialAndReset() =
         testScope.runTest { useCredentialAndReset(Utils.CREDENTIAL_PATTERN) }
 
     @Test

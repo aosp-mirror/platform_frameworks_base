@@ -17,6 +17,7 @@ sealed class BiometricPromptRequest(
     val title: String,
     val subtitle: String,
     val description: String,
+    val contentView: PromptContentView?,
     val userInfo: BiometricUserInfo,
     val operationInfo: BiometricOperationInfo,
     val showEmergencyCallButton: Boolean,
@@ -33,11 +34,11 @@ sealed class BiometricPromptRequest(
             title = info.title?.toString() ?: "",
             subtitle = info.subtitle?.toString() ?: "",
             description = info.description?.toString() ?: "",
+            contentView = info.contentView,
             userInfo = userInfo,
             operationInfo = operationInfo,
             showEmergencyCallButton = info.isShowEmergencyCallButton
         ) {
-        val contentView: PromptContentView? = info.contentView
         val logoRes: Int = info.logoRes
         val logoBitmap: Bitmap? = info.logoBitmap
         val logoDescription: String? = info.logoDescription
@@ -54,6 +55,7 @@ sealed class BiometricPromptRequest(
             title = (info.deviceCredentialTitle ?: info.title)?.toString() ?: "",
             subtitle = (info.deviceCredentialSubtitle ?: info.subtitle)?.toString() ?: "",
             description = (info.deviceCredentialDescription ?: info.description)?.toString() ?: "",
+            contentView = info.contentView,
             userInfo = userInfo,
             operationInfo = operationInfo,
             showEmergencyCallButton = info.isShowEmergencyCallButton
