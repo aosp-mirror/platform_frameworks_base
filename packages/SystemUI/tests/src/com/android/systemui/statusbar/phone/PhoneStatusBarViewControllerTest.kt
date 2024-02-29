@@ -20,6 +20,7 @@ import android.app.StatusBarManager.WINDOW_STATE_HIDDEN
 import android.app.StatusBarManager.WINDOW_STATE_HIDING
 import android.app.StatusBarManager.WINDOW_STATE_SHOWING
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
+import android.view.InputDevice
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -239,8 +240,39 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             controller = createAndInitController(view)
         }
         val statusContainer = view.requireViewById<View>(R.id.system_icons)
-        statusContainer.performClick()
+        statusContainer.dispatchTouchEvent(
+            getMotionEventFromSource(
+                MotionEvent.ACTION_UP,
+                0,
+                0,
+                InputDevice.SOURCE_MOUSE
+            )
+        )
         verify(shadeViewController).expand(any())
+    }
+
+    @Test
+    fun statusIconContainerIsNotHandlingTouchScreenTouches() {
+        val view = createViewMock()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            controller = createAndInitController(view)
+        }
+        val statusContainer = view.requireViewById<View>(R.id.system_icons)
+        val handled = statusContainer.dispatchTouchEvent(
+            getMotionEventFromSource(
+                MotionEvent.ACTION_UP,
+                0,
+                0,
+                InputDevice.SOURCE_TOUCHSCREEN
+            )
+        )
+        assertThat(handled).isFalse()
+    }
+
+    private fun getMotionEventFromSource(action: Int, x: Int, y: Int, source: Int): MotionEvent {
+        val ev = MotionEvent.obtain(0, 0, action, x.toFloat(), y.toFloat(), 0)
+        ev.source = source
+        return ev
     }
 
     @Test
