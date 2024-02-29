@@ -16815,10 +16815,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAttachInfo.mViewRootImpl.getWindowVisibleDisplayFrame(outRect);
             return;
         }
-        // The view is not attached to a display so we don't have a context.
-        // Make a best guess about the display size.
-        Display d = DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
-        d.getRectSize(outRect);
+        // TODO (b/327559224): Refine the behavior to better reflect the window environment with API
+        //  doc updates.
+        final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
+        final WindowMetrics metrics = windowManager.getMaximumWindowMetrics();
+        final Insets insets = metrics.getWindowInsets().getInsets(
+                WindowInsets.Type.navigationBars() | WindowInsets.Type.displayCutout());
+        outRect.set(metrics.getBounds());
+        outRect.inset(insets);
+        outRect.offsetTo(0, 0);
     }
 
     /**
