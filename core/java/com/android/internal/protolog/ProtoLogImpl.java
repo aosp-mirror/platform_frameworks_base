@@ -98,7 +98,7 @@ public class ProtoLogImpl {
      */
     public static synchronized IProtoLog getSingleInstance() {
         if (sServiceInstance == null) {
-            if (android.tracing.Flags.perfettoProtolog()) {
+            if (android.tracing.Flags.perfettoProtologTracing()) {
                 sServiceInstance =
                         new PerfettoProtoLogImpl(sViewerConfigPath);
             } else {

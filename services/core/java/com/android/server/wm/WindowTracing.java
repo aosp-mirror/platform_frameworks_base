@@ -155,13 +155,13 @@ class WindowTracing {
             logAndPrintln(pw, "Stop tracing to " + mTraceFile + ". Waiting for traces to flush.");
             writeTraceToFileLocked();
             logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
-            if (!android.tracing.Flags.perfettoProtolog()) {
+            if (!android.tracing.Flags.perfettoProtologTracing()) {
                 ((LegacyProtoLogImpl) mProtoLog).stopProtoLog(pw, true);
             }
             logAndPrintln(pw, "Start tracing to " + mTraceFile + ".");
             mBuffer.resetBuffer();
             mEnabled = mEnabledLockFree = true;
-            if (!android.tracing.Flags.perfettoProtolog()) {
+            if (!android.tracing.Flags.perfettoProtologTracing()) {
                 ((LegacyProtoLogImpl) mProtoLog).startProtoLog(pw);
             }
         }

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "messages": {
     "7286191062634870297": {
       "message": "Binding proc %s with config %s",
