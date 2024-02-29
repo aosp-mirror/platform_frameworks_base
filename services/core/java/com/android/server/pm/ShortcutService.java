@@ -520,7 +520,7 @@ public class ShortcutService extends IShortcutService.Stub {
         mShortcutRequestPinProcessor = new ShortcutRequestPinProcessor(this, mLock);
         mShortcutDumpFiles = new ShortcutDumpFiles(this);
         mIsAppSearchEnabled = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, true)
+                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, false)
                 && !injectIsLowRamDevice();
 
         if (onlyForPackageManagerApis) {
