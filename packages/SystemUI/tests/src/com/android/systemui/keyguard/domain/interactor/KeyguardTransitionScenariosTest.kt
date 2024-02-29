@@ -169,6 +169,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
+                    powerInteractor = powerInteractor,
                 )
                 .apply { start() }
 
@@ -574,8 +575,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN the device begins to wake
+            keyguardRepository.setKeyguardShowing(true)
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(60L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -630,14 +632,41 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun dozingToGone() =
+    fun dozingToGoneWithUnlock() =
         testScope.runTest {
             // GIVEN a prior transition has run to DOZING
             runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DOZING)
+            runCurrent()
 
             // WHEN biometrics succeeds with wake and unlock mode
+            powerInteractor.setAwakeForTest()
             keyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+            advanceTimeBy(60L)
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    to = KeyguardState.GONE,
+                    from = KeyguardState.DOZING,
+                    ownerName = "FromDozingTransitionInteractor",
+                    animatorAssertion = { it.isNotNull() }
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    /** This handles security method NONE and screen off with lock timeout */
+    @Test
+    fun dozingToGoneWithKeyguardNotShowing() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DOZING
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DOZING)
             runCurrent()
+
+            // WHEN the device wakes up without a keyguard
+            keyguardRepository.setKeyguardShowing(false)
+            keyguardRepository.setKeyguardDismissible(true)
+            powerInteractor.setAwakeForTest()
+            advanceTimeBy(60L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -666,8 +695,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN the device begins to wake
+            keyguardRepository.setKeyguardShowing(true)
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(60L)
 
             assertThat(transitionRepository)
                 .startedTransition(
@@ -1335,8 +1365,9 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the keyguard is occluded and device wakes up
             keyguardRepository.setKeyguardOccluded(true)
+            keyguardRepository.setKeyguardShowing(true)
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(60L)
 
             // THEN a transition to OCCLUDED should occur
             assertThat(transitionRepository)
