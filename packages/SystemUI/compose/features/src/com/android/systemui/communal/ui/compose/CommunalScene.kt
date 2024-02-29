@@ -19,12 +19,12 @@ package com.android.systemui.communal.ui.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.UserAction
-import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.scene.ui.composable.ComposableScene
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
