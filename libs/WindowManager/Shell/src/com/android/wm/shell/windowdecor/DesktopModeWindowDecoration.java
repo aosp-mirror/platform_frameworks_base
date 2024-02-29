@@ -56,6 +56,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeAppControlsWindowDecorationViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeFocusedWindowDecorationViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeWindowDecorationViewHolder;
@@ -337,6 +338,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             controlsElement.mWidthResId = R.dimen.desktop_mode_right_edge_buttons_width;
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
+            relayoutParams.mAllowCaptionInputFallthrough =
+                    TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo);
         }
         if (DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ taskInfo.isFocused)) {
             relayoutParams.mShadowRadiusId = taskInfo.isFocused
@@ -696,6 +699,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 && inputPoint.x <= mResult.mCaptionX + mResult.mCaptionWidth
                 && inputPoint.y >= 0
                 && inputPoint.y <= mResult.mCaptionHeight;
+    }
+
+    /**
+     * Checks whether the touch event falls inside the customizable caption region.
+     */
+    boolean checkTouchEventInCustomizableRegion(MotionEvent ev) {
+        return mResult.mCustomizableCaptionRegion.contains((int) ev.getRawX(), (int) ev.getRawY());
     }
 
     /**

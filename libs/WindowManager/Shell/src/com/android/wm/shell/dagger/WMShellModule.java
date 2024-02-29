@@ -201,9 +201,11 @@ public abstract class WMShellModule {
     @Provides
     static WindowDecorViewModel provideWindowDecorViewModel(
             Context context,
+            @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellMainThread Choreographer mainChoreographer,
             ShellInit shellInit,
+            IWindowManager windowManager,
             ShellCommandHandler shellCommandHandler,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
@@ -216,10 +218,12 @@ public abstract class WMShellModule {
         if (DesktopModeStatus.isEnabled()) {
             return new DesktopModeWindowDecorViewModel(
                     context,
+                    mainExecutor,
                     mainHandler,
                     mainChoreographer,
                     shellInit,
                     shellCommandHandler,
+                    windowManager,
                     taskOrganizer,
                     displayController,
                     shellController,
