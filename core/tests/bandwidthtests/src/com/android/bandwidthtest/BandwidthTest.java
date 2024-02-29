@@ -30,8 +30,9 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
+
+import androidx.test.filters.LargeTest;
 
 import com.android.bandwidthtest.util.BandwidthTestUtil;
 import com.android.bandwidthtest.util.ConnectionUtil;
