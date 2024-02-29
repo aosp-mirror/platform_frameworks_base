@@ -25,6 +25,7 @@ import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl
@@ -42,7 +43,6 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
@@ -515,8 +515,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             val transitionProgress by collectLastValue(transitionProgressFlow)
 
             val transitionState =
-                MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(targetScene)
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(targetScene)
                 )
             underTest.setTransitionState(transitionState)
 
@@ -533,8 +533,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             val transitionProgress by collectLastValue(transitionProgressFlow)
 
             val transitionState =
-                MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(currentScene)
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(currentScene)
                 )
             underTest.setTransitionState(transitionState)
 
@@ -551,8 +551,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             val transitionProgress by collectLastValue(transitionProgressFlow)
 
             var transitionState =
-                MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(currentScene)
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(currentScene)
                 )
             underTest.setTransitionState(transitionState)
 
@@ -562,7 +562,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             val progress = MutableStateFlow(0f)
             transitionState =
                 MutableStateFlow(
-                    ObservableCommunalTransitionState.Transition(
+                    ObservableTransitionState.Transition(
                         fromScene = currentScene,
                         toScene = targetScene,
                         progress = progress,
@@ -581,7 +581,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Transition(1f))
 
             // Transition finishes.
-            transitionState = MutableStateFlow(ObservableCommunalTransitionState.Idle(targetScene))
+            transitionState = MutableStateFlow(ObservableTransitionState.Idle(targetScene))
             underTest.setTransitionState(transitionState)
             assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(targetScene))
         }
@@ -595,8 +595,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             val transitionProgress by collectLastValue(transitionProgressFlow)
 
             var transitionState =
-                MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(currentScene)
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(currentScene)
                 )
             underTest.setTransitionState(transitionState)
 
@@ -606,7 +606,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             val progress = MutableStateFlow(0f)
             transitionState =
                 MutableStateFlow(
-                    ObservableCommunalTransitionState.Transition(
+                    ObservableTransitionState.Transition(
                         fromScene = currentScene,
                         toScene = targetScene,
                         progress = progress,
@@ -627,7 +627,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.OtherTransition)
 
             // Transition finishes.
-            transitionState = MutableStateFlow(ObservableCommunalTransitionState.Idle(targetScene))
+            transitionState = MutableStateFlow(ObservableTransitionState.Idle(targetScene))
             underTest.setTransitionState(transitionState)
             assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(targetScene))
         }
@@ -706,8 +706,8 @@ class CommunalInteractorTest : SysuiTestCase() {
     fun isIdleOnCommunal() =
         testScope.runTest {
             val transitionState =
-                MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalScenes.Blank)
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(CommunalScenes.Blank)
                 )
             communalRepository.setTransitionState(transitionState)
 
@@ -717,7 +717,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isIdleOnCommunal).isEqualTo(false)
 
             // Transition to communal.
-            transitionState.value = ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
+            transitionState.value = ObservableTransitionState.Idle(CommunalScenes.Communal)
             runCurrent()
 
             // isIdleOnCommunal is now true since we're on communal.
@@ -725,7 +725,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             // Start transition away from communal.
             transitionState.value =
-                ObservableCommunalTransitionState.Transition(
+                ObservableTransitionState.Transition(
                     fromScene = CommunalScenes.Communal,
                     toScene = CommunalScenes.Blank,
                     progress = flowOf(0f),
@@ -742,8 +742,8 @@ class CommunalInteractorTest : SysuiTestCase() {
     fun isCommunalVisible() =
         testScope.runTest {
             val transitionState =
-                MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalScenes.Blank)
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(CommunalScenes.Blank)
                 )
             communalRepository.setTransitionState(transitionState)
 
@@ -753,7 +753,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             // Start transition to communal.
             transitionState.value =
-                ObservableCommunalTransitionState.Transition(
+                ObservableTransitionState.Transition(
                     fromScene = CommunalScenes.Blank,
                     toScene = CommunalScenes.Communal,
                     progress = flowOf(0f),
@@ -765,14 +765,14 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalVisible).isEqualTo(true)
 
             // Finish transition to communal
-            transitionState.value = ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
+            transitionState.value = ObservableTransitionState.Idle(CommunalScenes.Communal)
 
             // isCommunalVisible is true since we're on communal.
             assertThat(isCommunalVisible).isEqualTo(true)
 
             // Start transition away from communal.
             transitionState.value =
-                ObservableCommunalTransitionState.Transition(
+                ObservableTransitionState.Transition(
                     fromScene = CommunalScenes.Communal,
                     toScene = CommunalScenes.Blank,
                     progress = flowOf(1.0f),

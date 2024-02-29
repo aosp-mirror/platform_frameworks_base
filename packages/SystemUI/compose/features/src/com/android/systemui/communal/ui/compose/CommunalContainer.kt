@@ -14,7 +14,6 @@ import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.FixedSizeEdgeDetector
 import com.android.compose.animation.scene.LowestZIndexScenePicker
-import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
@@ -25,12 +24,10 @@ import com.android.compose.animation.scene.transitions
 import com.android.compose.animation.scene.updateSceneTransitionLayoutState
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.res.R
-import kotlinx.coroutines.flow.map
 
 object Communal {
     object Elements {
@@ -79,9 +76,7 @@ fun CommunalContainer(
     // This effect exposes the SceneTransitionLayout's observable transition state to the rest of
     // the system, and unsets it when the view is disposed to avoid a memory leak.
     DisposableEffect(viewModel, sceneTransitionLayoutState) {
-        viewModel.setTransitionState(
-            sceneTransitionLayoutState.observableTransitionState().map { it.toModel() }
-        )
+        viewModel.setTransitionState(sceneTransitionLayoutState.observableTransitionState())
         onDispose { viewModel.setTransitionState(null) }
     }
 
@@ -127,23 +122,4 @@ private fun SceneScope.CommunalScene(
                 .background(LocalAndroidColorScheme.current.outlineVariant),
     )
     Box(modifier.element(Communal.Elements.Content)) { CommunalHub(viewModel = viewModel) }
-}
-
-/**
- * Converts between the [SceneTransitionLayout] state class and our forked data class that can be
- * used throughout SysUI.
- */
-// TODO(b/315490861): Remove these conversions once Compose can be used throughout SysUI.
-fun ObservableTransitionState.toModel(): ObservableCommunalTransitionState {
-    return when (this) {
-        is ObservableTransitionState.Idle -> ObservableCommunalTransitionState.Idle(scene)
-        is ObservableTransitionState.Transition ->
-            ObservableCommunalTransitionState.Transition(
-                fromScene = fromScene,
-                toScene = toScene,
-                progress = progress,
-                isInitiatedByUserInput = isInitiatedByUserInput,
-                isUserInputOngoing = isUserInputOngoing,
-            )
-    }
 }

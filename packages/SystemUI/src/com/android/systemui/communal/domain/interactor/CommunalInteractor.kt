@@ -19,6 +19,7 @@ package com.android.systemui.communal.domain.interactor
 import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
 import android.os.UserHandle
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalPrefsRepository
@@ -32,7 +33,6 @@ import com.android.systemui.communal.shared.model.CommunalContentSize.HALF
 import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
@@ -140,15 +140,14 @@ constructor(
         }
 
     /** Transition state of the hub mode. */
-    val transitionState: StateFlow<ObservableCommunalTransitionState> =
-        communalRepository.transitionState
+    val transitionState: StateFlow<ObservableTransitionState> = communalRepository.transitionState
 
     /**
      * Updates the transition state of the hub [SceneTransitionLayout].
      *
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
-    fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?) {
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
         communalRepository.setTransitionState(transitionState)
     }
 
@@ -157,9 +156,9 @@ constructor(
         transitionState
             .flatMapLatest { state ->
                 when (state) {
-                    is ObservableCommunalTransitionState.Idle ->
+                    is ObservableTransitionState.Idle ->
                         flowOf(CommunalTransitionProgress.Idle(state.scene))
-                    is ObservableCommunalTransitionState.Transition ->
+                    is ObservableTransitionState.Transition ->
                         if (state.toScene == targetScene) {
                             state.progress.map {
                                 CommunalTransitionProgress.Transition(
@@ -221,7 +220,7 @@ constructor(
      */
     val isIdleOnCommunal: Flow<Boolean> =
         communalRepository.transitionState.map {
-            it is ObservableCommunalTransitionState.Idle && it.scene == CommunalScenes.Communal
+            it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Communal
         }
 
     /**
@@ -231,7 +230,7 @@ constructor(
      */
     val isCommunalVisible: Flow<Boolean> =
         communalRepository.transitionState.map {
-            !(it is ObservableCommunalTransitionState.Idle && it.scene == CommunalScenes.Blank)
+            !(it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Blank)
         }
 
     /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */

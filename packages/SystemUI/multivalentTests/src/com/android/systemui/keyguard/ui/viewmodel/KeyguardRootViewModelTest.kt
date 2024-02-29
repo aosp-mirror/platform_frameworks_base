@@ -22,12 +22,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.communalRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.flags.Flags
@@ -262,7 +262,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
 
             // Hub transition state is idle with hub open.
             communalRepository.setTransitionState(
-                flowOf(ObservableCommunalTransitionState.Idle(CommunalScenes.Communal))
+                flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
             )
             runCurrent()
 

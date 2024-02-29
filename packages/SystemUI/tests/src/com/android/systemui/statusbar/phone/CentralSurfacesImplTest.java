@@ -73,6 +73,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -96,7 +97,6 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.communal.data.repository.CommunalRepository;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.communal.shared.model.CommunalScenes;
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -842,7 +842,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void testEnteringGlanceableHub_updatesScrim() {
         // Transition to the glanceable hub.
-        mCommunalRepository.setTransitionState(flowOf(new ObservableCommunalTransitionState.Idle(
+        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
                 CommunalScenes.Communal)));
         mTestScope.getTestScheduler().runCurrent();
 
@@ -850,7 +850,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         verify(mScrimController).transitionTo(ScrimState.GLANCEABLE_HUB);
 
         // Transition away from the glanceable hub.
-        mCommunalRepository.setTransitionState(flowOf(new ObservableCommunalTransitionState.Idle(
+        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
                 CommunalScenes.Blank)));
         mTestScope.getTestScheduler().runCurrent();
 

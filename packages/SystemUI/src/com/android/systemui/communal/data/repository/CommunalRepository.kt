@@ -16,9 +16,9 @@
 
 package com.android.systemui.communal.data.repository
 
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.data.repository.SceneContainerRepository
@@ -44,7 +44,7 @@ interface CommunalRepository {
     val desiredScene: StateFlow<SceneKey>
 
     /** Exposes the transition state of the communal [SceneTransitionLayout]. */
-    val transitionState: StateFlow<ObservableCommunalTransitionState>
+    val transitionState: StateFlow<ObservableTransitionState>
 
     /** Updates the requested scene. */
     fun setDesiredScene(desiredScene: SceneKey)
@@ -54,7 +54,7 @@ interface CommunalRepository {
      *
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
-    fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?)
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -70,10 +70,9 @@ constructor(
     private val _desiredScene: MutableStateFlow<SceneKey> = MutableStateFlow(CommunalScenes.Default)
     override val desiredScene: StateFlow<SceneKey> = _desiredScene.asStateFlow()
 
-    private val defaultTransitionState =
-        ObservableCommunalTransitionState.Idle(CommunalScenes.Default)
-    private val _transitionState = MutableStateFlow<Flow<ObservableCommunalTransitionState>?>(null)
-    override val transitionState: StateFlow<ObservableCommunalTransitionState> =
+    private val defaultTransitionState = ObservableTransitionState.Idle(CommunalScenes.Default)
+    private val _transitionState = MutableStateFlow<Flow<ObservableTransitionState>?>(null)
+    override val transitionState: StateFlow<ObservableTransitionState> =
         _transitionState
             .flatMapLatest { innerFlowOrNull -> innerFlowOrNull ?: flowOf(defaultTransitionState) }
             .stateIn(
@@ -91,7 +90,7 @@ constructor(
      *
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
-    override fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?) {
+    override fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
         _transitionState.value = transitionState
     }
 }

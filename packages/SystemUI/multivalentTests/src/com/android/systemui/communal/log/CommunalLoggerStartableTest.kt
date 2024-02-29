@@ -18,6 +18,7 @@ package com.android.systemui.communal.log
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
@@ -25,7 +26,6 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -74,7 +74,7 @@ class CommunalLoggerStartableTest : SysuiTestCase() {
         testScope.runTest {
             // Transition state is default (non-communal)
             val transitionState =
-                MutableStateFlow<ObservableCommunalTransitionState>(idle(CommunalScenes.Default))
+                MutableStateFlow<ObservableTransitionState>(idle(CommunalScenes.Default))
             communalInteractor.setTransitionState(transitionState)
             runCurrent()
 
@@ -102,7 +102,7 @@ class CommunalLoggerStartableTest : SysuiTestCase() {
         testScope.runTest {
             // Transition state is default (non-communal)
             val transitionState =
-                MutableStateFlow<ObservableCommunalTransitionState>(idle(CommunalScenes.Default))
+                MutableStateFlow<ObservableTransitionState>(idle(CommunalScenes.Default))
             communalInteractor.setTransitionState(transitionState)
             runCurrent()
 
@@ -133,7 +133,7 @@ class CommunalLoggerStartableTest : SysuiTestCase() {
         testScope.runTest {
             // Transition state is communal
             val transitionState =
-                MutableStateFlow<ObservableCommunalTransitionState>(idle(CommunalScenes.Communal))
+                MutableStateFlow<ObservableTransitionState>(idle(CommunalScenes.Communal))
             communalInteractor.setTransitionState(transitionState)
             runCurrent()
 
@@ -161,7 +161,7 @@ class CommunalLoggerStartableTest : SysuiTestCase() {
         testScope.runTest {
             // Transition state is communal
             val transitionState =
-                MutableStateFlow<ObservableCommunalTransitionState>(idle(CommunalScenes.Communal))
+                MutableStateFlow<ObservableTransitionState>(idle(CommunalScenes.Communal))
             communalInteractor.setTransitionState(transitionState)
             runCurrent()
 
@@ -190,8 +190,8 @@ class CommunalLoggerStartableTest : SysuiTestCase() {
     private fun transition(
         from: SceneKey = CommunalScenes.Default,
         to: SceneKey = CommunalScenes.Default,
-    ): ObservableCommunalTransitionState.Transition {
-        return ObservableCommunalTransitionState.Transition(
+    ): ObservableTransitionState.Transition {
+        return ObservableTransitionState.Transition(
             fromScene = from,
             toScene = to,
             progress = emptyFlow(),
@@ -200,7 +200,7 @@ class CommunalLoggerStartableTest : SysuiTestCase() {
         )
     }
 
-    private fun idle(sceneKey: SceneKey): ObservableCommunalTransitionState.Idle {
-        return ObservableCommunalTransitionState.Idle(sceneKey)
+    private fun idle(sceneKey: SceneKey): ObservableTransitionState.Idle {
+        return ObservableTransitionState.Idle(sceneKey)
     }
 }
