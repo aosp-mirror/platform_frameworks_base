@@ -95,7 +95,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.communal.data.repository.CommunalRepository;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
-import com.android.systemui.communal.shared.model.CommunalSceneKey;
+import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
@@ -843,7 +843,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void testEnteringGlanceableHub_updatesScrim() {
         // Transition to the glanceable hub.
         mCommunalRepository.setTransitionState(flowOf(new ObservableCommunalTransitionState.Idle(
-                CommunalSceneKey.Communal.INSTANCE)));
+                CommunalScenes.Communal)));
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState also transitions.
@@ -851,7 +851,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         // Transition away from the glanceable hub.
         mCommunalRepository.setTransitionState(flowOf(new ObservableCommunalTransitionState.Idle(
-                CommunalSceneKey.Blank.INSTANCE)));
+                CommunalScenes.Blank)));
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState goes back to UNLOCKED.

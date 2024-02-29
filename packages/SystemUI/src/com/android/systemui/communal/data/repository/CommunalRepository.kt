@@ -17,6 +17,7 @@
 package com.android.systemui.communal.data.repository
 
 import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -67,11 +68,11 @@ constructor(
 ) : CommunalRepository {
 
     private val _desiredScene: MutableStateFlow<CommunalSceneKey> =
-        MutableStateFlow(CommunalSceneKey.DEFAULT)
+        MutableStateFlow(CommunalScenes.Default)
     override val desiredScene: StateFlow<CommunalSceneKey> = _desiredScene.asStateFlow()
 
     private val defaultTransitionState =
-        ObservableCommunalTransitionState.Idle(CommunalSceneKey.DEFAULT)
+        ObservableCommunalTransitionState.Idle(CommunalScenes.Default)
     private val _transitionState = MutableStateFlow<Flow<ObservableCommunalTransitionState>?>(null)
     override val transitionState: StateFlow<ObservableCommunalTransitionState> =
         _transitionState

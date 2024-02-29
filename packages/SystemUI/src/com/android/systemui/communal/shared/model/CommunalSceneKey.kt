@@ -16,21 +16,21 @@
 
 package com.android.systemui.communal.shared.model
 
-/** Definition of the possible scenes for the communal UI. */
-sealed class CommunalSceneKey(
+class CommunalSceneKey(
     private val loggingName: String,
 ) {
-    /** The communal scene containing the hub UI. */
-    object Communal : CommunalSceneKey("communal")
-
-    /** The default scene, shows nothing and is only there to allow swiping to communal. */
-    object Blank : CommunalSceneKey("blank")
-
     override fun toString(): String {
         return loggingName
     }
+}
 
-    companion object {
-        val DEFAULT = Blank
-    }
+/** Definition of the possible scenes for the communal UI. */
+object CommunalScenes {
+    /** The default scene, shows nothing and is only there to allow swiping to communal. */
+    @JvmField val Blank = CommunalSceneKey("blank")
+
+    /** The communal scene containing the hub UI. */
+    @JvmField val Communal = CommunalSceneKey("communal")
+
+    @JvmField val Default = Blank
 }

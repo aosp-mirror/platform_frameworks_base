@@ -30,6 +30,7 @@ import com.android.systemui.communal.shared.model.CommunalContentSize.FULL
 import com.android.systemui.communal.shared.model.CommunalContentSize.HALF
 import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
 import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
@@ -131,11 +132,11 @@ constructor(
      * Target scene as requested by the underlying [SceneTransitionLayout] or through
      * [onSceneChanged].
      *
-     * If [isCommunalAvailable] is false, will return [CommunalSceneKey.Blank]
+     * If [isCommunalAvailable] is false, will return [CommunalScenes.Blank]
      */
     val desiredScene: Flow<CommunalSceneKey> =
         communalRepository.desiredScene.combine(isCommunalAvailable) { scene, available ->
-            if (available) scene else CommunalSceneKey.Blank
+            if (available) scene else CommunalScenes.Blank
         }
 
     /** Transition state of the hub mode. */
@@ -176,7 +177,7 @@ constructor(
 
     /**
      * Flow that emits a boolean if the communal UI is the target scene, ie. the [desiredScene] is
-     * the [CommunalSceneKey.Communal].
+     * the [CommunalScenes.Communal].
      *
      * This will be true as soon as the desired scene is set programmatically or at whatever point
      * during a fling that SceneTransitionLayout determines that the end state will be the communal
@@ -193,7 +194,7 @@ constructor(
                 if (sceneContainerEnabled) {
                     sceneInteractor.currentScene.map { it == Scenes.Communal }
                 } else {
-                    desiredScene.map { it == CommunalSceneKey.Communal }
+                    desiredScene.map { it == CommunalScenes.Communal }
                 }
             }
             .distinctUntilChanged()
@@ -220,7 +221,7 @@ constructor(
      */
     val isIdleOnCommunal: Flow<Boolean> =
         communalRepository.transitionState.map {
-            it is ObservableCommunalTransitionState.Idle && it.scene == CommunalSceneKey.Communal
+            it is ObservableCommunalTransitionState.Idle && it.scene == CommunalScenes.Communal
         }
 
     /**
@@ -230,7 +231,7 @@ constructor(
      */
     val isCommunalVisible: Flow<Boolean> =
         communalRepository.transitionState.map {
-            !(it is ObservableCommunalTransitionState.Idle && it.scene == CommunalSceneKey.Blank)
+            !(it is ObservableCommunalTransitionState.Idle && it.scene == CommunalScenes.Blank)
         }
 
     /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */

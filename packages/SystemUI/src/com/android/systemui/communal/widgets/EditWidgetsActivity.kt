@@ -36,7 +36,7 @@ import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.shared.log.CommunalUiEvent
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
@@ -173,7 +173,7 @@ constructor(
 
     private fun onEditDone() {
         try {
-            communalViewModel.onSceneChanged(CommunalSceneKey.Communal)
+            communalViewModel.onSceneChanged(CommunalScenes.Communal)
             checkNotNull(windowManagerService).lockNow(/* options */ null)
             finish()
         } catch (e: RemoteException) {

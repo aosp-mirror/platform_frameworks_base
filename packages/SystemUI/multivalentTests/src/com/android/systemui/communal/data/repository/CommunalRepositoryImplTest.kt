@@ -19,7 +19,7 @@ package com.android.systemui.communal.data.repository
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
@@ -60,13 +60,13 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val transitionState by collectLastValue(underTest.transitionState)
             assertThat(transitionState)
-                .isEqualTo(ObservableCommunalTransitionState.Idle(CommunalSceneKey.DEFAULT))
+                .isEqualTo(ObservableCommunalTransitionState.Idle(CommunalScenes.Default))
         }
 
     @Test
     fun transitionState_setTransitionState_returnsNewValue() =
         testScope.runTest {
-            val expectedSceneKey = CommunalSceneKey.Communal
+            val expectedSceneKey = CommunalScenes.Communal
             underTest.setTransitionState(
                 flowOf(ObservableCommunalTransitionState.Idle(expectedSceneKey))
             )
@@ -81,7 +81,7 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             // Set a value for the transition state flow.
             underTest.setTransitionState(
-                flowOf(ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal))
+                flowOf(ObservableCommunalTransitionState.Idle(CommunalScenes.Communal))
             )
 
             // Set the transition state flow back to null.
@@ -90,6 +90,6 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
             // Flow returns default scene key.
             val transitionState by collectLastValue(underTest.transitionState)
             assertThat(transitionState)
-                .isEqualTo(ObservableCommunalTransitionState.Idle(CommunalSceneKey.DEFAULT))
+                .isEqualTo(ObservableCommunalTransitionState.Idle(CommunalScenes.Default))
         }
 }

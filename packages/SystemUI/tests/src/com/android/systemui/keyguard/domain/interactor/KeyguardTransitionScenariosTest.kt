@@ -25,7 +25,7 @@ import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -660,7 +660,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN the device is idle on the glanceable hub
             val idleTransitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()
@@ -817,7 +817,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN the device is idle on the glanceable hub
             val idleTransitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()
@@ -966,7 +966,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN the device is idle on the glanceable hub
             val idleTransitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()
@@ -1074,7 +1074,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN the device is idle on the glanceable hub
             val idleTransitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()
@@ -1109,7 +1109,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN the device is idle on the glanceable hub
             val idleTransitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()
@@ -1227,7 +1227,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN the device is idle on the glanceable hub
             val idleTransitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()
@@ -1414,8 +1414,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN a transition to the glanceable hub starts
-            val currentScene = CommunalSceneKey.Blank
-            val targetScene = CommunalSceneKey.Communal
+            val currentScene = CommunalScenes.Blank
+            val targetScene = CommunalScenes.Communal
 
             val progress = MutableStateFlow(0f)
             val transitionState =
@@ -1593,8 +1593,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN a glanceable hub transition starts
-            val currentScene = CommunalSceneKey.Blank
-            val targetScene = CommunalSceneKey.Communal
+            val currentScene = CommunalScenes.Blank
+            val targetScene = CommunalScenes.Communal
 
             val progress = MutableStateFlow(0f)
             val transitionState =
@@ -1649,8 +1649,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN a transition away from glanceable hub starts
-            val currentScene = CommunalSceneKey.Communal
-            val targetScene = CommunalSceneKey.Blank
+            val currentScene = CommunalScenes.Communal
+            val targetScene = CommunalScenes.Blank
 
             val progress = MutableStateFlow(0f)
             val transitionState =
@@ -1767,7 +1767,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN the device is idle on the glanceable hub
             val idleTransitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()
@@ -1823,8 +1823,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN a transition away from glanceable hub starts
-            val currentScene = CommunalSceneKey.Communal
-            val targetScene = CommunalSceneKey.Blank
+            val currentScene = CommunalScenes.Communal
+            val targetScene = CommunalScenes.Blank
 
             val transitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(

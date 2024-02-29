@@ -1,6 +1,7 @@
 package com.android.systemui.communal.data.repository
 
 import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,14 +18,14 @@ import kotlinx.coroutines.flow.stateIn
 class FakeCommunalRepository(
     applicationScope: CoroutineScope,
     override val desiredScene: MutableStateFlow<CommunalSceneKey> =
-        MutableStateFlow(CommunalSceneKey.DEFAULT),
+        MutableStateFlow(CommunalScenes.Default),
 ) : CommunalRepository {
     override fun setDesiredScene(desiredScene: CommunalSceneKey) {
         this.desiredScene.value = desiredScene
     }
 
     private val defaultTransitionState =
-        ObservableCommunalTransitionState.Idle(CommunalSceneKey.DEFAULT)
+        ObservableCommunalTransitionState.Idle(CommunalScenes.Default)
     private val _transitionState = MutableStateFlow<Flow<ObservableCommunalTransitionState>?>(null)
     override val transitionState: StateFlow<ObservableCommunalTransitionState> =
         _transitionState

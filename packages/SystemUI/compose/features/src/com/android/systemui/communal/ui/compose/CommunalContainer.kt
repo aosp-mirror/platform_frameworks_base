@@ -25,6 +25,7 @@ import com.android.compose.animation.scene.transitions
 import com.android.compose.animation.scene.updateSceneTransitionLayoutState
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
@@ -138,8 +139,8 @@ private fun SceneScope.CommunalScene(
 
 // TODO(b/315490861): Remove these conversions once Compose can be used throughout SysUI.
 object TransitionSceneKey {
-    val Blank = CommunalSceneKey.Blank.toTransitionSceneKey()
-    val Communal = CommunalSceneKey.Communal.toTransitionSceneKey()
+    val Blank = CommunalScenes.Blank.toTransitionSceneKey()
+    val Communal = CommunalScenes.Communal.toTransitionSceneKey()
 }
 
 // TODO(b/315490861): Remove these conversions once Compose can be used throughout SysUI.

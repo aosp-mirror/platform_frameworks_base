@@ -26,7 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
@@ -279,7 +279,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             )
             val idleTransitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()
@@ -392,7 +392,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             // Move to glanceable hub
             val idleTransitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()

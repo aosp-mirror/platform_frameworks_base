@@ -40,7 +40,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalTutorialReposit
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
@@ -462,9 +462,9 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             var desiredScene = collectLastValue(underTest.desiredScene)
             runCurrent()
-            assertThat(desiredScene()).isEqualTo(CommunalSceneKey.Blank)
+            assertThat(desiredScene()).isEqualTo(CommunalScenes.Blank)
 
-            val targetScene = CommunalSceneKey.Communal
+            val targetScene = CommunalScenes.Communal
             communalRepository.setDesiredScene(targetScene)
             desiredScene = collectLastValue(underTest.desiredScene)
             runCurrent()
@@ -474,7 +474,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun updatesScene() =
         testScope.runTest {
-            val targetScene = CommunalSceneKey.Communal
+            val targetScene = CommunalScenes.Communal
 
             underTest.onSceneChanged(targetScene)
 
@@ -491,26 +491,26 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             val desiredScene by collectLastValue(underTest.desiredScene)
 
-            underTest.onSceneChanged(CommunalSceneKey.Communal)
-            assertThat(desiredScene).isEqualTo(CommunalSceneKey.Communal)
+            underTest.onSceneChanged(CommunalScenes.Communal)
+            assertThat(desiredScene).isEqualTo(CommunalScenes.Communal)
 
             kosmos.setCommunalAvailable(false)
             runCurrent()
 
             // Scene returns blank when communal is not available.
-            assertThat(desiredScene).isEqualTo(CommunalSceneKey.Blank)
+            assertThat(desiredScene).isEqualTo(CommunalScenes.Blank)
 
             kosmos.setCommunalAvailable(true)
             runCurrent()
 
             // After re-enabling, scene goes back to Communal.
-            assertThat(desiredScene).isEqualTo(CommunalSceneKey.Communal)
+            assertThat(desiredScene).isEqualTo(CommunalScenes.Communal)
         }
 
     @Test
     fun transitionProgress_onTargetScene_fullProgress() =
         testScope.runTest {
-            val targetScene = CommunalSceneKey.Blank
+            val targetScene = CommunalScenes.Blank
             val transitionProgressFlow = underTest.transitionProgressToScene(targetScene)
             val transitionProgress by collectLastValue(transitionProgressFlow)
 
@@ -527,8 +527,8 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun transitionProgress_notOnTargetScene_noProgress() =
         testScope.runTest {
-            val targetScene = CommunalSceneKey.Blank
-            val currentScene = CommunalSceneKey.Communal
+            val targetScene = CommunalScenes.Blank
+            val currentScene = CommunalScenes.Communal
             val transitionProgressFlow = underTest.transitionProgressToScene(targetScene)
             val transitionProgress by collectLastValue(transitionProgressFlow)
 
@@ -545,8 +545,8 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun transitionProgress_transitioningToTrackedScene() =
         testScope.runTest {
-            val currentScene = CommunalSceneKey.Communal
-            val targetScene = CommunalSceneKey.Blank
+            val currentScene = CommunalScenes.Communal
+            val targetScene = CommunalScenes.Blank
             val transitionProgressFlow = underTest.transitionProgressToScene(targetScene)
             val transitionProgress by collectLastValue(transitionProgressFlow)
 
@@ -589,8 +589,8 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun transitionProgress_transitioningAwayFromTrackedScene() =
         testScope.runTest {
-            val currentScene = CommunalSceneKey.Blank
-            val targetScene = CommunalSceneKey.Communal
+            val currentScene = CommunalScenes.Blank
+            val targetScene = CommunalScenes.Communal
             val transitionProgressFlow = underTest.transitionProgressToScene(currentScene)
             val transitionProgress by collectLastValue(transitionProgressFlow)
 
@@ -642,7 +642,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             runCurrent()
             assertThat(isCommunalShowing()).isEqualTo(false)
 
-            underTest.onSceneChanged(CommunalSceneKey.Communal)
+            underTest.onSceneChanged(CommunalScenes.Communal)
 
             isCommunalShowing = collectLastValue(underTest.isCommunalShowing)
             runCurrent()
@@ -666,12 +666,12 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes (without the flag) to communal sets the value to true
-            underTest.onSceneChanged(CommunalSceneKey.Communal)
+            underTest.onSceneChanged(CommunalScenes.Communal)
             runCurrent()
             assertThat(isCommunalShowing).isTrue()
 
             // Verify scene changes (without the flag) to blank sets the value back to false
-            underTest.onSceneChanged(CommunalSceneKey.Blank)
+            underTest.onSceneChanged(CommunalScenes.Blank)
             runCurrent()
             assertThat(isCommunalShowing).isFalse()
         }
@@ -687,7 +687,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalShowing).isFalse()
 
             // Verify scene changes without the flag doesn't have any impact
-            underTest.onSceneChanged(CommunalSceneKey.Communal)
+            underTest.onSceneChanged(CommunalScenes.Communal)
             runCurrent()
             assertThat(isCommunalShowing).isFalse()
 
@@ -707,7 +707,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Blank)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Blank)
                 )
             communalRepository.setTransitionState(transitionState)
 
@@ -717,8 +717,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isIdleOnCommunal).isEqualTo(false)
 
             // Transition to communal.
-            transitionState.value =
-                ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+            transitionState.value = ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
             runCurrent()
 
             // isIdleOnCommunal is now true since we're on communal.
@@ -727,8 +726,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             // Start transition away from communal.
             transitionState.value =
                 ObservableCommunalTransitionState.Transition(
-                    fromScene = CommunalSceneKey.Communal,
-                    toScene = CommunalSceneKey.Blank,
+                    fromScene = CommunalScenes.Communal,
+                    toScene = CommunalScenes.Blank,
                     progress = flowOf(0f),
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),
@@ -744,7 +743,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableCommunalTransitionState>(
-                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Blank)
+                    ObservableCommunalTransitionState.Idle(CommunalScenes.Blank)
                 )
             communalRepository.setTransitionState(transitionState)
 
@@ -755,8 +754,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             // Start transition to communal.
             transitionState.value =
                 ObservableCommunalTransitionState.Transition(
-                    fromScene = CommunalSceneKey.Blank,
-                    toScene = CommunalSceneKey.Communal,
+                    fromScene = CommunalScenes.Blank,
+                    toScene = CommunalScenes.Communal,
                     progress = flowOf(0f),
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),
@@ -766,8 +765,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(isCommunalVisible).isEqualTo(true)
 
             // Finish transition to communal
-            transitionState.value =
-                ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+            transitionState.value = ObservableCommunalTransitionState.Idle(CommunalScenes.Communal)
 
             // isCommunalVisible is true since we're on communal.
             assertThat(isCommunalVisible).isEqualTo(true)
@@ -775,8 +773,8 @@ class CommunalInteractorTest : SysuiTestCase() {
             // Start transition away from communal.
             transitionState.value =
                 ObservableCommunalTransitionState.Transition(
-                    fromScene = CommunalSceneKey.Communal,
-                    toScene = CommunalSceneKey.Blank,
+                    fromScene = CommunalScenes.Communal,
+                    toScene = CommunalScenes.Blank,
                     progress = flowOf(1.0f),
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),

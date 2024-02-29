@@ -20,7 +20,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.shared.log.CommunalUiEvent
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -88,24 +88,24 @@ constructor(
 
 /** Whether currently in communal scene. */
 private fun ObservableCommunalTransitionState.isOnCommunal(): Boolean {
-    return this is ObservableCommunalTransitionState.Idle && scene == CommunalSceneKey.Communal
+    return this is ObservableCommunalTransitionState.Idle && scene == CommunalScenes.Communal
 }
 
 /** Whether currently in a scene other than communal. */
 private fun ObservableCommunalTransitionState.isNotOnCommunal(): Boolean {
-    return this is ObservableCommunalTransitionState.Idle && scene != CommunalSceneKey.Communal
+    return this is ObservableCommunalTransitionState.Idle && scene != CommunalScenes.Communal
 }
 
 /** Whether currently transitioning from another scene to communal. */
 private fun ObservableCommunalTransitionState.isSwipingToCommunal(): Boolean {
     return this is ObservableCommunalTransitionState.Transition &&
-        toScene == CommunalSceneKey.Communal &&
+        toScene == CommunalScenes.Communal &&
         isInitiatedByUserInput
 }
 
 /** Whether currently transitioning from communal to another scene. */
 private fun ObservableCommunalTransitionState.isSwipingFromCommunal(): Boolean {
     return this is ObservableCommunalTransitionState.Transition &&
-        fromScene == CommunalSceneKey.Communal &&
+        fromScene == CommunalScenes.Communal &&
         isInitiatedByUserInput
 }
