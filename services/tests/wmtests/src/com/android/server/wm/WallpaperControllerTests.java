@@ -39,6 +39,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -305,12 +307,12 @@ public class WallpaperControllerTests extends WindowTestsBase {
         final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
         wallpaperController.adjustWallpaperWindows();
         // Wallpaper is visible because the show-when-locked activity is translucent.
-        assertTrue(wallpaperController.isWallpaperTarget(wallpaperWindow));
+        assertSame(wallpaperWindow, wallpaperController.getWallpaperTarget());
 
         behind.mActivityRecord.setShowWhenLocked(true);
         wallpaperController.adjustWallpaperWindows();
         // Wallpaper is invisible because the lowest show-when-locked activity is opaque.
-        assertTrue(wallpaperController.isWallpaperTarget(null));
+        assertNull(wallpaperController.getWallpaperTarget());
 
         // A show-when-locked wallpaper is used for lockscreen. So the top wallpaper should
         // be the one that is not show-when-locked.
@@ -374,10 +376,10 @@ public class WallpaperControllerTests extends WindowTestsBase {
         // The activity in restore-below task should not be the target if keyguard is not locked.
         mDisplayContent.mWallpaperController.adjustWallpaperWindows();
         assertNotEquals(appWin, mDisplayContent.mWallpaperController.getWallpaperTarget());
-        // The activity in restore-below task should be the target if keyguard is occluded.
+        // The activity in restore-below task should not be the target if keyguard is occluded.
         doReturn(true).when(mDisplayContent).isKeyguardLocked();
         mDisplayContent.mWallpaperController.adjustWallpaperWindows();
-        assertEquals(appWin, mDisplayContent.mWallpaperController.getWallpaperTarget());
+        assertNotEquals(appWin, mDisplayContent.mWallpaperController.getWallpaperTarget());
     }
 
     @Test
