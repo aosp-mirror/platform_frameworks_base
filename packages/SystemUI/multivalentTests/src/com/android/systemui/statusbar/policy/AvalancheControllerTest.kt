@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
+import com.android.systemui.statusbar.policy.HeadsUpManagerTestUtil.createFullScreenIntentEntry
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
@@ -94,6 +95,12 @@ class AvalancheControllerTest : SysuiTestCase() {
                 .setSbn(HeadsUpManagerTestUtil.createSbn(id, Notification.Builder(mContext, "")))
                 .build()
         )
+        return entry
+    }
+
+    private fun createFsiHeadsUpEntry(id: Int): BaseHeadsUpManager.HeadsUpEntry {
+        val entry = testableHeadsUpManager!!.createHeadsUpEntry()
+        entry.setEntry(createFullScreenIntentEntry(id, mContext))
         return entry
     }
 
@@ -237,5 +244,69 @@ class AvalancheControllerTest : SysuiTestCase() {
 
         // Next entry is shown
         Truth.assertThat(mAvalancheController.headsUpEntryShowing).isEqualTo(nextEntry)
+    }
+
+    @Test
+    fun testGetDurationMs_lastEntry_useAutoDismissTime() {
+        // Entry is showing
+        val showingEntry = createHeadsUpEntry(id = 0)
+        mAvalancheController.headsUpEntryShowing = showingEntry
+
+        // Nothing is next
+        mAvalancheController.clearNext()
+
+        val durationMs = mAvalancheController.getDurationMs(showingEntry, autoDismissMs = 5000)
+        Truth.assertThat(durationMs).isEqualTo(5000)
+    }
+
+    @Test
+    fun testGetDurationMs_nextEntryLowerPriority_500() {
+        // Entry is showing
+        val showingEntry = createFsiHeadsUpEntry(id = 1)
+        mAvalancheController.headsUpEntryShowing = showingEntry
+
+        // There's another entry waiting to show next
+        val nextEntry = createHeadsUpEntry(id = 0)
+        mAvalancheController.addToNext(nextEntry, runnableMock!!)
+
+        // Next entry has lower priority
+        Truth.assertThat(nextEntry.compareNonTimeFields(showingEntry)).isEqualTo(1)
+
+        val durationMs = mAvalancheController.getDurationMs(showingEntry, autoDismissMs = 5000)
+        Truth.assertThat(durationMs).isEqualTo(5000)
+    }
+
+    @Test
+    fun testGetDurationMs_nextEntrySamePriority_1000() {
+        // Entry is showing
+        val showingEntry = createHeadsUpEntry(id = 0)
+        mAvalancheController.headsUpEntryShowing = showingEntry
+
+        // There's another entry waiting to show next
+        val nextEntry = createHeadsUpEntry(id = 1)
+        mAvalancheController.addToNext(nextEntry, runnableMock!!)
+
+        // Same priority
+        Truth.assertThat(nextEntry.compareNonTimeFields(showingEntry)).isEqualTo(0)
+
+        val durationMs = mAvalancheController.getDurationMs(showingEntry, autoDismissMs = 5000)
+        Truth.assertThat(durationMs).isEqualTo(1000)
+    }
+
+    @Test
+    fun testGetDurationMs_nextEntryHigherPriority_500() {
+        // Entry is showing
+        val showingEntry = createHeadsUpEntry(id = 0)
+        mAvalancheController.headsUpEntryShowing = showingEntry
+
+        // There's another entry waiting to show next
+        val nextEntry = createFsiHeadsUpEntry(id = 1)
+        mAvalancheController.addToNext(nextEntry, runnableMock!!)
+
+        // Next entry has higher priority
+        Truth.assertThat(nextEntry.compareNonTimeFields(showingEntry)).isEqualTo(-1)
+
+        val durationMs = mAvalancheController.getDurationMs(showingEntry, autoDismissMs = 5000)
+        Truth.assertThat(durationMs).isEqualTo(500)
     }
 }
