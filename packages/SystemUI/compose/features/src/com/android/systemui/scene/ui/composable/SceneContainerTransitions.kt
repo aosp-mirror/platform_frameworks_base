@@ -32,14 +32,14 @@ val SceneContainerTransitions = transitions {
     from(
         Scenes.Gone,
         to = Scenes.Shade,
-        key = CollapseShadeInstantly.asComposeAware(),
+        key = CollapseShadeInstantly,
     ) {
         goneToShadeTransition(durationScale = 0.0)
     }
     from(
         Scenes.Gone,
         to = Scenes.Shade,
-        key = SlightlyFasterShadeCollapse.asComposeAware(),
+        key = SlightlyFasterShadeCollapse,
     ) {
         goneToShadeTransition(durationScale = 0.9)
     }
@@ -50,14 +50,14 @@ val SceneContainerTransitions = transitions {
     from(
         Scenes.Lockscreen,
         to = Scenes.Shade,
-        key = CollapseShadeInstantly.asComposeAware(),
+        key = CollapseShadeInstantly,
     ) {
         lockscreenToShadeTransition(durationScale = 0.0)
     }
     from(
         Scenes.Lockscreen,
         to = Scenes.Shade,
-        key = SlightlyFasterShadeCollapse.asComposeAware(),
+        key = SlightlyFasterShadeCollapse,
     ) {
         lockscreenToShadeTransition(durationScale = 0.9)
     }

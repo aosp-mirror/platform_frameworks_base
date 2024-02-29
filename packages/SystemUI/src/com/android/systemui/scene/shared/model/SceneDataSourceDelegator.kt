@@ -19,6 +19,7 @@
 package com.android.systemui.scene.shared.model
 
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
