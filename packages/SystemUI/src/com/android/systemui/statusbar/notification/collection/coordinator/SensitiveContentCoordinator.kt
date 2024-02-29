@@ -119,6 +119,9 @@ class SensitiveContentCoordinatorImpl @Inject constructor(
             val needsRedaction = lockscreenUserManager.needsRedaction(entry)
             val isSensitive = userPublic && needsRedaction
             entry.setSensitive(isSensitive || shouldProtectNotification, deviceSensitive)
+            if (screenshareNotificationHiding()) {
+                entry.row?.setPublicExpanderVisible(!shouldProtectNotification)
+            }
         }
     }
 }
