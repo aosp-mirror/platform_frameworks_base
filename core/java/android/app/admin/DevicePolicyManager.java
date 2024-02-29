@@ -14071,7 +14071,7 @@ public class DevicePolicyManager {
     public void setAuditLogEnabled(boolean enabled) {
         throwIfParentInstance("setAuditLogEnabled");
         try {
-            mService.setAuditLogEnabled(mContext.getPackageName(), true);
+            mService.setAuditLogEnabled(mContext.getPackageName(), enabled);
         } catch (RemoteException re) {
             re.rethrowFromSystemServer();
         }
