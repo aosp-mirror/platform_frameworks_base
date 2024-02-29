@@ -24,8 +24,11 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.ui.viewmodel.fakeCommunalTransitionViewModel
+import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -112,10 +115,10 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var isQsBypassingShade: MutableStateFlow<Boolean>
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
+    private val communalInteractor = kosmos.communalInteractor
     private val settings = FakeSettings()
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeHandler: FakeHandler
-    private var communalTransitionViewModel = kosmos.fakeCommunalTransitionViewModel
 
     @Before
     fun setup() {
@@ -139,7 +142,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 mediaDataManager,
                 keyguardViewController,
                 dreamOverlayStateController,
-                communalTransitionViewModel,
+                communalInteractor,
                 configurationController,
                 wakefulnessLifecycle,
                 shadeInteractor,
@@ -507,7 +510,11 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Test
     fun testCommunalLocation() =
         testScope.runTest {
-            communalTransitionViewModel.setIsUmoOnCommunal(true)
+            mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
@@ -519,7 +526,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 )
             clearInvocations(mediaCarouselController)
 
-            communalTransitionViewModel.setIsUmoOnCommunal(false)
+            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
@@ -534,11 +541,15 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Test
     fun testCommunalLocation_showsOverLockscreen() =
         testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
             // Device is on lock screen.
             whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
 
             // UMO goes to communal even over the lock screen.
-            communalTransitionViewModel.setIsUmoOnCommunal(true)
+            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
@@ -553,10 +564,14 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Test
     fun testCommunalLocation_showsUntilQsExpands() =
         testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
             // Device is on lock screen.
             whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
 
-            communalTransitionViewModel.setIsUmoOnCommunal(true)
+            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(

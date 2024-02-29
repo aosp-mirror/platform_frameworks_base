@@ -64,9 +64,6 @@ constructor(
             )
             .onStart { emit(0f) }
 
-    // Show UMO as long as keyguard is not visible.
-    val showUmo: Flow<Boolean> = keyguardAlpha.map { alpha -> alpha == 0f }
-
     val keyguardTranslationX: Flow<StateToValue> =
         configurationInteractor
             .dimensionPixelSize(R.dimen.hub_to_lockscreen_transition_lockscreen_translation_x)

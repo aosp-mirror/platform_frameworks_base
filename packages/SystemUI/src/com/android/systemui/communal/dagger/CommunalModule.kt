@@ -23,8 +23,6 @@ import com.android.systemui.communal.data.repository.CommunalRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalTutorialRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule
-import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel
-import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModelImpl
 import com.android.systemui.communal.widgets.CommunalWidgetModule
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarterImpl
@@ -49,9 +47,4 @@ interface CommunalModule {
     fun bindEditWidgetsActivityStarter(
         starter: EditWidgetsActivityStarterImpl
     ): EditWidgetsActivityStarter
-
-    @Binds
-    fun bindCommunalTransitionViewModel(
-        impl: CommunalTransitionViewModelImpl
-    ): CommunalTransitionViewModel
 }
