@@ -41,6 +41,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.modifiers.thenIf
@@ -57,7 +58,6 @@ import com.android.systemui.notifications.ui.composable.NotificationScrollingSta
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.shared.model.UserActionResult

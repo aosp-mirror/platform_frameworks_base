@@ -16,6 +16,8 @@
 
 package com.android.systemui.scene.shared.model
 
+import com.android.compose.animation.scene.SceneKey
+
 data class UserActionResult(
 
     /** The scene we should be transitioning due to the [UserAction]. */

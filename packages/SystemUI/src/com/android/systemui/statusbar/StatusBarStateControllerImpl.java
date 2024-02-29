@@ -36,6 +36,7 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 
 import com.android.app.animation.Interpolators;
+import com.android.compose.animation.scene.SceneKey;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -49,7 +50,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
-import com.android.systemui.scene.shared.model.SceneKey;
 import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;

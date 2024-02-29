@@ -18,11 +18,11 @@
 
 package com.android.systemui.scene.data.repository
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSource
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.TransitionKey
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope

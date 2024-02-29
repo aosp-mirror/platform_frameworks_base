@@ -1,6 +1,7 @@
 package com.android.systemui.scene.ui.composable
 
 import com.android.compose.animation.scene.transitions
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.CollapseShadeInstantly
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransition
@@ -26,41 +27,41 @@ import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettings
  * Please keep the list sorted alphabetically.
  */
 val SceneContainerTransitions = transitions {
-    from(Bouncer, to = Gone) { bouncerToGoneTransition() }
-    from(Gone, to = Shade) { goneToShadeTransition() }
+    from(Scenes.Bouncer, to = Scenes.Gone) { bouncerToGoneTransition() }
+    from(Scenes.Gone, to = Scenes.Shade) { goneToShadeTransition() }
     from(
-        Gone,
-        to = Shade,
+        Scenes.Gone,
+        to = Scenes.Shade,
         key = CollapseShadeInstantly.asComposeAware(),
     ) {
         goneToShadeTransition(durationScale = 0.0)
     }
     from(
-        Gone,
-        to = Shade,
+        Scenes.Gone,
+        to = Scenes.Shade,
         key = SlightlyFasterShadeCollapse.asComposeAware(),
     ) {
         goneToShadeTransition(durationScale = 0.9)
     }
-    from(Gone, to = QuickSettings) { goneToQuickSettingsTransition() }
-    from(Lockscreen, to = Bouncer) { lockscreenToBouncerTransition() }
-    from(Lockscreen, to = Communal) { lockscreenToCommunalTransition() }
-    from(Lockscreen, to = Shade) { lockscreenToShadeTransition() }
+    from(Scenes.Gone, to = Scenes.QuickSettings) { goneToQuickSettingsTransition() }
+    from(Scenes.Lockscreen, to = Scenes.Bouncer) { lockscreenToBouncerTransition() }
+    from(Scenes.Lockscreen, to = Scenes.Communal) { lockscreenToCommunalTransition() }
+    from(Scenes.Lockscreen, to = Scenes.Shade) { lockscreenToShadeTransition() }
     from(
-        Lockscreen,
-        to = Shade,
+        Scenes.Lockscreen,
+        to = Scenes.Shade,
         key = CollapseShadeInstantly.asComposeAware(),
     ) {
         lockscreenToShadeTransition(durationScale = 0.0)
     }
     from(
-        Lockscreen,
-        to = Shade,
+        Scenes.Lockscreen,
+        to = Scenes.Shade,
         key = SlightlyFasterShadeCollapse.asComposeAware(),
     ) {
         lockscreenToShadeTransition(durationScale = 0.9)
     }
-    from(Lockscreen, to = QuickSettings) { lockscreenToQuickSettingsTransition() }
-    from(Lockscreen, to = Gone) { lockscreenToGoneTransition() }
-    from(Shade, to = QuickSettings) { shadeToQuickSettingsTransition() }
+    from(Scenes.Lockscreen, to = Scenes.QuickSettings) { lockscreenToQuickSettingsTransition() }
+    from(Scenes.Lockscreen, to = Scenes.Gone) { lockscreenToGoneTransition() }
+    from(Scenes.Shade, to = Scenes.QuickSettings) { shadeToQuickSettingsTransition() }
 }

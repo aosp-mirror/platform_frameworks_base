@@ -19,6 +19,7 @@ package com.android.systemui.bouncer.ui.viewmodel
 import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
@@ -33,7 +34,6 @@ import com.android.systemui.inputmethod.domain.interactor.inputMethodInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.model.SelectedUserModel

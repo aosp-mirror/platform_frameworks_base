@@ -16,11 +16,11 @@
 
 package com.android.systemui.model
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED

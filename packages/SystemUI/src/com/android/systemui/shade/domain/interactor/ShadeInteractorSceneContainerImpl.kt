@@ -16,11 +16,11 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject

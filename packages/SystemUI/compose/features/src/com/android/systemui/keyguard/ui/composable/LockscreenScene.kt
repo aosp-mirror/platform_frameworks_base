@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.composable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
@@ -27,7 +28,6 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.shared.model.UserActionResult

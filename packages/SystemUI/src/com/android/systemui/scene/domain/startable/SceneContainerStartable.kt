@@ -19,6 +19,7 @@
 package com.android.systemui.scene.domain.startable
 
 import android.app.StatusBarManager
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -42,7 +43,6 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor

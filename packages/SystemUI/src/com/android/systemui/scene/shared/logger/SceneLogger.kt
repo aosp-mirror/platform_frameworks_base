@@ -16,10 +16,10 @@
 
 package com.android.systemui.scene.shared.logger
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.SceneFrameworkLog
-import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
 
 class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: LogBuffer) {

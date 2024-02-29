@@ -17,22 +17,15 @@
 package com.android.systemui.scene.ui.composable
 
 import com.android.compose.animation.scene.ObservableTransitionState as ComposeAwareObservableTransitionState
-import com.android.compose.animation.scene.SceneKey as ComposeAwareSceneKey
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
-
-fun ComposeAwareSceneKey.asComposeUnaware(): SceneKey {
-    return this.identity as SceneKey
-}
 
 fun ComposeAwareObservableTransitionState.asComposeUnaware(): ObservableTransitionState {
     return when (this) {
-        is ComposeAwareObservableTransitionState.Idle ->
-            ObservableTransitionState.Idle(scene.asComposeUnaware())
+        is ComposeAwareObservableTransitionState.Idle -> ObservableTransitionState.Idle(scene)
         is ComposeAwareObservableTransitionState.Transition ->
             ObservableTransitionState.Transition(
-                fromScene = fromScene.asComposeUnaware(),
-                toScene = toScene.asComposeUnaware(),
+                fromScene = fromScene,
+                toScene = toScene,
                 progress = progress,
                 isInitiatedByUserInput = isInitiatedByUserInput,
                 isUserInputOngoing = isUserInputOngoing,

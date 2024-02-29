@@ -18,7 +18,6 @@ package com.android.systemui.scene.ui.composable
 
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Edge as ComposeAwareEdge
-import com.android.compose.animation.scene.SceneKey as ComposeAwareSceneKey
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.TransitionKey as ComposeAwareTransitionKey
@@ -26,19 +25,11 @@ import com.android.compose.animation.scene.UserAction as ComposeAwareUserAction
 import com.android.compose.animation.scene.UserActionResult as ComposeAwareUserActionResult
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.TransitionKey
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.shared.model.UserActionResult
 
 // TODO(b/293899074): remove this file once we can use the types from SceneTransitionLayout.
-
-fun SceneKey.asComposeAware(): ComposeAwareSceneKey {
-    return ComposeAwareSceneKey(
-        debugName = toString(),
-        identity = this,
-    )
-}
 
 fun TransitionKey.asComposeAware(): ComposeAwareTransitionKey {
     return ComposeAwareTransitionKey(
@@ -75,7 +66,7 @@ fun UserAction.asComposeAware(): ComposeAwareUserAction {
 fun UserActionResult.asComposeAware(): ComposeAwareUserActionResult {
     val composeUnaware = this
     return ComposeAwareUserActionResult(
-        toScene = composeUnaware.toScene.asComposeAware(),
+        toScene = composeUnaware.toScene,
         transitionKey = composeUnaware.transitionKey?.asComposeAware(),
     )
 }

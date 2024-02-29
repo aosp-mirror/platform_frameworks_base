@@ -16,12 +16,12 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject

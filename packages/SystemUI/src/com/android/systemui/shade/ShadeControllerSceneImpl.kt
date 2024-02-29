@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -25,7 +26,6 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.ShadeTouchLog
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.CollapseShadeInstantly
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse

@@ -16,13 +16,7 @@
 
 package com.android.systemui.scene.shared.model
 
-class SceneKey(
-    private val loggingName: String,
-) {
-    override fun toString(): String {
-        return loggingName
-    }
-}
+import com.android.compose.animation.scene.SceneKey
 
 /**
  * Keys of all known scenes.

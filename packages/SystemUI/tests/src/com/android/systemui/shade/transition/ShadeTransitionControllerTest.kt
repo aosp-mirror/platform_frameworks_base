@@ -5,6 +5,7 @@ package com.android.systemui.shade.transition
 import android.platform.test.annotations.DisableFlags
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -21,7 +22,6 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.FakeSceneDataSource
 import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.shade.STATE_OPENING

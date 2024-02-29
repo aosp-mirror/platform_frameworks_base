@@ -35,11 +35,11 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
@@ -77,8 +77,8 @@ fun SceneContainer(
         currentScene.destinationScenes.collectAsState()
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
-            initialScene = currentSceneKey.asComposeAware(),
-            canChangeScene = { toScene -> viewModel.canChangeScene(toScene.asComposeUnaware()) },
+            initialScene = currentSceneKey,
+            canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
             transitions = SceneContainerTransitions,
         )
     }
@@ -116,7 +116,7 @@ fun SceneContainer(
         ) {
             sceneByKey.forEach { (sceneKey, composableScene) ->
                 scene(
-                    key = sceneKey.asComposeAware(),
+                    key = sceneKey,
                     userActions =
                         if (sceneKey == currentSceneKey) {
                                 currentDestinations
@@ -130,9 +130,7 @@ fun SceneContainer(
                 ) {
                     with(composableScene) {
                         this@scene.Content(
-                            modifier =
-                                Modifier.element(sceneKey.asComposeAware().rootElementKey)
-                                    .fillMaxSize(),
+                            modifier = Modifier.element(sceneKey.rootElementKey).fillMaxSize(),
                         )
                     }
                 }

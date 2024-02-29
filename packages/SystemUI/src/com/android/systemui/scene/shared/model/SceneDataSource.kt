@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene.shared.model
 
+import com.android.compose.animation.scene.SceneKey
 import kotlinx.coroutines.flow.StateFlow
 
 /** Defines interface for classes that provide access to scene state. */
