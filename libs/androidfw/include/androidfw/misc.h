@@ -43,6 +43,8 @@ typedef enum FileType {
 FileType getFileType(const char* fileName);
 /* get the file's modification date; returns -1 w/errno set on failure */
 time_t getFileModDate(const char* fileName);
+/* same, but also returns -1 if the file has already been deleted */
+time_t getFileModDate(int fd);
 
 // Check if |path| or |fd| resides on a readonly filesystem.
 bool isReadonlyFilesystem(const char* path);
