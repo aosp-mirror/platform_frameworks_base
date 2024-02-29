@@ -19,18 +19,19 @@ package com.android.systemui.keyguard.ui.composable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.qs.ui.composable.QuickSettings
-import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
 import dagger.Lazy
 import javax.inject.Inject
@@ -80,11 +81,11 @@ constructor(
         left: SceneKey?,
     ): Map<UserAction, UserActionResult> {
         return buildMap {
-            up?.let { this[UserAction.Swipe(Direction.UP)] = UserActionResult(up) }
-            left?.let { this[UserAction.Swipe(Direction.LEFT)] = UserActionResult(left) }
-            this[UserAction.Swipe(fromEdge = Edge.TOP, direction = Direction.DOWN)] =
+            up?.let { this[Swipe(SwipeDirection.Up)] = UserActionResult(up) }
+            left?.let { this[Swipe(SwipeDirection.Left)] = UserActionResult(left) }
+            this[Swipe(fromSource = Edge.Top, direction = SwipeDirection.Down)] =
                 UserActionResult(Scenes.QuickSettings)
-            this[UserAction.Swipe(direction = Direction.DOWN)] = UserActionResult(Scenes.Shade)
+            this[Swipe(direction = SwipeDirection.Down)] = UserActionResult(Scenes.Shade)
         }
     }
 }
