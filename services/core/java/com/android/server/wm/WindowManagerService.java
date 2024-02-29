@@ -9082,7 +9082,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Objects.requireNonNull(outInputChannel);
         synchronized (mGlobalLock) {
             WindowState hostWindowState = hostInputTransferToken != null
-                    ? mInputToWindowMap.get(hostInputTransferToken.mToken) : null;
+                    ? mInputToWindowMap.get(hostInputTransferToken.getToken()) : null;
             EmbeddedWindowController.EmbeddedWindow win =
                     new EmbeddedWindowController.EmbeddedWindow(session, this, clientToken,
                             hostWindowState, callingUid, callingPid, sanitizedType, displayId,
@@ -9111,12 +9111,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 // If the transferToToken exists in the input to window map, it means the request
                 // is to transfer from embedded to host. Otherwise, the transferToToken
                 // represents an embedded window so transfer from host to embedded.
-                WindowState windowStateTo = mInputToWindowMap.get(transferToToken.mToken);
+                WindowState windowStateTo = mInputToWindowMap.get(transferToToken.getToken());
                 if (windowStateTo != null) {
                     didTransfer = mEmbeddedWindowController.transferToHost(transferFromToken,
                             windowStateTo);
                 } else {
-                    WindowState windowStateFrom = mInputToWindowMap.get(transferFromToken.mToken);
+                    WindowState windowStateFrom = mInputToWindowMap.get(
+                            transferFromToken.getToken());
                     didTransfer = mEmbeddedWindowController.transferToEmbedded(windowStateFrom,
                             transferToToken);
                 }

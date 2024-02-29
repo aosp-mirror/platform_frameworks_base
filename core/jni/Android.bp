@@ -265,6 +265,7 @@ cc_library_shared_for_libandroid_runtime {
                 "fd_utils.cpp",
                 "android_hardware_input_InputWindowHandle.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
+                "android_window_InputTransferToken.cpp",
                 "android_window_WindowInfosListener.cpp",
                 "android_window_ScreenCapture.cpp",
                 "jni_common.cpp",

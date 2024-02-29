@@ -58,6 +58,7 @@ cc_library_shared {
         "configuration.cpp",
         "hardware_buffer_jni.cpp",
         "input.cpp",
+        "input_transfer_token.cpp",
         "looper.cpp",
         "native_activity.cpp",
         "native_window_jni.cpp",
