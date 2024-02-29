@@ -84,7 +84,7 @@ import com.android.systemui.media.controls.ui.view.RecommendationViewHolder
 import com.android.systemui.media.controls.ui.viewmodel.SeekBarViewModel
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
-import com.android.systemui.media.dialog.MediaOutputDialogFactory
+import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
 import com.android.systemui.plugins.ActivityStarter
@@ -160,7 +160,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var expandedSet: ConstraintSet
     @Mock private lateinit var collapsedSet: ConstraintSet
-    @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
+    @Mock private lateinit var mediaOutputDialogManager: MediaOutputDialogManager
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var transitionParent: ViewGroup
@@ -266,7 +266,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     mediaViewController,
                     seekBarViewModel,
                     Lazy { mediaDataManager },
-                    mediaOutputDialogFactory,
+                    mediaOutputDialogManager,
                     mediaCarouselController,
                     falsingManager,
                     clock,

@@ -24,7 +24,7 @@ import android.os.Looper;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -100,7 +100,7 @@ public interface VolumeModule {
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             DeviceProvisionedController deviceProvisionedController,
             ConfigurationController configurationController,
-            MediaOutputDialogFactory mediaOutputDialogFactory,
+            MediaOutputDialogManager mediaOutputDialogManager,
             InteractionJankMonitor interactionJankMonitor,
             VolumePanelNavigationInteractor volumePanelNavigationInteractor,
             VolumeNavigator volumeNavigator,
@@ -116,7 +116,7 @@ public interface VolumeModule {
                 accessibilityManagerWrapper,
                 deviceProvisionedController,
                 configurationController,
-                mediaOutputDialogFactory,
+                mediaOutputDialogManager,
                 interactionJankMonitor,
                 volumePanelNavigationInteractor,
                 volumeNavigator,

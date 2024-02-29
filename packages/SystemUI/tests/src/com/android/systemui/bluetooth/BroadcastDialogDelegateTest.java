@@ -42,7 +42,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -77,7 +77,8 @@ public class BroadcastDialogDelegateTest extends SysuiTestCase {
     @Mock SysUiState mSysUiState;
     @Mock
     DialogTransitionAnimator mDialogTransitionAnimator;
-    @Mock MediaOutputDialogFactory mMediaOutputDialogFactory;
+    @Mock
+    MediaOutputDialogManager mMediaOutputDialogManager;
     private SystemUIDialog mDialog;
     private TextView mTitle;
     private TextView mSubTitle;
@@ -96,7 +97,7 @@ public class BroadcastDialogDelegateTest extends SysuiTestCase {
 
         mBroadcastDialogDelegate = new BroadcastDialogDelegate(
                 mContext,
-                mMediaOutputDialogFactory,
+                mMediaOutputDialogManager,
                 mLocalBluetoothManager,
                 new UiEventLoggerFake(),
                 mFakeExecutor,

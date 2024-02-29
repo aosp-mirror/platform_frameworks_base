@@ -16,43 +16,24 @@
 
 package com.android.systemui.media.dialog
 
-import android.app.KeyguardManager
 import android.content.Context
-import android.media.AudioManager
-import android.media.session.MediaSessionManager
-import android.os.PowerExemptionManager
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
-import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastSender
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.media.nearby.NearbyMediaDevicesManager
-import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import javax.inject.Inject
 
-/** Factory to create [MediaOutputDialog] objects. */
-open class MediaOutputDialogFactory
+/** Manager to create and show a [MediaOutputDialog]. */
+open class MediaOutputDialogManager
 @Inject
 constructor(
     private val context: Context,
-    private val mediaSessionManager: MediaSessionManager,
-    private val lbm: LocalBluetoothManager?,
-    private val starter: ActivityStarter,
     private val broadcastSender: BroadcastSender,
-    private val notifCollection: CommonNotifCollection,
     private val uiEventLogger: UiEventLogger,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
-    private val nearbyMediaDevicesManager: NearbyMediaDevicesManager,
-    private val audioManager: AudioManager,
-    private val powerExemptionManager: PowerExemptionManager,
-    private val keyGuardManager: KeyguardManager,
-    private val featureFlags: FeatureFlags,
-    private val userTracker: UserTracker
+    private val mediaOutputControllerFactory: MediaOutputController.Factory,
 ) {
     companion object {
         const val INTERACTION_JANK_TAG = "media_output"
@@ -60,8 +41,8 @@ constructor(
     }
 
     /** Creates a [MediaOutputDialog] for the given package. */
-    open fun create(packageName: String, aboveStatusBar: Boolean, view: View? = null) {
-        createWithController(
+    open fun createAndShow(packageName: String, aboveStatusBar: Boolean, view: View? = null) {
+        createAndShowWithController(
             packageName,
             aboveStatusBar,
             controller =
@@ -78,12 +59,12 @@ constructor(
     }
 
     /** Creates a [MediaOutputDialog] for the given package. */
-    open fun createWithController(
+    open fun createAndShowWithController(
         packageName: String,
         aboveStatusBar: Boolean,
         controller: DialogTransitionAnimator.Controller?,
     ) {
-        create(
+        createAndShow(
             packageName,
             aboveStatusBar,
             dialogTransitionAnimatorController = controller,
@@ -91,8 +72,10 @@ constructor(
         )
     }
 
-    open fun createDialogForSystemRouting(controller: DialogTransitionAnimator.Controller? = null) {
-        create(
+    open fun createAndShowForSystemRouting(
+        controller: DialogTransitionAnimator.Controller? = null
+    ) {
+        createAndShow(
             packageName = null,
             aboveStatusBar = false,
             dialogTransitionAnimatorController = null,
@@ -100,7 +83,7 @@ constructor(
         )
     }
 
-    private fun create(
+    private fun createAndShow(
         packageName: String?,
         aboveStatusBar: Boolean,
         dialogTransitionAnimatorController: DialogTransitionAnimator.Controller?,
@@ -109,23 +92,9 @@ constructor(
         // Dismiss the previous dialog, if any.
         mediaOutputDialog?.dismiss()
 
-        val controller =
-            MediaOutputController(
-                context,
-                packageName,
-                mediaSessionManager,
-                lbm,
-                starter,
-                notifCollection,
-                dialogTransitionAnimator,
-                nearbyMediaDevicesManager,
-                audioManager,
-                powerExemptionManager,
-                keyGuardManager,
-                featureFlags,
-                userTracker
-            )
-        val dialog =
+        val controller = mediaOutputControllerFactory.create(packageName)
+
+        val mediaOutputDialog =
             MediaOutputDialog(
                 context,
                 aboveStatusBar,
@@ -135,16 +104,15 @@ constructor(
                 uiEventLogger,
                 includePlaybackAndAppMetadata
             )
-        mediaOutputDialog = dialog
 
         // Show the dialog.
         if (dialogTransitionAnimatorController != null) {
             dialogTransitionAnimator.show(
-                dialog,
+                mediaOutputDialog,
                 dialogTransitionAnimatorController,
             )
         } else {
-            dialog.show()
+            mediaOutputDialog.show()
         }
     }
 
