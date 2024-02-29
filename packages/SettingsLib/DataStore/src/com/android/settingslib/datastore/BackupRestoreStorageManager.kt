@@ -46,12 +46,22 @@ class BackupRestoreStorageManager private constructor(private val application: A
     /**
      * Adds all the registered [BackupRestoreStorage] as the helpers of given [BackupAgentHelper].
      *
+     * All [BackupRestoreFileStorage]s will be wrapped as a single [BackupRestoreFileArchiver].
+     *
      * @see BackupAgentHelper.addHelper
      */
     fun addBackupAgentHelpers(backupAgentHelper: BackupAgentHelper) {
+        val fileStorages = mutableListOf<BackupRestoreFileStorage>()
         for ((keyPrefix, storage) in storages) {
-            backupAgentHelper.addHelper(keyPrefix, storage)
+            if (storage is BackupRestoreFileStorage) {
+                fileStorages.add(storage)
+            } else {
+                backupAgentHelper.addHelper(keyPrefix, storage)
+            }
         }
+        // Always add file archiver even fileStorages is empty to handle forward compatibility
+        val fileArchiver = BackupRestoreFileArchiver(application, fileStorages)
+        backupAgentHelper.addHelper(fileArchiver.name, fileArchiver)
     }
 
     /**
@@ -87,6 +97,7 @@ class BackupRestoreStorageManager private constructor(private val application: A
      * The storage MUST implement [KeyedObservable] or [Observable].
      */
     fun add(storage: BackupRestoreStorage) {
+        if (storage is BackupRestoreFileStorage) storage.checkFilePaths()
         val name = storage.name
         val oldStorage = storages.put(name, storage)
         if (oldStorage != null) {
