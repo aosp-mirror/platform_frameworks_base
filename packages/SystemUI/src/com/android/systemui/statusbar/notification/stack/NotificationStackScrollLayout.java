@@ -4992,6 +4992,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {
         ExpandableNotificationRow row = entry.getHeadsUpAnimationView();
+        generateHeadsUpAnimation(row, isHeadsUp);
+    }
+
+    /**
+     * Notifies the NSSL, that the given view would need a HeadsUp animation, when it is being
+     * added to this container.
+     *
+     * @param row to animate
+     * @param isHeadsUp true for appear, false for disappear animations
+     */
+    public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
         final boolean add = mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed);
         if (SPEW) {
             Log.v(TAG, "generateHeadsUpAnimation:"
@@ -5725,11 +5736,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mShelf.updateAppearance();
     }
 
-    void setTopHeadsUpRow(ExpandableNotificationRow topHeadsUpRow) {
+    /**
+     * @param topHeadsUpRow the first headsUp row in z-order.
+     */
+    public void setTopHeadsUpRow(ExpandableNotificationRow topHeadsUpRow) {
         mTopHeadsUpRow = topHeadsUpRow;
     }
 
-    void setNumHeadsUp(long numHeadsUp) {
+    /**
+     * @param numHeadsUp the number of active alerting notifications.
+     */
+    public void setNumHeadsUp(long numHeadsUp) {
         mNumHeadsUp = numHeadsUp;
         mAmbientState.setHasHeadsUpEntries(numHeadsUp > 0);
     }
