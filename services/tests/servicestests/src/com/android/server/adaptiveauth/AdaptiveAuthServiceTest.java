@@ -37,6 +37,7 @@ import android.content.pm.PackageManager;
 import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricManager;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.InstrumentationRegistry;
@@ -64,6 +65,7 @@ import org.mockito.MockitoAnnotations;
 /**
  * atest FrameworksServicesTests:AdaptiveAuthServiceTest
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AdaptiveAuthServiceTest {
