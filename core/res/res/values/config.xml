@@ -6986,4 +6986,7 @@
     <!-- Whether WM DisplayContent supports high performance transitions
          (lower-end devices may want to disable) -->
     <bool name="config_deviceSupportsHighPerfTransitions">true</bool>
+
+    <!-- Wear devices: An intent action that is used for remote intent. -->
+    <string name="config_wearRemoteIntentAction" translatable="false" />
 </resources>
