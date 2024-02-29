@@ -20,8 +20,7 @@ import static android.hardware.camera2.utils.TypeReference.*;
 
 import android.hardware.camera2.utils.TypeReference;
 
-import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
+import androidx.test.filters.SmallTest;
 
 import java.lang.reflect.Type;
 import java.util.List;
