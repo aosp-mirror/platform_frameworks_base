@@ -2259,22 +2259,22 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Finish the topmost activities in all root tasks that belong to the crashed app.
+     * Finish the topmost activities in all leaf tasks that belong to the crashed app.
      *
      * @param app    The app that crashed.
      * @param reason Reason to perform this action.
-     * @return The task id that was finished in this root task, or INVALID_TASK_ID if none was
+     * @return The task id that was finished in this leaf task, or INVALID_TASK_ID if none was
      * finished.
      */
     int finishTopCrashedActivities(WindowProcessController app, String reason) {
         Task focusedRootTask = getTopDisplayFocusedRootTask();
         final Task[] finishedTask = new Task[1];
-        forAllRootTasks(rootTask -> {
-            final Task t = rootTask.finishTopCrashedActivityLocked(app, reason);
-            if (rootTask == focusedRootTask || finishedTask[0] == null) {
+        forAllLeafTasks(leafTask -> {
+            final Task t = leafTask.finishTopCrashedActivityLocked(app, reason);
+            if (leafTask.getRootTask() == focusedRootTask || finishedTask[0] == null) {
                 finishedTask[0] = t;
             }
-        });
+        }, true);
         return finishedTask[0] != null ? finishedTask[0].mTaskId : INVALID_TASK_ID;
     }
 
