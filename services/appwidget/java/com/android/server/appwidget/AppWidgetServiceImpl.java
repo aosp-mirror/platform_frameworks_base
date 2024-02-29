@@ -2074,7 +2074,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void handleNotifyAppWidgetViewDataChanged(Host host, IAppWidgetHost callbacks,
             int appWidgetId, int viewId, long requestId) {
         try {
-            Slog.d(TAG, "Trying to notify widget view data changed");
             callbacks.viewDataChanged(appWidgetId, viewId);
             host.lastWidgetUpdateSequenceNo = requestId;
         } catch (RemoteException re) {
@@ -2159,8 +2158,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void handleNotifyUpdateAppWidget(Host host, IAppWidgetHost callbacks,
             int appWidgetId, RemoteViews views, long requestId) {
         try {
-            Slog.d(TAG, "Trying to notify widget update for package "
-                    + views.getPackage());
             callbacks.updateAppWidget(appWidgetId, views);
             host.lastWidgetUpdateSequenceNo = requestId;
         } catch (RemoteException re) {
@@ -2199,7 +2196,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void handleNotifyProviderChanged(Host host, IAppWidgetHost callbacks,
             int appWidgetId, AppWidgetProviderInfo info, long requestId) {
         try {
-            Slog.d(TAG, "Trying to notify provider update");
             callbacks.providerChanged(appWidgetId, info);
             host.lastWidgetUpdateSequenceNo = requestId;
         } catch (RemoteException re) {
@@ -2243,7 +2239,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void handleNotifyAppWidgetRemoved(Host host, IAppWidgetHost callbacks, int appWidgetId,
             long requestId) {
         try {
-            Slog.d(TAG, "Trying to notify widget removed");
             callbacks.appWidgetRemoved(appWidgetId);
             host.lastWidgetUpdateSequenceNo = requestId;
         } catch (RemoteException re) {
@@ -2291,7 +2286,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private void handleNotifyProvidersChanged(Host host, IAppWidgetHost callbacks) {
         try {
-            Slog.d(TAG, "Trying to notify widget providers changed");
             callbacks.providersChanged();
         } catch (RemoteException re) {
             synchronized (mLock) {
