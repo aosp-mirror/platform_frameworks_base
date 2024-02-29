@@ -8,14 +8,6 @@ flag {
 }
 
 flag {
-    name: "enable_desktop_windowing"
-    namespace: "multitasking"
-    description: "Enables desktop windowing"
-    bug: "304778354"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "enable_split_contextual"
     namespace: "multitasking"
     description: "Enables invoking split contextually"

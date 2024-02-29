@@ -38,13 +38,11 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ACTION_BLUETOOTH_DEVICE_DETAILS
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ACTION_PAIR_NEW_DEVICE
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ACTION_PREVIOUSLY_CONNECTED_DEVICE
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.MAX_DEVICE_ITEM_ENTRY
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogDelegate.Companion.ACTION_BLUETOOTH_DEVICE_DETAILS
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogDelegate.Companion.ACTION_PAIR_NEW_DEVICE
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogDelegate.Companion.ACTION_PREVIOUSLY_CONNECTED_DEVICE
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogDelegate.Companion.MAX_DEVICE_ITEM_ENTRY
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.phone.SystemUIDialog
-import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -67,13 +65,12 @@ constructor(
     private val bluetoothAutoOnInteractor: BluetoothAutoOnInteractor,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val activityStarter: ActivityStarter,
-    private val systemClock: SystemClock,
     private val uiEventLogger: UiEventLogger,
-    private val logger: BluetoothTileDialogLogger,
     @Application private val coroutineScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @Main private val sharedPreferences: SharedPreferences,
+    private val bluetoothDialogDelegateFactory: BluetoothTileDialogDelegate.Factory,
 ) : BluetoothTileDialogCallback {
 
     private var job: Job? = null
@@ -92,7 +89,8 @@ constructor(
             coroutineScope.launch(mainDispatcher) {
                 var updateDeviceItemJob: Job?
                 var updateDialogUiJob: Job? = null
-                val dialog = createBluetoothTileDialog(context)
+                val dialogDelegate = createBluetoothTileDialog(context)
+                val dialog = dialogDelegate.createDialog()
 
                 view?.let {
                     dialogTransitionAnimator.showFromView(
@@ -118,13 +116,14 @@ constructor(
                     .onEach {
                         updateDialogUiJob?.cancel()
                         updateDialogUiJob = launch {
-                            dialog.apply {
+                            dialogDelegate.apply {
                                 onDeviceItemUpdated(
+                                    dialog,
                                     it.take(MAX_DEVICE_ITEM_ENTRY),
                                     showSeeAll = it.size > MAX_DEVICE_ITEM_ENTRY,
                                     showPairNewDevice = bluetoothStateInteractor.isBluetoothEnabled
                                 )
-                                animateProgressBar(false)
+                                animateProgressBar(dialog, false)
                             }
                         }
                     }
@@ -134,7 +133,7 @@ constructor(
                 // the device item list and animiate the progress bar.
                 deviceItemInteractor.deviceItemUpdateRequest
                     .onEach {
-                        dialog.animateProgressBar(true)
+                        dialogDelegate.animateProgressBar(dialog, true)
                         updateDeviceItemJob?.cancel()
                         updateDeviceItemJob = launch {
                             deviceItemInteractor.updateDeviceItems(
@@ -150,7 +149,8 @@ constructor(
                 bluetoothStateInteractor.bluetoothStateUpdate
                     .filterNotNull()
                     .onEach {
-                        dialog.onBluetoothStateUpdated(
+                        dialogDelegate.onBluetoothStateUpdated(
+                            dialog,
                             it,
                             UiProperties.build(it, isAutoOnToggleFeatureAvailable())
                         )
@@ -166,20 +166,20 @@ constructor(
 
                 // bluetoothStateToggle is emitted when user toggles the bluetooth state switch,
                 // send the new value to the bluetoothStateInteractor and animate the progress bar.
-                dialog.bluetoothStateToggle
+                dialogDelegate.bluetoothStateToggle
                     .onEach {
-                        dialog.animateProgressBar(true)
+                        dialogDelegate.animateProgressBar(dialog, true)
                         bluetoothStateInteractor.isBluetoothEnabled = it
                     }
                     .launchIn(this)
 
                 // deviceItemClick is emitted when user clicked on a device item.
-                dialog.deviceItemClick
+                dialogDelegate.deviceItemClick
                     .onEach { deviceItemInteractor.updateDeviceItemOnClick(it) }
                     .launchIn(this)
 
                 // contentHeight is emitted when the dialog is dismissed.
-                dialog.contentHeight
+                dialogDelegate.contentHeight
                     .onEach {
                         withContext(backgroundDispatcher) {
                             sharedPreferences.edit().putInt(CONTENT_HEIGHT_PREF_KEY, it).apply()
@@ -191,12 +191,12 @@ constructor(
                     // bluetoothAutoOnUpdate is emitted when bluetooth auto on on/off state is
                     // changed.
                     bluetoothAutoOnInteractor.isEnabled
-                        .onEach { dialog.onBluetoothAutoOnUpdated(it) }
+                        .onEach { dialogDelegate.onBluetoothAutoOnUpdated(dialog, it) }
                         .launchIn(this)
 
                     // bluetoothAutoOnToggle is emitted when user toggles the bluetooth auto on
                     // switch, send the new value to the bluetoothAutoOnInteractor.
-                    dialog.bluetoothAutoOnToggle
+                    dialogDelegate.bluetoothAutoOnToggle
                         .filterNotNull()
                         .onEach { bluetoothAutoOnInteractor.setEnabled(it) }
                         .launchIn(this)
@@ -206,7 +206,7 @@ constructor(
             }
     }
 
-    private suspend fun createBluetoothTileDialog(context: Context): BluetoothTileDialog {
+    private suspend fun createBluetoothTileDialog(context: Context): BluetoothTileDialogDelegate {
         val cachedContentHeight =
             withContext(backgroundDispatcher) {
                 sharedPreferences.getInt(
@@ -215,21 +215,17 @@ constructor(
                 )
             }
 
-        return BluetoothTileDialog(
+        return bluetoothDialogDelegateFactory.create(
+            context,
+            UiProperties.build(
                 bluetoothStateInteractor.isBluetoothEnabled,
-                UiProperties.build(
-                    bluetoothStateInteractor.isBluetoothEnabled,
-                    isAutoOnToggleFeatureAvailable()
-                ),
-                cachedContentHeight,
-                this@BluetoothTileDialogViewModel,
-                mainDispatcher,
-                systemClock,
-                uiEventLogger,
-                logger,
-                context
-            )
-            .apply { SystemUIDialog.registerDismissListener(this) { cancelJob() } }
+                isAutoOnToggleFeatureAvailable()
+            ),
+            cachedContentHeight,
+            bluetoothStateInteractor.isBluetoothEnabled,
+            this@BluetoothTileDialogViewModel,
+            { cancelJob() }
+        )
     }
 
     override fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View) {
@@ -308,7 +304,7 @@ constructor(
     }
 }
 
-internal interface BluetoothTileDialogCallback {
+interface BluetoothTileDialogCallback {
     fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View)
     fun onSeeAllClicked(view: View)
     fun onPairNewDeviceClicked(view: View)

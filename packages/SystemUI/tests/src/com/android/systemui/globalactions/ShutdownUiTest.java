@@ -19,7 +19,13 @@ package com.android.systemui.globalactions;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 
+import static org.mockito.Mockito.when;
+
+import android.nearby.NearbyManager;
+import android.net.platform.flags.Flags;
 import android.os.PowerManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -32,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 
 @SmallTest
@@ -41,10 +48,13 @@ public class ShutdownUiTest extends SysuiTestCase {
     ShutdownUi mShutdownUi;
     @Mock
     BlurUtils mBlurUtils;
+    @Mock
+    NearbyManager mNearbyManager;
 
     @Before
     public void setUp() throws Exception {
-        mShutdownUi = new ShutdownUi(getContext(), mBlurUtils);
+        MockitoAnnotations.initMocks(this);
+        mShutdownUi = new ShutdownUi(getContext(), mBlurUtils, mNearbyManager);
     }
 
     @Test
@@ -82,4 +92,53 @@ public class ShutdownUiTest extends SysuiTestCase {
         String message = mShutdownUi.getReasonMessage("anything-else");
         assertNull(message);
     }
+
+    @EnableFlags(Flags.FLAG_POWERED_OFF_FINDING_PLATFORM)
+    @Test
+    public void getDialog_whenPowerOffFindingModeEnabled_returnsFinderDialog() {
+        when(mNearbyManager.getPoweredOffFindingMode()).thenReturn(
+                NearbyManager.POWERED_OFF_FINDING_MODE_ENABLED);
+
+        int actualLayout = mShutdownUi.getShutdownDialogContent(false);
+
+        int expectedLayout = com.android.systemui.res.R.layout.shutdown_dialog_finder_active;
+        assertEquals(actualLayout, expectedLayout);
+    }
+
+    @DisableFlags(Flags.FLAG_POWERED_OFF_FINDING_PLATFORM)
+    @Test
+    public void getDialog_whenPowerOffFindingModeEnabledFlagDisabled_returnsFinderDialog() {
+        when(mNearbyManager.getPoweredOffFindingMode()).thenReturn(
+                NearbyManager.POWERED_OFF_FINDING_MODE_ENABLED);
+
+        int actualLayout = mShutdownUi.getShutdownDialogContent(false);
+
+        int expectedLayout = R.layout.shutdown_dialog;
+        assertEquals(actualLayout, expectedLayout);
+    }
+
+    @EnableFlags(Flags.FLAG_POWERED_OFF_FINDING_PLATFORM)
+    @Test
+    public void getDialog_whenPowerOffFindingModeDisabled_returnsDefaultDialog() {
+        when(mNearbyManager.getPoweredOffFindingMode()).thenReturn(
+                NearbyManager.POWERED_OFF_FINDING_MODE_DISABLED);
+
+        int actualLayout = mShutdownUi.getShutdownDialogContent(false);
+
+        int expectedLayout = R.layout.shutdown_dialog;
+        assertEquals(actualLayout, expectedLayout);
+    }
+
+    @EnableFlags(Flags.FLAG_POWERED_OFF_FINDING_PLATFORM)
+    @Test
+    public void getDialog_whenPowerOffFindingModeEnabledAndIsReboot_returnsDefaultDialog() {
+        when(mNearbyManager.getPoweredOffFindingMode()).thenReturn(
+                NearbyManager.POWERED_OFF_FINDING_MODE_ENABLED);
+
+        int actualLayout = mShutdownUi.getShutdownDialogContent(true);
+
+        int expectedLayout = R.layout.shutdown_dialog;
+        assertEquals(actualLayout, expectedLayout);
+    }
+
 }

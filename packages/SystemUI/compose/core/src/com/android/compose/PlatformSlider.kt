@@ -152,7 +152,10 @@ fun PlatformSlider(
                         modifier =
                             Modifier.fillMaxHeight()
                                 .weight(1f)
-                                .padding(start = { paddingStart.roundToPx() }),
+                                .padding(
+                                    start = { paddingStart.roundToPx() },
+                                    end = { sliderHeight.roundToPx() / 2 },
+                                ),
                         contentAlignment = Alignment.CenterStart,
                     ) {
                         labelComposable(isDragging)

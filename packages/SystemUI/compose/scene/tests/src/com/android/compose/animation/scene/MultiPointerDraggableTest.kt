@@ -59,9 +59,18 @@ class MultiPointerDraggableTest {
                         orientation = Orientation.Vertical,
                         enabled = { enabled },
                         startDragImmediately = { false },
-                        onDragStarted = { _, _, _ -> started = true },
-                        onDragDelta = { _ -> dragged = true },
-                        onDragStopped = { stopped = true },
+                        onDragStarted = { _, _, _ ->
+                            started = true
+                            object : DragController {
+                                override fun onDrag(delta: Float) {
+                                    dragged = true
+                                }
+
+                                override fun onStop(velocity: Float, canChangeScene: Boolean) {
+                                    stopped = true
+                                }
+                            }
+                        },
                     )
             )
         }

@@ -34,6 +34,10 @@
         remaining [CHAR LIMIT=none]-->
     <string name="battery_low_percent_format"><xliff:g id="percentage">%s</xliff:g> remaining</string>
 
+    <!-- SVG path description for the battery frame of the unified battery drawable
+    (BatteryLayersDrawable.kt). Drawn on a 24x14 canvas. Not suitable outside in any other context -->
+    <string name="battery_unified_frame_path_string" translatable="false">M2.75,3C2.75,1.757 3.757,0.75 5,0.75H20C21.795,0.75 23.25,2.205 23.25,4V10C23.25,11.795 21.795,13.25 20,13.25H5C3.757,13.25 2.75,12.243 2.75,11V3Z </string>
+
     <!-- A message that appears when the battery remaining estimate is low in a dialog.  This is
     appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery
     remaining. "time" is the amount of time remaining before the phone runs out of battery [CHAR LIMIT=none]-->
@@ -1114,6 +1118,8 @@
     <string name="popup_on_dismiss_cta_tile_text">Long press to customize widgets</string>
     <!-- Text for the button to configure widgets after long press. [CHAR LIMIT=50] -->
     <string name="button_to_configure_widgets_text">Customize widgets</string>
+    <!-- Description for the App icon of disabled widget. [CHAR LIMIT=NONE] -->
+    <string name="icon_description_for_disabled_widget">App icon for disabled widget</string>
     <!-- Label for the button which configures widgets [CHAR LIMIT=NONE] -->
     <string name="edit_widget">Edit widget</string>
     <!-- Description for the button that removes a widget on click. [CHAR LIMIT=50] -->
@@ -2235,6 +2241,11 @@
     <!-- Tuner string -->
     <!-- Tuner string -->
     <!-- Tuner string -->
+
+    <!-- Message shown during shutdown when Find My Device with Dead Battery Finder is active  [CHAR LIMIT=300] -->
+    <string name="finder_active">You can locate this phone with Find My Device even when powered off</string>
+    <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. [CHAR LIMIT=60] -->
+    <string name="shutdown_progress">Shutting down\u2026</string>
 
     <!-- Text help link for care instructions for overheating devices [CHAR LIMIT=40] -->
     <string name="thermal_shutdown_dialog_help_text">See care steps</string>

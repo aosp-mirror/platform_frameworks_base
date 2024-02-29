@@ -1541,6 +1541,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return;
         }
 
+        // Initialize all necessary settings for archival installation.
+        pkgSetting
+                // No package.
+                .setPkg(null)
+                // Mark for later restore.
+                .setPendingRestore(true);
+        for (int userId : userIds) {
+            // Unmark "installed" for all users.
+            pkgSetting
+                    .modifyUserState(userId)
+                    .setInstalled(false);
+        }
+
         String responsibleInstallerPackage = PackageArchiver.getResponsibleInstallerPackage(
                 pkgSetting);
         // TODO(b/278553670) Check if responsibleInstallerPackage supports unarchival.
@@ -1551,16 +1564,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         for (int userId : userIds) {
             var archiveState = mInstallerService.mPackageArchiver.createArchiveState(
                     archivePackage, userId, responsibleInstallerPackage);
-            if (archiveState == null) {
-                continue;
-            }
-            pkgSetting
-                    .setPkg(null)
-                    // This package was installed as archived. Need to mark it for later restore.
-                    .setPendingRestore(true)
+            if (archiveState != null) {
+                pkgSetting
                     .modifyUserState(userId)
-                    .setInstalled(false)
                     .setArchiveState(archiveState);
+            }
         }
     }
 

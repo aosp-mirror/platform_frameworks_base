@@ -24,7 +24,6 @@ import androidx.compose.foundation.gestures.awaitVerticalTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.horizontalDrag
 import androidx.compose.foundation.gestures.verticalDrag
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEvent
@@ -33,7 +32,6 @@ import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
@@ -69,9 +67,7 @@ internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
     enabled: () -> Boolean,
     startDragImmediately: (startedPosition: Offset) -> Boolean,
-    onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
-    onDragDelta: (delta: Float) -> Unit,
-    onDragStopped: (velocity: Float) -> Unit,
+    onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
 ): Modifier =
     this.then(
         MultiPointerDraggableElement(
@@ -79,8 +75,6 @@ internal fun Modifier.multiPointerDraggable(
             enabled,
             startDragImmediately,
             onDragStarted,
-            onDragDelta,
-            onDragStopped,
         )
     )
 
@@ -89,9 +83,7 @@ private data class MultiPointerDraggableElement(
     private val enabled: () -> Boolean,
     private val startDragImmediately: (startedPosition: Offset) -> Boolean,
     private val onDragStarted:
-        (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
-    private val onDragDelta: (Float) -> Unit,
-    private val onDragStopped: (velocity: Float) -> Unit,
+        (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
 ) : ModifierNodeElement<MultiPointerDraggableNode>() {
     override fun create(): MultiPointerDraggableNode =
         MultiPointerDraggableNode(
@@ -99,8 +91,6 @@ private data class MultiPointerDraggableElement(
             enabled = enabled,
             startDragImmediately = startDragImmediately,
             onDragStarted = onDragStarted,
-            onDragDelta = onDragDelta,
-            onDragStopped = onDragStopped,
         )
 
     override fun update(node: MultiPointerDraggableNode) {
@@ -108,8 +98,6 @@ private data class MultiPointerDraggableElement(
         node.enabled = enabled
         node.startDragImmediately = startDragImmediately
         node.onDragStarted = onDragStarted
-        node.onDragDelta = onDragDelta
-        node.onDragStopped = onDragStopped
     }
 }
 
@@ -117,9 +105,8 @@ internal class MultiPointerDraggableNode(
     orientation: Orientation,
     enabled: () -> Boolean,
     var startDragImmediately: (startedPosition: Offset) -> Boolean,
-    var onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
-    var onDragDelta: (Float) -> Unit,
-    var onDragStopped: (velocity: Float) -> Unit,
+    var onDragStarted:
+        (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
 ) :
     PointerInputModifierNode,
     DelegatingNode(),
@@ -176,40 +163,33 @@ internal class MultiPointerDraggableNode(
             return
         }
 
-        val onDragStart: (Offset, Float, Int) -> Unit = { startedPosition, overSlop, pointersDown ->
-            velocityTracker.resetTracking()
-            onDragStarted(startedPosition, overSlop, pointersDown)
-        }
-
-        val onDragCancel: () -> Unit = { onDragStopped(/* velocity= */ 0f) }
-
-        val onDragEnd: () -> Unit = {
-            val maxFlingVelocity =
-                currentValueOf(LocalViewConfiguration).maximumFlingVelocity.let { max ->
-                    Velocity(max, max)
-                }
-
-            val velocity = velocityTracker.calculateVelocity(maxFlingVelocity)
-            onDragStopped(
-                when (orientation) {
-                    Orientation.Horizontal -> velocity.x
-                    Orientation.Vertical -> velocity.y
-                }
-            )
-        }
-
-        val onDrag: (change: PointerInputChange, dragAmount: Float) -> Unit = { change, amount ->
-            velocityTracker.addPointerInputChange(change)
-            onDragDelta(amount)
-        }
-
         detectDragGestures(
             orientation = orientation,
             startDragImmediately = startDragImmediately,
-            onDragStart = onDragStart,
-            onDragEnd = onDragEnd,
-            onDragCancel = onDragCancel,
-            onDrag = onDrag,
+            onDragStart = { startedPosition, overSlop, pointersDown ->
+                velocityTracker.resetTracking()
+                onDragStarted(startedPosition, overSlop, pointersDown)
+            },
+            onDrag = { controller, change, amount ->
+                velocityTracker.addPointerInputChange(change)
+                controller.onDrag(amount)
+            },
+            onDragEnd = { controller ->
+                val viewConfiguration = currentValueOf(LocalViewConfiguration)
+                val maxVelocity = viewConfiguration.maximumFlingVelocity.let { Velocity(it, it) }
+                val velocity = velocityTracker.calculateVelocity(maxVelocity)
+                controller.onStop(
+                    velocity =
+                        when (orientation) {
+                            Orientation.Horizontal -> velocity.x
+                            Orientation.Vertical -> velocity.y
+                        },
+                    canChangeScene = true,
+                )
+            },
+            onDragCancel = { controller ->
+                controller.onStop(velocity = 0f, canChangeScene = true)
+            },
         )
     }
 }
@@ -225,10 +205,10 @@ internal class MultiPointerDraggableNode(
 private suspend fun PointerInputScope.detectDragGestures(
     orientation: Orientation,
     startDragImmediately: (startedPosition: Offset) -> Boolean,
-    onDragStart: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
-    onDragEnd: () -> Unit,
-    onDragCancel: () -> Unit,
-    onDrag: (change: PointerInputChange, dragAmount: Float) -> Unit,
+    onDragStart: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
+    onDragEnd: (controller: DragController) -> Unit,
+    onDragCancel: (controller: DragController) -> Unit,
+    onDrag: (controller: DragController, change: PointerInputChange, dragAmount: Float) -> Unit,
 ) {
     awaitEachGesture {
         val initialDown = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
@@ -282,34 +262,34 @@ private suspend fun PointerInputScope.detectDragGestures(
                 }
             }
 
-            onDragStart(drag.position, overSlop, pressed.size)
+            val controller = onDragStart(drag.position, overSlop, pressed.size)
 
             val successful: Boolean
             try {
-                onDrag(drag, overSlop)
+                onDrag(controller, drag, overSlop)
 
                 successful =
                     when (orientation) {
                         Orientation.Horizontal ->
                             horizontalDrag(drag.id) {
-                                onDrag(it, it.positionChange().x)
+                                onDrag(controller, it, it.positionChange().x)
                                 it.consume()
                             }
                         Orientation.Vertical ->
                             verticalDrag(drag.id) {
-                                onDrag(it, it.positionChange().y)
+                                onDrag(controller, it, it.positionChange().y)
                                 it.consume()
                             }
                     }
             } catch (t: Throwable) {
-                onDragCancel()
+                onDragCancel(controller)
                 throw t
             }
 
             if (successful) {
-                onDragEnd()
+                onDragEnd(controller)
             } else {
-                onDragCancel()
+                onDragCancel(controller)
             }
         }
     }

@@ -506,7 +506,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // keep backwards compatibility we remove the task from recents when finishing
                     // task with root activity.
                     mTaskSupervisor.removeTask(tr, false /*killProcess*/,
-                            finishWithRootActivity, "finish-activity", r.getUid(), r.info.name);
+                            finishWithRootActivity, "finish-activity", r.getUid(), r.getPid(),
+                            r.info.name);
                     res = true;
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;

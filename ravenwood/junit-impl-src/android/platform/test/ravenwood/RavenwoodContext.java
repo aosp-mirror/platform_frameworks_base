@@ -16,18 +16,28 @@
 
 package android.platform.test.ravenwood;
 
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.hardware.ISerialManager;
 import android.hardware.SerialManager;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.PermissionEnforcer;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
 import android.util.Singleton;
 
+import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class RavenwoodContext extends MockContext {
+    private final String mPackageName;
+    private final HandlerThread mMainThread;
+
     private final RavenwoodPermissionEnforcer mEnforcer = new RavenwoodPermissionEnforcer();
 
     private final ArrayMap<Class<?>, String> mClassToName = new ArrayMap<>();
@@ -39,7 +49,13 @@ public class RavenwoodContext extends MockContext {
         mNameToFactory.put(serviceName, serviceSupplier);
     }
 
-    public RavenwoodContext() {
+    public RavenwoodContext(String packageName, HandlerThread mainThread) {
+        mPackageName = packageName;
+        mMainThread = mainThread;
+
+        registerService(ClipboardManager.class,
+                Context.CLIPBOARD_SERVICE, asSingleton(() ->
+                        new ClipboardManager(this, getMainThreadHandler())));
         registerService(PermissionEnforcer.class,
                 Context.PERMISSION_ENFORCER_SERVICE, () -> mEnforcer);
         registerService(SerialManager.class,
@@ -73,18 +89,79 @@ public class RavenwoodContext extends MockContext {
         }
     }
 
+    @Override
+    public Looper getMainLooper() {
+        Objects.requireNonNull(mMainThread,
+                "Test must request setProvideMainThread() via RavenwoodRule");
+        return mMainThread.getLooper();
+    }
+
+    @Override
+    public Handler getMainThreadHandler() {
+        Objects.requireNonNull(mMainThread,
+                "Test must request setProvideMainThread() via RavenwoodRule");
+        return mMainThread.getThreadHandler();
+    }
+
+    @Override
+    public Executor getMainExecutor() {
+        Objects.requireNonNull(mMainThread,
+                "Test must request setProvideMainThread() via RavenwoodRule");
+        return mMainThread.getThreadExecutor();
+    }
+
+    @Override
+    public String getPackageName() {
+        return Objects.requireNonNull(mPackageName,
+                "Test must request setPackageName() via RavenwoodRule");
+    }
+
+    @Override
+    public String getOpPackageName() {
+        return Objects.requireNonNull(mPackageName,
+                "Test must request setPackageName() via RavenwoodRule");
+    }
+
+    @Override
+    public String getAttributionTag() {
+        return null;
+    }
+
+    @Override
+    public UserHandle getUser() {
+        return android.os.UserHandle.of(android.os.UserHandle.myUserId());
+    }
+
+    @Override
+    public int getUserId() {
+        return android.os.UserHandle.myUserId();
+    }
+
+    @Override
+    public int getDeviceId() {
+        return Context.DEVICE_ID_DEFAULT;
+    }
+
     /**
      * Wrap the given {@link Supplier} to become a memoized singleton.
      */
-    private static <T> Supplier<T> asSingleton(Supplier<T> supplier) {
+    private static <T> Supplier<T> asSingleton(ThrowingSupplier<T> supplier) {
         final Singleton<T> singleton = new Singleton<>() {
             @Override
             protected T create() {
-                return supplier.get();
+                try {
+                    return supplier.get();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
         return () -> {
             return singleton.get();
         };
+    }
+
+    public interface ThrowingSupplier<T> {
+        T get() throws Exception;
     }
 }

@@ -145,6 +145,16 @@ java_library {
 }
 
 java_library {
+    name: "services.fakes.ravenwood-jarjar",
+    installable: false,
+    srcs: [":services.fakes-sources"],
+    libs: [
+        "services.core.ravenwood",
+    ],
+    jarjar_rules: ":ravenwood-services-jarjar-rules",
+}
+
+java_library {
     name: "mockito-ravenwood-prebuilt",
     installable: false,
     static_libs: [
@@ -189,6 +199,7 @@ android_ravenwood_libgroup {
         "ravenwood-helper-runtime",
         "hoststubgen-helper-runtime.ravenwood",
         "services.core.ravenwood-jarjar",
+        "services.fakes.ravenwood-jarjar",
 
         // Provide runtime versions of utils linked in below
         "junit",

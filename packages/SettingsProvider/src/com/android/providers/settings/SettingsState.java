@@ -359,6 +359,15 @@ final class SettingsState {
 
     @VisibleForTesting
     @GuardedBy("mLock")
+    public void addAconfigDefaultValuesFromMap(
+            @NonNull Map<String, Map<String, String>> defaultMap) {
+        if (mNamespaceDefaults != null) {
+            mNamespaceDefaults.putAll(defaultMap);
+        }
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
     public static void loadAconfigDefaultValues(byte[] fileContents,
             @NonNull Map<String, Map<String, String>> defaultMap) {
         try {
@@ -508,6 +517,28 @@ final class SettingsState {
             boolean overrideableByRestore) {
         if (TextUtils.isEmpty(name)) {
             return false;
+        }
+
+        // Aconfig flags are always boot stable, so we anytime we write one, we staged it to be
+        // applied on reboot.
+        if (Flags.stageAllAconfigFlags() && mNamespaceDefaults != null) {
+            int slashIndex = name.indexOf("/");
+            boolean stageFlag = isConfigSettingsKey(mKey)
+                    && slashIndex != -1
+                    && slashIndex != 0
+                    && slashIndex != name.length();
+
+            if (stageFlag) {
+                String namespace = name.substring(0, slashIndex);
+                String flag = name.substring(slashIndex + 1);
+
+                boolean isAconfig = mNamespaceDefaults.containsKey(namespace)
+                        && mNamespaceDefaults.get(namespace).containsKey(name);
+
+                if (isAconfig) {
+                    name = "staged/" + namespace + "*" + flag;
+                }
+            }
         }
 
         final boolean isNameTooLong = name.length() > SettingsState.MAX_LENGTH_PER_STRING;

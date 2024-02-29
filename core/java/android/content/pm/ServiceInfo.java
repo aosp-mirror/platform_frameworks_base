@@ -163,25 +163,12 @@ public class ServiceInfo extends ComponentInfo
      * Because of this, developers must make sure to stop the foreground service even if
      * {@link android.app.Service#onTimeout(int, int)} is not called on such versions.
      *
-     * <p>Apps targeting API level {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and
-     * later should <b>NOT</b> use this type: calling
-     * {@link android.app.Service#startForeground(int, android.app.Notification, int)} with
-     * this type on devices running {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} is
-     * still allowed, but it may throw an {@link android.app.InvalidForegroundServiceTypeException}
-     * in future platform releases.
-     *
-     * <p class="note">
-     * Use the {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean)} API for
-     * user-initiated, network data transfers.
-     *
-     * @deprecated Use {@link android.app.job.JobInfo.Builder} APIs or alternate FGS types
-     * (like {@link #FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING}) applicable to your use-case.
+     * @see android.app.Service#onTimeout(int, int)
      */
     @RequiresPermission(
             value = Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC,
             conditional = true
     )
-    @Deprecated
     public static final int FOREGROUND_SERVICE_TYPE_DATA_SYNC = 1 << 0;
 
     /**

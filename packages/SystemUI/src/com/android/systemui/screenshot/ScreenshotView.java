@@ -57,6 +57,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -86,9 +87,9 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -103,6 +104,8 @@ public class ScreenshotView extends FrameLayout implements
 
     interface ScreenshotViewCallback {
         void onUserInteraction();
+
+        void onAction(Intent intent, UserHandle owner, boolean overrideTransition);
 
         void onDismiss();
 
@@ -166,7 +169,6 @@ public class ScreenshotView extends FrameLayout implements
 
     private final InteractionJankMonitor mInteractionJankMonitor;
     private long mDefaultTimeoutOfTimeoutHandler;
-    private ActionIntentExecutor mActionExecutor;
     private FeatureFlags mFlags;
     private final Bundle mInteractiveBroadcastOption;
 
@@ -430,11 +432,9 @@ public class ScreenshotView extends FrameLayout implements
      * Note: must be called before any other (non-constructor) method or null pointer exceptions
      * may occur.
      */
-    void init(UiEventLogger uiEventLogger, ScreenshotViewCallback callbacks,
-            ActionIntentExecutor actionExecutor, FeatureFlags flags) {
+    void init(UiEventLogger uiEventLogger, ScreenshotViewCallback callbacks, FeatureFlags flags) {
         mUiEventLogger = uiEventLogger;
         mCallbacks = callbacks;
-        mActionExecutor = actionExecutor;
         mFlags = flags;
     }
 
@@ -800,24 +800,21 @@ public class ScreenshotView extends FrameLayout implements
                 shareIntent = ActionIntentCreator.INSTANCE.createShareWithSubject(
                         imageData.uri, imageData.subject);
             }
-            mActionExecutor.launchIntentAsync(shareIntent,
-                    imageData.shareTransition.get().bundle,
-                    imageData.owner, false);
+            mCallbacks.onAction(shareIntent, imageData.owner, false);
+
         });
         mEditChip.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED, 0, mPackageName);
             prepareSharedTransition();
-            mActionExecutor.launchIntentAsync(
+            mCallbacks.onAction(
                     ActionIntentCreator.INSTANCE.createEdit(imageData.uri, mContext),
-                    imageData.editTransition.get().bundle,
                     imageData.owner, true);
         });
         mScreenshotPreview.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED, 0, mPackageName);
             prepareSharedTransition();
-            mActionExecutor.launchIntentAsync(
+            mCallbacks.onAction(
                     ActionIntentCreator.INSTANCE.createEdit(imageData.uri, mContext),
-                    imageData.editTransition.get().bundle,
                     imageData.owner, true);
         });
         if (mQuickShareChip != null) {

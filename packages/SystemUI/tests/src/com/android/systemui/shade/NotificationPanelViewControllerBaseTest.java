@@ -599,6 +599,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         // Primary Bouncer->Gone
         when(mPrimaryBouncerToGoneTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
+        when(mPrimaryBouncerToGoneTransitionViewModel.getNotificationAlpha())
+                .thenReturn(emptyFlow());
 
         NotificationsKeyguardViewStateRepository notifsKeyguardViewStateRepository =
                 new NotificationsKeyguardViewStateRepository();

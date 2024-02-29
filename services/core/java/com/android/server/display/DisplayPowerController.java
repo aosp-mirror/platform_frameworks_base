@@ -1474,6 +1474,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 && mFlags.isDisplayOffloadEnabled()
                 && mPowerRequest.policy == POLICY_DOZE
                 && mDisplayOffloadSession != null
+                && mAutomaticBrightnessController != null
                 && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
             rawBrightnessState = mAutomaticBrightnessController
                     .getAutomaticScreenBrightnessBasedOnLastObservedLux(mTempBrightnessEvent);

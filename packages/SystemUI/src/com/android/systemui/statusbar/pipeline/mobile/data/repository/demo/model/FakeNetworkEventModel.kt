@@ -31,7 +31,7 @@ sealed interface FakeNetworkEventModel {
         // Null means the default (chosen by the repository)
         val subId: Int?,
         val carrierId: Int?,
-        val inflateStrength: Boolean?,
+        val inflateStrength: Boolean = false,
         @DataActivityType val activity: Int?,
         val carrierNetworkChange: Boolean,
         val roaming: Boolean,

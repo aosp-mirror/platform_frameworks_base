@@ -32,6 +32,7 @@ import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.dagger.ShadeTouchLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -98,6 +99,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
                 statusBarKeyguardViewManager,
                 notificationShadeWindowController,
                 assistManagerLazy);
+        SceneContainerFlag.assertInLegacyMode();
         mCommandQueue = commandQueue;
         mMainExecutor = mainExecutor;
         mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;

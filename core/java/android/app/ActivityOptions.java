@@ -93,15 +93,30 @@ public class ActivityOptions extends ComponentOptions {
      */
     public static final String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
 
-    /** No explicit value chosen. The system will decide whether to grant privileges. */
-    public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED =
-            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
-    /** Allow the {@link PendingIntent} to use the background activity start privileges. */
-    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED =
-            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
-    /** Deny the {@link PendingIntent} to use the background activity start privileges. */
-    public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED =
-            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
+    /** Enumeration of background activity start modes.
+     *
+     * These define if an app wants to grant it's background activity start privileges to a
+     * {@link PendingIntent}.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"MODE_BACKGROUND_ACTIVITY_START_"}, value = {
+            MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED,
+            MODE_BACKGROUND_ACTIVITY_START_ALLOWED,
+            MODE_BACKGROUND_ACTIVITY_START_DENIED})
+    public @interface BackgroundActivityStartMode {}
+    /**
+     * No explicit value chosen. The system will decide whether to grant privileges.
+     */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0;
+    /**
+     * Allow the {@link PendingIntent} to use the background activity start privileges.
+     */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1;
+    /**
+     * Deny the {@link PendingIntent} to use the background activity start privileges.
+     */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2;
 
     /**
      * The package name that created the options.

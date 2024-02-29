@@ -27,6 +27,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,7 +47,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
@@ -78,8 +78,8 @@ constructor(
             color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(28.dp),
             onClick = { viewModel.onBarClick(it) },
-        ) {
-            Row {
+        ) { _ ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 connectedDeviceViewModel?.let { ConnectedDeviceText(it) }
 
                 deviceIconViewModel?.let { ConnectedDeviceIcon(it) }
@@ -90,26 +90,23 @@ constructor(
     @Composable
     private fun RowScope.ConnectedDeviceText(connectedDeviceViewModel: ConnectedDeviceViewModel) {
         Column(
-            modifier =
-                Modifier.weight(1f)
-                    .padding(start = 24.dp, top = 20.dp, bottom = 20.dp)
-                    .fillMaxHeight(),
+            modifier = Modifier.weight(1f).padding(start = 24.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
-                connectedDeviceViewModel.label.toString(),
+                modifier = Modifier.basicMarquee(),
+                text = connectedDeviceViewModel.label.toString(),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
             )
             connectedDeviceViewModel.deviceName?.let {
                 Text(
-                    it.toString(),
+                    modifier = Modifier.basicMarquee(),
+                    text = it.toString(),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

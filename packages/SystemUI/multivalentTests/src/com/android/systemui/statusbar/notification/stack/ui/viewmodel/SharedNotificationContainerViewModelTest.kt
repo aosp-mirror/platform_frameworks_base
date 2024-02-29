@@ -47,8 +47,6 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
-import com.android.systemui.statusbar.policy.SplitShadeStateController
-import com.android.systemui.statusbar.policy.splitShadeStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
@@ -68,7 +66,6 @@ import org.mockito.Mockito.mock
 @RunWith(AndroidJUnit4::class)
 class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     val aodBurnInViewModel = mock(AodBurnInViewModel::class.java)
-    val splitShadeStateController = mock(SplitShadeStateController::class.java)
     lateinit var translationYFlow: MutableStateFlow<Float>
 
     val kosmos =
@@ -81,7 +78,6 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     init {
         kosmos.aodBurnInViewModel = aodBurnInViewModel
-        kosmos.splitShadeStateController = splitShadeStateController
     }
     val testScope = kosmos.testScope
     val configurationRepository = kosmos.fakeConfigurationRepository
@@ -98,7 +94,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        whenever(splitShadeStateController.shouldUseSplitNotificationShade(any())).thenReturn(false)
+        overrideResource(R.bool.config_use_split_notification_shade, false)
         translationYFlow = MutableStateFlow(0f)
         whenever(aodBurnInViewModel.translationY(any())).thenReturn(translationYFlow)
         underTest = kosmos.sharedNotificationContainerViewModel
@@ -107,8 +103,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun validateMarginStartInSplitShade() =
         testScope.runTest {
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(true)
+            overrideResource(R.bool.config_use_split_notification_shade, true)
             overrideResource(R.dimen.notification_panel_margin_horizontal, 20)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
@@ -121,8 +116,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun validateMarginStart() =
         testScope.runTest {
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(false)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
             overrideResource(R.dimen.notification_panel_margin_horizontal, 20)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
@@ -137,8 +131,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(true)
+            overrideResource(R.bool.config_use_split_notification_shade, true)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -156,8 +149,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(true)
+            overrideResource(R.bool.config_use_split_notification_shade, true)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -172,8 +164,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun validatePaddingTop() =
         testScope.runTest {
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(false)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
 
@@ -431,8 +422,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             val bounds by collectLastValue(underTest.bounds)
 
             // When not in split shade
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(false)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
             runCurrent()
 
@@ -454,8 +444,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             // When in split shade
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(true)
+            overrideResource(R.bool.config_use_split_notification_shade, true)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -483,8 +472,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             // When in split shade
             whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(true)
+            overrideResource(R.bool.config_use_split_notification_shade, true)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -543,8 +531,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             showLockscreen()
 
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(false)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
             keyguardInteractor.setNotificationContainerBounds(
                 NotificationContainerBounds(top = 1f, bottom = 2f)
@@ -567,8 +554,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             showLockscreen()
 
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(false)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
             keyguardInteractor.setNotificationContainerBounds(
                 NotificationContainerBounds(top = 1f, bottom = 2f)
@@ -604,8 +590,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             // Show lockscreen with shade expanded
             showLockscreenWithShadeExpanded()
 
-            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
-                .thenReturn(false)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
             keyguardInteractor.setNotificationContainerBounds(
                 NotificationContainerBounds(top = 1f, bottom = 2f)
@@ -698,6 +683,32 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             // ... now send animation complete signal
             underTest.setShadeCollapseFadeInComplete(true)
+            assertThat(fadeIn).isEqualTo(false)
+        }
+
+    @Test
+    fun shadeCollapseFadeIn_doesNotRunIfTransitioningToAod() =
+        testScope.runTest {
+            val fadeIn by collectLastValue(underTest.shadeCollapseFadeIn)
+
+            // Start on lockscreen without the shade
+            underTest.setShadeCollapseFadeInComplete(false)
+            showLockscreen()
+            assertThat(fadeIn).isEqualTo(false)
+
+            // ... then the shade expands
+            showLockscreenWithShadeExpanded()
+            assertThat(fadeIn).isEqualTo(false)
+
+            // ... then user hits power to go to AOD
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.AOD,
+                testScope,
+            )
+            // ... followed by a shade collapse
+            showLockscreen()
+            // ... does not trigger a fade in
             assertThat(fadeIn).isEqualTo(false)
         }
 

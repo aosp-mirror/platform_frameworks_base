@@ -67,7 +67,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
     private static final String TAG = "HeadsUpManagerPhone";
 
     @VisibleForTesting
-    final int mExtensionTime;
+    public final int mExtensionTime;
     private final KeyguardBypassController mBypassController;
     private final GroupMembershipManager mGroupMembershipManager;
     private final List<OnHeadsUpPhoneListenerChange> mHeadsUpPhoneListeners = new ArrayList<>();

@@ -16,6 +16,7 @@
 
 package android.platform.test.ravenwood;
 
+import android.content.ClipboardManager;
 import android.hardware.SerialManager;
 import android.os.SystemClock;
 import android.util.ArrayMap;
@@ -40,7 +41,10 @@ public class RavenwoodSystemServer {
     // authors to exhaustively declare all transitive services
 
     static {
-        sKnownServices.put(SerialManager.class, "com.android.server.SerialService$Lifecycle");
+        sKnownServices.put(ClipboardManager.class,
+                "com.android.server.FakeClipboardService$Lifecycle");
+        sKnownServices.put(SerialManager.class,
+                "com.android.server.SerialService$Lifecycle");
     }
 
     private static TimingsTraceAndSlog sTimings;

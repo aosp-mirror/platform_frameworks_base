@@ -364,6 +364,30 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    public void systemAudioControlOnPowerOn_singleActionStarted() throws Exception {
+        mHdmiCecLocalDeviceAudioSystem.removeAction(SystemAudioInitiationActionFromAvr.class);
+        mHdmiCecLocalDeviceAudioSystem.systemAudioControlOnPowerOn(
+                Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON, true);
+        mHdmiCecLocalDeviceAudioSystem.systemAudioControlOnPowerOn(
+                Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON, true);
+        assertThat(
+                mHdmiCecLocalDeviceAudioSystem.getActions(
+                        SystemAudioInitiationActionFromAvr.class))
+                .hasSize(1);
+    }
+
+    @Test
+    public void onSystemAudioControlFeatureSupportChanged_singleActionStarted() throws Exception {
+        mHdmiCecLocalDeviceAudioSystem.removeAction(SystemAudioInitiationActionFromAvr.class);
+        mHdmiCecLocalDeviceAudioSystem.onSystemAudioControlFeatureSupportChanged(true);
+        mHdmiCecLocalDeviceAudioSystem.onSystemAudioControlFeatureSupportChanged(true);
+        assertThat(
+                mHdmiCecLocalDeviceAudioSystem.getActions(
+                        SystemAudioInitiationActionFromAvr.class))
+                .hasSize(1);
+    }
+
+    @Test
     public void handleActiveSource_updateActiveSource() throws Exception {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
         ActiveSource expectedActiveSource = new ActiveSource(ADDR_TV, 0x0000);

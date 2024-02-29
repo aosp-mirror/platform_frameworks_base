@@ -27,6 +27,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
@@ -62,6 +63,7 @@ import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -831,6 +833,95 @@ class CommunalInteractorTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun widgetContent_containsDisabledWidgets_whenCategoryNotAllowed() =
+        testScope.runTest {
+            // Communal available, and tutorial completed.
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setKeyguardOccluded(false)
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+            userRepository.setSelectedUserInfo(mainUser)
+
+            val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(
+                userInfos = userInfos,
+                selectedUserIndex = 0,
+            )
+            runCurrent()
+
+            // Widgets available.
+            val widget1 =
+                createWidgetWithCategory(1, AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
+            val widget2 =
+                createWidgetWithCategory(2, AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
+            val widget3 =
+                createWidgetWithCategory(3, AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)
+            val widgets = listOf(widget1, widget2, widget3)
+            widgetRepository.setCommunalWidgets(widgets)
+
+            val widgetContent by collectLastValue(underTest.widgetContent)
+            kosmos.fakeSettings.putIntForUser(
+                CommunalSettingsRepositoryImpl.GLANCEABLE_HUB_CONTENT_SETTING,
+                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
+                mainUser.id
+            )
+            runCurrent()
+
+            // Only the keyguard widget is enabled.
+            assertThat(widgetContent).hasSize(3)
+            assertThat(widgetContent!!.get(0))
+                .isInstanceOf(CommunalContentModel.WidgetContent.DisabledWidget::class.java)
+            assertThat(widgetContent!!.get(1))
+                .isInstanceOf(CommunalContentModel.WidgetContent.Widget::class.java)
+            assertThat(widgetContent!!.get(2))
+                .isInstanceOf(CommunalContentModel.WidgetContent.DisabledWidget::class.java)
+        }
+
+    @Test
+    fun widgetContent_allEnabled_whenCategoryAllowed() =
+        testScope.runTest {
+            // Communal available, and tutorial completed.
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setKeyguardOccluded(false)
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+            userRepository.setSelectedUserInfo(mainUser)
+
+            val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(
+                userInfos = userInfos,
+                selectedUserIndex = 0,
+            )
+            runCurrent()
+
+            // Widgets available.
+            val widget1 =
+                createWidgetWithCategory(1, AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
+            val widget2 =
+                createWidgetWithCategory(2, AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
+            val widget3 =
+                createWidgetWithCategory(3, AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
+            val widgets = listOf(widget1, widget2, widget3)
+            widgetRepository.setCommunalWidgets(widgets)
+
+            val widgetContent by collectLastValue(underTest.widgetContent)
+            kosmos.fakeSettings.putIntForUser(
+                CommunalSettingsRepositoryImpl.GLANCEABLE_HUB_CONTENT_SETTING,
+                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD or
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
+                mainUser.id
+            )
+            runCurrent()
+
+            // All widgets are enabled.
+            assertThat(widgetContent).hasSize(3)
+            widgetContent!!.forEach { model ->
+                assertThat(model)
+                    .isInstanceOf(CommunalContentModel.WidgetContent.Widget::class.java)
+            }
+        }
+
     private fun smartspaceTimer(id: String, timestamp: Long = 0L): SmartspaceTarget {
         val timer = mock(SmartspaceTarget::class.java)
         whenever(timer.smartspaceTargetId).thenReturn(id)
@@ -845,6 +936,17 @@ class CommunalInteractorTest : SysuiTestCase() {
             whenever(this.appWidgetId).thenReturn(appWidgetId)
             val providerInfo = mock<AppWidgetProviderInfo>()
             whenever(providerInfo.profile).thenReturn(UserHandle(userId))
+            whenever(this.providerInfo).thenReturn(providerInfo)
+        }
+
+    private fun createWidgetWithCategory(
+        appWidgetId: Int,
+        category: Int
+    ): CommunalWidgetContentModel =
+        mock<CommunalWidgetContentModel> {
+            whenever(this.appWidgetId).thenReturn(appWidgetId)
+            val providerInfo = mock<AppWidgetProviderInfo>().apply { widgetCategory = category }
+            whenever(providerInfo.profile).thenReturn(UserHandle(MAIN_USER_INFO.id))
             whenever(this.providerInfo).thenReturn(providerInfo)
         }
 

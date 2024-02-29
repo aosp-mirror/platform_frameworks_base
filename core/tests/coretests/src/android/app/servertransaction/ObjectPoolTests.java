@@ -157,7 +157,8 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleMoveToDisplayItem() {
-        testRecycle(() -> MoveToDisplayItem.obtain(mActivityToken, 4, config()));
+        testRecycle(() -> MoveToDisplayItem.obtain(mActivityToken, 4, config(),
+                new ActivityWindowInfo()));
     }
 
     @Test

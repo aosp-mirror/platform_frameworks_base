@@ -822,4 +822,7 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void unregisterCompatScaleProvider(
             @CompatScaleProvider.CompatScaleModeOrderId int id);
+
+    /** Returns whether assist data is allowed. */
+    public abstract boolean isAssistDataAllowed();
 }

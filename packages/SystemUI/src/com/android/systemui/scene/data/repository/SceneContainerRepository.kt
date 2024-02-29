@@ -49,6 +49,13 @@ constructor(
     private val _isVisible = MutableStateFlow(true)
     val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
 
+    /**
+     * Whether there's an ongoing remotely-initiated user interaction.
+     *
+     * For more information see the logic in `SceneInteractor` that mutates this.
+     */
+    val isRemoteUserInteractionOngoing = MutableStateFlow(false)
+
     private val defaultTransitionState = ObservableTransitionState.Idle(config.initialSceneKey)
     private val _transitionState = MutableStateFlow<Flow<ObservableTransitionState>?>(null)
     val transitionState: StateFlow<ObservableTransitionState> =
