@@ -134,7 +134,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"चेहरा स्कॅन करत आहे"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"पाठवा"</string>
     <string name="cancel" msgid="1089011503403416730">"रद्द करा"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"कंफर्म करा"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"कन्फर्म करा"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"पुन्हा प्रयत्न करा"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ऑथेंटिकेशन रद्द करण्यासाठी टॅप करा"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"कृपया पुन्हा प्रयत्न करा"</string>
@@ -582,7 +582,7 @@
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे संभाषण वैशिष्ट्यांना सपोर्ट करत नाही"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"कॉलशी संबंधित सूचनांमध्ये फेरबदल केला जाऊ शकत नाही."</string>
-    <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉंफिगर केला जाऊ शकत नाही"</string>
+    <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी केलेल्या सूचना"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"सर्व <xliff:g id="APP_NAME">%1$s</xliff:g> वरील सूचना"</string>
     <string name="see_more_title" msgid="7409317011708185729">"आणखी पहा"</string>
