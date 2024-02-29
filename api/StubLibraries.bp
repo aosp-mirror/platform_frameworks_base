@@ -458,13 +458,21 @@ java_defaults {
     libs: ["stub-annotations"],
 }
 
+java_defaults {
+    name: "android-non-updatable_everything_from_text_defaults",
+    defaults: [
+        "android-non-updatable_from_text_defaults",
+    ],
+    stubs_type: "everything",
+}
+
 java_api_library {
     name: "android-non-updatable.stubs.from-text",
     api_surface: "public",
     api_contributions: [
         "api-stubs-docs-non-updatable.api.contribution",
     ],
-    defaults: ["android-non-updatable_from_text_defaults"],
+    defaults: ["android-non-updatable_everything_from_text_defaults"],
     full_api_surface_stub: "android_stubs_current.from-text",
 }
 
@@ -475,7 +483,7 @@ java_api_library {
         "api-stubs-docs-non-updatable.api.contribution",
         "system-api-stubs-docs-non-updatable.api.contribution",
     ],
-    defaults: ["android-non-updatable_from_text_defaults"],
+    defaults: ["android-non-updatable_everything_from_text_defaults"],
     full_api_surface_stub: "android_system_stubs_current.from-text",
 }
 
@@ -487,7 +495,7 @@ java_api_library {
         "system-api-stubs-docs-non-updatable.api.contribution",
         "test-api-stubs-docs-non-updatable.api.contribution",
     ],
-    defaults: ["android-non-updatable_from_text_defaults"],
+    defaults: ["android-non-updatable_everything_from_text_defaults"],
     full_api_surface_stub: "android_test_stubs_current.from-text",
 }
 
@@ -499,7 +507,7 @@ java_api_library {
         "system-api-stubs-docs-non-updatable.api.contribution",
         "module-lib-api-stubs-docs-non-updatable.api.contribution",
     ],
-    defaults: ["android-non-updatable_from_text_defaults"],
+    defaults: ["android-non-updatable_everything_from_text_defaults"],
     full_api_surface_stub: "android_module_lib_stubs_current_full.from-text",
 }
 
@@ -515,7 +523,7 @@ java_api_library {
         "test-api-stubs-docs-non-updatable.api.contribution",
         "module-lib-api-stubs-docs-non-updatable.api.contribution",
     ],
-    defaults: ["android-non-updatable_from_text_defaults"],
+    defaults: ["android-non-updatable_everything_from_text_defaults"],
     full_api_surface_stub: "android_test_module_lib_stubs_current.from-text",
 
     // This module is only used for hiddenapi, and other modules should not
@@ -827,6 +835,7 @@ java_api_library {
     ],
     visibility: ["//visibility:public"],
     enable_validation: false,
+    stubs_type: "everything",
 }
 
 java_api_library {
@@ -843,6 +852,7 @@ java_api_library {
     ],
     visibility: ["//visibility:public"],
     enable_validation: false,
+    stubs_type: "everything",
 }
 
 java_api_library {
@@ -861,6 +871,7 @@ java_api_library {
     ],
     visibility: ["//visibility:public"],
     enable_validation: false,
+    stubs_type: "everything",
 }
 
 java_api_library {
@@ -879,6 +890,7 @@ java_api_library {
         "system-api-stubs-docs-non-updatable.api.contribution",
     ],
     enable_validation: false,
+    stubs_type: "everything",
 }
 
 java_api_library {
@@ -899,6 +911,7 @@ java_api_library {
     ],
     visibility: ["//visibility:public"],
     enable_validation: false,
+    stubs_type: "everything",
 }
 
 java_api_library {
@@ -913,6 +926,7 @@ java_api_library {
     ],
     visibility: ["//visibility:public"],
     enable_validation: false,
+    stubs_type: "everything",
 }
 
 java_api_library {
@@ -938,6 +952,7 @@ java_api_library {
         "//visibility:private",
     ],
     enable_validation: false,
+    stubs_type: "everything",
 }
 
 java_api_library {
@@ -955,6 +970,7 @@ java_api_library {
     ],
     visibility: ["//visibility:public"],
     enable_validation: false,
+    stubs_type: "everything",
 }
 
 ////////////////////////////////////////////////////////////////////////
