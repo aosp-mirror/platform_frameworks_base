@@ -1127,12 +1127,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     void updateSidePadding(int viewWidth) {
-        final boolean portrait =
-                getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        final int orientation = getResources().getConfiguration().orientation;
 
         mLastUpdateSidePaddingDumpString = "viewWidth=" + viewWidth
                 + " skinnyNotifsInLandscape=" + mSkinnyNotifsInLandscape
-                + " portrait=" + portrait;
+                + " orientation=" + orientation;
 
         if (DEBUG_UPDATE_SIDE_PADDING) {
             Log.v(TAG, "updateSidePadding: " + mLastUpdateSidePaddingDumpString);
@@ -1144,7 +1143,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
 
         // Portrait is easy, just use the dimen for paddings
-        if (portrait) {
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             mSidePaddings = mMinimumPaddings;
             return;
         }
