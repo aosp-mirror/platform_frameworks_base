@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.getflow
 
+import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -75,6 +76,7 @@ import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.credentialmanager.userAndDisplayNameForPasskey
 import com.android.internal.logging.UiEventLogger.UiEventEnum
+import kotlin.math.max
 
 @Composable
 fun GetCredentialScreen(
@@ -110,16 +112,29 @@ fun GetCredentialScreen(
                     ProviderActivityState.NOT_APPLICABLE -> {
                         if (getCredentialUiState.currentScreenState
                             == GetScreenState.PRIMARY_SELECTION) {
-                            PrimarySelectionCard(
-                                requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
-                                providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
-                                providerInfoList = getCredentialUiState.providerInfoList,
-                                activeEntry = getCredentialUiState.activeEntry,
-                                onEntrySelected = viewModel::getFlowOnEntrySelected,
-                                onConfirm = viewModel::getFlowOnConfirmEntrySelected,
-                                onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
-                                onLog = { viewModel.logUiEvent(it) },
-                            )
+                            if (selectorUiImprovementsEnabled()) {
+                                PrimarySelectionCardVImpl(
+                                    requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
+                                    providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
+                                    providerInfoList = getCredentialUiState.providerInfoList,
+                                    activeEntry = getCredentialUiState.activeEntry,
+                                    onEntrySelected = viewModel::getFlowOnEntrySelected,
+                                    onConfirm = viewModel::getFlowOnConfirmEntrySelected,
+                                    onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
+                                    onLog = { viewModel.logUiEvent(it) },
+                                )
+                            } else {
+                                PrimarySelectionCard(
+                                    requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
+                                    providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
+                                    providerInfoList = getCredentialUiState.providerInfoList,
+                                    activeEntry = getCredentialUiState.activeEntry,
+                                    onEntrySelected = viewModel::getFlowOnEntrySelected,
+                                    onConfirm = viewModel::getFlowOnConfirmEntrySelected,
+                                    onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
+                                    onLog = { viewModel.logUiEvent(it) },
+                                )
+                            }
                             viewModel.uiMetrics.log(GetCredentialEvent
                                     .CREDMAN_GET_CRED_SCREEN_PRIMARY_SELECTION)
                         } else {
@@ -174,7 +189,8 @@ fun GetCredentialScreen(
     }
 }
 
-/** Draws the primary credential selection page. */
+/** Draws the primary credential selection page, used in Android U. */
+// TODO(b/327518384) - remove after flag selectorUiImprovementsEnabled is enabled.
 @Composable
 fun PrimarySelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
@@ -356,6 +372,198 @@ fun PrimarySelectionCard(
         }
     }
     onLog(GetCredentialEvent.CREDMAN_GET_CRED_PRIMARY_SELECTION_CARD)
+}
+
+internal const val MAX_ENTRY_FOR_PRIMARY_PAGE = 4
+/** Draws the primary credential selection page, used starting from android V. */
+@Composable
+fun PrimarySelectionCardVImpl(
+    requestDisplayInfo: RequestDisplayInfo,
+    providerDisplayInfo: ProviderDisplayInfo,
+    providerInfoList: List<ProviderInfo>,
+    activeEntry: EntryInfo?,
+    onEntrySelected: (EntryInfo) -> Unit,
+    onConfirm: () -> Unit,
+    onMoreOptionSelected: () -> Unit,
+    onLog: @Composable (UiEventEnum) -> Unit,
+) {
+    val showMoreForTruncatedEntry = remember { mutableStateOf(false) }
+    val sortedUserNameToCredentialEntryList =
+        providerDisplayInfo.sortedUserNameToCredentialEntryList
+    val authenticationEntryList = providerDisplayInfo.authenticationEntryList
+    // Show at most 4 entries (credential type or locked type) in this primary page
+    val primaryPageCredentialEntryList =
+        sortedUserNameToCredentialEntryList.take(MAX_ENTRY_FOR_PRIMARY_PAGE)
+    val primaryPageLockedEntryList = authenticationEntryList.take(
+        max(0, MAX_ENTRY_FOR_PRIMARY_PAGE - primaryPageCredentialEntryList.size)
+    )
+    SheetContainerCard {
+        val preferTopBrandingContent = requestDisplayInfo.preferTopBrandingContent
+        if (preferTopBrandingContent != null) {
+            item {
+                HeadlineProviderIconAndName(
+                    preferTopBrandingContent.icon,
+                    preferTopBrandingContent.displayName
+                )
+            }
+        } else {
+            // When only one provider's entries will be displayed on the primary page, display that
+            // provider's icon + name up top.
+            val singleProviderId = findSingleProviderIdForPrimaryPage(
+                primaryPageCredentialEntryList,
+                primaryPageLockedEntryList
+            )
+            if (singleProviderId != null) {
+                // First should always work but just to be safe.
+                val providerInfo = providerInfoList.firstOrNull { it.id == singleProviderId }
+                if (providerInfo != null) {
+                    item {
+                        HeadlineProviderIconAndName(
+                            providerInfo.icon,
+                            providerInfo.displayName
+                        )
+                    }
+                }
+            }
+        }
+
+        val hasSingleEntry = primaryPageCredentialEntryList.size +
+                primaryPageLockedEntryList.size == 1
+        item {
+            if (requestDisplayInfo.preferIdentityDocUi) {
+                HeadlineText(
+                    text = stringResource(
+                        if (hasSingleEntry) {
+                            R.string.get_dialog_title_use_info_on
+                        } else {
+                            R.string.get_dialog_title_choose_option_for
+                        },
+                        requestDisplayInfo.appName
+                    ),
+                )
+            } else {
+                HeadlineText(
+                    text = stringResource(
+                        if (hasSingleEntry) {
+                            val singleEntryType = primaryPageCredentialEntryList.firstOrNull()
+                                ?.sortedCredentialEntryList?.firstOrNull()?.credentialType
+                            if (singleEntryType == CredentialType.PASSKEY)
+                                R.string.get_dialog_title_use_passkey_for
+                            else if (singleEntryType == CredentialType.PASSWORD)
+                                R.string.get_dialog_title_use_password_for
+                            else if (authenticationEntryList.isNotEmpty())
+                                R.string.get_dialog_title_unlock_options_for
+                            else R.string.get_dialog_title_use_sign_in_for
+                        } else {
+                            if (authenticationEntryList.isNotEmpty() ||
+                                sortedUserNameToCredentialEntryList.any { perNameEntryList ->
+                                    perNameEntryList.sortedCredentialEntryList.any { entry ->
+                                        entry.credentialType != CredentialType.PASSWORD &&
+                                            entry.credentialType != CredentialType.PASSKEY
+                                    }
+                                }
+                            ) // For an unknown / locked entry, it's not true that it is
+                            // already saved, strictly speaking. Hence use a different title
+                            // without the mention of "saved"
+                                R.string.get_dialog_title_choose_sign_in_for
+                            else
+                                R.string.get_dialog_title_choose_saved_sign_in_for
+                        },
+                        requestDisplayInfo.appName
+                    ),
+                )
+            }
+        }
+        item { Divider(thickness = 24.dp, color = Color.Transparent) }
+        item {
+            CredentialContainerCard {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    primaryPageCredentialEntryList.forEach {
+                        CredentialEntryRow(
+                                credentialEntryInfo = it.sortedCredentialEntryList.first(),
+                                onEntrySelected = onEntrySelected,
+                                enforceOneLine = true,
+                                onTextLayout = {
+                                    showMoreForTruncatedEntry.value = it.hasVisualOverflow
+                                },
+                                hasSingleEntry = hasSingleEntry,
+                        )
+                    }
+                    primaryPageLockedEntryList.forEach {
+                        AuthenticationEntryRow(
+                                authenticationEntryInfo = it,
+                                onEntrySelected = onEntrySelected,
+                                enforceOneLine = true,
+                        )
+                    }
+                }
+            }
+        }
+        item { Divider(thickness = 24.dp, color = Color.Transparent) }
+        var totalEntriesCount = sortedUserNameToCredentialEntryList
+            .flatMap { it.sortedCredentialEntryList }.size + authenticationEntryList
+            .size + providerInfoList.flatMap { it.actionEntryList }.size
+        if (providerDisplayInfo.remoteEntry != null) totalEntriesCount += 1
+        // Row horizontalArrangement differs on only one actionButton(should place on most
+        // left)/only one confirmButton(should place on most right)/two buttons exist the same
+        // time(should be one on the left, one on the right)
+        item {
+            CtaButtonRow(
+                leftButton = if (totalEntriesCount > 1) {
+                    {
+                        ActionButton(
+                            stringResource(R.string.get_dialog_title_sign_in_options),
+                            onMoreOptionSelected
+                        )
+                    }
+                } else if (showMoreForTruncatedEntry.value) {
+                    {
+                        ActionButton(
+                            stringResource(R.string.button_label_view_more),
+                            onMoreOptionSelected
+                        )
+                    }
+                } else null,
+                rightButton = if (activeEntry != null) { // Only one sign-in options exist
+                    {
+                        ConfirmButton(
+                            stringResource(R.string.string_continue),
+                            onClick = onConfirm
+                        )
+                    }
+                } else null,
+            )
+        }
+    }
+    onLog(GetCredentialEvent.CREDMAN_GET_CRED_PRIMARY_SELECTION_CARD)
+}
+
+/**
+ * Attempt to find a single provider id, if it has supplied all the entries to be displayed on the
+ * front page; otherwise if multiple providers are found, return null.
+ */
+private fun findSingleProviderIdForPrimaryPage(
+    primaryPageCredentialEntryList: List<PerUserNameCredentialEntryList>,
+    primaryPageLockedEntryList: List<AuthenticationEntryInfo>
+): String? {
+    var providerId: String? = null
+    primaryPageCredentialEntryList.forEach {
+        val currProviderId = it.sortedCredentialEntryList.first().providerId
+        if (providerId == null) {
+            providerId = currProviderId
+        } else if (providerId != currProviderId) {
+            return null
+        }
+    }
+    primaryPageLockedEntryList.forEach {
+        val currProviderId = it.providerId
+        if (providerId == null) {
+            providerId = currProviderId
+        } else if (providerId != currProviderId) {
+            return null
+        }
+    }
+    return providerId
 }
 
 /** Draws the secondary credential selection page, where all sign-in options are listed. */
@@ -540,6 +748,8 @@ fun CredentialEntryRow(
     onEntrySelected: (EntryInfo) -> Unit,
     enforceOneLine: Boolean = false,
     onTextLayout: (TextLayoutResult) -> Unit = {},
+    // Make optional since the secondary page doesn't care about this value.
+    hasSingleEntry: Boolean? = null,
 ) {
     val (username, displayName) = if (credentialEntryInfo.credentialType == CredentialType.PASSKEY)
         userAndDisplayNameForPasskey(
@@ -554,11 +764,19 @@ fun CredentialEntryRow(
         if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
         else null,
         entryHeadlineText = username,
-        entrySecondLineText = listOf(
+        entrySecondLineText =
+        (if (hasSingleEntry != null && hasSingleEntry)
+            if (credentialEntryInfo.credentialType == CredentialType.PASSKEY ||
+                    credentialEntryInfo.credentialType == CredentialType.PASSWORD)
+                listOf(displayName)
+            // Still show the type display name for all non-password/passkey types since it won't be
+            // mentioned in the bottom sheet heading.
+            else listOf(displayName, credentialEntryInfo.credentialTypeDisplayName)
+        else listOf(
                 displayName,
                 credentialEntryInfo.credentialTypeDisplayName,
                 credentialEntryInfo.providerDisplayName
-        ).filterNot(TextUtils::isEmpty).let { itemsToDisplay ->
+        )).filterNot(TextUtils::isEmpty).let { itemsToDisplay ->
             if (itemsToDisplay.isEmpty()) null
             else itemsToDisplay.joinToString(
                 separator = stringResource(R.string.get_dialog_sign_in_type_username_separator)
