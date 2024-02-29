@@ -429,6 +429,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"আরও উইজেট যোগ করুন"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"উইজেট কাস্টমাইজ করতে বেশিক্ষণ প্রেস করুন"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"উইজেট কাস্টমাইজ করুন"</string>
+    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"উইজেট এডিট করুন"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"সরান"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"উইজেট যোগ করুন"</string>
@@ -573,11 +575,16 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"রিং"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"ভাইব্রেট"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"মিউট"</string>
+    <!-- no translation found for media_device_cast (4786241789687569892) -->
+    <skip />
+    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s। সশব্দ করতে আলতো চাপুন।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s। কম্পন এ সেট করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে মিউট করা হতে পারে।"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। মিউট করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে মিউট করা হতে পারে।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s। ভাইব্রেট করতে ট্যাপ করুন।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s। মিউট করতে ট্যাপ করুন।"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"আশপাশের আওয়াজ কন্ট্রোল করা"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"রিঙ্গার মোড পরিবর্তন করতে ট্যাপ করুন"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"মিউট করুন"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"আনমিউট করুন"</string>
@@ -832,6 +839,10 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"পাওয়ার মেনু"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>টির মধ্যে <xliff:g id="ID_1">%1$d</xliff:g> নং পৃষ্ঠা"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"লক স্ক্রিন"</string>
+    <!-- no translation found for finder_active (7907846989716941952) -->
+    <skip />
+    <!-- no translation found for shutdown_progress (5464239146561542178) -->
+    <skip />
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ডিভাইস রক্ষণাবেক্ষণের ধাপগুলি দেখুন"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ডিভাইস রক্ষণাবেক্ষণের ধাপগুলি দেখুন"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"আপনার ডিভাইস আনপ্লাগ করা"</string>
@@ -1186,6 +1197,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"নোট নেওয়া"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"নোট নেওয়া, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"অডিও শেয়ার করা হচ্ছে"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ব্রডকাস্ট করা হচ্ছে"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> সম্প্রচার বন্ধ করবেন?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"আপনি <xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্রচার করলে বা আউটপুট পরিবর্তন করলে, আপনার বর্তমান সম্প্রচার বন্ধ হয়ে যাবে"</string>

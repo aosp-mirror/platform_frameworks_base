@@ -429,6 +429,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ज़्यादा विजेट जोड़ें"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"विजेट पसंद के मुताबिक बनाने के लिए उसे दबाकर रखें"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"विजेट अपनी पसंद के मुताबिक बनाएं"</string>
+    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"विजेट में बदलाव करें"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"हटाएं"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"विजेट जोड़ें"</string>
@@ -573,11 +575,16 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"आवाज़ चालू है"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"वाइब्रेशन"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"आवाज़ बंद है"</string>
+    <!-- no translation found for media_device_cast (4786241789687569892) -->
+    <skip />
+    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. अनम्यूट करने के लिए टैप करें."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. कंपन पर सेट करने के लिए टैप करें. सुलभता सेवाएं म्यूट हो सकती हैं."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. म्यूट करने के लिए टैप करें. सुलभता सेवाएं म्यूट हो सकती हैं."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. कंपन (वाइब्रेशन) पर सेट करने के लिए छूएं."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. म्यूट करने के लिए टैप करें."</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"शोर को कंट्रोल करने की सुविधा"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"रिंगर मोड बदलने के लिए टैप करें"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"म्यूट करें"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"अनम्यूट करें"</string>
@@ -832,6 +839,10 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पावर मेन्यू"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"पेज <xliff:g id="ID_2">%2$d</xliff:g> में से <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लॉक स्‍क्रीन"</string>
+    <!-- no translation found for finder_active (7907846989716941952) -->
+    <skip />
+    <!-- no translation found for shutdown_progress (5464239146561542178) -->
+    <skip />
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"डिवाइस के रखरखाव के तरीके देखें"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"डिवाइस के रखरखाव के तरीके देखें"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"डिवाइस को अनप्लग करें"</string>
@@ -1186,6 +1197,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"नोट बनाएं"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"नोट लेने के लिए, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"ऑडियो शेयर किया जा रहा है"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ब्रॉडकास्ट ऐप्लिकेशन"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर ब्रॉडकास्ट करना रोकें?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> पर ब्रॉडकास्ट शुरू करने पर या आउटपुट बदलने पर, आपका मौजूदा ब्रॉडकास्ट बंद हो जाएगा"</string>
@@ -1236,9 +1248,9 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"सेटिंग में जाकर, नोट लेने की सुविधा देने वाले ऐप्लिकेशन को डिफ़ॉल्ट के तौर पर सेट करें"</string>
     <string name="install_app" msgid="5066668100199613936">"ऐप्लिकेशन इंस्टॉल करें"</string>
     <string name="dismissible_keyguard_swipe" msgid="8377597870094949432">"जारी रखने के लिए, ऊपर की ओर स्वाइप करें"</string>
-    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"क्या आपको किसी बाहरी डिवाइस पर डिसप्ले करना है?"</string>
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"क्या आपको किसी बाहरी डिवाइस पर स्क्रीन शेयर करनी है?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"आपके फ़ोन के इनर डिसप्ले की स्क्रीन शेयर की जाएगी. फ़्रंट डिसप्ले को बंद कर दिया जाएगा."</string>
-    <string name="mirror_display" msgid="2515262008898122928">"डिसप्ले करें"</string>
+    <string name="mirror_display" msgid="2515262008898122928">"स्क्रीन शेयर करें"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"खारिज करें"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"डिसप्ले कनेक्ट किया गया"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"माइक्रोफ़ोन और कैमरा"</string>
