@@ -41,8 +41,8 @@ import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.res.R;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +53,7 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-public class QuickSettingsControllerTest extends QuickSettingsControllerBaseTest {
+public class QuickSettingsControllerImplTest extends QuickSettingsControllerImplBaseTest {
 
     @Test
     public void testCloseQsSideEffects() {
