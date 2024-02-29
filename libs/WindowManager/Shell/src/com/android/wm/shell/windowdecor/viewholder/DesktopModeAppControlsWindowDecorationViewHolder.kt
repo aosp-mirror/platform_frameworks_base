@@ -12,6 +12,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.withStyledAttributes
+import androidx.core.view.isVisible
 import com.android.internal.R.attr.materialColorOnSecondaryContainer
 import com.android.internal.R.attr.materialColorOnSurface
 import com.android.internal.R.attr.materialColorSecondaryContainer
@@ -76,6 +77,7 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         closeWindowButton.imageTintList = ColorStateList.valueOf(color)
         maximizeWindowButton.imageTintList = ColorStateList.valueOf(color)
         expandMenuButton.imageTintList = ColorStateList.valueOf(color)
+        appNameTextView.isVisible = !taskInfo.isTransparentCaptionBarAppearance
         appNameTextView.setTextColor(color)
         appIconImageView.imageAlpha = alpha
         maximizeWindowButton.imageAlpha = alpha
