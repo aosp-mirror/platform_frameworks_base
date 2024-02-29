@@ -334,18 +334,18 @@ public class TransactionExecutor {
                     break;
                 case ON_PAUSE:
                     mTransactionHandler.handlePauseActivity(r, false /* finished */,
-                            false /* userLeaving */, 0 /* configChanges */,
+                            false /* userLeaving */,
                             false /* autoEnteringPip */, mPendingActions,
                             "LIFECYCLER_PAUSE_ACTIVITY");
                     break;
                 case ON_STOP:
-                    mTransactionHandler.handleStopActivity(r, 0 /* configChanges */,
+                    mTransactionHandler.handleStopActivity(r,
                             mPendingActions, false /* finalStateRequest */,
                             "LIFECYCLER_STOP_ACTIVITY");
                     break;
                 case ON_DESTROY:
                     mTransactionHandler.handleDestroyActivity(r, false /* finishing */,
-                            0 /* configChanges */, false /* getNonConfigInstance */,
+                            false /* getNonConfigInstance */,
                             "performLifecycleSequence. cycling to:" + path.get(size - 1));
                     break;
                 case ON_RESTART:

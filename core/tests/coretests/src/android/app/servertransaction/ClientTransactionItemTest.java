@@ -136,7 +136,7 @@ public class ClientTransactionItemTest {
     @Test
     public void testDestroyActivityItem_preExecute() {
         final DestroyActivityItem item = DestroyActivityItem
-                .obtain(mActivityToken, false /* finished */, 123 /* configChanges */);
+                .obtain(mActivityToken, false /* finished */);
         item.preExecute(mHandler);
 
         assertEquals(1, mActivitiesToBeDestroyed.size());
@@ -146,7 +146,7 @@ public class ClientTransactionItemTest {
     @Test
     public void testDestroyActivityItem_postExecute() {
         final DestroyActivityItem item = DestroyActivityItem
-                .obtain(mActivityToken, false /* finished */, 123 /* configChanges */);
+                .obtain(mActivityToken, false /* finished */);
         item.preExecute(mHandler);
         item.postExecute(mHandler, mPendingActions);
 
@@ -156,11 +156,11 @@ public class ClientTransactionItemTest {
     @Test
     public void testDestroyActivityItem_execute() {
         final DestroyActivityItem item = DestroyActivityItem
-                .obtain(mActivityToken, false /* finished */, 123 /* configChanges */);
+                .obtain(mActivityToken, false /* finished */);
         item.execute(mHandler, mActivityClientRecord, mPendingActions);
 
         verify(mHandler).handleDestroyActivity(eq(mActivityClientRecord), eq(false) /* finishing */,
-                eq(123) /* configChanges */, eq(false) /* getNonConfigInstance */, any());
+                eq(false) /* getNonConfigInstance */, any());
     }
 
     @Test
