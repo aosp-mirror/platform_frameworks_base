@@ -44,8 +44,8 @@ final class RampOffVibratorStep extends AbstractVibratorStep {
 
     @Override
     public List<Step> cancel() {
-        return Arrays.asList(
-                new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(), controller));
+        return Arrays.asList(new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(),
+                controller, /* isCleanUp= */ true));
     }
 
     @Override
@@ -71,8 +71,8 @@ final class RampOffVibratorStep extends AbstractVibratorStep {
                 // Vibrator amplitude cannot go further down, just turn it off with the configured
                 // deadline that has been adjusted for the scenario when this was triggered by a
                 // cancelled vibration.
-                return Arrays.asList(new TurnOffVibratorStep(
-                        conductor, mPendingVibratorOffDeadline, controller));
+                return Arrays.asList(new TurnOffVibratorStep(conductor, mPendingVibratorOffDeadline,
+                        controller, /* isCleanUp= */ true));
             }
             return Arrays.asList(new RampOffVibratorStep(
                     conductor,

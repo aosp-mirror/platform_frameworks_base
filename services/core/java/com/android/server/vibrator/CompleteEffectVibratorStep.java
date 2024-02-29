@@ -51,8 +51,8 @@ final class CompleteEffectVibratorStep extends AbstractVibratorStep {
     public List<Step> cancel() {
         if (mCancelled) {
             // Double cancelling will just turn off the vibrator right away.
-            return Arrays.asList(
-                    new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(), controller));
+            return Arrays.asList(new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(),
+                    controller, /* isCleanUp= */ true));
         }
         return super.cancel();
     }
@@ -92,8 +92,8 @@ final class CompleteEffectVibratorStep extends AbstractVibratorStep {
                 } else {
                     // Vibration is completing normally, turn off after the deadline in case we
                     // don't receive the callback in time (callback also triggers it right away).
-                    return Arrays.asList(new TurnOffVibratorStep(
-                            conductor, mPendingVibratorOffDeadline, controller));
+                    return Arrays.asList(new TurnOffVibratorStep(conductor,
+                            mPendingVibratorOffDeadline, controller, /* isCleanUp= */ false));
                 }
             }
 

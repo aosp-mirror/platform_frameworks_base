@@ -32,20 +32,23 @@ import java.util.List;
  */
 final class TurnOffVibratorStep extends AbstractVibratorStep {
 
+    private final boolean mIsCleanUp;
+
     TurnOffVibratorStep(VibrationStepConductor conductor, long startTime,
-            VibratorController controller) {
+            VibratorController controller, boolean isCleanUp) {
         super(conductor, startTime, controller, /* effect= */ null, /* index= */ -1, startTime);
+        mIsCleanUp = isCleanUp;
     }
 
     @Override
     public boolean isCleanUp() {
-        return true;
+        return mIsCleanUp;
     }
 
     @Override
     public List<Step> cancel() {
-        return Arrays.asList(
-                new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(), controller));
+        return Arrays.asList(new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(),
+                controller, /* isCleanUp= */ true));
     }
 
     @Override

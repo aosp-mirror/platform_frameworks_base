@@ -16,7 +16,6 @@
 
 package com.android.server.vibrator;
 
-import static android.os.ExternalVibrationScale.ScaleLevel.SCALE_MUTE;
 import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
 import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
 
@@ -2146,6 +2145,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     /** Provide limited functionality from {@link VibratorManagerService} as shell commands. */
     private final class VibratorManagerShellCommand extends ShellCommand {
         public static final String SHELL_PACKAGE_NAME = "com.android.shell";
+        public static final long VIBRATION_END_TIMEOUT_MS = 500; // Clean up shouldn't be too long.
 
         private final class CommonOptions {
             public boolean force = false;
@@ -2521,6 +2521,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     // Waits for the client vibration to finish, but the VibrationThread may still
                     // do cleanup after this.
                     vib.waitForEnd();
+                    // Wait for vibration clean up and possible ramp down before ending.
+                    mVibrationThread.waitForThreadIdle(
+                            mVibrationSettings.getRampDownDuration() + VIBRATION_END_TIMEOUT_MS);
                 } catch (InterruptedException e) {
                 }
             }
