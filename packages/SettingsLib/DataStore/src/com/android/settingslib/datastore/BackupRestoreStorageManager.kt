@@ -17,6 +17,7 @@
 package com.android.settingslib.datastore
 
 import android.app.Application
+import android.app.backup.BackupAgentHelper
 import android.app.backup.BackupManager
 import android.content.Context
 import android.util.Log
@@ -40,6 +41,35 @@ class BackupRestoreStorageManager private constructor(private val application: A
         // TODO: log storage name
         Log.d(LOG_TAG, "Notify BackupManager data changed for change: key=$key")
         BackupManager.dataChanged(application.packageName)
+    }
+
+    /**
+     * Adds all the registered [BackupRestoreStorage] as the helpers of given [BackupAgentHelper].
+     *
+     * @see BackupAgentHelper.addHelper
+     */
+    fun addBackupAgentHelpers(backupAgentHelper: BackupAgentHelper) {
+        for ((keyPrefix, storage) in storages) {
+            backupAgentHelper.addHelper(keyPrefix, storage)
+        }
+    }
+
+    /**
+     * Callback when restore finished.
+     *
+     * The observers of the storages will be notified.
+     */
+    fun onRestoreFinished() {
+        for (storage in storages.values) {
+            storage.notifyRestoreFinished()
+        }
+    }
+
+    private fun BackupRestoreStorage.notifyRestoreFinished() {
+        when (this) {
+            is KeyedObservable<*> -> notifyChange(ChangeReason.RESTORE)
+            is Observable -> notifyChange(ChangeReason.RESTORE)
+        }
     }
 
     /**
@@ -76,6 +106,11 @@ class BackupRestoreStorageManager private constructor(private val application: A
                     "$this does not implement either KeyedObservable or Observable"
                 )
         }
+    }
+
+    /** Removes all the storages. */
+    fun removeAll() {
+        for ((name, _) in storages) remove(name)
     }
 
     /** Removes storage with given name. */
