@@ -324,7 +324,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPermissionHelper.getNotificationPermissionValues(USER_SYSTEM))
                 .thenReturn(appPermissions);
 
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(IntArray.wrap(new int[] {0}));
+        IntArray currentProfileIds = IntArray.wrap(new int[]{0});
+        if (UserManager.isHeadlessSystemUserMode()) {
+            currentProfileIds.add(UserHandle.getUserId(UID_HEADLESS));
+        }
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(currentProfileIds);
 
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
