@@ -248,7 +248,8 @@ public class LocaleConfig implements Parcelable {
     }
 
     /**
-     * Returns the default locale if specified, otherwise null
+     * Returns the locale the strings in values/strings.xml (the default strings in the directory
+     * with no locale qualifier) are in if specified, otherwise null
      *
      * @return The default Locale or null
      */
