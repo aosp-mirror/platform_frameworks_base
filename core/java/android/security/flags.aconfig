@@ -31,6 +31,13 @@ flag {
 }
 
 flag {
+    name: "keyinfo_unlocked_device_required"
+    namespace: "hardware_backed_security"
+    description: "Add the API android.security.keystore.KeyInfo#isUnlockedDeviceRequired()"
+    bug: "296475382"
+}
+
+flag {
     name: "deprecate_fsv_sig"
     namespace: "hardware_backed_security"
     description: "Feature flag for deprecating .fsv_sig"
