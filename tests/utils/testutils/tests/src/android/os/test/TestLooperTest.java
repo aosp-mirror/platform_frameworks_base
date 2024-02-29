@@ -28,7 +28,8 @@ import static org.mockito.Mockito.spy;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Rule;

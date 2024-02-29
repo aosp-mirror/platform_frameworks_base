@@ -31,6 +31,7 @@ android_test {
         "androidx.test.runner",
         "mockito-target-minus-junit4",
         "frameworks-base-testutils",
+        "androidx.test.rules",
     ],
 
     libs: [
