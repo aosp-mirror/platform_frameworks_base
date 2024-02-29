@@ -133,6 +133,7 @@ private fun getCredentialOptionInfoList(
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
                 )
                 )
             }
@@ -156,6 +157,7 @@ private fun getCredentialOptionInfoList(
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
                 )
                 )
             }
@@ -178,6 +180,7 @@ private fun getCredentialOptionInfoList(
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
                 )
                 )
             }
