@@ -22,6 +22,7 @@ import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ACTIVATED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DEACTIVATED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DISABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_UNKNOWN;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
@@ -108,6 +109,7 @@ import android.app.AutomaticZenRule;
 import android.app.Flags;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
+import android.app.compat.CompatChanges;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.pm.ActivityInfo;
@@ -4673,7 +4675,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, Process.SYSTEM_UID);
 
         assertTrue(latch.await(500, TimeUnit.MILLISECONDS));
-        assertEquals(AUTOMATIC_RULE_STATUS_ACTIVATED, actualStatus[0]);
+        if (CompatChanges.isChangeEnabled(ZenModeHelper.SEND_ACTIVATION_AZR_STATUSES)) {
+            assertEquals(AUTOMATIC_RULE_STATUS_ACTIVATED, actualStatus[0]);
+        } else {
+            assertEquals(AUTOMATIC_RULE_STATUS_UNKNOWN, actualStatus[0]);
+        }
     }
 
     @Test
@@ -4714,7 +4720,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 null, "", Process.SYSTEM_UID);
 
         assertTrue(latch.await(500, TimeUnit.MILLISECONDS));
-        assertEquals(AUTOMATIC_RULE_STATUS_DEACTIVATED, actualStatus[1]);
+        if (CompatChanges.isChangeEnabled(ZenModeHelper.SEND_ACTIVATION_AZR_STATUSES)) {
+            assertEquals(AUTOMATIC_RULE_STATUS_DEACTIVATED, actualStatus[1]);
+        } else {
+            assertEquals(AUTOMATIC_RULE_STATUS_UNKNOWN, actualStatus[1]);
+        }
     }
 
     @Test
@@ -4753,10 +4763,14 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         mZenModeHelper.setAutomaticZenRuleState(createdId,
                 new Condition(zenRule.getConditionId(), "", STATE_FALSE),
-                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, Process.SYSTEM_UID);
+                UPDATE_ORIGIN_APP, Process.SYSTEM_UID);
 
         assertTrue(latch.await(500, TimeUnit.MILLISECONDS));
-        assertEquals(AUTOMATIC_RULE_STATUS_DEACTIVATED, actualStatus[1]);
+        if (CompatChanges.isChangeEnabled(ZenModeHelper.SEND_ACTIVATION_AZR_STATUSES)) {
+            assertEquals(AUTOMATIC_RULE_STATUS_DEACTIVATED, actualStatus[1]);
+        } else {
+            assertEquals(AUTOMATIC_RULE_STATUS_UNKNOWN, actualStatus[1]);
+        }
     }
 
     @Test

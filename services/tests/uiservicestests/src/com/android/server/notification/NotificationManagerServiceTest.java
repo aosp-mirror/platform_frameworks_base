@@ -14334,6 +14334,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
     public void requestInterruptionFilterFromListener_fromApp_doesNotSetGlobalZen()
             throws Exception {
         mService.setCallerIsNormalPackage();
@@ -14351,6 +14352,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
     public void requestInterruptionFilterFromListener_fromSystem_setsGlobalZen()
             throws Exception {
         mService.isSystemUid = true;
