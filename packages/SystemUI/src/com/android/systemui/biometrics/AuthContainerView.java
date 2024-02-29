@@ -43,6 +43,7 @@ import android.os.Looper;
 import android.os.UserManager;
 import android.util.Log;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -632,11 +633,14 @@ public class AuthContainerView extends LinearLayout
         if (display == null) {
             return false;
         }
+
+        final DisplayInfo cachedDisplayInfo = new DisplayInfo();
+        display.getDisplayInfo(cachedDisplayInfo);
         if (mBiometricView == null || !shouldUpdatePositionForUdfps(mBiometricView.asView())) {
             return false;
         }
 
-        final int displayRotation = display.getRotation();
+        final int displayRotation = cachedDisplayInfo.rotation;
         switch (displayRotation) {
             case Surface.ROTATION_0:
                 mPanelController.setPosition(AuthPanelController.POSITION_BOTTOM);
