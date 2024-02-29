@@ -1135,25 +1135,23 @@ class PermissionService(private val service: AccessCheckingService) :
             return emptyMap()
         }
 
-        val permissionFlagsMap =
-            service.getState {
+        service.getState {
+            val permissionFlags =
                 if (deviceId == VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT) {
                     with(policy) { getAllPermissionFlags(packageState.appId, userId) }
                 } else {
                     with(devicePolicy) {
                         getAllPermissionFlags(packageState.appId, deviceId, userId)
                     }
-                }
+                } ?: return emptyMap()
+            val permissionStates = ArrayMap<String, PermissionState>()
+            permissionFlags.forEachIndexed { _, permissionName, flags ->
+                val granted = isPermissionGranted(packageState, userId, permissionName, deviceId)
+                val apiFlags = PermissionFlags.toApiFlags(flags)
+                permissionStates[permissionName] = PermissionState(granted, apiFlags)
             }
-                ?: return emptyMap()
-
-        val permissionStates = ArrayMap<String, PermissionState>()
-        permissionFlagsMap.forEachIndexed { _, permissionName, flags ->
-            val granted = PermissionFlags.isPermissionGranted(flags)
-            val apiFlags = PermissionFlags.toApiFlags(flags)
-            permissionStates[permissionName] = PermissionState(granted, apiFlags)
+            return permissionStates
         }
-        return permissionStates
     }
 
     override fun isPermissionRevokedByPolicy(
