@@ -16,10 +16,9 @@
 
 package android.app.admin;
 
-import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.flags.Flags;
 import android.os.Parcel;
 
 import java.util.HashSet;
@@ -33,7 +32,7 @@ public final class StringSetPolicyValue extends PolicyValue<Set<String>> {
 
     public StringSetPolicyValue(@NonNull Set<String> value) {
         super(value);
-        if (devicePolicySizeTrackingEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalEnabled()) {
             for (String str : value) {
                 PolicySizeVerifier.enforceMaxStringLength(str, "policyValue");
             }
