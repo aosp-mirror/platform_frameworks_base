@@ -110,8 +110,11 @@ public class TransactionParcelTests {
     @Test
     public void testMoveToDisplay() {
         // Write to parcel
+        final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
+        activityWindowInfo.set(true /* isEmbedded */, new Rect(0, 0, 500, 1000),
+                new Rect(0, 0, 500, 500));
         MoveToDisplayItem item = MoveToDisplayItem.obtain(mActivityToken, 4 /* targetDisplayId */,
-                config());
+                config(), activityWindowInfo);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert

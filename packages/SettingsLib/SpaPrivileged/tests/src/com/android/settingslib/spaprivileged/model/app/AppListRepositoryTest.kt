@@ -28,6 +28,8 @@ import android.content.pm.PackageManager.ResolveInfoFlags
 import android.content.pm.ResolveInfo
 import android.content.pm.UserInfo
 import android.content.res.Resources
+import android.os.BadParcelableException
+import android.os.DeadObjectException
 import android.os.UserManager
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.core.app.ApplicationProvider
@@ -44,6 +46,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
@@ -308,6 +311,19 @@ class AppListRepositoryTest {
         val appList = repository.loadApps(userId = ADMIN_USER_ID)
 
         assertThat(appList).containsExactly(NORMAL_APP, HIDDEN_APEX_APP)
+    }
+
+    @Test
+    fun loadApps_hasException_returnEmptyList() = runTest {
+        packageManager.stub {
+            on {
+                getInstalledApplicationsAsUser(any<ApplicationInfoFlags>(), eq(ADMIN_USER_ID))
+            } doThrow BadParcelableException(DeadObjectException())
+        }
+
+        val appList = repository.loadApps(userId = ADMIN_USER_ID)
+
+        assertThat(appList).isEmpty()
     }
 
     @Test

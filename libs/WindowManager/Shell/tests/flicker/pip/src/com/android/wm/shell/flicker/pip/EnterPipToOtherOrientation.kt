@@ -206,6 +206,18 @@ class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransition(fli
         }
     }
 
+    @Presubmit
+    @Test
+    fun pipLayerRemainInsideVisibleBounds() {
+        // during the transition we assert the center point is within the display bounds, since it
+        // might go outside of bounds as we resize from landscape fullscreen to destination bounds,
+        // and once the animation is over we assert that it's fully within the display bounds, at
+        // which point the device also performs orientation change from landscape to portrait
+        flicker.assertLayersVisibleRegion(pipApp.or(ComponentNameMatcher.PIP_CONTENT_OVERLAY)) {
+            regionsCenterPointInside(startingBounds).then().coversAtMost(endingBounds)
+        }
+    }
+
     /** {@inheritDoc} */
     @FlakyTest(bugId = 267424412)
     @Test

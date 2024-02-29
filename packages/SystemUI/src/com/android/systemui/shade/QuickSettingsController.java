@@ -282,12 +282,6 @@ public class QuickSettingsController implements Dumpable {
     /** The duration of the notification bounds animation. */
     private long mNotificationBoundsAnimationDuration;
 
-    /** TODO(b/273591201): remove after bug resolved */
-    private int mLastClippingTopBound;
-    private int mLastNotificationsTopPadding;
-    private int mLastNotificationsClippingTopBound;
-    private int mLastNotificationsClippingTopBoundNssl;
-
     private final Region mInterceptRegion = new Region();
     /** The end bounds of a clipping animation. */
     private final Rect mClippingAnimationEndBounds = new Rect();
@@ -2141,14 +2135,6 @@ public class QuickSettingsController implements Dumpable {
         ipw.println(mNotificationBoundsAnimationDelay);
         ipw.print("mNotificationBoundsAnimationDuration=");
         ipw.println(mNotificationBoundsAnimationDuration);
-        ipw.print("mLastClippingTopBound=");
-        ipw.println(mLastClippingTopBound);
-        ipw.print("mLastNotificationsTopPadding=");
-        ipw.println(mLastNotificationsTopPadding);
-        ipw.print("mLastNotificationsClippingTopBound=");
-        ipw.println(mLastNotificationsClippingTopBound);
-        ipw.print("mLastNotificationsClippingTopBoundNssl=");
-        ipw.println(mLastNotificationsClippingTopBoundNssl);
         ipw.print("mInterceptRegion=");
         ipw.println(mInterceptRegion);
         ipw.print("mClippingAnimationEndBounds=");

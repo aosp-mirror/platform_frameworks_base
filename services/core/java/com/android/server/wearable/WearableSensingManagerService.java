@@ -21,8 +21,8 @@ import static android.provider.DeviceConfig.NAMESPACE_WEARABLE_SENSING;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.ActivityOptions;
 import android.app.BroadcastOptions;
-import android.app.ComponentOptions;
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.wearable.IWearableSensingManager;
@@ -353,7 +353,7 @@ public class WearableSensingManagerService extends
                             dataRequest);
                     BroadcastOptions options = BroadcastOptions.makeBasic();
                     options.setPendingIntentBackgroundActivityStartMode(
-                            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
                     mDataRequestRateLimiter.noteEvent(
                             userId, RATE_LIMITER_PACKAGE_NAME, RATE_LIMITER_TAG);
                     final long previousCallingIdentity = Binder.clearCallingIdentity();

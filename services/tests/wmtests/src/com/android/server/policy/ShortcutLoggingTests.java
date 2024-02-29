@@ -145,7 +145,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         KeyboardLogEvent.SYSTEM_MUTE, KeyEvent.KEYCODE_MUTE, 0},
                 {"Meta + Ctrl + DPAD_UP -> Split screen navigation",
                         new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_UP},
-                        KeyboardLogEvent.SPLIT_SCREEN_NAVIGATION, KeyEvent.KEYCODE_DPAD_UP,
+                        KeyboardLogEvent.MULTI_WINDOW_NAVIGATION, KeyEvent.KEYCODE_DPAD_UP,
                         META_ON | CTRL_ON},
                 {"Meta + Ctrl + DPAD_LEFT -> Split screen navigation",
                         new int[]{META_KEY, CTRL_KEY, KeyEvent.KEYCODE_DPAD_LEFT},

@@ -6023,6 +6023,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public int startActivityWithScreenshot(@NonNull Intent intent,
                 @NonNull String callingPackage, int callingUid, int callingPid,
                 @Nullable IBinder resultTo, @Nullable Bundle options, int userId) {
+            userId = getActivityStartController().checkTargetUser(userId,
+                    false /* validateIncomingUser */, Binder.getCallingPid(),
+                    Binder.getCallingUid(), "startActivityWithScreenshot");
+
             return getActivityStartController()
                     .obtainStarter(intent, "startActivityWithScreenshot")
                     .setCallingUid(callingUid)
@@ -7346,6 +7350,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void unregisterCompatScaleProvider(
                 @CompatScaleProvider.CompatScaleModeOrderId int id) {
             ActivityTaskManagerService.this.unregisterCompatScaleProvider(id);
+        }
+
+        @Override
+        public boolean isAssistDataAllowed() {
+            return ActivityTaskManagerService.this.isAssistDataAllowed();
         }
     }
 

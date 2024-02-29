@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static java.util.Objects.requireNonNull;
 
+import android.app.ActivityOptions;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -100,7 +101,7 @@ public class OverlayActionChip extends FrameLayout {
                 BroadcastOptions options = BroadcastOptions.makeBasic();
                 options.setInteractive(true);
                 options.setPendingIntentBackgroundActivityStartMode(
-                        BroadcastOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
                 intent.send(options.toBundle());
                 finisher.run();
             } catch (PendingIntent.CanceledException e) {

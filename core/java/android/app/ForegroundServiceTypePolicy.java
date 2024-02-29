@@ -62,7 +62,6 @@ import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -128,14 +127,10 @@ public abstract class ForegroundServiceTypePolicy {
      * The FGS type enforcement:
      * deprecating the {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_DATA_SYNC}.
      *
-     * <p>Starting a FGS with this type from apps with targetSdkVersion
-     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or later will result in a warning
-     * in the log.
-     *
      * @hide
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Disabled
     @Overridable
     public static final long FGS_TYPE_DATA_SYNC_DEPRECATION_CHANGE_ID = 255039210L;
 

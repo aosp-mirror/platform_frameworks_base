@@ -578,7 +578,7 @@ class CredentialAutofillService : AutofillService() {
             responseClientState: Bundle
     ): GetCredentialRequest? {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
-        traverseStructureForRequest(structure, credentialOptions, responseClientState)
+        traverseStructureForRequest(structure, credentialOptions, responseClientState, sessionId)
 
         if (credentialOptions.isNotEmpty()) {
             val dataBundle = Bundle()
@@ -594,7 +594,8 @@ class CredentialAutofillService : AutofillService() {
     private fun traverseStructureForRequest(
             structure: AssistStructure,
             cmRequests: MutableList<CredentialOption>,
-            responseClientState: Bundle
+            responseClientState: Bundle,
+            sessionId: Int
     ) {
         val traversedViewNodes: MutableSet<AutofillId> = mutableSetOf()
         val credentialOptionsFromHints: MutableMap<String, CredentialOption> = mutableMapOf()
@@ -606,7 +607,7 @@ class CredentialAutofillService : AutofillService() {
         windowNodes.forEach { windowNode: AssistStructure.WindowNode ->
             traverseNodeForRequest(
                 windowNode.rootViewNode, cmRequests, responseClientState, traversedViewNodes,
-                credentialOptionsFromHints)
+                credentialOptionsFromHints, sessionId)
         }
     }
 
@@ -615,11 +616,12 @@ class CredentialAutofillService : AutofillService() {
             cmRequests: MutableList<CredentialOption>,
             responseClientState: Bundle,
             traversedViewNodes: MutableSet<AutofillId>,
-            credentialOptionsFromHints: MutableMap<String, CredentialOption>
+            credentialOptionsFromHints: MutableMap<String, CredentialOption>,
+            sessionId: Int
     ) {
         viewNode.autofillId?.let {
             cmRequests.addAll(getCredentialOptionsFromViewNode(viewNode, it, responseClientState,
-                traversedViewNodes, credentialOptionsFromHints))
+                traversedViewNodes, credentialOptionsFromHints, sessionId))
             traversedViewNodes.add(it)
         }
 
@@ -630,7 +632,7 @@ class CredentialAutofillService : AutofillService() {
 
         children.forEach { childNode: AssistStructure.ViewNode ->
             traverseNodeForRequest(childNode, cmRequests, responseClientState, traversedViewNodes,
-                credentialOptionsFromHints)
+                credentialOptionsFromHints, sessionId)
         }
     }
 
@@ -639,7 +641,8 @@ class CredentialAutofillService : AutofillService() {
             autofillId: AutofillId,
             responseClientState: Bundle,
             traversedViewNodes: MutableSet<AutofillId>,
-            credentialOptionsFromHints: MutableMap<String, CredentialOption>
+            credentialOptionsFromHints: MutableMap<String, CredentialOption>,
+            sessionId: Int
     ): MutableList<CredentialOption> {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
         if (Flags.autofillCredmanDevIntegration() && viewNode.credentialManagerRequest != null) {
@@ -650,12 +653,25 @@ class CredentialAutofillService : AutofillService() {
                         .getParcelableArrayList(
                             CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId::class.java)
                         ?.let { associatedAutofillIds ->
+                            // Set sessionId in autofillIds. The autofillIds stored in Credential
+                            // Options do not have associated session id and will result in
+                            // different hashes than the ones in assistStructure.
+                            associatedAutofillIds.forEach { associatedAutofillId ->
+                                associatedAutofillId.sessionId = sessionId
+                            }
+
                             // Check whether any of the associated autofill ids have already been
                             // traversed. If so, skip, to dedupe on duplicate credential options.
                             if ((traversedViewNodes intersect associatedAutofillIds.toSet())
                                         .isEmpty()) {
                                 credentialOptions.add(credentialOption)
                             }
+
+                            // Set the autofillIds with session id back to credential option.
+                            credentialOption.candidateQueryData.putParcelableArrayList(
+                                CredentialProviderService.EXTRA_AUTOFILL_ID,
+                                associatedAutofillIds
+                            )
                         }
             }
         }

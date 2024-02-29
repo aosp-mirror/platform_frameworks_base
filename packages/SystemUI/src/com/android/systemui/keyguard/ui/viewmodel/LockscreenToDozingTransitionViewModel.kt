@@ -44,6 +44,14 @@ constructor(
             to = KeyguardState.DOZING,
         )
 
+    val lockscreenAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 250.milliseconds,
+            onStep = { 1 - it },
+            onFinish = { 1f },
+            onCancel = { 1f },
+        )
+
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = 250.milliseconds,

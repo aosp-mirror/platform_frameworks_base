@@ -72,9 +72,16 @@ constructor(
     /** When all connections are considered OOS, satellite connectivity is potentially valid */
     val areAllConnectionsOutOfService =
         if (Flags.oemEnabledSatelliteFlag()) {
-                iconsInteractor.icons.aggregateOver(selector = { intr -> intr.isInService }) {
-                    isInServiceList ->
-                    isInServiceList.all { !it }
+                iconsInteractor.icons.aggregateOver(
+                    selector = { intr ->
+                        combine(intr.isInService, intr.isEmergencyOnly) {
+                            isInService,
+                            isEmergencyOnly ->
+                            !isInService && !isEmergencyOnly
+                        }
+                    }
+                ) { isOosAndIsNotEmergencyOnly ->
+                    isOosAndIsNotEmergencyOnly.all { it }
                 }
             } else {
                 flowOf(false)

@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.annotation.Nullable;
 import android.app.Person;
 
 import java.util.List;
@@ -32,6 +33,8 @@ final class MessagingData {
     private final List<Person> mSenders;
     private final int mUnreadCount;
 
+    private ConversationHeaderData mConversationHeaderData;
+
     MessagingData(Person user, boolean showSpinner,
             List<MessagingMessage> historicMessagingMessages,
             List<MessagingMessage> newMessagingMessages, List<List<MessagingMessage>> groups,
@@ -39,7 +42,7 @@ final class MessagingData {
         this(user, showSpinner, /* unreadCount= */0,
                 historicMessagingMessages, newMessagingMessages,
                 groups,
-                senders);
+                senders, null);
     }
 
     MessagingData(Person user, boolean showSpinner,
@@ -47,7 +50,8 @@ final class MessagingData {
             List<MessagingMessage> historicMessagingMessages,
             List<MessagingMessage> newMessagingMessages,
             List<List<MessagingMessage>> groups,
-            List<Person> senders) {
+            List<Person> senders,
+            @Nullable ConversationHeaderData conversationHeaderData) {
         mUser = user;
         mShowSpinner = showSpinner;
         mUnreadCount = unreadCount;
@@ -55,6 +59,7 @@ final class MessagingData {
         mNewMessagingMessages = newMessagingMessages;
         mGroups = groups;
         mSenders = senders;
+        mConversationHeaderData = conversationHeaderData;
     }
 
     public Person getUser() {
@@ -83,5 +88,10 @@ final class MessagingData {
 
     public List<List<MessagingMessage>> getGroups() {
         return mGroups;
+    }
+
+    @Nullable
+    public ConversationHeaderData getConversationHeaderData() {
+        return mConversationHeaderData;
     }
 }

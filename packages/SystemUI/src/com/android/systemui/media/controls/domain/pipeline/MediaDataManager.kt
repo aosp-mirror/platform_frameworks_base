@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.domain.pipeline
 
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
 import android.app.BroadcastOptions
 import android.app.Notification
 import android.app.Notification.EXTRA_SUBSTITUTE_APP_NAME
@@ -1272,7 +1273,7 @@ class MediaDataManager(
             val options = BroadcastOptions.makeBasic()
             options.setInteractive(true)
             options.setPendingIntentBackgroundActivityStartMode(
-                BroadcastOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
             )
             intent.send(options.toBundle())
             true

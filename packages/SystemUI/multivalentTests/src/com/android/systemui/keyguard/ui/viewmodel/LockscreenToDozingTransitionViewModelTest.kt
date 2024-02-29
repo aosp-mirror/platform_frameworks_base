@@ -102,6 +102,24 @@ class LockscreenToDozingTransitionViewModelTest : SysuiTestCase() {
             values.forEach { assertThat(it).isEqualTo(0f) }
         }
 
+
+    @Test
+    fun lockscreenAlphaFadesOutAndFinishesVisible() =
+        testScope.runTest {
+            val alpha by collectValues(underTest.lockscreenAlpha)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DOZING,
+                testScope,
+            )
+
+            assertThat(alpha[0]).isEqualTo(1f)
+            // Halfway through, it will have faded out
+            assertThat(alpha[1]).isEqualTo(0f)
+            // FINISHED alpha should be visible, to support pulsing
+            assertThat(alpha[2]).isEqualTo(1f)
+        }
+
     @Test
     fun deviceEntryBackgroundViewDisappear() =
         testScope.runTest {

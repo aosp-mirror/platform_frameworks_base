@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.scene.ui.viewmodel
 
+import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -35,9 +34,9 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -50,7 +49,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope by lazy { kosmos.testScope }
-    private val interactor by lazy { kosmos.sceneInteractor }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
     private val sceneContainerConfig = kosmos.sceneContainerConfig
     private val falsingManager = kosmos.fakeFalsingManager
@@ -62,7 +61,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
         kosmos.fakeSceneContainerFlags.enabled = true
         underTest =
             SceneContainerViewModel(
-                sceneInteractor = interactor,
+                sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
                 powerInteractor = kosmos.powerInteractor,
             )
@@ -74,10 +73,10 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             val isVisible by collectLastValue(underTest.isVisible)
             assertThat(isVisible).isTrue()
 
-            interactor.setVisible(false, "reason")
+            sceneInteractor.setVisible(false, "reason")
             assertThat(isVisible).isFalse()
 
-            interactor.setVisible(true, "reason")
+            sceneInteractor.setVisible(true, "reason")
             assertThat(isVisible).isTrue()
         }
 
@@ -198,5 +197,21 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             assertThat(kosmos.fakePowerRepository.userTouchRegistered).isFalse()
             underTest.onMotionEvent(mock())
             assertThat(kosmos.fakePowerRepository.userTouchRegistered).isTrue()
+        }
+
+    @Test
+    fun remoteUserInteraction_keepsContainerVisible() =
+        testScope.runTest {
+            sceneInteractor.setVisible(false, "reason")
+            val isVisible by collectLastValue(underTest.isVisible)
+            assertThat(isVisible).isFalse()
+            sceneInteractor.onRemoteUserInteractionStarted("reason")
+            assertThat(isVisible).isTrue()
+
+            underTest.onMotionEvent(
+                mock { whenever(actionMasked).thenReturn(MotionEvent.ACTION_UP) }
+            )
+
+            assertThat(isVisible).isFalse()
         }
 }

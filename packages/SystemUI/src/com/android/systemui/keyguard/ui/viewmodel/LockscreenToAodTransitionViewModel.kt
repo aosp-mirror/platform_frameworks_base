@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
@@ -66,6 +67,15 @@ constructor(
             onFinish = { 0f },
             onCancel = { 1f },
         )
+
+    fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        return transitionAnimation.sharedFlow(
+            duration = 500.milliseconds,
+            onStart = { startAlpha = viewState.alpha() },
+            onStep = { MathUtils.lerp(startAlpha, 1f, it) },
+        )
+    }
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest {

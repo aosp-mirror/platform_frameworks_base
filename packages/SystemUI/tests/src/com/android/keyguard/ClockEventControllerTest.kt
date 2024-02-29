@@ -336,48 +336,6 @@ class ClockEventControllerTest : SysuiTestCase() {
         }
 
     @Test
-    fun listenForTransitionToAodFromGone_updatesClockDozeAmountToOne() =
-        runBlocking(IMMEDIATE) {
-            val transitionStep = MutableStateFlow(TransitionStep())
-            whenever(keyguardTransitionInteractor.transitionStepsToState(KeyguardState.AOD))
-                .thenReturn(transitionStep)
-
-            val job = underTest.listenForAnyStateToAodTransition(this)
-            transitionStep.value =
-                TransitionStep(
-                    from = KeyguardState.GONE,
-                    to = KeyguardState.AOD,
-                    transitionState = TransitionState.STARTED,
-                )
-            yield()
-
-            verify(animations, times(2)).doze(1f)
-
-            job.cancel()
-        }
-
-    @Test
-    fun listenForTransitionToAodFromLockscreen_neverUpdatesClockDozeAmount() =
-        runBlocking(IMMEDIATE) {
-            val transitionStep = MutableStateFlow(TransitionStep())
-            whenever(keyguardTransitionInteractor.transitionStepsToState(KeyguardState.AOD))
-                .thenReturn(transitionStep)
-
-            val job = underTest.listenForAnyStateToAodTransition(this)
-            transitionStep.value =
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.AOD,
-                    transitionState = TransitionState.STARTED,
-                )
-            yield()
-
-            verify(animations, never()).doze(1f)
-
-            job.cancel()
-        }
-
-    @Test
     fun unregisterListeners_validate() =
         runBlocking(IMMEDIATE) {
             underTest.unregisterListeners()

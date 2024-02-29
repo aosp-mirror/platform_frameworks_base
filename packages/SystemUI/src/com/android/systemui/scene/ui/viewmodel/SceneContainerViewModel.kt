@@ -68,6 +68,12 @@ constructor(
     fun onMotionEvent(event: MotionEvent) {
         powerInteractor.onUserTouch()
         falsingInteractor.onTouchEvent(event)
+        if (
+            event.actionMasked == MotionEvent.ACTION_UP ||
+                event.actionMasked == MotionEvent.ACTION_CANCEL
+        ) {
+            sceneInteractor.onUserInteractionFinished()
+        }
     }
 
     /**

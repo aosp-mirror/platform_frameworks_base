@@ -3874,7 +3874,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private static class SetDrawInstructionAction extends Action {
+    private class SetDrawInstructionAction extends Action {
 
         @Nullable
         private final DrawInstructions mInstructions;
@@ -3909,6 +3909,15 @@ public class RemoteViews implements Parcelable, Filter {
                 }
                 try (ByteArrayInputStream is = new ByteArrayInputStream(bytes.get(0))) {
                     player.setDocument(new RemoteComposeDocument(is));
+                    player.addClickListener((viewId, metadata) -> {
+                        mActions.forEach(action -> {
+                            if (viewId == action.mViewId
+                                    && action instanceof SetOnClickResponse setOnClickResponse) {
+                                setOnClickResponse.mResponse.handleViewInteraction(
+                                        player, params.handler);
+                            }
+                        });
+                    });
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Failed to render draw instructions", e);
                 }
@@ -6051,16 +6060,6 @@ public class RemoteViews implements Parcelable, Filter {
         RemoteViews rvToApply = getRemoteViewsToApply(context, size);
         View result = inflateView(context, rvToApply, directParent,
                 params.applyThemeResId, params.colorResources);
-        if (result instanceof RemoteComposePlayer player) {
-            player.addClickListener((viewId, metadata) -> {
-                mActions.forEach(action -> {
-                    if (viewId == action.mViewId
-                            && action instanceof SetOnClickResponse setOnClickResponse) {
-                        setOnClickResponse.mResponse.handleViewInteraction(player, params.handler);
-                    }
-                });
-            });
-        }
         rvToApply.performApply(result, rootParent, params);
         return result;
     }

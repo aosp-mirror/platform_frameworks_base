@@ -54,7 +54,7 @@ class RowAlertTimeCoordinator @Inject constructor() : Coordinator {
     }
 
     private fun GroupEntry.calculateLatestAlertTime(): Long {
-        val lastChildAlertedTime = children.maxOf { it.lastAudiblyAlertedMs }
+        val lastChildAlertedTime = children.maxOfOrNull { it.lastAudiblyAlertedMs } ?: 0
         val summaryAlertedTime = checkNotNull(summary).lastAudiblyAlertedMs
         return max(lastChildAlertedTime, summaryAlertedTime)
     }

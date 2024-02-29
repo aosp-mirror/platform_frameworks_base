@@ -4081,13 +4081,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
-     * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
-     * of the target image.
-     */
-    @Override
-    public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
+    @Nullable
+    private ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot() {
         if (!checkCallingPermission(READ_FRAME_BUFFER, "requestAssistScreenshot()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
@@ -4106,24 +4101,34 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        final Bitmap bm;
+        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
         if (captureArgs != null) {
             ScreenCapture.SynchronousScreenCaptureListener syncScreenCapture =
                     ScreenCapture.createSyncCaptureListener();
 
             ScreenCapture.captureLayers(captureArgs, syncScreenCapture);
 
-            final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                    syncScreenCapture.getBuffer();
-            bm = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+            screenshotBuffer = syncScreenCapture.getBuffer();
         } else {
-            bm = null;
+            screenshotBuffer = null;
         }
 
-        if (bm == null) {
+        if (screenshotBuffer == null) {
             Slog.w(TAG_WM, "Failed to take screenshot");
         }
 
+        return screenshotBuffer;
+    }
+
+    /**
+     * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
+     * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
+     * of the target image.
+     */
+    @Override
+    public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
+        final ScreenCapture.ScreenshotHardwareBuffer shb = takeAssistScreenshot();
+        final Bitmap bm = shb != null ? shb.asBitmap() : null;
         FgThread.getHandler().post(() -> {
             try {
                 receiver.onHandleAssistScreenshot(bm);
@@ -8687,6 +8692,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 return false;
             }
+        }
+
+        @Override
+        public ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot() {
+            // WMS.takeAssistScreenshot takes care of the locking.
+            return WindowManagerService.this.takeAssistScreenshot();
         }
     }
 

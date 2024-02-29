@@ -45,7 +45,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.shareIn
 
 /** Encapsulates business-logic related to the keyguard transitions. */
@@ -177,10 +176,16 @@ constructor(
      * Lockscreen (0f).
      */
     val dozeAmountTransition: Flow<TransitionStep> =
-        merge(
-            aodToLockscreenTransition.map { step -> step.copy(value = 1f - step.value) },
-            lockscreenToAodTransition,
-        )
+        repository.transitions
+            .filter { step -> step.from == AOD || step.to == AOD }
+            .map { step ->
+                if (step.from == AOD) {
+                    step.copy(value = 1 - step.value)
+                } else {
+                    step
+                }
+            }
+            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     /** The last [TransitionStep] with a [TransitionState] of STARTED */
     val startedKeyguardTransitionStep: Flow<TransitionStep> =

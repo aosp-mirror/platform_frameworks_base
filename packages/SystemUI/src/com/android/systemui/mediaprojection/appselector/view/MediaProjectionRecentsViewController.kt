@@ -18,7 +18,7 @@ package com.android.systemui.mediaprojection.appselector.view
 
 import android.app.ActivityOptions
 import android.app.ActivityOptions.LaunchCookie
-import android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+import android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.IActivityTaskManager
 import android.graphics.Rect
 import android.view.LayoutInflater

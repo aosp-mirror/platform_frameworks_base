@@ -381,6 +381,18 @@ class DesktopTasksController(
         }
     }
 
+    /** Enter fullscreen by moving the focused freeform task in given `displayId` to fullscreen. */
+    fun enterFullscreen(displayId: Int) {
+        if (DesktopModeStatus.isEnabled()) {
+            shellTaskOrganizer
+                    .getRunningTasks(displayId)
+                    .find { taskInfo ->
+                        taskInfo.isFocused && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM
+                    }
+                    ?.let { moveToFullscreenWithAnimation(it, it.positionInParent) }
+        }
+    }
+
     /** Move a desktop app to split screen. */
     fun moveToSplit(task: RunningTaskInfo) {
         KtProtoLog.v(
@@ -1106,6 +1118,12 @@ class DesktopTasksController(
         override fun enterDesktop(displayId: Int) {
             mainExecutor.execute {
                 this@DesktopTasksController.enterDesktop(displayId)
+            }
+        }
+
+        override fun moveFocusedTaskToFullscreen(displayId: Int) {
+            mainExecutor.execute {
+                this@DesktopTasksController.enterFullscreen(displayId)
             }
         }
     }

@@ -312,10 +312,12 @@ public class AnrTimerTest {
     }
 
     /**
-     * Verify the dump output.
+     * Verify the dump output.  This only applies when native timers are supported.
      */
     @Test
     public void testDumpOutput() throws Exception {
+        if (!AnrTimer.nativeTimersSupported()) return;
+
         String r1 = getDumpOutput();
         assertThat(r1).doesNotContain("timer:");
 

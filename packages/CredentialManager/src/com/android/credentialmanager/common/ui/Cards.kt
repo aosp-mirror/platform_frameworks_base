@@ -18,7 +18,10 @@ package com.android.credentialmanager.common.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -66,6 +69,9 @@ fun SheetContainerCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             content = content,
             verticalArrangement = contentVerticalArrangement,
+            // The bottom sheet overlaps with the navigation bars but make sure the actual content
+            // in the bottom sheet does not.
+            contentPadding = WindowInsets.navigationBars.asPaddingValues(),
         )
     }
 }

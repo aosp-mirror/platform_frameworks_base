@@ -726,7 +726,7 @@ public class GraphicsActivity extends Activity {
                                       .map(Object::toString)
                                       .collect(Collectors.joining(", ")));
             int initialNumEvents = mModeChangedEvents.size();
-            surface.setFrameRate(30.f, compatibility);
+            surface.setFrameRate(70.f, compatibility);
             verifyFrameRates(expectedFrameRates, surface);
             verifyModeSwitchesDontChangeResolution(initialNumEvents, mModeChangedEvents.size());
         });
@@ -824,7 +824,7 @@ public class GraphicsActivity extends Activity {
         Display display = getDisplay();
         List<Float> expectedFrameRates = getRefreshRates(display.getMode(), display)
                                                  .stream()
-                                                 .filter(rate -> rate >= 30.f)
+                                                 .filter(rate -> rate >= 70.f)
                                                  .collect(Collectors.toList());
 
         assumeTrue("**** testSurfaceControlFrameRateCompatibility SKIPPED because no refresh rate "

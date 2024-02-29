@@ -32,6 +32,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.classifier.falsingManager
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -115,6 +116,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 displayId = Display.DEFAULT_DISPLAY,
                 sceneLogger = mock(),
                 falsingCollector = falsingCollector,
+                falsingManager = kosmos.falsingManager,
                 powerInteractor = powerInteractor,
                 bouncerInteractor = bouncerInteractor,
                 simBouncerInteractor = { kosmos.simBouncerInteractor },
@@ -968,6 +970,20 @@ class SceneContainerStartableTest : SysuiTestCase() {
                     verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
                 },
             )
+        }
+
+    @Test
+    fun respondToFalsingDetections() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val transitionStateFlow = prepareState()
+            underTest.start()
+            emulateSceneTransition(transitionStateFlow, toScene = SceneKey.Bouncer)
+            assertThat(currentScene).isNotEqualTo(SceneKey.Lockscreen)
+
+            kosmos.falsingManager.sendFalsingBelief()
+
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
         }
 
     private fun TestScope.emulateSceneTransition(
