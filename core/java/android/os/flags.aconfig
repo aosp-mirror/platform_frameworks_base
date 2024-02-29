@@ -1,5 +1,4 @@
 package: "android.os"
-container: "system"
 
 flag {
     name: "android_os_build_vanilla_ice_cream"
@@ -41,7 +40,6 @@ flag {
     namespace: "profile_experiences"
     description: "Guards a new Private Profile type in UserManager - everything from its setup to config to deletion."
     bug: "299069460"
-    is_exported: true
 }
 
 flag {
