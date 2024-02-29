@@ -283,6 +283,11 @@ class CrossActivityBackAnimation @Inject constructor(
 
     private inner class Callback : IOnBackInvokedCallback.Default() {
         override fun onBackStarted(backMotionEvent: BackMotionEvent) {
+            // in case we're still animating an onBackCancelled event, let's remove the finish-
+            // callback from the progress animator to prevent calling finishAnimation() before
+            // restarting a new animation
+            progressAnimator.removeOnBackCancelledFinishCallback();
+
             startBackAnimation(backMotionEvent)
             progressAnimator.onBackStarted(backMotionEvent) { backEvent: BackEvent ->
                 onGestureProgress(backEvent)
