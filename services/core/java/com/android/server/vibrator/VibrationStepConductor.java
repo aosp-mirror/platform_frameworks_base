@@ -161,7 +161,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
                 waitForVibrationParamsIfRequired();
             }
             // Scale resolves the default amplitudes from the effect before scaling them.
-            mVibration.scaleEffects(mVibrationScaler::scale);
+            mVibration.scaleEffects(mVibrationScaler);
         } else {
             mVibration.resolveEffects(mVibrationScaler.getDefaultVibrationAmplitude());
         }

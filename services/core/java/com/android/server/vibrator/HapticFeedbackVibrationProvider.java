@@ -34,8 +34,6 @@ import java.io.PrintWriter;
 
 /**
  * Provides the {@link VibrationEffect} and {@link VibrationAttributes} for haptic feedback.
- *
- * @hide
  */
 public final class HapticFeedbackVibrationProvider {
     private static final String TAG = "HapticFeedbackVibrationProvider";
@@ -58,17 +56,14 @@ public final class HapticFeedbackVibrationProvider {
 
     private float mKeyboardVibrationFixedAmplitude;
 
-    /** @hide */
     public HapticFeedbackVibrationProvider(Resources res, Vibrator vibrator) {
         this(res, vibrator.getInfo());
     }
 
-    /** @hide */
     public HapticFeedbackVibrationProvider(Resources res, VibratorInfo vibratorInfo) {
         this(res, vibratorInfo, loadHapticCustomizations(res, vibratorInfo));
     }
 
-    /** @hide */
     @VisibleForTesting HapticFeedbackVibrationProvider(
             Resources res,
             VibratorInfo vibratorInfo,

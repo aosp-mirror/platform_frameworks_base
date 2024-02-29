@@ -218,12 +218,13 @@ abstract class Vibration {
         private final long mDurationMs;
         @Nullable
         private final CombinedVibration mOriginalEffect;
-        private final float mScale;
+        private final int mScaleLevel;
+        private final float mAdaptiveScale;
         private final Status mStatus;
 
         DebugInfo(Status status, VibrationStats stats, @Nullable CombinedVibration playedEffect,
-                @Nullable CombinedVibration originalEffect, float scale,
-                @NonNull CallerInfo callerInfo) {
+                @Nullable CombinedVibration originalEffect, int scaleLevel,
+                float adaptiveScale, @NonNull CallerInfo callerInfo) {
             Objects.requireNonNull(callerInfo);
             mCreateTime = stats.getCreateTimeDebug();
             mStartTime = stats.getStartTimeDebug();
@@ -231,7 +232,8 @@ abstract class Vibration {
             mDurationMs = stats.getDurationDebug();
             mPlayedEffect = playedEffect;
             mOriginalEffect = originalEffect;
-            mScale = scale;
+            mScaleLevel = scaleLevel;
+            mAdaptiveScale = adaptiveScale;
             mCallerInfo = callerInfo;
             mStatus = status;
         }
@@ -246,7 +248,8 @@ abstract class Vibration {
                     + ", status: " + mStatus.name().toLowerCase(Locale.ROOT)
                     + ", playedEffect: " + mPlayedEffect
                     + ", originalEffect: " + mOriginalEffect
-                    + ", scale: " + String.format(Locale.ROOT, "%.2f", mScale)
+                    + ", scaleLevel: " + VibrationScaler.scaleLevelToString(mScaleLevel)
+                    + ", adaptiveScale: " + String.format(Locale.ROOT, "%.2f", mAdaptiveScale)
                     + ", callerInfo: " + mCallerInfo;
         }
 
@@ -259,26 +262,39 @@ abstract class Vibration {
         void dumpCompact(IndentingPrintWriter pw) {
             boolean isExternalVibration = mPlayedEffect == null;
             String timingsStr = String.format(Locale.ROOT,
-                    "%s | %8s | %20s | duration: %5dms | start: %12s | end: %10s",
+                    "%s | %8s | %20s | duration: %5dms | start: %12s | end: %12s",
                     DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime)),
                     isExternalVibration ? "external" : "effect",
                     mStatus.name().toLowerCase(Locale.ROOT),
                     mDurationMs,
                     mStartTime == 0 ? "" : DEBUG_TIME_FORMAT.format(new Date(mStartTime)),
                     mEndTime == 0 ? "" : DEBUG_TIME_FORMAT.format(new Date(mEndTime)));
-            String callerInfoStr = String.format(Locale.ROOT,
-                    " | %s (uid=%d, deviceId=%d) | usage: %s (audio=%s) | flags: %s | reason: %s",
-                    mCallerInfo.opPkg, mCallerInfo.uid, mCallerInfo.deviceId,
-                    mCallerInfo.attrs.usageToString(),
-                    AudioAttributes.usageToString(mCallerInfo.attrs.getAudioUsage()),
+            String paramStr = String.format(Locale.ROOT,
+                    " | scale: %8s (adaptive=%.2f) | flags: %4s | usage: %s",
+                    VibrationScaler.scaleLevelToString(mScaleLevel), mAdaptiveScale,
                     Long.toBinaryString(mCallerInfo.attrs.getFlags()),
-                    mCallerInfo.reason);
+                    mCallerInfo.attrs.usageToString());
+            // Optional, most vibrations have category unknown so skip them to simplify the logs
+            String categoryStr =
+                    mCallerInfo.attrs.getCategory() != VibrationAttributes.CATEGORY_UNKNOWN
+                            ? " | category=" + VibrationAttributes.categoryToString(
+                            mCallerInfo.attrs.getCategory())
+                            : "";
+            // Optional, most vibrations should not be defined via AudioAttributes
+            // so skip them to simplify the logs
+            String audioUsageStr =
+                    mCallerInfo.attrs.getOriginalAudioUsage() != AudioAttributes.USAGE_UNKNOWN
+                            ? " | audioUsage=" + AudioAttributes.usageToString(
+                            mCallerInfo.attrs.getOriginalAudioUsage())
+                            : "";
+            String callerStr = String.format(Locale.ROOT,
+                    " | %s (uid=%d, deviceId=%d) | reason: %s",
+                    mCallerInfo.opPkg, mCallerInfo.uid, mCallerInfo.deviceId, mCallerInfo.reason);
             String effectStr = String.format(Locale.ROOT,
-                    " | played: %s | original: %s | scale: %.2f",
+                    " | played: %s | original: %s",
                     mPlayedEffect == null ? null : mPlayedEffect.toDebugString(),
-                    mOriginalEffect == null ? null : mOriginalEffect.toDebugString(),
-                    mScale);
-            pw.println(timingsStr + callerInfoStr + effectStr);
+                    mOriginalEffect == null ? null : mOriginalEffect.toDebugString());
+            pw.println(timingsStr + paramStr + categoryStr + audioUsageStr + callerStr + effectStr);
         }
 
         /** Write this info into given {@link PrintWriter}. */
@@ -293,7 +309,8 @@ abstract class Vibration {
                     + (mEndTime == 0 ? null : DEBUG_DATE_TIME_FORMAT.format(new Date(mEndTime))));
             pw.println("playedEffect = " + mPlayedEffect);
             pw.println("originalEffect = " + mOriginalEffect);
-            pw.println("scale = " + String.format(Locale.ROOT, "%.2f", mScale));
+            pw.println("scale = " + VibrationScaler.scaleLevelToString(mScaleLevel));
+            pw.println("adaptiveScale = " + String.format(Locale.ROOT, "%.2f", mAdaptiveScale));
             pw.println("callerInfo = " + mCallerInfo);
             pw.decreaseIndent();
         }
@@ -310,6 +327,7 @@ abstract class Vibration {
             final VibrationAttributes attrs = mCallerInfo.attrs;
             proto.write(VibrationAttributesProto.USAGE, attrs.getUsage());
             proto.write(VibrationAttributesProto.AUDIO_USAGE, attrs.getAudioUsage());
+            proto.write(VibrationAttributesProto.CATEGORY, attrs.getCategory());
             proto.write(VibrationAttributesProto.FLAGS, attrs.getFlags());
             proto.end(attrsToken);
 
