@@ -190,10 +190,11 @@ public final class HapticFeedbackVibrationProvider {
      *      to get.
      * @param bypassVibrationIntensitySetting {@code true} if the returned attribute should bypass
      *      vibration intensity settings. {@code false} otherwise.
+     * @param fromIme the haptic feedback is performed from an IME.
      * @return the {@link VibrationAttributes} that should be used for the provided haptic feedback.
      */
     public VibrationAttributes getVibrationAttributesForHapticFeedback(
-            int effectId, boolean bypassVibrationIntensitySetting) {
+            int effectId, boolean bypassVibrationIntensitySetting, boolean fromIme) {
         VibrationAttributes attrs;
         switch (effectId) {
             case HapticFeedbackConstants.EDGE_SQUEEZE:
@@ -209,7 +210,7 @@ public final class HapticFeedbackVibrationProvider {
                 break;
             case HapticFeedbackConstants.KEYBOARD_TAP:
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
-                attrs = createKeyboardVibrationAttributes();
+                attrs = createKeyboardVibrationAttributes(fromIme);
                 break;
             default:
                 attrs = TOUCH_VIBRATION_ATTRIBUTES;
@@ -222,7 +223,7 @@ public final class HapticFeedbackVibrationProvider {
         if (shouldBypassInterruptionPolicy(effectId)) {
             flags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
         }
-        if (shouldBypassIntensityScale(effectId)) {
+        if (shouldBypassIntensityScale(effectId, fromIme)) {
             flags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
         }
 
@@ -337,9 +338,9 @@ public final class HapticFeedbackVibrationProvider {
                 /* fallbackForPredefinedEffect= */ predefinedEffectFallback);
     }
 
-    private boolean shouldBypassIntensityScale(int effectId) {
-        if (!Flags.keyboardCategoryEnabled() || mKeyboardVibrationFixedAmplitude < 0) {
-            // shouldn't bypass if not support keyboard category or no fixed amplitude
+    private boolean shouldBypassIntensityScale(int effectId, boolean isIme) {
+        if (!Flags.keyboardCategoryEnabled() || mKeyboardVibrationFixedAmplitude < 0 || !isIme) {
+            // Shouldn't bypass if not support keyboard category, no fixed amplitude or not an IME.
             return false;
         }
         switch (effectId) {
@@ -353,8 +354,9 @@ public final class HapticFeedbackVibrationProvider {
         return false;
     }
 
-    private static VibrationAttributes createKeyboardVibrationAttributes() {
-        if (!Flags.keyboardCategoryEnabled()) {
+    private VibrationAttributes createKeyboardVibrationAttributes(boolean fromIme) {
+        // Use touch attribute when the keyboard category is disable or it's not from an IME.
+        if (!Flags.keyboardCategoryEnabled() || !fromIme) {
             return TOUCH_VIBRATION_ATTRIBUTES;
         }
 
