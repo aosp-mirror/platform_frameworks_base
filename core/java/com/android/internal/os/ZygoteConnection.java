@@ -93,6 +93,9 @@ class ZygoteConnection {
             throw ex;
         }
 
+        if (peer.getUid() != Process.SYSTEM_UID) {
+            throw new ZygoteSecurityException("Only system UID is allowed to connect to Zygote.");
+        }
         isEof = false;
     }
 
