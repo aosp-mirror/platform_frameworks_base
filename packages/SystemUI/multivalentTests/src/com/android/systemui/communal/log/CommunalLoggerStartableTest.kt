@@ -18,12 +18,12 @@ package com.android.systemui.communal.log
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.log.CommunalUiEvent
-import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.kosmos.testScope
@@ -188,8 +188,8 @@ class CommunalLoggerStartableTest : SysuiTestCase() {
         }
 
     private fun transition(
-        from: CommunalSceneKey = CommunalScenes.Default,
-        to: CommunalSceneKey = CommunalScenes.Default,
+        from: SceneKey = CommunalScenes.Default,
+        to: SceneKey = CommunalScenes.Default,
     ): ObservableCommunalTransitionState.Transition {
         return ObservableCommunalTransitionState.Transition(
             fromScene = from,
@@ -200,7 +200,7 @@ class CommunalLoggerStartableTest : SysuiTestCase() {
         )
     }
 
-    private fun idle(sceneKey: CommunalSceneKey): ObservableCommunalTransitionState.Idle {
+    private fun idle(sceneKey: SceneKey): ObservableCommunalTransitionState.Idle {
         return ObservableCommunalTransitionState.Idle(sceneKey)
     }
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.shared.model
 
+import com.android.compose.animation.scene.SceneKey
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -25,12 +26,12 @@ import kotlinx.coroutines.flow.Flow
  */
 sealed class ObservableCommunalTransitionState {
     /** No transition/animation is currently running. */
-    data class Idle(val scene: CommunalSceneKey) : ObservableCommunalTransitionState()
+    data class Idle(val scene: SceneKey) : ObservableCommunalTransitionState()
 
     /** There is a transition animating between two scenes. */
     data class Transition(
-        val fromScene: CommunalSceneKey,
-        val toScene: CommunalSceneKey,
+        val fromScene: SceneKey,
+        val toScene: SceneKey,
         val progress: Flow<Float>,
 
         /**

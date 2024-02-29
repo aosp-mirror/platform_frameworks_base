@@ -26,6 +26,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
@@ -33,7 +34,6 @@ import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
-import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -263,7 +263,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         wm.updateViewLayout(parentView, lp)
     }
 
-    private fun goToScene(scene: CommunalSceneKey) {
+    private fun goToScene(scene: SceneKey) {
         communalRepository.setDesiredScene(scene)
         testableLooper.processAllMessages()
     }

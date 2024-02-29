@@ -1,6 +1,6 @@
 package com.android.systemui.communal.data.repository
 
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import kotlinx.coroutines.CoroutineScope
@@ -17,10 +17,10 @@ import kotlinx.coroutines.flow.stateIn
 @OptIn(ExperimentalCoroutinesApi::class)
 class FakeCommunalRepository(
     applicationScope: CoroutineScope,
-    override val desiredScene: MutableStateFlow<CommunalSceneKey> =
+    override val desiredScene: MutableStateFlow<SceneKey> =
         MutableStateFlow(CommunalScenes.Default),
 ) : CommunalRepository {
-    override fun setDesiredScene(desiredScene: CommunalSceneKey) {
+    override fun setDesiredScene(desiredScene: SceneKey) {
         this.desiredScene.value = desiredScene
     }
 

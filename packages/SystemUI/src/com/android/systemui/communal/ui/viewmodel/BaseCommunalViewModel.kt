@@ -18,9 +18,9 @@ package com.android.systemui.communal.ui.viewmodel
 
 import android.content.ComponentName
 import android.os.UserHandle
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -34,7 +34,7 @@ abstract class BaseCommunalViewModel(
     private val communalInteractor: CommunalInteractor,
     val mediaHost: MediaHost,
 ) {
-    val currentScene: Flow<CommunalSceneKey> = communalInteractor.desiredScene
+    val currentScene: Flow<SceneKey> = communalInteractor.desiredScene
 
     /** Whether widgets are currently being re-ordered. */
     open val reorderingWidgets: StateFlow<Boolean> = MutableStateFlow(false)
@@ -45,7 +45,7 @@ abstract class BaseCommunalViewModel(
     val selectedKey: StateFlow<String?>
         get() = _selectedKey
 
-    fun onSceneChanged(scene: CommunalSceneKey) {
+    fun onSceneChanged(scene: SceneKey) {
         communalInteractor.onSceneChanged(scene)
     }
 

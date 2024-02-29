@@ -16,21 +16,15 @@
 
 package com.android.systemui.communal.shared.model
 
-class CommunalSceneKey(
-    private val loggingName: String,
-) {
-    override fun toString(): String {
-        return loggingName
-    }
-}
+import com.android.compose.animation.scene.SceneKey
 
 /** Definition of the possible scenes for the communal UI. */
 object CommunalScenes {
     /** The default scene, shows nothing and is only there to allow swiping to communal. */
-    @JvmField val Blank = CommunalSceneKey("blank")
+    @JvmField val Blank = SceneKey("blank")
 
     /** The communal scene containing the hub UI. */
-    @JvmField val Communal = CommunalSceneKey("communal")
+    @JvmField val Communal = SceneKey("communal")
 
     @JvmField val Default = Blank
 }

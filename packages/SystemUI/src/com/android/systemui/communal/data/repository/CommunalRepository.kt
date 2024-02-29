@@ -16,7 +16,7 @@
 
 package com.android.systemui.communal.data.repository
 
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.dagger.SysUISingleton
@@ -41,13 +41,13 @@ interface CommunalRepository {
      * Target scene as requested by the underlying [SceneTransitionLayout] or through
      * [setDesiredScene].
      */
-    val desiredScene: StateFlow<CommunalSceneKey>
+    val desiredScene: StateFlow<SceneKey>
 
     /** Exposes the transition state of the communal [SceneTransitionLayout]. */
     val transitionState: StateFlow<ObservableCommunalTransitionState>
 
     /** Updates the requested scene. */
-    fun setDesiredScene(desiredScene: CommunalSceneKey)
+    fun setDesiredScene(desiredScene: SceneKey)
 
     /**
      * Updates the transition state of the hub [SceneTransitionLayout].
@@ -67,9 +67,8 @@ constructor(
     sceneContainerRepository: SceneContainerRepository,
 ) : CommunalRepository {
 
-    private val _desiredScene: MutableStateFlow<CommunalSceneKey> =
-        MutableStateFlow(CommunalScenes.Default)
-    override val desiredScene: StateFlow<CommunalSceneKey> = _desiredScene.asStateFlow()
+    private val _desiredScene: MutableStateFlow<SceneKey> = MutableStateFlow(CommunalScenes.Default)
+    override val desiredScene: StateFlow<SceneKey> = _desiredScene.asStateFlow()
 
     private val defaultTransitionState =
         ObservableCommunalTransitionState.Idle(CommunalScenes.Default)
@@ -83,7 +82,7 @@ constructor(
                 initialValue = defaultTransitionState,
             )
 
-    override fun setDesiredScene(desiredScene: CommunalSceneKey) {
+    override fun setDesiredScene(desiredScene: SceneKey) {
         _desiredScene.value = desiredScene
     }
 

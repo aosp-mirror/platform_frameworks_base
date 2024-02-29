@@ -16,9 +16,9 @@
 
 package com.android.systemui.communal
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.CoreStartable
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -83,7 +83,7 @@ constructor(
 
     private suspend fun determineSceneAfterTransition(
         lastStartedTransition: TransitionStep,
-    ): CommunalSceneKey? {
+    ): SceneKey? {
         val to = lastStartedTransition.to
         val from = lastStartedTransition.from
         val docked = dockManager.isDocked
