@@ -12673,7 +12673,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (getSystemGestureExclusionRects().isEmpty()
                 && collectPreferKeepClearRects().isEmpty()
                 && collectUnrestrictedPreferKeepClearRects().isEmpty()
-                && (info.mHandwritingArea == null || !shouldInitiateHandwriting())) {
+                && (info.mHandwritingArea == null || !shouldTrackHandwritingArea())) {
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
                 info.mPositionUpdateListener = null;
@@ -13040,7 +13040,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     void updateHandwritingArea() {
         // If autoHandwritingArea is not enabled, do nothing.
-        if (!shouldInitiateHandwriting()) return;
+        if (!shouldTrackHandwritingArea()) return;
         final AttachInfo ai = mAttachInfo;
         if (ai != null) {
             ai.mViewRootImpl.getHandwritingInitiator().updateHandwritingAreasForView(this);
@@ -13055,6 +13055,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     boolean shouldInitiateHandwriting() {
         return isAutoHandwritingEnabled() || getHandwritingDelegatorCallback() != null;
+    }
+
+    /**
+     * Returns whether the handwriting initiator should track the handwriting area for this view,
+     * either to initiate handwriting mode, or to prepare handwriting delegation, or to show the
+     * handwriting unsupported message.
+     * @hide
+     */
+    public boolean shouldTrackHandwritingArea() {
+        return shouldInitiateHandwriting();
     }
 
     /**

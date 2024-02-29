@@ -3244,6 +3244,12 @@
     <!-- Title for EditText context menu [CHAR LIMIT=20] -->
     <string name="editTextMenuTitle">Text actions</string>
 
+    <!-- Error shown when a user uses a stylus to try handwriting on a text field which doesn't support stylus handwriting. [CHAR LIMIT=TOAST] -->
+    <string name="error_handwriting_unsupported">Handwriting is not supported in this field</string>
+
+    <!-- Error shown when a user uses a stylus to try handwriting on a password text field which doesn't support stylus handwriting. [CHAR LIMIT=TOAST] -->
+    <string name="error_handwriting_unsupported_password">Handwriting is not supported in password fields</string>
+
     <!-- Content description of the back button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="input_method_nav_back_button_desc">Back</string>
     <!-- Content description of the switch input method button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
