@@ -90,9 +90,7 @@ fun SceneContainer(
     }
 
     DisposableEffect(viewModel, state) {
-        viewModel.setTransitionState(
-            state.observableTransitionState().map { it.asComposeUnaware() }
-        )
+        viewModel.setTransitionState(state.observableTransitionState())
         onDispose { viewModel.setTransitionState(null) }
     }
 

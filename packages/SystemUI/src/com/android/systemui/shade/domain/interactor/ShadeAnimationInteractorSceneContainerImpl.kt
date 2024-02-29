@@ -16,9 +16,9 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import javax.inject.Inject
