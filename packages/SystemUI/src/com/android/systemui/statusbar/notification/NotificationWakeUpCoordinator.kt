@@ -613,20 +613,20 @@ constructor(
 
     interface WakeUpListener {
         /** Called whenever the notifications are fully hidden or shown */
-        @JvmDefault fun onFullyHiddenChanged(isFullyHidden: Boolean) {}
+        fun onFullyHiddenChanged(isFullyHidden: Boolean) {}
 
         /**
          * Called whenever the pulseExpansion changes
          *
          * @param expandingChanged if the user has started or stopped expanding
          */
-        @JvmDefault fun onPulseExpansionChanged(expandingChanged: Boolean) {}
+        fun onPulseExpansionChanged(expandingChanged: Boolean) {}
 
         /**
          * Called when the animator started by [scheduleDelayedDozeAmountAnimation] begins running
          * after the start delay, or after it ends/is cancelled.
          */
-        @JvmDefault fun onDelayedDozeAmountAnimationRunning(running: Boolean) {}
+        fun onDelayedDozeAmountAnimationRunning(running: Boolean) {}
     }
 
     companion object {
