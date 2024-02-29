@@ -28,10 +28,6 @@ import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
-import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
-import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
-import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
-import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
@@ -47,7 +43,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 
 /**
@@ -127,17 +122,9 @@ constructor(
         params: BurnInParameters,
     ): Flow<BurnInModel> {
         return combine(
-            merge(
-                    keyguardTransitionInteractor.transition(GONE, AOD).map { it.value },
-                    keyguardTransitionInteractor.transition(AOD, PRIMARY_BOUNCER).map {
-                        1f - it.value
-                    },
-                    keyguardTransitionInteractor.transition(ALTERNATE_BOUNCER, AOD).map {
-                        it.value
-                    },
-                    keyguardTransitionInteractor.dozeAmountTransition.map { it.value },
-                )
-                .map { dozeAmount -> Interpolators.FAST_OUT_SLOW_IN.getInterpolation(dozeAmount) },
+            keyguardTransitionInteractor.dozeAmountTransition.map {
+                Interpolators.FAST_OUT_SLOW_IN.getInterpolation(it.value)
+            },
             burnInInteractor.keyguardBurnIn,
         ) { interpolated, burnIn ->
             val useScaleOnly =
@@ -158,9 +145,9 @@ constructor(
                 val burnInY = MathUtils.lerp(0, burnIn.translationY, interpolated).toInt()
                 val translationY =
                     if (Flags.migrateClocksToBlueprint()) {
-                        burnInY
+                        max(params.topInset - params.minViewY, burnInY)
                     } else {
-                        max(params.topInset, params.statusViewTop + burnInY) - params.statusViewTop
+                        max(params.topInset, params.minViewY + burnInY) - params.minViewY
                     }
 
                 BurnInModel(
@@ -194,8 +181,8 @@ data class BurnInParameters(
     val clockControllerProvider: Provider<ClockController>? = null,
     /** System insets that keyguard needs to stay out of */
     val topInset: Int = 0,
-    /** Status view top, without translation added in */
-    val statusViewTop: Int = 0,
+    /** The min y-value of the visible elements on lockscreen */
+    val minViewY: Int = Int.MAX_VALUE,
     /** The current y translation of the view */
     val translationY: () -> Float? = { null }
 )

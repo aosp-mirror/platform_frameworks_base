@@ -25,6 +25,8 @@ import com.android.credentialmanager.model.get.ProviderInfo
  */
 sealed class Request private constructor(
     open val token: IBinder?,
+    open val resultReceiver: ResultReceiver? = null,
+    open val finalResponseReceiver: ResultReceiver? = null,
 ) {
 
     /**
@@ -48,9 +50,10 @@ sealed class Request private constructor(
      */
     data class Get(
         override val token: IBinder?,
-        val resultReceiver: ResultReceiver?,
+        override val resultReceiver: ResultReceiver?,
+        override val finalResponseReceiver: ResultReceiver?,
         val providerInfos: List<ProviderInfo>,
-    ) : Request(token)
+    ) : Request(token, resultReceiver, finalResponseReceiver)
     /**
      * Request to start the create credentials flow.
      */

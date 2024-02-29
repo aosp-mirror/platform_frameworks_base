@@ -306,11 +306,11 @@ import android.view.displayhash.VerifiedDisplayHash;
 import android.view.inputmethod.ImeTracker;
 import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
+import android.window.IGlobalDragListener;
 import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ITrustedPresentationListener;
-import android.window.IUnhandledDragListener;
 import android.window.InputTransferToken;
 import android.window.ScreenCapture;
 import android.window.SystemPerformanceHinter;
@@ -327,8 +327,8 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
+import com.android.internal.protolog.LegacyProtoLogImpl;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -4081,13 +4081,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
-     * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
-     * of the target image.
-     */
-    @Override
-    public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
+    @Nullable
+    private ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot() {
         if (!checkCallingPermission(READ_FRAME_BUFFER, "requestAssistScreenshot()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
@@ -4106,24 +4101,34 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        final Bitmap bm;
+        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
         if (captureArgs != null) {
             ScreenCapture.SynchronousScreenCaptureListener syncScreenCapture =
                     ScreenCapture.createSyncCaptureListener();
 
             ScreenCapture.captureLayers(captureArgs, syncScreenCapture);
 
-            final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                    syncScreenCapture.getBuffer();
-            bm = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+            screenshotBuffer = syncScreenCapture.getBuffer();
         } else {
-            bm = null;
+            screenshotBuffer = null;
         }
 
-        if (bm == null) {
+        if (screenshotBuffer == null) {
             Slog.w(TAG_WM, "Failed to take screenshot");
         }
 
+        return screenshotBuffer;
+    }
+
+    /**
+     * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
+     * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
+     * of the target image.
+     */
+    @Override
+    public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
+        final ScreenCapture.ScreenshotHardwareBuffer shb = takeAssistScreenshot();
+        final Bitmap bm = shb != null ? shb.asBitmap() : null;
         FgThread.getHandler().post(() -> {
             try {
                 receiver.onHandleAssistScreenshot(bm);
@@ -6701,7 +6706,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void dumpLogStatus(PrintWriter pw) {
         pw.println("WINDOW MANAGER LOGGING (dumpsys window logging)");
-        pw.println(ProtoLogImpl.getSingleInstance().getStatus());
+        if (android.tracing.Flags.perfettoProtolog()) {
+            pw.println("Deprecated legacy command. Use Perfetto commands instead.");
+            return;
+        }
+        ((LegacyProtoLogImpl) ProtoLog.getSingleInstance()).getStatus();
     }
 
     private void dumpSessionsLocked(PrintWriter pw) {
@@ -6750,11 +6759,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,
             ArrayList<WindowState> windows) {
         pw.println("WINDOW MANAGER WINDOWS (dumpsys window windows)");
-        dumpWindowsNoHeaderLocked(pw, dumpAll, windows);
-    }
-
-    private void dumpWindowsNoHeaderLocked(PrintWriter pw, boolean dumpAll,
-            ArrayList<WindowState> windows) {
         mRoot.dumpWindowsNoHeader(pw, dumpAll, windows);
 
         if (!mHidingNonSystemOverlayWindows.isEmpty()) {
@@ -6989,9 +6993,15 @@ public class WindowManagerService extends IWindowManager.Stub
         if (reason != null) {
             pw.println("  Reason: " + reason);
         }
+        pw.println();
+        final ArrayList<WindowState> relatedWindows = new ArrayList<>();
         for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
             final DisplayContent dc = mRoot.getChildAt(i);
             final int displayId = dc.getDisplayId();
+            final WindowState currentFocus = dc.mCurrentFocus;
+            final ActivityRecord focusedApp = dc.mFocusedApp;
+            pw.println("  Display #" + displayId + " currentFocus=" + currentFocus
+                    + " focusedApp=" + focusedApp);
             if (!dc.mWinAddedSinceNullFocus.isEmpty()) {
                 pw.println("  Windows added in display #" + displayId + " since null focus: "
                         + dc.mWinAddedSinceNullFocus);
@@ -7000,12 +7010,25 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("  Windows removed in display #" + displayId + " since null focus: "
                         + dc.mWinRemovedSinceNullFocus);
             }
+            pw.println("  Tasks in top down Z order:");
+            dc.forAllTaskDisplayAreas(tda -> {
+                tda.dump(pw, "    ", false /* dumpAll */);
+            });
+            dc.getInputMonitor().dump(pw, "  ");
+            pw.println();
+            dc.forAllWindows(w -> {
+                if ((currentFocus != null && Objects.equals(w.mAttrs.packageName,
+                        currentFocus.mAttrs.packageName)) || (focusedApp != null
+                        && Objects.equals(w.mAttrs.packageName, focusedApp.packageName))) {
+                    relatedWindows.add(w);
+                }
+            }, true /* traverseTopToBottom */);
         }
+        if (windowState != null && !relatedWindows.contains(windowState)) {
+            relatedWindows.add(windowState);
+        }
+        mRoot.dumpWindowsNoHeader(pw, true /* dumpAll */, relatedWindows);
         pw.println();
-        dumpWindowsNoHeaderLocked(pw, true, null);
-        pw.println();
-        pw.println("Last ANR continued");
-        mRoot.dumpDisplayContents(pw);
         pw.close();
         mLastANRState = sw.toString();
 
@@ -7844,10 +7867,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setForceShowMagnifiableBounds(int displayId, boolean show) {
+        public void setFullscreenMagnificationActivated(int displayId, boolean activated) {
             synchronized (mGlobalLock) {
                 if (mAccessibilityController.hasCallbacks()) {
-                    mAccessibilityController.setForceShowMagnifiableBounds(displayId, show);
+                    mAccessibilityController
+                            .setFullscreenMagnificationActivated(displayId, activated);
                 } else {
                     throw new IllegalStateException("Magnification callbacks not set!");
                 }
@@ -8668,6 +8692,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 return false;
             }
+        }
+
+        @Override
+        public ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot() {
+            // WMS.takeAssistScreenshot takes care of the locking.
+            return WindowManagerService.this.takeAssistScreenshot();
         }
     }
 
@@ -10005,14 +10035,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Sets the listener to be called back when a cross-window drag and drop operation is unhandled
-     * (ie. not handled by any window which can handle the drag).
+     * Sets the listener to be called back when a cross-window drag and drop operation happens.
      */
     @Override
-    public void setUnhandledDragListener(IUnhandledDragListener listener) throws RemoteException {
+    public void setGlobalDragListener(IGlobalDragListener listener) throws RemoteException {
         mAtmService.enforceTaskPermission("setUnhandledDragListener");
         synchronized (mGlobalLock) {
-            mDragDropController.setUnhandledDragListener(listener);
+            mDragDropController.setGlobalDragListener(listener);
         }
     }
 }

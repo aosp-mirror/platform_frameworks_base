@@ -1486,7 +1486,6 @@ public final class SystemServer implements Dumpable {
         VcnManagementService vcnManagement = null;
         NetworkPolicyManagerService networkPolicy = null;
         WindowManagerService wm = null;
-        SerialService serial = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
@@ -2362,13 +2361,7 @@ public final class SystemServer implements Dumpable {
 
             if (!isWatch) {
                 t.traceBegin("StartSerialService");
-                try {
-                    // Serial port support
-                    serial = new SerialService(context);
-                    ServiceManager.addService(Context.SERIAL_SERVICE, serial);
-                } catch (Throwable e) {
-                    Slog.e(TAG, "Failure starting SerialService", e);
-                }
+                mSystemServiceManager.startService(SerialService.Lifecycle.class);
                 t.traceEnd();
             }
 

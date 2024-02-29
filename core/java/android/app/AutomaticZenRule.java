@@ -377,6 +377,9 @@ public final class AutomaticZenRule implements Parcelable {
      * Sets the {@link ZenDeviceEffects} associated to this rule. Device effects specify changes to
      * the device behavior that should apply while the rule is active, but are not directly related
      * to suppressing notifications (for example: disabling always-on display).
+     *
+     * <p>When updating an existing rule via {@link NotificationManager#updateAutomaticZenRule},
+     * a {@code null} value here means the previous set of effects is retained.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public void setDeviceEffects(@Nullable ZenDeviceEffects deviceEffects) {
@@ -702,7 +705,15 @@ public final class AutomaticZenRule implements Parcelable {
         }
 
         /**
-         * Sets the component (service or activity) that owns this rule.
+         * Sets the component name of the
+         * {@link android.service.notification.ConditionProviderService} that manages this rule
+         * (but note that {@link android.service.notification.ConditionProviderService} is
+         * deprecated in favor of using {@link NotificationManager#setAutomaticZenRuleState} to
+         * notify the system about the state of your rule).
+         *
+         * <p>This is exclusive with {@link #setConfigurationActivity}; rules where a configuration
+         * activity is set will not use the component set here to determine whether the rule
+         * should be active.
          */
         public @NonNull Builder setOwner(@Nullable ComponentName owner) {
             mOwner = owner;
@@ -740,6 +751,11 @@ public final class AutomaticZenRule implements Parcelable {
          * information about this rule and/or allows them to configure it. This is required to be
          * non-null for rules that are not backed by a
          * {@link android.service.notification.ConditionProviderService}.
+         *
+         * <p>This is exclusive with {@link #setOwner}; rules where a configuration
+         * activity is set will not use the
+         * {@link android.service.notification.ConditionProviderService} supplied there to determine
+         * whether the rule should be active.
          */
         public @NonNull Builder setConfigurationActivity(
                 @Nullable ComponentName configurationActivity) {
@@ -749,6 +765,9 @@ public final class AutomaticZenRule implements Parcelable {
 
         /**
          * Sets the zen policy.
+         *
+         * <p>When updating an existing rule via {@link NotificationManager#updateAutomaticZenRule},
+         * a {@code null} value here means the previous policy is retained.
          */
         public @NonNull Builder setZenPolicy(@Nullable ZenPolicy policy) {
             mPolicy = policy;
@@ -759,6 +778,9 @@ public final class AutomaticZenRule implements Parcelable {
          * Sets the {@link ZenDeviceEffects} associated to this rule. Device effects specify changes
          * to the device behavior that should apply while the rule is active, but are not directly
          * related to suppressing notifications (for example: disabling always-on display).
+         *
+         * <p>When updating an existing rule via {@link NotificationManager#updateAutomaticZenRule},
+         * a {@code null} value here means the previous set of effects is retained.
          */
         @NonNull
         public Builder setDeviceEffects(@Nullable ZenDeviceEffects deviceEffects) {

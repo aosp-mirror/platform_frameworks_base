@@ -20,6 +20,6 @@ import android.content.ComponentName;
 
 /** @hide */
 parcelable SignedPackageParcel {
-    String pkgName;
+    String packageName;
     byte[] certificateDigest;
 }

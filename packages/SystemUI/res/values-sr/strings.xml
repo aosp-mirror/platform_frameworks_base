@@ -530,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Овим уређајем управља родитељ. Родитељ може да види информације, као што су апликације које користиш, твоју локацију и време испред екрана, и да управља њима."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Поуздани агент спречава закључавање"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Заштита од крађе\nЗакљ. уређај, превише покушаја откључавања"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Подешавања звука"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Аутоматски титл за медије"</string>
@@ -583,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"вибрација"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Контроле за јачину звука за %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Мелодија звона за позиве и обавештења је укључена (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> се пушта на"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Звук се пушта на"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Тјунер за кориснички интерфејс система"</string>
     <string name="status_bar" msgid="4357390266055077437">"Статусна трака"</string>
     <string name="demo_mode" msgid="263484519766901593">"Режим демонстрације за кориснички интерфејс система"</string>

@@ -83,6 +83,7 @@ import android.os.StatFs;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.provider.E2eeContactKeysManager;
 import android.provider.MediaStore;
 import android.telephony.TelephonyRegistryManager;
 import android.util.AttributeSet;
@@ -4815,7 +4816,7 @@ public abstract class Context {
      * @see android.net.thread.ThreadNetworkManager
      * @hide
      */
-    @FlaggedApi(com.android.net.thread.flags.Flags.FLAG_THREAD_ENABLED_PLATFORM)
+    @FlaggedApi(com.android.net.thread.platform.flags.Flags.FLAG_THREAD_ENABLED_PLATFORM)
     @SystemApi
     public static final String THREAD_NETWORK_SERVICE = "thread_network";
 
@@ -5066,7 +5067,6 @@ public abstract class Context {
      * {@link android.hardware.fingerprint.FingerprintManager} for handling management
      * of fingerprints.
      *
-     * @removed See {@link android.hardware.biometrics.BiometricPrompt}
      * @see #getSystemService(String)
      * @see android.hardware.fingerprint.FingerprintManager
      */
@@ -6557,11 +6557,18 @@ public abstract class Context {
     public static final String ECM_ENHANCED_CONFIRMATION_SERVICE = "ecm_enhanced_confirmation";
 
     /**
+     * Service to protect sensitive content during screen share.
+     * @hide
+     */
+    public static final String SENSITIVE_CONTENT_PROTECTION_SERVICE =
+            "sensitive_content_protection_service";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.provider.ContactKeysManager} to managing contact keys.
+     * {@link E2eeContactKeysManager} to managing contact keys.
      *
      * @see #getSystemService(String)
-     * @see android.provider.ContactKeysManager
+     * @see E2eeContactKeysManager
      */
     @FlaggedApi(android.provider.Flags.FLAG_USER_KEYS)
     public static final String CONTACT_KEYS_SERVICE = "contact_keys";

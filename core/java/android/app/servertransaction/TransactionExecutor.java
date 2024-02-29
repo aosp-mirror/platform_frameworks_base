@@ -40,7 +40,6 @@ import android.app.ClientTransactionHandler;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.IBinder;
-import android.os.Process;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -218,8 +217,6 @@ public class TransactionExecutor {
         final boolean shouldTrackConfigUpdatedContext =
                 // No configuration change for local transaction.
                 !mTransactionHandler.isExecutingLocalTransaction()
-                        // Can't read flag from isolated process.
-                        && !Process.isIsolated()
                         && bundleClientTransactionFlag();
         final Context configUpdatedContext = shouldTrackConfigUpdatedContext
                 ? item.getContextToUpdate(mTransactionHandler)

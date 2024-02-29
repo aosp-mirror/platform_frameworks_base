@@ -810,11 +810,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void goToFullscreenFromSplit() {
+        public void moveFocusedTaskToFullscreen(int displayId) {
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
-                    bar.goToFullscreenFromSplit();
+                    bar.moveFocusedTaskToFullscreen(displayId);
                 } catch (RemoteException ex) { }
             }
         }

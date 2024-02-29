@@ -15,12 +15,15 @@
  *
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
+import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
@@ -29,7 +32,9 @@ import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.Intra
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -41,6 +46,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val context: Context,
     private val splitShadeStateController: SplitShadeStateController,
+    private val clockInteractor: KeyguardClockInteractor,
 ) {
 
     /** The current blueprint for the lockscreen. */
@@ -58,6 +64,7 @@ constructor(
                 .onStart { emit(Unit) }
                 .collect { updateBlueprint() }
         }
+        applicationScope.launch { clockInteractor.currentClock.collect { updateBlueprint() } }
     }
 
     /**
@@ -67,12 +74,17 @@ constructor(
     private fun updateBlueprint() {
         val useSplitShade =
             splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
+        // TODO(b/326098079): Make ID a constant value.
+        val useWeatherClockLayout =
+            clockInteractor.currentClock.value?.config?.id == "DIGITAL_CLOCK_WEATHER" &&
+                ComposeLockscreen.isEnabled
 
         val blueprintId =
-            if (useSplitShade) {
-                SplitShadeKeyguardBlueprint.ID
-            } else {
-                DefaultKeyguardBlueprint.DEFAULT
+            when {
+                useWeatherClockLayout && useSplitShade -> SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
+                useWeatherClockLayout -> WEATHER_CLOCK_BLUEPRINT_ID
+                useSplitShade -> SplitShadeKeyguardBlueprint.ID
+                else -> DefaultKeyguardBlueprint.DEFAULT
             }
 
         transitionToBlueprint(blueprintId)
@@ -106,5 +118,14 @@ constructor(
 
     fun getCurrentBlueprint(): KeyguardBlueprint {
         return keyguardBlueprintRepository.blueprint.value
+    }
+
+    companion object {
+        /**
+         * These values live here because classes in the composable package do not exist in some
+         * systems.
+         */
+        const val WEATHER_CLOCK_BLUEPRINT_ID = "weather-clock"
+        const val SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID = "split-shade-weather-clock"
     }
 }

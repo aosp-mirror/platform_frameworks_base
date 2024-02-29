@@ -61,6 +61,7 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.testing.PollingCheck;
 import android.view.WindowManagerGlobal;
+import android.window.ActivityWindowInfo;
 import android.window.SizeConfigurationBuckets;
 
 import androidx.test.annotation.UiThreadTest;
@@ -354,7 +355,7 @@ public class ActivityThreadClientTest {
                     null /* activityOptions */, true /* isForward */, null /* profilerInfo */,
                     mThread /* client */, null /* asssitToken */, null /* shareableActivityToken */,
                     false /* launchedFromBubble */, null /* taskfragmentToken */,
-                    null /* initialCallerInfoAccessToken */);
+                    null /* initialCallerInfoAccessToken */, new ActivityWindowInfo());
         }
 
         @Override

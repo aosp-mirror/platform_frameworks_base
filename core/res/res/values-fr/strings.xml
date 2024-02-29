@@ -201,7 +201,7 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"L\'administrateur a mis l\'appareil à disposition pour un usage personnel"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"L\'appareil est géré"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Votre organisation gère cet appareil et peut surveiller le trafic réseau. Appuyez ici pour obtenir plus d\'informations."</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"Des application peuvent accéder à votre position"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Des applications peuvent accéder à votre position"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Contactez votre administrateur pour en savoir plus"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"Service de géorepérage"</string>
     <string name="country_detector" msgid="7023275114706088854">"Détecteur de pays"</string>
@@ -667,24 +667,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Visage authentifié, veuillez appuyer sur \"Confirmer\""</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Lecteur d\'empreintes digitales indisponible"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Impossible de configurer l\'empreinte"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Délai de configuration de l\'empreinte dépassé. Réessayez."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Opération d\'authentification par empreinte digitale annulée"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Opération d\'authentification par empreinte digitale annulée par l\'utilisateur"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Trop de tentatives. Utilisez plutôt le verrouillage de l\'écran."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Trop de tentatives. Utilisez plutôt le verrouillage de l\'écran."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Impossible de reconnaître l\'empreinte digitale. Réessayez."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Aucune empreinte digitale enregistrée"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Aucun lecteur d\'empreinte digitale n\'est installé sur cet appareil"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Lecteur d\'empreintes temporairement désactivé"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Impossible d\'utiliser le lecteur d\'empreintes digitales. Contactez un réparateur."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Bouton Marche/Arrêt appuyé"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Doigt <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utiliser l\'empreinte digitale"</string>
@@ -802,8 +796,8 @@
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"Permet à l\'application de s\'associer à l\'interface de niveau supérieur d\'un service de fournisseur de conditions. Ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"associer à un service d\'écran de veille interactif"</string>
     <string name="permdesc_bindDreamService" msgid="9129615743300572973">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service d\'écran de veille interactif. Cette autorisation ne devrait jamais être nécessaire pour les applications standards."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"faire appel à l\'application de configuration fournie par l\'opérateur"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"Permet à l\'application autorisée de faire appel à l\'application de configuration fournie par l\'opérateur. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"invoquer l\'appli de configuration fournie par l\'opérateur"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"Permet au titulaire d\'invoquer l\'appli de configuration fournie par l\'opérateur. Ne devrait pas être nécessaire pour les applis standards."</string>
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"détecter des observations sur les conditions du réseau"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"Permet à une application de détecter des observations sur les conditions du réseau. Les applications standards ne devraient pas nécessiter cette autorisation."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"modifier le calibrage du périphérique d\'entrée"</string>
@@ -839,7 +833,7 @@
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Contrôle le nombre de fois qu\'un mot de passe incorrect est saisi lors du déverrouillage de l\'écran, et verrouille votre appareil Android TV ou en efface toutes les données si le nombre maximal de mots de passe incorrects autorisé est dépassé."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller le système d\'infoloisirs ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller le téléphone ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Contrôlez le nombre de fois qu\'un mot de passe incorrect est saisi lors du déverrouillage de l\'écran, et verrouillez la tablette ou effacez toutes les informations sur l\'utilisateur si le nombre maximal de mots de passe incorrects autorisés est dépassé."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Contrôlez le nombre de mots de passe incorrects saisis pour déverrouiller l\'écran, et verrouillez la tablette ou effacez toutes les données de cet utilisateur si trop de mots de passe incorrects sont saisis."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Contrôle le nombre de fois qu\'un mot de passe incorrect est saisi lors du déverrouillage de l\'écran, et verrouille votre appareil Android TV ou efface toutes les données de cet utilisateur si le nombre maximal de mots de passe incorrects autorisé est dépassé."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller le système d\'infoloisirs ou effacer toutes les données de ce profil si le nombre maximal de tentatives de saisie du mot de passe est atteint."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Contrôlez le nombre de fois qu\'un mot de passe incorrect est saisi lors du déverrouillage de l\'écran, et verrouillez le téléphone ou effacez toutes les informations sur l\'utilisateur si le nombre maximal de mots de passe incorrects autorisés est dépassé."</string>

@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "InputEventReceiver"
+#define ATRACE_TAG ATRACE_TAG_INPUT
 
 //#define LOG_NDEBUG 0
 
@@ -44,6 +45,16 @@ static const bool kDebugDispatchCycle = false;
 
 static const char* toString(bool value) {
     return value ? "true" : "false";
+}
+
+/**
+ * Trace a bool variable, writing "1" if the value is "true" and "0" otherwise.
+ * TODO(b/311142655): delete this tracing. It's only useful for debugging very specific issues.
+ * @param var the name of the variable
+ * @param value the value of the variable
+ */
+static void traceBoolVariable(const char* var, bool value) {
+    ATRACE_INT(var, value ? 1 : 0);
 }
 
 static struct {
@@ -130,6 +141,7 @@ NativeInputEventReceiver::NativeInputEventReceiver(
         mMessageQueue(messageQueue),
         mBatchedInputEventPending(false),
         mFdEvents(0) {
+    traceBoolVariable("mBatchedInputEventPending", mBatchedInputEventPending);
     if (kDebugDispatchCycle) {
         ALOGD("channel '%s' ~ Initializing input event receiver.", getInputChannelName().c_str());
     }
@@ -311,6 +323,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 
     if (consumeBatches) {
         mBatchedInputEventPending = false;
+        traceBoolVariable("mBatchedInputEventPending", mBatchedInputEventPending);
     }
     if (outConsumedBatch) {
         *outConsumedBatch = false;
@@ -344,6 +357,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 }
 
                 mBatchedInputEventPending = true;
+                traceBoolVariable("mBatchedInputEventPending", mBatchedInputEventPending);
                 if (kDebugDispatchCycle) {
                     ALOGD("channel '%s' ~ Dispatching batched input event pending notification.",
                           getInputChannelName().c_str());
@@ -355,6 +369,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 if (env->ExceptionCheck()) {
                     ALOGE("Exception dispatching batched input events.");
                     mBatchedInputEventPending = false; // try again later
+                    traceBoolVariable("mBatchedInputEventPending", mBatchedInputEventPending);
                 }
             }
             return OK;
@@ -371,15 +386,15 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                 }
             }
 
-            jobject inputEventObj;
+            ScopedLocalRef<jobject> inputEventObj(env);
             switch (inputEvent->getType()) {
                 case InputEventType::KEY:
                     if (kDebugDispatchCycle) {
                         ALOGD("channel '%s' ~ Received key event.", getInputChannelName().c_str());
                     }
                     inputEventObj =
-                            android_view_KeyEvent_fromNative(env,
-                                                             static_cast<KeyEvent&>(*inputEvent));
+                            android_view_KeyEvent_obtainAsCopy(env,
+                                                               static_cast<KeyEvent&>(*inputEvent));
                     break;
 
                 case InputEventType::MOTION: {
@@ -447,20 +462,19 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 
             default:
                 assert(false); // InputConsumer should prevent this from ever happening
-                inputEventObj = nullptr;
             }
 
-            if (inputEventObj) {
+            if (inputEventObj.get()) {
                 if (kDebugDispatchCycle) {
                     ALOGD("channel '%s' ~ Dispatching input event.", getInputChannelName().c_str());
                 }
                 env->CallVoidMethod(receiverObj.get(),
-                        gInputEventReceiverClassInfo.dispatchInputEvent, seq, inputEventObj);
+                                    gInputEventReceiverClassInfo.dispatchInputEvent, seq,
+                                    inputEventObj.get());
                 if (env->ExceptionCheck()) {
                     ALOGE("Exception dispatching input event.");
                     skipCallbacks = true;
                 }
-                env->DeleteLocalRef(inputEventObj);
             } else {
                 ALOGW("channel '%s' ~ Failed to obtain event object.",
                         getInputChannelName().c_str());

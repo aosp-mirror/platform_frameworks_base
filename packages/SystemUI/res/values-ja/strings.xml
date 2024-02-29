@@ -530,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"このデバイスは保護者によって管理されています。保護者は、あなたが使用するアプリ、あなたの現在地、デバイスの利用時間などの情報を確認したり、管理したりできます。"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"信頼エージェントがロック解除を管理"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"盗難防止\nデバイスをロック - ロック解除に繰り返し失敗"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"音声の設定"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"メディアの自動字幕起こし"</string>
@@ -583,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"バイブレーション"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s の音量調節"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"着信音と通知音が鳴ります（<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>）"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> を再生:"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"音声の再生形式:"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"システムUI調整ツール"</string>
     <string name="status_bar" msgid="4357390266055077437">"ステータスバー"</string>
     <string name="demo_mode" msgid="263484519766901593">"システム UI デモモード"</string>

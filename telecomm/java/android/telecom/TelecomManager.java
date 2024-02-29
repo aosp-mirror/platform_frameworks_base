@@ -2797,13 +2797,10 @@ public class TelecomManager {
      * calls for a given {@code packageName} and {@code userHandle}.
      *
      * @param packageName the package name of the app to check calls for.
-     * @param userHandle the user handle on which to check for calls.
-     * @param detectForAllUsers indicates if calls should be detected across all users. If it is
-     *                          set to {@code true}, and the caller has the ability to interact
-     *                          across users, the userHandle parameter is disregarded.
+     * @param userHandle the user handle to check calls for.
      * @return {@code true} if there are ongoing calls, {@code false} otherwise.
-     * @throws SecurityException if detectForAllUsers is true or userHandle is not the calling user
-     * and the caller does not grant the ability to interact across users.
+     * @throws SecurityException if the userHandle is not the calling user and the caller does not
+     * grant the ability to interact across users.
      * @hide
      */
     @SystemApi
@@ -2811,11 +2808,45 @@ public class TelecomManager {
     @RequiresPermission(allOf = {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isInSelfManagedCall(@NonNull String packageName,
-            @NonNull UserHandle userHandle, boolean detectForAllUsers) {
+            @NonNull UserHandle userHandle) {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
                 return service.isInSelfManagedCall(packageName, userHandle,
+                        mContext.getOpPackageName(), false);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException isInSelfManagedCall: " + e);
+                e.rethrowFromSystemServer();
+                return false;
+            }
+        } else {
+            throw new IllegalStateException("Telecom service is not present");
+        }
+    }
+
+    /**
+     * Determines whether there are any ongoing {@link PhoneAccount#CAPABILITY_SELF_MANAGED}
+     * calls for a given {@code packageName} amongst all users, given that detectForAllUsers is true
+     * and the caller has the ability to interact across users. If detectForAllUsers isn't enabled,
+     * the calls will be checked against the caller.
+     *
+     * @param packageName the package name of the app to check calls for.
+     * @param detectForAllUsers indicates if calls should be detected across all users.
+     * @return {@code true} if there are ongoing calls, {@code false} otherwise.
+     * @throws SecurityException if detectForAllUsers is true and the caller does not grant the
+     * ability to interact across users.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    @RequiresPermission(allOf = {Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    public boolean isInSelfManagedCall(@NonNull String packageName,
+            boolean detectForAllUsers) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.isInSelfManagedCall(packageName, null,
                         mContext.getOpPackageName(), detectForAllUsers);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException isInSelfManagedCall: " + e);

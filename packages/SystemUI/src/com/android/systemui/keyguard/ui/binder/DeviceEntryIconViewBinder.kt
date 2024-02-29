@@ -22,6 +22,7 @@ import android.content.res.ColorStateList
 import android.util.StateSet
 import android.view.HapticFeedbackConstants
 import android.view.View
+import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.view.LongPressHandlingView
@@ -81,6 +82,11 @@ object DeviceEntryIconViewBinder {
             // GONE => AOD transition (even though the view may not be visible until the middle
             // of the transition.
             repeatOnLifecycle(Lifecycle.State.CREATED) {
+                launch {
+                    viewModel.isVisible.collect { isVisible ->
+                        longPressHandlingView.isInvisible = !isVisible
+                    }
+                }
                 launch {
                     viewModel.isLongPressEnabled.collect { isEnabled ->
                         longPressHandlingView.setLongPressHandlingEnabled(isEnabled)

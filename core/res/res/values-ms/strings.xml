@@ -666,24 +666,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Cap jari disahkan"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Wajah disahkan"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Wajah disahkan, sila tekan sahkan"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Perkakasan cap jari tidak tersedia"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Tidak dapat menyediakan cap jari"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Persediaan cap jari telah tamat masa. Cuba lagi."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Pengendalian cap jari dibatalkan"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Pengendalian cap jari dibatalkan oleh pengguna"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Terlalu banyak percubaan. Gunakan kunci skrin."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Terlalu banyak percubaan. Gunakan kunci skrin."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Tidak dapat memproses cap jari. Cuba lagi."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Tiada cap jari didaftarkan"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Peranti ini tiada penderia cap jari"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Penderia dilumpuhkan untuk sementara"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Tidak dapat menggunakan penderia cap jari. Lawati penyedia pembaikan."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Butang kuasa ditekan"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Jari <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Gunakan cap jari"</string>

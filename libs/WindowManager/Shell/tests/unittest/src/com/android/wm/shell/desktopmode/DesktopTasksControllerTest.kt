@@ -48,12 +48,14 @@ import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.LaunchAdjacentController
+import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createSplitScreenTask
+import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -106,6 +108,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock lateinit var desktopModeWindowDecoration: DesktopModeWindowDecoration
     @Mock lateinit var splitScreenController: SplitScreenController
     @Mock lateinit var recentsTransitionHandler: RecentsTransitionHandler
+    @Mock lateinit var dragAndDropController: DragAndDropController
+    @Mock lateinit var multiInstanceHelper: MultiInstanceHelper
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var controller: DesktopTasksController
@@ -148,6 +152,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             shellTaskOrganizer,
             syncQueue,
             rootTaskDisplayAreaOrganizer,
+            dragAndDropController,
             transitions,
             enterDesktopTransitionHandler,
             exitDesktopTransitionHandler,
@@ -156,6 +161,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             desktopModeTaskRepository,
             launchAdjacentController,
             recentsTransitionHandler,
+            multiInstanceHelper,
             shellExecutor
         )
     }
@@ -773,6 +779,23 @@ class DesktopTasksControllerTest : ShellTestCase() {
         verify(splitScreenController).prepareExitSplitScreen(any(), anyInt(),
             eq(SplitScreenController.EXIT_REASON_DESKTOP_MODE)
         )
+    }
+
+    @Test
+    fun moveFocusedTaskToFullscreen() {
+        val task1 = setUpFreeformTask()
+        val task2 = setUpFreeformTask()
+        val task3 = setUpFreeformTask()
+
+        task1.isFocused = false
+        task2.isFocused = true
+        task3.isFocused = false
+
+        controller.enterFullscreen(DEFAULT_DISPLAY)
+
+        val wct = getLatestExitDesktopWct()
+        assertThat(wct.changes[task2.token.asBinder()]?.windowingMode)
+                .isEqualTo(WINDOWING_MODE_FULLSCREEN)
     }
 
     private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {

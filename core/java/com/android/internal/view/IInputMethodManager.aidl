@@ -24,6 +24,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
 import android.window.ImeOnBackInvokedDispatcher;
 
+import com.android.internal.inputmethod.IBooleanListener;
 import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInputMethodClient;
@@ -173,10 +174,15 @@ interface IInputMethodManager {
                 in String delegatePackageName,
                 in String delegatorPackageName);
 
-    // TODO(b/293640003): introduce a new API method to provide async way to return boolean.
     /** Accepts and starts a stylus handwriting session for the delegate view **/
     boolean acceptStylusHandwritingDelegation(in IInputMethodClient client, in int userId,
             in String delegatePackageName, in String delegatorPackageName, int flags);
+
+    /** Accepts and starts a stylus handwriting session for the delegate view and provides result
+     *  async **/
+    oneway void acceptStylusHandwritingDelegationAsync(in IInputMethodClient client, in int userId,
+            in String delegatePackageName, in String delegatorPackageName, int flags,
+            in IBooleanListener callback);
 
     /** Returns {@code true} if currently selected IME supports Stylus handwriting. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "

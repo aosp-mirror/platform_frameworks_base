@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.graphics.Point
+import android.util.MathUtils
 import android.view.View.VISIBLE
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
@@ -32,6 +33,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
+import com.android.systemui.keyguard.ui.StateToValue
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
@@ -42,6 +45,7 @@ import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.toAnimatedValueFlow
 import com.android.systemui.util.ui.zip
 import javax.inject.Inject
+import kotlin.math.max
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,7 +66,7 @@ constructor(
     private val dozeParameters: DozeParameters,
     private val keyguardInteractor: KeyguardInteractor,
     private val communalInteractor: CommunalInteractor,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
@@ -70,6 +74,10 @@ constructor(
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
+    private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
+    private val goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
+    private val lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
+    private val lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
     private val lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
     private val lockscreenToGlanceableHubTransitionViewModel:
         LockscreenToGlanceableHubTransitionViewModel,
@@ -86,6 +94,7 @@ constructor(
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val aodBurnInViewModel: AodBurnInViewModel,
     private val aodAlphaViewModel: AodAlphaViewModel,
+    private val shadeInteractor: ShadeInteractor,
 ) {
 
     val burnInLayerVisibility: Flow<Int> =
@@ -99,6 +108,16 @@ constructor(
         goneToAodTransition
             .map { it.transitionState == STARTED || it.transitionState == RUNNING }
             .onStart { emit(false) }
+            .distinctUntilChanged()
+
+    private val alphaOnShadeExpansion: Flow<Float> =
+        combine(
+                shadeInteractor.qsExpansion,
+                shadeInteractor.shadeExpansion,
+            ) { qsExpansion, shadeExpansion ->
+                // Fade out quickly as the shade expands
+                1f - MathUtils.constrainedMap(0f, 1f, 0f, 0.2f, max(qsExpansion, shadeExpansion))
+            }
             .distinctUntilChanged()
 
     /** Last point that the root view was tapped */
@@ -118,15 +137,24 @@ constructor(
     fun alpha(viewState: ViewStateAccessor): Flow<Float> {
         return combine(
                 communalInteractor.isIdleOnCommunal,
+                keyguardTransitionInteractor
+                    .transitionValue(GONE)
+                    .map { it == 1f }
+                    .onStart { emit(false) }
+                    .distinctUntilChanged(),
                 // The transitions are mutually exclusive, so they are safe to merge to get the last
                 // value emitted by any of them. Do not add flows that cannot make this guarantee.
                 merge(
-                        aodAlphaViewModel.alpha,
+                        alphaOnShadeExpansion,
                         keyguardInteractor.dismissAlpha.filterNotNull(),
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToLockscreenTransitionViewModel.lockscreenAlpha,
                         glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
+                        goneToAodTransitionViewModel.enterFromTopAnimationAlpha,
+                        goneToDozingTransitionViewModel.lockscreenAlpha,
+                        lockscreenToAodTransitionViewModel.lockscreenAlpha(viewState),
+                        lockscreenToDozingTransitionViewModel.lockscreenAlpha,
                         lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
                         lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
                         lockscreenToGoneTransitionViewModel.lockscreenAlpha(viewState),
@@ -139,11 +167,12 @@ constructor(
                         primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,
                     )
                     .onStart { emit(1f) }
-            ) { isIdleOnCommunal, alpha ->
-                if (isIdleOnCommunal) {
+            ) { isIdleOnCommunal, gone, alpha ->
+                if (isIdleOnCommunal || gone) {
                     // Keyguard should not show while the communal hub is fully visible. This check
                     // is added since at the moment, closing the notification shade will cause the
-                    // keyguard alpha to be set back to 1.
+                    // keyguard alpha to be set back to 1. Also ensure keyguard is never visible
+                    // when GONE.
                     0f
                 } else {
                     alpha
@@ -165,8 +194,12 @@ constructor(
         return aodBurnInViewModel.translationY(params)
     }
 
-    fun translationX(params: BurnInParameters): Flow<Float> {
-        return aodBurnInViewModel.translationX(params)
+    fun translationX(params: BurnInParameters): Flow<StateToValue> {
+        return merge(
+            aodBurnInViewModel.translationX(params).map { StateToValue(to = AOD, value = it) },
+            lockscreenToGlanceableHubTransitionViewModel.keyguardTranslationX,
+            glanceableHubToLockscreenTransitionViewModel.keyguardTranslationX,
+        )
     }
 
     fun scale(params: BurnInParameters): Flow<BurnInScaleViewModel> {

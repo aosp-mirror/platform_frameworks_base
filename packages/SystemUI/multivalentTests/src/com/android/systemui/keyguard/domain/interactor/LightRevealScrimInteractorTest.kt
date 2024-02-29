@@ -22,7 +22,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.fakeLightRevealScrimRepository
 import com.android.systemui.keyguard.data.repository.FakeLightRevealScrimRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
@@ -33,16 +32,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.mockito.Mockito.anyBoolean
-import org.mockito.Mockito.never
-import org.mockito.Mockito.reset
-import org.mockito.Mockito.verify
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -102,42 +96,5 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
             assertEquals(values, listOf(reveal1, reveal2))
 
             job.cancel()
-        }
-
-    @Test
-    fun lightRevealEffect_startsAnimationOnlyForDifferentStateTargets() =
-        testScope.runTest {
-            runCurrent()
-            reset(fakeLightRevealScrimRepository)
-
-            fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.OFF,
-                    to = KeyguardState.OFF
-                )
-            )
-            runCurrent()
-            verify(fakeLightRevealScrimRepository, never()).startRevealAmountAnimator(anyBoolean())
-
-            fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.DOZING,
-                    to = KeyguardState.LOCKSCREEN
-                )
-            )
-            runCurrent()
-            verify(fakeLightRevealScrimRepository).startRevealAmountAnimator(true)
-
-            fakeKeyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.DOZING
-                )
-            )
-            runCurrent()
-            verify(fakeLightRevealScrimRepository).startRevealAmountAnimator(false)
         }
 }

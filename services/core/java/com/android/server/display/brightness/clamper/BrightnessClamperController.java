@@ -38,6 +38,7 @@ import com.android.server.display.DisplayDeviceConfig.PowerThrottlingConfigData;
 import com.android.server.display.DisplayDeviceConfig.PowerThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.feature.DisplayManagerFlags;
 
@@ -156,6 +157,8 @@ public class BrightnessClamperController {
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL;
         } else if (mClamperType == Type.POWER) {
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_POWER_IC;
+        } else if (mClamperType == Type.WEAR_BEDTIME_MODE) {
+            return BrightnessInfo.BRIGHTNESS_MAX_REASON_WEAR_BEDTIME_MODE;
         } else {
             Slog.wtf(TAG, "BrightnessMaxReason not mapped for type=" + mClamperType);
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
@@ -333,6 +336,11 @@ public class BrightnessClamperController {
         @Override
         public float getBrightnessWearBedtimeModeCap() {
             return mDisplayDeviceConfig.getBrightnessCapForWearBedtimeMode();
+        }
+
+        @NonNull
+        public SensorData getTempSensor() {
+            return mDisplayDeviceConfig.getTempSensor();
         }
     }
 }

@@ -75,6 +75,24 @@ object SharedNotificationContainerBinder {
                 }
             }
 
+        // Required to capture keyguard media changes and ensure the notification count is correct
+        val layoutChangeListener =
+            object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    view: View,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int
+                ) {
+                    viewModel.notificationStackChanged()
+                }
+            }
+
         val burnInParams = MutableStateFlow(BurnInParameters())
         val viewState =
             ViewStateAccessor(
@@ -91,10 +109,10 @@ object SharedNotificationContainerBinder {
                     if (!sceneContainerFlags.flexiNotifsEnabled()) {
                         launch {
                             // Only temporarily needed, until flexi notifs go live
-                            viewModel.shadeCollpaseFadeIn.collect { fadeIn ->
+                            viewModel.shadeCollapseFadeIn.collect { fadeIn ->
                                 if (fadeIn) {
                                     android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
-                                        duration = 350
+                                        duration = 250
                                         addUpdateListener { animation ->
                                             controller.setMaxAlphaForExpansion(
                                                 animation.getAnimatedFraction()
@@ -144,6 +162,8 @@ object SharedNotificationContainerBinder {
                             .collect { y -> controller.setTranslationY(y) }
                     }
 
+                    launch { viewModel.translationX.collect { x -> controller.translationX = x } }
+
                     if (!sceneContainerFlags.isEnabled()) {
                         launch {
                             viewModel.expansionAlpha(viewState).collect {
@@ -168,6 +188,7 @@ object SharedNotificationContainerBinder {
             }
             insets
         }
+        view.addOnLayoutChangeListener(layoutChangeListener)
 
         return object : DisposableHandle {
             override fun dispose() {
@@ -175,6 +196,7 @@ object SharedNotificationContainerBinder {
                 disposableHandleMainImmediate.dispose()
                 controller.setOnHeightChangedRunnable(null)
                 view.setOnApplyWindowInsetsListener(null)
+                view.removeOnLayoutChangeListener(layoutChangeListener)
             }
         }
     }

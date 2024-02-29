@@ -17,8 +17,12 @@
 package com.android.systemui
 
 import android.content.Context
+import android.graphics.Rect
+import android.util.RotationUtils
+import android.view.Display
 import android.view.DisplayCutout
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.display.naturalBounds
 import javax.inject.Inject
 
 @SysUISingleton
@@ -33,15 +37,43 @@ constructor(
         cameraProtectionLoader.loadCameraProtectionInfoList()
     }
 
-    fun cutoutInfoForCurrentDisplay(): SysUICutoutInformation? {
+    /**
+     * Returns the [SysUICutoutInformation] for the current display and the current rotation.
+     *
+     * This means that the bounds of the display cutout and the camera protection will be
+     * adjusted/rotated for the current rotation.
+     */
+    fun cutoutInfoForCurrentDisplayAndRotation(): SysUICutoutInformation? {
         val display = context.display
         val displayCutout: DisplayCutout = display.cutout ?: return null
+        return SysUICutoutInformation(displayCutout, getCameraProtectionForDisplay(display))
+    }
+
+    private fun getCameraProtectionForDisplay(display: Display): CameraProtectionInfo? {
         val displayUniqueId: String? = display.uniqueId
         if (displayUniqueId.isNullOrEmpty()) {
-            return SysUICutoutInformation(displayCutout, cameraProtection = null)
+            return null
         }
-        val cameraProtection: CameraProtectionInfo? =
+        val cameraProtection: CameraProtectionInfo =
             cameraProtectionList.firstOrNull { it.displayUniqueId == displayUniqueId }
-        return SysUICutoutInformation(displayCutout, cameraProtection)
+                ?: return null
+        val adjustedBoundsForRotation =
+            calculateCameraProtectionBoundsForRotation(display, cameraProtection.bounds)
+        return cameraProtection.copy(bounds = adjustedBoundsForRotation)
+    }
+
+    private fun calculateCameraProtectionBoundsForRotation(
+        display: Display,
+        originalProtectionBounds: Rect,
+    ): Rect {
+        val displayNaturalBounds = display.naturalBounds
+        val rotatedBoundsOut = Rect(originalProtectionBounds)
+        RotationUtils.rotateBounds(
+            /* inOutBounds = */ rotatedBoundsOut,
+            /* parentWidth = */ displayNaturalBounds.width(),
+            /* parentHeight = */ displayNaturalBounds.height(),
+            /* rotation = */ display.rotation
+        )
+        return rotatedBoundsOut
     }
 }

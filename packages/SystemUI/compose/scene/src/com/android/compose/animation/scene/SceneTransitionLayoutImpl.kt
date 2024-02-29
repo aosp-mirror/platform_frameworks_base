@@ -25,8 +25,13 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ApproachLayoutModifierNode
+import androidx.compose.ui.layout.ApproachMeasureScope
 import androidx.compose.ui.layout.LookaheadScope
-import androidx.compose.ui.layout.intermediateLayout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
@@ -96,33 +101,42 @@ internal class SceneTransitionLayoutImpl(
                 ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>()
                     .also { _sharedValues = it }
 
-    private val horizontalGestureHandler: SceneGestureHandler
-    private val verticalGestureHandler: SceneGestureHandler
+    // TODO(b/317958526): Lazily allocate scene gesture handlers the first time they are needed.
+    private val horizontalDraggableHandler: DraggableHandlerImpl
+    private val verticalDraggableHandler: DraggableHandlerImpl
+
+    private var _userActionDistanceScope: UserActionDistanceScope? = null
+    internal val userActionDistanceScope: UserActionDistanceScope
+        get() =
+            _userActionDistanceScope
+                ?: UserActionDistanceScopeImpl(layoutImpl = this).also {
+                    _userActionDistanceScope = it
+                }
 
     init {
         updateScenes(builder)
 
-        // SceneGestureHandler must wait for the scenes to be initialized, in order to access the
+        // DraggableHandlerImpl must wait for the scenes to be initialized, in order to access the
         // current scene (required for SwipeTransition).
-        horizontalGestureHandler =
-            SceneGestureHandler(
+        horizontalDraggableHandler =
+            DraggableHandlerImpl(
                 layoutImpl = this,
                 orientation = Orientation.Horizontal,
                 coroutineScope = coroutineScope,
             )
 
-        verticalGestureHandler =
-            SceneGestureHandler(
+        verticalDraggableHandler =
+            DraggableHandlerImpl(
                 layoutImpl = this,
                 orientation = Orientation.Vertical,
                 coroutineScope = coroutineScope,
             )
     }
 
-    internal fun gestureHandler(orientation: Orientation): SceneGestureHandler =
+    internal fun draggableHandler(orientation: Orientation): DraggableHandlerImpl =
         when (orientation) {
-            Orientation.Vertical -> verticalGestureHandler
-            Orientation.Horizontal -> horizontalGestureHandler
+            Orientation.Vertical -> verticalDraggableHandler
+            Orientation.Horizontal -> horizontalDraggableHandler
         }
 
     internal fun scene(key: SceneKey): Scene {
@@ -172,46 +186,15 @@ internal class SceneTransitionLayoutImpl(
     }
 
     @Composable
-    @OptIn(ExperimentalComposeUiApi::class)
     internal fun Content(modifier: Modifier) {
         Box(
             modifier
                 // Handle horizontal and vertical swipes on this layout.
                 // Note: order here is important and will give a slight priority to the vertical
                 // swipes.
-                .swipeToScene(horizontalGestureHandler)
-                .swipeToScene(verticalGestureHandler)
-                // Animate the size of this layout.
-                .intermediateLayout { measurable, constraints ->
-                    // Measure content normally.
-                    val placeable = measurable.measure(constraints)
-
-                    val width: Int
-                    val height: Int
-                    val transition = state.currentTransition
-                    if (transition == null) {
-                        width = placeable.width
-                        height = placeable.height
-                    } else {
-                        // Interpolate the size.
-                        val fromSize = scene(transition.fromScene).targetSize
-                        val toSize = scene(transition.toScene).targetSize
-
-                        // Optimization: make sure we don't read state.progress if fromSize ==
-                        // toSize to avoid running this code every frame when the layout size does
-                        // not change.
-                        if (fromSize == toSize) {
-                            width = fromSize.width
-                            height = fromSize.height
-                        } else {
-                            val size = lerp(fromSize, toSize, transition.progress)
-                            width = size.width.coerceAtLeast(0)
-                            height = size.height.coerceAtLeast(0)
-                        }
-                    }
-
-                    layout(width, height) { placeable.place(0, 0) }
-                }
+                .swipeToScene(horizontalDraggableHandler)
+                .swipeToScene(verticalDraggableHandler)
+                .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
                 val scenesToCompose =
@@ -252,5 +235,56 @@ internal class SceneTransitionLayoutImpl(
 
     internal fun setScenesTargetSizeForTest(size: IntSize) {
         scenes.values.forEach { it.targetSize = size }
+    }
+}
+
+private data class LayoutElement(private val layoutImpl: SceneTransitionLayoutImpl) :
+    ModifierNodeElement<LayoutNode>() {
+    override fun create(): LayoutNode = LayoutNode(layoutImpl)
+
+    override fun update(node: LayoutNode) {
+        node.layoutImpl = layoutImpl
+    }
+}
+
+private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
+    Modifier.Node(), ApproachLayoutModifierNode {
+    override fun isMeasurementApproachComplete(lookaheadSize: IntSize): Boolean {
+        return layoutImpl.state.currentTransition == null
+    }
+
+    @ExperimentalComposeUiApi
+    override fun ApproachMeasureScope.approachMeasure(
+        measurable: Measurable,
+        constraints: Constraints,
+    ): MeasureResult {
+        // Measure content normally.
+        val placeable = measurable.measure(constraints)
+
+        val width: Int
+        val height: Int
+        val transition = layoutImpl.state.currentTransition
+        if (transition == null) {
+            width = placeable.width
+            height = placeable.height
+        } else {
+            // Interpolate the size.
+            val fromSize = layoutImpl.scene(transition.fromScene).targetSize
+            val toSize = layoutImpl.scene(transition.toScene).targetSize
+
+            // Optimization: make sure we don't read state.progress if fromSize ==
+            // toSize to avoid running this code every frame when the layout size does
+            // not change.
+            if (fromSize == toSize) {
+                width = fromSize.width
+                height = fromSize.height
+            } else {
+                val size = lerp(fromSize, toSize, transition.progress)
+                width = size.width.coerceAtLeast(0)
+                height = size.height.coerceAtLeast(0)
+            }
+        }
+
+        return layout(width, height) { placeable.place(0, 0) }
     }
 }

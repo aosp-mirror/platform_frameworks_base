@@ -245,7 +245,6 @@ import android.window.OnBackInvokedCallbackInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
-import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ToBooleanFunction;
@@ -1897,11 +1896,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return true;
         }
 
-        if (android.permission.flags.Flags.sensitiveNotificationAppProtection()) {
-            if (mWmService.mSensitiveContentPackages
-                    .shouldBlockScreenCaptureForApp(getOwningPackage(), getOwningUid())) {
-                return true;
-            }
+        // block screen capture to protect sensitive notifications or content on the screen.
+        if (mWmService.mSensitiveContentPackages.shouldBlockScreenCaptureForApp(
+                getOwningPackage(), getOwningUid(), getWindowToken())) {
+            return true;
         }
 
         return !DevicePolicyCache.getInstance().isScreenCaptureAllowed(mShowUserId);
@@ -2603,7 +2601,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * Move the touch gesture from the currently touched window on this display to this window.
+     *
+     * @deprecated Use {@link
+     *   com.android.server.input.InputManagerInternal#transferTouchGesture(IBinder, IBinder)}.
      */
+    @Deprecated
     public boolean transferTouch() {
         return mWmService.mInputManager.transferTouch(mInputChannelToken, getDisplayId());
     }
@@ -2835,10 +2837,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // For child windows we want to use the pid for the parent window in case the the child
         // window was added from another process.
         final WindowState parentWindow = getParentWindow();
-        final int pid = parentWindow != null ? parentWindow.mSession.mPid : mSession.mPid;
-        final Configuration processConfig =
-                mWmService.mAtmService.getGlobalConfigurationForPid(pid);
-        return processConfig;
+        final Session session = parentWindow != null ? parentWindow.mSession : mSession;
+        return session.mPid == MY_PID ? mWmService.mRoot.getConfiguration()
+                : session.mProcess.getConfiguration();
     }
 
     private Configuration getLastReportedConfiguration() {
@@ -4679,7 +4680,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void onExitAnimationDone() {
-        if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+        if (ProtoLog.isEnabled(WM_DEBUG_ANIM)) {
             final AnimationAdapter animationAdapter = mSurfaceAnimator.getAnimation();
             StringWriter sw = new StringWriter();
             if (animationAdapter != null) {

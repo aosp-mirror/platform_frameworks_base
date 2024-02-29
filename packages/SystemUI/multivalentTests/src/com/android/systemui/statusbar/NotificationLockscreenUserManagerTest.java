@@ -172,8 +172,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mFakeFeatureFlags.set(Flags.NOTIF_LS_BACKGROUND_THREAD, true);
-
         int currentUserId = ActivityManager.getCurrentUser();
         when(mUserTracker.getUserId()).thenReturn(currentUserId);
         mSettings = new FakeSettings();

@@ -37,7 +37,7 @@ android_robolectric_test {
         ":CredentialManagerScreenshotTestFiles",
     ],
 
-    // Do not add any libraries here, instead add them to the ScreenshotTestStub
+    // Do not add any libraries here, instead add them to the ScreenshotTestRobo
     static_libs: [
         "androidx.compose.runtime_runtime",
         "androidx.test.uiautomator_uiautomator",
@@ -45,6 +45,7 @@ android_robolectric_test {
         "inline-mockito-robolectric-prebuilt",
         "platform-parametric-runner-lib",
         "uiautomator-helpers",
+        "flag-junit-base",
     ],
     libs: [
         "android.test.runner",

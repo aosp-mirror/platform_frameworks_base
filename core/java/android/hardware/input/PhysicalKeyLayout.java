@@ -336,11 +336,13 @@ final class PhysicalKeyLayout {
             return "";
         }
         int utf8Char = (kcm.get(keyCode, modifierState) & KeyCharacterMap.COMBINING_ACCENT_MASK);
+        if (utf8Char == 0) {
+            return "";
+        }
         if (Character.isValidCodePoint(utf8Char)) {
             return String.valueOf(Character.toChars(utf8Char));
-        } else {
-            return String.valueOf(kcm.getDisplayLabel(keyCode));
         }
+        return "□";
     }
 
     private static LayoutKey getKey(int keyCode, float keyWeight) {
@@ -434,10 +436,11 @@ final class PhysicalKeyLayout {
         }
 
         public boolean hasValidAltGrText() {
-            return !TextUtils.isEmpty(mAltGrText) && !TextUtils.equals(mBaseText, mAltGrText);
+            return !TextUtils.isEmpty(mAltGrText) && !TextUtils.equals(mBaseText, mAltGrText)
+                    && !TextUtils.equals(mShiftText, mAltGrText);
         }
 
-        public boolean hasValidAltShiftText() {
+        public boolean hasValidAltGrShiftText() {
             return !TextUtils.isEmpty(mAltGrShiftText)
                     && !TextUtils.equals(mBaseText, mAltGrShiftText)
                     && !TextUtils.equals(mAltGrText, mAltGrShiftText)

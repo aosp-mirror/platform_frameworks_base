@@ -55,6 +55,7 @@ message IntentProto {
     optional string data = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional string type = 4;
     optional string flag = 5;
+    optional string extended_flag = 14;
     optional string package = 6;
     optional ComponentNameProto component = 7;
     optional string source_bounds = 8;

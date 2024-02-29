@@ -26,8 +26,6 @@ import static com.android.window.flags.Flags.FLAG_DELEGATE_UNHANDLED_DRAGS;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
-import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetFileDescriptor;
@@ -171,6 +169,8 @@ import java.util.List;
  */
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ClipData implements Parcelable {
+    private static final String TAG = "ClipData";
+
     static final String[] MIMETYPES_TEXT_PLAIN = new String[] {
         ClipDescription.MIMETYPE_TEXT_PLAIN };
     static final String[] MIMETYPES_TEXT_HTML = new String[] {
@@ -213,7 +213,7 @@ public class ClipData implements Parcelable {
         final CharSequence mText;
         final String mHtmlText;
         final Intent mIntent;
-        final PendingIntent mPendingIntent;
+        final IntentSender mIntentSender;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         Uri mUri;
         private TextLinks mTextLinks;
@@ -225,12 +225,11 @@ public class ClipData implements Parcelable {
          * A builder for a ClipData Item.
          */
         @FlaggedApi(FLAG_DELEGATE_UNHANDLED_DRAGS)
-        @SuppressLint("PackageLayering")
         public static final class Builder {
             private CharSequence mText;
             private String mHtmlText;
             private Intent mIntent;
-            private PendingIntent mPendingIntent;
+            private IntentSender mIntentSender;
             private Uri mUri;
 
             /**
@@ -264,18 +263,20 @@ public class ClipData implements Parcelable {
             }
 
             /**
-             * Sets the PendingIntent for the item to be constructed. To prevent receiving apps from
-             * improperly manipulating the intent to launch another activity as this caller, the
-             * provided PendingIntent must be immutable (see {@link PendingIntent#FLAG_IMMUTABLE}).
-             * The system will clean up the PendingIntent when it is no longer used.
+             * Sets the {@link IntentSender} for the item to be constructed. To prevent receiving
+             * apps from improperly manipulating the intent to launch another activity as this
+             * caller, the provided IntentSender must be immutable.
+             *
+             * If there is a fixed lifetime for this ClipData (ie. for drag and drop), the system
+             * will cancel the IntentSender when it is no longer used.
              */
             @FlaggedApi(FLAG_DELEGATE_UNHANDLED_DRAGS)
             @NonNull
-            public Builder setPendingIntent(@Nullable PendingIntent pendingIntent) {
-                if (pendingIntent != null && !pendingIntent.isImmutable()) {
-                    throw new IllegalArgumentException("Expected pending intent to be immutable");
+            public Builder setIntentSender(@Nullable IntentSender intentSender) {
+                if (intentSender != null && !intentSender.isImmutable()) {
+                    throw new IllegalArgumentException("Expected intent sender to be immutable");
                 }
-                mPendingIntent = pendingIntent;
+                mIntentSender = intentSender;
                 return this;
             }
 
@@ -295,7 +296,7 @@ public class ClipData implements Parcelable {
             @FlaggedApi(FLAG_DELEGATE_UNHANDLED_DRAGS)
             @NonNull
             public Item build() {
-                return new Item(mText, mHtmlText, mIntent, mPendingIntent, mUri);
+                return new Item(mText, mHtmlText, mIntent, mIntentSender, mUri);
             }
         }
 
@@ -305,7 +306,7 @@ public class ClipData implements Parcelable {
             mText = other.mText;
             mHtmlText = other.mHtmlText;
             mIntent = other.mIntent;
-            mPendingIntent = other.mPendingIntent;
+            mIntentSender = other.mIntentSender;
             mUri = other.mUri;
             mActivityInfo = other.mActivityInfo;
             mTextLinks = other.mTextLinks;
@@ -366,7 +367,7 @@ public class ClipData implements Parcelable {
         /**
          * Builder ctor.
          */
-        private Item(CharSequence text, String htmlText, Intent intent, PendingIntent pendingIntent,
+        private Item(CharSequence text, String htmlText, Intent intent, IntentSender intentSender,
                 Uri uri) {
             if (htmlText != null && text == null) {
                 throw new IllegalArgumentException(
@@ -375,7 +376,7 @@ public class ClipData implements Parcelable {
             mText = text;
             mHtmlText = htmlText;
             mIntent = intent;
-            mPendingIntent = pendingIntent;
+            mIntentSender = intentSender;
             mUri = uri;
         }
 
@@ -401,12 +402,12 @@ public class ClipData implements Parcelable {
         }
 
         /**
-         * Returns the pending intent in this Item.
+         * Returns the {@link IntentSender} in this Item.
          */
         @FlaggedApi(FLAG_DELEGATE_UNHANDLED_DRAGS)
         @Nullable
-        public PendingIntent getPendingIntent() {
-            return mPendingIntent;
+        public IntentSender getIntentSender() {
+            return mIntentSender;
         }
 
         /**
@@ -477,7 +478,6 @@ public class ClipData implements Parcelable {
          * @return Returns the item's textual representation.
          */
 //BEGIN_INCLUDE(coerceToText)
-        @android.ravenwood.annotation.RavenwoodThrow
         public CharSequence coerceToText(Context context) {
             // If this Item has an explicit textual value, simply return that.
             CharSequence text = getText();
@@ -485,13 +485,20 @@ public class ClipData implements Parcelable {
                 return text;
             }
 
+            // Gracefully handle cases where resolver isn't available
+            ContentResolver resolver = null;
+            try {
+                resolver = context.getContentResolver();
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to obtain ContentResolver: " + e);
+            }
+
             // If this Item has a URI value, try using that.
             Uri uri = getUri();
-            if (uri != null) {
+            if (uri != null && resolver != null) {
                 // First see if the URI can be opened as a plain text stream
                 // (of any sub-type).  If so, this is the best textual
                 // representation for it.
-                final ContentResolver resolver = context.getContentResolver();
                 AssetFileDescriptor descr = null;
                 FileInputStream stream = null;
                 InputStreamReader reader = null;
@@ -500,7 +507,7 @@ public class ClipData implements Parcelable {
                         // Ask for a stream of the desired type.
                         descr = resolver.openTypedAssetFileDescriptor(uri, "text/*", null);
                     } catch (SecurityException e) {
-                        Log.w("ClipData", "Failure opening stream", e);
+                        Log.w(TAG, "Failure opening stream", e);
                     } catch (FileNotFoundException|RuntimeException e) {
                         // Unable to open content URI as text...  not really an
                         // error, just something to ignore.
@@ -520,7 +527,7 @@ public class ClipData implements Parcelable {
                             return builder.toString();
                         } catch (IOException e) {
                             // Something bad has happened.
-                            Log.w("ClipData", "Failure loading text", e);
+                            Log.w(TAG, "Failure loading text", e);
                             return e.toString();
                         }
                     }
@@ -529,7 +536,8 @@ public class ClipData implements Parcelable {
                     IoUtils.closeQuietly(stream);
                     IoUtils.closeQuietly(reader);
                 }
-
+            }
+            if (uri != null) {
                 // If we couldn't open the URI as a stream, use the URI itself as a textual
                 // representation (but not for "content", "android.resource" or "file" schemes).
                 final String scheme = uri.getScheme();
@@ -705,7 +713,7 @@ public class ClipData implements Parcelable {
                         }
 
                     } catch (SecurityException e) {
-                        Log.w("ClipData", "Failure opening stream", e);
+                        Log.w(TAG, "Failure opening stream", e);
 
                     } catch (FileNotFoundException e) {
                         // Unable to open content URI as text...  not really an
@@ -713,7 +721,7 @@ public class ClipData implements Parcelable {
 
                     } catch (IOException e) {
                         // Something bad has happened.
-                        Log.w("ClipData", "Failure loading text", e);
+                        Log.w(TAG, "Failure loading text", e);
                         return Html.escapeHtml(e.toString());
 
                     } finally {
@@ -1124,39 +1132,10 @@ public class ClipData implements Parcelable {
      *
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodThrow
+    @android.ravenwood.annotation.RavenwoodKeep
     public void prepareToLeaveProcess(boolean leavingPackage) {
         // Assume that callers are going to be granting permissions
         prepareToLeaveProcess(leavingPackage, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-    }
-
-    /**
-     * Checks if this clip data has a pending intent that is an activity type.
-     * @hide
-     */
-    public boolean hasActivityPendingIntents() {
-        final int size = mItems.size();
-        for (int i = 0; i < size; i++) {
-            final Item item = mItems.get(i);
-            if (item.mPendingIntent != null && item.mPendingIntent.isActivity()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Cleans up all pending intents in the ClipData.
-     * @hide
-     */
-    public void cleanUpPendingIntents() {
-        final int size = mItems.size();
-        for (int i = 0; i < size; i++) {
-            final Item item = mItems.get(i);
-            if (item.mPendingIntent != null) {
-                item.mPendingIntent.cancel();
-            }
-        }
     }
 
     /**
@@ -1164,7 +1143,7 @@ public class ClipData implements Parcelable {
      *
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodThrow
+    @android.ravenwood.annotation.RavenwoodReplace
     public void prepareToLeaveProcess(boolean leavingPackage, int intentFlags) {
         final int size = mItems.size();
         for (int i = 0; i < size; i++) {
@@ -1182,6 +1161,11 @@ public class ClipData implements Parcelable {
                 }
             }
         }
+    }
+
+    /** @hide */
+    public void prepareToLeaveProcess$ravenwood(boolean leavingPackage, int intentFlags) {
+        // No process boundaries on Ravenwood; ignored
     }
 
     /** {@hide} */
@@ -1361,7 +1345,7 @@ public class ClipData implements Parcelable {
             TextUtils.writeToParcel(item.mText, dest, flags);
             dest.writeString8(item.mHtmlText);
             dest.writeTypedObject(item.mIntent, flags);
-            dest.writeTypedObject(item.mPendingIntent, flags);
+            dest.writeTypedObject(item.mIntentSender, flags);
             dest.writeTypedObject(item.mUri, flags);
             dest.writeTypedObject(mParcelItemActivityInfos ? item.mActivityInfo : null, flags);
             dest.writeTypedObject(item.mTextLinks, flags);
@@ -1381,11 +1365,11 @@ public class ClipData implements Parcelable {
             CharSequence text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             String htmlText = in.readString8();
             Intent intent = in.readTypedObject(Intent.CREATOR);
-            PendingIntent pendingIntent = in.readTypedObject(PendingIntent.CREATOR);
+            IntentSender intentSender = in.readTypedObject(IntentSender.CREATOR);
             Uri uri = in.readTypedObject(Uri.CREATOR);
             ActivityInfo info = in.readTypedObject(ActivityInfo.CREATOR);
             TextLinks textLinks = in.readTypedObject(TextLinks.CREATOR);
-            Item item = new Item(text, htmlText, intent, pendingIntent, uri);
+            Item item = new Item(text, htmlText, intent, intentSender, uri);
             item.setActivityInfo(info);
             item.setTextLinks(textLinks);
             mItems.add(item);

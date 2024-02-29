@@ -51,7 +51,7 @@ import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.media.controls.ui.MediaHost;
+import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -207,6 +207,9 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mFooterActionsViewBinder = footerActionsViewBinder;
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
         mSceneContainerFlags = sceneContainerFlags;
+        if (mSceneContainerFlags.isEnabled()) {
+            mStatusBarState = StatusBarState.SHADE;
+        }
     }
 
     /**
@@ -506,10 +509,20 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         }
     }
 
-    private boolean isKeyguardState() {
-        // We want the freshest state here since otherwise we'll have some weirdness if earlier
-        // listeners trigger updates
-        return mStatusBarStateController.getCurrentOrUpcomingState() == KEYGUARD;
+    @VisibleForTesting
+    boolean isKeyguardState() {
+        if (mSceneContainerFlags.isEnabled()) {
+            return false;
+        } else {
+            // We want the freshest state here since otherwise we'll have some weirdness if earlier
+            // listeners trigger updates
+            return mStatusBarStateController.getCurrentOrUpcomingState() == KEYGUARD;
+        }
+    }
+
+    @VisibleForTesting
+    int getStatusBarState() {
+        return mStatusBarState;
     }
 
     private void updateShowCollapsedOnKeyguard() {
@@ -562,15 +575,17 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     }
 
     private void setKeyguardShowing(boolean keyguardShowing) {
-        if (DEBUG) Log.d(TAG, "setKeyguardShowing " + keyguardShowing);
-        mLastQSExpansion = -1;
+        if (!mSceneContainerFlags.isEnabled()) {
+            if (DEBUG) Log.d(TAG, "setKeyguardShowing " + keyguardShowing);
+            mLastQSExpansion = -1;
 
-        if (mQSAnimator != null) {
-            mQSAnimator.setOnKeyguard(keyguardShowing);
+            if (mQSAnimator != null) {
+                mQSAnimator.setOnKeyguard(keyguardShowing);
+            }
+
+            mFooter.setKeyguardShowing(keyguardShowing);
+            updateQsState();
         }
-
-        mFooter.setKeyguardShowing(keyguardShowing);
-        updateQsState();
     }
 
     @Override
@@ -971,7 +986,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     @Override
     public void onStateChanged(int newState) {
-        if (newState == mStatusBarState) {
+        if (mSceneContainerFlags.isEnabled() || newState == mStatusBarState) {
             return;
         }
         mStatusBarState = newState;

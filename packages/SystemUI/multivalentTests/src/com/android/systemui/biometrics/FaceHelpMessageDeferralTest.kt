@@ -220,6 +220,7 @@ class FaceHelpMessageDeferralTest : SysuiTestCase() {
             threshold,
             logger,
             dumpManager,
+            "0",
         )
     }
 }

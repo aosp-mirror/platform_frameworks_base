@@ -16,6 +16,9 @@
 
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.bluetooth.HearingAidStatsLogUtils.CONNECTED_HISTORY_EXPIRED_DAY;
+import static com.android.settingslib.bluetooth.HearingAidStatsLogUtils.PAIRED_HISTORY_EXPIRED_DAY;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
@@ -34,6 +37,9 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
@@ -84,8 +90,8 @@ public class HearingAidStatsLogUtilsTest {
 
     @Test
     public void addCurrentTimeToHistory_addNewData() {
-        final long currentTime = System.currentTimeMillis();
-        final long lastData = currentTime - TimeUnit.DAYS.toMillis(2);
+        final long todayStartOfDay = convertToStartOfDayTime(System.currentTimeMillis());
+        final long lastData = todayStartOfDay - TimeUnit.DAYS.toMillis(6);
         HearingAidStatsLogUtils.addToHistory(mContext, TEST_HISTORY_TYPE, lastData);
 
         HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext, TEST_HISTORY_TYPE);
@@ -96,22 +102,21 @@ public class HearingAidStatsLogUtilsTest {
     }
     @Test
     public void addCurrentTimeToHistory_skipSameDateData() {
-        final long currentTime = System.currentTimeMillis();
-        final long lastData = currentTime - 1;
-        HearingAidStatsLogUtils.addToHistory(mContext, TEST_HISTORY_TYPE, lastData);
+        final long todayStartOfDay = convertToStartOfDayTime(System.currentTimeMillis());
+        HearingAidStatsLogUtils.addToHistory(mContext, TEST_HISTORY_TYPE, todayStartOfDay);
 
         HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext, TEST_HISTORY_TYPE);
 
         LinkedList<Long> history = HearingAidStatsLogUtils.getHistory(mContext, TEST_HISTORY_TYPE);
         assertThat(history).isNotNull();
         assertThat(history.size()).isEqualTo(1);
-        assertThat(history.getFirst()).isEqualTo(lastData);
+        assertThat(history.getFirst()).isEqualTo(todayStartOfDay);
     }
 
     @Test
     public void addCurrentTimeToHistory_cleanUpExpiredData() {
-        final long currentTime = System.currentTimeMillis();
-        final long expiredData = currentTime - TimeUnit.DAYS.toMillis(10);
+        final long todayStartOfDay = convertToStartOfDayTime(System.currentTimeMillis());
+        final long expiredData = todayStartOfDay - TimeUnit.DAYS.toMillis(6) - 1;
         HearingAidStatsLogUtils.addToHistory(mContext, TEST_HISTORY_TYPE, expiredData);
 
         HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext, TEST_HISTORY_TYPE);
@@ -120,5 +125,72 @@ public class HearingAidStatsLogUtilsTest {
         assertThat(history).isNotNull();
         assertThat(history.size()).isEqualTo(1);
         assertThat(history.getFirst()).isNotEqualTo(expiredData);
+    }
+
+    @Test
+    public void getUserCategory_hearingAidsUser() {
+        prepareHearingAidsUserHistory();
+
+        assertThat(HearingAidStatsLogUtils.getUserCategory(mContext)).isEqualTo(
+                HearingAidStatsLogUtils.CATEGORY_HEARING_AIDS);
+    }
+
+    @Test
+    public void getUserCategory_newHearingAidsUser() {
+        prepareHearingAidsUserHistory();
+        prepareNewUserHistory();
+
+        assertThat(HearingAidStatsLogUtils.getUserCategory(mContext)).isEqualTo(
+                HearingAidStatsLogUtils.CATEGORY_NEW_HEARING_AIDS);
+    }
+
+    @Test
+    public void getUserCategory_hearingDevicesUser() {
+        prepareHearingDevicesUserHistory();
+
+        assertThat(HearingAidStatsLogUtils.getUserCategory(mContext)).isEqualTo(
+                HearingAidStatsLogUtils.CATEGORY_HEARING_DEVICES);
+    }
+
+    @Test
+    public void getUserCategory_newHearingDevicesUser() {
+        prepareHearingDevicesUserHistory();
+        prepareNewUserHistory();
+
+        assertThat(HearingAidStatsLogUtils.getUserCategory(mContext)).isEqualTo(
+                HearingAidStatsLogUtils.CATEGORY_NEW_HEARING_DEVICES);
+    }
+
+    private long convertToStartOfDayTime(long timestamp) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        LocalDate date = Instant.ofEpochMilli(timestamp).atZone(zoneId).toLocalDate();
+        return date.atStartOfDay(zoneId).toInstant().toEpochMilli();
+    }
+
+    private void prepareHearingAidsUserHistory() {
+        final long todayStartOfDay = convertToStartOfDayTime(System.currentTimeMillis());
+        for (int i = CONNECTED_HISTORY_EXPIRED_DAY - 1; i >= 0; i--) {
+            final long data = todayStartOfDay - TimeUnit.DAYS.toMillis(i);
+            HearingAidStatsLogUtils.addToHistory(mContext,
+                    HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_CONNECTED, data);
+        }
+    }
+
+    private void prepareHearingDevicesUserHistory() {
+        final long todayStartOfDay = convertToStartOfDayTime(System.currentTimeMillis());
+        for (int i = CONNECTED_HISTORY_EXPIRED_DAY - 1; i >= 0; i--) {
+            final long data = todayStartOfDay - TimeUnit.DAYS.toMillis(i);
+            HearingAidStatsLogUtils.addToHistory(mContext,
+                    HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_CONNECTED, data);
+        }
+    }
+
+    private void prepareNewUserHistory() {
+        final long todayStartOfDay = convertToStartOfDayTime(System.currentTimeMillis());
+        final long data = todayStartOfDay - TimeUnit.DAYS.toMillis(PAIRED_HISTORY_EXPIRED_DAY - 1);
+        HearingAidStatsLogUtils.addToHistory(mContext,
+                HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_PAIRED, data);
+        HearingAidStatsLogUtils.addToHistory(mContext,
+                HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_PAIRED, data);
     }
 }

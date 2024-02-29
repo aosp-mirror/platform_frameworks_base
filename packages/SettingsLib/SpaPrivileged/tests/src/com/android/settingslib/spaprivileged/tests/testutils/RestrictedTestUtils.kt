@@ -19,6 +19,7 @@ package com.android.settingslib.spaprivileged.tests.testutils
 import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spaprivileged.model.enterprise.BlockedByAdmin
+import com.android.settingslib.spaprivileged.model.enterprise.BlockedByEcm
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictedMode
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProvider
 
@@ -33,6 +34,18 @@ class FakeBlockedByAdmin : BlockedByAdmin {
 
     companion object {
         const val SUMMARY = "Blocked by admin"
+    }
+}
+
+class FakeBlockedByEcm : BlockedByEcm {
+    var showRestrictedSettingsDetailsIsCalled = false
+
+    override fun showRestrictedSettingsDetails() {
+        showRestrictedSettingsDetailsIsCalled = true
+    }
+
+    companion object {
+        const val SUMMARY = "Disabled"
     }
 }
 

@@ -16,7 +16,6 @@
 
 package com.android.settingslib.volume.data.repository
 
-import android.media.AudioManager
 import android.media.session.MediaController
 import android.media.session.MediaController.PlaybackInfo
 import android.media.session.MediaSessionManager
@@ -26,7 +25,8 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.BluetoothCallback
 import com.android.settingslib.bluetooth.BluetoothEventManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.settingslib.volume.shared.FakeAudioManagerIntentsReceiver
+import com.android.settingslib.volume.shared.FakeAudioManagerEventsReceiver
+import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -66,7 +66,7 @@ class MediaControllerRepositoryImplTest {
     @Mock private lateinit var localPlaybackInfo: PlaybackInfo
 
     private val testScope = TestScope()
-    private val intentsReceiver = FakeAudioManagerIntentsReceiver()
+    private val eventsReceiver = FakeAudioManagerEventsReceiver()
 
     private lateinit var underTest: MediaControllerRepository
 
@@ -94,7 +94,7 @@ class MediaControllerRepositoryImplTest {
 
         underTest =
             MediaControllerRepositoryImpl(
-                intentsReceiver,
+                eventsReceiver,
                 mediaSessionManager,
                 localBluetoothManager,
                 testScope.backgroundScope,
@@ -121,7 +121,7 @@ class MediaControllerRepositoryImplTest {
                 .launchIn(backgroundScope)
             runCurrent()
 
-            intentsReceiver.triggerIntent(AudioManager.STREAM_DEVICES_CHANGED_ACTION)
+            eventsReceiver.triggerEvent(AudioManagerEvent.StreamDevicesChanged)
             triggerOnAudioModeChanged()
             runCurrent()
 
@@ -146,7 +146,7 @@ class MediaControllerRepositoryImplTest {
                 .launchIn(backgroundScope)
             runCurrent()
 
-            intentsReceiver.triggerIntent(AudioManager.STREAM_DEVICES_CHANGED_ACTION)
+            eventsReceiver.triggerEvent(AudioManagerEvent.StreamDevicesChanged)
             triggerOnAudioModeChanged()
             runCurrent()
 

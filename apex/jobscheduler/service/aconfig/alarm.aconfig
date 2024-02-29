@@ -1,0 +1,11 @@
+package: "com.android.server.alarm"
+
+flag {
+    name: "use_frozen_state_to_drop_listener_alarms"
+    namespace: "backstage_power"
+    description: "Use frozen state callback to drop listener alarms for cached apps"
+    bug: "324470945"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

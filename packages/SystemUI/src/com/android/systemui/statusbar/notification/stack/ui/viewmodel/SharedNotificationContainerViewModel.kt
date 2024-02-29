@@ -79,6 +79,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.isActive
 
 /** View-model for the shared notification container, used by both the shade and keyguard spaces */
@@ -89,7 +90,7 @@ constructor(
     private val interactor: SharedNotificationContainerInteractor,
     @Application applicationScope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
     communalInteractor: CommunalInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
@@ -132,6 +133,21 @@ constructor(
             .map { it.transitionState == STARTED || it.transitionState == RUNNING }
             .distinctUntilChanged()
             .onStart { emit(false) }
+
+    /**
+     * Shade locked is a legacy concept, but necessary to mimic current functionality. Listen for
+     * both SHADE_LOCKED and shade/qs expansion in order to determine lock state, as one can arrive
+     * before the other.
+     */
+    private val isShadeLocked: Flow<Boolean> =
+        combine(
+                keyguardInteractor.statusBarState.map { it == SHADE_LOCKED },
+                shadeInteractor.qsExpansion.map { it > 0f },
+                shadeInteractor.shadeExpansion.map { it > 0f },
+            ) { isShadeLocked, isQsExpanded, isShadeExpanded ->
+                isShadeLocked && (isQsExpanded || isShadeExpanded)
+            }
+            .distinctUntilChanged()
 
     val shadeCollapseFadeInComplete = MutableStateFlow(false)
 
@@ -190,7 +206,7 @@ constructor(
             )
 
     /** Are we purely on the glanceable hub without the shade/qs? */
-    internal val isOnGlanceableHubWithoutShade: Flow<Boolean> =
+    val isOnGlanceableHubWithoutShade: Flow<Boolean> =
         combine(
                 communalInteractor.isIdleOnCommunal,
                 // Shade with notifications
@@ -207,19 +223,60 @@ constructor(
                 initialValue = false,
             )
 
+    /**
+     * Fade in if the user swipes the shade back up, not if collapsed by going to AOD. This is
+     * needed due to the lack of a SHADE state with existing keyguard transitions.
+     */
+    private fun awaitCollapse(): Flow<Boolean> {
+        var aodTransitionIsComplete = true
+        return combine(
+                isOnLockscreenWithoutShade,
+                keyguardTransitionInteractor
+                    .isInTransitionWhere(
+                        fromStatePredicate = { it == LOCKSCREEN },
+                        toStatePredicate = { it == AOD }
+                    )
+                    .onStart { emit(false) },
+                ::Pair
+            )
+            .transformWhile { (isOnLockscreenWithoutShade, aodTransitionIsRunning) ->
+                // Wait until the AOD transition is complete before terminating
+                if (!aodTransitionIsComplete && !aodTransitionIsRunning) {
+                    aodTransitionIsComplete = true
+                    emit(false) // do not fade in
+                    false
+                } else if (aodTransitionIsRunning) {
+                    aodTransitionIsComplete = false
+                    true
+                } else if (isOnLockscreenWithoutShade) {
+                    // Shade is closed, fade in and terminate
+                    emit(true)
+                    false
+                } else {
+                    true
+                }
+            }
+    }
+
     /** Fade in only for use after the shade collapses */
-    val shadeCollpaseFadeIn: Flow<Boolean> =
+    val shadeCollapseFadeIn: Flow<Boolean> =
         flow {
                 while (currentCoroutineContext().isActive) {
+                    // Ensure shade is collapsed
+                    isShadeLocked.first { !it }
                     emit(false)
                     // Wait for shade to be fully expanded
-                    keyguardInteractor.statusBarState.first { it == SHADE_LOCKED }
-                    // ... and then for it to be collapsed
-                    isOnLockscreenWithoutShade.first { it }
-                    emit(true)
-                    // ... and then for the animation to complete
-                    shadeCollapseFadeInComplete.first { it }
-                    shadeCollapseFadeInComplete.value = false
+                    isShadeLocked.first { it }
+                    // ... and then for it to be collapsed OR a transition to AOD begins.
+                    // If AOD, do not fade in (a fade out occurs instead).
+                    awaitCollapse().collect { doFadeIn ->
+                        if (doFadeIn) {
+                            emit(true)
+                            // ... and then for the animation to complete
+                            shadeCollapseFadeInComplete.first { it }
+                            shadeCollapseFadeInComplete.value = false
+                        }
+                    }
                 }
             }
             .stateIn(
@@ -318,7 +375,7 @@ constructor(
                 lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
                 occludedToAodTransitionViewModel.lockscreenAlpha,
                 occludedToLockscreenTransitionViewModel.lockscreenAlpha,
-                primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
+                primaryBouncerToGoneTransitionViewModel.notificationAlpha,
                 primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,
             )
 
@@ -330,16 +387,16 @@ constructor(
                 // shade expansion or swipe to dismiss
                 combineTransform(
                     isOnLockscreenWithoutShade,
-                    shadeCollpaseFadeIn,
+                    shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
                     keyguardInteractor.dismissAlpha,
                 ) {
                     isOnLockscreenWithoutShade,
-                    shadeCollpaseFadeIn,
+                    shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
                     dismissAlpha ->
                     if (isOnLockscreenWithoutShade) {
-                        if (!shadeCollpaseFadeIn && dismissAlpha != null) {
+                        if (!shadeCollapseFadeIn && dismissAlpha != null) {
                             emit(dismissAlpha)
                         }
                     } else {
@@ -363,14 +420,9 @@ constructor(
                 lockscreenToGlanceableHubRunning,
                 glanceableHubToLockscreenRunning,
                 merge(
-                        lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
-                        glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
-                    )
-                    .onStart {
-                        // Transition flows don't emit a value on start, kick things off so the
-                        // combine starts.
-                        emit(1f)
-                    }
+                    lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
+                    glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
+                )
             ) { lockscreenToGlanceableHubRunning, glanceableHubToLockscreenRunning, alpha ->
                 if (isOnGlanceableHubWithoutShade) {
                     // Notifications should not be visible on the glanceable hub.
@@ -407,6 +459,16 @@ constructor(
             }
         }
     }
+
+    /**
+     * The container may need to be translated in the x direction as the keyguard fades out, such as
+     * when swiping open the glanceable hub from the lockscreen.
+     */
+    val translationX: Flow<Float> =
+        merge(
+            lockscreenToGlanceableHubTransitionViewModel.notificationTranslationX,
+            glanceableHubToLockscreenTransitionViewModel.notificationTranslationX,
+        )
 
     /**
      * When on keyguard, there is limited space to display notifications so calculate how many could

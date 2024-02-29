@@ -47,6 +47,9 @@ import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindow;
@@ -67,6 +70,7 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -77,9 +81,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+// This test verifies deprecated codepath. Probably changing this file means
+// AccessibilityWindowManagerWithAccessibilityWindowTest also needs to be updated.
+// LINT.IfChange
+
 /**
- * Tests for the AccessibilityWindowManager
+ * Tests for the AccessibilityWindowManager with Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y enabled.
+ * TODO(b/322444245): Merge with AccessibilityWindowManagerWithAccessibilityWindowTest
+ *  after completing the flag migration.
  */
+@RequiresFlagsDisabled(Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y)
 public class AccessibilityWindowManagerTest {
     private static final String PACKAGE_NAME = "com.android.server.accessibility";
     private static final boolean FORCE_SEND = true;
@@ -131,6 +142,9 @@ public class AccessibilityWindowManagerTest {
     @Mock private IBinder mMockHostToken;
     @Mock private IBinder mMockEmbeddedToken;
     @Mock private IBinder mMockInvalidToken;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() throws RemoteException {
@@ -1227,3 +1241,4 @@ public class AccessibilityWindowManagerTest {
         }
     }
 }
+// LINT.ThenChange(/services/tests/servicestests/src/com/android/server/accessibility/AccessibilityWindowManagerWithAccessibilityWindowTest.java)

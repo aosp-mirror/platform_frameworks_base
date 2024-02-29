@@ -149,9 +149,9 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransition
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
-import com.android.systemui.media.controls.pipeline.MediaDataManager;
-import com.android.systemui.media.controls.ui.KeyguardMediaController;
-import com.android.systemui.media.controls.ui.MediaHierarchyManager;
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.ui.controller.KeyguardMediaController;
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
@@ -165,6 +165,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.shared.model.WakefulnessModel;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.data.repository.FlingInfo;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
@@ -1200,7 +1201,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // Primary bouncer->Gone (ensures lockscreen content is not visible on successful auth)
         if (!migrateClocksToBlueprint()) {
             collectFlow(mView, mPrimaryBouncerToGoneTransitionViewModel.getLockscreenAlpha(),
-                    setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+                    setTransitionAlpha(mNotificationStackScrollLayoutController,
+                            /* excludeNotifications=*/ true), mMainDispatcher);
+            collectFlow(mView, mPrimaryBouncerToGoneTransitionViewModel.getNotificationAlpha(),
+                    (Float alpha) -> {
+                        mNotificationStackScrollLayoutController.setMaxAlphaForExpansion(alpha);
+                    }, mMainDispatcher);
         }
     }
 
@@ -1538,6 +1544,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public void setOpenCloseListener(OpenCloseListener openCloseListener) {
+        SceneContainerFlag.assertInLegacyMode();
         mOpenCloseListener = openCloseListener;
     }
 
@@ -4595,8 +4602,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         public void onViewAttachedToWindow(View v) {
             mFragmentService.getFragmentHostManager(mView)
                     .addTagListener(QS.TAG, mQsController.getQsFragmentListener());
-            mStatusBarStateController.addCallback(mStatusBarStateListener);
-            mStatusBarStateListener.onStateChanged(mStatusBarStateController.getState());
+            if (!SceneContainerFlag.isEnabled()) {
+                mStatusBarStateController.addCallback(mStatusBarStateListener);
+                mStatusBarStateListener.onStateChanged(mStatusBarStateController.getState());
+            }
             mConfigurationController.addCallback(mConfigurationListener);
             // Theme might have changed between inflating this view and attaching it to the
             // window, so
@@ -4721,9 +4730,17 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private Consumer<Float> setTransitionAlpha(
             NotificationStackScrollLayoutController stackScroller) {
+        return setTransitionAlpha(stackScroller, /* excludeNotifications= */ false);
+    }
+
+    private Consumer<Float> setTransitionAlpha(
+            NotificationStackScrollLayoutController stackScroller,
+            boolean excludeNotifications) {
         return (Float alpha) -> {
             mKeyguardStatusViewController.setAlpha(alpha);
-            stackScroller.setMaxAlphaForExpansion(alpha);
+            if (!excludeNotifications) {
+                stackScroller.setMaxAlphaForExpansion(alpha);
+            }
 
             if (keyguardBottomAreaRefactor()) {
                 mKeyguardInteractor.setAlpha(alpha);

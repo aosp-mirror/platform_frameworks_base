@@ -212,7 +212,7 @@ import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
-import android.provider.ContactKeysManager;
+import android.provider.E2eeContactKeysManager;
 import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
@@ -1608,16 +1608,16 @@ public final class SystemServiceRegistry {
                     }
                 });
 
-        registerService(Context.CONTACT_KEYS_SERVICE, ContactKeysManager.class,
-                new CachedServiceFetcher<ContactKeysManager>() {
+        registerService(Context.CONTACT_KEYS_SERVICE, E2eeContactKeysManager.class,
+                new CachedServiceFetcher<E2eeContactKeysManager>() {
                     @Override
-                    public ContactKeysManager createService(ContextImpl ctx)
+                    public E2eeContactKeysManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
                         if (!android.provider.Flags.userKeys()) {
                             throw new ServiceNotFoundException(
                                     "ContactKeysManager is not supported");
                         }
-                        return new ContactKeysManager(ctx);
+                        return new E2eeContactKeysManager(ctx);
                     }});
 
         // DO NOT do a flag check like this unless the flag is read-only.

@@ -17,8 +17,8 @@
 package com.android.wm.shell.flicker.utils
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.flicker.legacy.LegacyFlickerTest
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd

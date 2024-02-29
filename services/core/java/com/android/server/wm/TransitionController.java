@@ -267,7 +267,8 @@ class TransitionController {
         mSyncEngine.addOnIdleListener(this::tryStartCollectFromQueue);
     }
 
-    private void detachPlayer() {
+    @VisibleForTesting
+    void detachPlayer() {
         if (mTransitionPlayer == null) return;
         // Immediately set to null so that nothing inadvertently starts/queues.
         mTransitionPlayer = null;

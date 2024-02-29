@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.content.Context
+import androidx.annotation.GravityInt
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
@@ -43,11 +44,14 @@ constructor(
      * @param context the [Context] in which the dialog will be constructed.
      * @param dismissOnDeviceLock whether the dialog should be automatically dismissed when the
      *   device is locked (true by default).
+     * @param dialogGravity is one of the [android.view.Gravity] and determines dialog position on
+     *   the screen.
      */
     fun create(
         context: Context = this.applicationContext,
         theme: Int = SystemUIDialog.DEFAULT_THEME,
         dismissOnDeviceLock: Boolean = SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
+        @GravityInt dialogGravity: Int? = null,
     ): ComponentSystemUIDialog {
         Assert.isMainThread()
 
@@ -59,6 +63,7 @@ constructor(
             sysUiState,
             broadcastDispatcher,
             dialogTransitionAnimator,
+            dialogGravity,
         )
     }
 }

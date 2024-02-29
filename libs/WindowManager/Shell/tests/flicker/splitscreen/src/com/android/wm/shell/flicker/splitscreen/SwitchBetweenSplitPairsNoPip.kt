@@ -17,12 +17,12 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.NavBar
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.NavBar
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.wm.shell.flicker.splitscreen.benchmark.SplitScreenBase

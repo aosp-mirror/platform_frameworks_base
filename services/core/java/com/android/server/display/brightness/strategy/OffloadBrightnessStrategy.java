@@ -67,6 +67,7 @@ public class OffloadBrightnessStrategy implements DisplayBrightnessStrategy {
     /**
      * Dumps the state of this class.
      */
+    @Override
     public void dump(PrintWriter writer) {
         writer.println("OffloadBrightnessStrategy:");
         writer.println("  mOffloadScreenBrightness:" + mOffloadScreenBrightness);

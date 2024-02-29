@@ -667,24 +667,18 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Amprentă autentificată"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Chip autentificat"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Chip autentificat, apasă pe Confirmă"</string>
-    <!-- no translation found for fingerprint_error_hw_not_available (7755729484334001137) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7755729484334001137">"Hardware-ul pentru amprentă nu este disponibil"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nu se poate configura amprenta"</string>
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Configurarea amprentei a expirat. Încearcă din nou."</string>
-    <!-- no translation found for fingerprint_error_canceled (5541771463159727513) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_user_canceled (2017941773466506863) -->
-    <skip />
+    <string name="fingerprint_error_canceled" msgid="5541771463159727513">"Operațiunea privind amprenta a fost anulată"</string>
+    <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"Operațiunea privind amprenta a fost anulată de utilizator"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Prea multe încercări. Folosește blocarea ecranului."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Prea multe încercări. Folosește blocarea ecranului."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Nu putem procesa amprenta. Încearcă din nou."</string>
-    <!-- no translation found for fingerprint_error_no_fingerprints (3144806556204061862) -->
-    <skip />
+    <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"Nu au fost înregistrate amprente"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"Acest dispozitiv nu are senzor de amprentă"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (8440349108169661934) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_bad_calibration (6770614925736183528) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Senzor dezactivat temporar"</string>
+    <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Nu se poate folosi senzorul de amprentă. Vizitează un furnizor de servicii de reparații."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"A fost apăsat butonul de pornire"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Degetul <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Folosește amprenta"</string>
@@ -1172,7 +1166,7 @@
     <string name="Midnight" msgid="8176019203622191377">"Miezul nopții"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="8689459651807876423">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="1532369154488982046">"Selectează-le pe toate"</string>
+    <string name="selectAll" msgid="1532369154488982046">"Selectează tot"</string>
     <string name="cut" msgid="2561199725874745819">"Decupează"</string>
     <string name="copy" msgid="5472512047143665218">"Copiază"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Eroare la copierea în clipboard"</string>

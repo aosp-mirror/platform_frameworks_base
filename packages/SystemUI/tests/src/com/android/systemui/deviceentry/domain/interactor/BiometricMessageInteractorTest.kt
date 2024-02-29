@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
+import com.android.systemui.biometrics.domain.faceHelpMessageDeferral
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectLastValue
@@ -39,11 +40,13 @@ import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationS
 import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -57,6 +60,7 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
     private val fingerprintAuthRepository = kosmos.deviceEntryFingerprintAuthRepository
     private val faceAuthRepository = kosmos.fakeDeviceEntryFaceAuthRepository
     private val biometricSettingsRepository = kosmos.biometricSettingsRepository
+    private val faceHelpMessageDeferral = kosmos.faceHelpMessageDeferral
 
     @Test
     fun fingerprintErrorMessage() =
@@ -266,8 +270,35 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
                 )
             )
 
-            // THEN fingerprintFailedMessage is updated
+            // THEN fingerprintHelpMessage is updated
             assertThat(faceHelpMessage).isNotNull()
+        }
+
+    @Test
+    fun faceHelpMessageShouldDefer() =
+        testScope.runTest {
+            val faceHelpMessage by collectLastValue(underTest.faceMessage)
+
+            // GIVEN face is allowed
+            biometricSettingsRepository.setIsFaceAuthCurrentlyAllowed(true)
+
+            // GIVEN face only enrolled
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
+
+            // WHEN all face help messages should be deferred
+            whenever(faceHelpMessageDeferral.shouldDefer(anyInt())).thenReturn(true)
+
+            // WHEN authentication status help
+            faceAuthRepository.setAuthenticationStatus(
+                HelpFaceAuthenticationStatus(
+                    msg = "Move left",
+                    msgId = FaceManager.FACE_ACQUIRED_TOO_RIGHT,
+                )
+            )
+
+            // THEN fingerprintHelpMessage is NOT updated
+            assertThat(faceHelpMessage).isNull()
         }
 
     @Test
@@ -291,7 +322,7 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
                 )
             )
 
-            // THEN fingerprintFailedMessage is NOT updated
+            // THEN fingerprintHelpMessage is NOT updated
             assertThat(faceHelpMessage).isNull()
         }
 
@@ -337,7 +368,7 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val faceErrorMessage by collectLastValue(underTest.faceMessage)
 
-            // WHEN authentication status error is FACE_ERROR_HW_UNAVAILABLE
+            // WHEN authentication status error is FACE_ERROR_TIMEOUT
             faceAuthRepository.setAuthenticationStatus(
                 ErrorFaceAuthenticationStatus(msgId = FaceManager.FACE_ERROR_TIMEOUT, msg = "test")
             )
@@ -348,5 +379,24 @@ class BiometricMessageInteractorTest : SysuiTestCase() {
             // THEN faceErrorMessage is updated
             assertThat(faceErrorMessage).isInstanceOf(FaceTimeoutMessage::class.java)
             assertThat(faceErrorMessage?.message).isEqualTo("test")
+        }
+
+    @Test
+    fun faceTimeoutDeferredErrorMessage() =
+        testScope.runTest {
+            whenever(faceHelpMessageDeferral.getDeferredMessage()).thenReturn("deferredMessage")
+            val faceErrorMessage by collectLastValue(underTest.faceMessage)
+
+            // WHEN authentication status error is FACE_ERROR_TIMEOUT
+            faceAuthRepository.setAuthenticationStatus(
+                ErrorFaceAuthenticationStatus(msgId = FaceManager.FACE_ERROR_TIMEOUT, msg = "test")
+            )
+
+            // GIVEN face is allowed
+            biometricSettingsRepository.setIsFaceAuthCurrentlyAllowed(true)
+
+            // THEN faceErrorMessage is updated to deferred message instead of timeout message
+            assertThat(faceErrorMessage).isNotInstanceOf(FaceTimeoutMessage::class.java)
+            assertThat(faceErrorMessage?.message).isEqualTo("deferredMessage")
         }
 }

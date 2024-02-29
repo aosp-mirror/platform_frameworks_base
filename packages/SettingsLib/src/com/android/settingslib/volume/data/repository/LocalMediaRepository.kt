@@ -15,13 +15,13 @@
  */
 package com.android.settingslib.volume.data.repository
 
-import android.media.AudioManager
 import android.media.MediaRouter2Manager
 import android.media.RoutingSessionInfo
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.volume.data.model.RoutingSession
-import com.android.settingslib.volume.shared.AudioManagerIntentsReceiver
+import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
+import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -54,7 +54,7 @@ interface LocalMediaRepository {
 }
 
 class LocalMediaRepositoryImpl(
-    audioManagerIntentsReceiver: AudioManagerIntentsReceiver,
+    audioManagerEventsReceiver: AudioManagerEventsReceiver,
     private val localMediaManager: LocalMediaManager,
     private val mediaRouter2Manager: MediaRouter2Manager,
     coroutineScope: CoroutineScope,
@@ -62,9 +62,9 @@ class LocalMediaRepositoryImpl(
 ) : LocalMediaRepository {
 
     private val devicesChanges =
-        audioManagerIntentsReceiver.intents.filter {
-            AudioManager.STREAM_DEVICES_CHANGED_ACTION == it.action
-        }
+        audioManagerEventsReceiver.events.filterIsInstance(
+            AudioManagerEvent.StreamDevicesChanged::class
+        )
     private val mediaDevicesUpdates: Flow<DevicesUpdate> =
         callbackFlow {
                 val callback =
@@ -109,6 +109,7 @@ class LocalMediaRepositoryImpl(
     override val currentConnectedDevice: StateFlow<MediaDevice?> =
         merge(devicesChanges, mediaDevicesUpdates)
             .map { localMediaManager.currentConnectedDevice }
+            .onStart { emit(localMediaManager.currentConnectedDevice) }
             .stateIn(
                 coroutineScope,
                 SharingStarted.WhileSubscribed(),

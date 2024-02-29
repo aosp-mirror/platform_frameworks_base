@@ -40,6 +40,7 @@ import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.bouncerViewModel
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.classifier.falsingCollector
+import com.android.systemui.classifier.falsingManager
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
@@ -50,7 +51,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
@@ -65,8 +66,11 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.settings.FakeDisplayTracker
+import com.android.systemui.shade.domain.interactor.privacyChipInteractor
+import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
+import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -141,6 +145,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         SceneContainerViewModel(
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
+                powerInteractor = kosmos.powerInteractor,
             )
             .apply { setTransitionState(transitionState) }
     }
@@ -229,9 +234,10 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             ShadeHeaderViewModel(
                 applicationScope = testScope.backgroundScope,
                 context = context,
-                sceneInteractor = sceneInteractor,
                 mobileIconsInteractor = mobileIconsInteractor,
                 mobileIconsViewModel = mobileIconsViewModel,
+                privacyChipInteractor = kosmos.privacyChipInteractor,
+                clockInteractor = kosmos.shadeHeaderClockInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
 
@@ -260,6 +266,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 displayId = displayTracker.defaultDisplayId,
                 sceneLogger = mock(),
                 falsingCollector = kosmos.falsingCollector,
+                falsingManager = kosmos.falsingManager,
                 powerInteractor = powerInteractor,
                 bouncerInteractor = bouncerInteractor,
                 simBouncerInteractor = dagger.Lazy { kosmos.simBouncerInteractor },
@@ -267,6 +274,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 windowController = mock(),
                 deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
                 centralSurfaces = mock(),
+                headsUpInteractor = kosmos.headsUpNotificationInteractor,
             )
         startable.start()
 
@@ -607,6 +615,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private fun TestScope.emulatePendingTransitionProgress(
         expectedVisible: Boolean = true,
     ) {
+        val isVisible by collectLastValue(sceneContainerViewModel.isVisible)
         assertWithMessage("The FakeSceneDataSource has to be paused for this to do anything.")
             .that(fakeSceneDataSource.isPaused)
             .isTrue()
@@ -643,7 +652,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         runCurrent()
 
         assertWithMessage("Visibility mismatch after scene transition from $from to $to!")
-            .that(sceneContainerViewModel.isVisible.value)
+            .that(isVisible)
             .isEqualTo(expectedVisible)
         assertThat(sceneContainerViewModel.currentScene.value).isEqualTo(to)
 

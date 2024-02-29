@@ -24,12 +24,27 @@ import android.graphics.PixelFormat
  * Stub drawable that does nothing. It's to be used in tests as a mock drawable and checked for the
  * same instance
  */
-class TestStubDrawable : Drawable() {
+class TestStubDrawable(private val name: String? = null) : Drawable() {
 
     override fun draw(canvas: Canvas) = Unit
     override fun setAlpha(alpha: Int) = Unit
     override fun setColorFilter(colorFilter: ColorFilter?) = Unit
     override fun getOpacity(): Int = PixelFormat.UNKNOWN
 
-    override fun equals(other: Any?): Boolean = this === other
+    override fun toString(): String {
+        return name ?: super.toString()
+    }
+
+    override fun getConstantState(): ConstantState =
+        TestStubConstantState(this, changingConfigurations)
+
+    private class TestStubConstantState(
+        private val drawable: Drawable,
+        private val changingConfigurations: Int,
+    ) : ConstantState() {
+
+        override fun newDrawable(): Drawable = drawable
+
+        override fun getChangingConfigurations(): Int = changingConfigurations
+    }
 }

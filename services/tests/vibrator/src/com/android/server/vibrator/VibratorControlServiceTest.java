@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.content.pm.PackageManagerInternal;
 import android.frameworks.vibrator.ScaleParam;
-import android.frameworks.vibrator.VibrationParam;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -55,8 +54,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -70,6 +67,7 @@ public class VibratorControlServiceTest {
     @Mock
     private PackageManagerInternal mPackageManagerInternalMock;
 
+    private TestLooper mTestLooper;
     private FakeVibratorController mFakeVibratorController;
     private VibratorControlService mVibratorControlService;
     private VibrationSettings mVibrationSettings;
@@ -77,6 +75,7 @@ public class VibratorControlServiceTest {
 
     @Before
     public void setUp() throws Exception {
+        mTestLooper = new TestLooper();
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName("", ""));
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
@@ -86,7 +85,7 @@ public class VibratorControlServiceTest {
         mVibrationSettings = new VibrationSettings(
                 ApplicationProvider.getApplicationContext(), new Handler(testLooper.getLooper()));
 
-        mFakeVibratorController = new FakeVibratorController();
+        mFakeVibratorController = new FakeVibratorController(mTestLooper.getLooper());
         mVibratorControlService = new VibratorControlService(new VibratorControllerHolder(),
                 mMockVibrationScaler, mVibrationSettings, mLock);
     }
@@ -111,13 +110,13 @@ public class VibratorControlServiceTest {
     @Test
     public void testUnregisterVibratorController_providingAnInvalidController_ignoresRequest()
             throws RemoteException {
-        FakeVibratorController fakeController1 = new FakeVibratorController();
-        FakeVibratorController fakeController2 = new FakeVibratorController();
-        mVibratorControlService.registerVibratorController(fakeController1);
-        mVibratorControlService.unregisterVibratorController(fakeController2);
+        FakeVibratorController controller1 = new FakeVibratorController(mTestLooper.getLooper());
+        FakeVibratorController controller2 = new FakeVibratorController(mTestLooper.getLooper());
+        mVibratorControlService.registerVibratorController(controller1);
+        mVibratorControlService.unregisterVibratorController(controller2);
 
         verifyZeroInteractions(mMockVibrationScaler);
-        assertThat(fakeController1.isLinkedToDeath).isTrue();
+        assertThat(controller1.isLinkedToDeath).isTrue();
     }
 
     @Test
@@ -135,7 +134,7 @@ public class VibratorControlServiceTest {
         vibrationScales.put(ScaleParam.TYPE_NOTIFICATION, 0.4f);
 
         mVibratorControlService.onRequestVibrationParamsComplete(token,
-                generateVibrationParams(vibrationScales));
+                VibrationParamGenerator.generateVibrationParams(vibrationScales));
 
         verify(mMockVibrationScaler).updateAdaptiveHapticsScale(USAGE_ALARM, 0.7f);
         verify(mMockVibrationScaler).updateAdaptiveHapticsScale(USAGE_NOTIFICATION, 0.4f);
@@ -162,7 +161,7 @@ public class VibratorControlServiceTest {
         vibrationScales.put(ScaleParam.TYPE_NOTIFICATION, 0.4f);
 
         mVibratorControlService.onRequestVibrationParamsComplete(new Binder(),
-                generateVibrationParams(vibrationScales));
+                VibrationParamGenerator.generateVibrationParams(vibrationScales));
 
         verifyZeroInteractions(mMockVibrationScaler);
     }
@@ -175,7 +174,8 @@ public class VibratorControlServiceTest {
         vibrationScales.put(ScaleParam.TYPE_ALARM, 0.7f);
         vibrationScales.put(ScaleParam.TYPE_NOTIFICATION, 0.4f);
 
-        mVibratorControlService.setVibrationParams(generateVibrationParams(vibrationScales),
+        mVibratorControlService.setVibrationParams(
+                VibrationParamGenerator.generateVibrationParams(vibrationScales),
                 mFakeVibratorController);
 
         verify(mMockVibrationScaler).updateAdaptiveHapticsScale(USAGE_ALARM, 0.7f);
@@ -193,7 +193,8 @@ public class VibratorControlServiceTest {
         vibrationScales.put(ScaleParam.TYPE_ALARM, 0.7f);
         vibrationScales.put(ScaleParam.TYPE_NOTIFICATION, 0.4f);
 
-        mVibratorControlService.setVibrationParams(generateVibrationParams(vibrationScales),
+        mVibratorControlService.setVibrationParams(
+                VibrationParamGenerator.generateVibrationParams(vibrationScales),
                 mFakeVibratorController);
 
         verifyZeroInteractions(mMockVibrationScaler);
@@ -266,28 +267,6 @@ public class VibratorControlServiceTest {
         for (int vibration : vibrations) {
             assertThat(mVibratorControlService.shouldRequestVibrationParams(vibration)).isFalse();
         }
-    }
-
-    private VibrationParam[] generateVibrationParams(SparseArray<Float> vibrationScales) {
-        List<VibrationParam> vibrationParamList = new ArrayList<>();
-        for (int i = 0; i < vibrationScales.size(); i++) {
-            int type = vibrationScales.keyAt(i);
-            float scale = vibrationScales.valueAt(i);
-
-            vibrationParamList.add(generateVibrationParam(type, scale));
-        }
-
-        return vibrationParamList.toArray(new VibrationParam[0]);
-    }
-
-    private VibrationParam generateVibrationParam(int type, float scale) {
-        ScaleParam scaleParam = new ScaleParam();
-        scaleParam.typesMask = type;
-        scaleParam.scale = scale;
-        VibrationParam vibrationParam = new VibrationParam();
-        vibrationParam.setScale(scaleParam);
-
-        return vibrationParam;
     }
 
     private int buildVibrationTypesMask(int... types) {

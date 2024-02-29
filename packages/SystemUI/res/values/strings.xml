@@ -34,6 +34,10 @@
         remaining [CHAR LIMIT=none]-->
     <string name="battery_low_percent_format"><xliff:g id="percentage">%s</xliff:g> remaining</string>
 
+    <!-- SVG path description for the battery frame of the unified battery drawable
+    (BatteryLayersDrawable.kt). Drawn on a 24x14 canvas. Not suitable outside in any other context -->
+    <string name="battery_unified_frame_path_string" translatable="false">M2.75,3C2.75,1.757 3.757,0.75 5,0.75H20C21.795,0.75 23.25,2.205 23.25,4V10C23.25,11.795 21.795,13.25 20,13.25H5C3.757,13.25 2.75,12.243 2.75,11V3Z </string>
+
     <!-- A message that appears when the battery remaining estimate is low in a dialog.  This is
     appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery
     remaining. "time" is the amount of time remaining before the phone runs out of battery [CHAR LIMIT=none]-->
@@ -1114,6 +1118,8 @@
     <string name="popup_on_dismiss_cta_tile_text">Long press to customize widgets</string>
     <!-- Text for the button to configure widgets after long press. [CHAR LIMIT=50] -->
     <string name="button_to_configure_widgets_text">Customize widgets</string>
+    <!-- Description for the App icon of disabled widget. [CHAR LIMIT=NONE] -->
+    <string name="icon_description_for_disabled_widget">App icon for disabled widget</string>
     <!-- Label for the button which configures widgets [CHAR LIMIT=NONE] -->
     <string name="edit_widget">Edit widget</string>
     <!-- Description for the button that removes a widget on click. [CHAR LIMIT=50] -->
@@ -1513,6 +1519,11 @@
     <string name="volume_ringer_status_vibrate">Vibrate</string>
     <string name="volume_ringer_status_silent">Mute</string>
 
+    <!-- Media device casting volume slider label [CHAR_LIMIT=20] -->
+    <string name="media_device_cast">Cast</string>
+    <!-- A message shown when the notification volume changing is disabled because of the muted ring stream [CHAR_LIMIT=40]-->
+    <string name="stream_notification_unavailable">Unavailable because ring is muted</string>
+
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on vibrate. [CHAR_LIMIT=NONE] -->
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on silent (muted). [CHAR_LIMIT=NONE] -->
 
@@ -1521,6 +1532,9 @@
     <string name="volume_stream_content_description_mute">%1$s. Tap to mute. Accessibility services may be muted.</string>
     <string name="volume_stream_content_description_vibrate_a11y">%1$s. Tap to set to vibrate.</string>
     <string name="volume_stream_content_description_mute_a11y">%1$s. Tap to mute.</string>
+
+    <!-- Label for button to enabled/disable live caption [CHAR_LIMIT=30] -->
+    <string name="volume_panel_noise_control_title">Noise Control</string>
 
     <string name="volume_ringer_change">Tap to change ringer mode</string>
 
@@ -2227,6 +2241,11 @@
     <!-- Tuner string -->
     <!-- Tuner string -->
     <!-- Tuner string -->
+
+    <!-- Message shown during shutdown when Find My Device with Dead Battery Finder is active  [CHAR LIMIT=300] -->
+    <string name="finder_active">You can locate this phone with Find My Device even when powered off</string>
+    <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. [CHAR LIMIT=60] -->
+    <string name="shutdown_progress">Shutting down\u2026</string>
 
     <!-- Text help link for care instructions for overheating devices [CHAR LIMIT=40] -->
     <string name="thermal_shutdown_dialog_help_text">See care steps</string>
@@ -3126,6 +3145,8 @@
     <!-- [CHAR LIMIT=25] Long label used by Note Task Shortcut -->
     <string name="note_task_shortcut_long_label">Note-taking, <xliff:g id="note_taking_app" example="Note-taking App">%1$s</xliff:g></string>
 
+    <!-- [CHAR LIMIT=NONE] Output switch chip text during broadcasting -->
+    <string name="audio_sharing_description">Sharing audio</string>
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is broadcasting -->
     <string name="broadcasting_description_is_broadcasting">Broadcasting</string>
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, title -->

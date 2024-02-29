@@ -24,8 +24,9 @@ import com.android.systemui.keyguard.domain.interactor.naturalScrollingSettingOb
 import com.android.systemui.keyguard.wakefulnessLifecycle
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.media.controls.ui.mediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.mediaHierarchyManager
 import com.android.systemui.plugins.activityStarter
+import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.domain.interactor.shadeLockscreenInteractor
@@ -61,5 +62,6 @@ val Kosmos.lockscreenShadeTransitionController by Fixture {
         splitShadeStateController = splitShadeStateController,
         shadeLockscreenInteractorLazy = { shadeLockscreenInteractor },
         naturalScrollingSettingObserver = naturalScrollingSettingObserver,
+        lazyQSSceneAdapter = { qsSceneAdapter }
     )
 }

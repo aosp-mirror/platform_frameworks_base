@@ -537,7 +537,6 @@ public final class UserProperties implements Parcelable {
             setDeleteAppWithParent(orig.getDeleteAppWithParent());
             setAlwaysVisible(orig.getAlwaysVisible());
             setAllowStoppingUserWithDelayedLocking(orig.getAllowStoppingUserWithDelayedLocking());
-            setItemsRestrictedOnHomeScreen(orig.areItemsRestrictedOnHomeScreen());
         }
         if (hasManagePermission) {
             // Add items that require MANAGE_USERS or stronger.
@@ -557,6 +556,7 @@ public final class UserProperties implements Parcelable {
         setShowInSharingSurfaces(orig.getShowInSharingSurfaces());
         setCrossProfileContentSharingStrategy(orig.getCrossProfileContentSharingStrategy());
         setProfileApiVisibility(orig.getProfileApiVisibility());
+        setItemsRestrictedOnHomeScreen(orig.areItemsRestrictedOnHomeScreen());
     }
 
     /**

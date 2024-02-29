@@ -67,6 +67,8 @@ import java.util.concurrent.TimeUnit;
  *
  * {@hide}
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
+@android.ravenwood.annotation.RavenwoodKeepStaticInitializer
 public final class SystemServiceManager implements Dumpable {
     private static final String TAG = SystemServiceManager.class.getSimpleName();
     private static final boolean DEBUG = false;
@@ -123,7 +125,8 @@ public final class SystemServiceManager implements Dumpable {
     @GuardedBy("mTargetUsers")
     @Nullable private TargetUser mCurrentUser;
 
-    SystemServiceManager(Context context) {
+    @android.ravenwood.annotation.RavenwoodKeep
+    public SystemServiceManager(Context context) {
         mContext = context;
         mServices = new ArrayList<>();
         mServiceClassnames = new ArraySet<>();
@@ -136,6 +139,7 @@ public final class SystemServiceManager implements Dumpable {
      *
      * @return The service instance.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public SystemService startService(String className) {
         final Class<SystemService> serviceClass = loadClassFromLoader(className,
                 this.getClass().getClassLoader());
@@ -178,6 +182,7 @@ public final class SystemServiceManager implements Dumpable {
      * Loads and initializes a class from the given classLoader. Returns the class.
      */
     @SuppressWarnings("unchecked")
+    @android.ravenwood.annotation.RavenwoodKeep
     private static Class<SystemService> loadClassFromLoader(String className,
             ClassLoader classLoader) {
         try {
@@ -201,6 +206,7 @@ public final class SystemServiceManager implements Dumpable {
      * @return The service instance, never null.
      * @throws RuntimeException if the service fails to start.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public <T extends SystemService> T startService(Class<T> serviceClass) {
         try {
             final String name = serviceClass.getName();
@@ -237,6 +243,7 @@ public final class SystemServiceManager implements Dumpable {
         }
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public void startService(@NonNull final SystemService service) {
         // Check if already started
         String className = service.getClass().getName();
@@ -261,7 +268,8 @@ public final class SystemServiceManager implements Dumpable {
     }
 
     /** Disallow starting new services after this call. */
-    void sealStartedServices() {
+    @android.ravenwood.annotation.RavenwoodKeep
+    public void sealStartedServices() {
         mServiceClassnames = Collections.emptySet();
         mServices = Collections.unmodifiableList(mServices);
     }
@@ -273,6 +281,7 @@ public final class SystemServiceManager implements Dumpable {
      * @param t     trace logger
      * @param phase The boot phase to start.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public void startBootPhase(@NonNull TimingsTraceAndSlog t, int phase) {
         if (phase <= mCurrentPhase) {
             throw new IllegalArgumentException("Next phase must be larger than previous");
@@ -305,13 +314,23 @@ public final class SystemServiceManager implements Dumpable {
         if (phase == SystemService.PHASE_BOOT_COMPLETED) {
             final long totalBootTime = SystemClock.uptimeMillis() - mRuntimeStartUptime;
             t.logDuration("TotalBootTime", totalBootTime);
-            SystemServerInitThreadPool.shutdown();
+            shutdownInitThreadPool();
         }
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private void shutdownInitThreadPool() {
+        SystemServerInitThreadPool.shutdown();
+    }
+
+    private void shutdownInitThreadPool$ravenwood() {
+        // Thread pool not configured yet on Ravenwood; ignored
     }
 
     /**
      * @return true if system has completed the boot; false otherwise.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public boolean isBootCompleted() {
         return mCurrentPhase >= SystemService.PHASE_BOOT_COMPLETED;
     }
@@ -646,12 +665,14 @@ public final class SystemServiceManager implements Dumpable {
     }
 
     /** Logs the failure. That's all. Tests may rely on parsing it, so only modify carefully. */
+    @android.ravenwood.annotation.RavenwoodKeep
     private void logFailure(String onWhat, TargetUser curUser, String serviceName, Exception ex) {
         Slog.wtf(TAG, "SystemService failure: Failure reporting " + onWhat + " of user "
                 + curUser + " to service " + serviceName, ex);
     }
 
     /** Sets the safe mode flag for services to query. */
+    @android.ravenwood.annotation.RavenwoodKeep
     void setSafeMode(boolean safeMode) {
         mSafeMode = safeMode;
     }
@@ -661,6 +682,7 @@ public final class SystemServiceManager implements Dumpable {
      *
      * @return safe mode flag
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public boolean isSafeMode() {
         return mSafeMode;
     }
@@ -668,6 +690,7 @@ public final class SystemServiceManager implements Dumpable {
     /**
      * @return true if runtime was restarted, false if it's normal boot
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public boolean isRuntimeRestarted() {
         return mRuntimeRestarted;
     }
@@ -675,6 +698,7 @@ public final class SystemServiceManager implements Dumpable {
     /**
      * @return Time when SystemServer was started, in elapsed realtime.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public long getRuntimeStartElapsedTime() {
         return mRuntimeStartElapsedTime;
     }
@@ -682,17 +706,20 @@ public final class SystemServiceManager implements Dumpable {
     /**
      * @return Time when SystemServer was started, in uptime.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public long getRuntimeStartUptime() {
         return mRuntimeStartUptime;
     }
 
-    void setStartInfo(boolean runtimeRestarted,
+    @android.ravenwood.annotation.RavenwoodKeep
+    public void setStartInfo(boolean runtimeRestarted,
             long runtimeStartElapsedTime, long runtimeStartUptime) {
         mRuntimeRestarted = runtimeRestarted;
         mRuntimeStartElapsedTime = runtimeStartElapsedTime;
         mRuntimeStartUptime = runtimeStartUptime;
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     private void warnIfTooLong(long duration, SystemService service, String operation) {
         if (duration > SERVICE_CALL_WARN_TIME_MS) {
             Slog.w(TAG, "Service " + service.getClass().getName() + " took " + duration + " ms in "

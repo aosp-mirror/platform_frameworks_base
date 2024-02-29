@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.Intent
 import com.android.credentialmanager.ktx.getCredentialProviderDataList
 import com.android.credentialmanager.ktx.requestInfo
+import com.android.credentialmanager.ktx.finalResponseReceiver
 import com.android.credentialmanager.ktx.resultReceiver
 import com.android.credentialmanager.ktx.toProviderList
 import com.android.credentialmanager.model.Request
@@ -28,6 +29,7 @@ fun Intent.toGet(context: Context): Request.Get {
     return Request.Get(
         token = requestInfo?.token,
         resultReceiver = resultReceiver,
+        finalResponseReceiver = finalResponseReceiver,
         providerInfos = getCredentialProviderDataList.toProviderList(context)
     )
 }

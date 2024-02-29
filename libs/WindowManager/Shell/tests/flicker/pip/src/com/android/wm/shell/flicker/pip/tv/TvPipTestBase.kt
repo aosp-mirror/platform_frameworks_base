@@ -20,8 +20,8 @@ import android.app.ActivityManager
 import android.app.IActivityManager
 import android.app.IProcessObserver
 import android.os.SystemClock
-import android.tools.device.helpers.wakeUpAndGoToHomeScreen
-import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.helpers.wakeUpAndGoToHomeScreen
+import android.tools.traces.parsers.WindowManagerStateHelper
 import android.view.Surface.ROTATION_0
 import android.view.Surface.rotationToString
 import com.android.wm.shell.flicker.utils.SYSTEM_UI_PACKAGE_NAME

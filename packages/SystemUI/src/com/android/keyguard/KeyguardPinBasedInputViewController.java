@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static com.android.systemui.Flags.pinInputFieldStyledFocusState;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.util.TypedValue;
@@ -150,17 +151,21 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
     }
 
     private void setKeyboardBasedFocusOutline(boolean isAnyKeyboardConnected) {
-        StateListDrawable background = (StateListDrawable) mPasswordEntry.getBackground();
-        GradientDrawable stateDrawable = (GradientDrawable) background.getStateDrawable(0);
+        Drawable background = mPasswordEntry.getBackground();
+        if (!(background instanceof StateListDrawable)) return;
+        Drawable stateDrawable = ((StateListDrawable) background).getStateDrawable(0);
+        if (!(stateDrawable instanceof GradientDrawable gradientDrawable)) return;
+
         int color = getResources().getColor(R.color.bouncer_password_focus_color);
         if (!isAnyKeyboardConnected) {
-            stateDrawable.setStroke(0, color);
+            gradientDrawable.setStroke(0, color);
         } else {
             int strokeWidthInDP = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3,
                     getResources().getDisplayMetrics());
-            stateDrawable.setStroke(strokeWidthInDP, color);
+            gradientDrawable.setStroke(strokeWidthInDP, color);
         }
     }
+
 
     @Override
     protected void onViewDetached() {

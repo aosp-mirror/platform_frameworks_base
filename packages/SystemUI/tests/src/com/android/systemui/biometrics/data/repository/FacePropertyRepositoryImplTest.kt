@@ -237,6 +237,35 @@ class FacePropertyRepositoryImplTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun providesTheCameraInfoOnCameraAvailableChange() {
+        testScope.runTest {
+            runCurrent()
+            collectLastValue(underTest.cameraInfo)
+
+            verify(faceManager).addAuthenticatorsRegisteredCallback(callback.capture())
+            callback.value.onAllAuthenticatorsRegistered(
+                listOf(createSensorProperties(1, SensorProperties.STRENGTH_STRONG))
+            )
+            runCurrent()
+            verify(cameraManager)
+                .registerAvailabilityCallback(any(Executor::class.java), cameraCallback.capture())
+
+            cameraCallback.value.onPhysicalCameraAvailable("0", PHYSICAL_CAMERA_ID_OUTER_FRONT)
+            runCurrent()
+
+            val cameraInfo by collectLastValue(underTest.cameraInfo)
+            assertThat(cameraInfo)
+                .isEqualTo(
+                    CameraInfo(
+                        "0",
+                        PHYSICAL_CAMERA_ID_OUTER_FRONT,
+                        Point(OUTER_FRONT_SENSOR_LOCATION[0], OUTER_FRONT_SENSOR_LOCATION[1])
+                    )
+                )
+        }
+    }
+
     private fun createSensorProperties(id: Int, strength: Int) =
         FaceSensorPropertiesInternal(id, strength, 0, emptyList(), 1, false, false, false)
 }

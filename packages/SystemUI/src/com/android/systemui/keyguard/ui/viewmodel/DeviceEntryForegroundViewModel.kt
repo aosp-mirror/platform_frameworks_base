@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -48,9 +49,9 @@ constructor(
     deviceEntryIconViewModel: DeviceEntryIconViewModel,
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
-    private val isShowingAod: Flow<Boolean> =
+    private val isShowingAodOrDozing: Flow<Boolean> =
         transitionInteractor.startedKeyguardState.map { keyguardState ->
-            keyguardState == KeyguardState.AOD
+            keyguardState == KeyguardState.AOD || keyguardState == KeyguardState.DOZING
         }
 
     private fun getColor(usingBackgroundProtection: Boolean): Int {
@@ -68,13 +69,15 @@ constructor(
                 .onStart { emit(getColor(useBgProtection)) }
         }
 
+    // While dozing, the display can show the AOD UI; show the AOD udfps when dozing
     private val useAodIconVariant: Flow<Boolean> =
-        combine(isShowingAod, deviceEntryUdfpsInteractor.isUdfpsSupported) {
-                isTransitionToAod,
-                isUdfps ->
-                isTransitionToAod && isUdfps
+        deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest { udfspEnrolled ->
+            if (udfspEnrolled) {
+                isShowingAodOrDozing.distinctUntilChanged()
+            } else {
+                flowOf(false)
             }
-            .distinctUntilChanged()
+        }
 
     private val padding: Flow<Int> =
         deviceEntryUdfpsInteractor.isUdfpsSupported.flatMapLatest { udfpsSupported ->

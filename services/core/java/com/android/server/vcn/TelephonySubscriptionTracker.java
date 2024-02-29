@@ -44,6 +44,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
@@ -163,7 +164,6 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
         registerCarrierPrivilegesCallbacks();
     }
 
-    // TODO(b/221306368): Refactor with the new onCarrierServiceChange in the new CPCallback
     private void registerCarrierPrivilegesCallbacks() {
         final HandlerExecutor executor = new HandlerExecutor(mHandler);
         final int modemCount = mTelephonyManager.getActiveModemCount();
@@ -318,8 +318,12 @@ public class TelephonySubscriptionTracker extends BroadcastReceiver {
 
         if (SubscriptionManager.isValidSubscriptionId(subId)) {
             // Get only configs as needed to save memory.
-            final PersistableBundle carrierConfig = mCarrierConfigManager.getConfigForSubId(subId,
-                    VcnManager.VCN_RELATED_CARRIER_CONFIG_KEYS);
+            final PersistableBundle carrierConfig =
+                    Flags.fixCrashOnGettingConfigWhenPhoneIsGone()
+                            ? CarrierConfigManager.getCarrierConfigSubset(mContext, subId,
+                                    VcnManager.VCN_RELATED_CARRIER_CONFIG_KEYS)
+                            : mCarrierConfigManager.getConfigForSubId(subId,
+                                    VcnManager.VCN_RELATED_CARRIER_CONFIG_KEYS);
             if (mDeps.isConfigForIdentifiedCarrier(carrierConfig)) {
                 mReadySubIdsBySlotId.put(slotId, subId);
 

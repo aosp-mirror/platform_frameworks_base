@@ -47,6 +47,7 @@ fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
             )
             },
             actionEntryList = providerInfos.flatMap { it.actionEntryList },
+            authenticationEntryList = providerInfos.flatMap { it.authenticationEntryList }
         )
     }
 }

@@ -807,7 +807,9 @@ public class SettingsBackupTest {
                  Settings.Secure.UI_TRANSLATION_ENABLED,
                  Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_EDGE_HAPTIC_ENABLED,
                  Settings.Secure.DND_CONFIGS_MIGRATED,
-                 Settings.Secure.NAVIGATION_MODE_RESTORE);
+                 Settings.Secure.NAVIGATION_MODE_RESTORE,
+                 Settings.Secure.V_TO_U_RESTORE_ALLOWLIST,
+                 Settings.Secure.V_TO_U_RESTORE_DENYLIST);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {

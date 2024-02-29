@@ -1277,6 +1277,20 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
+        public void onCaptureFailed(int captureSequenceId, int reason) {
+            if (Flags.concertMode()) {
+                if (mCaptureCallback != null) {
+                    try {
+                        mCaptureCallback.onCaptureProcessFailed(captureSequenceId, reason);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Failed to notify capture failure due to remote " +
+                                "exception!");
+                    }
+                }
+            }
+        }
+
+        @Override
         public void onCaptureSequenceCompleted(int captureSequenceId) {
             if (mCaptureCallback != null) {
                 try {

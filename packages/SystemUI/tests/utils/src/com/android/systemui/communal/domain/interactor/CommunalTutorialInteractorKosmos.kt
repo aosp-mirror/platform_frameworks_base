@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.domain.interactor
 
-import com.android.systemui.communal.data.repository.communalRepository
 import com.android.systemui.communal.data.repository.communalTutorialRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
@@ -29,7 +28,6 @@ val Kosmos.communalTutorialInteractor by
             scope = applicationCoroutineScope,
             communalTutorialRepository = communalTutorialRepository,
             keyguardInteractor = keyguardInteractor,
-            communalRepository = communalRepository,
             communalInteractor = communalInteractor,
             communalSettingsInteractor = communalSettingsInteractor,
             tableLogBuffer = mock(),

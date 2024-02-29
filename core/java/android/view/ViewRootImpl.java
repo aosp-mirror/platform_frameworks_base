@@ -30,6 +30,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -57,6 +58,7 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
+import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -93,12 +95,14 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.accessibility.Flags.fixMergedContentChangeEvent;
 import static android.view.accessibility.Flags.forceInvertColor;
 import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
+import static android.view.flags.Flags.toolkitFrameRateTypingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
 import static com.android.input.flags.Flags.enablePointerChoreographer;
+import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -165,6 +169,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -923,6 +928,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
+    private final ISensitiveContentProtectionManager mSensitiveContentProtectionService;
+
     static final class SystemUiVisibilityInfo {
         int globalVisibility;
         int localValue;
@@ -992,8 +999,6 @@ public final class ViewRootImpl implements ViewParent,
      */
     private final boolean mViewBoundsSandboxingEnabled;
 
-    private int mLastTransformHint = Integer.MIN_VALUE;
-
     private AccessibilityWindowAttributes mAccessibilityWindowAttributes;
 
     /*
@@ -1027,12 +1032,19 @@ public final class ViewRootImpl implements ViewParent,
     // as needed and can be useful for power saving.
     // Should not enable the dVRR feature if the value is false.
     private boolean mIsFrameRatePowerSavingsBalanced = true;
+    // Used to check if there is a conflict between different frame rate voting.
+    // Take 24 and 30 as an example, 24 is not a divisor of 30.
+    // We consider there is a conflict.
+    private boolean mIsFrameRateConflicted = false;
+    // Used to set frame rate compatibility.
+    @Surface.FrameRateCompatibility int mFrameRateCompatibility =
+            FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
     // time for touch boost period.
     private static final int FRAME_RATE_TOUCH_BOOST_TIME = 3000;
     // time for checking idle status periodically.
     private static final int FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS = 500;
     // time for revaluating the idle status before lowering the frame rate.
-    private static final int FRAME_RATE_IDLENESS_REEVALUATE_TIME = 500;
+    private static final int FRAME_RATE_IDLENESS_REEVALUATE_TIME = 1000;
     // time for evaluating the interval between current time and
     // the time when frame rate was set previously.
     private static final int FRAME_RATE_SETTING_REEVALUATE_TIME = 100;
@@ -1049,9 +1061,6 @@ public final class ViewRootImpl implements ViewParent,
     /*
      * the variables below are used to determine whther a dVRR feature should be enabled
      */
-
-    // Used to determine whether to suppress boost on typing
-    private boolean mShouldSuppressBoostOnTyping = false;
 
     /**
      * A temporary object used so relayoutWindow can return the latest SyncSeqId
@@ -1106,10 +1115,12 @@ public final class ViewRootImpl implements ViewParent,
 
     private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
+    private static boolean sToolkitFrameRateTypingReadOnlyFlagValue;
 
     static {
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
         sToolkitMetricsForFrameRateDecisionFlagValue = toolkitMetricsForFrameRateDecision();
+        sToolkitFrameRateTypingReadOnlyFlagValue = toolkitFrameRateTypingReadOnly();
     }
 
     // The latest input event from the gesture that was used to resolve the pointer icon.
@@ -1195,6 +1206,13 @@ public final class ViewRootImpl implements ViewParent,
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
         mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(context);
+        if (sensitiveContentAppProtection()) {
+            mSensitiveContentProtectionService =
+                    ISensitiveContentProtectionManager.Stub.asInterface(
+                        ServiceManager.getService(Context.SENSITIVE_CONTENT_PROTECTION_SERVICE));
+        } else {
+            mSensitiveContentProtectionService = null;
+        }
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -4110,6 +4128,7 @@ public final class ViewRootImpl implements ViewParent,
                 ? mFrameRateCategoryLowCount - 1 : mFrameRateCategoryLowCount;
         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
         mPreferredFrameRate = -1;
+        mIsFrameRateConflicted = false;
     }
 
     private void createSyncIfNeeded() {
@@ -4143,6 +4162,29 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mWmsRequestSyncGroup.add(this, null /* runnable */);
+    }
+
+    /**
+     * Helper used to notify the service to block projection when a sensitive
+     * view (the view displays sensitive content) is attached to the window.
+     * The window manager service is also notified to unblock projection when
+     * no attached view (to the window) displays sensitive content.
+     *
+     * <ol>
+     *   <li>It should only notify service to block projection when first sensitive view is
+     *   attached to the window.
+     *   <li>It should only notify service to unblock projection when all sensitive view are
+     *   removed from the window.
+     * </ol>
+     */
+    void notifySensitiveContentAppProtection(boolean showSensitiveContent) {
+        try {
+            // The window would be blocked during screen share if it shows sensitive content.
+            mSensitiveContentProtectionService.setSensitiveContentProtection(
+                    getWindowToken(), mContext.getPackageName(), showSensitiveContent);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Unable to protect sensitive content during screen share", ex);
+        }
     }
 
     private void notifyContentCaptureEvents() {
@@ -6498,6 +6540,7 @@ public final class ViewRootImpl implements ViewParent,
                         mHasInvalidation = false;
                         mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
                                 FRAME_RATE_IDLENESS_REEVALUATE_TIME);
+                        mHasIdledMessage = true;
                     }
                     break;
                 case MSG_REFRESH_POINTER_ICON:
@@ -6508,6 +6551,7 @@ public final class ViewRootImpl implements ViewParent,
                     break;
                 case MSG_FRAME_RATE_SETTING:
                     mPreferredFrameRate = 0;
+                    mFrameRateCompatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
                     setPreferredFrameRate(mPreferredFrameRate);
                     break;
             }
@@ -8626,7 +8670,7 @@ public final class ViewRootImpl implements ViewParent,
                         mAttachInfo.mDragSurface = null;
                     }
                     if (mAttachInfo.mDragData != null) {
-                        mAttachInfo.mDragData.cleanUpPendingIntents();
+                        View.cleanUpPendingIntents(mAttachInfo.mDragData);
                         mAttachInfo.mDragData = null;
                     }
                 }
@@ -8651,6 +8695,12 @@ public final class ViewRootImpl implements ViewParent,
         ArrayList<KeyboardShortcutGroup> list = new ArrayList<>();
         if (mView != null) {
             mView.requestKeyboardShortcuts(list, deviceId);
+        }
+        int numGroups = list.size();
+        for (int i = 0; i < numGroups; ++i) {
+            final KeyboardShortcutGroup group = list.get(i);
+            group.setPackageName(mBasePackageName);
+
         }
         data.putParcelableArrayList(WindowManager.PARCEL_KEY_SHORTCUTS_ARRAY, list);
         try {
@@ -8868,11 +8918,13 @@ public final class ViewRootImpl implements ViewParent,
 
         final int transformHint = SurfaceControl.rotationToBufferTransform(
                 (mDisplay.getInstallOrientation() + mDisplay.getRotation()) % 4);
+        final boolean transformHintChanged = transformHint != mPreviousTransformHint;
+        mPreviousTransformHint = transformHint;
+        mSurfaceControl.setTransformHint(transformHint);
 
         WindowLayout.computeSurfaceSize(mWindowAttributes, winConfig.getMaxBounds(), requestedWidth,
                 requestedHeight, mWinFrameInScreen, mPendingDragResizing, mSurfaceSize);
 
-        final boolean transformHintChanged = transformHint != mLastTransformHint;
         final boolean sizeChanged = !mLastSurfaceSize.equals(mSurfaceSize);
         final boolean surfaceControlChanged =
                 (relayoutResult & RELAYOUT_RES_SURFACE_CHANGED) == RELAYOUT_RES_SURFACE_CHANGED;
@@ -8901,10 +8953,6 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        mLastTransformHint = transformHint;
-
-        mSurfaceControl.setTransformHint(transformHint);
-
         if (mAttachInfo.mContentCaptureManager != null) {
             ContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
                     .getMainContentCaptureSession();
@@ -8918,8 +8966,7 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl, mBlastBufferQueue);
             }
             mHdrRenderState.forceUpdateHdrSdrRatio();
-            if (mPreviousTransformHint != transformHint) {
-                mPreviousTransformHint = transformHint;
+            if (transformHintChanged) {
                 dispatchTransformHintChanged(transformHint);
             }
         } else {
@@ -11883,6 +11930,14 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public @SurfaceControl.BufferTransform int getBufferTransformHint() {
+        // TODO(b/326482114) We use mPreviousTransformHint (calculated using mDisplay's rotation)
+        // instead of mSurfaceControl#getTransformHint because there's a race where SurfaceFlinger
+        // can set an incorrect transform hint for a few frames before it is aware of the updated
+        // display rotation.
+        if (enableBufferTransformHintFromDisplay()) {
+            return mPreviousTransformHint;
+        }
+
         if (mSurfaceControl.isValid()) {
             return mSurfaceControl.getTransformHint();
         } else {
@@ -12280,9 +12335,15 @@ public final class ViewRootImpl implements ViewParent,
         if (!shouldSetFrameRateCategory()) {
             return;
         }
+        int categoryFromConflictedFrameRates = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+        if (mIsFrameRateConflicted) {
+            categoryFromConflictedFrameRates = mPreferredFrameRate > 60
+                    ? FRAME_RATE_CATEGORY_HIGH : FRAME_RATE_CATEGORY_NORMAL;
+        }
 
         int frameRateCategory = mIsTouchBoosting
-                ? FRAME_RATE_CATEGORY_HIGH_HINT : preferredFrameRateCategory;
+                ? FRAME_RATE_CATEGORY_HIGH_HINT
+                : Math.max(preferredFrameRateCategory, categoryFromConflictedFrameRates);
 
         // FRAME_RATE_CATEGORY_HIGH has a higher precedence than FRAME_RATE_CATEGORY_HIGH_HINT
         // For now, FRAME_RATE_CATEGORY_HIGH_HINT is used for boosting with user interaction.
@@ -12308,14 +12369,6 @@ public final class ViewRootImpl implements ViewParent,
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
-
-        if (mPreferredFrameRateCategory != FRAME_RATE_CATEGORY_NO_PREFERENCE && !mHasIdledMessage) {
-            // Check where the display is idled periodically.
-            // If so, set the frame rate category to NO_PREFERENCE
-            mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
-                    FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS);
-            mHasIdledMessage = true;
-        }
     }
 
     private void setPreferredFrameRate(float preferredFrameRate) {
@@ -12329,10 +12382,11 @@ public final class ViewRootImpl implements ViewParent,
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                     Trace.traceBegin(
                             Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRate "
-                                + preferredFrameRate);
+                                + preferredFrameRate + " compatibility "
+                                + mFrameRateCompatibility);
                 }
                 mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
-                    Surface.FRAME_RATE_COMPATIBILITY_DEFAULT).applyAsyncUnsafe();
+                    mFrameRateCompatibility).applyAsyncUnsafe();
                 mLastPreferredFrameRate = preferredFrameRate;
             }
         } catch (Exception e) {
@@ -12355,14 +12409,16 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldSetFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
-        return mSurface.isValid() && mPreferredFrameRate > 0 && shouldEnableDvrr();
+        return mSurface.isValid() && mPreferredFrameRate >= 0
+                && shouldEnableDvrr() && !mIsFrameRateConflicted;
     }
 
     private boolean shouldTouchBoost(int motionEventAction, int windowType) {
         boolean desiredAction = motionEventAction == MotionEvent.ACTION_DOWN
                 || motionEventAction == MotionEvent.ACTION_MOVE
                 || motionEventAction == MotionEvent.ACTION_UP;
-        boolean undesiredType = windowType == TYPE_INPUT_METHOD && mShouldSuppressBoostOnTyping;
+        boolean undesiredType = windowType == TYPE_INPUT_METHOD
+                && sToolkitFrameRateTypingReadOnlyFlagValue;
         // use toolkitSetFrameRate flag to gate the change
         return desiredAction && !undesiredType && shouldEnableDvrr()
                 && getFrameRateBoostOnTouchEnabled();
@@ -12395,32 +12451,50 @@ public final class ViewRootImpl implements ViewParent,
             mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_LOW;
         }
         mHasInvalidation = true;
+        checkIdleness();
     }
 
     /**
-     * Allow Views to vote for the preferred frame rate
+     * Allow Views to vote for the preferred frame rate and compatibility.
      * When determining the preferred frame rate value,
      * we follow this logic: If no preferred frame rate has been set yet,
      * we assign the value of frameRate as the preferred frame rate.
-     * If either the current or the new preferred frame rate exceeds 60 Hz,
-     * we select the higher value between them.
-     * However, if both values are 60 Hz or lower, we set the preferred frame rate
-     * to 60 Hz to maintain optimal performance.
+     * IF there are multiple frame rates are voted:
+     * 1. There is a frame rate is a multiple of all other frame rates.
+     * We choose this frmae rate to be the one to be set.
+     * 2. There is no frame rate can be a multiple of others
+     * We set category to HIGH if the maximum frame rate is greater than 60.
+     * Otherwise, we set category to NORMAL.
+     *
+     * Use FRAME_RATE_COMPATIBILITY_GTE for velocity and FRAME_RATE_COMPATIBILITY_FIXED_SOURCE
+     * for TextureView video play and user requested frame rate.
      *
      * @param frameRate the preferred frame rate of a View
+     * @param frameRateCompatibility the preferred frame rate compatibility of a View
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
-    public void votePreferredFrameRate(float frameRate) {
+    public void votePreferredFrameRate(float frameRate, int frameRateCompatibility) {
         if (frameRate <= 0) {
             return;
         }
+        if (mPreferredFrameRate > 0 && mPreferredFrameRate % frameRate != 0
+                && frameRate % mPreferredFrameRate != 0) {
+            mIsFrameRateConflicted = true;
+            mFrameRateCompatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+        }
+        if (frameRate > mPreferredFrameRate) {
+            mFrameRateCompatibility = frameRateCompatibility;
+        }
 
         mPreferredFrameRate = Math.max(mPreferredFrameRate, frameRate);
-
         mHasInvalidation = true;
-        mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
-        mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
-                FRAME_RATE_SETTING_REEVALUATE_TIME);
+
+        if (!mIsFrameRateConflicted) {
+            mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
+            mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
+                    FRAME_RATE_SETTING_REEVALUATE_TIME);
+        }
+        checkIdleness();
     }
 
     /**
@@ -12445,6 +12519,14 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public float getPreferredFrameRate() {
         return mPreferredFrameRate >= 0 ? mPreferredFrameRate : mLastPreferredFrameRate;
+    }
+
+    /**
+     * Get the value of mFrameRateCompatibility
+     */
+    @VisibleForTesting
+    public int getFrameRateCompatibility() {
+        return mFrameRateCompatibility;
     }
 
     /**
@@ -12497,6 +12579,15 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Get the value of mIsFrameRateConflicted
+     * Can be used to checked if there is a conflict of frame rate votes.
+     */
+    @VisibleForTesting
+    public boolean isFrameRateConflicted() {
+        return mIsFrameRateConflicted;
+    }
+
+    /**
      * Set the value of mIsFrameRatePowerSavingsBalanced
      * Can be used to checked if toolkit dVRR feature is enabled.
      */
@@ -12508,5 +12599,15 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldEnableDvrr() {
         return sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced;
+    }
+
+    private void checkIdleness() {
+        if (!mHasIdledMessage) {
+            // Check where the display is idled periodically.
+            // If so, set the frame rate category to NO_PREFERENCE
+            mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
+                    FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS);
+            mHasIdledMessage = true;
+        }
     }
 }

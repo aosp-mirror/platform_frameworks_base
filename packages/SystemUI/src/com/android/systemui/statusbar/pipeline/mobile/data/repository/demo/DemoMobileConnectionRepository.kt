@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionS
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_CARRIER_ID
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_CARRIER_NETWORK_CHANGE
@@ -222,6 +223,9 @@ class DemoMobileConnectionRepository(
         carrierName.value = NetworkNameModel.SubscriptionDerived("${event.name} ${event.subId}")
 
         _carrierId.value = event.carrierId ?: INVALID_SUBSCRIPTION_ID
+
+        numberOfLevels.value =
+            if (event.inflateStrength) DEFAULT_NUM_LEVELS + 1 else DEFAULT_NUM_LEVELS
 
         cdmaRoaming.value = event.roaming
         _isRoaming.value = event.roaming

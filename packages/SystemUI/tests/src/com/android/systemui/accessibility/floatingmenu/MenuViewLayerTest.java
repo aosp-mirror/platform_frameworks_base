@@ -160,6 +160,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
                 new MenuView(mSpyContext, mMenuViewModel, menuViewAppearance, mSecureSettings));
         // Ensure tests don't actually update metrics.
         doNothing().when(mMenuView).incrementTexMetric(any(), anyInt());
+        doNothing().when(mMenuView).gotoEditScreen();
 
         mMenuViewLayer = spy(new MenuViewLayer(mSpyContext, mStubWindowManager,
                 mStubAccessibilityManager, mMenuViewModel, menuViewAppearance, mMenuView,

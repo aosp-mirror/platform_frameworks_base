@@ -77,7 +77,7 @@ constructor(
             qsTileLogger.logCustomTileUserActionDelivered(tileSpec)
         }
 
-    private fun click(
+    private suspend fun click(
         view: View?,
         activityLaunchForClick: PendingIntent?,
     ) {
@@ -114,9 +114,6 @@ constructor(
     }
 
     fun startActivityAndCollapse(pendingIntent: PendingIntent) {
-        if (!pendingIntent.isActivity) {
-            return
-        }
         if (!isTokenGranted) {
             return
         }

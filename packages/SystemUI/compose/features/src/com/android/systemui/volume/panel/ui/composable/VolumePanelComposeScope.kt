@@ -27,9 +27,9 @@ class VolumePanelComposeScope(private val state: VolumePanelState) {
     val orientation: Int
         get() = state.orientation
 
-    /** Is true when Volume Panel is using wide-screen layout and false the otherwise. */
-    val isWideScreen: Boolean
-        get() = state.isWideScreen
+    /** Is true when Volume Panel is using large-screen layout and false the otherwise. */
+    val isLargeScreen: Boolean
+        get() = state.isLargeScreen
 }
 
 val VolumePanelComposeScope.isPortrait: Boolean

@@ -153,13 +153,13 @@ public class AuthenticationStatsCollector {
         if (authenticationStats.getTotalAttempts() < MINIMUM_ATTEMPTS) {
             return;
         }
-
         // Don't send notification if FRR below the threshold.
         if (authenticationStats.getEnrollmentNotifications() >= MAXIMUM_ENROLLMENT_NOTIFICATIONS
                 || authenticationStats.getFrr() < mThreshold) {
             authenticationStats.resetData();
             return;
         }
+
 
         authenticationStats.resetData();
 
@@ -184,6 +184,28 @@ public class AuthenticationStatsCollector {
                     authenticationStats.getEnrollmentNotifications(),
                     authenticationStats.getModality());
         }
+    }
+
+    /**
+     * This is meant for debug purposes only, this will bypass many checks.
+     * The origination of this call should be from an adb shell command sent from
+     * FaceService.
+     *
+     * adb shell cmd face notification
+     */
+    public void sendFaceReEnrollNotification() {
+        mBiometricNotification.sendFaceEnrollNotification(mContext);
+    }
+
+    /**
+     * This is meant for debug purposes only, this will bypass many checks.
+     * The origination of this call should be from an adb shell command sent from
+     * FingerprintService.
+     *
+     * adb shell cmd fingerprint notification
+     */
+    public void sendFingerprintReEnrollNotification() {
+        mBiometricNotification.sendFpEnrollNotification(mContext);
     }
 
     private void onUserRemoved(final int userId) {

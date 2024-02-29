@@ -17,10 +17,6 @@
   <1> *;
 }
 
--keepclasseswithmembers class * {
-    public <init>(android.content.Context, android.util.AttributeSet);
-}
-
 -keep class androidx.core.app.CoreComponentFactory
 
 # Keep the wm shell lib

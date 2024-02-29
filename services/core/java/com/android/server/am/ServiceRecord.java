@@ -267,6 +267,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     int mAllowStart_byBindings = REASON_DENIED;
 
     /**
+     * Whether or not we've bumped its oom adj scores during its execution.
+     */
+    boolean mOomAdjBumpedInExec;
+
+    /**
      * Whether to use the new "while-in-use permission" logic for FGS start
      */
     private boolean useNewWiuLogic_forStart() {

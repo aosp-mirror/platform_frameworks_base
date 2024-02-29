@@ -340,8 +340,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     static final String TAG = NetworkPolicyLogger.TAG;
     private static final boolean LOGD = NetworkPolicyLogger.LOGD;
     private static final boolean LOGV = NetworkPolicyLogger.LOGV;
-    // TODO: b/304347838 - Remove once the feature is in staging.
-    private static final boolean ALWAYS_RESTRICT_BACKGROUND_NETWORK = false;
 
     /**
      * No opportunistic quota could be calculated from user data plan or data settings.
@@ -729,7 +727,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Map of uid -> UidStateCallbackInfo objects holding the data received from
      * {@link IUidObserver#onUidStateChanged(int, int, long, int)} callbacks. In order to avoid
      * creating a new object for every callback received, we hold onto the object created for each
-     * uid and reuse it.
+     * uid and reuse it until the uid stays alive.
      *
      * Note that the lock used for accessing this object should not be used for anything else and we
      * should not be acquiring new locks or doing any heavy work while this lock is held since this
@@ -800,6 +798,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static @NonNull Clock getDefaultClock() {
         return new BestClock(ZoneOffset.UTC, SystemClock.currentNetworkTimeClock(),
                 Clock.systemUTC());
+    }
+
+    @VisibleForTesting
+    UidState getUidStateForTest(int uid) {
+        synchronized (mUidRulesFirstLock) {
+            return mUidState.get(uid);
+        }
     }
 
     static class Dependencies {
@@ -1063,8 +1068,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
 
                     // The flag is boot-stable.
-                    mBackgroundNetworkRestricted = ALWAYS_RESTRICT_BACKGROUND_NETWORK
-                            && Flags.networkBlockedForTopSleepingAndAbove();
+                    mBackgroundNetworkRestricted = Flags.networkBlockedForTopSleepingAndAbove();
                     if (mBackgroundNetworkRestricted) {
                         // Firewall rules and UidBlockedState will get updated in
                         // updateRulesForGlobalChangeAL below.
@@ -1257,6 +1261,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override public void onUidGone(int uid, boolean disabled) {
+            synchronized (mUidStateCallbackInfos) {
+                mUidStateCallbackInfos.remove(uid);
+            }
+            // TODO: b/327058756 - Remove any pending UID_MSG_STATE_CHANGED on the handler.
             mUidEventHandler.obtainMessage(UID_MSG_GONE, uid, 0).sendToTarget();
         }
     };
@@ -5918,7 +5926,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     void handleUidGone(int uid) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidGone");
         try {
-            boolean updated;
+            final boolean updated;
             synchronized (mUidRulesFirstLock) {
                 updated = removeUidStateUL(uid);
             }

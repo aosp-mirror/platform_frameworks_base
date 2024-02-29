@@ -51,9 +51,9 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
 
     private final Executor mExecutor = Executors.newSingleThreadExecutor();
 
-    public ManagerInfoMediaManager(
+    /* package */ ManagerInfoMediaManager(
             Context context,
-            String packageName,
+            @NonNull String packageName,
             Notification notification,
             LocalBluetoothManager localBluetoothManager) {
         super(context, packageName, notification, localBluetoothManager);
@@ -83,18 +83,6 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
     protected void transferToRoute(@NonNull MediaRoute2Info route) {
         // TODO: b/279555229 - provide real user handle of a caller.
         mRouterManager.transfer(mPackageName, route, android.os.Process.myUserHandle());
-    }
-
-    @Override
-    protected boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device) {
-        final RoutingSessionInfo info = mRouterManager.getSystemRoutingSession(null);
-        if (info != null) {
-            // TODO: b/279555229 - provide real user handle and package name of a caller.
-            mRouterManager.transfer(
-                    info, device.mRouteInfo, android.os.Process.myUserHandle(), mPackageName);
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -170,12 +158,6 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
         RoutingSessionInfo systemSession = mRouterManager.getSystemRoutingSession(null);
 
         return TextUtils.equals(systemSession.getId(), sessionId) ? systemSession : null;
-    }
-
-    @Override
-    @NonNull
-    protected List<MediaRoute2Info> getAllRoutes() {
-        return mRouterManager.getAllRoutes();
     }
 
     @Override

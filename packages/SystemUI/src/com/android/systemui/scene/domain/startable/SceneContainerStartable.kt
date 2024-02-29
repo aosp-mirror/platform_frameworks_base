@@ -26,6 +26,7 @@ import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorActual
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
@@ -34,6 +35,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
+import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.FalsingManager.FalsingBeliefListener
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
@@ -41,6 +44,7 @@ import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
@@ -52,6 +56,7 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -81,12 +86,14 @@ constructor(
     @DisplayId private val displayId: Int,
     private val sceneLogger: SceneLogger,
     @FalsingCollectorActual private val falsingCollector: FalsingCollector,
+    private val falsingManager: FalsingManager,
     private val powerInteractor: PowerInteractor,
     private val simBouncerInteractor: Lazy<SimBouncerInteractor>,
     private val authenticationInteractor: Lazy<AuthenticationInteractor>,
     private val windowController: NotificationShadeWindowController,
     private val deviceProvisioningInteractor: DeviceProvisioningInteractor,
     private val centralSurfaces: CentralSurfaces,
+    private val headsUpInteractor: HeadsUpNotificationInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -96,6 +103,7 @@ constructor(
             automaticallySwitchScenes()
             hydrateSystemUiState()
             collectFalsingSignals()
+            respondToFalsingDetections()
             hydrateWindowFocus()
             hydrateInteractionState()
         } else {
@@ -145,6 +153,15 @@ constructor(
                                             null
                                         }
                                     }
+                                }
+                            }
+                            .combine(headsUpInteractor.isHeadsUpOrAnimatingAway) {
+                                visibilityForTransitionState,
+                                isHeadsUpOrAnimatingAway ->
+                                if (isHeadsUpOrAnimatingAway) {
+                                    true to "showing a HUN"
+                                } else {
+                                    visibilityForTransitionState
                                 }
                             }
                             .distinctUntilChanged()
@@ -362,6 +379,18 @@ constructor(
                         falsingCollector.onBouncerHidden()
                     }
                 }
+        }
+    }
+
+    /** Switches to the lockscreen when falsing is detected. */
+    private fun respondToFalsingDetections() {
+        applicationScope.launch {
+            conflatedCallbackFlow {
+                    val listener = FalsingBeliefListener { trySend(Unit) }
+                    falsingManager.addFalsingBeliefListener(listener)
+                    awaitClose { falsingManager.removeFalsingBeliefListener(listener) }
+                }
+                .collect { switchToScene(SceneKey.Lockscreen, "Falsing detected.") }
         }
     }
 

@@ -23,7 +23,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.content.Intent;
+import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -48,6 +51,8 @@ public class ActivityStartControllerTests extends WindowTestsBase {
     private Factory mFactory;
     private ActivityStarter mStarter;
 
+    private static final String TEST_TYPE = "testType";
+
     @Before
     public void setUp() throws Exception {
         mFactory = mock(Factory.class);
@@ -55,6 +60,28 @@ public class ActivityStartControllerTests extends WindowTestsBase {
         mStarter = spy(new ActivityStarter(mController, mAtm,
                 mAtm.mTaskSupervisor, mock(ActivityStartInterceptor.class)));
         doReturn(mStarter).when(mFactory).obtain();
+    }
+
+    /**
+     * Ensures that when an [Activity] is started in a [TaskFragment] the associated
+     * [ActivityStarter.Request] has the intent's resolved type correctly set.
+     */
+    @Test
+    public void testStartActivityInTaskFragment_setsActivityStarterRequestResolvedType() {
+        final Intent intent = new Intent();
+        intent.setType(TEST_TYPE);
+
+        mController.startActivityInTaskFragment(
+                mock(TaskFragment.class),
+                intent,
+                null /* activityOptions */,
+                null /* resultTo */ ,
+                Binder.getCallingPid(),
+                Binder.getCallingUid(),
+                null /* errorCallbackToken */
+        );
+
+        assertThat(mStarter.mRequest.resolvedType).isEqualTo(TEST_TYPE);
     }
 
     /**

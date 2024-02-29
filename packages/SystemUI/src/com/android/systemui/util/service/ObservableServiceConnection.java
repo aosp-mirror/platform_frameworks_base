@@ -158,11 +158,11 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
         try {
             bindResult = mContext.bindServiceAsUser(mServiceIntent, this, mFlags,
                     mUserTracker.getUserHandle());
+            mBoundCalled = true;
         } catch (SecurityException e) {
             Log.d(TAG, "Could not bind to service", e);
             mContext.unbindService(this);
         }
-        mBoundCalled = true;
         if (DEBUG) {
             Log.d(TAG, "bind. bound:" + bindResult);
         }

@@ -50,6 +50,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.credentials.GetCredentialException;
+import android.credentials.GetCredentialResponse;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.Build;
@@ -104,6 +106,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -2364,6 +2367,7 @@ public final class AutofillManager {
 
         synchronized (mLock) {
             if (!isActiveLocked()) {
+                Log.w(TAG, "onAuthenticationResult(): sessionId=" + mSessionId + " not active");
                 return;
             }
             mState = STATE_ACTIVE;
@@ -2380,6 +2384,7 @@ public final class AutofillManager {
             }
             if (data == null) {
                 // data is set to null when result is not RESULT_OK
+                Log.i(TAG, "onAuthenticationResult(): empty intent");
                 return;
             }
 
@@ -2397,6 +2402,13 @@ public final class AutofillManager {
 
             final Bundle responseData = new Bundle();
             responseData.putParcelable(EXTRA_AUTHENTICATION_RESULT, result);
+            Serializable exception = data.getSerializableExtra(
+                    CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION,
+                    GetCredentialException.class);
+            if (exception != null && Flags.autofillCredmanIntegration()) {
+                responseData.putSerializable(
+                        CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION, exception);
+            }
             final Bundle newClientState = data.getBundleExtra(EXTRA_CLIENT_STATE);
             if (newClientState != null) {
                 responseData.putBundle(EXTRA_CLIENT_STATE, newClientState);
@@ -2923,6 +2935,107 @@ public final class AutofillManager {
         }
     }
 
+    private void onGetCredentialException(int sessionId, AutofillId id, String errorType,
+            String errorMsg) {
+        synchronized (mLock) {
+            if (sessionId != mSessionId) {
+                Log.w(TAG, "onGetCredentialException afm sessionIds don't match");
+                return;
+            }
+
+            final AutofillClient client = getClient();
+            if (client == null) {
+                Log.w(TAG, "onGetCredentialException afm client id null");
+                return;
+            }
+            ArrayList<AutofillId> failedIds = new ArrayList<>();
+            final View[] views = client.autofillClientFindViewsByAutofillIdTraversal(
+                    Helper.toArray(new ArrayList<>(Collections.singleton(id))));
+            if (views == null || views.length == 0) {
+                Log.w(TAG, "onGetCredentialException afm client view not found");
+                return;
+            }
+
+            final View view = views[0];
+            if (view == null) {
+                Log.i(TAG, "onGetCredentialException View is null");
+
+                // Most likely view has been removed after the initial request was sent to the
+                // the service; this is fine, but we need to update the view status in the
+                // server side so it can be triggered again.
+                Log.d(TAG, "onGetCredentialException(): no View with id " + id);
+                failedIds.add(id);
+            }
+            if (id.isVirtualInt()) {
+                Log.i(TAG, "onGetCredentialException afm client id is virtual");
+                // TODO(b/326314286): Handle virtual views
+            } else {
+                Log.i(TAG, "onGetCredentialException afm client id is NOT virtual");
+                view.onGetCredentialException(errorType, errorMsg);
+            }
+            handleFailedIdsLocked(failedIds);
+        }
+    }
+
+    private void onGetCredentialResponse(int sessionId, AutofillId id,
+            GetCredentialResponse response) {
+        synchronized (mLock) {
+            if (sessionId != mSessionId) {
+                Log.w(TAG, "onGetCredentialResponse afm sessionIds don't match");
+                return;
+            }
+
+            final AutofillClient client = getClient();
+            if (client == null) {
+                Log.w(TAG, "onGetCredentialResponse afm client id null");
+                return;
+            }
+            ArrayList<AutofillId> failedIds = new ArrayList<>();
+            final View[] views = client.autofillClientFindViewsByAutofillIdTraversal(
+                    Helper.toArray(new ArrayList<>(Collections.singleton(id))));
+            if (views == null || views.length == 0) {
+                Log.w(TAG, "onGetCredentialResponse afm client view not found");
+                return;
+            }
+
+            final View view = views[0];
+            if (view == null) {
+                Log.i(TAG, "onGetCredentialResponse View is null");
+
+                // Most likely view has been removed after the initial request was sent to the
+                // the service; this is fine, but we need to update the view status in the
+                // server side so it can be triggered again.
+                Log.d(TAG, "onGetCredentialResponse(): no View with id " + id);
+                failedIds.add(id);
+            }
+            if (id.isVirtualInt()) {
+                Log.i(TAG, "onGetCredentialResponse afm client id is virtual");
+                // TODO(b/326314286): Handle virtual views
+            } else {
+                Log.i(TAG, "onGetCredentialResponse afm client id is NOT virtual");
+                view.onGetCredentialResponse(response);
+            }
+            handleFailedIdsLocked(failedIds);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void handleFailedIdsLocked(ArrayList<AutofillId> failedIds) {
+        if (failedIds != null && !failedIds.isEmpty()) {
+            if (sVerbose) {
+                Log.v(TAG, "autofill(): total failed views: " + failedIds);
+            }
+            try {
+                mService.setAutofillFailure(mSessionId, failedIds, mContext.getUserId());
+            } catch (RemoteException e) {
+                // In theory, we could ignore this error since it's not a big deal, but
+                // in reality, we rather crash the app anyways, as the failure could be
+                // a consequence of something going wrong on the server side...
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
     private void autofill(int sessionId, List<AutofillId> ids, List<AutofillValue> values,
             boolean hideHighlight) {
         synchronized (mLock) {
@@ -2989,19 +3102,7 @@ public final class AutofillManager {
                 }
             }
 
-            if (failedIds != null) {
-                if (sVerbose) {
-                    Log.v(TAG, "autofill(): total failed views: " + failedIds);
-                }
-                try {
-                    mService.setAutofillFailure(mSessionId, failedIds, mContext.getUserId());
-                } catch (RemoteException e) {
-                    // In theory, we could ignore this error since it's not a big deal, but
-                    // in reality, we rather crash the app anyways, as the failure could be
-                    // a consequence of something going wrong on the server side...
-                    throw e.rethrowFromSystemServer();
-                }
-            }
+            handleFailedIdsLocked(failedIds);
 
             if (virtualValues != null) {
                 for (int i = 0; i < virtualValues.size(); i++) {
@@ -3429,6 +3530,10 @@ public final class AutofillManager {
         if (view == null) {
             return false;
         }
+        if (view.getViewCredentialHandler() != null) {
+            return true;
+        }
+
         String[] hints = view.getAutofillHints();
         if (hints == null) {
             return false;
@@ -4315,6 +4420,24 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> afm.autofill(sessionId, ids, values, hideHighlight));
+            }
+        }
+
+        @Override
+        public void onGetCredentialResponse(int sessionId, AutofillId id,
+                GetCredentialResponse response) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.onGetCredentialResponse(sessionId, id, response));
+            }
+        }
+
+        @Override
+        public void onGetCredentialException(int sessionId, AutofillId id,
+                String errorType, String errorMsg) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.onGetCredentialException(sessionId, id, errorType, errorMsg));
             }
         }
 

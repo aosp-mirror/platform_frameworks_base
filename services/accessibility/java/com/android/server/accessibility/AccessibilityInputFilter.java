@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static android.view.InputDevice.SOURCE_CLASS_POINTER;
+import static android.view.MotionEvent.ACTION_SCROLL;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 
@@ -25,6 +27,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Region;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -35,6 +38,8 @@ import android.view.InputEvent;
 import android.view.InputFilter;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.MotionEvent.PointerCoords;
+import android.view.MotionEvent.PointerProperties;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.server.LocalServices;
@@ -203,6 +208,62 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private EventStreamState mKeyboardStreamState;
 
+    /**
+     * The last MotionEvent emitted from the input device that's currently active. This is used to
+     * keep track of which input device is currently active, and also to generate the cancel event
+     * if a new device becomes active.
+     */
+    private MotionEvent mLastActiveDeviceMotionEvent = null;
+
+    private static MotionEvent cancelMotion(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_CANCEL
+                || event.getActionMasked() == MotionEvent.ACTION_HOVER_EXIT
+                || event.getActionMasked() == MotionEvent.ACTION_UP) {
+            throw new IllegalArgumentException("Can't cancel " + event);
+        }
+        final int action;
+        if (event.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER
+                || event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE) {
+            action = MotionEvent.ACTION_HOVER_EXIT;
+        } else {
+            action = MotionEvent.ACTION_CANCEL;
+        }
+
+        final int pointerCount;
+        if (event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) {
+            pointerCount = event.getPointerCount() - 1;
+        } else {
+            pointerCount = event.getPointerCount();
+        }
+        final PointerProperties[] properties = new PointerProperties[pointerCount];
+        final PointerCoords[] coords = new PointerCoords[pointerCount];
+        int newPointerIndex = 0;
+        for (int i = 0; i < event.getPointerCount(); i++) {
+            if (event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) {
+                if (event.getActionIndex() == i) {
+                    // Skip the pointer that's going away
+                    continue;
+                }
+            }
+            final PointerCoords c = new PointerCoords();
+            c.x = event.getX(i);
+            c.y = event.getY(i);
+            coords[newPointerIndex] = c;
+            final PointerProperties p = new PointerProperties();
+            p.id = event.getPointerId(i);
+            p.toolType = event.getToolType(i);
+            properties[newPointerIndex] = p;
+            newPointerIndex++;
+        }
+
+        return MotionEvent.obtain(event.getDownTime(), SystemClock.uptimeMillis(), action,
+                pointerCount, properties, coords,
+                event.getMetaState(), event.getButtonState(),
+                event.getXPrecision(), event.getYPrecision(), event.getDeviceId(),
+                event.getEdgeFlags(), event.getSource(), event.getDisplayId(), event.getFlags(),
+                event.getClassification());
+    }
+
     AccessibilityInputFilter(Context context, AccessibilityManagerService service) {
         this(context, service, new SparseArray<>(0));
     }
@@ -260,6 +321,17 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                     AccessibilityTrace.FLAGS_INPUT_FILTER,
                     "event=" + event + ";policyFlags=" + policyFlags);
         }
+        if (Flags.handleMultiDeviceInput()) {
+            if (!shouldProcessMultiDeviceEvent(event, policyFlags)) {
+                // We are only allowing a single device to be active at a time.
+                return;
+            }
+        }
+
+        onInputEventInternal(event, policyFlags);
+    }
+
+    private void onInputEventInternal(InputEvent event, int policyFlags) {
         if (mEventHandler.size() == 0) {
             if (DEBUG) Slog.d(TAG, "No mEventHandler for event " + event);
             super.onInputEvent(event, policyFlags);
@@ -353,8 +425,71 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
     }
 
+    boolean shouldProcessMultiDeviceEvent(InputEvent event, int policyFlags) {
+        if (event instanceof MotionEvent motion) {
+            if (!motion.isFromSource(SOURCE_CLASS_POINTER) || motion.getAction() == ACTION_SCROLL) {
+                // Non-pointer events are focus-dispatched and don't require special logic.
+                // Scroll events are stand-alone and therefore can be considered to not be part of
+                // a stream.
+                return true;
+            }
+            // Only allow 1 device to be sending motion events at a time
+            // If the event is from an active device, let it through.
+            // If the event is not from an active device, only let it through if it starts a new
+            // gesture like ACTION_DOWN or ACTION_HOVER_ENTER
+            final boolean eventIsFromCurrentDevice = mLastActiveDeviceMotionEvent != null
+                    && mLastActiveDeviceMotionEvent.getDeviceId() == motion.getDeviceId();
+            final int actionMasked = motion.getActionMasked();
+            switch (actionMasked) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_HOVER_ENTER:
+                case MotionEvent.ACTION_HOVER_MOVE: {
+                    if (mLastActiveDeviceMotionEvent != null
+                            && mLastActiveDeviceMotionEvent.getDeviceId() != motion.getDeviceId()) {
+                        // This is a new gesture from a new device. Cancel the existing state
+                        // and let this through
+                        MotionEvent canceled = cancelMotion(mLastActiveDeviceMotionEvent);
+                        onInputEventInternal(canceled, policyFlags);
+                    }
+                    mLastActiveDeviceMotionEvent = MotionEvent.obtain(motion);
+                    return true;
+                }
+                case MotionEvent.ACTION_MOVE:
+                case MotionEvent.ACTION_POINTER_DOWN:
+                case MotionEvent.ACTION_POINTER_UP: {
+                    if (eventIsFromCurrentDevice) {
+                        mLastActiveDeviceMotionEvent = MotionEvent.obtain(motion);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_HOVER_EXIT: {
+                    if (eventIsFromCurrentDevice) {
+                        // This is the last event of the gesture from this device.
+                        mLastActiveDeviceMotionEvent = null;
+                        return true;
+                    } else {
+                        // Event is from another device
+                        return false;
+                    }
+                }
+                default: {
+                    if (mLastActiveDeviceMotionEvent != null
+                            && event.getDeviceId() != mLastActiveDeviceMotionEvent.getDeviceId()) {
+                        // This is an event from another device, ignore it.
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     private void processMotionEvent(EventStreamState state, MotionEvent event, int policyFlags) {
-        if (!state.shouldProcessScroll() && event.getActionMasked() == MotionEvent.ACTION_SCROLL) {
+        if (!state.shouldProcessScroll() && event.getActionMasked() == ACTION_SCROLL) {
             super.onInputEvent(event, policyFlags);
             return;
         }

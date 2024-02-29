@@ -16,9 +16,6 @@
 
 package com.android.systemui.scene.ui.composable
 
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Edge as ComposeAwareEdge
 import com.android.compose.animation.scene.SceneKey as ComposeAwareSceneKey
@@ -26,14 +23,12 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.TransitionKey as ComposeAwareTransitionKey
 import com.android.compose.animation.scene.UserAction as ComposeAwareUserAction
-import com.android.compose.animation.scene.UserActionDistance as ComposeAwareUserActionDistance
 import com.android.compose.animation.scene.UserActionResult as ComposeAwareUserActionResult
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.TransitionKey
 import com.android.systemui.scene.shared.model.UserAction
-import com.android.systemui.scene.shared.model.UserActionDistance
 import com.android.systemui.scene.shared.model.UserActionResult
 
 // TODO(b/293899074): remove this file once we can use the types from SceneTransitionLayout.
@@ -82,22 +77,5 @@ fun UserActionResult.asComposeAware(): ComposeAwareUserActionResult {
     return ComposeAwareUserActionResult(
         toScene = composeUnaware.toScene.asComposeAware(),
         transitionKey = composeUnaware.transitionKey?.asComposeAware(),
-        distance = composeUnaware.distance?.asComposeAware(),
     )
-}
-
-fun UserActionDistance.asComposeAware(): ComposeAwareUserActionDistance {
-    val composeUnware = this
-    return object : ComposeAwareUserActionDistance {
-        override fun Density.absoluteDistance(
-            fromSceneSize: IntSize,
-            orientation: Orientation,
-        ): Float {
-            return composeUnware.absoluteDistance(
-                fromSceneWidth = fromSceneSize.width,
-                fromSceneHeight = fromSceneSize.height,
-                isHorizontal = orientation == Orientation.Horizontal,
-            )
-        }
-    }
 }

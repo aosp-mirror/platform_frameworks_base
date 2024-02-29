@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.content.res.Configuration.SCREENLAYOUT_ROUND_NO;
+import static android.content.res.Configuration.SCREENLAYOUT_ROUND_YES;
 import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
 import static android.view.RoundedCorner.POSITION_BOTTOM_RIGHT;
 import static android.view.RoundedCorner.POSITION_TOP_LEFT;
@@ -28,21 +30,46 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.platform.test.annotations.Presubmit;
+import android.util.DisplayMetrics;
 import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
 public class RoundedCornersTest {
+
+    @Mock
+    DisplayMetrics mMockDisplayMetrics;
+    @Mock
+    Resources mMockResources;
+    @Mock TypedArray mMockTypedArray;
+    Configuration mConfiguration;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mConfiguration = Configuration.EMPTY;
+    }
 
     final RoundedCorners mRoundedCorners = new RoundedCorners(
             new RoundedCorner(POSITION_TOP_LEFT, 10, 10, 10),
@@ -198,5 +225,64 @@ public class RoundedCornersTest {
 
         assertThat(RoundedCorners.fromRadii(radius, 200, 300),
                 not(sameInstance(cached)));
+    }
+
+    @Test
+    public void testGetRoundedCornerRadius_withRoundDevice_usesDisplayRadiusAsDefault() {
+        final int displayWidth = 400;
+        mConfiguration.screenLayout = SCREENLAYOUT_ROUND_YES;
+        mMockDisplayMetrics.widthPixels = displayWidth;
+
+        when(mMockResources.getConfiguration()).thenReturn(mConfiguration);
+        when(mMockResources.getDisplayMetrics()).thenReturn(mMockDisplayMetrics);
+        when(mMockResources.getStringArray(R.array.config_displayUniqueIdArray))
+                .thenReturn(new String[]{"0"});
+        when(mMockTypedArray.length()).thenReturn(0);
+        when(mMockResources.obtainTypedArray(anyInt())).thenReturn(mMockTypedArray);
+        when(mMockResources.getDimensionPixelSize(R.dimen.rounded_corner_radius))
+                .thenReturn(0);
+
+
+        int radius = RoundedCorners.getRoundedCornerRadius(mMockResources, "0");
+        assertEquals((displayWidth / 2), radius);
+    }
+
+    @Test
+    public void testGetRoundedCornerRadius_withRoundDevice_usesOverlayIfProvided() {
+        final int displayWidth = 400;
+        final int overlayValue = 199;
+        mConfiguration.screenLayout = SCREENLAYOUT_ROUND_YES;
+        mMockDisplayMetrics.widthPixels = displayWidth;
+
+        when(mMockResources.getConfiguration()).thenReturn(mConfiguration);
+        when(mMockResources.getDisplayMetrics()).thenReturn(mMockDisplayMetrics);
+        when(mMockResources.getStringArray(R.array.config_displayUniqueIdArray))
+                .thenReturn(new String[]{"0"});
+        when(mMockTypedArray.length()).thenReturn(0);
+        when(mMockResources.obtainTypedArray(anyInt())).thenReturn(mMockTypedArray);
+        when(mMockResources.getDimensionPixelSize(R.dimen.rounded_corner_radius))
+                .thenReturn(overlayValue);
+
+        int radius = RoundedCorners.getRoundedCornerRadius(mMockResources, "0");
+        assertEquals(overlayValue, radius);
+    }
+
+    @Test
+    public void testGetRoundedCornerRadius_withNonRoundDevice_noDisplayDefault() {
+        final int displayWidth = 400;
+        mConfiguration.screenLayout = SCREENLAYOUT_ROUND_NO;
+        mMockDisplayMetrics.widthPixels = displayWidth;
+
+        when(mMockResources.getConfiguration()).thenReturn(mConfiguration);
+        when(mMockResources.getDisplayMetrics()).thenReturn(mMockDisplayMetrics);
+        when(mMockResources.getStringArray(R.array.config_displayUniqueIdArray))
+                .thenReturn(new String[]{"0"});
+        when(mMockTypedArray.length()).thenReturn(0);
+        when(mMockResources.obtainTypedArray(anyInt())).thenReturn(mMockTypedArray);
+        when(mMockResources.getDimensionPixelSize(R.dimen.rounded_corner_radius))
+                .thenReturn(0);
+
+        int radius = RoundedCorners.getRoundedCornerRadius(mMockResources, "0");
+        assertEquals(0, radius);
     }
 }

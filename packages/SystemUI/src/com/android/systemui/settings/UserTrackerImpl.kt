@@ -121,7 +121,6 @@ open class UserTrackerImpl internal constructor(
     @GuardedBy("callbacks")
     private val callbacks: MutableList<DataItem> = ArrayList()
 
-    private var beforeUserSwitchingJob: Job? = null
     private var userSwitchingJob: Job? = null
     private var afterUserSwitchingJob: Job? = null
 
@@ -194,14 +193,7 @@ open class UserTrackerImpl internal constructor(
     private fun registerUserSwitchObserver() {
         iActivityManager.registerUserSwitchObserver(object : UserSwitchObserver() {
             override fun onBeforeUserSwitching(newUserId: Int) {
-                if (isBackgroundUserSwitchEnabled) {
-                    beforeUserSwitchingJob?.cancel()
-                    beforeUserSwitchingJob = appScope.launch(backgroundContext) {
-                        handleBeforeUserSwitching(newUserId)
-                    }
-                } else {
-                    handleBeforeUserSwitching(newUserId)
-                }
+                handleBeforeUserSwitching(newUserId)
             }
 
             override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
@@ -233,15 +225,12 @@ open class UserTrackerImpl internal constructor(
 
     @WorkerThread
     protected open fun handleBeforeUserSwitching(newUserId: Int) {
-        Assert.isNotMainThread()
         setUserIdInternal(newUserId)
 
-        val list = synchronized(callbacks) {
-            callbacks.toList()
-        }
-        list.forEach {
-            it.callback.get()?.onBeforeUserSwitching(newUserId)
-        }
+        notifySubscribers { callback, resultCallback ->
+            callback.onBeforeUserSwitching(newUserId)
+            resultCallback.run()
+        }.await()
     }
 
     @WorkerThread
@@ -249,21 +238,9 @@ open class UserTrackerImpl internal constructor(
         Assert.isNotMainThread()
         Log.i(TAG, "Switching to user $newUserId")
 
-        val list = synchronized(callbacks) {
-            callbacks.toList()
-        }
-        val latch = CountDownLatch(list.size)
-        list.forEach {
-            val callback = it.callback.get()
-            if (callback != null) {
-                it.executor.execute {
-                    callback.onUserChanging(userId, userContext) { latch.countDown() }
-                }
-            } else {
-                latch.countDown()
-            }
-        }
-        latch.await()
+        notifySubscribers { callback, resultCallback ->
+            callback.onUserChanging(newUserId, userContext, resultCallback)
+        }.await()
     }
 
     @WorkerThread
@@ -293,9 +270,9 @@ open class UserTrackerImpl internal constructor(
         Assert.isNotMainThread()
         Log.i(TAG, "Switched to user $newUserId")
 
-        notifySubscribers {
-            onUserChanged(newUserId, userContext)
-            onProfilesChanged(userProfiles)
+        notifySubscribers { callback, _ ->
+            callback.onUserChanged(newUserId, userContext)
+            callback.onProfilesChanged(userProfiles)
         }
     }
 
@@ -307,8 +284,8 @@ open class UserTrackerImpl internal constructor(
         synchronized(mutex) {
             userProfiles = profiles.map { UserInfo(it) } // save a "deep" copy
         }
-        notifySubscribers {
-            onProfilesChanged(profiles)
+        notifySubscribers { callback, _ ->
+            callback.onProfilesChanged(profiles)
         }
     }
 
@@ -324,18 +301,24 @@ open class UserTrackerImpl internal constructor(
         }
     }
 
-    private inline fun notifySubscribers(crossinline action: UserTracker.Callback.() -> Unit) {
+    private inline fun notifySubscribers(
+            crossinline action: (UserTracker.Callback, resultCallback: Runnable) -> Unit
+    ): CountDownLatch {
         val list = synchronized(callbacks) {
             callbacks.toList()
         }
-
+        val latch = CountDownLatch(list.size)
         list.forEach {
-            if (it.callback.get() != null) {
+            val callback = it.callback.get()
+            if (callback != null) {
                 it.executor.execute {
-                    it.callback.get()?.action()
+                    action(callback) { latch.countDown() }
                 }
+            } else {
+                latch.countDown()
             }
         }
+        return latch
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

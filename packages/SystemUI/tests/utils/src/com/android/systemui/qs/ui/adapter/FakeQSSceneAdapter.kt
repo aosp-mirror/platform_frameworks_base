@@ -41,6 +41,8 @@ class FakeQSSceneAdapter(
     private val _navBarPadding = MutableStateFlow<Int>(0)
     val navBarPadding = _navBarPadding.asStateFlow()
 
+    override var isQsFullyCollapsed: Boolean = true
+
     override suspend fun inflate(context: Context) {
         _view.value = inflateDelegate(context)
     }

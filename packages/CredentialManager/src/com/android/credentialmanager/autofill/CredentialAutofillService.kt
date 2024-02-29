@@ -40,6 +40,7 @@ import android.service.autofill.Field
 import android.service.autofill.FillCallback
 import android.service.autofill.FillRequest
 import android.service.autofill.FillResponse
+import android.service.autofill.Flags
 import android.service.autofill.InlinePresentation
 import android.service.autofill.Presentations
 import android.service.autofill.SaveCallback
@@ -56,6 +57,7 @@ import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import com.android.credentialmanager.GetFlowUtils
+import com.android.credentialmanager.common.ui.InlinePresentationsFactory
 import com.android.credentialmanager.common.ui.RemoteViewsFactory
 import com.android.credentialmanager.getflow.ProviderDisplayInfo
 import com.android.credentialmanager.getflow.toProviderDisplayInfo
@@ -211,7 +213,7 @@ class CredentialAutofillService : AutofillService() {
         autofillIdToProvidersMap.forEach { (autofillId, providers) ->
             validFillResponse = processProvidersForAutofillId(
                     filLRequest, autofillId, providers, entryIconMap, fillResponseBuilder,
-                    getCredResponse.pendingIntent)
+                    getCredResponse.intent)
                     .or(validFillResponse)
         }
         if (!validFillResponse) {
@@ -227,7 +229,7 @@ class CredentialAutofillService : AutofillService() {
             providerDataList: ArrayList<GetCredentialProviderData>,
             entryIconMap: Map<String, Icon>,
             fillResponseBuilder: FillResponse.Builder,
-            bottomSheetPendingIntent: PendingIntent?
+            bottomSheetIntent: Intent
     ): Boolean {
         val providerList = GetFlowUtils.toProviderList(
             providerDataList,
@@ -250,7 +252,7 @@ class CredentialAutofillService : AutofillService() {
         maxInlineItemCount = maxInlineItemCount.coerceAtMost(inlineMaxSuggestedCount)
         val lastDropdownDatasetIndex = Settings.Global.getInt(this.contentResolver,
                 Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
-                (maxDropdownDisplayLimit - 1)).coerceAtMost(totalEntryCount - 1)
+                (maxDropdownDisplayLimit - 1)).coerceAtMost(totalEntryCount)
 
         var i = 0
         var datasetAdded = false
@@ -265,6 +267,8 @@ class CredentialAutofillService : AutofillService() {
                 }
             }
         }
+        bottomSheetIntent.putExtra(
+                ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, providerDataList)
         providerDisplayInfo.sortedUserNameToCredentialEntryList.forEach usernameLoop@{
             val primaryEntry = it.sortedCredentialEntryList.first()
             val pendingIntent = primaryEntry.pendingIntent
@@ -293,8 +297,12 @@ class CredentialAutofillService : AutofillService() {
                 } else {
                     inlinePresentationSpecs[inlinePresentationSpecsCount - 1]
                 }
-                inlinePresentation = createInlinePresentation(primaryEntry, pendingIntent, icon,
-                        spec!!, duplicateDisplayNamesForPasskeys)
+                if (spec != null) {
+                    inlinePresentation = createInlinePresentation(primaryEntry, pendingIntent, icon,
+                            InlinePresentationsFactory.modifyInlinePresentationSpec
+                            (this@CredentialAutofillService, spec),
+                            duplicateDisplayNamesForPasskeys)
+                }
             }
             var dropdownPresentation: RemoteViews? = null
             if (i < lastDropdownDatasetIndex) {
@@ -324,16 +332,16 @@ class CredentialAutofillService : AutofillService() {
             datasetAdded = true
             i++
 
-            if (i == lastDropdownDatasetIndex && bottomSheetPendingIntent != null) {
-                addDropdownMoreOptionsPresentation(bottomSheetPendingIntent, autofillId,
+            if (i == lastDropdownDatasetIndex) {
+                addDropdownMoreOptionsPresentation(bottomSheetIntent, autofillId,
                         fillResponseBuilder)
             }
         }
         val pinnedSpec = getLastInlinePresentationSpec(inlinePresentationSpecs,
                 inlinePresentationSpecsCount)
-        if (datasetAdded && bottomSheetPendingIntent != null && pinnedSpec != null) {
-            addPinnedInlineSuggestion(bottomSheetPendingIntent, pinnedSpec, autofillId,
-                    fillResponseBuilder, providerDataList)
+        if (datasetAdded && pinnedSpec != null) {
+            addPinnedInlineSuggestion(pinnedSpec, autofillId,
+                    fillResponseBuilder, bottomSheetIntent)
         }
         return datasetAdded
     }
@@ -364,13 +372,14 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun addDropdownMoreOptionsPresentation(
-            bottomSheetPendingIntent: PendingIntent,
+            bottomSheetIntent: Intent,
             autofillId: AutofillId,
             fillResponseBuilder: FillResponse.Builder
     ) {
         val presentationBuilder = Presentations.Builder()
                 .setMenuPresentation(
                         RemoteViewsFactory.createMoreSignInOptionsPresentation(this))
+        val pendingIntent = setUpBottomSheetPendingIntent(bottomSheetIntent)
 
         fillResponseBuilder.addDataset(
                 Dataset.Builder()
@@ -379,7 +388,7 @@ class CredentialAutofillService : AutofillService() {
                                 Field.Builder().setPresentations(
                                         presentationBuilder.build())
                                         .build())
-                        .setAuthentication(bottomSheetPendingIntent.intentSender)
+                        .setAuthentication(pendingIntent.intentSender)
                         .build()
         )
     }
@@ -395,35 +404,39 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun addPinnedInlineSuggestion(
-            bottomSheetPendingIntent: PendingIntent,
             spec: InlinePresentationSpec,
             autofillId: AutofillId,
             fillResponseBuilder: FillResponse.Builder,
-            providerDataList: ArrayList<GetCredentialProviderData>
+            bottomSheetIntent: Intent
     ) {
+        val pendingIntent = setUpBottomSheetPendingIntent(bottomSheetIntent)
+
         val dataSetBuilder = Dataset.Builder()
         val sliceBuilder = InlineSuggestionUi
-                .newContentBuilder(bottomSheetPendingIntent)
+                .newContentBuilder(pendingIntent)
                 .setStartIcon(Icon.createWithResource(this,
                         com.android.credentialmanager.R.drawable.more_horiz_24px))
         val presentationBuilder = Presentations.Builder()
                 .setInlinePresentation(InlinePresentation(
                         sliceBuilder.build().slice, spec, /* pinned= */ true))
 
-        val extrasIntent = Intent()
-        extrasIntent.putExtra(ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, providerDataList)
-
         fillResponseBuilder.addDataset(
                 dataSetBuilder
                         .setField(
                                 autofillId,
                                 Field.Builder().setPresentations(
-                                        presentationBuilder.build())
-                                        .build())
-                        .setAuthentication(bottomSheetPendingIntent.intentSender)
-                        .setCredentialFillInIntent(extrasIntent)
+                                        presentationBuilder.build()
+                                ).build()
+                        )
+                        .setAuthentication(pendingIntent.intentSender)
                         .build()
         )
+    }
+
+    private fun setUpBottomSheetPendingIntent(intent: Intent): PendingIntent {
+        intent.setAction(java.util.UUID.randomUUID().toString())
+        return PendingIntent.getActivity(this, /*requestCode=*/0, intent,
+                PendingIntent.FLAG_MUTABLE, /*options=*/null)
     }
 
     /**
@@ -479,18 +492,28 @@ class CredentialAutofillService : AutofillService() {
         val autofillIdToCredentialEntries:
                 MutableMap<AutofillId, ArrayList<Entry>> = mutableMapOf()
         credentialEntryList.forEach entryLoop@{ credentialEntry ->
-            val autofillId: AutofillId? = credentialEntry
-                    .frameworkExtrasIntent
-                    ?.getParcelableExtra(
-                            CredentialProviderService.EXTRA_AUTOFILL_ID,
-                            AutofillId::class.java)
-            if (autofillId == null) {
-                Log.e(TAG, "AutofillId is missing from credential entry. Credential" +
-                        " Integration might be disabled.")
-                return@entryLoop
-            }
-            autofillIdToCredentialEntries.getOrPut(autofillId) { ArrayList() }
-                    .add(credentialEntry)
+            val intent = credentialEntry.frameworkExtrasIntent
+            intent?.getParcelableExtra(
+                        CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,
+                        android.service.credentials.GetCredentialRequest::class.java)
+                    ?.credentialOptions
+                    ?.forEach { credentialOption ->
+                        credentialOption.candidateQueryData.getParcelableArrayList(
+                            CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId::class.java)
+                                ?.forEach { autofillId ->
+                                    intent.putExtra(
+                                        CredentialProviderService.EXTRA_AUTOFILL_ID,
+                                        autofillId)
+                                    val entry = Entry(
+                                        credentialEntry.key,
+                                        credentialEntry.subkey,
+                                        credentialEntry.slice,
+                                        intent)
+                                    autofillIdToCredentialEntries
+                                            .getOrPut(autofillId) { ArrayList() }
+                                            .add(entry)
+                                }
+                    }
         }
         return autofillIdToCredentialEntries
     }
@@ -555,7 +578,7 @@ class CredentialAutofillService : AutofillService() {
             responseClientState: Bundle
     ): GetCredentialRequest? {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
-        traverseStructureForRequest(structure, credentialOptions, responseClientState)
+        traverseStructureForRequest(structure, credentialOptions, responseClientState, sessionId)
 
         if (credentialOptions.isNotEmpty()) {
             val dataBundle = Bundle()
@@ -571,25 +594,35 @@ class CredentialAutofillService : AutofillService() {
     private fun traverseStructureForRequest(
             structure: AssistStructure,
             cmRequests: MutableList<CredentialOption>,
-            responseClientState: Bundle
+            responseClientState: Bundle,
+            sessionId: Int
     ) {
+        val traversedViewNodes: MutableSet<AutofillId> = mutableSetOf()
+        val credentialOptionsFromHints: MutableMap<String, CredentialOption> = mutableMapOf()
         val windowNodes: List<AssistStructure.WindowNode> =
                 structure.run {
                     (0 until windowNodeCount).map { getWindowNodeAt(it) }
                 }
 
         windowNodes.forEach { windowNode: AssistStructure.WindowNode ->
-            traverseNodeForRequest(windowNode.rootViewNode, cmRequests, responseClientState)
+            traverseNodeForRequest(
+                windowNode.rootViewNode, cmRequests, responseClientState, traversedViewNodes,
+                credentialOptionsFromHints, sessionId)
         }
     }
 
     private fun traverseNodeForRequest(
             viewNode: AssistStructure.ViewNode,
             cmRequests: MutableList<CredentialOption>,
-            responseClientState: Bundle
+            responseClientState: Bundle,
+            traversedViewNodes: MutableSet<AutofillId>,
+            credentialOptionsFromHints: MutableMap<String, CredentialOption>,
+            sessionId: Int
     ) {
         viewNode.autofillId?.let {
-            cmRequests.addAll(getCredentialOptionsFromViewNode(viewNode, it, responseClientState))
+            cmRequests.addAll(getCredentialOptionsFromViewNode(viewNode, it, responseClientState,
+                traversedViewNodes, credentialOptionsFromHints, sessionId))
+            traversedViewNodes.add(it)
         }
 
         val children: List<AssistStructure.ViewNode> =
@@ -598,22 +631,51 @@ class CredentialAutofillService : AutofillService() {
                 }
 
         children.forEach { childNode: AssistStructure.ViewNode ->
-            traverseNodeForRequest(childNode, cmRequests, responseClientState)
+            traverseNodeForRequest(childNode, cmRequests, responseClientState, traversedViewNodes,
+                credentialOptionsFromHints, sessionId)
         }
     }
 
     private fun getCredentialOptionsFromViewNode(
             viewNode: AssistStructure.ViewNode,
             autofillId: AutofillId,
-            responseClientState: Bundle
+            responseClientState: Bundle,
+            traversedViewNodes: MutableSet<AutofillId>,
+            credentialOptionsFromHints: MutableMap<String, CredentialOption>,
+            sessionId: Int
     ): MutableList<CredentialOption> {
-        if (viewNode.credentialManagerRequest != null &&
-                viewNode.credentialManagerCallback != null) {
-            val options = viewNode.credentialManagerRequest?.getCredentialOptions()
-            if (options != null) {
-                return options
+        val credentialOptions: MutableList<CredentialOption> = mutableListOf()
+        if (Flags.autofillCredmanDevIntegration() && viewNode.credentialManagerRequest != null) {
+            viewNode.credentialManagerRequest
+                    ?.getCredentialOptions()
+                    ?.forEach { credentialOption ->
+                credentialOption.candidateQueryData
+                        .getParcelableArrayList(
+                            CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId::class.java)
+                        ?.let { associatedAutofillIds ->
+                            // Set sessionId in autofillIds. The autofillIds stored in Credential
+                            // Options do not have associated session id and will result in
+                            // different hashes than the ones in assistStructure.
+                            associatedAutofillIds.forEach { associatedAutofillId ->
+                                associatedAutofillId.sessionId = sessionId
+                            }
+
+                            // Check whether any of the associated autofill ids have already been
+                            // traversed. If so, skip, to dedupe on duplicate credential options.
+                            if ((traversedViewNodes intersect associatedAutofillIds.toSet())
+                                        .isEmpty()) {
+                                credentialOptions.add(credentialOption)
+                            }
+
+                            // Set the autofillIds with session id back to credential option.
+                            credentialOption.candidateQueryData.putParcelableArrayList(
+                                CredentialProviderService.EXTRA_AUTOFILL_ID,
+                                associatedAutofillIds
+                            )
+                        }
             }
         }
+        // TODO(b/325502552): clean up cred option logic in autofill hint
         val credentialHints: MutableList<String> = mutableListOf()
 
         if (viewNode.autofillHints != null) {
@@ -627,10 +689,10 @@ class CredentialAutofillService : AutofillService() {
             }
         }
 
-        val credentialOptions: MutableList<CredentialOption> = mutableListOf()
         for (credentialHint in credentialHints) {
             try {
-                convertJsonToCredentialOption(credentialHint, autofillId)
+                convertJsonToCredentialOption(
+                    credentialHint, autofillId, credentialOptionsFromHints)
                         .let { credentialOptions.addAll(it) }
             } catch (e: JSONException) {
                 Log.i(TAG, "Exception while parsing response: " + e.message)
@@ -639,10 +701,11 @@ class CredentialAutofillService : AutofillService() {
         return credentialOptions
     }
 
-    private fun convertJsonToCredentialOption(jsonString: String, autofillId: AutofillId):
-            List<CredentialOption> {
-        // TODO(b/302000646) Move this logic to jetpack so that is consistent
-        //  with building the json
+    private fun convertJsonToCredentialOption(
+        jsonString: String,
+        autofillId: AutofillId,
+        credentialOptionsFromHints: MutableMap<String, CredentialOption>
+    ): List<CredentialOption> {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
 
         val json = JSONObject(jsonString)
@@ -650,16 +713,34 @@ class CredentialAutofillService : AutofillService() {
         val options = jsonGet.getJSONArray(CRED_OPTIONS_KEY)
         for (i in 0 until options.length()) {
             val option = options.getJSONObject(i)
-            val candidateBundle = convertJsonToBundle(option.getJSONObject(CANDIDATE_DATA_KEY))
-            candidateBundle.putParcelable(
+            val optionString = option.toString()
+            credentialOptionsFromHints[optionString]
+                    ?.let { credentialOption ->
+                        // if the current credential option was seen before, add the current
+                        // viewNode to the credential option, but do not add it to the option list
+                        // again. This will result in the same result as deduping based on
+                        // traversed viewNode.
+                        credentialOption.candidateQueryData.getParcelableArrayList(
+                            CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId::class.java)
+                                ?.let {
+                                    it.add(autofillId)
+                                    credentialOption.candidateQueryData.putParcelableArrayList(
+                                        CredentialProviderService.EXTRA_AUTOFILL_ID, it)
+                                }
+            } ?: run {
+                val candidateBundle = convertJsonToBundle(option.getJSONObject(CANDIDATE_DATA_KEY))
+                candidateBundle.putParcelableArrayList(
                     CredentialProviderService.EXTRA_AUTOFILL_ID,
-                    autofillId)
-            credentialOptions.add(CredentialOption(
+                    arrayListOf(autofillId))
+                val credentialOption = CredentialOption(
                     option.getString(TYPE_KEY),
                     convertJsonToBundle(option.getJSONObject(REQUEST_DATA_KEY)),
                     candidateBundle,
                     option.getBoolean(SYS_PROVIDER_REQ_KEY),
-            ))
+                )
+                credentialOptions.add(credentialOption)
+                credentialOptionsFromHints[optionString] = credentialOption
+            }
         }
         return credentialOptions
     }

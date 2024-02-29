@@ -21,11 +21,15 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
+import static android.view.MotionEvent.ACTION_CANCEL;
+import static android.view.MotionEvent.ACTION_HOVER_ENTER;
+import static android.view.MotionEvent.ACTION_HOVER_EXIT;
+import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.statusBars;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FINAL_FREEFORM_SCALE;
 import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION;
 import static com.android.wm.shell.windowdecor.MoveToDesktopAnimator.DRAG_FREEFORM_SCALE;
 
@@ -57,7 +61,6 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -310,8 +313,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private class DesktopModeTouchEventListener extends GestureDetector.SimpleOnGestureListener
             implements View.OnClickListener, View.OnTouchListener, View.OnLongClickListener,
-            DragDetector.MotionEventHandler {
-
+            View.OnGenericMotionListener , DragDetector.MotionEventHandler {
+        private static final int CLOSE_MAXIMIZE_MENU_DELAY_MS = 150;
         private final int mTaskId;
         private final WindowContainerToken mTaskToken;
         private final DragPositioningCallback mDragPositioningCallback;
@@ -319,9 +322,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         private final GestureDetector mGestureDetector;
 
         private boolean mIsDragging;
+        private boolean mTouchscreenInUse;
         private boolean mHasLongClicked;
-        private boolean mShouldClick;
         private int mDragPointerId = -1;
+        private final Runnable mCloseMaximizeWindowRunnable;
 
         private DesktopModeTouchEventListener(
                 RunningTaskInfo taskInfo,
@@ -331,10 +335,19 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             mDragPositioningCallback = dragPositioningCallback;
             mDragDetector = new DragDetector(this);
             mGestureDetector = new GestureDetector(mContext, this);
+            mCloseMaximizeWindowRunnable = () -> {
+                final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+                if (decoration == null) return;
+                decoration.closeMaximizeMenu();
+            };
         }
 
         @Override
         public void onClick(View v) {
+            if (mIsDragging) {
+                mIsDragging = false;
+                return;
+            }
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final int id = v.getId();
             if (id == R.id.close_window) {
@@ -386,13 +399,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDesktopTasksController.ifPresent(c -> c.moveToNextDisplay(mTaskId));
                 }
             } else if (id == R.id.maximize_window) {
-                if (decoration.isMaximizeMenuActive()) {
-                    decoration.closeMaximizeMenu();
-                    return;
-                }
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
-                mDesktopTasksController.ifPresent(c -> c.toggleDesktopTaskSize(taskInfo));
                 decoration.closeHandleMenu();
+                decoration.closeMaximizeMenu();
+                mDesktopTasksController.ifPresent(c -> c.toggleDesktopTaskSize(taskInfo));
             } else if (id == R.id.maximize_menu_maximize_button) {
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
                 mDesktopTasksController.ifPresent(c -> c.toggleDesktopTaskSize(taskInfo));
@@ -416,6 +426,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         @Override
         public boolean onTouch(View v, MotionEvent e) {
             final int id = v.getId();
+            if ((e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN) {
+                mTouchscreenInUse = e.getActionMasked() != ACTION_UP
+                        && e.getActionMasked() != ACTION_CANCEL;
+            }
             if (id != R.id.caption_handle && id != R.id.desktop_mode_caption
                     && id != R.id.open_menu_button && id != R.id.close_window
                     && id != R.id.maximize_window) {
@@ -427,29 +441,50 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             if (!mHasLongClicked && id != R.id.maximize_window) {
                 decoration.closeMaximizeMenuIfNeeded(e);
             }
-
-            final long eventDuration = e.getEventTime() - e.getDownTime();
-            final boolean shouldLongClick = id == R.id.maximize_window && !mIsDragging
-                    && !mHasLongClicked && eventDuration >= ViewConfiguration.getLongPressTimeout();
-            if (shouldLongClick) {
-                v.performLongClick();
-                mHasLongClicked = true;
-                return true;
-            }
-
             return mDragDetector.onMotionEvent(v, e);
         }
 
         @Override
         public boolean onLongClick(View v) {
             final int id = v.getId();
-            if (id == R.id.maximize_window) {
+            if (id == R.id.maximize_window && mTouchscreenInUse) {
                 final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
                 moveTaskToFront(decoration.mTaskInfo);
                 if (decoration.isMaximizeMenuActive()) {
                     decoration.closeMaximizeMenu();
                 } else {
+                    mHasLongClicked = true;
                     decoration.createMaximizeMenu();
+                }
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onGenericMotion(View v, MotionEvent ev) {
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+            final int id = v.getId();
+            if (ev.getAction() == ACTION_HOVER_ENTER) {
+                if (!decoration.isMaximizeMenuActive() && id == R.id.maximize_window) {
+                    decoration.onMaximizeWindowHoverEnter();
+                } else if (id == R.id.maximize_window
+                        || MaximizeMenu.Companion.isMaximizeMenuView(id)) {
+                    // Re-hovering over any of the maximize menu views should keep the menu open by
+                    // cancelling any attempts to close the menu.
+                    mMainHandler.removeCallbacks(mCloseMaximizeWindowRunnable);
+                }
+                return true;
+            } else if (ev.getAction() == ACTION_HOVER_EXIT) {
+                if (!decoration.isMaximizeMenuActive() && id == R.id.maximize_window) {
+                    decoration.onMaximizeWindowHoverExit();
+                } else if (id == R.id.maximize_window
+                        || MaximizeMenu.Companion.isMaximizeMenuView(id)) {
+                    // Close menu if not hovering over maximize menu or maximize button after a
+                    // delay to give user a chance to re-enter view or to move from one maximize
+                    // menu view to another.
+                    mMainHandler.postDelayed(mCloseMaximizeWindowRunnable,
+                            CLOSE_MAXIMIZE_MENU_DELAY_MS);
                 }
                 return true;
             }
@@ -477,11 +512,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             if (mGestureDetector.onTouchEvent(e)) {
                 return true;
             }
-            if (e.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                // If a motion event is cancelled, reset mShouldClick so a click is not accidentally
-                // performed.
-                mShouldClick = false;
-            }
+            final int id = v.getId();
+            final boolean touchingButton = (id == R.id.close_window || id == R.id.maximize_window
+                    || id == R.id.open_menu_button);
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
                     mDragPointerId = e.getPointerId(0);
@@ -489,12 +522,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             0 /* ctrlType */, e.getRawX(0),
                             e.getRawY(0));
                     mIsDragging = false;
-                    mShouldClick = true;
                     mHasLongClicked = false;
-                    return true;
+                    // Do not consume input event if a button is touched, otherwise it would
+                    // prevent the button's ripple effect from showing.
+                    return !touchingButton;
                 }
                 case MotionEvent.ACTION_MOVE: {
-                    mShouldClick = false;
                     // If a decor's resize drag zone is active, don't also try to reposition it.
                     if (decoration.isHandlingDragResize()) break;
                     decoration.closeMaximizeMenu();
@@ -515,11 +548,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 case MotionEvent.ACTION_CANCEL: {
                     final boolean wasDragging = mIsDragging;
                     if (!wasDragging) {
-                        if (mShouldClick && v != null && !mHasLongClicked) {
-                            v.performClick();
-                            mShouldClick = false;
-                            return true;
-                        }
                         return false;
                     }
                     if (e.findPointerIndex(mDragPointerId) == -1) {
@@ -538,8 +566,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             position,
                             new PointF(e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx)),
                             newTaskBounds));
-                    mIsDragging = false;
-                    return true;
+                    if (touchingButton && !mHasLongClicked) {
+                        // We need the input event to not be consumed here to end the ripple
+                        // effect on the touched button. We will reset drag state in the ensuing
+                        // onClick call that results.
+                        return false;
+                    } else {
+                        mIsDragging = false;
+                        return true;
+                    }
                 }
             }
             return true;
@@ -728,7 +763,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mTransitionDragActive = false;
                     final int statusBarHeight = getStatusBarHeight(
                             relevantDecor.mTaskInfo.displayId);
-                    if (ev.getY() > 2 * statusBarHeight) {
+                    if (ev.getRawY() > 2 * statusBarHeight) {
                         if (DesktopModeStatus.isEnabled()) {
                             animateToDesktop(relevantDecor, ev);
                         }
@@ -753,10 +788,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDesktopTasksController.ifPresent(
                             c -> c.updateVisualIndicator(
                                     relevantDecor.mTaskInfo,
-                                    relevantDecor.mTaskSurface, ev.getX(), ev.getY()));
+                                    relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY()));
                     final int statusBarHeight = getStatusBarHeight(
                             relevantDecor.mTaskInfo.displayId);
-                    if (ev.getY() > statusBarHeight) {
+                    if (ev.getRawY() > statusBarHeight) {
                         if (mMoveToDesktopAnimator == null) {
                             mMoveToDesktopAnimator = new MoveToDesktopAnimator(
                                     mContext, mDragToDesktopAnimationStartBounds,
@@ -785,16 +820,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      * @param scale the amount to scale to relative to the Screen Bounds
      */
     private Rect calculateFreeformBounds(int displayId, float scale) {
+        // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
         final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(displayId);
         final int screenWidth = displayLayout.width();
         final int screenHeight = displayLayout.height();
 
         final float adjustmentPercentage = (1f - scale) / 2;
-        final Rect endBounds = new Rect((int) (screenWidth * adjustmentPercentage),
+        return new Rect((int) (screenWidth * adjustmentPercentage),
                 (int) (screenHeight * adjustmentPercentage),
                 (int) (screenWidth * (adjustmentPercentage + scale)),
                 (int) (screenHeight * (adjustmentPercentage + scale)));
-        return endBounds;
     }
 
     /**
@@ -836,7 +871,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         c -> {
                             c.onDragPositioningEndThroughStatusBar(relevantDecor.mTaskInfo,
                                     calculateFreeformBounds(ev.getDisplayId(),
-                                            FINAL_FREEFORM_SCALE));
+                                            DesktopTasksController
+                                                    .DESKTOP_MODE_INITIAL_BOUNDS_SCALE));
                         });
             }
         });
@@ -986,7 +1022,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new DesktopModeTouchEventListener(taskInfo, dragPositioningCallback);
 
         windowDecoration.setCaptionListeners(
-                touchEventListener, touchEventListener, touchEventListener);
+                touchEventListener, touchEventListener, touchEventListener, touchEventListener);
         windowDecoration.setExclusionRegionListener(mExclusionRegionListener);
         windowDecoration.setDragPositioningCallback(dragPositioningCallback);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
@@ -1032,6 +1068,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 return;
             }
             decoration.showResizeVeil(t, bounds);
+            decoration.setAnimatingTaskResize(true);
         }
 
         @Override
@@ -1046,6 +1083,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
             if (decoration == null) return;
             decoration.hideResizeVeil();
+            decoration.setAnimatingTaskResize(false);
         }
     }
 

@@ -127,7 +127,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
-import android.os.OutcomeReceiver;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -2770,6 +2769,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
+        if (sDebug) {
+            Slog.d(TAG, "setAuthenticationResultLocked(): id= " + authenticationId
+                    + ", data=" + data);
+        }
         final int requestId = AutofillManager.getRequestIdFromAuthenticationId(authenticationId);
         if (requestId == AUGMENTED_AUTOFILL_REQUEST_ID) {
             setAuthenticationResultForAugmentedAutofillLocked(data, authenticationId);
@@ -2799,9 +2802,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final int datasetIdx = AutofillManager.getDatasetIdFromAuthenticationId(
                 authenticationId);
+        Dataset dataset = null;
         // Authenticated a dataset - reset view state regardless if we got a response or a dataset
         if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
-            final Dataset dataset = authenticatedResponse.getDatasets().get(datasetIdx);
+            dataset = authenticatedResponse.getDatasets().get(datasetIdx);
             if (dataset == null) {
                 Slog.w(TAG, "no dataset with index " + datasetIdx + " on fill response");
                 mPresentationStatsEventLogger.maybeSetAuthenticationResult(
@@ -2816,33 +2820,66 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mSessionFlags.mExpiredResponse = false;
 
         final Parcelable result = data.getParcelable(AutofillManager.EXTRA_AUTHENTICATION_RESULT);
+        final GetCredentialException exception = data.getSerializable(
+                CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION,
+                GetCredentialException.class);
 
         final Bundle newClientState = data.getBundle(AutofillManager.EXTRA_CLIENT_STATE);
         if (sDebug) {
             Slog.d(TAG, "setAuthenticationResultLocked(): result=" + result
                     + ", clientState=" + newClientState + ", authenticationId=" + authenticationId);
         }
+        if (Flags.autofillCredmanDevIntegration() && exception != null
+                && exception instanceof GetCredentialException) {
+            if (dataset != null && dataset.getFieldIds().size() == 1) {
+                if (sDebug) {
+                    Slog.d(TAG, "setAuthenticationResultLocked(): result returns with"
+                            + "Credential Manager Exception");
+                }
+                AutofillId autofillId = dataset.getFieldIds().get(0);
+                sendCredentialManagerResponseToApp(/*response=*/ null,
+                        (GetCredentialException) exception, autofillId);
+            }
+            return;
+        }
+
         if (result instanceof FillResponse) {
+            if (sDebug) {
+                Slog.d(TAG, "setAuthenticationResultLocked(): received FillResponse from"
+                        + " authentication flow");
+            }
             logAuthenticationStatusLocked(requestId, MetricsEvent.AUTOFILL_AUTHENTICATED);
             mPresentationStatsEventLogger.maybeSetAuthenticationResult(
                 AUTHENTICATION_RESULT_SUCCESS);
             replaceResponseLocked(authenticatedResponse, (FillResponse) result, newClientState);
         } else if (result instanceof GetCredentialResponse) {
-            Slog.d(TAG, "Received GetCredentialResponse from authentication flow");
-            boolean isCredmanCallbackInvoked = false;
-            if (Flags.autofillCredmanIntegration()) {
-                GetCredentialResponse response = (GetCredentialResponse) result;
-                isCredmanCallbackInvoked = invokeCredentialManagerCallback(response);
+            if (sDebug) {
+                Slog.d(TAG, "Received GetCredentialResponse from authentication flow");
             }
-
-            if (!isCredmanCallbackInvoked) {
-                Dataset dataset = getDatasetFromCredentialResponse(
-                    (GetCredentialResponse) result);
-                if (dataset != null) {
-                    autoFill(requestId, datasetIdx, dataset, false, UI_TYPE_UNKNOWN);
+            if (Flags.autofillCredmanDevIntegration()) {
+                GetCredentialResponse response = (GetCredentialResponse) result;
+                if (dataset != null && dataset.getFieldIds().size() == 1) {
+                    AutofillId autofillId = dataset.getFieldIds().get(0);
+                    if (sDebug) {
+                        Slog.d(TAG, "Received GetCredentialResponse from authentication flow,"
+                                + "for autofillId: " + autofillId);
+                    }
+                    sendCredentialManagerResponseToApp(response,
+                            /*exception=*/ null, autofillId);
+                }
+            } else if (Flags.autofillCredmanIntegration()) {
+                Dataset datasetFromCredentialResponse = getDatasetFromCredentialResponse(
+                        (GetCredentialResponse) result);
+                if (datasetFromCredentialResponse != null) {
+                    autoFill(requestId, datasetIdx, datasetFromCredentialResponse,
+                            false, UI_TYPE_UNKNOWN);
                 }
             }
         } else if (result instanceof Dataset) {
+            if (sDebug) {
+                Slog.d(TAG, "setAuthenticationResultLocked(): received Dataset from"
+                        + " authentication flow");
+            }
             if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
                 logAuthenticationStatusLocked(requestId,
                         MetricsEvent.AUTOFILL_DATASET_AUTHENTICATED);
@@ -2852,12 +2889,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sDebug) Slog.d(TAG,  "Updating client state from auth dataset");
                     mClientState = newClientState;
                 }
-                Dataset dataset = getEffectiveDatasetForAuthentication((Dataset) result);
+                Dataset datasetFromResult = getEffectiveDatasetForAuthentication((Dataset) result);
                 final Dataset oldDataset = authenticatedResponse.getDatasets().get(datasetIdx);
                 if (!isAuthResultDatasetEphemeral(oldDataset, data)) {
-                    authenticatedResponse.getDatasets().set(datasetIdx, dataset);
+                    authenticatedResponse.getDatasets().set(datasetIdx, datasetFromResult);
                 }
-                autoFill(requestId, datasetIdx, dataset, false, UI_TYPE_UNKNOWN);
+                autoFill(requestId, datasetIdx, datasetFromResult, false, UI_TYPE_UNKNOWN);
             } else {
                 Slog.w(TAG, "invalid index (" + datasetIdx + ") for authentication id "
                         + authenticationId);
@@ -2876,49 +2913,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 AUTHENTICATION_RESULT_FAILURE);
             processNullResponseLocked(requestId, 0);
         }
-    }
-
-    private boolean invokeCredentialManagerCallback(GetCredentialResponse response) {
-        synchronized (mLock) {
-            return invokeCredentialManagerCallbackLocked(response);
-        }
-    }
-
-    @GuardedBy("mLock")
-    private boolean invokeCredentialManagerCallbackLocked(GetCredentialResponse response) {
-        AutofillId autofillId = response.getAutofillId();
-        if (autofillId != null) {
-            OutcomeReceiver<GetCredentialResponse,
-                    GetCredentialException> callback =
-                    getCredmanCallbackFromContextsLocked(autofillId);
-            if (callback != null) {
-                Slog.w(TAG, "Propagating response to Credential Manager callback");
-                callback.onResult(response);
-                return true;
-            } else {
-                Slog.w(TAG, "Received Credential Manager response but no callback found");
-            }
-        } else {
-            Slog.w(TAG, "Received Credential Manager response but no autofillId found");
-        }
-        return false;
-    }
-
-    @GuardedBy("mLock")
-    @Nullable
-    private OutcomeReceiver<GetCredentialResponse,
-            GetCredentialException> getCredmanCallbackFromContextsLocked(
-            @NonNull AutofillId autofillId) {
-        final int numContexts = mContexts.size();
-        for (int i = numContexts - 1; i >= 0; i--) {
-            final FillContext context = mContexts.get(i);
-            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(),
-                    autofillId);
-            if (node != null) {
-                return node.getCredentialManagerCallback();
-            }
-        }
-        return null;
     }
 
     private Dataset getDatasetFromCredentialResponse(GetCredentialResponse result) {
@@ -5084,21 +5078,25 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private void addCredentialManagerCallbackForDataset(Dataset dataset, int requestId) {
+        AutofillId autofillId = null;
+        if (dataset != null && dataset.getFieldIds().size() == 1) {
+            autofillId = dataset.getFieldIds().get(0);
+        }
+        final AutofillId finalAutofillId = autofillId;
         final ResultReceiver resultReceiver = new ResultReceiver(mHandler) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 if (resultCode == SUCCESS_CREDMAN_SELECTOR) {
                     Slog.d(TAG, "onReceiveResult from Credential Manager bottom sheet");
-                    boolean isCredmanCallbackInvoked = false;
                     GetCredentialResponse getCredentialResponse =
                             resultData.getParcelable(
                                     CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE,
                                     GetCredentialResponse.class);
 
-                    isCredmanCallbackInvoked =
-                            invokeCredentialManagerCallback(getCredentialResponse);
-
-                    if (!isCredmanCallbackInvoked) {
+                    if (Flags.autofillCredmanDevIntegration()) {
+                        sendCredentialManagerResponseToApp(getCredentialResponse,
+                                /*exception=*/ null, finalAutofillId);
+                    } else {
                         Dataset datasetFromCredential = getDatasetFromCredentialResponse(
                                 getCredentialResponse);
                         if (datasetFromCredential != null) {
@@ -5114,6 +5112,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         Slog.w(TAG, "Credman bottom sheet from pinned "
                                 + "entry failed with: + " + exception[0] + " , "
                                 + exception[1]);
+                        sendCredentialManagerResponseToApp(/*response=*/ null,
+                                new GetCredentialException(exception[0], exception[1]),
+                                finalAutofillId);
                     }
                 } else {
                     Slog.d(TAG, "Unknown resultCode from credential "
@@ -5125,6 +5126,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 toIpcFriendlyResultReceiver(resultReceiver);
 
         Intent metadataIntent = dataset.getCredentialFillInIntent();
+        if (metadataIntent == null) {
+            metadataIntent = new Intent();
+        }
+
         metadataIntent.putExtra(
                 android.credentials.selection.Constants.EXTRA_FINAL_RESPONSE_RECEIVER,
                 ipcFriendlyResultReceiver);
@@ -6390,6 +6395,38 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int value = getNumericValue(log, tag);
         if (value != 0) {
             pw.print(", "); pw.print(field); pw.print('='); pw.print(value);
+        }
+    }
+
+    void sendCredentialManagerResponseToApp(@Nullable GetCredentialResponse response,
+            @Nullable GetCredentialException exception, @NonNull AutofillId viewId) {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                Slog.w(TAG, "Call to Session#sendCredentialManagerResponseToApp() rejected "
+                        + "- session: " + id + " destroyed");
+                return;
+            }
+            try {
+                final ViewState viewState = mViewStates.get(viewId);
+                if (mService.getMaster().getIsFillFieldsFromCurrentSessionOnly()
+                        && viewState != null && viewState.id.getSessionId() != id) {
+                    if (sVerbose) {
+                        Slog.v(TAG, "Skipping sending credential response to view: "
+                                + viewId + " as it isn't part of the current session: " + id);
+                    }
+                }
+                if (exception != null) {
+                    mClient.onGetCredentialException(id, viewId, exception.getType(),
+                            exception.getMessage());
+                } else if (response != null) {
+                    mClient.onGetCredentialResponse(id, viewId, response);
+                } else {
+                    Slog.w(TAG, "sendCredentialManagerResponseToApp called with null response"
+                            + "and exception");
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Error sending credential response to activity: " + e);
+            }
         }
     }
 

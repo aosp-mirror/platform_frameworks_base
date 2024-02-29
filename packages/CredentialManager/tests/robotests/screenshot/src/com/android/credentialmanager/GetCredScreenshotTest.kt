@@ -16,7 +16,10 @@
 
 package com.android.credentialmanager
 
+import android.credentials.flags.Flags
 import android.content.Context
+import android.platform.test.flag.junit.SetFlagsRule
+import androidx.compose.ui.test.isPopup
 import com.android.credentialmanager.getflow.RequestDisplayInfo
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.ProviderInfo
@@ -59,12 +62,48 @@ class GetCredScreenshotTest(emulationSpec: DeviceEmulationSpec) {
             CredentialManagerGoldenImagePathManager(getEmulatedDevicePathConfig(emulationSpec))
     )
 
+    @get:Rule val setFlagsRule: SetFlagsRule = SetFlagsRule()
+
     @Test
-    fun singleCredentialScreen() {
+    fun singleCredentialScreen_M3BottomSheetDisabled() {
+        setFlagsRule.disableFlags(Flags.FLAG_SELECTOR_UI_IMPROVEMENTS_ENABLED)
         val providerInfoList = buildProviderInfoList()
         val providerDisplayInfo = toProviderDisplayInfo(providerInfoList)
         val activeEntry = toActiveEntry(providerDisplayInfo)
         screenshotRule.screenshotTest("singleCredentialScreen") {
+            ModalBottomSheet(
+                    sheetContent = {
+                        PrimarySelectionCard(
+                                requestDisplayInfo = REQUEST_DISPLAY_INFO,
+                                providerDisplayInfo = providerDisplayInfo,
+                                providerInfoList = providerInfoList,
+                                activeEntry = activeEntry,
+                                onEntrySelected = {},
+                                onConfirm = {},
+                                onMoreOptionSelected = {},
+                                onLog = {},
+                        )
+                    },
+                    isInitialRender = true,
+                    onDismiss = {},
+                    onInitialRenderComplete = {},
+                    isAutoSelectFlow = false,
+            )
+        }
+    }
+
+    @Test
+    fun singleCredentialScreen_M3BottomSheetEnabled() {
+        setFlagsRule.enableFlags(Flags.FLAG_SELECTOR_UI_IMPROVEMENTS_ENABLED)
+        val providerInfoList = buildProviderInfoList()
+        val providerDisplayInfo = toProviderDisplayInfo(providerInfoList)
+        val activeEntry = toActiveEntry(providerDisplayInfo)
+        screenshotRule.screenshotTest(
+                "singleCredentialScreen_newM3BottomSheet",
+                // M3's ModalBottomSheet lives in a new window, meaning we have two windows with
+                // a root. Hence use a different matcher `isPopup`.
+                viewFinder = { screenshotRule.composeRule.onNode(isPopup()) },
+        ) {
             ModalBottomSheet(
                     sheetContent = {
                         PrimarySelectionCard(

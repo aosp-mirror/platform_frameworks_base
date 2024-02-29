@@ -18,14 +18,16 @@ package com.android.systemui.biometrics
 
 import android.content.res.Resources
 import com.android.keyguard.logging.BiometricMessageDeferralLogger
-import com.android.keyguard.logging.FaceMessageDeferralLogger
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.dagger.BiometricLog
 import com.android.systemui.res.R
 import java.io.PrintWriter
 import java.util.Objects
+import java.util.UUID
 import javax.inject.Inject
 
 @SysUISingleton
@@ -33,14 +35,16 @@ class FaceHelpMessageDeferralFactory
 @Inject
 constructor(
     @Main private val resources: Resources,
-    private val logBuffer: FaceMessageDeferralLogger,
+    @BiometricLog private val logBuffer: LogBuffer,
     private val dumpManager: DumpManager
 ) {
     fun create(): FaceHelpMessageDeferral {
+        val id = UUID.randomUUID().toString()
         return FaceHelpMessageDeferral(
             resources = resources,
-            logBuffer = logBuffer,
+            logBuffer = BiometricMessageDeferralLogger(logBuffer, "FaceHelpMessageDeferral[$id]"),
             dumpManager = dumpManager,
+            id = id,
         )
     }
 }
@@ -51,15 +55,17 @@ constructor(
  */
 class FaceHelpMessageDeferral(
     resources: Resources,
-    logBuffer: FaceMessageDeferralLogger,
-    dumpManager: DumpManager
+    logBuffer: BiometricMessageDeferralLogger,
+    dumpManager: DumpManager,
+    val id: String,
 ) :
     BiometricMessageDeferral(
         resources.getIntArray(R.array.config_face_help_msgs_defer_until_timeout).toHashSet(),
         resources.getIntArray(R.array.config_face_help_msgs_ignore).toHashSet(),
         resources.getFloat(R.dimen.config_face_help_msgs_defer_until_timeout_threshold),
         logBuffer,
-        dumpManager
+        dumpManager,
+        id,
     )
 
 /**
@@ -72,7 +78,8 @@ open class BiometricMessageDeferral(
     private val acquiredInfoToIgnore: Set<Int>,
     private val threshold: Float,
     private val logBuffer: BiometricMessageDeferralLogger,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    id: String,
 ) : Dumpable {
     private val acquiredInfoToFrequency: MutableMap<Int, Int> = HashMap()
     private val acquiredInfoToHelpString: MutableMap<Int, String> = HashMap()
@@ -80,7 +87,10 @@ open class BiometricMessageDeferral(
     private var totalFrames = 0
 
     init {
-        dumpManager.registerDumpable(this.javaClass.name, this)
+        dumpManager.registerNormalDumpable(
+            "${this.javaClass.name}[$id]",
+            this,
+        )
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

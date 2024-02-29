@@ -38,7 +38,6 @@ import android.graphics.PointF;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.HostUsiVersion;
@@ -322,6 +321,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages Keyboard modifier keys remapping
     private final KeyRemapper mKeyRemapper;
 
+    // Manages loading PointerIcons
+    private final PointerIconCache mPointerIconCache;
+
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -408,44 +410,6 @@ public class InputManagerService extends IInputManager.Stub
     private boolean mShowKeyPresses = false;
     private boolean mShowRotaryInput = false;
 
-    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
-    final SparseArray<SparseArray<PointerIcon>> mLoadedPointerIconsByDisplayAndType =
-            new SparseArray<>();
-    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
-    boolean mUseLargePointerIcons = false;
-    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
-    final SparseArray<Context> mDisplayContexts = new SparseArray<>();
-
-    final DisplayManager.DisplayListener mDisplayListener = new DisplayManager.DisplayListener() {
-        @Override
-        public void onDisplayAdded(int displayId) {
-
-        }
-
-        @Override
-        public void onDisplayRemoved(int displayId) {
-            synchronized (mLoadedPointerIconsByDisplayAndType) {
-                mLoadedPointerIconsByDisplayAndType.remove(displayId);
-                mDisplayContexts.remove(displayId);
-            }
-        }
-
-        @Override
-        public void onDisplayChanged(int displayId) {
-            synchronized (mLoadedPointerIconsByDisplayAndType) {
-                // The display density could have changed, so force all cached pointer icons to be
-                // reloaded for the display.
-                var iconsByType = mLoadedPointerIconsByDisplayAndType.get(displayId);
-                if (iconsByType == null) {
-                    return;
-                }
-                iconsByType.clear();
-                mDisplayContexts.remove(displayId);
-            }
-            mNative.reloadPointerIcons();
-        }
-    };
-
     /** Point of injection for test dependencies. */
     @VisibleForTesting
     static class Injector {
@@ -504,6 +468,7 @@ public class InputManagerService extends IInputManager.Stub
                 : new KeyboardBacklightControllerInterface() {};
         mStickyModifierStateController = new StickyModifierStateController();
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
+        mPointerIconCache = new PointerIconCache(mContext, mNative);
 
         mUseDevInputEventForAudioJack =
                 mContext.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
@@ -613,14 +578,11 @@ public class InputManagerService extends IInputManager.Stub
             mWiredAccessoryCallbacks.systemReady();
         }
 
-        Objects.requireNonNull(
-                mContext.getSystemService(DisplayManager.class)).registerDisplayListener(
-                mDisplayListener, mHandler);
-
         mKeyboardLayoutManager.systemRunning();
         mBatteryController.systemRunning();
         mKeyboardBacklightController.systemRunning();
         mKeyRemapper.systemRunning();
+        mPointerIconCache.systemRunning();
     }
 
     private void reloadDeviceAliases() {
@@ -737,7 +699,9 @@ public class InputManagerService extends IInputManager.Stub
      * @param destChannelToken The token of the window or input channel that should receive the
      * gesture
      * @return True if the transfer succeeded, false if there was no active touch gesture happening
+     * @deprecated Use {@link #transferTouchGesture(IBinder, IBinder)}
      */
+    @Deprecated
     public boolean transferTouch(IBinder destChannelToken, int displayId) {
         // TODO(b/162194035): Replace this with a SPY window
         Objects.requireNonNull(destChannelToken, "destChannelToken must not be null");
@@ -1343,43 +1307,44 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     /**
-     * Atomically transfers touch focus from one window to another as identified by
-     * their input channels.  It is possible for multiple windows to have
-     * touch focus if they support split touch dispatch
-     * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
-     * method only transfers touch focus of the specified window without affecting
-     * other windows that may also have touch focus at the same time.
-     * @param fromChannel The channel of a window that currently has touch focus.
-     * @param toChannel The channel of the window that should receive touch focus in
-     * place of the first.
-     * @param isDragDrop True if transfer touch focus for drag and drop.
-     * @return True if the transfer was successful.  False if the window with the
-     * specified channel did not actually have touch focus at the time of the request.
+     * Start drag and drop.
+     *
+     * @param fromChannel The input channel that is currently receiving a touch gesture that should
+     *                    be turned into the drag pointer.
+     * @param dragAndDropChannel The input channel associated with the system drag window.
+     * @return true if drag and drop was successfully started, false otherwise.
      */
-    public boolean transferTouchFocus(@NonNull InputChannel fromChannel,
-            @NonNull InputChannel toChannel, boolean isDragDrop) {
-        return mNative.transferTouchFocus(fromChannel.getToken(), toChannel.getToken(),
-                isDragDrop);
+    public boolean startDragAndDrop(@NonNull InputChannel fromChannel,
+            @NonNull InputChannel dragAndDropChannel) {
+        return mNative.transferTouchGesture(fromChannel.getToken(), dragAndDropChannel.getToken(),
+                true /* isDragDrop */);
     }
 
     /**
-     * Atomically transfers touch focus from one window to another as identified by
-     * their input channels.  It is possible for multiple windows to have
-     * touch focus if they support split touch dispatch
-     * {@link android.view.WindowManager.LayoutParams#FLAG_SPLIT_TOUCH} but this
-     * method only transfers touch focus of the specified window without affecting
-     * other windows that may also have touch focus at the same time.
-     * @param fromChannelToken The channel token of a window that currently has touch focus.
-     * @param toChannelToken The channel token of the window that should receive touch focus in
-     * place of the first.
-     * @return True if the transfer was successful.  False if the window with the
-     * specified channel did not actually have touch focus at the time of the request.
+     * Atomically transfers an active touch gesture from one window to another, as identified by
+     * their input channels.
+     *
+     * <p>Only the touch gesture that is currently being dispatched to a window associated with
+     * {@code fromChannelToken} will be effected. That window will no longer receive
+     * the touch gesture (i.e. it will receive {@link android.view.MotionEvent#ACTION_CANCEL}).
+     * A window associated with the {@code toChannelToken} will receive the rest of the gesture
+     * (i.e. beginning with {@link android.view.MotionEvent#ACTION_DOWN} or
+     * {@link android.view.MotionEvent#ACTION_POINTER_DOWN}).
+     *
+     * <p>Transferring touch gestures will have no impact on focused windows. If the {@code
+     * toChannelToken} window is focusable, this will not bring focus to that window.
+     *
+     * @param fromChannelToken The channel token of a window that has an active touch gesture.
+     * @param toChannelToken The channel token of the window that should receive the gesture in
+     *   place of the first.
+     * @return True if the transfer was successful. False if the specified windows don't exist, or
+     *   if the source window is not actively receiving a touch gesture at the time of the request.
      */
-    public boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
+    public boolean transferTouchGesture(@NonNull IBinder fromChannelToken,
             @NonNull IBinder toChannelToken) {
         Objects.requireNonNull(fromChannelToken);
         Objects.requireNonNull(toChannelToken);
-        return mNative.transferTouchFocus(fromChannelToken, toChannelToken,
+        return mNative.transferTouchGesture(fromChannelToken, toChannelToken,
                 false /* isDragDrop */);
     }
 
@@ -2371,8 +2336,8 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mLidSwitchLock) { /* Test if blocked by lid switch lock. */ }
         synchronized (mInputMonitors) { /* Test if blocked by input monitor lock. */ }
         synchronized (mAdditionalDisplayInputPropertiesLock) { /* Test if blocked by props lock */ }
-        synchronized (mLoadedPointerIconsByDisplayAndType) { /* Test if blocked by pointer lock */}
         mBatteryController.monitor();
+        mPointerIconCache.monitor();
         mNative.monitor();
     }
 
@@ -2766,21 +2731,7 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     @SuppressWarnings("unused")
     private @NonNull PointerIcon getLoadedPointerIcon(int displayId, int type) {
-        synchronized (mLoadedPointerIconsByDisplayAndType) {
-            SparseArray<PointerIcon> iconsByType = mLoadedPointerIconsByDisplayAndType.get(
-                    displayId);
-            if (iconsByType == null) {
-                iconsByType = new SparseArray<>();
-                mLoadedPointerIconsByDisplayAndType.put(displayId, iconsByType);
-            }
-            PointerIcon icon = iconsByType.get(type);
-            if (icon == null) {
-                icon = PointerIcon.getLoadedSystemIcon(getContextForDisplay(displayId), type,
-                        mUseLargePointerIcons);
-                iconsByType.put(type, icon);
-            }
-            return Objects.requireNonNull(icon);
-        }
+        return mPointerIconCache.getLoadedPointerIcon(displayId, type);
     }
 
     // Native callback.
@@ -2791,33 +2742,6 @@ public class InputManagerService extends IInputManager.Stub
             return 0;
         }
         return sc.mNativeObject;
-    }
-
-    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
-    @NonNull
-    private Context getContextForDisplay(int displayId) {
-        if (displayId == Display.INVALID_DISPLAY) {
-            // Fallback to using the default context.
-            return mContext;
-        }
-        if (displayId == mContext.getDisplay().getDisplayId()) {
-            return mContext;
-        }
-
-        Context displayContext = mDisplayContexts.get(displayId);
-        if (displayContext == null) {
-            final DisplayManager displayManager = Objects.requireNonNull(
-                    mContext.getSystemService(DisplayManager.class));
-            final Display display = displayManager.getDisplay(displayId);
-            if (display == null) {
-                // Fallback to using the default context.
-                return mContext;
-            }
-
-            displayContext = mContext.createDisplayContext(display);
-            mDisplayContexts.put(displayId, displayContext);
-        }
-        return displayContext;
     }
 
     // Native callback.
@@ -3312,9 +3236,9 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
+        public boolean transferTouchGesture(@NonNull IBinder fromChannelToken,
                 @NonNull IBinder toChannelToken) {
-            return InputManagerService.this.transferTouchFocus(fromChannelToken, toChannelToken);
+            return InputManagerService.this.transferTouchGesture(fromChannelToken, toChannelToken);
         }
 
         @Override
@@ -3625,15 +3549,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     void setUseLargePointerIcons(boolean useLargeIcons) {
-        synchronized (mLoadedPointerIconsByDisplayAndType) {
-            if (mUseLargePointerIcons == useLargeIcons) {
-                return;
-            }
-            mUseLargePointerIcons = useLargeIcons;
-            // Clear all cached icons on all displays.
-            mLoadedPointerIconsByDisplayAndType.clear();
-        }
-        mNative.reloadPointerIcons();
+        mPointerIconCache.setUseLargePointerIcons(useLargeIcons);
     }
 
     interface KeyboardBacklightControllerInterface {

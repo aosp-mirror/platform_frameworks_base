@@ -18,12 +18,17 @@ package com.android.server.power.stats;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.hardware.SensorManager;
+import android.os.AggregateBatteryConsumer;
 import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -34,6 +39,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
 import android.platform.test.ravenwood.RavenwoodRule;
+import android.util.SparseLongArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -49,7 +55,6 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 
 @SmallTest
@@ -64,11 +69,10 @@ public class BatteryUsageStatsProviderTest {
     private static final long MINUTE_IN_MS = 60 * 1000;
     private static final double PRECISION = 0.00001;
 
-    private File mHistoryDir;
-
     @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule =
-            new BatteryUsageStatsRule(12345, mHistoryDir)
+            new BatteryUsageStatsRule(12345)
+                    .createTempDirectory()
                     .setAveragePower(PowerProfile.POWER_FLASHLIGHT, 360.0)
                     .setAveragePower(PowerProfile.POWER_AUDIO, 720.0);
 
@@ -77,26 +81,12 @@ public class BatteryUsageStatsProviderTest {
 
     @Before
     public void setup() throws IOException {
-        mHistoryDir = Files.createTempDirectory("BatteryUsageStatsProviderTest").toFile();
-        clearDirectory(mHistoryDir);
-
         if (RavenwoodRule.isUnderRavenwood()) {
             mContext = mock(Context.class);
             SensorManager sensorManager = mock(SensorManager.class);
             when(mContext.getSystemService(SensorManager.class)).thenReturn(sensorManager);
         } else {
             mContext = InstrumentationRegistry.getContext();
-        }
-    }
-
-    private void clearDirectory(File dir) {
-        if (dir.exists()) {
-            for (File child : dir.listFiles()) {
-                if (child.isDirectory()) {
-                    clearDirectory(child);
-                }
-                child.delete();
-            }
         }
     }
 
@@ -417,7 +407,7 @@ public class BatteryUsageStatsProviderTest {
         }
 
         PowerStatsStore powerStatsStore = new PowerStatsStore(
-                new File(mHistoryDir, "powerstatsstore"),
+                new File(mStatsRule.getHistoryDir(), "powerstatsstore"),
                 mStatsRule.getHandler(), null);
         powerStatsStore.reset();
 
@@ -514,6 +504,57 @@ public class BatteryUsageStatsProviderTest {
     private void setTime(long timeMs) {
         mMockClock.currentTime = timeMs;
         mMockClock.realtime = timeMs;
+    }
+
+    @Test
+    public void saveBatteryUsageStatsOnReset_incompatibleEnergyConsumers() throws Throwable {
+        MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
+        batteryStats.initMeasuredEnergyStats(new String[]{"FOO", "BAR"});
+        int componentId0 = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID;
+        int componentId1 = BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1;
+
+        synchronized (batteryStats) {
+            batteryStats.getUidStatsLocked(APP_UID);
+
+            SparseLongArray uidEnergies = new SparseLongArray();
+            uidEnergies.put(APP_UID, 30_000_000);
+            batteryStats.updateCustomEnergyConsumerStatsLocked(0, 100_000_000, uidEnergies);
+            batteryStats.updateCustomEnergyConsumerStatsLocked(1, 200_000_000, uidEnergies);
+        }
+
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext, null,
+                mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), null, mMockClock);
+
+        PowerStatsStore powerStatsStore = mock(PowerStatsStore.class);
+        doAnswer(invocation -> {
+            BatteryUsageStats stats = invocation.getArgument(1);
+            AggregateBatteryConsumer device = stats.getAggregateBatteryConsumer(
+                    BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+            assertThat(device.getCustomPowerComponentName(componentId0)).isEqualTo("FOO");
+            assertThat(device.getCustomPowerComponentName(componentId1)).isEqualTo("BAR");
+            assertThat(device.getConsumedPowerForCustomComponent(componentId0))
+                    .isWithin(PRECISION).of(27.77777);
+            assertThat(device.getConsumedPowerForCustomComponent(componentId1))
+                    .isWithin(PRECISION).of(55.55555);
+
+            UidBatteryConsumer uid = stats.getUidBatteryConsumers().get(0);
+            assertThat(uid.getConsumedPowerForCustomComponent(componentId0))
+                    .isWithin(PRECISION).of(8.33333);
+            assertThat(uid.getConsumedPowerForCustomComponent(componentId1))
+                    .isWithin(PRECISION).of(8.33333);
+            return null;
+        }).when(powerStatsStore).storeBatteryUsageStats(anyLong(), any());
+
+        mStatsRule.getBatteryStats().saveBatteryUsageStatsOnReset(provider, powerStatsStore);
+
+        // Make an incompatible change of supported energy components.  This will trigger
+        // a BatteryStats reset, which will generate a snapshot of battery stats.
+        mStatsRule.initMeasuredEnergyStatsLocked(
+                new String[]{"COMPONENT1"});
+
+        mStatsRule.waitForBackgroundThread();
+
+        verify(powerStatsStore).storeBatteryUsageStats(anyLong(), any());
     }
 
     @Test

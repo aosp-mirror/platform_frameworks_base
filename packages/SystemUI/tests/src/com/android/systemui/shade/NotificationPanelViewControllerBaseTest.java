@@ -115,9 +115,9 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransition
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
-import com.android.systemui.media.controls.pipeline.MediaDataManager;
-import com.android.systemui.media.controls.ui.KeyguardMediaController;
-import com.android.systemui.media.controls.ui.MediaHierarchyManager;
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.ui.controller.KeyguardMediaController;
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -439,8 +439,13 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 )
         );
         SystemClock systemClock = new FakeSystemClock();
-        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger,
-                mInteractionJankMonitor, mJavaAdapter, () -> mShadeInteractor);
+        mStatusBarStateController = new StatusBarStateControllerImpl(
+                mUiEventLogger,
+                mInteractionJankMonitor,
+                mJavaAdapter,
+                () -> mShadeInteractor,
+                () -> mKosmos.getDeviceUnlockedInteractor(),
+                () -> mKosmos.getSceneInteractor());
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);
@@ -594,6 +599,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         // Primary Bouncer->Gone
         when(mPrimaryBouncerToGoneTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
+        when(mPrimaryBouncerToGoneTransitionViewModel.getNotificationAlpha())
+                .thenReturn(emptyFlow());
 
         NotificationsKeyguardViewStateRepository notifsKeyguardViewStateRepository =
                 new NotificationsKeyguardViewStateRepository();
@@ -603,9 +610,13 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 new NotificationWakeUpCoordinator(
                         mDumpManager,
                         mock(HeadsUpManager.class),
-                        new StatusBarStateControllerImpl(new UiEventLoggerFake(),
+                        new StatusBarStateControllerImpl(
+                                new UiEventLoggerFake(),
                                 mInteractionJankMonitor,
-                                mJavaAdapter, () -> mShadeInteractor),
+                                mJavaAdapter,
+                                () -> mShadeInteractor,
+                                () -> mKosmos.getDeviceUnlockedInteractor(),
+                                () -> mKosmos.getSceneInteractor()),
                         mKeyguardBypassController,
                         mDozeParameters,
                         mScreenOffAnimationController,

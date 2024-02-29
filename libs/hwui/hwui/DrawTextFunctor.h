@@ -92,6 +92,7 @@ public:
             // high contrast draw path
             int color = paint.getColor();
             bool darken;
+            // This equation should match the one in core/java/android/text/Layout.java
             if (flags::high_contrast_text_luminance()) {
                 uirenderer::Lab lab = uirenderer::sRGBToLab(color);
                 darken = lab.L <= 50;

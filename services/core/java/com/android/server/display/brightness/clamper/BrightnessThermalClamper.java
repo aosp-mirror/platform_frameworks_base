@@ -35,8 +35,10 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel;
+import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.utils.DeviceConfigParsingUtils;
+import com.android.server.display.utils.SensorUtils;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -49,9 +51,8 @@ class BrightnessThermalClamper extends
         BrightnessClamper<BrightnessThermalClamper.ThermalData> {
 
     private static final String TAG = "BrightnessThermalClamper";
-
-    @Nullable
-    private final IThermalService mThermalService;
+    @NonNull
+    private final ThermalStatusObserver mThermalStatusObserver;
     @NonNull
     private final DeviceConfigParameterProvider mConfigParameterProvider;
     // data from DeviceConfig, for all displays, for all dataSets
@@ -66,21 +67,12 @@ class BrightnessThermalClamper extends
     // otherwise mDataFromDeviceConfig
     @Nullable
     private ThermalBrightnessThrottlingData mThermalThrottlingDataActive = null;
-    private boolean mStarted = false;
     @Nullable
     private String mUniqueDisplayId = null;
     @Nullable
     private String mDataId = null;
     @Temperature.ThrottlingStatus
     private int mThrottlingStatus = Temperature.THROTTLING_NONE;
-
-    private final IThermalEventListener mThermalEventListener = new IThermalEventListener.Stub() {
-        @Override
-        public void notifyThrottling(Temperature temperature) {
-            @Temperature.ThrottlingStatus int status = temperature.getStatus();
-            mHandler.post(() -> thermalStatusChanged(status));
-        }
-    };
 
     private final BiFunction<String, String, ThrottlingLevel> mDataPointMapper = (key, value) -> {
         try {
@@ -105,12 +97,11 @@ class BrightnessThermalClamper extends
     BrightnessThermalClamper(Injector injector, Handler handler,
             ClamperChangeListener listener, ThermalData thermalData) {
         super(handler, listener);
-        mThermalService = injector.getThermalService();
         mConfigParameterProvider = injector.getDeviceConfigParameterProvider();
+        mThermalStatusObserver = new ThermalStatusObserver(injector, handler);
         mHandler.post(() -> {
             setDisplayData(thermalData);
             loadOverrideData();
-            start();
         });
 
     }
@@ -139,32 +130,19 @@ class BrightnessThermalClamper extends
 
     @Override
     void stop() {
-        if (!mStarted) {
-            return;
-        }
-        try {
-            mThermalService.unregisterThermalEventListener(mThermalEventListener);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to unregister thermal status listener", e);
-        }
-        mStarted = false;
+        mThermalStatusObserver.stopObserving();
     }
 
     @Override
     void dump(PrintWriter writer) {
         writer.println("BrightnessThermalClamper:");
-        writer.println("  mStarted: " + mStarted);
-        if (mThermalService != null) {
-            writer.println("  ThermalService available");
-        } else {
-            writer.println("  ThermalService not available");
-        }
         writer.println("  mThrottlingStatus: " + mThrottlingStatus);
         writer.println("  mUniqueDisplayId: " + mUniqueDisplayId);
         writer.println("  mDataId: " + mDataId);
         writer.println("  mDataOverride: " + mThermalThrottlingDataOverride);
         writer.println("  mDataFromDeviceConfig: " + mThermalThrottlingDataFromDeviceConfig);
         writer.println("  mDataActive: " + mThermalThrottlingDataActive);
+        mThermalStatusObserver.dump(writer);
         super.dump(writer);
     }
 
@@ -193,6 +171,7 @@ class BrightnessThermalClamper extends
             Slog.wtf(TAG,
                     "Thermal throttling data is missing for thermalThrottlingDataId=" + mDataId);
         }
+        mThermalStatusObserver.registerSensor(data.getTempSensor());
     }
 
     private void recalculateBrightnessCap() {
@@ -226,19 +205,91 @@ class BrightnessThermalClamper extends
         }
     }
 
-    private void start() {
-        if (mThermalService == null) {
-            Slog.e(TAG, "Could not observe thermal status. Service not available");
-            return;
+
+    private final class ThermalStatusObserver extends IThermalEventListener.Stub {
+        private final Injector mInjector;
+        private final Handler mHandler;
+        private IThermalService mThermalService;
+        private boolean mStarted;
+        private SensorData mObserverTempSensor;
+
+        ThermalStatusObserver(Injector injector, Handler handler) {
+            mInjector = injector;
+            mHandler = handler;
+            mStarted = false;
         }
-        try {
-            // We get a callback immediately upon registering so there's no need to query
-            // for the current value.
-            mThermalService.registerThermalEventListenerWithType(mThermalEventListener,
-                    Temperature.TYPE_SKIN);
-            mStarted = true;
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to register thermal status listener", e);
+
+        void registerSensor(SensorData tempSensor) {
+            if (!mStarted || mObserverTempSensor == null) {
+                mObserverTempSensor = tempSensor;
+                registerThermalListener();
+                return;
+            }
+
+            String curType = mObserverTempSensor.type;
+            mObserverTempSensor = tempSensor;
+            if (curType.equals(tempSensor.type)) {
+                Slog.d(TAG, "Thermal status observer already started");
+                return;
+            }
+            stopObserving();
+            registerThermalListener();
+        }
+
+        void registerThermalListener() {
+            mThermalService = mInjector.getThermalService();
+            if (mThermalService == null) {
+                Slog.e(TAG, "Could not observe thermal status. Service not available");
+                return;
+            }
+            int temperatureType = SensorUtils.getSensorTemperatureType(mObserverTempSensor);
+            try {
+                // We get a callback immediately upon registering so there's no need to query
+                // for the current value.
+                mThermalService.registerThermalEventListenerWithType(this, temperatureType);
+                mStarted = true;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to register thermal status listener", e);
+            }
+        }
+
+        @Override
+        public void notifyThrottling(Temperature temp) {
+            Slog.d(TAG, "New thermal throttling status = " + temp.getStatus());
+            if (mObserverTempSensor.name != null
+                    && !mObserverTempSensor.name.equals(temp.getName())) {
+                Slog.i(TAG, "Skipping thermal throttling notification as monitored sensor: "
+                            + mObserverTempSensor.name
+                            + " != notified sensor: "
+                            + temp.getName());
+                return;
+            }
+            @Temperature.ThrottlingStatus int status = temp.getStatus();
+            mHandler.post(() -> thermalStatusChanged(status));
+        }
+
+        void stopObserving() {
+            if (!mStarted) {
+                return;
+            }
+            try {
+                mThermalService.unregisterThermalEventListener(this);
+                mStarted = false;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to unregister thermal status listener", e);
+            }
+            mThermalService = null;
+        }
+
+        void dump(PrintWriter writer) {
+            writer.println("  ThermalStatusObserver:");
+            writer.println("    mStarted: " + mStarted);
+            writer.println("    mObserverTempSensor: " + mObserverTempSensor);
+            if (mThermalService != null) {
+                writer.println("    ThermalService available");
+            } else {
+                writer.println("    ThermalService not available");
+            }
         }
     }
 
@@ -251,6 +302,9 @@ class BrightnessThermalClamper extends
 
         @Nullable
         ThermalBrightnessThrottlingData getThermalBrightnessThrottlingData();
+
+        @NonNull
+        SensorData getTempSensor();
     }
 
     @VisibleForTesting

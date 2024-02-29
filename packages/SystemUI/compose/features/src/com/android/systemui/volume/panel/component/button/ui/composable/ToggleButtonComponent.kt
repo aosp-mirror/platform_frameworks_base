@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconToggleButton
@@ -39,6 +40,7 @@ import com.android.systemui.volume.panel.ui.composable.ComposeVolumePanelUiCompo
 import com.android.systemui.volume.panel.ui.composable.VolumePanelComposeScope
 import kotlinx.coroutines.flow.StateFlow
 
+/** [ComposeVolumePanelUiComponent] implementing a toggleable button from a bottom row. */
 class ToggleButtonComponent(
     private val viewModelFlow: StateFlow<ToggleButtonViewModel?>,
     private val onCheckedChange: (isChecked: Boolean) -> Unit
@@ -57,6 +59,7 @@ class ToggleButtonComponent(
                 modifier = Modifier.height(64.dp).fillMaxWidth(),
                 checked = viewModel.isChecked,
                 onCheckedChange = onCheckedChange,
+                shape = RoundedCornerShape(28.dp),
                 colors =
                     IconButtonDefaults.outlinedIconToggleButtonColors(
                         containerColor = MaterialTheme.colorScheme.surface,

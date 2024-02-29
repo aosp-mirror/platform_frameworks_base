@@ -96,6 +96,7 @@ import android.provider.Downloads;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.service.chooser.ChooserTarget;
+import android.service.chooser.Flags;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.HashedStringCache;
@@ -2543,6 +2544,9 @@ public class ChooserActivity extends ResolverActivity implements
 
         @Override
         public boolean isComponentPinned(ComponentName name) {
+            if (Flags.legacyChooserPinningRemoval()) {
+                return false;
+            }
             return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
         }
 
@@ -3147,6 +3151,10 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private boolean shouldShowTargetDetails(TargetInfo ti) {
+        if (Flags.legacyChooserPinningRemoval()) {
+            // Never show the long press menu if we've removed pinning.
+            return false;
+        }
         ComponentName nearbyShare = getNearbySharingComponent();
         //  Suppress target details for nearby share to hide pin/unpin action
         boolean isNearbyShare = nearbyShare != null && nearbyShare.equals(

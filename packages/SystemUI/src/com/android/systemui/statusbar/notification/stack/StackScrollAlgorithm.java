@@ -853,7 +853,7 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isHeadsUpAnimatingAway()) {
-                if (NotificationsImprovedHunAnimation.isEnabled()) {
+                if (NotificationsImprovedHunAnimation.isEnabled() && !ambientState.isDozing()) {
                     if (shouldHunAppearFromBottom(ambientState, childState)) {
                         // move to the bottom of the screen
                         childState.setYTranslation(

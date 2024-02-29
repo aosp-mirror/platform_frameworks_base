@@ -23,6 +23,7 @@ import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.Status;
 import android.hardware.face.Face;
+import android.hardware.face.FaceEnrollOptions;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -61,15 +62,20 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, long requestId,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,
             @Nullable Surface previewSurface, int sensorId,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            @NonNull FaceEnrollOptions options) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
-                timeoutSec, sensorId, false /* shouldVibrate */, logger, biometricContext);
+                timeoutSec, sensorId, false /* shouldVibrate */, logger, biometricContext,
+                BiometricFaceConstants.reasonToMetric(options.getEnrollReason()));
         setRequestId(requestId);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
         mEnrollIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
         mEnrollIgnoreListVendor = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_vendor_enroll_ignorelist);
+
+        Slog.w(TAG, "EnrollOptions "
+                + FaceEnrollOptions.enrollReasonToString(options.getEnrollReason()));
     }
 
     @Override

@@ -72,7 +72,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         context: Context,
         logger: MediaTttReceiverLogger,
         windowManager: WindowManager,
-        mainExecutor: DelayableExecutor,
+        @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
         dumpManager: DumpManager,
@@ -266,8 +266,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         // translation animation.
         bounceAnimator.removeAllUpdateListeners()
         bounceAnimator.cancel()
-        if (removalReason == ChipStateReceiver.TRANSFER_TO_RECEIVER_SUCCEEDED.name &&
-                mediaTttFlags.isMediaTttReceiverSuccessRippleEnabled()) {
+        if (removalReason == ChipStateReceiver.TRANSFER_TO_RECEIVER_SUCCEEDED.name) {
             rippleController.expandToSuccessState(rippleView, onAnimationEnd)
             animateViewTranslationAndFade(
                 iconContainerView,

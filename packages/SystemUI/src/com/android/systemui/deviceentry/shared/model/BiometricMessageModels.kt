@@ -27,6 +27,7 @@ sealed class BiometricMessage(
 /** Face biometric message */
 open class FaceMessage(faceMessage: String?) : BiometricMessage(faceMessage)
 
+/** Face timeout message. */
 data class FaceTimeoutMessage(
     private val faceTimeoutMessage: String?,
 ) : FaceMessage(faceTimeoutMessage)

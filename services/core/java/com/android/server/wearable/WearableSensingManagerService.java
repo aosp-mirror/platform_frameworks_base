@@ -21,8 +21,8 @@ import static android.provider.DeviceConfig.NAMESPACE_WEARABLE_SENSING;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.ActivityOptions;
 import android.app.BroadcastOptions;
-import android.app.ComponentOptions;
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.wearable.IWearableSensingManager;
@@ -55,6 +55,7 @@ import com.android.server.pm.KnownPackages;
 import com.android.server.utils.quota.MultiRateLimiter;
 
 import java.io.FileDescriptor;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -106,7 +107,7 @@ public class WearableSensingManagerService extends
     private final Context mContext;
     private final AtomicInteger mNextDataRequestObserverId = new AtomicInteger(1);
     private final Set<DataRequestObserverContext> mDataRequestObserverContexts = new HashSet<>();
-    private final MultiRateLimiter mDataRequestRateLimiter;
+    @NonNull private volatile MultiRateLimiter mDataRequestRateLimiter;
     volatile boolean mIsServiceEnabled;
 
     public WearableSensingManagerService(Context context) {
@@ -238,6 +239,57 @@ public class WearableSensingManagerService extends
         }
     }
 
+    /**
+     * Sets the window size used in data request rate limiting.
+     *
+     * <p>The new value will not be reflected in {@link
+     * WearableSensingDataRequest#getRateLimitWindowSize()}.
+     *
+     * <p>{@code windowSize} will be automatically capped between
+     * com.android.server.utils.quota.QuotaTracker#MIN_WINDOW_SIZE_MS and
+     * com.android.server.utils.quota.QuotaTracker#MAX_WINDOW_SIZE_MS
+     *
+     * <p>The current rate limit will also be reset.
+     *
+     * <p>This method is only used for testing and must not be called in production code because
+     * it effectively bypasses the rate limiting introduced to enhance privacy protection.
+     */
+    @VisibleForTesting
+    void setDataRequestRateLimitWindowSize(@NonNull Duration windowSize) {
+        Slog.w(
+                TAG,
+                TextUtils.formatSimple(
+                        "Setting the data request rate limit window size to %s. This also resets"
+                            + " the current limit and should only be callable from a test.",
+                        windowSize));
+        mDataRequestRateLimiter =
+                new MultiRateLimiter.Builder(mContext)
+                        .addRateLimit(WearableSensingDataRequest.getRateLimit(), windowSize)
+                        .build();
+    }
+
+    /**
+     * Resets the window size used in data request rate limiting back to the default value.
+     *
+     * <p>The current rate limit will also be reset.
+     *
+     * <p>This method is only used for testing and must not be called in production code because
+     * it effectively bypasses the rate limiting introduced to enhance privacy protection.
+     */
+    @VisibleForTesting
+    void resetDataRequestRateLimitWindowSize() {
+        Slog.w(
+                TAG,
+                "Resetting the data request rate limit window size back to the default value. This"
+                    + " also resets the current limit and should only be callable from a test.");
+        mDataRequestRateLimiter =
+                new MultiRateLimiter.Builder(mContext)
+                        .addRateLimit(
+                                WearableSensingDataRequest.getRateLimit(),
+                                WearableSensingDataRequest.getRateLimitWindowSize())
+                        .build();
+    }
+
     private DataRequestObserverContext getDataRequestObserverContext(
             int dataType, int userId, PendingIntent dataRequestPendingIntent) {
         synchronized (mDataRequestObserverContexts) {
@@ -301,7 +353,7 @@ public class WearableSensingManagerService extends
                             dataRequest);
                     BroadcastOptions options = BroadcastOptions.makeBasic();
                     options.setPendingIntentBackgroundActivityStartMode(
-                            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
                     mDataRequestRateLimiter.noteEvent(
                             userId, RATE_LIMITER_PACKAGE_NAME, RATE_LIMITER_TAG);
                     final long previousCallingIdentity = Binder.clearCallingIdentity();
@@ -347,9 +399,9 @@ public class WearableSensingManagerService extends
     private final class WearableSensingManagerInternal extends IWearableSensingManager.Stub {
 
         @Override
-        public void provideWearableConnection(
+        public void provideConnection(
                 ParcelFileDescriptor wearableConnection, RemoteCallback callback) {
-            Slog.i(TAG, "WearableSensingManagerInternal provideWearableConnection.");
+            Slog.i(TAG, "WearableSensingManagerInternal provideConnection.");
             Objects.requireNonNull(wearableConnection);
             Objects.requireNonNull(callback);
             mContext.enforceCallingOrSelfPermission(
@@ -361,7 +413,7 @@ public class WearableSensingManagerService extends
                 return;
             }
             callPerUserServiceIfExist(
-                    service -> service.onProvideWearableConnection(wearableConnection, callback),
+                    service -> service.onProvideConnection(wearableConnection, callback),
                     callback);
         }
 

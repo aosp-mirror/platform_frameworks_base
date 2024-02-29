@@ -16,16 +16,19 @@
 
 package com.android.systemui.volume.panel.ui.composable
 
-import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -35,13 +38,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayout
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelState
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
+import kotlin.math.max
+
+private val padding = 24.dp
 
 @Composable
 fun VolumePanelRoot(
@@ -62,12 +71,12 @@ fun VolumePanelRoot(
         val components by viewModel.componentsLayout.collectAsState(null)
 
         with(VolumePanelComposeScope(state)) {
-            var boxModifier = modifier.fillMaxSize().clickable(onClick = onDismiss)
-            if (!isPortrait) {
-                boxModifier = boxModifier.padding(horizontal = 48.dp)
-            }
             Box(
-                modifier = boxModifier,
+                modifier =
+                    modifier
+                        .fillMaxSize()
+                        .clickable(onClick = onDismiss)
+                        .volumePanelPaddings(isPortrait = isPortrait),
                 contentAlignment = Alignment.BottomCenter,
             ) {
                 val radius = dimensionResource(R.dimen.volume_panel_corner_radius)
@@ -77,14 +86,25 @@ fun VolumePanelRoot(
                             interactionSource = null,
                             indication = null,
                             onClick = {
-                                // prevent windowCloseOnTouchOutside from dismissing when tapped on
-                                // the panel itself.
+                                // prevent windowCloseOnTouchOutside from dismissing when tapped
+                                // on the panel itself.
                             },
                         ),
                     shape = RoundedCornerShape(topStart = radius, topEnd = radius),
                     color = MaterialTheme.colorScheme.surfaceContainer,
                 ) {
-                    Column { components?.let { componentsState -> Components(componentsState) } }
+                    components?.let { componentsState ->
+                        Components(
+                            componentsState,
+                            Modifier.padding(
+                                    start = padding,
+                                    top = padding,
+                                    end = padding,
+                                    bottom = 20.dp,
+                                )
+                                .navigationBarsPadding()
+                        )
+                    }
                 }
             }
         }
@@ -92,38 +112,76 @@ fun VolumePanelRoot(
 }
 
 @Composable
-private fun VolumePanelComposeScope.Components(components: ComponentsLayout) {
-    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-        VerticalVolumePanelContent(
-            components,
-            modifier = Modifier.padding(24.dp),
-        )
-    } else {
-        HorizontalVolumePanelContent(
-            components,
-            modifier =
-                Modifier.padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 20.dp)
-                    .heightIn(max = 236.dp),
+private fun VolumePanelComposeScope.Components(
+    layout: ComponentsLayout,
+    modifier: Modifier = Modifier
+) {
+    val arrangement: Arrangement.Vertical =
+        if (isLargeScreen) {
+            Arrangement.spacedBy(20.dp)
+        } else {
+            if (isPortrait) Arrangement.spacedBy(padding) else Arrangement.spacedBy(4.dp)
+        }
+    Column(
+        modifier = modifier.widthIn(max = 800.dp),
+        verticalArrangement = arrangement,
+    ) {
+        if (isPortrait || isLargeScreen) {
+            VerticalVolumePanelContent(
+                modifier = Modifier.weight(weight = 1f, fill = false),
+                layout = layout
+            )
+        } else {
+            HorizontalVolumePanelContent(
+                modifier = Modifier.weight(weight = 1f, fill = false).heightIn(max = 212.dp),
+                layout = layout,
+            )
+        }
+        BottomBar(
+            modifier = Modifier,
+            layout = layout,
         )
     }
+}
 
-    if (components.bottomBarComponent.isVisible) {
-        val horizontalPadding =
-            dimensionResource(R.dimen.volume_panel_bottom_bar_horizontal_padding)
+@Composable
+private fun VolumePanelComposeScope.BottomBar(
+    layout: ComponentsLayout,
+    modifier: Modifier = Modifier
+) {
+    if (layout.bottomBarComponent.isVisible) {
         Box(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(
-                        start = horizontalPadding,
-                        end = horizontalPadding,
-                        bottom = dimensionResource(R.dimen.volume_panel_bottom_bar_bottom_padding),
-                    ),
+            modifier = modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
-            with(components.bottomBarComponent.component as ComposeVolumePanelUiComponent) {
+            with(layout.bottomBarComponent.component as ComposeVolumePanelUiComponent) {
                 Content(Modifier)
             }
         }
+    }
+}
+
+/**
+ * Makes sure volume panel stays symmetrically in the middle of the screen while still avoiding
+ * being under the cutouts.
+ */
+@Composable
+private fun Modifier.volumePanelPaddings(isPortrait: Boolean): Modifier {
+    val cutout = WindowInsets.displayCutout
+    return with(LocalDensity.current) {
+        val horizontalCutout =
+            max(
+                cutout.getLeft(density = this, layoutDirection = LocalLayoutDirection.current),
+                cutout.getRight(density = this, layoutDirection = LocalLayoutDirection.current)
+            )
+        val minHorizontalPadding = if (isPortrait) 0.dp else 48.dp
+        val horizontalPadding = max(horizontalCutout.toDp(), minHorizontalPadding)
+
+        padding(
+            start = horizontalPadding,
+            top = cutout.getTop(this).toDp(),
+            end = horizontalPadding,
+            bottom = cutout.getBottom(this).toDp(),
+        )
     }
 }

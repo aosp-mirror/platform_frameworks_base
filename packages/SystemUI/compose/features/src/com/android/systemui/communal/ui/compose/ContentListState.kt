@@ -71,8 +71,8 @@ internal constructor(
 
     /** Remove widget from the list and the database. */
     fun onRemove(indexToRemove: Int) {
-        if (list[indexToRemove] is CommunalContentModel.Widget) {
-            val widget = list[indexToRemove] as CommunalContentModel.Widget
+        if (list[indexToRemove].isWidgetContent()) {
+            val widget = list[indexToRemove] as CommunalContentModel.WidgetContent
             list.apply { removeAt(indexToRemove) }
             onDeleteWidget(widget.appWidgetId)
         }
@@ -100,7 +100,7 @@ internal constructor(
         val widgetIdToPriorityMap: Map<Int, Int> =
             list
                 .mapIndexedNotNull { index, item ->
-                    if (item is CommunalContentModel.Widget) {
+                    if (item is CommunalContentModel.WidgetContent) {
                         item.appWidgetId to list.size - index
                     } else {
                         null
@@ -115,5 +115,5 @@ internal constructor(
     }
 
     /** Returns true if the item at given index is editable. */
-    fun isItemEditable(index: Int) = list[index] is CommunalContentModel.Widget
+    fun isItemEditable(index: Int) = list[index].isWidgetContent()
 }

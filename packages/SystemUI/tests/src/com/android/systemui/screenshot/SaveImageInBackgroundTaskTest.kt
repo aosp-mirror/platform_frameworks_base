@@ -34,7 +34,6 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import java.util.concurrent.CompletableFuture
-import java.util.function.Supplier
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -46,8 +45,6 @@ class SaveImageInBackgroundTaskTest : SysuiTestCase() {
     private val smartActions = mock<ScreenshotSmartActions>()
     private val smartActionsProvider = mock<ScreenshotNotificationSmartActionsProvider>()
     private val saveImageData = SaveImageInBackgroundData()
-    private val sharedTransitionSupplier =
-        mock<Supplier<ScreenshotController.SavedImageData.ActionTransition>>()
     private val testScreenshotId: String = "testScreenshotId"
     private val testBitmap = mock<Bitmap>()
     private val testUser = UserHandle.getUserHandleForUid(0)
@@ -88,7 +85,6 @@ class SaveImageInBackgroundTaskTest : SysuiTestCase() {
             imageExporter,
             smartActions,
             saveImageData,
-            sharedTransitionSupplier,
             smartActionsProvider,
         )
 

@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.BrightnessMappingStrategy.INVALID_LUX;
 import static com.android.server.display.config.DisplayBrightnessMappingConfig.autoBrightnessModeToString;
 
 import android.annotation.IntDef;
@@ -202,7 +203,7 @@ public class AutomaticBrightnessController {
     private float mScreenBrighteningThreshold;
     private float mScreenDarkeningThreshold;
     // The most recent light sample.
-    private float mLastObservedLux;
+    private float mLastObservedLux = INVALID_LUX;
 
     // The time of the most light recent sample.
     private long mLastObservedLuxTime;
@@ -403,8 +404,8 @@ public class AutomaticBrightnessController {
             brightnessEvent.setFlags(brightnessEvent.getFlags()
                     | (!mAmbientLuxValid ? BrightnessEvent.FLAG_INVALID_LUX : 0)
                     | (mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE
-                        ? BrightnessEvent.FLAG_DOZE_SCALE : 0)
-                    | (isInIdleMode() ? BrightnessEvent.FLAG_IDLE_CURVE : 0));
+                        ? BrightnessEvent.FLAG_DOZE_SCALE : 0));
+            brightnessEvent.setAutoBrightnessMode(getMode());
         }
 
         if (!mAmbientLuxValid) {
@@ -418,6 +419,35 @@ public class AutomaticBrightnessController {
 
     float getRawAutomaticScreenBrightness() {
         return mRawScreenAutoBrightness;
+    }
+
+    /**
+     * Get the automatic screen brightness based on the last observed lux reading. Used e.g. when
+     * entering doze - we disable the light sensor, invalidate the lux, but we still need to set
+     * the initial brightness in doze mode.
+     */
+    public float getAutomaticScreenBrightnessBasedOnLastObservedLux(
+            BrightnessEvent brightnessEvent) {
+        if (mLastObservedLux == INVALID_LUX) {
+            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        }
+
+        float brightness = mCurrentBrightnessMapper.getBrightness(mLastObservedLux,
+                mForegroundAppPackageName, mForegroundAppCategory);
+        if (mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE) {
+            brightness *= mDozeScaleFactor;
+        }
+
+        if (brightnessEvent != null) {
+            brightnessEvent.setLux(mLastObservedLux);
+            brightnessEvent.setRecommendedBrightness(brightness);
+            brightnessEvent.setFlags(brightnessEvent.getFlags()
+                    | (mLastObservedLux == INVALID_LUX ? BrightnessEvent.FLAG_INVALID_LUX : 0)
+                    | (mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE
+                    ? BrightnessEvent.FLAG_DOZE_SCALE : 0));
+            brightnessEvent.setAutoBrightnessMode(getMode());
+        }
+        return brightness;
     }
 
     public boolean hasValidAmbientLux() {
@@ -539,7 +569,7 @@ public class AutomaticBrightnessController {
     }
 
     private boolean setScreenBrightnessByUser(float lux, float brightness) {
-        if (lux == BrightnessMappingStrategy.INVALID_LUX || Float.isNaN(brightness)) {
+        if (lux == INVALID_LUX || Float.isNaN(brightness)) {
             return false;
         }
         mCurrentBrightnessMapper.addUserDataPoint(lux, brightness);
@@ -562,6 +592,15 @@ public class AutomaticBrightnessController {
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return The auto-brightness mode of the current mapping strategy. Different modes use
+     * different brightness curves.
+     */
+    @AutomaticBrightnessController.AutomaticBrightnessMode
+    public int getMode() {
+        return mCurrentBrightnessMapper.getMode();
     }
 
     public boolean isInIdleMode() {
@@ -1236,12 +1275,12 @@ public class AutomaticBrightnessController {
         // light.
         // The anchor determines what were the light levels when the user has set their preference,
         // and we use a relative threshold to determine when to revert to the OEM curve.
-        private float mAnchor = BrightnessMappingStrategy.INVALID_LUX;
+        private float mAnchor = INVALID_LUX;
         private float mBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         private boolean mIsValid = false;
 
         private void reset() {
-            mAnchor = BrightnessMappingStrategy.INVALID_LUX;
+            mAnchor = INVALID_LUX;
             mBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             mIsValid = false;
         }
@@ -1265,7 +1304,7 @@ public class AutomaticBrightnessController {
         private boolean maybeReset(float currentLux) {
             // If the short term model was invalidated and the change is drastic enough, reset it.
             // Otherwise, we revalidate it.
-            if (!mIsValid && mAnchor != BrightnessMappingStrategy.INVALID_LUX) {
+            if (!mIsValid && mAnchor != INVALID_LUX) {
                 if (mCurrentBrightnessMapper.shouldResetShortTermModel(currentLux, mAnchor)) {
                     resetShortTermModel();
                 } else {

@@ -25,7 +25,6 @@ import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
-import com.android.systemui.keyguard.ui.viewmodel.AodAlphaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
@@ -37,7 +36,6 @@ class DefaultIndicationAreaSection
 constructor(
     private val context: Context,
     private val keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel,
-    private val aodAlphaViewModel: AodAlphaViewModel,
     private val indicationController: KeyguardIndicationController,
 ) : KeyguardSection() {
     private val indicationAreaViewId = R.id.keyguard_indication_area
@@ -56,7 +54,6 @@ constructor(
                 KeyguardIndicationAreaBinder.bind(
                     constraintLayout.requireViewById(R.id.keyguard_indication_area),
                     keyguardIndicationAreaViewModel,
-                    aodAlphaViewModel,
                     indicationController,
                 )
         }

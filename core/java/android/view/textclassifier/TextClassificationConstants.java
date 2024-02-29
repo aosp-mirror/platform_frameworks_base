@@ -137,10 +137,6 @@ public final class TextClassificationConstants {
                     properties.getBoolean(
                             LOCAL_TEXT_CLASSIFIER_ENABLED,
                             LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT);
-            sSystemTextClassifierEnabled =
-                    properties.getBoolean(
-                            SYSTEM_TEXT_CLASSIFIER_ENABLED,
-                            SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT);
             sModelDarkLaunchEnabled =
                     properties.getBoolean(
                             MODEL_DARK_LAUNCH_ENABLED,
@@ -199,8 +195,11 @@ public final class TextClassificationConstants {
     }
 
     public boolean isSystemTextClassifierEnabled() {
-        ensureMemoizedValues();
-        return sSystemTextClassifierEnabled;
+        // Don't memoize this value because we want to be able to receive config
+        // updates at runtime.
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                SYSTEM_TEXT_CLASSIFIER_ENABLED,
+                SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT);
     }
 
     public boolean isModelDarkLaunchEnabled() {

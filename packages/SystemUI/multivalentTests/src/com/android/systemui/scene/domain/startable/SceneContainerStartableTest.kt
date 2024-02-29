@@ -32,6 +32,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.classifier.falsingManager
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -49,6 +50,8 @@ import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
+import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
@@ -113,6 +116,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 displayId = Display.DEFAULT_DISPLAY,
                 sceneLogger = mock(),
                 falsingCollector = falsingCollector,
+                falsingManager = kosmos.falsingManager,
                 powerInteractor = powerInteractor,
                 bouncerInteractor = bouncerInteractor,
                 simBouncerInteractor = { kosmos.simBouncerInteractor },
@@ -120,6 +124,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 windowController = windowController,
                 deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
                 centralSurfaces = centralSurfaces,
+                headsUpInteractor = kosmos.headsUpNotificationInteractor,
             )
     }
 
@@ -167,6 +172,12 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(isVisible).isTrue()
             fakeSceneDataSource.unpause(expectedScene = SceneKey.Gone)
             transitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
+            assertThat(isVisible).isFalse()
+
+            kosmos.headsUpNotificationRepository.hasPinnedHeadsUp.value = true
+            assertThat(isVisible).isTrue()
+
+            kosmos.headsUpNotificationRepository.hasPinnedHeadsUp.value = false
             assertThat(isVisible).isFalse()
         }
 
@@ -959,6 +970,20 @@ class SceneContainerStartableTest : SysuiTestCase() {
                     verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
                 },
             )
+        }
+
+    @Test
+    fun respondToFalsingDetections() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val transitionStateFlow = prepareState()
+            underTest.start()
+            emulateSceneTransition(transitionStateFlow, toScene = SceneKey.Bouncer)
+            assertThat(currentScene).isNotEqualTo(SceneKey.Lockscreen)
+
+            kosmos.falsingManager.sendFalsingBelief()
+
+            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
         }
 
     private fun TestScope.emulateSceneTransition(

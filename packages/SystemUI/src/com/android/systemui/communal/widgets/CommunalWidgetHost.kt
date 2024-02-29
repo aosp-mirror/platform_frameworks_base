@@ -21,6 +21,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.ComponentName
+import android.os.Bundle
 import android.os.UserHandle
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -56,6 +57,7 @@ constructor(
             return widgetInfo.configure != null && !configurationOptional
         }
     }
+
     private val logger = Logger(logBuffer, TAG)
 
     /**
@@ -84,9 +86,16 @@ constructor(
 
     private fun bindWidget(widgetId: Int, user: UserHandle, provider: ComponentName): Boolean {
         if (appWidgetManager.isPresent) {
+            val options =
+                Bundle().apply {
+                    putInt(
+                        AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                        AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
+                    )
+                }
             return appWidgetManager
                 .get()
-                .bindAppWidgetIdIfAllowed(widgetId, user, provider, /* options */ null)
+                .bindAppWidgetIdIfAllowed(widgetId, user, provider, options)
         }
         return false
     }

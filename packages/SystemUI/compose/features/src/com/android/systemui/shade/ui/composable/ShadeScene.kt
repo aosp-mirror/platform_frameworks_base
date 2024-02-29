@@ -26,8 +26,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,19 +36,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.media.controls.ui.MediaCarouselController
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
-import com.android.systemui.media.controls.ui.MediaHost
-import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
 import com.android.systemui.qs.ui.composable.QuickSettings
@@ -73,7 +77,6 @@ import kotlinx.coroutines.flow.stateIn
 
 object Shade {
     object Elements {
-        val QuickSettings = ElementKey("ShadeQuickSettings")
         val MediaCarousel = ElementKey("ShadeMediaCarousel")
         val BackgroundScrim =
             ElementKey("ShadeBackgroundScrim", scenePicker = LowestZIndexScenePicker)
@@ -160,12 +163,15 @@ private fun SceneScope.ShadeScene(
     val density = LocalDensity.current
     val layoutWidth = remember { mutableStateOf(0) }
     val maxNotifScrimTop = remember { mutableStateOf(0f) }
+    val tileSquishiness by
+        animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
+    val isClickable by viewModel.isClickable.collectAsState()
 
     Box(
         modifier =
             modifier
                 .element(Shade.Elements.BackgroundScrim)
-                .background(MaterialTheme.colorScheme.scrim),
+                .background(colorResource(R.color.shade_scrim_background_dark)),
     )
     Box {
         Layout(
@@ -175,8 +181,9 @@ private fun SceneScope.ShadeScene(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier =
-                                Modifier.fillMaxWidth()
-                                    .clickable(onClick = { viewModel.onContentClicked() })
+                                Modifier.fillMaxWidth().thenIf(isClickable) {
+                                    Modifier.clickable(onClick = { viewModel.onContentClicked() })
+                                }
                         ) {
                             CollapsedShadeHeader(
                                 viewModel = viewModel.shadeHeaderViewModel,
@@ -190,7 +197,11 @@ private fun SceneScope.ShadeScene(
                             )
                             QuickSettings(
                                 viewModel.qsSceneAdapter,
-                                { viewModel.qsSceneAdapter.qqsHeight },
+                                {
+                                    (viewModel.qsSceneAdapter.qqsHeight * tileSquishiness)
+                                        .roundToInt()
+                                },
+                                squishiness = tileSquishiness,
                             )
 
                             if (viewModel.isMediaVisible()) {

@@ -21,9 +21,11 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_OWN_FOCUS;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
@@ -80,6 +82,10 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.ContentRecordingSession;
@@ -106,6 +112,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import com.android.server.wm.WindowManagerService.WindowContainerInfo;
+import com.android.window.flags.Flags;
 
 import com.google.common.truth.Expect;
 
@@ -136,6 +143,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Rule
     public Expect mExpect = Expect.create();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @After
     public void tearDown() {
@@ -237,6 +247,22 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
         mWm.dismissKeyguard(null, "test-dismiss-keyguard");
         verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
+    }
+
+    @Test
+    public void testTrackOverlayWindow() {
+        final WindowProcessController wpc = mSystemServicesTestRule.addProcess(
+                "pkgName", "processName", 1000 /* pid */, Process.SYSTEM_UID);
+        final Session session = createTestSession(mAtm, wpc.getPid(), wpc.mUid);
+        spyOn(session);
+        assertTrue(session.mCanAddInternalSystemWindow);
+        final WindowSurfaceController winSurface = mock(WindowSurfaceController.class);
+        session.onWindowSurfaceVisibilityChanged(winSurface, true /* visible */,
+                LayoutParams.TYPE_PHONE);
+        verify(session).setHasOverlayUi(true);
+        session.onWindowSurfaceVisibilityChanged(winSurface, false /* visible */,
+                LayoutParams.TYPE_PHONE);
+        verify(session).setHasOverlayUi(false);
     }
 
     @Test
@@ -824,7 +850,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
-    public void addBlockScreenCaptureForApps() {
+    @RequiresFlagsEnabled(FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION)
+    public void shouldBlockScreenCaptureForNotificationApps() {
         String testPackage = "test";
         int ownerId1 = 20;
         int ownerId2 = 21;
@@ -834,12 +861,59 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
         wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+        verify(mWm).refreshScreenCaptureDisabled();
+
+        // window client token parameter is ignored for this feature.
+        assertTrue(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1, new Binder()));
+        assertFalse(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId2, new Binder()));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_SENSITIVE_CONTENT_APP_PROTECTION)
+    public void shouldBlockScreenCaptureForSensitiveContentOnScreenApps() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        final IBinder windowClientToken = new Binder("window client token");
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1, windowClientToken);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+        verify(mWm).refreshScreenCaptureDisabled();
 
         assertTrue(mWm.mSensitiveContentPackages
-                .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1, windowClientToken));
         assertFalse(mWm.mSensitiveContentPackages
-                .shouldBlockScreenCaptureForApp(testPackage, ownerId2));
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1, new Binder()));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(
+            {FLAG_SENSITIVE_CONTENT_APP_PROTECTION, FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION})
+    public void shouldBlockScreenCaptureForApps() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        int ownerId2 = 21;
+        final IBinder windowClientToken = new Binder("window client token");
+        PackageInfo blockedPackage1 = new PackageInfo(testPackage, ownerId1);
+        PackageInfo blockedPackage2 = new PackageInfo(testPackage, ownerId1, windowClientToken);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage1);
+        blockedPackages.add(blockedPackage2);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
         verify(mWm).refreshScreenCaptureDisabled();
+
+        assertTrue(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1, windowClientToken));
+        assertTrue(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1, new Binder()));
+        assertFalse(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId2, new Binder()));
     }
 
     @Test
@@ -875,10 +949,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         wmInternal.addBlockScreenCaptureForApps(blockedPackages);
         wmInternal.addBlockScreenCaptureForApps(blockedPackages2);
 
-        assertTrue(mWm.mSensitiveContentPackages
-                .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
-        assertTrue(mWm.mSensitiveContentPackages
-                .shouldBlockScreenCaptureForApp(testPackage, ownerId2));
         verify(mWm, times(2)).refreshScreenCaptureDisabled();
     }
 
@@ -893,9 +963,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
         wmInternal.addBlockScreenCaptureForApps(blockedPackages);
         wmInternal.clearBlockedApps();
-
-        assertFalse(mWm.mSensitiveContentPackages
-                .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
         verify(mWm, times(2)).refreshScreenCaptureDisabled();
     }
 
@@ -1046,6 +1113,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
     }
 
+    @RequiresFlagsDisabled(Flags.FLAG_MAGNIFICATION_ALWAYS_DRAW_FULLSCREEN_BORDER)
     @Test
     public void testDrawMagnifiedViewport() {
         final int displayId = mDisplayContent.mDisplayId;

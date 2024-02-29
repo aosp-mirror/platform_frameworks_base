@@ -29,16 +29,20 @@ import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupTransport;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.os.Build;
 import android.os.Message;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.testing.TestableDeviceConfig;
+import com.android.server.backup.Flags;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.transport.BackupTransportClient;
@@ -56,10 +60,12 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -74,10 +80,17 @@ public class PerformUnifiedRestoreTaskTest {
     private static final String SYSTEM_PACKAGE_NAME = "android";
     private static final String NON_SYSTEM_PACKAGE_NAME = "package";
 
-    @Mock private BackupDataInput mBackupDataInput;
-    @Mock private BackupDataOutput mBackupDataOutput;
-    @Mock private UserBackupManagerService mBackupManagerService;
-    @Mock private TransportConnection mTransportConnection;
+    private static final String V_TO_U_ALLOWLIST = "pkg1";
+    private static final String V_TO_U_DENYLIST = "pkg2";
+
+    @Mock
+    private BackupDataInput mBackupDataInput;
+    @Mock
+    private BackupDataOutput mBackupDataOutput;
+    @Mock
+    private UserBackupManagerService mBackupManagerService;
+    @Mock
+    private TransportConnection mTransportConnection;
 
     private Set<String> mExcludedkeys = new HashSet<>();
     private Map<String, String> mBackupData = new HashMap<>();
@@ -90,6 +103,10 @@ public class PerformUnifiedRestoreTaskTest {
     @Rule
     public TestableDeviceConfig.TestableDeviceConfigRule mDeviceConfigRule =
             new TestableDeviceConfig.TestableDeviceConfigRule();
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
 
     private Context mContext;
 
@@ -118,7 +135,8 @@ public class PerformUnifiedRestoreTaskTest {
                                     return null;
                                 });
 
-        mRestoreTask = new PerformUnifiedRestoreTask(mBackupManagerService, mTransportConnection);
+        mRestoreTask = new PerformUnifiedRestoreTask(mBackupManagerService, mTransportConnection,
+                V_TO_U_ALLOWLIST, V_TO_U_DENYLIST);
     }
 
     private void populateTestData() {
@@ -233,6 +251,122 @@ public class PerformUnifiedRestoreTaskTest {
         assertTrue(
                 mRestoreTask.getCurrentUnifiedRestoreStateForTesting()
                         == UnifiedRestoreState.FINAL);
+    }
+
+    @Test
+    public void testCreateVToUList_listSettingIsNull_returnEmptyList() {
+        List<String> expectedEmptyList = new ArrayList<>();
+
+        List<String> list = mRestoreTask.createVToUList(null);
+
+        assertEquals(list, expectedEmptyList);
+    }
+
+    @Test
+    public void testCreateVToUList_listIsNotNull_returnCorrectList() {
+        List<String> expectedList = Arrays.asList("a", "b", "c");
+        String listString = "a,b,c";
+
+        List<String> list = mRestoreTask.createVToUList(listString);
+
+        assertEquals(list, expectedList);
+    }
+
+    @Test
+    public void testIsVToUDowngrade_vToUFlagIsOffAndTargetIsUSourceIsV_returnFalse() {
+        mSetFlagsRule.disableFlags(
+                Flags.FLAG_ENABLE_V_TO_U_RESTORE_FOR_SYSTEM_COMPONENTS_IN_ALLOWLIST);
+
+        boolean isVToUDowngrade = mRestoreTask.isVToUDowngrade(
+                Build.VERSION_CODES.VANILLA_ICE_CREAM, Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
+
+        assertFalse(isVToUDowngrade);
+    }
+
+    @Test
+    public void testIsVToUDowngrade_vToUFlagIsOnAndTargetIsUSourceIsV_returnTrue() {
+        mSetFlagsRule.enableFlags(
+                Flags.FLAG_ENABLE_V_TO_U_RESTORE_FOR_SYSTEM_COMPONENTS_IN_ALLOWLIST);
+
+        boolean isVToUDowngrade = mRestoreTask.isVToUDowngrade(
+                Build.VERSION_CODES.VANILLA_ICE_CREAM, Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
+
+        assertTrue(isVToUDowngrade);
+    }
+
+    @Test
+    public void testIsVToUDowngrade_vToUFlagIsOnAndSourceIsNotV_returnFalse() {
+        mSetFlagsRule.enableFlags(
+                Flags.FLAG_ENABLE_V_TO_U_RESTORE_FOR_SYSTEM_COMPONENTS_IN_ALLOWLIST);
+
+        boolean isVToUDowngrade = mRestoreTask.isVToUDowngrade(Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+                Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
+
+        assertFalse(isVToUDowngrade);
+    }
+
+    @Test
+    public void testIsVToUDowngrade_vToUFlagIsOnAndTargetIsNotU_returnFalse() {
+        mSetFlagsRule.enableFlags(
+                Flags.FLAG_ENABLE_V_TO_U_RESTORE_FOR_SYSTEM_COMPONENTS_IN_ALLOWLIST);
+
+        boolean isVToUDowngrade = mRestoreTask.isVToUDowngrade(
+                Build.VERSION_CODES.VANILLA_ICE_CREAM, Build.VERSION_CODES.VANILLA_ICE_CREAM);
+
+        assertFalse(isVToUDowngrade);
+    }
+
+
+    @Test
+    public void testIsEligibleForVToUDowngrade_pkgIsNotOnAllowlist_returnFalse() {
+        PackageInfo testPackageInfo = new PackageInfo();
+        testPackageInfo.packageName = "pkg";
+        testPackageInfo.applicationInfo = new ApplicationInfo();
+        // restoreAnyVersion flag is off
+        testPackageInfo.applicationInfo.flags = 0;
+
+        boolean eligibilityCriteria = mRestoreTask.isPackageEligibleForVToURestore(testPackageInfo);
+
+        assertFalse(eligibilityCriteria);
+    }
+
+    @Test
+    public void testIsEligibleForVToUDowngrade_pkgIsOnAllowlist_returnTrue() {
+        PackageInfo testPackageInfo = new PackageInfo();
+        testPackageInfo.packageName = "pkg1";
+        testPackageInfo.applicationInfo = new ApplicationInfo();
+        // restoreAnyVersion flag is off
+        testPackageInfo.applicationInfo.flags = 0;
+
+        boolean eligibilityCriteria = mRestoreTask.isPackageEligibleForVToURestore(testPackageInfo);
+
+        assertTrue(eligibilityCriteria);
+    }
+
+    @Test
+    public void testIsEligibleForVToUDowngrade_pkgIsNotOnDenyList_returnTrue() {
+        PackageInfo testPackageInfo = new PackageInfo();
+        testPackageInfo.packageName = "pkg";
+        testPackageInfo.applicationInfo = new ApplicationInfo();
+        // restoreAnyVersion flag is on
+        testPackageInfo.applicationInfo.flags = ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
+
+        boolean eligibilityCriteria = mRestoreTask.isPackageEligibleForVToURestore(testPackageInfo);
+
+        assertTrue(eligibilityCriteria);
+    }
+
+    @Test
+    public void testIsEligibleForVToUDowngrade_pkgIsOnDenyList_returnFalse() {
+        PackageInfo testPackageInfo = new PackageInfo();
+        testPackageInfo.packageName = "pkg2";
+        testPackageInfo.applicationInfo = new ApplicationInfo();
+        // restoreAnyVersion flag is on
+        testPackageInfo.applicationInfo.flags = ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
+
+        boolean eligibilityCriteria = mRestoreTask.isPackageEligibleForVToURestore(testPackageInfo);
+
+        assertFalse(eligibilityCriteria);
     }
 
     private void setupForRestoreKeyValueState(int transportStatus)

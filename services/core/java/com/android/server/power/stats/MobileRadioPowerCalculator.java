@@ -32,7 +32,6 @@ import com.android.internal.power.ModemPowerProfile;
 
 import java.util.ArrayList;
 
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class MobileRadioPowerCalculator extends PowerCalculator {
     private static final String TAG = "MobRadioPowerCalculator";
     private static final boolean DEBUG = PowerCalculator.DEBUG;

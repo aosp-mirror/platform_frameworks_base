@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -195,8 +197,6 @@ public class TextureView extends View {
 
     private Canvas mCanvas;
     private int mSaveCount;
-
-    @Surface.FrameRateCompatibility int mFrameRateCompatibility;
 
     private final Object[] mNativeWindowLock = new Object[0];
     // Set by native code, do not write!
@@ -883,6 +883,17 @@ public class TextureView extends View {
      */
     public void setSurfaceTextureListener(@Nullable SurfaceTextureListener listener) {
         mListener = listener;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected int calculateFrameRateCategory(float sizePercentage) {
+        if (mMinusTwoFrameIntervalMillis > 15 && mMinusOneFrameIntervalMillis > 15) {
+            return FRAME_RATE_CATEGORY_NORMAL;
+        }
+        return super.calculateFrameRateCategory(sizePercentage);
     }
 
     @UnsupportedAppUsage

@@ -119,6 +119,16 @@ public class LogModule {
         return factory.create("LSShadeTransitionLog", 50);
     }
 
+    /** */
+    @Provides
+    @SysUISingleton
+    @SensitiveNotificationProtectionLog
+    public static LogBuffer provideSensitiveNotificationProtectionLogBuffer(
+            LogBufferFactory factory
+    ) {
+        return factory.create("SensitiveNotificationProtectionLog", 10);
+    }
+
     /** Provides a logging buffer for shade window messages. */
     @Provides
     @SysUISingleton
@@ -333,7 +343,7 @@ public class LogModule {
     /**
      * Provides a buffer for our connections and disconnections to MediaBrowserService.
      *
-     * See {@link com.android.systemui.media.controls.resume.ResumeMediaBrowser}.
+     * See {@link com.android.systemui.media.controls.domain.resume.ResumeMediaBrowser}.
      */
     @Provides
     @SysUISingleton
@@ -345,7 +355,7 @@ public class LogModule {
     /**
      * Provides a buffer for updates to the media carousel.
      *
-     * See {@link com.android.systemui.media.controls.ui.MediaCarouselController}.
+     * See {@link com.android.systemui.media.controls.ui.controller.MediaCarouselController}.
      */
     @Provides
     @SysUISingleton
@@ -637,4 +647,11 @@ public class LogModule {
         return factory.create("NavBarButtonClick", 50);
     }
 
+    /** Provides a {@link LogBuffer} for NavBar Orientation Tracking. */
+    @Provides
+    @SysUISingleton
+    @NavbarOrientationTrackingLog
+    public static LogBuffer provideNavbarOrientationTrackingLogBuffer(LogBufferFactory factory) {
+        return factory.create("NavbarOrientationTrackingLog", 50);
+    }
 }

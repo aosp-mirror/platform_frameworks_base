@@ -1122,11 +1122,6 @@ class ProcessRecord implements WindowProcessListener {
         mInFullBackup = inFullBackup;
     }
 
-    @GuardedBy("mService")
-    public void setCached(boolean cached) {
-        mState.setCached(cached);
-    }
-
     @Override
     @GuardedBy("mService")
     public boolean isCached() {

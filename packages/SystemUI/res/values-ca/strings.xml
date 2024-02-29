@@ -530,6 +530,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"El teu pare o mare gestionen aquest dispositiu, i poden veure i gestionar informació com ara les aplicacions que utilitzes, la teva ubicació i el teu temps de connexió."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Desbloquejat per TrustAgent"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="1265107698772588299">"Protecció antirobatoris\nDispositiu bloquejat; massa intents"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Configuració del so"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Subtitula el contingut multimèdia automàticament"</string>
@@ -583,6 +584,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrar"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Controls de volum %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Les trucades i les notificacions sonaran (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"S\'està reproduint <xliff:g id="LABEL">%s</xliff:g> a"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Es reproduirà a"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Personalitzador d\'interfície d\'usuari"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra d\'estat"</string>
     <string name="demo_mode" msgid="263484519766901593">"Mode de demostració de la IU del sistema"</string>

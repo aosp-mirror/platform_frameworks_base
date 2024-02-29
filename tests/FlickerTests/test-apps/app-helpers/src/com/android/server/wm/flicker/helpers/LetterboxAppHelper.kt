@@ -17,14 +17,14 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.tools.common.datatypes.Rect
-import android.tools.common.datatypes.Region
-import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.datatypes.Rect
+import android.tools.datatypes.Region
 import android.tools.device.apphelpers.StandardAppHelper
-import android.tools.device.helpers.FIND_TIMEOUT
-import android.tools.device.helpers.SYSTEMUI_PACKAGE
-import android.tools.device.traces.parsers.WindowManagerStateHelper
-import android.tools.device.traces.parsers.toFlickerComponent
+import android.tools.helpers.FIND_TIMEOUT
+import android.tools.helpers.SYSTEMUI_PACKAGE
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.parsers.WindowManagerStateHelper
+import android.tools.traces.parsers.toFlickerComponent
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions

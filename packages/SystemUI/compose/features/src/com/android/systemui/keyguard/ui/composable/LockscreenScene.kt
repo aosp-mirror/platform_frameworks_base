@@ -18,11 +18,14 @@ package com.android.systemui.keyguard.ui.composable
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
+import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
 import com.android.systemui.scene.shared.model.SceneKey
@@ -87,10 +90,15 @@ constructor(
 }
 
 @Composable
-private fun LockscreenScene(
+private fun SceneScope.LockscreenScene(
     lockscreenContent: Lazy<LockscreenContent>,
     modifier: Modifier = Modifier,
 ) {
+    animateSceneFloatAsState(
+        value = QuickSettings.SharedValues.SquishinessValues.LockscreenSceneStarting,
+        key = QuickSettings.SharedValues.TilesSquishiness,
+    )
+
     lockscreenContent
         .get()
         .Content(

@@ -25,6 +25,7 @@ import android.annotation.UserIdInt;
 import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
@@ -158,7 +159,9 @@ public abstract class WindowManagerInternal {
     public interface WindowsForAccessibilityCallback {
 
         /**
-         * Called when the windows for accessibility changed.
+         * Called when the windows for accessibility changed. This is called if
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y} is
+         * false.
          *
          * @param forceSend Send the windows for accessibility even if they haven't changed.
          * @param topFocusedDisplayId The display Id which has the top focused window.
@@ -167,6 +170,23 @@ public abstract class WindowManagerInternal {
          */
         void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
                 IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows);
+
+        /**
+         * Called when the windows for accessibility changed. This is called if
+         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y} is
+         * true.
+         * TODO(b/322444245): Remove screenSize parameter by getting it from
+         *  DisplayManager#getDisplay(int).getRealSize() on the a11y side.
+         *
+         * @param forceSend Send the windows for accessibility even if they haven't changed.
+         * @param topFocusedDisplayId The display Id which has the top focused window.
+         * @param topFocusedWindowToken The window token of top focused window.
+         * @param screenSize The size of the display that the change happened.
+         * @param windows The windows for accessibility.
+         */
+        void onAccessibilityWindowsChanged(boolean forceSend, int topFocusedDisplayId,
+                @NonNull IBinder topFocusedWindowToken, @NonNull Point screenSize,
+                @NonNull List<AccessibilityWindowsPopulator.AccessibilityWindow> windows);
     }
 
     /**
@@ -315,8 +335,7 @@ public abstract class WindowManagerInternal {
                 InputChannel source) {
             return state.register(display)
                 .thenApply(unused ->
-                    service.transferTouchFocus(source, state.getInputChannel(),
-                            true /* isDragDrop */));
+                    service.startDragAndDrop(source, state.getInputChannel()));
         }
 
         /**
@@ -409,13 +428,12 @@ public abstract class WindowManagerInternal {
     public abstract void setMagnificationSpec(int displayId, MagnificationSpec spec);
 
     /**
-     * Set by the accessibility framework to indicate whether the magnifiable regions of the display
-     * should be shown.
+     * Set by the accessibility framework to indicate whether fullscreen magnification is activated.
      *
      * @param displayId The logical display id.
-     * @param show {@code true} to show magnifiable region bounds, {@code false} to hide
+     * @param activated The activation of fullscreen magnification
      */
-    public abstract void setForceShowMagnifiableBounds(int displayId, boolean show);
+    public abstract void setFullscreenMagnificationActivated(int displayId, boolean activated);
 
     /**
      * Obtains the magnification regions.
@@ -1061,4 +1079,10 @@ public abstract class WindowManagerInternal {
      * Moves the current focus to the top activity window if the top activity is embedded.
      */
     public abstract boolean moveFocusToTopEmbeddedWindowIfNeeded();
+
+    /**
+     * Returns an instance of {@link ScreenCapture.ScreenshotHardwareBuffer} containing the current
+     * screenshot.
+     */
+    public abstract ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot();
 }

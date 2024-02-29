@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.domain.interactor
 
-import android.content.pm.UserInfo
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_NOT_STARTED
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_STARTED
@@ -24,10 +23,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
-import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -38,13 +36,11 @@ import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalTutorialInteractorTest : SysuiTestCase() {
@@ -54,7 +50,6 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     private lateinit var underTest: CommunalTutorialInteractor
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var communalTutorialRepository: FakeCommunalTutorialRepository
-    private lateinit var communalRepository: FakeCommunalRepository
     private lateinit var communalInteractor: CommunalInteractor
     private lateinit var userRepository: FakeUserRepository
 
@@ -62,11 +57,9 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     fun setUp() {
         keyguardRepository = kosmos.fakeKeyguardRepository
         communalTutorialRepository = kosmos.fakeCommunalTutorialRepository
-        communalRepository = kosmos.fakeCommunalRepository
         communalInteractor = kosmos.communalInteractor
         userRepository = kosmos.fakeUserRepository
 
-        userRepository.setUserInfos(listOf(MAIN_USER_INFO))
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
 
@@ -77,7 +70,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     fun tutorialUnavailable_whenKeyguardNotVisible() =
         testScope.runTest {
             val isTutorialAvailable by collectLastValue(underTest.isTutorialAvailable)
-            setCommunalAvailable(true)
+            kosmos.setCommunalAvailable(true)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
             keyguardRepository.setKeyguardShowing(false)
             assertThat(isTutorialAvailable).isFalse()
@@ -87,10 +80,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     fun tutorialUnavailable_whenTutorialIsCompleted() =
         testScope.runTest {
             val isTutorialAvailable by collectLastValue(underTest.isTutorialAvailable)
-            setCommunalAvailable(true)
-            keyguardRepository.setKeyguardShowing(true)
-            keyguardRepository.setKeyguardOccluded(false)
-            communalRepository.setIsCommunalHubShowing(false)
+            goToCommunal()
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
             assertThat(isTutorialAvailable).isFalse()
         }
@@ -99,7 +89,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     fun tutorialUnavailable_whenCommunalNotAvailable() =
         testScope.runTest {
             val isTutorialAvailable by collectLastValue(underTest.isTutorialAvailable)
-            setCommunalAvailable(false)
+            kosmos.setCommunalAvailable(false)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
             keyguardRepository.setKeyguardShowing(true)
             assertThat(isTutorialAvailable).isFalse()
@@ -109,10 +99,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     fun tutorialAvailable_whenTutorialNotStarted() =
         testScope.runTest {
             val isTutorialAvailable by collectLastValue(underTest.isTutorialAvailable)
-            setCommunalAvailable(true)
-            keyguardRepository.setKeyguardShowing(true)
-            keyguardRepository.setKeyguardOccluded(false)
-            communalRepository.setIsCommunalHubShowing(false)
+            kosmos.setCommunalAvailable(true)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
             assertThat(isTutorialAvailable).isTrue()
         }
@@ -121,10 +108,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
     fun tutorialAvailable_whenTutorialIsStarted() =
         testScope.runTest {
             val isTutorialAvailable by collectLastValue(underTest.isTutorialAvailable)
-            setCommunalAvailable(true)
-            keyguardRepository.setKeyguardShowing(true)
-            keyguardRepository.setKeyguardOccluded(false)
-            communalRepository.setIsCommunalHubShowing(true)
+            goToCommunal()
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
             assertThat(isTutorialAvailable).isTrue()
         }
@@ -134,10 +118,9 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
 
-            communalRepository.setIsCommunalHubShowing(true)
+            goToCommunal()
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_STARTED)
         }
@@ -147,10 +130,10 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
+
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
 
-            communalRepository.setIsCommunalHubShowing(true)
+            goToCommunal()
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_STARTED)
         }
@@ -160,10 +143,9 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
 
-            communalRepository.setIsCommunalHubShowing(true)
+            goToCommunal()
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
@@ -173,10 +155,10 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
+            kosmos.setCommunalAvailable(true)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
 
-            communalRepository.setIsCommunalHubShowing(false)
+            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_NOT_STARTED)
         }
@@ -186,11 +168,10 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
-            communalRepository.setIsCommunalHubShowing(true)
+            goToCommunal()
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
 
-            communalRepository.setIsCommunalHubShowing(false)
+            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
@@ -200,26 +181,16 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val tutorialSettingState by
                 collectLastValue(communalTutorialRepository.tutorialSettingState)
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
-            communalRepository.setIsCommunalHubShowing(true)
+            goToCommunal()
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
 
-            communalRepository.setIsCommunalHubShowing(false)
+            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
 
-    private suspend fun setCommunalAvailable(available: Boolean) {
-        if (available) {
-            keyguardRepository.setIsEncryptedOrLockdown(false)
-            userRepository.setSelectedUserInfo(MAIN_USER_INFO)
-            keyguardRepository.setKeyguardShowing(true)
-        } else {
-            keyguardRepository.setIsEncryptedOrLockdown(true)
-        }
-    }
-
-    private companion object {
-        val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
+    private suspend fun goToCommunal() {
+        kosmos.setCommunalAvailable(true)
+        communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
     }
 }

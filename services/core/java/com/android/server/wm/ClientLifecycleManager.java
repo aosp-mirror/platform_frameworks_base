@@ -87,11 +87,7 @@ class ClientLifecycleManager {
     void scheduleTransactionItemNow(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem) throws RemoteException {
         final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-        if (transactionItem.isActivityLifecycleItem()) {
-            clientTransaction.setLifecycleStateRequest((ActivityLifecycleItem) transactionItem);
-        } else {
-            clientTransaction.addCallback(transactionItem);
-        }
+        clientTransaction.addTransactionItem(transactionItem);
         scheduleTransaction(clientTransaction);
     }
 
@@ -115,11 +111,8 @@ class ClientLifecycleManager {
         } else {
             // TODO(b/260873529): cleanup after launch.
             final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-            if (transactionItem.isActivityLifecycleItem()) {
-                clientTransaction.setLifecycleStateRequest((ActivityLifecycleItem) transactionItem);
-            } else {
-                clientTransaction.addCallback(transactionItem);
-            }
+            clientTransaction.addTransactionItem(transactionItem);
+
             scheduleTransaction(clientTransaction);
         }
     }
@@ -160,8 +153,8 @@ class ClientLifecycleManager {
         } else {
             // TODO(b/260873529): cleanup after launch.
             final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-            clientTransaction.addCallback(transactionItem);
-            clientTransaction.setLifecycleStateRequest(lifecycleItem);
+            clientTransaction.addTransactionItem(transactionItem);
+            clientTransaction.addTransactionItem(lifecycleItem);
             scheduleTransaction(clientTransaction);
         }
     }

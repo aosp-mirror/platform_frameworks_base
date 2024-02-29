@@ -359,8 +359,7 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
                         new PermissionGroupUsage(usage.packageName, usage.uid, usage.lastAccessTime,
                                 permGroup,
                                 usage.isRunning, isPhone, usage.attributionTag, attributionLabel,
-                                usagesWithLabels.valueAt(usageNum),
-                                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT));
+                                usagesWithLabels.valueAt(usageNum), deviceId));
             }
         }
 

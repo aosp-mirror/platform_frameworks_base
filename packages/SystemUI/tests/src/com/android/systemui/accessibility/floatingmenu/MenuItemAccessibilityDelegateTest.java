@@ -21,6 +21,7 @@ import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.ACTIO
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -89,6 +90,7 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
         mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance,
                 mSecureSettings));
         mMenuView.setTranslationY(halfScreenHeight);
+        doNothing().when(mMenuView).gotoEditScreen();
 
         mMenuViewLayer = spy(new MenuViewLayer(
                 mContext, stubWindowManager, mAccessibilityManager,

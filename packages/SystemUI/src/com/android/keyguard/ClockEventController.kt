@@ -377,7 +377,9 @@ constructor(
                 if (mode == ZenMode.OFF) SysuiR.string::dnd_is_off.name
                     else SysuiR.string::dnd_is_on.name
             ).also { data ->
-                clock?.run { events.onZenDataChanged(data) }
+                mainExecutor.execute {
+                    clock?.run { events.onZenDataChanged(data) }
+                }
             }
         }
 
@@ -411,7 +413,6 @@ constructor(
                     listenForDozing(this)
                     if (migrateClocksToBlueprint()) {
                         listenForDozeAmountTransition(this)
-                        listenForAnyStateToAodTransition(this)
                     } else {
                         listenForDozeAmount(this)
                     }
@@ -517,19 +518,6 @@ constructor(
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor.dozeAmountTransition.collect { handleDoze(it.value) }
-        }
-    }
-
-    /**
-     * When keyguard is displayed again after being gone, the clock must be reset to full dozing.
-     */
-    @VisibleForTesting
-    internal fun listenForAnyStateToAodTransition(scope: CoroutineScope): Job {
-        return scope.launch {
-            keyguardTransitionInteractor.transitionStepsToState(AOD)
-                .filter { it.transitionState == TransitionState.STARTED }
-                .filter { it.from != LOCKSCREEN }
-                .collect { handleDoze(1f) }
         }
     }
 

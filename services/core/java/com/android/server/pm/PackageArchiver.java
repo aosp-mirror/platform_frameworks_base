@@ -21,7 +21,7 @@ import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_PERMISSION_DENIED;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
-import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.content.pm.ArchivedActivityInfo.bytesFromBitmap;
 import static android.content.pm.ArchivedActivityInfo.drawableToBitmap;
 import static android.content.pm.PackageInstaller.EXTRA_UNARCHIVE_STATUS;
@@ -62,6 +62,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -85,6 +86,7 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.ExceptionUtils;
 import android.util.Pair;
@@ -163,6 +165,9 @@ public class PackageArchiver {
 
     @Nullable
     private AppOpsManager mAppOpsManager;
+
+    @Nullable
+    private UserManager mUserManager;
 
     /* IntentSender store that maps key: {userId, appPackageName} to respective existing attached
      unarchival intent sender. */
@@ -276,12 +281,8 @@ public class PackageArchiver {
             Slog.e(TAG, "callerPackageName cannot be null for unarchival!");
             return START_CLASS_NOT_FOUND;
         }
-        if (!isCallingPackageValid(callerPackageName, callingUid, userId)) {
-            // Return early as the calling UID does not match caller package's UID.
-            return START_CLASS_NOT_FOUND;
-        }
 
-        String currentLauncherPackageName = getCurrentLauncherPackageName(userId);
+        String currentLauncherPackageName = getCurrentLauncherPackageName(getParentUserId(userId));
         if ((currentLauncherPackageName == null || !callerPackageName.equals(
                 currentLauncherPackageName)) && callingUid != Process.SHELL_UID) {
             // TODO(b/311619990): Remove dependency on SHELL_UID for testing
@@ -316,6 +317,13 @@ public class PackageArchiver {
         return START_ABORTED;
     }
 
+    // Profiles share their UI and default apps, so we have to get the profile parent before
+    // fetching the default launcher.
+    private int getParentUserId(int userId) {
+        UserInfo profileParent = getUserManager().getProfileParent(userId);
+        return profileParent == null ? userId : profileParent.id;
+    }
+
     /**
      * Returns true if the componentName targeted by the intent corresponds to that of an archived
      * app.
@@ -348,19 +356,34 @@ public class PackageArchiver {
     }
 
     void clearArchiveState(String packageName, int userId) {
+        final PackageSetting ps;
         synchronized (mPm.mLock) {
-            PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
-            if (ps != null) {
-                ps.setArchiveState(/* archiveState= */ null, userId);
-            }
+            ps = mPm.mSettings.getPackageLPr(packageName);
         }
-        File iconsDir = getIconsDir(packageName, userId);
+        clearArchiveState(ps, userId);
+    }
+
+    void clearArchiveState(PackageSetting ps, int userId) {
+        synchronized (mPm.mLock) {
+            if (ps == null || ps.getUserStateOrDefault(userId).getArchiveState() == null) {
+                // No archive states to clear
+                return;
+            }
+            if (DEBUG) {
+                Slog.e(TAG, "Clearing archive states for " + ps.getPackageName());
+            }
+            ps.setArchiveState(/* archiveState= */ null, userId);
+        }
+        File iconsDir = getIconsDir(ps.getPackageName(), userId);
         if (!iconsDir.exists()) {
+            if (DEBUG) {
+                Slog.e(TAG, "Icons are already deleted at " + iconsDir.getAbsolutePath());
+            }
             return;
         }
         // TODO(b/319238030) Move this into installd.
         if (!FileUtils.deleteContentsAndDir(iconsDir)) {
-            Slog.e(TAG, "Failed to clean up archive files for " + packageName);
+            Slog.e(TAG, "Failed to clean up archive files for " + ps.getPackageName());
         } else {
             if (DEBUG) {
                 Slog.e(TAG, "Deleted icons at " + iconsDir.getAbsolutePath());
@@ -1126,6 +1149,13 @@ public class PackageArchiver {
             mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         }
         return mAppOpsManager;
+    }
+
+    private UserManager getUserManager() {
+        if (mUserManager == null) {
+            mUserManager = mContext.getSystemService(UserManager.class);
+        }
+        return mUserManager;
     }
 
     private void storeArchiveState(String packageName, ArchiveState archiveState, int userId)

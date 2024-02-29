@@ -21,12 +21,14 @@ import android.os.Build;
 import android.os.StrictMode;
 
 /**
- * @hide This should not be made public in its present form because it
- * assumes that private and secret key bytes are available and would
- * preclude the use of hardware crypto.
+ * This class provides some constants and helper methods related to Android's Keystore service.
+ * This class was originally much larger, but its functionality was superseded by other classes.
+ * It now just contains a few remaining pieces for which the users haven't been updated yet.
+ * You may be looking for {@link java.security.KeyStore} instead.
+ *
+ * @hide
  */
 public class KeyStore {
-    private static final String TAG = "KeyStore";
 
     // ResponseCodes - see system/security/keystore/include/keystore/keystore.h
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -40,50 +42,6 @@ public class KeyStore {
     @UnsupportedAppUsage
     public static KeyStore getInstance() {
         return KEY_STORE;
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public byte[] get(String key) {
-        return null;
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public boolean delete(String key) {
-        return false;
-    }
-
-    /**
-     * List uids of all keys that are auth bound to the current user.
-     * Only system is allowed to call this method.
-     * @hide
-     * @deprecated This function always returns null.
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public int[] listUidsOfAuthBoundKeys() {
-        return null;
-    }
-
-
-    /**
-     * @hide
-     * @deprecated This function has no effect.
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public boolean unlock(String password) {
-        return false;
-    }
-
-    /**
-     *
-     * @return
-     * @deprecated This function always returns true.
-     * @hide
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public boolean isEmpty() {
-        return true;
     }
 
     /**
@@ -104,14 +62,5 @@ public class KeyStore {
      */
     public void onDeviceOffBody() {
         AndroidKeyStoreMaintenance.onDeviceOffBody();
-    }
-
-    /**
-     * Returns a {@link KeyStoreException} corresponding to the provided keystore/keymaster error
-     * code.
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static KeyStoreException getKeyStoreException(int errorCode) {
-        return new KeyStoreException(-10000, "Should not be called.");
     }
 }

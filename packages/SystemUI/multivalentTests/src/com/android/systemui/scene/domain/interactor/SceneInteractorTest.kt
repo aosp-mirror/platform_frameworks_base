@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.scene.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -22,7 +24,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
@@ -32,6 +33,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
@@ -278,10 +280,16 @@ class SceneInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun userInput() =
+    fun isVisible_duringRemoteUserInteraction_forcedVisible() =
         testScope.runTest {
-            assertThat(kosmos.fakePowerRepository.userTouchRegistered).isFalse()
-            underTest.onUserInput()
-            assertThat(kosmos.fakePowerRepository.userTouchRegistered).isTrue()
+            underTest.setVisible(false, "reason")
+            val isVisible by collectLastValue(underTest.isVisible)
+            assertThat(isVisible).isFalse()
+            underTest.onRemoteUserInteractionStarted("reason")
+            assertThat(isVisible).isTrue()
+
+            underTest.onUserInteractionFinished()
+
+            assertThat(isVisible).isFalse()
         }
 }

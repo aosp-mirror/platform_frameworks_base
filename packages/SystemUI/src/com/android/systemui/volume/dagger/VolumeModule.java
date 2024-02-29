@@ -57,8 +57,10 @@ import dagger.multibindings.IntoSet;
 @Module(
         includes = {
                 AudioModule.class,
+                AncModule.class,
                 CaptioningModule.class,
-                MediaDevicesModule.class
+                MediaDevicesModule.class,
+                SpatializerModule.class,
         },
         subcomponents = {
                 VolumePanelComponent.class

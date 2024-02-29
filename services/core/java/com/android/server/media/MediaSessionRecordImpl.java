@@ -32,6 +32,13 @@ import java.io.PrintWriter;
 public interface MediaSessionRecordImpl extends AutoCloseable {
 
     /**
+     * Get the unique id of this session record.
+     *
+     * @return a unique id of this session record.
+     */
+    int getUniqueId();
+
+    /**
      * Get the info for this session.
      *
      * @return Info that identifies this session.

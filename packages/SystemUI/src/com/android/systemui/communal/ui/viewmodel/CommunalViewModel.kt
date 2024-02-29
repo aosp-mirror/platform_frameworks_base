@@ -24,9 +24,9 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
-import com.android.systemui.media.controls.ui.MediaHost
-import com.android.systemui.media.controls.ui.MediaHostState
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not

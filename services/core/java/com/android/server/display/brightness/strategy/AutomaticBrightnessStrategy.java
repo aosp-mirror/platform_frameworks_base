@@ -267,6 +267,23 @@ public class AutomaticBrightnessStrategy {
     }
 
     /**
+     * Get the automatic screen brightness based on the last observed lux reading. Used e.g. when
+     * entering doze - we disable the light sensor, invalidate the lux, but we still need to set
+     * the initial brightness in doze mode.
+     * @param brightnessEvent Event object to populate with details about why the specific
+     *                        brightness was chosen.
+     */
+    public float getAutomaticScreenBrightnessBasedOnLastObservedLux(
+            BrightnessEvent brightnessEvent) {
+        float brightness = (mAutomaticBrightnessController != null)
+                ? mAutomaticBrightnessController
+                .getAutomaticScreenBrightnessBasedOnLastObservedLux(brightnessEvent)
+                : PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        adjustAutomaticBrightnessStateIfValid(brightness);
+        return brightness;
+    }
+
+    /**
      * Gets the auto-brightness adjustment flag change reason
      */
     public int getAutoBrightnessAdjustmentReasonsFlags() {

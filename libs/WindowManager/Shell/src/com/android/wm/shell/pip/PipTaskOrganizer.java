@@ -1996,6 +1996,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         pw.println(innerPrefix + "mToken=" + mToken
                 + " binder=" + (mToken != null ? mToken.asBinder() : null));
         pw.println(innerPrefix + "mLeash=" + mLeash);
+        pw.println(innerPrefix + "mPipOverlay=" + mPipOverlay);
         pw.println(innerPrefix + "mState=" + mPipTransitionState.getTransitionState());
         pw.println(innerPrefix + "mPictureInPictureParams=" + mPictureInPictureParams);
         mPipTransitionController.dump(pw, innerPrefix);

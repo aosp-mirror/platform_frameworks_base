@@ -38,6 +38,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.nfc.cardemulation.PollingFrame;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
@@ -1249,16 +1250,16 @@ public final class NfcAdapter {
      * and simply observe and notify the APDU service of polling loop frames. See
      * {@link #isObserveModeSupported()} for a description of observe mode.
      *
-     * @param allowed true disables observe mode to allow the transaction to proceed while false
+     * @param enabled false disables observe mode to allow the transaction to proceed while true
      *                enables observe mode and does not allow transactions to proceed.
      *
      * @return boolean indicating success or failure.
      */
 
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
-    public boolean setTransactionAllowed(boolean allowed) {
+    public boolean setObserveModeEnabled(boolean enabled) {
         try {
-            return sService.setObserveMode(!allowed);
+            return sService.setObserveMode(enabled);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
@@ -2799,7 +2800,8 @@ public final class NfcAdapter {
      */
     @TestApi
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public void notifyPollingLoop(@NonNull Bundle frame) {
+    public void notifyPollingLoop(@NonNull PollingFrame pollingFrame) {
+        Bundle frame = pollingFrame.toBundle();
         try {
             if (sService == null) {
                 attemptDeadServiceRecovery(null);

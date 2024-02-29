@@ -20,6 +20,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
@@ -91,6 +92,7 @@ public final class ChooserResult implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public ChooserResult(@ResultType int type, @Nullable ComponentName componentName,
             boolean isShortcut) {
         mType = type;

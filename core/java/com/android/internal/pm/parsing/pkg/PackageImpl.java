@@ -421,6 +421,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @NonNull
     private String[] mUsesStaticLibrariesSorted;
 
+    private boolean mAppMetadataFileInApk = false;
+
     @NonNull
     public static PackageImpl forParsing(@NonNull String packageName, @NonNull String baseCodePath,
             @NonNull String codePath, @NonNull TypedArray manifestArray, boolean isCoreApp,
@@ -1061,6 +1063,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public int getMemtagMode() {
         return memtagMode;
+    }
+
+    @Override
+    public boolean isAppMetadataFileInApk() {
+        return mAppMetadataFileInApk;
     }
 
     @Nullable
@@ -2147,6 +2154,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public PackageImpl setMemtagMode(@ApplicationInfo.MemtagMode int value) {
         memtagMode = value;
+        return this;
+    }
+
+    @Override
+    public PackageImpl setAppMetadataFileInApk(boolean fileInApk) {
+        mAppMetadataFileInApk = fileInApk;
         return this;
     }
 
@@ -3264,6 +3277,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         dest.writeLong(this.mBooleans);
         dest.writeLong(this.mBooleans2);
         dest.writeBoolean(this.mAllowCrossUidActivitySwitchFromBelow);
+        dest.writeBoolean(this.mAppMetadataFileInApk);
     }
 
     public PackageImpl(Parcel in) {
@@ -3426,6 +3440,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         this.mBooleans = in.readLong();
         this.mBooleans2 = in.readLong();
         this.mAllowCrossUidActivitySwitchFromBelow = in.readBoolean();
+        this.mAppMetadataFileInApk = in.readBoolean();
 
         assignDerivedFields();
         assignDerivedFields2();

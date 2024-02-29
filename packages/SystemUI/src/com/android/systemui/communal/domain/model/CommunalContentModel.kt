@@ -18,6 +18,7 @@ package com.android.systemui.communal.domain.model
 
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
+import android.content.pm.ApplicationInfo
 import android.widget.RemoteViews
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
@@ -42,20 +43,37 @@ sealed interface CommunalContentModel {
         val createdTimestampMillis: Long
     }
 
-    data class Widget(
-        val appWidgetId: Int,
-        val providerInfo: AppWidgetProviderInfo,
-        val appWidgetHost: CommunalAppWidgetHost,
-    ) : CommunalContentModel {
-        override val key = KEY.widget(appWidgetId)
-        // Widget size is always half.
-        override val size = CommunalContentSize.HALF
+    sealed interface WidgetContent : CommunalContentModel {
+        val appWidgetId: Int
+        val providerInfo: AppWidgetProviderInfo
 
-        /** Whether this widget can be reconfigured after it has already been added. */
-        val reconfigurable: Boolean
-            get() =
-                (providerInfo.widgetFeatures and WIDGET_FEATURE_RECONFIGURABLE != 0) &&
-                    providerInfo.configure != null
+        data class Widget(
+            override val appWidgetId: Int,
+            override val providerInfo: AppWidgetProviderInfo,
+            val appWidgetHost: CommunalAppWidgetHost,
+        ) : WidgetContent {
+            override val key = KEY.widget(appWidgetId)
+            // Widget size is always half.
+            override val size = CommunalContentSize.HALF
+
+            /** Whether this widget can be reconfigured after it has already been added. */
+            val reconfigurable: Boolean
+                get() =
+                    (providerInfo.widgetFeatures and WIDGET_FEATURE_RECONFIGURABLE != 0) &&
+                        providerInfo.configure != null
+        }
+
+        data class DisabledWidget(
+            override val appWidgetId: Int,
+            override val providerInfo: AppWidgetProviderInfo
+        ) : WidgetContent {
+            override val key = KEY.disabledWidget(appWidgetId)
+            // Widget size is always half.
+            override val size = CommunalContentSize.HALF
+
+            val appInfo: ApplicationInfo?
+                get() = providerInfo.providerInfo?.applicationInfo
+        }
     }
 
     /** A placeholder item representing a new widget being added */
@@ -111,6 +129,10 @@ sealed interface CommunalContentModel {
                 return "widget_$id"
             }
 
+            fun disabledWidget(id: Int): String {
+                return "disabled_widget_$id"
+            }
+
             fun widgetPlaceholder(): String {
                 return "widget_placeholder_${UUID.randomUUID()}"
             }
@@ -129,5 +151,5 @@ sealed interface CommunalContentModel {
         }
     }
 
-    fun isWidget() = this is Widget
+    fun isWidgetContent() = this is WidgetContent
 }

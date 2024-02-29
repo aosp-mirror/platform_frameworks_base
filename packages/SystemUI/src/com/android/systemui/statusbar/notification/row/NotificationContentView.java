@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationCustomViewWrapper;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
@@ -2312,6 +2313,13 @@ public class NotificationContentView extends FrameLayout implements Notification
             return true;
         }
         return false;
+    }
+
+    public void setNotificationWhen(long whenMillis) {
+        NotificationViewWrapper wrapper = getNotificationViewWrapper();
+        if (wrapper instanceof NotificationHeaderViewWrapper headerViewWrapper) {
+            headerViewWrapper.setNotificationWhen(whenMillis);
+        }
     }
 
     private static class RemoteInputViewData {

@@ -282,6 +282,8 @@ class CreateFlowUtils {
             val appPreferredDefaultProviderId: String? =
                 if (!requestInfo.hasPermissionToOverrideDefault()) null
                 else createCredentialRequestJetpack?.displayInfo?.preferDefaultProvider
+            val typeDisplayIcon = createCredentialRequestJetpack?.displayInfo?.credentialTypeIcon
+                    ?.loadDrawable(context)
             return when (createCredentialRequestJetpack) {
                 is CreatePasswordRequest -> RequestDisplayInfo(
                     createCredentialRequestJetpack.id,
@@ -302,7 +304,6 @@ class CreateFlowUtils {
                     newRequestDisplayInfoFromPasskeyJson(
                         requestJson = createCredentialRequestJetpack.requestJson,
                         appLabel = appLabel,
-                        context = context,
                         preferImmediatelyAvailableCredentials =
                         createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                         appPreferredDefaultProviderId = appPreferredDefaultProviderId,
@@ -311,6 +312,7 @@ class CreateFlowUtils {
                         // the passkey type. For now, directly parse it ourselves.
                         isAutoSelectRequest = createCredentialRequest.credentialData.getBoolean(
                             Constants.BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS, false),
+                        typeIcon = context.getDrawable(R.drawable.ic_passkey_24) ?: return null,
                     )
                 }
                 is CreateCustomCredentialRequest -> {
@@ -323,7 +325,7 @@ class CreateFlowUtils {
                         subtitle = displayInfo.userDisplayName?.toString(),
                         type = CredentialType.UNKNOWN,
                         appName = appLabel,
-                        typeIcon = displayInfo.credentialTypeIcon?.loadDrawable(context)
+                        typeIcon = typeDisplayIcon
                             ?: context.getDrawable(R.drawable.ic_other_sign_in_24) ?: return null,
                         preferImmediatelyAvailableCredentials =
                         createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
@@ -342,8 +344,6 @@ class CreateFlowUtils {
             defaultProviderIdPreferredByApp: String?,
             defaultProviderIdsSetByUser: Set<String>,
             requestDisplayInfo: RequestDisplayInfo,
-            isOnPasskeyIntroStateAlready: Boolean,
-            isPasskeyFirstUse: Boolean,
         ): CreateCredentialUiState? {
             var remoteEntry: RemoteInfo? = null
             var remoteEntryProvider: EnabledProviderInfo? = null
@@ -392,11 +392,8 @@ class CreateFlowUtils {
             val defaultProvider = defaultProviderPreferredByApp ?: defaultProviderSetByUser
             val initialScreenState = toCreateScreenState(
                 createOptionSize = createOptionsPairs.size,
-                isOnPasskeyIntroStateAlready = isOnPasskeyIntroStateAlready,
-                requestDisplayInfo = requestDisplayInfo,
                 remoteEntry = remoteEntry,
-                isPasskeyFirstUse = isPasskeyFirstUse
-            ) ?: return null
+            )
             val sortedCreateOptionsPairs = createOptionsPairs.sortedWith(
                 compareByDescending { it.first.lastUsedTime }
             )
@@ -419,15 +416,9 @@ class CreateFlowUtils {
 
         fun toCreateScreenState(
             createOptionSize: Int,
-            isOnPasskeyIntroStateAlready: Boolean,
-            requestDisplayInfo: RequestDisplayInfo,
             remoteEntry: RemoteInfo?,
-            isPasskeyFirstUse: Boolean,
-        ): CreateScreenState? {
-            return if (isPasskeyFirstUse && requestDisplayInfo.type == CredentialType.PASSKEY &&
-                !isOnPasskeyIntroStateAlready) {
-                CreateScreenState.PASSKEY_INTRO
-            } else if (createOptionSize == 0 && remoteEntry != null) {
+        ): CreateScreenState {
+            return if (createOptionSize == 0 && remoteEntry != null) {
                 CreateScreenState.EXTERNAL_ONLY_SELECTION
             } else {
                 CreateScreenState.CREATION_OPTION_SELECTION
@@ -513,7 +504,7 @@ class CreateFlowUtils {
         private fun newRequestDisplayInfoFromPasskeyJson(
             requestJson: String,
             appLabel: String,
-            context: Context,
+            typeIcon: Drawable,
             preferImmediatelyAvailableCredentials: Boolean,
             appPreferredDefaultProviderId: String?,
             userSetDefaultProviderIds: Set<String>,
@@ -536,7 +527,7 @@ class CreateFlowUtils {
                 displayname,
                 CredentialType.PASSKEY,
                 appLabel,
-                context.getDrawable(R.drawable.ic_passkey_24) ?: return null,
+                typeIcon,
                 preferImmediatelyAvailableCredentials,
                 appPreferredDefaultProviderId,
                 userSetDefaultProviderIds,

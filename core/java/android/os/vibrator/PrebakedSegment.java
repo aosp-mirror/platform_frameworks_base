@@ -137,6 +137,14 @@ public final class PrebakedSegment extends VibrationEffectSegment {
     /** @hide */
     @NonNull
     @Override
+    public PrebakedSegment scaleLinearly(float scaleFactor) {
+        // Prebaked effect strength cannot be scaled with this method.
+        return this;
+    }
+
+    /** @hide */
+    @NonNull
+    @Override
     public PrebakedSegment applyEffectStrength(int effectStrength) {
         if (effectStrength != mEffectStrength && isValidEffectStrength(effectStrength)) {
             return new PrebakedSegment(mEffectId, mFallback, effectStrength);

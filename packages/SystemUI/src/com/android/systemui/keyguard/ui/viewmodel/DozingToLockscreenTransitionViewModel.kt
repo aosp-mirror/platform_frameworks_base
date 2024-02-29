@@ -52,6 +52,9 @@ constructor(
 
     val lockscreenAlpha: Flow<Float> = shortcutsAlpha
 
+    val deviceEntryBackgroundViewAlpha: Flow<Float> =
+        transitionAnimation.immediatelyTransitionTo(1f)
+
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(1f)
 }

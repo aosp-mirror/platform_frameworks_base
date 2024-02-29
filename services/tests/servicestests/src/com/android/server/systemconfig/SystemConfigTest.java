@@ -602,56 +602,6 @@ public class SystemConfigTest {
     }
 
     /**
-     * Test that getRollbackDenylistedPackages works correctly for the tag:
-     * {@code automatic-rollback-denylisted-app}.
-     */
-    @Test
-    public void automaticRollbackDeny_vending() throws IOException {
-        final String contents =
-                "<config>\n"
-                + "    <automatic-rollback-denylisted-app package=\"com.android.vending\" />\n"
-                + "</config>";
-        final File folder = createTempSubfolder("folder");
-        createTempFile(folder, "automatic-rollback-denylisted-app.xml", contents);
-
-        readPermissions(folder, /* Grant all permission flags */ ~0);
-
-        assertThat(mSysConfig.getAutomaticRollbackDenylistedPackages())
-            .containsExactly("com.android.vending");
-    }
-
-    /**
-     * Test that getRollbackDenylistedPackages works correctly for the tag:
-     * {@code automatic-rollback-denylisted-app} without any packages.
-     */
-    @Test
-    public void automaticRollbackDeny_empty() throws IOException {
-        final String contents =
-                "<config>\n"
-                + "    <automatic-rollback-denylisted-app />\n"
-                + "</config>";
-        final File folder = createTempSubfolder("folder");
-        createTempFile(folder, "automatic-rollback-denylisted-app.xml", contents);
-
-        readPermissions(folder, /* Grant all permission flags */ ~0);
-
-        assertThat(mSysConfig.getAutomaticRollbackDenylistedPackages()).isEmpty();
-    }
-
-    /**
-     * Test that getRollbackDenylistedPackages works correctly for the tag:
-     * {@code automatic-rollback-denylisted-app} without the corresponding config.
-     */
-    @Test
-    public void automaticRollbackDeny_noConfig() throws IOException {
-        final File folder = createTempSubfolder("folder");
-
-        readPermissions(folder, /* Grant all permission flags */ ~0);
-
-        assertThat(mSysConfig.getAutomaticRollbackDenylistedPackages()).isEmpty();
-    }
-
-    /**
      * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
      */
     @Test
@@ -712,7 +662,7 @@ public class SystemConfigTest {
             android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
     public void getEnhancedConfirmationTrustedInstallers_returnsTrustedInstallers()
             throws IOException {
-        String pkgName = "com.example.app";
+        String packageName = "com.example.app";
         String certificateDigestStr = "E9:7A:BC:2C:D1:CA:8D:58:6A:57:0B:8C:F8:60:AA:D2:"
                 + "8D:13:30:2A:FB:C9:00:2C:5D:53:B2:6C:09:A4:85:A0";
 
@@ -720,7 +670,7 @@ public class SystemConfigTest {
                 .toByteArray();
         String contents = "<config>"
                 + "<" + "enhanced-confirmation-trusted-installer" + " "
-                + "package=\"" + pkgName + "\""
+                + "package=\"" + packageName + "\""
                 + " sha256-cert-digest=\"" + certificateDigestStr + "\""
                 + "/>"
                 + "</config>";
@@ -734,10 +684,10 @@ public class SystemConfigTest {
 
         assertThat(actualTrustedInstallers.size()).isEqualTo(1);
         SignedPackage actual = actualTrustedInstallers.stream().findFirst().orElseThrow();
-        SignedPackage expected = new SignedPackage(pkgName, certificateDigest);
+        SignedPackage expected = new SignedPackage(packageName, certificateDigest);
 
         assertThat(actual.getCertificateDigest()).isEqualTo(expected.getCertificateDigest());
-        assertThat(actual.getPkgName()).isEqualTo(expected.getPkgName());
+        assertThat(actual.getPackageName()).isEqualTo(expected.getPackageName());
         assertThat(actual).isEqualTo(expected);
     }
 

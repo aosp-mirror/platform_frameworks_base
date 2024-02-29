@@ -83,10 +83,18 @@ public class WireBuffer {
         mIndex = currentIndex;
     }
 
-    public void reset() {
+    /**
+     * Reset the internal buffer
+     *
+     * @param expectedSize provided hint for the buffer size
+     */
+    public void reset(int expectedSize) {
         mIndex = 0;
         mStartingIndex = 0;
         mSize = 0;
+        if (expectedSize > mMaxSize) {
+            resize(expectedSize);
+        }
     }
 
     public int size() {

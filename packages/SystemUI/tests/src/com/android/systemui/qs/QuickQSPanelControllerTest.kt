@@ -25,8 +25,8 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.controls.ui.MediaHost
-import com.android.systemui.media.controls.ui.MediaHostState
+import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger

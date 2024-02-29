@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.util.DisplayMetrics.DENSITY_DEFAULT;
-
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -29,8 +27,7 @@ import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
-import com.android.wm.shell.Flags;
-
+import com.android.window.flags.Flags;
 /**
  * The class that defines default launch params for tasks in desktop mode
  */
@@ -40,16 +37,11 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             TAG_WITH_CLASS_NAME ? "DesktopModeLaunchParamsModifier" : TAG_ATM;
     private static final boolean DEBUG = false;
 
-    // Desktop mode feature flags.
-    private static final boolean ENABLE_DESKTOP_WINDOWING = Flags.enableDesktopWindowing();
     private static final boolean DESKTOP_MODE_PROTO2_SUPPORTED =
             SystemProperties.getBoolean("persist.wm.debug.desktop_mode_2", false);
-    // Override default freeform task width when desktop mode is enabled. In dips.
-    private static final int DESKTOP_MODE_DEFAULT_WIDTH_DP = SystemProperties.getInt(
-            "persist.wm.debug.desktop_mode.default_width", 840);
-    // Override default freeform task height when desktop mode is enabled. In dips.
-    private static final int DESKTOP_MODE_DEFAULT_HEIGHT_DP = SystemProperties.getInt(
-            "persist.wm.debug.desktop_mode.default_height", 630);
+    public static final float DESKTOP_MODE_INITIAL_BOUNDS_SCALE =
+            SystemProperties
+                    .getInt("persist.wm.debug.desktop_mode_initial_bounds_scale", 75) / 100f;
 
     private StringBuilder mLogBuilder;
 
@@ -73,6 +65,11 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             LaunchParamsController.LaunchParams currentParams,
             LaunchParamsController.LaunchParams outParams) {
 
+        if (!isDesktopModeEnabled()) {
+            appendLog("desktop mode is not enabled, continuing");
+            return RESULT_CONTINUE;
+        }
+
         if (task == null) {
             appendLog("task null, skipping");
             return RESULT_SKIP;
@@ -93,7 +90,7 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
         // previous windowing mode to be restored even if the desktop mode state has changed.
         // Let task launches inherit the windowing mode from the source task if available, which
         // should have the desired windowing mode set by WM Shell. See b/286929122.
-        if (isDesktopModeSupported() && source != null && source.getTask() != null) {
+        if (isDesktopModeEnabled() && source != null && source.getTask() != null) {
             final Task sourceTask = source.getTask();
             outParams.mWindowingMode = sourceTask.getWindowingMode();
             appendLog("inherit-from-source=" + outParams.mWindowingMode);
@@ -108,21 +105,27 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             return RESULT_SKIP;
         }
 
-        // Update width and height with default desktop mode values
-        float density = (float) task.getConfiguration().densityDpi / DENSITY_DEFAULT;
-        final int width = (int) (DESKTOP_MODE_DEFAULT_WIDTH_DP * density + 0.5f);
-        final int height = (int) (DESKTOP_MODE_DEFAULT_HEIGHT_DP * density + 0.5f);
-        outParams.mBounds.right = width;
-        outParams.mBounds.bottom = height;
-
-        // Center the task in window bounds
-        Rect windowBounds = task.getWindowConfiguration().getBounds();
-        outParams.mBounds.offset(windowBounds.centerX() - outParams.mBounds.centerX(),
-                windowBounds.centerY() - outParams.mBounds.centerY());
+        calculateAndCentreInitialBounds(task, outParams);
 
         appendLog("setting desktop mode task bounds to %s", outParams.mBounds);
 
         return RESULT_DONE;
+    }
+
+    /**
+     * Calculates the initial height and width of a task in desktop mode and centers it within the
+     * window bounds.
+     */
+    private void calculateAndCentreInitialBounds(Task task,
+            LaunchParamsController.LaunchParams outParams) {
+        // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
+        final Rect windowBounds = task.getDisplayArea().getBounds();
+        final int width = (int) (windowBounds.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        final int height = (int) (windowBounds.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        outParams.mBounds.right = width;
+        outParams.mBounds.bottom = height;
+        outParams.mBounds.offset(windowBounds.centerX() - outParams.mBounds.centerX(),
+                windowBounds.centerY() - outParams.mBounds.centerY());
     }
 
     private void initLogBuilder(Task task, ActivityRecord activity) {
@@ -140,14 +143,8 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
         if (DEBUG) Slog.d(TAG, mLogBuilder.toString());
     }
 
-    /** Whether desktop mode is supported. */
-    static boolean isDesktopModeSupported() {
-        // Check for aconfig flag first
-        if (ENABLE_DESKTOP_WINDOWING) {
-            return true;
-        }
-        // Fall back to sysprop flag
-        // TODO(b/304778354): remove sysprop once desktop aconfig flag supports dynamic overriding
-        return DESKTOP_MODE_PROTO2_SUPPORTED;
+    /** Whether desktop mode is enabled. */
+    static boolean isDesktopModeEnabled() {
+        return Flags.enableDesktopWindowingMode();
     }
 }

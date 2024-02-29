@@ -230,6 +230,7 @@ android_library {
         extra_check_modules: ["SystemUILintChecker"],
         warning_checks: ["MissingApacheLicenseDetector"],
     },
+    skip_jarjar_repackage: true,
 }
 
 filegroup {
@@ -550,5 +551,6 @@ android_app {
     required: [
         "privapp_whitelist_com.android.systemui",
         "wmshell.protolog.json.gz",
+        "wmshell.protolog.pb",
     ],
 }

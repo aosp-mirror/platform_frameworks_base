@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
@@ -397,9 +398,12 @@ public class PackageInstallerActivity extends Activity {
             final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
-            String resolvedPath = info != null ? info.getResolvedBaseApkPath() : null;
+            String resolvedPath = null;
+            if (info != null && Flags.getResolvedApkPath()) {
+                resolvedPath = info.getResolvedBaseApkPath();
+            }
             if (info == null || !info.isSealed() || resolvedPath == null) {
-                Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
+                Log.w(TAG, "Session " + sessionId + " in funky state; ignoring");
                 finish();
                 return;
             }
@@ -414,7 +418,7 @@ public class PackageInstallerActivity extends Activity {
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
             if (info == null || !info.isPreApprovalRequested()) {
-                Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
+                Log.w(TAG, "Session " + sessionId + " in funky state; ignoring");
                 finish();
                 return;
             }
@@ -835,7 +839,9 @@ public class PackageInstallerActivity extends Activity {
                     // work for the multiple user case, i.e. the caller task user and started
                     // Activity user are not the same. To avoid having multiple PIAs in the task,
                     // finish the current PackageInstallerActivity
-                    finish();
+                    // Because finish() is overridden to set the installation result, we must use
+                    // the original finish() method, or the confirmation dialog fails to appear.
+                    PackageInstallerActivity.super.finish();
                 }
             }, 500);
 

@@ -17,7 +17,6 @@ package com.android.systemui.surfaceeffects.turbulencenoise
 
 import android.view.View
 import androidx.annotation.VisibleForTesting
-import java.util.Random
 
 /** Plays [TurbulenceNoiseView] in ease-in, main (no easing), and ease-out order. */
 class TurbulenceNoiseController(private val turbulenceNoiseView: TurbulenceNoiseView) {
@@ -36,8 +35,6 @@ class TurbulenceNoiseController(private val turbulenceNoiseView: TurbulenceNoise
             NOT_PLAYING
         }
     }
-
-    private val random = Random()
 
     /** Current state of the animation. */
     @VisibleForTesting
@@ -95,12 +92,7 @@ class TurbulenceNoiseController(private val turbulenceNoiseView: TurbulenceNoise
         }
         state = AnimationState.EASE_IN
 
-        // Add offset to avoid repetitive noise.
-        turbulenceNoiseView.playEaseIn(
-            offsetX = random.nextFloat(),
-            offsetY = random.nextFloat(),
-            this::playMainAnimation
-        )
+        turbulenceNoiseView.playEaseIn(this::playMainAnimation)
     }
 
     private fun playMainAnimation() {

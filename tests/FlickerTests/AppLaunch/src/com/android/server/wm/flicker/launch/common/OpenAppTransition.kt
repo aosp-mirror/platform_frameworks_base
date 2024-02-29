@@ -17,11 +17,11 @@
 package com.android.server.wm.flicker.launch.common
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.helpers.wakeUpAndGoToHomeScreen
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.helpers.wakeUpAndGoToHomeScreen
+import android.tools.traces.component.ComponentNameMatcher
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.setRotation

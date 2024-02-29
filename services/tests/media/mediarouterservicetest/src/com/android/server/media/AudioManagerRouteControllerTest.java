@@ -16,6 +16,8 @@
 
 package com.android.server.media;
 
+import static android.Manifest.permission.MODIFY_AUDIO_ROUTING;
+
 import static com.android.server.media.AudioRoutingUtils.ATTRIBUTES_MEDIA;
 import static com.android.server.media.AudioRoutingUtils.getMediaAudioProductStrategy;
 
@@ -31,6 +33,7 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Instrumentation;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
@@ -48,6 +51,7 @@ import android.os.UserHandle;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,6 +89,7 @@ public class AudioManagerRouteControllerTest {
                     /* name= */ null,
                     /* address= */ null);
 
+    private Instrumentation mInstrumentation;
     private AudioDeviceInfo mSelectedAudioDeviceInfo;
     private Set<AudioDeviceInfo> mAvailableAudioDeviceInfos;
     @Mock private AudioManager mMockAudioManager;
@@ -96,10 +101,11 @@ public class AudioManagerRouteControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
+        mInstrumentation.getUiAutomation().adoptShellPermissionIdentity(MODIFY_AUDIO_ROUTING);
         Resources mockResources = Mockito.mock(Resources.class);
         when(mockResources.getText(anyInt())).thenReturn(FAKE_ROUTE_NAME);
-        Context realContext = InstrumentationRegistry.getInstrumentation().getContext();
+        Context realContext = mInstrumentation.getContext();
         Context mockContext = Mockito.mock(Context.class);
         when(mockContext.getResources()).thenReturn(mockResources);
         // The bluetooth stack needs the application info, but we cannot use a spy because the
@@ -133,6 +139,11 @@ public class AudioManagerRouteControllerTest {
 
         // We clear any invocations during setup.
         clearInvocations(mOnDeviceRouteChangedListener);
+    }
+
+    @After
+    public void tearDown() {
+        mInstrumentation.getUiAutomation().dropShellPermissionIdentity();
     }
 
     @Test

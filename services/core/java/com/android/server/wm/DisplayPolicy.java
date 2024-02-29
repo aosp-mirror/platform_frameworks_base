@@ -47,6 +47,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLO
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
@@ -104,7 +105,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
@@ -1534,9 +1534,19 @@ public class DisplayPolicy {
         // Check the windows that overlap with system bars to determine system bars' appearance.
         if ((appWindow && attached == null && attrs.isFullscreen())
                 || attrs.type == TYPE_VOICE_INTERACTION) {
-            // Record the top-fullscreen-app-window which will be used to determine system UI
+
+            // If this is the exiting starting window, don't let it control the system bars.
+            // The app window behind it should be the controlling window instead. Reason: when an
+            // activity starts another activity behind a starting window, the app window of the
+            // first activity will lose the window focus. And then mTopFullscreenOpaqueWindowState
+            // will control the system bars. The logic here is to let first app window keep
+            // controlling system bars until the second app window is ready.
+            final boolean exitingStartingWindow =
+                    attrs.type == TYPE_APPLICATION_STARTING && win.mAnimatingExit;
+
+            // Record the top-fullscreen-app-window which will be used to determine the system UI
             // controlling window.
-            if (mTopFullscreenOpaqueWindowState == null) {
+            if (mTopFullscreenOpaqueWindowState == null && !exitingStartingWindow) {
                 mTopFullscreenOpaqueWindowState = win;
             }
 
@@ -2880,9 +2890,6 @@ public class DisplayPolicy {
         if (!CLIENT_TRANSIENT) {
             mSystemGestures.dump(pw, prefix);
         }
-
-        pw.print(prefix); pw.println("Looper state:");
-        mHandler.getLooper().dump(new PrintWriterPrinter(pw), prefix + "  ");
     }
 
     private boolean supportsPointerLocation() {

@@ -99,6 +99,16 @@ class CredentialInteractorImplTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun useCredentialOwnerWhenParentProfileIsNull() {
+        val value = 1
+
+        whenever(userManager.getProfileParent(eq(USER_ID))).thenReturn(null)
+        whenever(userManager.getCredentialOwnerProfile(eq(USER_ID))).thenReturn(value)
+
+        assertThat(interactor.getParentProfileIdOrSelfId(USER_ID)).isEqualTo(value)
+    }
+
     @Test fun pinCredentialWhenGood() = pinCredential(goodCredential())
 
     @Test fun pinCredentialWhenBad() = pinCredential(badCredential())

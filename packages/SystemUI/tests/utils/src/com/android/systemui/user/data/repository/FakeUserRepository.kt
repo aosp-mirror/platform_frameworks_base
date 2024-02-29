@@ -119,6 +119,13 @@ class FakeUserRepository @Inject constructor() : UserRepository {
         yield()
     }
 
+    /** Resets the current user to the default of [DEFAULT_SELECTED_USER_INFO]. */
+    suspend fun asDefaultUser(): UserInfo {
+        setUserInfos(listOf(DEFAULT_SELECTED_USER_INFO))
+        setSelectedUserInfo(DEFAULT_SELECTED_USER_INFO)
+        return DEFAULT_SELECTED_USER_INFO
+    }
+
     /** Makes the current user [MAIN_USER]. */
     suspend fun asMainUser(): UserInfo {
         setUserInfos(listOf(MAIN_USER))

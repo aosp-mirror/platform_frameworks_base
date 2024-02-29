@@ -122,6 +122,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -246,6 +247,9 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /** Saved font scale, used to detect font size changes in {@link #onConfigurationChanged}. */
     private float mFontScale = 0;
+
+    /** Saved locale, used to detect local changes in {@link #onConfigurationChanged}. */
+    private Locale mLocale = null;
 
     /** Saved direction, used to detect layout direction changes @link #onConfigChanged}. */
     private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
@@ -481,7 +485,12 @@ public class BubbleController implements ConfigurationChangeListener,
                 });
 
         mOneHandedOptional.ifPresent(this::registerOneHandedState);
-        mDragAndDropController.addListener(this::collapseStack);
+        mDragAndDropController.addListener(new DragAndDropController.DragAndDropListener() {
+            @Override
+            public void onDragStarted() {
+                collapseStack();
+            }
+        });
 
         // Clear out any persisted bubbles on disk that no longer have a valid user.
         List<UserInfo> users = mUserManager.getAliveUsers();
@@ -676,6 +685,17 @@ public class BubbleController implements ConfigurationChangeListener,
         // however, this gets complicated when users are removed (mCurrentUserId won't necessarily
         // be correct for this) so we update the repo directly.
         mDataRepository.removeBubblesForUser(removedUserId, parentUserId);
+    }
+
+    /** Called when sensitive notification state has changed */
+    public void onSensitiveNotificationProtectionStateChanged(
+            boolean sensitiveNotificationProtectionActive) {
+        if (mStackView != null) {
+            mStackView.onSensitiveNotificationProtectionStateChanged(
+                    sensitiveNotificationProtectionActive);
+            ProtoLog.d(WM_SHELL_BUBBLES, "onSensitiveNotificationProtectionStateChanged=%b",
+                    sensitiveNotificationProtectionActive);
+        }
     }
 
     /** Whether bubbles are showing in the bubble bar. */
@@ -1051,6 +1071,11 @@ public class BubbleController implements ConfigurationChangeListener,
             if (newConfig.getLayoutDirection() != mLayoutDirection) {
                 mLayoutDirection = newConfig.getLayoutDirection();
                 mStackView.onLayoutDirectionChanged(mLayoutDirection);
+            }
+            Locale newLocale = newConfig.locale;
+            if (newLocale != null && !newLocale.equals(mLocale)) {
+                mLocale = newLocale;
+                mStackView.updateLocale();
             }
         }
     }
@@ -1774,11 +1799,12 @@ public class BubbleController implements ConfigurationChangeListener,
         @Override
         public void removeBubble(Bubble removedBubble) {
             if (mLayerView != null) {
-                mLayerView.removeBubble(removedBubble);
-                if (!mBubbleData.hasBubbles() && !isStackExpanded()) {
-                    mLayerView.setVisibility(INVISIBLE);
-                    removeFromWindowManagerMaybe();
-                }
+                mLayerView.removeBubble(removedBubble, () -> {
+                    if (!mBubbleData.hasBubbles() && !isStackExpanded()) {
+                        mLayerView.setVisibility(INVISIBLE);
+                        removeFromWindowManagerMaybe();
+                    }
+                });
             }
         }
 
@@ -1838,7 +1864,7 @@ public class BubbleController implements ConfigurationChangeListener,
                     + " expanded=%b selectionChanged=%b selected=%s"
                     + " suppressed=%s unsupressed=%s shouldShowEducation=%b",
                     update.addedBubble != null ? update.addedBubble.getKey() : "null",
-                    update.removedBubbles.isEmpty(),
+                    !update.removedBubbles.isEmpty(),
                     update.updatedBubble != null ? update.updatedBubble.getKey() : "null",
                     update.orderChanged, update.expandedChanged, update.expanded,
                     update.selectionChanged,
@@ -2577,6 +2603,14 @@ public class BubbleController implements ConfigurationChangeListener,
         public void onNotificationPanelExpandedChanged(boolean expanded) {
             mMainExecutor.execute(
                     () -> BubbleController.this.onNotificationPanelExpandedChanged(expanded));
+        }
+
+        @Override
+        public void onSensitiveNotificationProtectionStateChanged(
+                boolean sensitiveNotificationProtectionActive) {
+            mMainExecutor.execute(
+                    () -> BubbleController.this.onSensitiveNotificationProtectionStateChanged(
+                            sensitiveNotificationProtectionActive));
         }
     }
 

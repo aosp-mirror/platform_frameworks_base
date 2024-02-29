@@ -26,6 +26,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityThread;
@@ -35,7 +36,9 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.ImageReader;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.view.Display;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -43,6 +46,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -54,7 +58,23 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ContextTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder().build();
+
     @Test
+    public void testInstrumentationContext() {
+        // Confirm that we have a valid Context
+        assertNotNull(InstrumentationRegistry.getInstrumentation().getContext());
+    }
+
+    @Test
+    public void testInstrumentationTargetContext() {
+        // Confirm that we have a valid Context
+        assertNotNull(InstrumentationRegistry.getInstrumentation().getTargetContext());
+    }
+
+    @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testDisplayIdForSystemContext() {
         final Context systemContext =
                 ActivityThread.currentActivityThread().getSystemContext();
@@ -63,6 +83,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testDisplayIdForSystemUiContext() {
         final Context systemUiContext =
                 ActivityThread.currentActivityThread().getSystemUiContext();
@@ -71,6 +92,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testDisplayIdForTestContext() {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -79,6 +101,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testDisplayIdForDefaultDisplayContext() {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -91,6 +114,7 @@ public class ContextTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testStartActivityAsUserNullIntentNullUser() {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -98,6 +122,7 @@ public class ContextTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testStartActivityAsUserNullIntentNonNullUser() {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -105,6 +130,7 @@ public class ContextTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testStartActivityAsUserNonNullIntentNullUser() {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -112,6 +138,7 @@ public class ContextTest {
     }
 
     @Test(expected = RuntimeException.class)
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testStartActivityAsUserNonNullIntentNonNullUser() {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -119,6 +146,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testIsUiContext_appContext_returnsFalse() {
         final Context appContext = ApplicationProvider.getApplicationContext();
 
@@ -126,6 +154,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testIsUiContext_systemContext_returnsTrue() {
         final Context systemContext =
                 ActivityThread.currentActivityThread().getSystemContext();
@@ -134,6 +163,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testIsUiContext_systemUiContext_returnsTrue() {
         final Context systemUiContext =
                 ActivityThread.currentActivityThread().getSystemUiContext();
@@ -142,11 +172,13 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testGetDisplayFromDisplayContextDerivedContextOnPrimaryDisplay() {
         verifyGetDisplayFromDisplayContextDerivedContext(false /* onSecondaryDisplay */);
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testGetDisplayFromDisplayContextDerivedContextOnSecondaryDisplay() {
         verifyGetDisplayFromDisplayContextDerivedContext(true /* onSecondaryDisplay */);
     }
@@ -179,6 +211,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testIsUiContext_ContextWrapper() {
         ContextWrapper wrapper = new ContextWrapper(null /* base */);
 
@@ -190,6 +223,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testIsUiContext_UiContextDerivedContext() {
         final Context uiContext = createUiContext();
         Context context = uiContext.createAttributionContext(null /* attributionTag */);
@@ -202,6 +236,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testIsUiContext_UiContextDerivedDisplayContext() {
         final Context uiContext = createUiContext();
         final Display secondaryDisplay =
@@ -212,6 +247,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testDeviceIdForSystemContext() {
         final Context systemContext =
                 ActivityThread.currentActivityThread().getSystemContext();
@@ -220,6 +256,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testDeviceIdForSystemUiContext() {
         final Context systemUiContext =
                 ActivityThread.currentActivityThread().getSystemUiContext();
@@ -228,6 +265,7 @@ public class ContextTest {
     }
 
     @Test
+    @DisabledOnRavenwood(blockedBy = Context.class)
     public void testDeviceIdForTestContext() {
         final Context testContext =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();

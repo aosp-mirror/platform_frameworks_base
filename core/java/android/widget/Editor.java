@@ -19,6 +19,8 @@ package android.widget;
 import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 import static android.widget.TextView.ACCESSIBILITY_ACTION_SMART_START_ID;
 
+import static com.android.graphics.hwui.flags.Flags.highContrastTextSmallTextRect;
+
 import android.R;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
@@ -2151,8 +2153,15 @@ public class Editor {
         int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
         if (lastLine < 0) return;
 
-        layout.drawWithoutText(canvas, highlightPaths, highlightPaints, selectionHighlight,
-                selectionHighlightPaint, cursorOffsetVertical, firstLine, lastLine);
+        boolean shouldDrawHighlightsOnTop = highContrastTextSmallTextRect()
+                && canvas.isHighContrastTextEnabled();
+
+        if (!shouldDrawHighlightsOnTop) {
+            layout.drawWithoutText(canvas, highlightPaths, highlightPaints, selectionHighlight,
+                    selectionHighlightPaint, cursorOffsetVertical, firstLine, lastLine);
+        } else {
+            layout.drawBackground(canvas, firstLine, lastLine);
+        }
 
         if (layout instanceof DynamicLayout) {
             if (mTextRenderNodes == null) {
@@ -2225,6 +2234,11 @@ public class Editor {
         } else {
             // Boring layout is used for empty and hint text
             layout.drawText(canvas, firstLine, lastLine);
+        }
+
+        if (shouldDrawHighlightsOnTop) {
+            layout.drawHighlights(canvas, highlightPaths, highlightPaints, selectionHighlight,
+                    selectionHighlightPaint, cursorOffsetVertical, firstLine, lastLine);
         }
     }
 

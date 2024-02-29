@@ -40,7 +40,6 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.window.BackEvent;
 import android.window.BackMotionEvent;
@@ -51,6 +50,7 @@ import com.android.internal.dynamicanimation.animation.SpringAnimation;
 import com.android.internal.dynamicanimation.animation.SpringForce;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
 import javax.inject.Inject;
@@ -65,7 +65,7 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
 
     /** Duration of post animation after gesture committed. */
     private static final int POST_ANIMATION_DURATION = 350;
-    private static final Interpolator INTERPOLATOR = new DecelerateInterpolator();
+    private static final Interpolator INTERPOLATOR = Interpolators.STANDARD_DECELERATE;
     private static final FloatProperty<CrossActivityBackAnimation> ENTER_PROGRESS_PROP =
             new FloatProperty<>("enter-alpha") {
                 @Override
@@ -285,7 +285,7 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
 
         ValueAnimator valueAnimator =
                 ValueAnimator.ofFloat(1f, 0f).setDuration(POST_ANIMATION_DURATION);
-        valueAnimator.setInterpolator(new DecelerateInterpolator());
+        valueAnimator.setInterpolator(INTERPOLATOR);
         valueAnimator.addUpdateListener(animation -> {
             float progress = animation.getAnimatedFraction();
             updatePostCommitEnteringAnimation(progress);

@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
-import android.content.SharedPreferences
 import android.content.pm.UserInfo
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -31,10 +30,14 @@ import com.android.settingslib.flags.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.kotlin.getMutableStateFlow
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.nullable
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -50,12 +53,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
@@ -84,9 +87,15 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var uiEventLogger: UiEventLogger
 
-    @Mock private lateinit var logger: BluetoothTileDialogLogger
+    @Mock
+    private lateinit var mBluetoothTileDialogDelegateDelegateFactory:
+        BluetoothTileDialogDelegate.Factory
 
-    @Mock private lateinit var sharedPreferences: SharedPreferences
+    @Mock private lateinit var bluetoothTileDialogDelegate: BluetoothTileDialogDelegate
+
+    @Mock private lateinit var sysuiDialog: SystemUIDialog
+
+    private val sharedPreferences = FakeSharedPreferences()
 
     private lateinit var scheduler: TestCoroutineScheduler
     private lateinit var dispatcher: CoroutineDispatcher
@@ -123,20 +132,38 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                 ),
                 mDialogTransitionAnimator,
                 activityStarter,
-                fakeSystemClock,
                 uiEventLogger,
-                logger,
                 testScope.backgroundScope,
                 dispatcher,
                 dispatcher,
                 sharedPreferences,
+                mBluetoothTileDialogDelegateDelegateFactory
             )
-        `when`(deviceItemInteractor.deviceItemUpdate).thenReturn(MutableSharedFlow())
-        `when`(bluetoothStateInteractor.bluetoothStateUpdate)
+        whenever(deviceItemInteractor.deviceItemUpdate).thenReturn(MutableSharedFlow())
+        whenever(bluetoothStateInteractor.bluetoothStateUpdate)
             .thenReturn(MutableStateFlow(null).asStateFlow())
-        `when`(deviceItemInteractor.deviceItemUpdateRequest)
+        whenever(deviceItemInteractor.deviceItemUpdateRequest)
             .thenReturn(MutableStateFlow(Unit).asStateFlow())
-        `when`(bluetoothStateInteractor.isBluetoothEnabled).thenReturn(true)
+        whenever(bluetoothStateInteractor.isBluetoothEnabled).thenReturn(true)
+        whenever(
+                mBluetoothTileDialogDelegateDelegateFactory.create(
+                    any(),
+                    any(),
+                    anyInt(),
+                    ArgumentMatchers.anyBoolean(),
+                    any(),
+                    any()
+                )
+            )
+            .thenReturn(bluetoothTileDialogDelegate)
+        whenever(bluetoothTileDialogDelegate.createDialog()).thenReturn(sysuiDialog)
+        whenever(bluetoothTileDialogDelegate.bluetoothStateToggle)
+            .thenReturn(getMutableStateFlow(false))
+        whenever(bluetoothTileDialogDelegate.deviceItemClick)
+            .thenReturn(getMutableStateFlow(deviceItem))
+        whenever(bluetoothTileDialogDelegate.contentHeight).thenReturn(getMutableStateFlow(0))
+        whenever(bluetoothTileDialogDelegate.bluetoothAutoOnToggle)
+            .thenReturn(getMutableStateFlow(false))
     }
 
     @Test
@@ -145,7 +172,6 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             bluetoothTileDialogViewModel.showDialog(context, null)
 
             verify(mDialogTransitionAnimator, never()).showFromView(any(), any(), any(), any())
-            verify(uiEventLogger).log(BluetoothTileDialogUiEvent.BLUETOOTH_TILE_DIALOG_SHOWN)
         }
     }
 
@@ -191,7 +217,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     @Test
     fun testStartSettingsActivity_activityLaunched_dialogDismissed() {
         testScope.runTest {
-            `when`(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
+            whenever(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
             bluetoothTileDialogViewModel.showDialog(context, null)
 
             val clickedView = View(context)

@@ -16,20 +16,27 @@
 
 package com.android.protolog.tool
 
+import com.android.internal.protolog.common.LogLevel
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.expr.BinaryExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.StringLiteralExpr
+import java.util.UUID
 
 object CodeUtils {
     /**
      * Returns a stable hash of a string.
      * We reimplement String::hashCode() for readability reasons.
      */
-    fun hash(position: String, messageString: String, logLevel: LogLevel, logGroup: LogGroup): Int {
-        return (position + messageString + logLevel.name + logGroup.name)
-                .map { c -> c.code }.reduce { h, c -> h * 31 + c }
+    fun hash(
+        position: String,
+        messageString: String,
+        logLevel: LogLevel,
+        logGroup: LogGroup
+    ): Long {
+        val fullStringIdentifier = position + messageString + logLevel.name + logGroup.name
+        return UUID.nameUUIDFromBytes(fullStringIdentifier.toByteArray()).mostSignificantBits
     }
 
     fun checkWildcardStaticImported(code: CompilationUnit, className: String, fileName: String) {

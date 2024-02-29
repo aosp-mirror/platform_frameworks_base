@@ -1618,6 +1618,17 @@ public class LocationProviderManager extends
      */
     @SuppressLint("AndroidFrameworkRequiresPermission")
     public boolean isVisibleToCaller() {
+        // Anything sharing the system's UID can view all providers
+        if (Binder.getCallingUid() == Process.SYSTEM_UID) {
+            return true;
+        }
+
+        // If an app mocked this provider, anybody can access it (the goal is
+        // to behave as if this provider didn't naturally exist).
+        if (mProvider.isMock()) {
+            return true;
+        }
+
         for (String permission : mRequiredPermissions) {
             if (mContext.checkCallingOrSelfPermission(permission) != PERMISSION_GRANTED) {
                 return false;

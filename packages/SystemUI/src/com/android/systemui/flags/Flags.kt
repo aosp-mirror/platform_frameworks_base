@@ -102,11 +102,6 @@ object Flags {
             default = true
         )
 
-    // TODO(b/301955929)
-    @JvmField
-    val NOTIF_LS_BACKGROUND_THREAD =
-            releasedFlag("notification_lockscreen_mgr_bg_thread")
-
     // 200 - keyguard/lockscreen
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =
@@ -329,9 +324,6 @@ object Flags {
     // TODO(b/254512673): Tracking Bug
     @JvmField val DREAM_MEDIA_TAP_TO_OPEN = unreleasedFlag("dream_media_tap_to_open")
 
-    // TODO(b/263272731): Tracking Bug
-    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag("media_ttt_receiver_success_ripple")
-
     // TODO(b/266157412): Tracking Bug
     val MEDIA_RETAIN_SESSIONS = unreleasedFlag("media_retain_sessions")
 
@@ -376,12 +368,6 @@ object Flags {
     @JvmField
     @Keep
     val WM_BUBBLE_BAR = sysPropBooleanFlag("persist.wm.debug.bubble_bar", default = false)
-
-    // TODO(b/260271148): Tracking bug
-    @Keep
-    @JvmField
-    val WM_DESKTOP_WINDOWING_2 =
-        sysPropBooleanFlag("persist.wm.debug.desktop_mode_2", default = false)
 
     // TODO(b/254513207): Tracking Bug to delete
     @Keep
@@ -482,11 +468,6 @@ object Flags {
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag("warn_on_blocking_binder_transactions")
 
-    // TODO(b/283071711): Tracking bug
-    @JvmField
-    val TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK =
-        unreleasedFlag("trim_resources_with_background_trim_on_lock")
-
     // TODO:(b/283203305): Tracking bug
     @JvmField val TRIM_FONT_CACHES_AT_UNLOCK = unreleasedFlag("trim_font_caches_on_unlock")
 
@@ -554,10 +535,6 @@ object Flags {
     // TODO(b/283740863): Tracking Bug
     @JvmField
     val ENABLE_NEW_PRIVACY_DIALOG = releasedFlag("enable_new_privacy_dialog")
-
-    // TODO(b/302087895): Tracking Bug
-    @JvmField val CALL_LAYOUT_ASYNC_SET_DATA =
-            unreleasedFlag("call_layout_async_set_data", teamfood = true)
 
     // TODO(b/302144438): Tracking Bug
     @JvmField val DECOUPLE_REMOTE_INPUT_DELEGATE_AND_CALLBACK_UPDATE =

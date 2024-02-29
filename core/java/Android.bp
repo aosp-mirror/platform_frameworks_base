@@ -126,6 +126,7 @@ filegroup {
     srcs: [
         "android/os/IExternalVibrationController.aidl",
         "android/os/IExternalVibratorService.aidl",
+        "android/os/ExternalVibrationScale.aidl",
     ],
 }
 
@@ -527,14 +528,10 @@ filegroup {
     ],
 }
 
-// common protolog sources without classes that rely on Android SDK
-filegroup {
-    name: "protolog-common-no-android-src",
+java_library {
+    name: "protolog-group",
     srcs: [
-        ":protolog-common-src",
-    ],
-    exclude_srcs: [
-        "com/android/internal/protolog/common/ProtoLog.java",
+        "com/android/internal/protolog/common/IProtoLogGroup.java",
     ],
 }
 
@@ -547,13 +544,20 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "protolog-impl",
+    srcs: [
+        "com/android/internal/protolog/ProtoLogImpl.java",
+    ],
+}
+
 java_library {
     name: "protolog-lib",
     platform_apis: true,
     srcs: [
         "com/android/internal/protolog/ProtoLogImpl.java",
         "com/android/internal/protolog/ProtoLogViewerConfigReader.java",
-        ":protolog-common-src",
+        ":perfetto_trace_javastream_protos",
     ],
 }
 

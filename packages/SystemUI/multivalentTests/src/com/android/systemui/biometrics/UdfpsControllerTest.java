@@ -63,6 +63,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -86,6 +87,7 @@ import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayView
 import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -94,10 +96,15 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.data.repository.FakePowerRepository;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.power.shared.model.WakeSleepReason;
+import com.android.systemui.power.shared.model.WakefulnessState;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
@@ -124,6 +131,8 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -226,6 +235,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ArgumentCaptor<IUdfpsOverlayController> mOverlayCaptor;
     private IUdfpsOverlayController mOverlayController;
     @Captor
+    private ArgumentCaptor<View> mViewCaptor;
+    @Captor
     private ArgumentCaptor<UdfpsView.OnTouchListener> mTouchListenerCaptor;
     @Captor
     private ArgumentCaptor<View.OnHoverListener> mHoverListenerCaptor;
@@ -238,6 +249,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ScreenLifecycle.Observer mScreenObserver;
     private FingerprintSensorPropertiesInternal mOpticalProps;
     private FingerprintSensorPropertiesInternal mUltrasonicProps;
+    private PowerInteractor mPowerInteractor;
+    private FakePowerRepository mPowerRepository;
     @Mock
     private InputManager mInputManager;
     @Mock
@@ -253,6 +266,19 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        mPowerRepository = new FakePowerRepository();
+        mPowerInteractor = new PowerInteractor(
+                mPowerRepository,
+                mock(FalsingCollector.class),
+                mock(ScreenOffAnimationController.class),
+                mStatusBarStateController
+        );
+        mPowerRepository.updateWakefulness(
+                WakefulnessState.AWAKE,
+                WakeSleepReason.POWER_BUTTON,
+                WakeSleepReason.OTHER,
+                /* powerButtonLaunchGestureTriggered */ false
+        );
         mContext.getOrCreateTestableResources()
                 .addOverride(com.android.internal.R.bool.config_ignoreUdfpsVote, false);
 
@@ -346,7 +372,9 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mKeyguardTransitionInteractor,
                 mDeviceEntryUdfpsTouchOverlayViewModel,
                 mDefaultUdfpsTouchOverlayViewModel,
-                mUdfpsOverlayInteractor
+                mUdfpsOverlayInteractor,
+                mPowerInteractor,
+                mock(CoroutineScope.class)
         );
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
@@ -525,8 +553,11 @@ public class UdfpsControllerTest extends SysuiTestCase {
                                     mOpticalProps.sensorId,
                                     BiometricRequestConstants.REASON_ENROLL_ENROLLING,
                                     mUdfpsOverlayControllerCallback);
+
                             mFgExecutor.runAllReady();
-                            verify(mWindowManager).addView(any(), any());
+                            verify(mWindowManager).addView(mViewCaptor.capture(), any());
+                            when(mViewCaptor.getValue().getParent())
+                                    .thenReturn(mock(ViewGroup.class));
 
                             // Update overlay parameters.
                             reset(mWindowManager);

@@ -173,4 +173,6 @@
     <dimen name="sfps_progress_bar_thickness">6dp</dimen>
     <!-- Padding from the edge of the screen for the progress bar -->
     <dimen name="sfps_progress_bar_padding_from_edge">7dp</dimen>
+
+    <dimen name="keyguard_presentation_width">410dp</dimen>
 </resources>

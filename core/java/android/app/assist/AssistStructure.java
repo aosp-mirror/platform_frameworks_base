@@ -10,6 +10,7 @@ import android.annotation.SystemApi;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
 import android.credentials.GetCredentialResponse;
@@ -29,6 +30,7 @@ import android.os.PooledStringWriter;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.FillRequest;
+import android.service.credentials.CredentialProviderService;
 import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -913,6 +915,7 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 mExtras = in.readBundle();
             }
+            mGetCredentialRequest = in.readTypedObject(GetCredentialRequest.CREATOR);
         }
 
         /**
@@ -1149,6 +1152,7 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_EXTRAS) != 0) {
                 out.writeBundle(mExtras);
             }
+            out.writeTypedObject(mGetCredentialRequest, flags);
             return flags;
         }
 
@@ -1287,11 +1291,7 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         *
-         * @return
-         *
          * @hide
-         *
          */
         @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
         @Nullable
@@ -2260,6 +2260,17 @@ public class AssistStructure implements Parcelable {
                 @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
             mNode.mGetCredentialRequest = request;
             mNode.mGetCredentialCallback = callback;
+            for (CredentialOption option : request.getCredentialOptions()) {
+                ArrayList<AutofillId> ids = option.getCandidateQueryData()
+                        .getParcelableArrayList(
+                                CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId.class);
+                ids = ids != null ? ids : new ArrayList<>();
+                if (!ids.contains(getAutofillId())) {
+                    ids.add(getAutofillId());
+                }
+                option.getCandidateQueryData()
+                        .putParcelableArrayList(CredentialProviderService.EXTRA_AUTOFILL_ID, ids);
+            }
         }
 
         @Override
@@ -2569,7 +2580,7 @@ public class AssistStructure implements Parcelable {
         }
         AutofillId autofillId = node.getAutofillId();
         if (autofillId == null) {
-            Log.i(TAG, prefix + " NO autofill ID");
+            Log.i(TAG, prefix + " No autofill ID");
         } else {
             Log.i(TAG, prefix + "  Autofill info: id= " + autofillId
                     + ", type=" + node.getAutofillType()
@@ -2584,7 +2595,7 @@ public class AssistStructure implements Parcelable {
         }
         GetCredentialRequest getCredentialRequest = node.getCredentialManagerRequest();
         if (getCredentialRequest == null) {
-            Log.i(TAG, prefix + " NO Credential Manager Request");
+            Log.i(TAG, prefix + " No Credential Manager Request");
         } else {
             Log.i(TAG, prefix + "  GetCredentialRequest: no. of options= "
                     + getCredentialRequest.getCredentialOptions().size()

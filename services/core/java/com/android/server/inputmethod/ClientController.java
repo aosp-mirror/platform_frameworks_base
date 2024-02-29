@@ -33,36 +33,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Store and manage {@link InputMethodManagerService} clients. This class was designed to be a
- * singleton in {@link InputMethodManagerService} since it stores information about all clients,
- * still the current client will be defined per display.
- *
- * <p>
- * As part of the re-architecture plan (described in go/imms-rearchitecture-plan), the following
- * fields and methods will be moved out from IMMS and placed here:
- * <ul>
- * <li>mClients (ArrayMap of ClientState indexed by IBinder)</li>
- * </ul>
- * <p>
- * Nested Classes (to move from IMMS):
- * <ul>
- * <li>ClientDeathRecipient</li>
- * <li>ClientState<</li>
- * </ul>
- * <p>
- * Methods to rewrite and/or extract from IMMS and move here:
- * <ul>
- * <li>addClient</li>
- * <li>removeClient</li>
- * <li>verifyClientAndPackageMatch</li>
- * <li>setImeTraceEnabledForAllClients (make it reactive)</li>
- * </ul>
+ * Store and manage {@link InputMethodManagerService} clients.
  */
-// TODO(b/314150112): Update the Javadoc above, by removing the re-architecture steps, once this
-//  class is finalized
 final class ClientController {
 
-    // TODO(b/314150112): Make this field private when breaking the cycle with IMMS.
     @GuardedBy("ImfLock.class")
     private final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
 

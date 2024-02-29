@@ -16,10 +16,10 @@
 
 package com.android.server.wm.flicker.launch.common
 
-import android.tools.common.Rotation
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
+import android.tools.Rotation
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.rules.RemoveAllTasksButHomeRule
 
 abstract class OpenAppFromIconTransition(flicker: LegacyFlickerTest) :
     OpenAppFromLauncherTransition(flicker) {

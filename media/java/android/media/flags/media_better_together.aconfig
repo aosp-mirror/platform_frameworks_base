@@ -104,3 +104,10 @@ flag {
     description: "Enable new MediaRouter2 API to enable watch companion apps to scan while the phone screen is off."
     bug: "281072508"
 }
+
+flag {
+    name: "enable_null_session_in_media_browser_service"
+    namespace: "media_solutions"
+    description: "Enables apps owning a MediaBrowserService to disconnect all connected browsers."
+    bug: "263520343"
+}

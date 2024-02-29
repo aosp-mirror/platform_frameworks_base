@@ -22,10 +22,13 @@ import static android.os.UserHandle.USER_SYSTEM;
 
 import static org.junit.Assert.fail;
 
+import android.app.Instrumentation;
+import android.content.Context;
 import android.platform.test.annotations.DisabledOnNonRavenwood;
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.EnabledOnRavenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.util.ArraySet;
 
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -118,9 +121,16 @@ public class RavenwoodRule implements TestRule {
     int mUid = NOBODY_UID;
     int mPid = sNextPid.getAndIncrement();
 
+    String mPackageName;
+
     boolean mProvideMainThread = false;
 
     final RavenwoodSystemProperties mSystemProperties = new RavenwoodSystemProperties();
+
+    final ArraySet<Class<?>> mServicesRequired = new ArraySet<>();
+
+    volatile Context mContext;
+    volatile Instrumentation mInstrumentation;
 
     public RavenwoodRule() {
     }
@@ -146,6 +156,15 @@ public class RavenwoodRule implements TestRule {
          */
         public Builder setProcessApp() {
             mRule.mUid = FIRST_APPLICATION_UID;
+            return this;
+        }
+
+        /**
+         * Configure the identity of this process to be the given package name for the duration
+         * of the test. Has no effect on non-Ravenwood environments.
+         */
+        public Builder setPackageName(/* @NonNull */ String packageName) {
+            mRule.mPackageName = Objects.requireNonNull(packageName);
             return this;
         }
 
@@ -192,6 +211,23 @@ public class RavenwoodRule implements TestRule {
             return this;
         }
 
+        /**
+         * Configure the set of system services that are required for this test to operate.
+         *
+         * For example, passing {@code android.hardware.SerialManager.class} as an argument will
+         * ensure that the underlying service is created, initialized, and ready to use for the
+         * duration of the test. The {@code SerialManager} instance can be obtained via
+         * {@code RavenwoodRule.getContext()} and {@code Context.getSystemService()}, and
+         * {@code SerialManagerInternal} can be obtained via {@code LocalServices.getService()}.
+         */
+        public Builder setServicesRequired(Class<?>... services) {
+            mRule.mServicesRequired.clear();
+            for (Class<?> service : services) {
+                mRule.mServicesRequired.add(service);
+            }
+            return this;
+        }
+
         public RavenwoodRule build() {
             return mRule;
         }
@@ -210,6 +246,28 @@ public class RavenwoodRule implements TestRule {
      */
     public static boolean isOnRavenwood() {
         return IS_ON_RAVENWOOD;
+    }
+
+    /**
+     * Return a {@code Context} available for usage during the currently running test case.
+     *
+     * Each test should obtain needed information or references via this method;
+     * references must not be stored beyond the scope of a test case.
+     */
+    public Context getContext() {
+        return Objects.requireNonNull(mContext,
+                "Context is only available during @Test execution");
+    }
+
+    /**
+     * Return a {@code Instrumentation} available for usage during the currently running test case.
+     *
+     * Each test should obtain needed information or references via this method;
+     * references must not be stored beyond the scope of a test case.
+     */
+    public Instrumentation getInstrumentation() {
+        return Objects.requireNonNull(mInstrumentation,
+                "Instrumentation is only available during @Test execution");
     }
 
     static boolean shouldEnableOnDevice(Description description) {

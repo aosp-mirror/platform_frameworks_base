@@ -34,6 +34,7 @@ import android.view.WindowManager;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.DirectBootAwareness;
+import com.android.internal.inputmethod.IBooleanListener;
 import com.android.internal.inputmethod.IConnectionlessHandwritingCallback;
 import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInputMethodClient;
@@ -585,6 +586,28 @@ final class IInputMethodManagerGlobalInvoker {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** Returns {@code true} if method is invoked */
+    @AnyThread
+    static boolean acceptStylusHandwritingDelegationAsync(
+            @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags,
+            @NonNull IBooleanListener callback) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return false;
+        }
+        try {
+            service.acceptStylusHandwritingDelegationAsync(
+                    client, userId, delegatePackageName, delegatorPackageName, flags, callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return true;
     }
 
     @AnyThread

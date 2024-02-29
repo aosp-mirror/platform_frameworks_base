@@ -29,6 +29,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.Flags.SCENE_CONTAINER_ENABLED
 import com.android.systemui.flags.RefactorFlagUtils
+import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.media.controls.util.MediaInSceneContainerFlag
 import dagger.Module
 import dagger.Provides
@@ -45,6 +46,7 @@ object SceneContainerFlag {
             sceneContainer() && // mainAconfigFlag
                 keyguardBottomAreaRefactor() &&
                 migrateClocksToBlueprint() &&
+                ComposeLockscreen.isEnabled &&
                 MediaInSceneContainerFlag.isEnabled &&
                 // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
                 ComposeFacade.isComposeAvailable()
@@ -65,6 +67,7 @@ object SceneContainerFlag {
         sequenceOf(
             FlagToken(FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR, keyguardBottomAreaRefactor()),
             FlagToken(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT, migrateClocksToBlueprint()),
+            ComposeLockscreen.token,
             MediaInSceneContainerFlag.token,
             // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer
         )

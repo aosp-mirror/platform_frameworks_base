@@ -438,9 +438,20 @@ object BiometricViewBinder {
 
                 // Play haptics
                 launch {
-                    viewModel.hapticsToPlay.collect { hapticFeedbackConstant ->
-                        if (hapticFeedbackConstant != HapticFeedbackConstants.NO_HAPTICS) {
-                            vibratorHelper.performHapticFeedback(view, hapticFeedbackConstant)
+                    viewModel.hapticsToPlay.collect { haptics ->
+                        if (haptics.hapticFeedbackConstant != HapticFeedbackConstants.NO_HAPTICS) {
+                            if (haptics.flag != null) {
+                                vibratorHelper.performHapticFeedback(
+                                    view,
+                                    haptics.hapticFeedbackConstant,
+                                    haptics.flag,
+                                )
+                            } else {
+                                vibratorHelper.performHapticFeedback(
+                                    view,
+                                    haptics.hapticFeedbackConstant,
+                                )
+                            }
                             viewModel.clearHaptics()
                         }
                     }

@@ -136,7 +136,7 @@ object FooterViewBinder {
         }
 
         launch {
-            viewModel.clearAllButton.accessibilityDescriptionId.collect { textId ->
+            viewModel.manageOrHistoryButton.accessibilityDescriptionId.collect { textId ->
                 footer.setManageOrHistoryButtonDescription(textId)
             }
         }

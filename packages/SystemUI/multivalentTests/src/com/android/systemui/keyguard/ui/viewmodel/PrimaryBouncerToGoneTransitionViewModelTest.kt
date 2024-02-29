@@ -119,15 +119,19 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     fun lockscreenAlpha_runDimissFromKeyguard() =
         testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
+            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
             runCurrent()
 
-            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.PRIMARY_BOUNCER,
+                to = KeyguardState.GONE,
+                testScope,
+            )
 
-            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            keyguardTransitionRepository.sendTransitionStep(step(1f))
-
-            assertThat(values.size).isEqualTo(2)
-            values.forEach { assertThat(it).isEqualTo(1f) }
+            assertThat(values[0]).isEqualTo(1f)
+            assertThat(values[1]).isEqualTo(1f)
+            // Ensure FINISHED sets alpha to 0
+            assertThat(values[2]).isEqualTo(0f)
         }
 
     @Test
@@ -142,6 +146,42 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionStep(step(1f))
 
             assertThat(values.size).isEqualTo(2)
+            values.forEach { assertThat(it).isEqualTo(1f) }
+        }
+
+    @Test
+    fun notificationAlpha() =
+        testScope.runTest {
+            val values by collectValues(underTest.notificationAlpha)
+            runCurrent()
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.PRIMARY_BOUNCER,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+
+            assertThat(values[0]).isEqualTo(1f)
+            // Should fade to zero between here
+            assertThat(values[1]).isEqualTo(0f)
+        }
+
+    @Test
+    fun notificationAlpha_leaveShadeOpen() =
+        testScope.runTest {
+            val values by collectValues(underTest.notificationAlpha)
+            runCurrent()
+
+            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.PRIMARY_BOUNCER,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+
+            assertThat(values.size).isEqualTo(2)
+            // Shade stays open, and alpha should remain visible
             values.forEach { assertThat(it).isEqualTo(1f) }
         }
 

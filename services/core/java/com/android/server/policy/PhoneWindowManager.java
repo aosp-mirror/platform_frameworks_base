@@ -236,6 +236,7 @@ import com.android.server.policy.keyguard.KeyguardServiceDelegate.DrawnListener;
 import com.android.server.policy.keyguard.KeyguardStateMonitor.StateCallback;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vibrator.HapticFeedbackVibrationProvider;
+import com.android.server.vibrator.VibratorFrameworkStatsLogger;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wallpaper.WallpaperManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -3503,8 +3504,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
                     StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
                     if (statusbar != null) {
-                        statusbar.goToFullscreenFromSplit();
-                        logKeyboardSystemsEvent(event, KeyboardLogEvent.SPLIT_SCREEN_NAVIGATION);
+                        statusbar.moveFocusedTaskToFullscreen(event.getDisplayId());
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.MULTI_WINDOW_NAVIGATION);
+                        return true;
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
+                    StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+                    if (statusbar != null) {
+                        statusbar.enterDesktop(event.getDisplayId());
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.DESKTOP_MODE);
                         return true;
                     }
                 }
@@ -6421,6 +6432,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         VibrationAttributes attrs =
                 mHapticFeedbackVibrationProvider.getVibrationAttributesForHapticFeedback(
                         effectId, /* bypassVibrationIntensitySetting= */ always);
+        VibratorFrameworkStatsLogger.logPerformHapticsFeedbackIfKeyboard(uid, effectId);
         mVibrator.vibrate(uid, packageName, effect, reason, attrs);
         return true;
     }

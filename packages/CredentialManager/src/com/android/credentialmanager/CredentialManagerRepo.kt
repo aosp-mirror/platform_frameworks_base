@@ -50,7 +50,6 @@ import com.android.credentialmanager.createflow.isFlowAutoSelectable
 class CredentialManagerRepo(
     private val context: Context,
     intent: Intent,
-    userConfigRepo: UserConfigRepo,
     isNewActivity: Boolean,
 ) {
     val requestInfo: RequestInfo?
@@ -111,11 +110,7 @@ class CredentialManagerRepo(
                 ResultReceiver::class.java
         )
 
-        isReqForAllOptions = intent.getBooleanExtra(
-                Constants.EXTRA_REQ_FOR_ALL_OPTIONS,
-                /*defaultValue=*/ false
-        ) || (requestInfo?.isShowAllOptionsRequested ?: false) // TODO(b/323552850) - Remove
-        // usage on Constants.EXTRA_REQ_FOR_ALL_OPTIONS once it is deprecated.
+        isReqForAllOptions = requestInfo?.isShowAllOptionsRequested ?: false
 
         val cancellationRequest = getCancelUiRequest(intent)
         val cancelUiRequestState = cancellationRequest?.let {
@@ -124,7 +119,6 @@ class CredentialManagerRepo(
 
         initialUiState = when (requestInfo?.type) {
             RequestInfo.TYPE_CREATE -> {
-                val isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
                 val providerEnableListUiState = getCreateProviderEnableListInitialUiState()
                 val providerDisableListUiState = getCreateProviderDisableListInitialUiState()
                 val requestDisplayInfoUiState =
@@ -137,8 +131,6 @@ class CredentialManagerRepo(
                     defaultProviderIdsSetByUser =
                     requestDisplayInfoUiState.userSetDefaultProviderIds,
                     requestDisplayInfo = requestDisplayInfoUiState,
-                    isOnPasskeyIntroStateAlready = false,
-                    isPasskeyFirstUse = isPasskeyFirstUse,
                 )!!
                 val isFlowAutoSelectable = isFlowAutoSelectable(createCredentialUiState)
                 UiState(

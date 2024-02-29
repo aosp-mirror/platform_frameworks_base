@@ -18,15 +18,15 @@ package com.android.server.wm.flicker.launch
 
 import android.os.SystemClock
 import android.platform.test.annotations.Postsubmit
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.CameraAppHelper
 import android.tools.device.apphelpers.StandardAppHelper
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.flicker.rules.RemoveAllTasksButHomeRule
+import android.tools.flicker.subject.layers.LayersTraceSubject
+import android.tools.traces.component.ComponentNameMatcher
 import android.view.KeyEvent
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.setRotation

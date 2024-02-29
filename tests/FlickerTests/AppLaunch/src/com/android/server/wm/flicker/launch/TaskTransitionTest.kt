@@ -20,20 +20,20 @@ import android.app.Instrumentation
 import android.app.WallpaperManager
 import android.content.res.Resources
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.Region
-import android.tools.common.flicker.subject.layers.LayersTraceSubject
-import android.tools.common.flicker.subject.layers.LayersTraceSubject.Companion.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS
-import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.common.traces.component.ComponentNameMatcher.Companion.SPLASH_SCREEN
-import android.tools.common.traces.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
-import android.tools.common.traces.component.ComponentSplashScreenMatcher
-import android.tools.common.traces.component.IComponentMatcher
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import android.tools.device.helpers.WindowUtils
-import android.tools.device.traces.parsers.toFlickerComponent
+import android.tools.datatypes.Region
+import android.tools.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.flicker.legacy.FlickerBuilder
+import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.flicker.subject.layers.LayersTraceSubject
+import android.tools.flicker.subject.layers.LayersTraceSubject.Companion.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS
+import android.tools.helpers.WindowUtils
+import android.tools.traces.component.ComponentNameMatcher
+import android.tools.traces.component.ComponentNameMatcher.Companion.SPLASH_SCREEN
+import android.tools.traces.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
+import android.tools.traces.component.ComponentSplashScreenMatcher
+import android.tools.traces.component.IComponentMatcher
+import android.tools.traces.parsers.toFlickerComponent
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
@@ -215,9 +215,10 @@ class TaskTransitionTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
             component: IComponentMatcher,
             expectedArea: Region,
             isOptional: Boolean = true
-        ): LayersTraceSubject = invoke("$component coversExactly $expectedArea", isOptional) {
-            it.visibleRegion(component).coversExactly(expectedArea)
-        }
+        ): LayersTraceSubject =
+            invoke("$component coversExactly $expectedArea", isOptional) {
+                it.visibleRegion(component).coversExactly(expectedArea)
+            }
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

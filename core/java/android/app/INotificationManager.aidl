@@ -225,6 +225,7 @@ interface INotificationManager
     boolean removeAutomaticZenRule(String id, boolean fromUser);
     boolean removeAutomaticZenRules(String packageName, boolean fromUser);
     int getRuleInstanceCount(in ComponentName owner);
+    int getAutomaticZenRuleState(String id);
     void setAutomaticZenRuleState(String id, in Condition condition);
 
     byte[] getBackupPayload(int user);
