@@ -617,3 +617,14 @@ flag {
     description: "enables new focus outline for qs tiles when focused on with physical keyboard"
     bug: "312899524"
 }
+
+flag {
+   name: "edgeback_gesture_handler_get_running_tasks_background"
+    namespace: "systemui"
+    description: "Decide whether to get the running tasks from activity manager in EdgebackGestureHandler"
+        " class on the background thread."
+    bug: "325041960"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
