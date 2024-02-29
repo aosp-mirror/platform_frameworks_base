@@ -17,6 +17,7 @@ android_test {
     ],
     static_libs: [
         "mockito-target-minus-junit4",
+        "androidx.test.rules",
     ],
     platform_apis: true,
     certificate: "platform",
