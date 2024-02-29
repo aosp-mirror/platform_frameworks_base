@@ -76,12 +76,14 @@ import java.util.Objects;
 public final class E2eeContactKeysManager {
     /**
      * The authority for the end-to-end encryption contact keys provider.
+     *
      * @hide
      */
     public static final String AUTHORITY = "com.android.contactkeys.contactkeysprovider";
 
     /**
      * A content:// style uri to the authority for the end-to-end encryption contact keys provider.
+     *
      * @hide
      */
     @NonNull
@@ -112,9 +114,9 @@ public final class E2eeContactKeysManager {
      * The inserted/updated end-to-end encryption contact key is owned by the caller app.
      *
      * @param lookupKey value that references the contact
-     * @param deviceId an app-specified identifier for the device
+     * @param deviceId  an app-specified identifier for the device
      * @param accountId an app-specified identifier for the account
-     * @param keyValue the raw bytes for the key (max size is {@link #getMaxKeySizeBytes} bytes)
+     * @param keyValue  the raw bytes for the key (max size is {@link #getMaxKeySizeBytes} bytes)
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
     public void updateOrInsertE2eeContactKey(@NonNull String lookupKey,
@@ -138,9 +140,8 @@ public final class E2eeContactKeysManager {
      * accountId and inferred caller package name.
      *
      * @param lookupKey the value that references the contact
-     * @param deviceId an app-specified identifier for the device
+     * @param deviceId  an app-specified identifier for the device
      * @param accountId an app-specified identifier for the account
-     *
      * @return a {@link E2eeContactKey} object containing the contact key information,
      * or null if no contact key is found.
      */
@@ -170,7 +171,6 @@ public final class E2eeContactKeysManager {
      * The keys will be stripped of deviceId, timeUpdated and keyValue data.
      *
      * @param lookupKey the value that references the contact
-     *
      * @return a list of {@link E2eeContactKey} objects containing the contact key
      * information, or an empty list if no keys are found.
      */
@@ -199,7 +199,6 @@ public final class E2eeContactKeysManager {
      * the caller app.
      *
      * @param lookupKey the value that references the contact
-     *
      * @return a list of {@link E2eeContactKey} objects containing the end-to-end encryption
      * contact key information, or an empty list if no keys are found.
      */
@@ -227,11 +226,10 @@ public final class E2eeContactKeysManager {
      * Updates an end-to-end encryption contact key entry's local verification state that belongs
      * to the caller app.
      *
-     * @param lookupKey the value that references the contact
-     * @param deviceId an app-specified identifier for the device
-     * @param accountId an app-specified identifier for the account
+     * @param lookupKey              the value that references the contact
+     * @param deviceId               an app-specified identifier for the device
+     * @param accountId              an app-specified identifier for the account
      * @param localVerificationState the new local verification state
-     *
      * @return true if the entry was updated, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
@@ -257,14 +255,12 @@ public final class E2eeContactKeysManager {
      * Updates an end-to-end encryption contact key entry's local verification state that belongs
      * to the app identified by ownerPackageName.
      *
-     * @param lookupKey the value that references the contact
-     * @param deviceId an app-specified identifier for the device
-     * @param accountId an app-specified identifier for the account
-     * @param ownerPackageName the package name of the app that owns the key
+     * @param lookupKey              the value that references the contact
+     * @param deviceId               an app-specified identifier for the device
+     * @param accountId              an app-specified identifier for the account
+     * @param ownerPackageName       the package name of the app that owns the key
      * @param localVerificationState the new local verification state
-     *
      * @return true if the entry was updated, false otherwise.
-     *
      * @hide
      */
     @SystemApi
@@ -296,11 +292,10 @@ public final class E2eeContactKeysManager {
      * Updates an end-to-end encryption contact key entry's remote verification state that belongs
      * to the caller app.
      *
-     * @param lookupKey the value that references the contact
-     * @param deviceId an app-specified identifier for the device
-     * @param accountId an app-specified identifier for the account
+     * @param lookupKey               the value that references the contact
+     * @param deviceId                an app-specified identifier for the device
+     * @param accountId               an app-specified identifier for the account
      * @param remoteVerificationState the new remote verification state
-     *
      * @return true if the entry was updated, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
@@ -326,14 +321,12 @@ public final class E2eeContactKeysManager {
      * Updates an end-to-end encryption contact key entry's remote verification state that belongs
      * to the app identified by ownerPackageName.
      *
-     * @param lookupKey the value that references the contact
-     * @param deviceId an app-specified identifier for the device
-     * @param accountId an app-specified identifier for the account
-     * @param ownerPackageName the package name of the app that owns the key
+     * @param lookupKey               the value that references the contact
+     * @param deviceId                an app-specified identifier for the device
+     * @param accountId               an app-specified identifier for the account
+     * @param ownerPackageName        the package name of the app that owns the key
      * @param remoteVerificationState the new remote verification state
-     *
      * @return true if the entry was updated, false otherwise.
-     *
      * @hide
      */
     @SystemApi
@@ -374,9 +367,8 @@ public final class E2eeContactKeysManager {
      * Removes an end-to-end encryption contact key entry that belongs to the caller app.
      *
      * @param lookupKey the value that references the contact
-     * @param deviceId an app-specified identifier for the device
+     * @param deviceId  an app-specified identifier for the device
      * @param accountId an app-specified identifier for the account
-     *
      * @return true if the entry was removed, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
@@ -397,11 +389,10 @@ public final class E2eeContactKeysManager {
     /**
      * Inserts a new entry into the end-to-end encryption self keys table or updates one if it
      * already exists.
-
-     * @param deviceId an app-specified identifier for the device
-     * @param accountId an app-specified identifier for the account
-     * @param keyValue the raw bytes for the key (max size is {@link #getMaxKeySizeBytes} bytes)
      *
+     * @param deviceId  an app-specified identifier for the device
+     * @param accountId an app-specified identifier for the account
+     * @param keyValue  the raw bytes for the key (max size is {@link #getMaxKeySizeBytes} bytes)
      * @return true if the entry was added or updated, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
@@ -432,10 +423,9 @@ public final class E2eeContactKeysManager {
     /**
      * Updates an end-to-end encryption self key entry's remote verification state.
      *
-     * @param deviceId an app-specified identifier for the device
-     * @param accountId an app-specified identifier for the account
+     * @param deviceId                an app-specified identifier for the device
+     * @param accountId               an app-specified identifier for the account
      * @param remoteVerificationState the new remote verification state
-     *
      * @return true if the entry was updated, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
@@ -459,13 +449,11 @@ public final class E2eeContactKeysManager {
      * Updates an end-to-end encryption self key entry's remote verification state that belongs to
      * the app identified by ownerPackageName.
      *
-     * @param deviceId an app-specified identifier for the device
-     * @param accountId an app-specified identifier for the account
-     * @param ownerPackageName the package name of the app that owns the key
+     * @param deviceId                an app-specified identifier for the device
+     * @param accountId               an app-specified identifier for the account
+     * @param ownerPackageName        the package name of the app that owns the key
      * @param remoteVerificationState the new remote verification state
-     *
      * @return true if the entry was updated, false otherwise.
-     *
      * @hide
      */
     @SystemApi
@@ -502,9 +490,8 @@ public final class E2eeContactKeysManager {
      * Returns an end-to-end encryption self key entry given the deviceId and the inferred package
      * name of the caller.
      *
-     * @param deviceId an app-specified identifier for the device
+     * @param deviceId  an app-specified identifier for the device
      * @param accountId an app-specified identifier for the account
-     *
      * @return a {@link E2eeSelfKey} object containing the end-to-end encryption self key
      * information, or null if no self key is found.
      */
@@ -579,9 +566,9 @@ public final class E2eeContactKeysManager {
     /**
      * Removes an end-to-end encryption self key entry given the deviceId and the inferred
      * package name of the caller.
-     * @param deviceId an app-specified identifier for the device
-     * @param accountId an app-specified identifier for the account
      *
+     * @param deviceId  an app-specified identifier for the device
+     * @param accountId an app-specified identifier for the account
      * @return true if the entry was removed, false otherwise.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_CONTACTS)
@@ -608,6 +595,7 @@ public final class E2eeContactKeysManager {
 
     /**
      * Possible values of verification state.
+     *
      * @hide
      */
     @IntDef(prefix = {"VERIFICATION_STATE_"}, value = {
@@ -616,7 +604,8 @@ public final class E2eeContactKeysManager {
             VERIFICATION_STATE_VERIFIED
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface VerificationState {}
+    public @interface VerificationState {
+    }
 
     /**
      * Unverified state of a contact end to end encrypted key.
@@ -634,7 +623,8 @@ public final class E2eeContactKeysManager {
     /** @hide */
     public static final class E2eeContactKeys {
 
-        private E2eeContactKeys() {}
+        private E2eeContactKeys() {
+        }
 
         /**
          * <p>
@@ -808,46 +798,13 @@ public final class E2eeContactKeysManager {
     /**
      * A parcelable class encapsulating other users' end to end encrypted contact key.
      */
-    public static final class E2eeContactKey implements Parcelable {
-        /**
-         * An app-specified identifier for the device for which the end-to-end encryption
-         * contact key can be used.
-         */
-        private final String mDeviceId;
-
-        /**
-         * An app-specified identifier for the account for which the end-to-end encryption
-         * contact key can be used.
-         * Usually a phone number.
-         */
-        private final String mAccountId;
-
-        /**
-         * Owner application package name.
-         */
-        private final String mOwnerPackageName;
-
-        /**
-         * Timestamp at which the key was updated.
-         */
-        private final long mTimeUpdated;
-
-        /**
-         * The raw bytes for the key.
-         */
-        private final byte[] mKeyValue;
+    public static final class E2eeContactKey extends E2eeBaseKey implements Parcelable {
 
         /**
          * Describes the local verification state for the key, for instance QR-code based
          * verification.
          */
         private final int mLocalVerificationState;
-
-        /**
-         * Describes the remote verification state for the key, for instance through a key
-         * transparency server.
-         */
-        private final int mRemoteVerificationState;
 
         /**
          * The display name for the contact.
@@ -873,74 +830,12 @@ public final class E2eeContactKeysManager {
                 @VerificationState int remoteVerificationState,
                 @Nullable String displayName,
                 @Nullable String phoneNumber, @Nullable String emailAddress) {
-            this.mDeviceId = deviceId;
-            this.mAccountId = accountId;
-            this.mOwnerPackageName = ownerPackageName;
-            this.mTimeUpdated = timeUpdated;
-            this.mKeyValue = keyValue == null ? null : Arrays.copyOf(keyValue, keyValue.length);
+            super(deviceId, accountId, ownerPackageName, timeUpdated, keyValue,
+                    remoteVerificationState);
             this.mLocalVerificationState = localVerificationState;
-            this.mRemoteVerificationState = remoteVerificationState;
             this.mDisplayName = displayName;
             this.mPhoneNumber = phoneNumber;
             this.mEmailAddress = emailAddress;
-        }
-
-        /**
-         * Gets the app-specified identifier for the device for which the end-to-end encryption
-         * contact key can be used.
-         * Returns null if the app doesn't have the required visibility into
-         * the end-to-end encryption contact key.
-         *
-         * @return An app-specified identifier for the device.
-         */
-        @Nullable
-        public String getDeviceId() {
-            return mDeviceId;
-        }
-
-        /**
-         * Gets the app-specified identifier for the account for which the end-to-end encryption
-         * contact key can be used.
-         * Usually a phone number.
-         *
-         * @return An app-specified identifier for the account.
-         */
-        @NonNull
-        public String getAccountId() {
-            return mAccountId;
-        }
-
-        /**
-         * Gets the owner application package name.
-         *
-         * @return The owner application package name.
-         */
-        @NonNull
-        public String getOwnerPackageName() {
-            return mOwnerPackageName;
-        }
-
-        /**
-         * Gets the timestamp at which the key was updated. Returns -1 if the app doesn't have the
-         * required visibility into the end-to-end encryption contact key.
-         *
-         * @return The timestamp at which the key was updated in the System.currentTimeMillis()
-         * base.
-         */
-        public long getTimeUpdated() {
-            return mTimeUpdated;
-        }
-
-        /**
-         * Gets the raw bytes for the key.
-         * Returns null if the app doesn't have the required visibility into
-         * the end-to-end encryption contact key.
-         *
-         * @return A copy of the raw bytes for the key.
-         */
-        @Nullable
-        public byte[] getKeyValue() {
-            return mKeyValue == null ? null : Arrays.copyOf(mKeyValue, mKeyValue.length);
         }
 
         /**
@@ -950,16 +845,6 @@ public final class E2eeContactKeysManager {
          */
         public @VerificationState int getLocalVerificationState() {
             return mLocalVerificationState;
-        }
-
-        /**
-         * Gets the remote verification state for the key, for instance through a key transparency
-         * server.
-         *
-         * @return The remote verification state for the key.
-         */
-        public @VerificationState int getRemoteVerificationState() {
-            return mRemoteVerificationState;
         }
 
         /**
@@ -1079,122 +964,15 @@ public final class E2eeContactKeysManager {
     /**
      * A parcelable class encapsulating self end to end encrypted contact key.
      */
-    public static final class E2eeSelfKey implements Parcelable {
-        /**
-         * An app-specified identifier for the device for which the end-to-end encryption
-         * contact key can be used.
-         */
-        private final String mDeviceId;
-
-        /**
-         * An app-specified identifier for the account for which the end-to-end encryption
-         * contact key can be used.
-         * Usually a phone number.
-         */
-        private final String mAccountId;
-
-        /**
-         * Owner application package name.
-         */
-        private final String mOwnerPackageName;
-
-        /**
-         * Timestamp at which the key was updated.
-         */
-        private final long mTimeUpdated;
-
-        /**
-         * The raw bytes for the key.
-         */
-        private final byte[] mKeyValue;
-
-
-        /**
-         * Describes the remote verification state for the key, for instance through a key
-         * transparency server.
-         */
-        private final int mRemoteVerificationState;
-
+    public static final class E2eeSelfKey extends E2eeBaseKey implements Parcelable {
         /**
          * @hide
          */
         public E2eeSelfKey(@Nullable String deviceId, @NonNull String accountId,
                 @NonNull String ownerPackageName, long timeUpdated, @Nullable byte[] keyValue,
                 @VerificationState int remoteVerificationState) {
-            this.mDeviceId = deviceId;
-            this.mAccountId = accountId;
-            this.mOwnerPackageName = ownerPackageName;
-            this.mTimeUpdated = timeUpdated;
-            this.mKeyValue = keyValue == null ? null : Arrays.copyOf(keyValue, keyValue.length);
-            this.mRemoteVerificationState = remoteVerificationState;
-        }
-
-        /**
-         * Gets the app-specified identifier for the device for which the end-to-end encryption
-         * contact key can be used.
-         * Returns null if the app doesn't have the required visibility into
-         * the end-to-end encryption contact key.
-         *
-         * @return An app-specified identifier for the device.
-         */
-        @Nullable
-        public String getDeviceId() {
-            return mDeviceId;
-        }
-
-        /**
-         * Gets the app-specified identifier for the account for which the end-to-end encryption
-         * contact key can be used.
-         * Usually a phone number.
-         *
-         * @return An app-specified identifier for the device.
-         */
-        @NonNull
-        public String getAccountId() {
-            return mAccountId;
-        }
-
-        /**
-         * Gets the owner application package name.
-         *
-         * @return The owner application package name.
-         */
-        @NonNull
-        public String getOwnerPackageName() {
-            return mOwnerPackageName;
-        }
-
-        /**
-         * Gets the timestamp at which the key was updated. Returns -1 if the app doesn't have the
-         * required visibility into the end-to-end encryption contact key.
-         *
-         * @return The timestamp at which the key was updated in the System.currentTimeMillis()
-         * base.
-         */
-        public long getTimeUpdated() {
-            return mTimeUpdated;
-        }
-
-        /**
-         * Gets the raw bytes for the key.
-         * Returns null if the app doesn't have the required visibility into
-         * the end-to-end encryption contact key.
-         *
-         * @return A copy of the raw bytes for the key.
-         */
-        @Nullable
-        public byte[] getKeyValue() {
-            return mKeyValue == null ? null : Arrays.copyOf(mKeyValue, mKeyValue.length);
-        }
-
-        /**
-         * Gets the remote verification state for the key, for instance through a key transparency
-         * server.
-         *
-         * @return The remote verification state for the key.
-         */
-        public @VerificationState int getRemoteVerificationState() {
-            return mRemoteVerificationState;
+            super(deviceId, accountId, ownerPackageName, timeUpdated, keyValue,
+                    remoteVerificationState);
         }
 
         @Override
@@ -1265,5 +1043,123 @@ public final class E2eeContactKeysManager {
                         return new E2eeSelfKey[size];
                     }
                 };
+    }
+
+    /**
+     * An abstract class that's extended by self and contact key classes.
+     *
+     * @hide
+     */
+    abstract static class E2eeBaseKey {
+        /**
+         * An app-specified identifier for the device for which the key can be used.
+         */
+        protected final String mDeviceId;
+
+        /**
+         * An app-specified identifier for the account for which the key can be used.
+         * Usually a phone number.
+         */
+        protected final String mAccountId;
+
+        /**
+         * Owner application package name.
+         */
+        protected final String mOwnerPackageName;
+
+        /**
+         * Timestamp at which the key was updated.
+         */
+        protected final long mTimeUpdated;
+
+        /**
+         * The raw bytes for the key.
+         */
+        protected final byte[] mKeyValue;
+
+        /**
+         * Describes the remote verification state for the end-to-end encryption key, for instance
+         * through a key transparency server.
+         */
+        protected final int mRemoteVerificationState;
+
+        protected E2eeBaseKey(@Nullable String deviceId, @NonNull String accountId,
+                @NonNull String ownerPackageName, long timeUpdated, @Nullable byte[] keyValue,
+                @VerificationState int remoteVerificationState) {
+            this.mDeviceId = deviceId;
+            this.mAccountId = accountId;
+            this.mOwnerPackageName = ownerPackageName;
+            this.mTimeUpdated = timeUpdated;
+            this.mKeyValue = keyValue == null ? null : Arrays.copyOf(keyValue, keyValue.length);
+            this.mRemoteVerificationState = remoteVerificationState;
+        }
+
+        /**
+         * Gets the app-specified identifier for the device for which the end-to-end encryption
+         * key can be used.
+         * Returns null if the app doesn't have the required visibility into
+         * the end-to-end encryption key.
+         *
+         * @return An app-specified identifier for the device.
+         */
+        @Nullable
+        public String getDeviceId() {
+            return mDeviceId;
+        }
+
+        /**
+         * Gets the app-specified identifier for the account for which the end-to-end encryption
+         * key can be used.
+         * Usually a phone number.
+         *
+         * @return An app-specified identifier for the account.
+         */
+        @NonNull
+        public String getAccountId() {
+            return mAccountId;
+        }
+
+        /**
+         * Gets the owner application package name.
+         *
+         * @return The owner application package name.
+         */
+        @NonNull
+        public String getOwnerPackageName() {
+            return mOwnerPackageName;
+        }
+
+        /**
+         * Gets the timestamp at which the end-to-end encryption key was updated. Returns -1 if
+         * the app doesn't have the required visibility into the key.
+         *
+         * @return The timestamp at which the key was updated in the System.currentTimeMillis()
+         * base.
+         */
+        public long getTimeUpdated() {
+            return mTimeUpdated;
+        }
+
+        /**
+         * Gets the raw bytes for the end-to-end encryption key.
+         * Returns null if the app doesn't have the required visibility into
+         * the end-to-end encryption key.
+         *
+         * @return A copy of the raw bytes for the end-to-end encryption key.
+         */
+        @Nullable
+        public byte[] getKeyValue() {
+            return mKeyValue == null ? null : Arrays.copyOf(mKeyValue, mKeyValue.length);
+        }
+
+        /**
+         * Gets the remote verification state for the end-to-end encryption key, for instance
+         * through a key transparency server.
+         *
+         * @return The remote verification state for the end-to-end encryption key.
+         */
+        public @VerificationState int getRemoteVerificationState() {
+            return mRemoteVerificationState;
+        }
     }
 }
