@@ -11,5 +11,6 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.collection_collection-ktx",
+        "guava",
     ],
 }
