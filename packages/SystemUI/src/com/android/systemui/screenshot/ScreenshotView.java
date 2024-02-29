@@ -102,7 +102,7 @@ import java.util.ArrayList;
 public class ScreenshotView extends FrameLayout implements
         ViewTreeObserver.OnComputeInternalInsetsListener {
 
-    interface ScreenshotViewCallback {
+    public interface ScreenshotViewCallback {
         void onUserInteraction();
 
         void onAction(Intent intent, UserHandle owner, boolean overrideTransition);
@@ -426,15 +426,15 @@ public class ScreenshotView extends FrameLayout implements
         return mScreenshotPreview;
     }
 
-    /**
-     * Set up the logger and callback on dismissal.
-     *
-     * Note: must be called before any other (non-constructor) method or null pointer exceptions
-     * may occur.
-     */
-    void init(UiEventLogger uiEventLogger, ScreenshotViewCallback callbacks, FeatureFlags flags) {
+    void setUiEventLogger(UiEventLogger uiEventLogger) {
         mUiEventLogger = uiEventLogger;
+    }
+
+    void setCallbacks(ScreenshotViewCallback callbacks) {
         mCallbacks = callbacks;
+    }
+
+    void setFlags(FeatureFlags flags) {
         mFlags = flags;
     }
 
