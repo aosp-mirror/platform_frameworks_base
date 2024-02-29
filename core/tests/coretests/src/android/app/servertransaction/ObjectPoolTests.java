@@ -82,7 +82,8 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleActivityConfigurationChangeItem() {
-        testRecycle(() -> ActivityConfigurationChangeItem.obtain(mActivityToken, config()));
+        testRecycle(() -> ActivityConfigurationChangeItem.obtain(mActivityToken, config(),
+                new ActivityWindowInfo()));
     }
 
     @Test
