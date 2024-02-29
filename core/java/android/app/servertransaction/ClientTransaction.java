@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
 import android.app.IApplicationThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -54,10 +55,12 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
     @Nullable
     private List<ClientTransactionItem> mTransactionItems;
 
-    /** A list of individual callbacks to a client. */
-    // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
-    @UnsupportedAppUsage
+    /** @deprecated use {@link #getTransactionItems} instead. */
     @Nullable
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            trackingBug = 324203798,
+            publicAlternatives = "Use {@code #getTransactionItems()}")
+    @Deprecated
     private List<ClientTransactionItem> mActivityCallbacks;
 
     /**
@@ -126,42 +129,42 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
         setActivityTokenIfNotSet(activityCallback);
     }
 
-    /**
-     * Gets the list of callbacks.
-     * @deprecated use {@link #getTransactionItems()} instead.
-     */
-    // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
-    @Nullable
+    /** @deprecated use {@link #getTransactionItems()} instead. */
     @VisibleForTesting
-    @UnsupportedAppUsage
+    @Nullable
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            trackingBug = 324203798,
+            publicAlternatives = "Use {@code #getTransactionItems()}")
     @Deprecated
     public List<ClientTransactionItem> getCallbacks() {
         return mActivityCallbacks;
     }
 
     /**
-     * @deprecated a transaction can contain {@link ClientTransactionItem} of different activities,
+     * A transaction can contain {@link ClientTransactionItem} of different activities,
      * this must not be used. For any unsupported app usages, please be aware that this is set to
      * the activity of the first item in {@link #getTransactionItems()}.
+     *
+     * @deprecated use {@link ClientTransactionItem#getActivityToken()} instead.
      */
-    // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
     @VisibleForTesting
     @Nullable
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            trackingBug = 324203798,
+            publicAlternatives = "Use {@code android.app.servertransaction"
+                    + ".ClientTransactionItem#getActivityToken()}")
     @Deprecated
     public IBinder getActivityToken() {
         return mActivityToken;
     }
 
-    /**
-     * Gets the target state lifecycle request.
-     * @deprecated use {@link #getTransactionItems()} instead.
-     */
-    // TODO(b/324203798): cleanup after remove UnsupportedAppUsage
+    /** @deprecated use {@link #getTransactionItems()} instead. */
     @VisibleForTesting(visibility = PACKAGE)
-    @UnsupportedAppUsage
-    @Deprecated
     @Nullable
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            trackingBug = 324203798,
+            publicAlternatives = "Use {@code #getTransactionItems()}")
+    @Deprecated
     public ActivityLifecycleItem getLifecycleStateRequest() {
         return mLifecycleStateRequest;
     }

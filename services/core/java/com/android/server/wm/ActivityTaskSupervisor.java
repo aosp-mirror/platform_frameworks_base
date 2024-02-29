@@ -74,6 +74,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_SUPERVISOR_TASK_MSG;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
+import static com.android.server.wm.ClientLifecycleManager.shouldDispatchCompatClientTransactionIndependently;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_ALLOWLISTED;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -948,6 +949,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 }
 
                 // Schedule transaction.
+                if (shouldDispatchCompatClientTransactionIndependently(r.mTargetSdk)) {
+                    // LaunchActivityItem has @UnsupportedAppUsage usages.
+                    // Guard the bundleClientTransactionFlag feature with targetSDK on Android 15+.
+                    // To not bundle the transaction, dispatch the pending before schedule new
+                    // transaction.
+                    mService.getLifecycleManager().dispatchPendingTransaction(proc.getThread());
+                }
                 mService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
                         proc.getThread(), launchActivityItem, lifecycleItem,
                         // Immediately dispatch the transaction, so that if it fails, the server can
