@@ -16,8 +16,6 @@
 
 package com.android.keyguard;
 
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
-
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,7 +30,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.power.data.repository.FakePowerRepository;
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.res.R;
@@ -62,7 +59,6 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
     @Mock protected KeyguardStatusViewController mControllerMock;
     @Mock protected InteractionJankMonitor mInteractionJankMonitor;
     @Mock protected ViewTreeObserver mViewTreeObserver;
-    @Mock protected KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock protected DumpManager mDumpManager;
     protected FakeKeyguardRepository mFakeKeyguardRepository;
     protected FakePowerRepository mFakePowerRepository;
@@ -93,7 +89,6 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardLogger,
                 mInteractionJankMonitor,
                 deps.getKeyguardInteractor(),
-                mKeyguardTransitionInteractor,
                 mDumpManager,
                 PowerInteractorFactory.create(
                         mFakePowerRepository
@@ -110,7 +105,6 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
 
         when(mKeyguardStatusView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
         when(mKeyguardClockSwitchController.getView()).thenReturn(mKeyguardClockSwitch);
-        when(mKeyguardTransitionInteractor.getGoneToAodTransition()).thenReturn(emptyFlow());
         when(mKeyguardStatusView.findViewById(R.id.keyguard_status_area))
                 .thenReturn(mKeyguardStatusAreaView);
     }
