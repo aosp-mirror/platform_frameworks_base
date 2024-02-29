@@ -142,7 +142,7 @@ public final class DisplayBrightnessController {
         DisplayBrightnessState state;
         synchronized (mLock) {
             mDisplayBrightnessStrategy = mDisplayBrightnessStrategySelector.selectStrategy(
-                    displayPowerRequest, targetDisplayState);
+                    constructStrategySelectionRequest(displayPowerRequest, targetDisplayState));
             state = mDisplayBrightnessStrategy.updateBrightness(displayPowerRequest);
         }
 
@@ -521,5 +521,11 @@ public final class DisplayBrightnessController {
         synchronized (mLock) {
             mCurrentScreenBrightness = currentBrightnessSetting;
         }
+    }
+
+    private StrategySelectionRequest constructStrategySelectionRequest(
+            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
+            int targetDisplayState) {
+        return new StrategySelectionRequest(displayPowerRequest, targetDisplayState);
     }
 }
