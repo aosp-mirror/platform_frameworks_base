@@ -403,25 +403,23 @@ class SplitScreenTransitions {
     IBinder startResizeTransition(WindowContainerTransaction wct,
             Transitions.TransitionHandler handler,
             @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishCallback) {
+            @Nullable TransitionFinishedCallback finishCallback,
+            @NonNull SplitDecorManager mainDecor, @NonNull SplitDecorManager sideDecor) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                "  splitTransition deduced Resize split screen.");
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "setResizeTransition: hasPendingResize=%b",
+                mPendingResize != null);
         if (mPendingResize != null) {
+            mainDecor.cancelRunningAnimations();
+            sideDecor.cancelRunningAnimations();
             mPendingResize.cancel(null);
             mAnimations.clear();
             onFinish(null /* wct */);
         }
 
         IBinder transition = mTransitions.startTransition(TRANSIT_CHANGE, wct, handler);
-        setResizeTransition(transition, consumedCallback, finishCallback);
-        return transition;
-    }
-
-    void setResizeTransition(@NonNull IBinder transition,
-            @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishCallback) {
         mPendingResize = new TransitSession(transition, consumedCallback, finishCallback);
-        ProtoLog.v(WM_SHELL_TRANSITIONS, "  splitTransition "
-                + " deduced Resize split screen");
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "setResizeTransition");
+        return transition;
     }
 
     void mergeAnimation(IBinder transition, TransitionInfo info, SurfaceControl.Transaction t,
