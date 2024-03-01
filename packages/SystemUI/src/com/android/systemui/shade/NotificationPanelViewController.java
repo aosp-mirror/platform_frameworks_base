@@ -3074,7 +3074,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void onClosingFinished() {
-        mOpenCloseListener.onClosingFinished();
+        if (mOpenCloseListener != null) {
+            mOpenCloseListener.onClosingFinished();
+        }
         setClosingWithAlphaFadeout(false);
         mMediaHierarchyManager.closeGuts();
     }
@@ -4705,7 +4707,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             if (mSplitShadeEnabled && !isKeyguardShowing()) {
                 mQsController.setExpandImmediate(true);
             }
-            mOpenCloseListener.onOpenStarted();
+            if (mOpenCloseListener != null) {
+                mOpenCloseListener.onOpenStarted();
+            }
         }
         if (state == STATE_CLOSED) {
             mQsController.setExpandImmediate(false);

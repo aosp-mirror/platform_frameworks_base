@@ -149,3 +149,10 @@ flag {
   description: "Allow to query whether MTE is enabled or not to check for compliance for enterprise policy"
   bug: "322777918"
 }
+
+flag {
+  name: "esim_management_ux_enabled"
+  namespace: "enterprise"
+  description: "Enable UX changes for esim management"
+  bug: "295301164"
+}

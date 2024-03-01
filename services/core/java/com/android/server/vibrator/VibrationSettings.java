@@ -386,7 +386,6 @@ final class VibrationSettings {
      * Returns the duration, in milliseconds, that the vibrator control service will wait for new
      * vibration params.
      * @return The request vibration params timeout in milliseconds.
-     * @hide
      */
     public int getRequestVibrationParamsTimeoutMs() {
         return mVibrationConfig.getRequestVibrationParamsTimeoutMs();
@@ -645,11 +644,16 @@ final class VibrationSettings {
                         .append("), ");
             }
             vibrationIntensitiesString.append('}');
+            String keyboardVibrationOnString = mKeyboardVibrationOn
+                    + " (default: " + mVibrationConfig.isDefaultKeyboardVibrationEnabled() + ")";
             return "VibrationSettings{"
                     + "mVibratorConfig=" + mVibrationConfig
+                    + ", mVibrateOn=" + mVibrateOn
+                    + ", mKeyboardVibrationOn=" + keyboardVibrationOnString
                     + ", mVibrateInputDevices=" + mVibrateInputDevices
                     + ", mBatterySaverMode=" + mBatterySaverMode
-                    + ", mVibrateOn=" + mVibrateOn
+                    + ", mRingerMode=" + ringerModeToString(mRingerMode)
+                    + ", mOnWirelessCharger=" + mOnWirelessCharger
                     + ", mVibrationIntensities=" + vibrationIntensitiesString
                     + ", mProcStatesCache=" + mUidObserver.mProcStatesCache
                     + '}';
@@ -658,32 +662,40 @@ final class VibrationSettings {
 
     /** Write current settings into given {@link PrintWriter}. */
     void dump(IndentingPrintWriter pw) {
-        pw.println("VibrationSettings:");
-        pw.increaseIndent();
-        pw.println("vibrateOn = " + mVibrateOn);
-        pw.println("vibrateInputDevices = " + mVibrateInputDevices);
-        pw.println("batterySaverMode = " + mBatterySaverMode);
-        pw.println("VibrationIntensities:");
+        synchronized (mLock) {
+            pw.println("VibrationSettings:");
+            pw.increaseIndent();
+            pw.println("vibrateOn = " + mVibrateOn);
+            pw.println("keyboardVibrationOn = " + mKeyboardVibrationOn
+                    + ", default: " + mVibrationConfig.isDefaultKeyboardVibrationEnabled());
+            pw.println("vibrateInputDevices = " + mVibrateInputDevices);
+            pw.println("batterySaverMode = " + mBatterySaverMode);
+            pw.println("ringerMode = " + ringerModeToString(mRingerMode));
+            pw.println("onWirelessCharger = " + mOnWirelessCharger);
+            pw.println("processStateCache size = " + mUidObserver.mProcStatesCache.size());
 
-        pw.increaseIndent();
-        for (int i = 0; i < mCurrentVibrationIntensities.size(); i++) {
-            int usage = mCurrentVibrationIntensities.keyAt(i);
-            int intensity = mCurrentVibrationIntensities.valueAt(i);
-            pw.println(VibrationAttributes.usageToString(usage) + " = "
-                    + intensityToString(intensity)
-                    + ", default: " + intensityToString(getDefaultIntensity(usage)));
+            pw.println("VibrationIntensities:");
+            pw.increaseIndent();
+            for (int i = 0; i < mCurrentVibrationIntensities.size(); i++) {
+                int usage = mCurrentVibrationIntensities.keyAt(i);
+                int intensity = mCurrentVibrationIntensities.valueAt(i);
+                pw.println(VibrationAttributes.usageToString(usage) + " = "
+                        + intensityToString(intensity)
+                        + ", default: " + intensityToString(getDefaultIntensity(usage)));
+            }
+            pw.decreaseIndent();
+
+            mVibrationConfig.dumpWithoutDefaultSettings(pw);
+            pw.decreaseIndent();
         }
-        pw.decreaseIndent();
-
-        mVibrationConfig.dumpWithoutDefaultSettings(pw);
-        pw.println("processStateCache = " + mUidObserver.mProcStatesCache);
-        pw.decreaseIndent();
     }
 
     /** Write current settings into given {@link ProtoOutputStream}. */
     void dump(ProtoOutputStream proto) {
         synchronized (mLock) {
             proto.write(VibratorManagerServiceDumpProto.VIBRATE_ON, mVibrateOn);
+            proto.write(VibratorManagerServiceDumpProto.KEYBOARD_VIBRATION_ON,
+                    mKeyboardVibrationOn);
             proto.write(VibratorManagerServiceDumpProto.LOW_POWER_MODE, mBatterySaverMode);
             proto.write(VibratorManagerServiceDumpProto.ALARM_INTENSITY,
                     getCurrentIntensity(USAGE_ALARM));
@@ -723,18 +735,22 @@ final class VibrationSettings {
     }
 
     private static String intensityToString(int intensity) {
-        switch (intensity) {
-            case Vibrator.VIBRATION_INTENSITY_OFF:
-                return "OFF";
-            case Vibrator.VIBRATION_INTENSITY_LOW:
-                return "LOW";
-            case Vibrator.VIBRATION_INTENSITY_MEDIUM:
-                return "MEDIUM";
-            case Vibrator.VIBRATION_INTENSITY_HIGH:
-                return "HIGH";
-            default:
-                return "UNKNOWN INTENSITY " + intensity;
-        }
+        return switch (intensity) {
+            case Vibrator.VIBRATION_INTENSITY_OFF -> "OFF";
+            case Vibrator.VIBRATION_INTENSITY_LOW -> "LOW";
+            case Vibrator.VIBRATION_INTENSITY_MEDIUM -> "MEDIUM";
+            case Vibrator.VIBRATION_INTENSITY_HIGH -> "HIGH";
+            default -> "UNKNOWN INTENSITY " + intensity;
+        };
+    }
+
+    private static String ringerModeToString(int ringerMode) {
+        return switch (ringerMode) {
+            case AudioManager.RINGER_MODE_SILENT -> "silent";
+            case AudioManager.RINGER_MODE_VIBRATE -> "vibrate";
+            case AudioManager.RINGER_MODE_NORMAL -> "normal";
+            default -> String.valueOf(ringerMode);
+        };
     }
 
     @VibrationIntensity

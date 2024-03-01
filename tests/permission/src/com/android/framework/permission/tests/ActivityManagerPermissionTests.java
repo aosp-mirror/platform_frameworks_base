@@ -21,7 +21,8 @@ import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.content.res.Configuration;
 import android.os.RemoteException;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 

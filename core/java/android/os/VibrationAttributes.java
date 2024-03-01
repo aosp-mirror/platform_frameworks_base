@@ -289,6 +289,15 @@ public final class VibrationAttributes implements Parcelable {
     }
 
     /**
+     * Return the original {@link AudioAttributes} used to create the vibration attributes.
+     * @hide
+     */
+    @AudioAttributes.AttributeUsage
+    public int getOriginalAudioUsage() {
+        return mOriginalAudioUsage;
+    }
+
+    /**
      * Return the flags.
      * @return a combined mask of all flags
      */
@@ -405,8 +414,8 @@ public final class VibrationAttributes implements Parcelable {
         return "VibrationAttributes{"
                 + "mUsage=" + usageToString()
                 + ", mAudioUsage= " + AudioAttributes.usageToString(mOriginalAudioUsage)
-                + ", mFlags=" + mFlags
                 + ", mCategory=" + categoryToString()
+                + ", mFlags=" + mFlags
                 + '}';
     }
 

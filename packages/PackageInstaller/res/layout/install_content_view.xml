@@ -24,114 +24,116 @@
     android:paddingLeft="?android:attr/dialogPreferredPadding"
     android:paddingRight="?android:attr/dialogPreferredPadding">
 
-    <LinearLayout
-        android:id="@+id/staging"
+  <LinearLayout
+      android:id="@+id/staging"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:visibility="invisible">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@android:style/TextAppearance.Material.Subhead"
+        android:text="@string/message_staging" />
+
+    <ProgressBar
+        android:id="@+id/progress_indeterminate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="invisible">
+        android:paddingTop="8dp"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:indeterminate="true" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@android:style/TextAppearance.Material.Subhead"
-            android:text="@string/message_staging" />
+  </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/progress_indeterminate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:indeterminate="true" />
+  <LinearLayout
+      android:id="@+id/installing"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:visibility="invisible">
 
-    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@android:style/TextAppearance.Material.Subhead"
+        android:text="@string/installing" />
 
-    <LinearLayout
-        android:id="@+id/installing"
+    <ProgressBar
+        android:id="@+id/progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="invisible">
+        android:paddingTop="8dp"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:indeterminate="true" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@android:style/TextAppearance.Material.Subhead"
-            android:text="@string/installing" />
+  </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/progress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:indeterminate="true" />
+  <TextView
+      android:id="@+id/install_confirm_question"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      style="@android:style/TextAppearance.Material.Subhead"
+      android:text="@string/install_confirm_question"
+      android:visibility="invisible"
+      android:scrollbars="vertical" />
 
-    </LinearLayout>
+  <TextView
+      android:id="@+id/install_confirm_question_update"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      style="@android:style/TextAppearance.Material.Subhead"
+      android:text="@string/install_confirm_question_update"
+      android:visibility="invisible"
+      android:scrollbars="vertical" />
 
-    <TextView
-        android:id="@+id/install_confirm_question"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_confirm_question"
-        android:visibility="invisible" />
+  <TextView
+      android:id="@+id/install_success"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      style="@android:style/TextAppearance.Material.Subhead"
+      android:text="@string/install_done"
+      android:visibility="invisible" />
 
-    <TextView
-        android:id="@+id/install_confirm_question_update"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_confirm_question_update"
-        android:visibility="invisible" />
+  <TextView
+      android:id="@+id/install_failed"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      style="@android:style/TextAppearance.Material.Subhead"
+      android:text="@string/install_failed"
+      android:visibility="invisible" />
 
-    <TextView
-        android:id="@+id/install_success"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_done"
-        android:visibility="invisible" />
+  <TextView
+      android:id="@+id/install_failed_blocked"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      style="@android:style/TextAppearance.Material.Subhead"
+      android:text="@string/install_failed_blocked"
+      android:visibility="invisible" />
 
-    <TextView
-        android:id="@+id/install_failed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_failed"
-        android:visibility="invisible" />
+  <TextView
+      android:id="@+id/install_failed_conflict"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      style="@android:style/TextAppearance.Material.Subhead"
+      android:text="@string/install_failed_conflict"
+      android:visibility="invisible" />
 
-    <TextView
-        android:id="@+id/install_failed_blocked"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_failed_blocked"
-        android:visibility="invisible" />
+  <TextView
+      android:id="@+id/install_failed_incompatible"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      style="@android:style/TextAppearance.Material.Subhead"
+      android:text="@string/install_failed_incompatible"
+      android:visibility="invisible" />
 
-    <TextView
-        android:id="@+id/install_failed_conflict"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_failed_conflict"
-        android:visibility="invisible" />
-
-    <TextView
-        android:id="@+id/install_failed_incompatible"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_failed_incompatible"
-        android:visibility="invisible" />
-
-    <TextView
-        android:id="@+id/install_failed_invalid_apk"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_failed_invalid_apk"
-        android:visibility="invisible" />
+  <TextView
+      android:id="@+id/install_failed_invalid_apk"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      style="@android:style/TextAppearance.Material.Subhead"
+      android:text="@string/install_failed_invalid_apk"
+      android:visibility="invisible" />
 
 </FrameLayout>

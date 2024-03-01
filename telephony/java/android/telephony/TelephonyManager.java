@@ -8435,7 +8435,7 @@ public class TelephonyManager {
      * In addition to the {@link Manifest.permission#MODIFY_PHONE_STATE} permission, callers of this
      * API must also be listed in the device configuration as an authorized app in
      * {@code packages/services/Telephony/res/values/config.xml} under the
-     * {@code config_number_verification_package_name} key.
+     * {@code platform_number_verification_package} key.
      *
      * @hide
      * @param range The range of phone numbers the caller expects a phone call from.
@@ -18535,7 +18535,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_GET_LAST_KNOWN_CELL_IDENTITY)
     @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_LAST_KNOWN_CELL_ID})
     public @Nullable CellIdentity getLastKnownCellIdentity() {

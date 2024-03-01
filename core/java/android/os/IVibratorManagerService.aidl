@@ -41,5 +41,5 @@ interface IVibratorManagerService {
     // There is no order guarantee with respect to the two-way APIs above like
     // vibrate/isVibrating/cancel.
     oneway void performHapticFeedback(int uid, int deviceId, String opPkg, int constant,
-            boolean always, String reason);
+            boolean always, String reason, boolean fromIme);
 }

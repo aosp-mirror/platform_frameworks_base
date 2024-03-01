@@ -23,7 +23,6 @@ import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConst
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
-import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.combineFlows;
 
 import android.content.Context;
@@ -98,6 +97,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Lazy;
 
@@ -348,6 +348,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private Lazy<KeyguardSurfaceBehindInteractor> mSurfaceBehindInteractor;
     private Lazy<KeyguardDismissActionInteractor> mKeyguardDismissActionInteractor;
 
+    private final JavaAdapter mJavaAdapter;
+
     @Inject
     public StatusBarKeyguardViewManager(
             Context context,
@@ -378,7 +380,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             Lazy<WindowManagerLockscreenVisibilityInteractor> wmLockscreenVisibilityInteractor,
             Lazy<KeyguardDismissActionInteractor> keyguardDismissActionInteractorLazy,
             SelectedUserInteractor selectedUserInteractor,
-            Lazy<KeyguardSurfaceBehindInteractor> surfaceBehindInteractor
+            Lazy<KeyguardSurfaceBehindInteractor> surfaceBehindInteractor,
+            JavaAdapter javaAdapter
     ) {
         mContext = context;
         mViewMediatorCallback = callback;
@@ -411,6 +414,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mKeyguardDismissActionInteractor = keyguardDismissActionInteractorLazy;
         mSelectedUserInteractor = selectedUserInteractor;
         mSurfaceBehindInteractor = surfaceBehindInteractor;
+        mJavaAdapter = javaAdapter;
     }
 
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -481,8 +485,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
         if (KeyguardWmStateRefactor.isEnabled()) {
             // Show the keyguard views whenever we've told WM that the lockscreen is visible.
-            collectFlow(
-                    getViewRootImpl().getView(),
+            mJavaAdapter.alwaysCollectFlow(
                     combineFlows(
                             mWmLockscreenVisibilityInteractor.get().getLockscreenVisibility(),
                             mSurfaceBehindInteractor.get().isAnimatingSurface(),
@@ -781,7 +784,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     }
 
                     updateAlternateBouncerShowing(mAlternateBouncerInteractor.show());
-                    setKeyguardMessage(message, null);
+                    setKeyguardMessage(message, null, null);
                     return;
                 }
 
@@ -1444,11 +1447,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /** Display security message to relevant KeyguardMessageArea. */
-    public void setKeyguardMessage(String message, ColorStateList colorState) {
+    public void setKeyguardMessage(String message, ColorStateList colorState,
+            BiometricSourceType biometricSourceType) {
         if (mAlternateBouncerInteractor.isVisibleState()) {
             if (mKeyguardMessageAreaController != null) {
                 DeviceEntryUdfpsRefactor.assertInLegacyMode();
-                mKeyguardMessageAreaController.setMessage(message);
+                mKeyguardMessageAreaController.setMessage(message, biometricSourceType);
             }
         } else {
             mPrimaryBouncerInteractor.showMessage(message, colorState);

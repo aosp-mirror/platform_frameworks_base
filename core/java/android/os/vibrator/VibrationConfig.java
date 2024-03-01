@@ -224,17 +224,19 @@ public class VibrationConfig {
     @Override
     public String toString() {
         return "VibrationConfig{"
-                + "mHapticChannelMaxVibrationAmplitude=" + mHapticChannelMaxVibrationAmplitude
+                + "mIgnoreVibrationsOnWirelessCharger=" + mIgnoreVibrationsOnWirelessCharger
+                + ", mHapticChannelMaxVibrationAmplitude=" + mHapticChannelMaxVibrationAmplitude
                 + ", mRampStepDurationMs=" + mRampStepDurationMs
                 + ", mRampDownDurationMs=" + mRampDownDurationMs
+                + ", mRequestVibrationParamsForUsages="
+                + Arrays.toString(getRequestVibrationParamsForUsagesNames())
+                + ", mRequestVibrationParamsTimeoutMs=" + mRequestVibrationParamsTimeoutMs
                 + ", mDefaultAlarmIntensity=" + mDefaultAlarmVibrationIntensity
                 + ", mDefaultHapticFeedbackIntensity=" + mDefaultHapticFeedbackIntensity
                 + ", mDefaultMediaIntensity=" + mDefaultMediaVibrationIntensity
                 + ", mDefaultNotificationIntensity=" + mDefaultNotificationVibrationIntensity
                 + ", mDefaultRingIntensity=" + mDefaultRingVibrationIntensity
-                + ", mRequestVibrationParamsTimeoutMs=" + mRequestVibrationParamsTimeoutMs
-                + ", mRequestVibrationParamsForUsages=" + Arrays.toString(
-                getRequestVibrationParamsForUsagesNames())
+                + ", mDefaultKeyboardVibrationEnabled=" + mDefaultKeyboardVibrationEnabled
                 + "}";
     }
 
@@ -246,9 +248,13 @@ public class VibrationConfig {
     public void dumpWithoutDefaultSettings(IndentingPrintWriter pw) {
         pw.println("VibrationConfig:");
         pw.increaseIndent();
+        pw.println("ignoreVibrationsOnWirelessCharger = " + mIgnoreVibrationsOnWirelessCharger);
         pw.println("hapticChannelMaxAmplitude = " + mHapticChannelMaxVibrationAmplitude);
         pw.println("rampStepDurationMs = " + mRampStepDurationMs);
         pw.println("rampDownDurationMs = " + mRampDownDurationMs);
+        pw.println("requestVibrationParamsForUsages = "
+                + Arrays.toString(getRequestVibrationParamsForUsagesNames()));
+        pw.println("requestVibrationParamsTimeoutMs = " + mRequestVibrationParamsTimeoutMs);
         pw.decreaseIndent();
     }
 

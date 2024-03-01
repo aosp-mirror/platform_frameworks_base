@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.createflow
 
+import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.text.TextUtils
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -329,6 +330,18 @@ fun CreationSelectionCard(
             )
         }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
+
+        val footerDescription = createOptionInfo.footerDescription
+        if (selectorUiImprovementsEnabled()) {
+            if (!footerDescription.isNullOrBlank()) {
+                item {
+                    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                        BodySmallText(text = footerDescription)
+                    }
+                }
+                item { Divider(thickness = 24.dp, color = Color.Transparent) }
+            }
+        }
         item {
             CredentialContainerCard {
                 PrimaryCreateOptionRow(
@@ -366,18 +379,19 @@ fun CreationSelectionCard(
                 },
             )
         }
-        val footerDescription = createOptionInfo.footerDescription
-        if (footerDescription != null && footerDescription.length > 0) {
-            item {
-                Divider(
-                    thickness = 1.dp,
-                    color = LocalAndroidColorScheme.current.outlineVariant,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-            }
-            item {
-                Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                    BodySmallText(text = footerDescription)
+        if (!selectorUiImprovementsEnabled()) {
+            if (footerDescription != null && footerDescription.length > 0) {
+                item {
+                    Divider(
+                        thickness = 1.dp,
+                        color = LocalAndroidColorScheme.current.outlineVariant,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+                item {
+                    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                        BodySmallText(text = footerDescription)
+                    }
                 }
             }
         }

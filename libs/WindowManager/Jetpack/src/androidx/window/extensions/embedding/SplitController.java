@@ -35,6 +35,7 @@ import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHA
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
 
+import static androidx.window.extensions.embedding.ActivityEmbeddingOptionsProperties.KEY_ACTIVITY_STACK_TOKEN;
 import static androidx.window.extensions.embedding.ActivityEmbeddingOptionsProperties.KEY_OVERLAY_TAG;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
@@ -111,10 +112,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     static final String TAG = "SplitController";
     static final boolean ENABLE_SHELL_TRANSITIONS =
             SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
-
-    // TODO(b/295993745): remove after prebuilt library is updated.
-    private static final String KEY_ACTIVITY_STACK_TOKEN =
-            "androidx.window.extensions.embedding.ActivityStackToken";
 
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -554,7 +551,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @Override
-    public void updateActivityStackAttributes(@NonNull IBinder activityStackToken,
+    public void updateActivityStackAttributes(@NonNull ActivityStack.Token activityStackToken,
                                               @NonNull ActivityStackAttributes attributes) {
         if (!Flags.activityEmbeddingOverlayPresentationFlag()) {
             return;
@@ -563,7 +560,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         Objects.requireNonNull(attributes);
 
         synchronized (mLock) {
-            final TaskFragmentContainer container = getContainer(activityStackToken);
+            final TaskFragmentContainer container = getContainer(activityStackToken.getRawToken());
             if (container == null) {
                 Log.w(TAG, "Cannot find TaskFragmentContainer for token:" + activityStackToken);
                 return;
@@ -583,13 +580,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     @Nullable
-    public ParentContainerInfo getParentContainerInfo(@NonNull IBinder activityStackToken) {
+    public ParentContainerInfo getParentContainerInfo(
+            @NonNull ActivityStack.Token activityStackToken) {
         if (!Flags.activityEmbeddingOverlayPresentationFlag()) {
             return null;
         }
         Objects.requireNonNull(activityStackToken);
         synchronized (mLock) {
-            final TaskFragmentContainer container = getContainer(activityStackToken);
+            final TaskFragmentContainer container = getContainer(activityStackToken.getRawToken());
             if (container == null) {
                 return null;
             }
@@ -601,7 +599,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     @Nullable
-    public IBinder getActivityStackToken(@NonNull String tag) {
+    public ActivityStack.Token getActivityStackToken(@NonNull String tag) {
         if (!Flags.activityEmbeddingOverlayPresentationFlag()) {
             return null;
         }
@@ -612,7 +610,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             if (taskFragmentContainer == null) {
                 return null;
             }
-            return taskFragmentContainer.getTaskFragmentToken();
+            return ActivityStack.Token.createFromBinder(taskFragmentContainer
+                    .getTaskFragmentToken());
         }
     }
 
@@ -2761,8 +2760,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // TODO(b/232042367): Consolidate the activity create handling so that we can handle
             // cross-process the same as normal.
 
-            IBinder activityStackToken = options.getBinder(KEY_ACTIVITY_STACK_TOKEN);
-            if (activityStackToken != null) {
+            final Bundle bundle = options.getBundle(KEY_ACTIVITY_STACK_TOKEN);
+            if (bundle != null) {
+                final IBinder activityStackToken = ActivityStack.Token.readFromBundle(bundle)
+                        .getRawToken();
                 // Put activityStack token to #KEY_LAUNCH_TASK_FRAGMENT_TOKEN to launch the activity
                 // into the taskFragment associated with the token.
                 options.putBinder(KEY_LAUNCH_TASK_FRAGMENT_TOKEN, activityStackToken);

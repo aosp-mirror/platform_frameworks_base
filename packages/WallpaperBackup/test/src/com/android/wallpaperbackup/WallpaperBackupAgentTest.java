@@ -59,6 +59,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
@@ -676,7 +677,7 @@ public class WallpaperBackupAgentTest {
 
         mWallpaperBackupAgent.onRestoreFinished();
 
-        for (String wallpaper: List.of(WALLPAPER_IMG_LOCK, WALLPAPER_IMG_SYSTEM)) {
+        for (String wallpaper : List.of(WALLPAPER_IMG_LOCK, WALLPAPER_IMG_SYSTEM)) {
             DataTypeResult result = getLoggingResult(wallpaper,
                     mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
             assertThat(result).isNotNull();
@@ -840,6 +841,26 @@ public class WallpaperBackupAgentTest {
         testParseCropHints(testMap);
     }
 
+    @Test
+    public void test_sourceDimensionsAreLargerThanTarget() {
+        // source device is larger than target, expecting to get false
+        Point sourceDimensions = new Point(2208, 1840);
+        Point targetDimensions = new Point(1080, 2092);
+        boolean isSourceSmaller = mWallpaperBackupAgent
+                .isSourceDeviceSignificantlySmallerThanTarget(sourceDimensions, targetDimensions);
+        assertThat(isSourceSmaller).isEqualTo(false);
+    }
+
+    @Test
+    public void test_sourceDimensionsMuchSmallerThanTarget() {
+        // source device is smaller than target, expecting to get true
+        Point sourceDimensions = new Point(1080, 2092);
+        Point targetDimensions = new Point(2208, 1840);
+        boolean isSourceSmaller = mWallpaperBackupAgent
+                .isSourceDeviceSignificantlySmallerThanTarget(sourceDimensions, targetDimensions);
+        assertThat(isSourceSmaller).isEqualTo(true);
+    }
+
     private void testParseCropHints(Map<Integer, Rect> testMap) throws Exception {
         assumeTrue(multiCrop());
         mockRestoredStaticWallpaperFile(testMap);
@@ -934,7 +955,7 @@ public class WallpaperBackupAgentTest {
         TypedXmlSerializer out = Xml.resolveSerializer(fstream);
         out.startDocument(null, true);
         out.startTag(null, "wp");
-        for (Map.Entry<Integer, Rect> entry: crops.entrySet()) {
+        for (Map.Entry<Integer, Rect> entry : crops.entrySet()) {
             String orientation = switch (entry.getKey()) {
                 case WallpaperManager.PORTRAIT -> "Portrait";
                 case WallpaperManager.LANDSCAPE -> "Landscape";

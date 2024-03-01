@@ -23,7 +23,7 @@ import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PERMISSIO
 import static android.content.ComponentName.createRelative;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 
-import static com.android.server.companion.Utils.prepareForIpc;
+import static com.android.server.companion.utils.Utils.prepareForIpc;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -54,9 +54,9 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.server.companion.AssociationStore;
 import com.android.server.companion.CompanionDeviceManagerService;
-import com.android.server.companion.PackageUtils;
-import com.android.server.companion.PermissionsUtils;
 import com.android.server.companion.transport.CompanionTransportManager;
+import com.android.server.companion.utils.PackageUtils;
+import com.android.server.companion.utils.PermissionsUtils;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

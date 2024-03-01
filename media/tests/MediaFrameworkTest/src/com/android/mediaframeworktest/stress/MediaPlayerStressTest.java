@@ -16,16 +16,16 @@
 
 package com.android.mediaframeworktest.stress;
 
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.MediaPlayerStressTestRunner;
-
 import android.os.Bundle;
 import android.os.Environment;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
+import androidx.test.filters.LargeTest;
+
+import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.MediaPlayerStressTestRunner;
 import com.android.mediaframeworktest.functional.CodecTest;
 
 import java.io.BufferedWriter;

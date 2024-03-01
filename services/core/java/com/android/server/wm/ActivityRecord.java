@@ -1476,7 +1476,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    private void scheduleConfigurationChanged(Configuration config) {
+    private void scheduleConfigurationChanged(@NonNull Configuration config,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
         if (!attachedToProcess()) {
             ProtoLog.w(WM_DEBUG_CONFIGURATION, "Can't report activity configuration "
                     + "update - client not running, activityRecord=%s", this);
@@ -1487,7 +1488,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     + "config: %s", this, config);
 
             mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    ActivityConfigurationChangeItem.obtain(token, config));
+                    ActivityConfigurationChangeItem.obtain(token, config, activityWindowInfo));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -9785,7 +9786,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // configurations because there are cases (like moving a task to the root pinned task) where
         // the combine configurations are equal, but would otherwise differ in the override config
         mTmpConfig.setTo(mLastReportedConfiguration.getMergedConfiguration());
-        if (getConfiguration().equals(mTmpConfig) && !displayChanged) {
+        final ActivityWindowInfo newActivityWindowInfo = getActivityWindowInfo();
+        final boolean isActivityWindowInfoChanged = Flags.activityWindowInfoFlag()
+                && !mLastReportedActivityWindowInfo.equals(newActivityWindowInfo);
+        if (!displayChanged && !isActivityWindowInfoChanged
+                && getConfiguration().equals(mTmpConfig)) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration & display "
                     + "unchanged in %s", this);
             return true;
@@ -9800,7 +9805,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Update last reported values.
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
-        final ActivityWindowInfo newActivityWindowInfo = getActivityWindowInfo();
 
         setLastReportedConfiguration(getProcessGlobalConfiguration(), newMergedOverrideConfig);
         setLastReportedActivityWindowInfo(newActivityWindowInfo);
@@ -9823,7 +9827,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig,
                         newActivityWindowInfo);
             } else {
-                scheduleConfigurationChanged(newMergedOverrideConfig);
+                scheduleConfigurationChanged(newMergedOverrideConfig, newActivityWindowInfo);
             }
             notifyDisplayCompatPolicyAboutConfigurationChange(
                     mLastReportedConfiguration.getMergedConfiguration(), mTmpConfig);
@@ -9891,7 +9895,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig,
                     newActivityWindowInfo);
         } else {
-            scheduleConfigurationChanged(newMergedOverrideConfig);
+            scheduleConfigurationChanged(newMergedOverrideConfig, newActivityWindowInfo);
         }
         notifyDisplayCompatPolicyAboutConfigurationChange(
                 mLastReportedConfiguration.getMergedConfiguration(), mTmpConfig);

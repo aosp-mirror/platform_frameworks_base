@@ -1437,7 +1437,7 @@ public class SplitControllerTest {
     @Test
     public void testUpdateSplitAttributes_nullParams_throwException() {
         assertThrows(NullPointerException.class,
-                () -> mSplitController.updateSplitAttributes(null, SPLIT_ATTRIBUTES));
+                () -> mSplitController.updateSplitAttributes((IBinder) null, SPLIT_ATTRIBUTES));
 
         final SplitContainer splitContainer = mock(SplitContainer.class);
         final IBinder token = new Binder();

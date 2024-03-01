@@ -20,8 +20,8 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIB
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 
 import static com.android.internal.util.CollectionUtils.any;
-import static com.android.server.companion.MetricUtils.logRemoveAssociation;
-import static com.android.server.companion.RolesUtils.removeRoleHolderForAssociation;
+import static com.android.server.companion.utils.MetricUtils.logRemoveAssociation;
+import static com.android.server.companion.utils.RolesUtils.removeRoleHolderForAssociation;
 import static com.android.server.companion.CompanionDeviceManagerService.PerUserAssociationSet;
 
 import android.annotation.NonNull;
@@ -203,7 +203,8 @@ public class AssociationRevokeProcessor {
             return false;
         }
 
-        removeRoleHolderForAssociation(mContext, association);
+        removeRoleHolderForAssociation(mContext, association.getUserId(),
+                association.getPackageName(), association.getDeviceProfile());
         return true;
     }
 

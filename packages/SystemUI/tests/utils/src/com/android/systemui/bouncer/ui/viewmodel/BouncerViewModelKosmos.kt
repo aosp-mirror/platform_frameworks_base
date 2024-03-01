@@ -21,12 +21,12 @@ import com.android.systemui.authentication.domain.interactor.authenticationInter
 import com.android.systemui.bouncer.domain.interactor.bouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.composeBouncerFlags
 import com.android.systemui.inputmethod.domain.interactor.inputMethodInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.userSwitcherViewModel
 import com.android.systemui.util.mockito.mock
@@ -42,7 +42,7 @@ val Kosmos.bouncerViewModel by Fixture {
         simBouncerInteractor = simBouncerInteractor,
         authenticationInteractor = authenticationInteractor,
         selectedUserInteractor = selectedUserInteractor,
-        flags = sceneContainerFlags,
+        flags = composeBouncerFlags,
         selectedUser = userSwitcherViewModel.selectedUser,
         users = userSwitcherViewModel.users,
         userSwitcherMenu = userSwitcherViewModel.menu,

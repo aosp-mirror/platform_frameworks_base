@@ -392,8 +392,6 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             return;
         }
 
-        Log.i(TAG, walFile.getAbsolutePath() + " " + size + " bytes: Bigger than "
-                + threshold + "; truncating");
         try {
             executeForString("PRAGMA wal_checkpoint(TRUNCATE)", null, null);
             mConfiguration.shouldTruncateWalFile = false;

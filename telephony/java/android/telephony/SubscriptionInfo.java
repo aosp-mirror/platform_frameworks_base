@@ -573,7 +573,7 @@ public class SubscriptionInfo implements Parcelable {
      * Returns the number of this subscription.
      *
      * Starting with API level 30, returns the number of this subscription if the calling app meets
-     * one of the following requirements:
+     * at least one of the following requirements:
      * <ul>
      *     <li>If the calling app's target SDK is API level 29 or lower and the app has been granted
      *     the READ_PHONE_STATE permission.
@@ -584,8 +584,8 @@ public class SubscriptionInfo implements Parcelable {
      *     <li>If the calling app is the default SMS role holder.
      * </ul>
      *
-     * @return the number of this subscription, or an empty string if one of these requirements is
-     * not met
+     * @return the number of this subscription, or an empty string if none of the requirements
+     * are met.
      * @deprecated use {@link SubscriptionManager#getPhoneNumber(int)} instead, which takes a
      *             {@link #getSubscriptionId() subscription ID}.
      */

@@ -48,9 +48,13 @@ import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.GestureDetector;
+import android.view.ISystemGestureExclusionListener;
+import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
@@ -73,6 +77,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
@@ -88,6 +93,7 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionRegionListener;
+import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 
 import java.io.PrintWriter;
 import java.util.Optional;
@@ -102,6 +108,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private static final String TAG = "DesktopModeWindowDecorViewModel";
 
     private final DesktopModeWindowDecoration.Factory mDesktopModeWindowDecorFactory;
+    private final IWindowManager mWindowManager;
+    private final ShellExecutor mMainExecutor;
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellTaskOrganizer mTaskOrganizer;
@@ -112,6 +120,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final DisplayController mDisplayController;
     private final SyncTransactionQueue mSyncQueue;
     private final Optional<DesktopTasksController> mDesktopTasksController;
+    private final InputManager mInputManager;
+
     private boolean mTransitionDragActive;
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
@@ -135,14 +145,31 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             new DesktopModeKeyguardChangeListener();
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final DisplayInsetsController mDisplayInsetsController;
+    private final Region mExclusionRegion = Region.obtain();
     private boolean mInImmersiveMode;
+
+    private final ISystemGestureExclusionListener mGestureExclusionListener =
+            new ISystemGestureExclusionListener.Stub() {
+                @Override
+                public void onSystemGestureExclusionChanged(int displayId,
+                        Region systemGestureExclusion, Region systemGestureExclusionUnrestricted) {
+                    if (mContext.getDisplayId() != displayId) {
+                        return;
+                    }
+                    mMainExecutor.execute(() -> {
+                        mExclusionRegion.set(systemGestureExclusion);
+                    });
+                }
+            };
 
     public DesktopModeWindowDecorViewModel(
             Context context,
+            ShellExecutor shellExecutor,
             Handler mainHandler,
             Choreographer mainChoreographer,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
+            IWindowManager windowManager,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             ShellController shellController,
@@ -154,10 +181,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     ) {
         this(
                 context,
+                shellExecutor,
                 mainHandler,
                 mainChoreographer,
                 shellInit,
                 shellCommandHandler,
+                windowManager,
                 taskOrganizer,
                 displayController,
                 shellController,
@@ -174,10 +203,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     @VisibleForTesting
     DesktopModeWindowDecorViewModel(
             Context context,
+            ShellExecutor shellExecutor,
             Handler mainHandler,
             Choreographer mainChoreographer,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
+            IWindowManager windowManager,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             ShellController shellController,
@@ -190,6 +221,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Supplier<SurfaceControl.Transaction> transactionFactory,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         mContext = context;
+        mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
         mMainChoreographer = mainChoreographer;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
@@ -201,10 +233,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mTransitions = transitions;
         mDesktopTasksController = desktopTasksController;
         mShellCommandHandler = shellCommandHandler;
+        mWindowManager = windowManager;
         mDesktopModeWindowDecorFactory = desktopModeWindowDecorFactory;
         mInputMonitorFactory = inputMonitorFactory;
         mTransactionFactory = transactionFactory;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
+        mInputManager = mContext.getSystemService(InputManager.class);
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -216,6 +250,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new DesktopModeOnInsetsChangedListener());
         mDesktopTasksController.ifPresent(c -> c.setOnTaskResizeAnimationListener(
                 new DeskopModeOnTaskResizeAnimationListener()));
+        try {
+            mWindowManager.registerSystemGestureExclusionListener(mGestureExclusionListener,
+                    mContext.getDisplayId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to register window manager callbacks", e);
+        }
     }
 
     @Override
@@ -315,12 +355,19 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             implements View.OnClickListener, View.OnTouchListener, View.OnLongClickListener,
             View.OnGenericMotionListener , DragDetector.MotionEventHandler {
         private static final int CLOSE_MAXIMIZE_MENU_DELAY_MS = 150;
+
         private final int mTaskId;
         private final WindowContainerToken mTaskToken;
         private final DragPositioningCallback mDragPositioningCallback;
         private final DragDetector mDragDetector;
         private final GestureDetector mGestureDetector;
 
+        /**
+         * Whether to pilfer the next motion event to send cancellations to the windows below.
+         * Useful when the caption window is spy and the gesture should be handle by the system
+         * instead of by the app for their custom header content.
+         */
+        private boolean mShouldPilferCaptionEvents;
         private boolean mIsDragging;
         private boolean mTouchscreenInUse;
         private boolean mHasLongClicked;
@@ -438,6 +485,40 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             moveTaskToFront(decoration.mTaskInfo);
 
+            final int actionMasked = e.getActionMasked();
+            final boolean isDown = actionMasked == MotionEvent.ACTION_DOWN;
+            final boolean isUpOrCancel = actionMasked == MotionEvent.ACTION_CANCEL
+                    || actionMasked == MotionEvent.ACTION_UP;
+            if (isDown) {
+                final boolean downInCustomizableCaptionRegion =
+                        decoration.checkTouchEventInCustomizableRegion(e);
+                final boolean downInExclusionRegion = mExclusionRegion.contains(
+                        (int) e.getRawX(), (int) e.getRawY());
+                final boolean isTransparentCaption =
+                        TaskInfoKt.isTransparentCaptionBarAppearance(decoration.mTaskInfo);
+                // The caption window may be a spy window when the caption background is
+                // transparent, which means events will fall through to the app window. Make
+                // sure to cancel these events if they do not happen in the intersection of the
+                // customizable region and what the app reported as exclusion areas, because
+                // the drag-move or other caption gestures should take priority outside those
+                // regions.
+                mShouldPilferCaptionEvents = !(downInCustomizableCaptionRegion
+                        && downInExclusionRegion && isTransparentCaption);
+            }
+
+            if (!mShouldPilferCaptionEvents) {
+                // The event will be handled by a window below.
+                return false;
+            }
+            // Otherwise pilfer so that windows below receive cancellations for this gesture, and
+            // continue normal handling as a caption gesture.
+            if (mInputManager != null) {
+                mInputManager.pilferPointers(v.getViewRootImpl().getInputToken());
+            }
+            if (isUpOrCancel) {
+                // Gesture is finished, reset state.
+                mShouldPilferCaptionEvents = false;
+            }
             if (!mHasLongClicked && id != R.id.maximize_window) {
                 decoration.closeMaximizeMenuIfNeeded(e);
             }

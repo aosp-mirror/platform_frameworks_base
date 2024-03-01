@@ -15,24 +15,20 @@
  */
 package android.gameperformance;
 
+import android.annotation.NonNull;
+import android.app.Activity;
+import android.os.Bundle;
+import android.test.ActivityInstrumentationTestCase2;
+import android.util.Log;
+
+import androidx.test.filters.SmallTest;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
-import android.annotation.NonNull;
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.PixelFormat;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Debug;
-import android.os.Trace;
-import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
 
 public class GamePerformanceTest extends
         ActivityInstrumentationTestCase2<GamePerformanceActivity> {

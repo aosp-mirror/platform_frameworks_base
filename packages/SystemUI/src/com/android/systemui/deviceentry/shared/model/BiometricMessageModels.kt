@@ -32,9 +32,15 @@ data class FaceTimeoutMessage(
     private val faceTimeoutMessage: String?,
 ) : FaceMessage(faceTimeoutMessage)
 
+data class FaceLockoutMessage(private val msg: String?) : FaceMessage(msg)
+
+data class FaceFailureMessage(private val msg: String) : FaceMessage(msg)
+
 /** Fingerprint biometric message */
 open class FingerprintMessage(fingerprintMessage: String?) : BiometricMessage(fingerprintMessage)
 
 data class FingerprintLockoutMessage(
     private val fingerprintLockoutMessage: String?,
 ) : FingerprintMessage(fingerprintLockoutMessage)
+
+data class FingerprintFailureMessage(private val msg: String?) : FingerprintMessage(msg)

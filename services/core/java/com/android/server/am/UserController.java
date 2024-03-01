@@ -1468,7 +1468,7 @@ class UserController implements Handler.Callback {
 
         // Send PROFILE_INACCESSIBLE broadcast if a profile was stopped
         final UserInfo userInfo = getUserInfo(userId);
-        if (userInfo.isProfile()) {
+        if (userInfo != null && userInfo.isProfile()) {
             UserInfo parent = mInjector.getUserManager().getProfileParent(userId);
             if (parent != null) {
                 broadcastProfileAccessibleStateChanged(userId, parent.id,

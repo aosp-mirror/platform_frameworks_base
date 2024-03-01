@@ -26,6 +26,7 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -46,6 +47,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
     fun setup() {
         with(kosmos) {
             fakeFeatureFlagsClassic.set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, true)
+            overrideResource(R.bool.config_use_split_notification_shade, false)
             underTest = lockscreenContentViewModel
         }
     }
@@ -87,11 +89,21 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun areNotificationsVisible_splitShadeTrue_true() =
+        with(kosmos) {
+            testScope.runTest {
+                overrideResource(R.bool.config_use_split_notification_shade, true)
+                kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
+
+                assertThat(underTest.areNotificationsVisible(context.resources)).isTrue()
+            }
+        }
+    @Test
     fun areNotificationsVisible_withSmallClock_true() =
         with(kosmos) {
             testScope.runTest {
                 kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
-                assertThat(underTest.areNotificationsVisible).isTrue()
+                assertThat(underTest.areNotificationsVisible(context.resources)).isTrue()
             }
         }
 
@@ -100,7 +112,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
-                assertThat(underTest.areNotificationsVisible).isFalse()
+                assertThat(underTest.areNotificationsVisible(context.resources)).isFalse()
             }
         }
 }

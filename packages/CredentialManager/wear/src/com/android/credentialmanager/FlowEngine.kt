@@ -17,6 +17,8 @@
 package com.android.credentialmanager
 
 import android.content.Intent
+import androidx.activity.result.IntentSenderRequest
+import androidx.compose.runtime.Composable
 import com.android.credentialmanager.model.EntryInfo
 
 /** Engine of the credential selecting flow. */
@@ -42,4 +44,14 @@ interface FlowEngine {
         resultData: Intent? = null,
         isAutoSelected: Boolean = false,
     )
+
+    /**
+     * Helper function to get an entry selector.
+     *
+     * @return selector fun consumes selected [EntryInfo]. Once invoked, [IntentSenderRequest] would
+     * be launched and invocation of [sendSelectionResult] would happen right after launching result
+     * coming back.
+     */
+    @Composable
+    fun getEntrySelector(): (entry: EntryInfo, isAutoSelected: Boolean) -> Unit
 }

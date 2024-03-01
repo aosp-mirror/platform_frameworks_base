@@ -6706,7 +6706,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void dumpLogStatus(PrintWriter pw) {
         pw.println("WINDOW MANAGER LOGGING (dumpsys window logging)");
-        if (android.tracing.Flags.perfettoProtolog()) {
+        if (android.tracing.Flags.perfettoProtologTracing()) {
             pw.println("Deprecated legacy command. Use Perfetto commands instead.");
             return;
         }

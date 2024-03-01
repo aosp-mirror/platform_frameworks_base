@@ -54,6 +54,8 @@
 #define INT32_MAX ((int32_t)(2147483647))
 #endif
 
+using namespace std::literals;
+
 namespace android {
 
 #if defined(_WIN32)
@@ -237,12 +239,24 @@ void Res_png_9patch::serialize(const Res_png_9patch& patch, const int32_t* xDivs
     fill9patchOffsets(reinterpret_cast<Res_png_9patch*>(outData));
 }
 
-bool IsFabricatedOverlay(const std::string& path) {
-  return IsFabricatedOverlay(path.c_str());
+bool IsFabricatedOverlayName(std::string_view path) {
+  static constexpr auto suffixFrro = ".frro"sv;
+  static constexpr auto suffixIdmap = ".frro@idmap"sv;
+
+  return (path.size() > suffixFrro.size() && path.ends_with(suffixFrro))
+        || (path.size() > suffixIdmap.size() && path.ends_with(suffixIdmap));
 }
 
-bool IsFabricatedOverlay(const char* path) {
-  auto fd = base::unique_fd(base::utf8::open(path, O_RDONLY|O_CLOEXEC));
+bool IsFabricatedOverlay(std::string_view path) {
+  if (!IsFabricatedOverlayName(path)) {
+    return false;
+  }
+  std::string path_copy;
+  if (path[path.size()] != '\0') {
+    path_copy.assign(path);
+    path = path_copy;
+  }
+  auto fd = base::unique_fd(base::utf8::open(path.data(), O_RDONLY|O_CLOEXEC|O_BINARY));
   if (fd < 0) {
     return false;
   }
@@ -7319,9 +7333,6 @@ class IdmapTypeMapping {
 public:
     void add(uint32_t targetResId, uint32_t overlayResId) {
         uint8_t targetTypeId = Res_GETTYPE(targetResId);
-        if (mData.find(targetTypeId) == mData.end()) {
-            mData.emplace(targetTypeId, std::set<std::pair<uint32_t, uint32_t>>());
-        }
         auto& entries = mData[targetTypeId];
         entries.insert(std::make_pair(targetResId, overlayResId));
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.utils;
 
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -80,7 +80,7 @@ public final class DataStoreUtils {
 
     /**
      * Writing to file could fail, for example, if the user has been recently removed and so was
-     * their DE (/data/system_de/<user-id>/) directory.
+     * their DE (/data/system_de/[user-id]/) directory.
      */
     public static void writeToFileSafely(
             @NonNull AtomicFile file, @NonNull ThrowingConsumer<FileOutputStream> consumer) {

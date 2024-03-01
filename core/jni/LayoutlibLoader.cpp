@@ -364,7 +364,7 @@ using namespace android;
 
 // Called right before aborting by LOG_ALWAYS_FATAL. Print the pending exception.
 void abort_handler(const char* abort_message) {
-    ALOGE("Abort to abort the process...");
+    ALOGE("About to abort the process...");
 
     JNIEnv* env = NULL;
     if (javaVM->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {

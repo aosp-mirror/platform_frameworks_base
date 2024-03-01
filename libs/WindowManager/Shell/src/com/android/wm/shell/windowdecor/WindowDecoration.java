@@ -31,6 +31,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Binder;
 import android.view.Display;
 import android.view.InsetsSource;
@@ -311,6 +312,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 if (numOfElements == 0) {
                     boundingRects = null;
                 } else {
+                    // The customizable region can at most be equal to the caption bar.
+                    if (params.mAllowCaptionInputFallthrough) {
+                        outResult.mCustomizableCaptionRegion.set(mCaptionInsetsRect);
+                    }
                     boundingRects = new Rect[numOfElements];
                     for (int i = 0; i < numOfElements; i++) {
                         final OccludingCaptionElement element =
@@ -319,9 +324,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                                 resources.getDimensionPixelSize(element.mWidthResId);
                         boundingRects[i] =
                                 calculateBoundingRect(element, elementWidthPx, mCaptionInsetsRect);
+                        // Subtract the regions used by the caption elements, the rest is
+                        // customizable.
+                        if (params.mAllowCaptionInputFallthrough) {
+                            outResult.mCustomizableCaptionRegion.op(boundingRects[i],
+                                    Region.Op.DIFFERENCE);
+                        }
                     }
                 }
-
                 // Add this caption as an inset source.
                 wct.addInsetsSource(mTaskInfo.token,
                         mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect,
@@ -389,6 +399,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
         lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
+        if (params.mAllowCaptionInputFallthrough) {
+            lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_SPY;
+        } else {
+            lp.inputFeatures &= ~WindowManager.LayoutParams.INPUT_FEATURE_SPY;
+        }
         if (mViewHost == null) {
             mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
                     mCaptionWindowManager);
@@ -596,6 +611,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionHeightId;
         int mCaptionWidthId;
         final List<OccludingCaptionElement> mOccludingCaptionElements = new ArrayList<>();
+        boolean mAllowCaptionInputFallthrough;
 
         int mShadowRadiusId;
         int mCornerRadius;
@@ -610,6 +626,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionHeightId = Resources.ID_NULL;
             mCaptionWidthId = Resources.ID_NULL;
             mOccludingCaptionElements.clear();
+            mAllowCaptionInputFallthrough = false;
 
             mShadowRadiusId = Resources.ID_NULL;
             mCornerRadius = 0;
@@ -637,6 +654,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionHeight;
         int mCaptionWidth;
         int mCaptionX;
+        final Region mCustomizableCaptionRegion = Region.obtain();
         int mWidth;
         int mHeight;
         T mRootView;
@@ -647,6 +665,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionHeight = 0;
             mCaptionWidth = 0;
             mCaptionX = 0;
+            mCustomizableCaptionRegion.setEmpty();
             mRootView = null;
         }
     }

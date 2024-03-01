@@ -60,11 +60,7 @@ public final class FakeVibratorController extends IVibratorController.Stub {
         requestTimeoutInMillis = timeoutInMillis;
         mHandler.post(() -> {
             if (mVibratorControlService != null) {
-                try {
-                    mVibratorControlService.onRequestVibrationParamsComplete(token, mRequestResult);
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
-                }
+                mVibratorControlService.onRequestVibrationParamsComplete(token, mRequestResult);
             }
         });
     }

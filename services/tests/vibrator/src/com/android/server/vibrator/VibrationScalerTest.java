@@ -117,32 +117,32 @@ public class VibrationScalerTest {
     }
 
     @Test
-    public void testGetExternalVibrationScale() {
+    public void testGetScaleLevel() {
         setDefaultIntensity(USAGE_TOUCH, Vibrator.VIBRATION_INTENSITY_LOW);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_HIGH);
         assertEquals(ExternalVibrationScale.ScaleLevel.SCALE_VERY_HIGH,
-                mVibrationScaler.getExternalVibrationScaleLevel(USAGE_TOUCH));
+                mVibrationScaler.getScaleLevel(USAGE_TOUCH));
 
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_MEDIUM);
         assertEquals(ExternalVibrationScale.ScaleLevel.SCALE_HIGH,
-                mVibrationScaler.getExternalVibrationScaleLevel(USAGE_TOUCH));
+                mVibrationScaler.getScaleLevel(USAGE_TOUCH));
 
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_LOW);
         assertEquals(ExternalVibrationScale.ScaleLevel.SCALE_NONE,
-                mVibrationScaler.getExternalVibrationScaleLevel(USAGE_TOUCH));
+                mVibrationScaler.getScaleLevel(USAGE_TOUCH));
 
         setDefaultIntensity(USAGE_TOUCH, VIBRATION_INTENSITY_MEDIUM);
         assertEquals(ExternalVibrationScale.ScaleLevel.SCALE_LOW,
-                mVibrationScaler.getExternalVibrationScaleLevel(USAGE_TOUCH));
+                mVibrationScaler.getScaleLevel(USAGE_TOUCH));
 
         setDefaultIntensity(USAGE_TOUCH, VIBRATION_INTENSITY_HIGH);
         assertEquals(ExternalVibrationScale.ScaleLevel.SCALE_VERY_LOW,
-                mVibrationScaler.getExternalVibrationScaleLevel(USAGE_TOUCH));
+                mVibrationScaler.getScaleLevel(USAGE_TOUCH));
 
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_OFF);
         // Vibration setting being bypassed will use default setting and not scale.
         assertEquals(ExternalVibrationScale.ScaleLevel.SCALE_NONE,
-                mVibrationScaler.getExternalVibrationScaleLevel(USAGE_TOUCH));
+                mVibrationScaler.getScaleLevel(USAGE_TOUCH));
     }
 
     @Test

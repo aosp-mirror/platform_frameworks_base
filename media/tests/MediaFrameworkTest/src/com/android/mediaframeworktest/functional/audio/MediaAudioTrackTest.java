@@ -16,17 +16,15 @@
 
 package com.android.mediaframeworktest.functional.audio;
 
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.MediaNames;
-
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
+
+import androidx.test.filters.LargeTest;
+
+import com.android.mediaframeworktest.MediaFrameworkTest;
 
 /**
  * Junit / Instrumentation test case for the media AudioTrack api

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.utils;
 
 import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
@@ -41,7 +41,7 @@ import android.util.ArrayMap;
 
 import java.util.Map;
 
-final class MetricUtils {
+public final class MetricUtils {
 
     private static final Map<String, Integer> METRIC_DEVICE_PROFILE;
     static {
@@ -75,13 +75,19 @@ final class MetricUtils {
         METRIC_DEVICE_PROFILE = unmodifiableMap(map);
     }
 
-    static void logCreateAssociation(String profile) {
+    /**
+     * Log association creation
+     */
+    public static void logCreateAssociation(String profile) {
         write(CDM_ASSOCIATION_ACTION,
                 CDM_ASSOCIATION_ACTION__ACTION__CREATED,
                 METRIC_DEVICE_PROFILE.get(profile));
     }
 
-    static void logRemoveAssociation(String profile) {
+    /**
+     * Log association removal
+     */
+    public static void logRemoveAssociation(String profile) {
         write(CDM_ASSOCIATION_ACTION,
                 CDM_ASSOCIATION_ACTION__ACTION__REMOVED,
                 METRIC_DEVICE_PROFILE.get(profile));

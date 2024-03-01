@@ -62,6 +62,10 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.google.errorprone.annotations.CompileTimeConstant
+import java.io.PrintWriter
+import java.util.Arrays
+import java.util.stream.Collectors
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -83,10 +87,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.PrintWriter
-import java.util.Arrays
-import java.util.stream.Collectors
-import javax.inject.Inject
 
 /**
  * API to run face authentication and detection for device entry / on keyguard (as opposed to the
@@ -431,11 +431,11 @@ constructor(
             override fun onAuthenticationFailed() {
                 _isAuthenticated.value = false
                 faceAuthLogger.authenticationFailed()
+                _authenticationStatus.value = FailedFaceAuthenticationStatus()
                 if (!_isLockedOut.value) {
                     // onAuthenticationError gets invoked before onAuthenticationFailed when the
                     // last auth attempt locks out face authentication.
-                    // Skip updating the authentication status in such a scenario.
-                    _authenticationStatus.value = FailedFaceAuthenticationStatus()
+                    // Skip onFaceAuthRequestCompleted in such a scenario.
                     onFaceAuthRequestCompleted()
                 }
             }
