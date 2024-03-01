@@ -505,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillader, at appen kan administrere vibratoren."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Tillader, at appen bruger vibration."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ringe direkte op til telefonnumre"</string>
-    <string name="permdesc_callPhone" msgid="7892422187827695656">"Tillader, at appen kan ringe til telefonnumre uden din indgriben. Dette kan resultere i uventede debiteringer eller opkald. Vær opmærksom på, at dette ikke giver appen tilladelse til at ringe til alarmnumre. Skadelige apps kan koste dig penge ved at foretage opkald uden din bekræftelse eller ved at ringe op til operatørkoder, hvilket resulterer i, at indgående opkald automatisk viderestilles til et andet nummer."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Tillader, at appen kan ringe til telefonnumre uden din indgriben. Dette kan resultere i uventede opkrævninger eller opkald. Vær opmærksom på, at dette ikke giver appen tilladelse til at ringe til alarmnumre. Skadelige apps kan koste dig penge ved at foretage opkald uden din bekræftelse eller ved at ringe op til operatørkoder, hvilket resulterer i, at indgående opkald automatisk viderestilles til et andet nummer."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"få adgang til chat-opkaldstjeneste"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Tillader, at appen kan bruge chat-tjenesten til at foretage opkald, uden du gør noget."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"læse telefonens status og identitet"</string>
