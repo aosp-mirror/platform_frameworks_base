@@ -179,7 +179,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     // onActivityResult() after the association is created.
     private @Nullable DeviceFilterPair<?> mSelectedDevice;
 
-    private LinearLayoutManager mPermissionsLayoutManager = new LinearLayoutManager(this);
+    private final LinearLayoutManager mPermissionsLayoutManager = new LinearLayoutManager(this);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -484,10 +484,18 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         }
 
         title = getHtmlFromResources(this, PROFILE_TITLES.get(deviceProfile), deviceName);
+
+        if (PROFILE_SUMMARIES.containsKey(deviceProfile)) {
+            final int summaryResourceId = PROFILE_SUMMARIES.get(deviceProfile);
+            final Spanned summary = getHtmlFromResources(this, summaryResourceId,
+                    deviceName);
+            mSummary.setText(summary);
+        } else {
+            mSummary.setVisibility(View.GONE);
+        }
+
         setupPermissionList(deviceProfile);
 
-        // Summary is not needed for selfManaged dialog.
-        mSummary.setVisibility(View.GONE);
         mTitle.setText(title);
         mVendorHeaderName.setText(vendorName);
         mVendorHeader.setVisibility(View.VISIBLE);
@@ -692,6 +700,11 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private void setupPermissionList(String deviceProfile) {
         final List<Integer> permissionTypes = new ArrayList<>(
                 PROFILE_PERMISSIONS.get(deviceProfile));
+        if (permissionTypes.isEmpty()) {
+            // Nothing to do if there are no permission types.
+            return;
+        }
+
         mPermissionListAdapter.setPermissionType(permissionTypes);
         mPermissionListRecyclerView.setAdapter(mPermissionListAdapter);
         mPermissionListRecyclerView.setLayoutManager(mPermissionsLayoutManager);
