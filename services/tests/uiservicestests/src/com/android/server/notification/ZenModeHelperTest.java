@@ -141,7 +141,6 @@ import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.notification.ZenModeDiff;
 import android.service.notification.ZenPolicy;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestWithLooperRule;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
@@ -149,6 +148,8 @@ import android.util.Log;
 import android.util.StatsEvent;
 import android.util.StatsEventTestUtils;
 import android.util.Xml;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.config.sysui.TestableFlagResolver;

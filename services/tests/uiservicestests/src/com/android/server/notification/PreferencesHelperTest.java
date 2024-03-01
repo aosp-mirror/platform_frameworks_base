@@ -115,7 +115,6 @@ import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.nano.RankingHelperProto;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -128,6 +127,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
