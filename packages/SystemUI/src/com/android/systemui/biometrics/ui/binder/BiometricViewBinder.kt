@@ -652,6 +652,8 @@ class Spaghetti(
 
     fun isCoex() = modalities.hasFaceAndFingerprint
 
+    fun isFaceOnly() = modalities.hasFaceOnly
+
     fun asView() = view
 }
 
