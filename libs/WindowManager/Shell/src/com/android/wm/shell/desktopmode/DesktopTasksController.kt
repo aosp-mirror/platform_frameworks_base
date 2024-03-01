@@ -305,6 +305,12 @@ class DesktopTasksController(
             task: RunningTaskInfo,
             wct: WindowContainerTransaction = WindowContainerTransaction()
     ) {
+        if (!DesktopModeStatus.meetsMinimumDisplayRequirements(task)) {
+            KtProtoLog.w(
+                WM_SHELL_DESKTOP_MODE, "DesktopTasksController: Cannot enter desktop, " +
+                        "display does not meet minimum size requirements")
+            return
+        }
         KtProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopTasksController: moveToDesktop taskId=%d",
