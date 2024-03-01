@@ -129,8 +129,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final ExclusionRegionListener mExclusionRegionListener =
             new ExclusionRegionListenerImpl();
 
-    private final SparseArray<DesktopModeWindowDecoration> mWindowDecorByTaskId =
-            new SparseArray<>();
+    private final SparseArray<DesktopModeWindowDecoration> mWindowDecorByTaskId;
     private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
     private final InputMonitorFactory mInputMonitorFactory;
     private TaskOperations mTaskOperations;
@@ -197,7 +196,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new,
-                rootTaskDisplayAreaOrganizer);
+                rootTaskDisplayAreaOrganizer,
+                new SparseArray<>());
     }
 
     @VisibleForTesting
@@ -219,7 +219,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
+            SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -239,6 +240,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mTransactionFactory = transactionFactory;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mInputManager = mContext.getSystemService(InputManager.class);
+        mWindowDecorByTaskId = windowDecorByTaskId;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -340,8 +342,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     @Override
     public void destroyWindowDecoration(RunningTaskInfo taskInfo) {
-        final DesktopModeWindowDecoration decoration =
-                mWindowDecorByTaskId.removeReturnOld(taskInfo.taskId);
+        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
         if (decoration == null) return;
 
         decoration.close();
@@ -349,6 +350,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (mEventReceiversByDisplay.contains(displayId)) {
             removeTaskFromEventReceiver(displayId);
         }
+        // Remove the decoration from the cache last because WindowDecoration#close could still
+        // issue CANCEL MotionEvents to touch listeners before its view host is released.
+        // See b/327664694.
+        mWindowDecorByTaskId.remove(taskInfo.taskId);
     }
 
     private class DesktopModeTouchEventListener extends GestureDetector.SimpleOnGestureListener
