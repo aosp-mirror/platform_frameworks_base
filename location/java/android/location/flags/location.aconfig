@@ -9,6 +9,7 @@ flag {
 
 flag {
     name: "location_bypass"
+    is_exported: true
     namespace: "location"
     description: "Enable location bypass appops behavior"
     bug: "329151785"

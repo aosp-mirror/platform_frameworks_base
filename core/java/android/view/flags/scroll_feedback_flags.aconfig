@@ -3,6 +3,7 @@ package: "android.view.flags"
 flag {
     namespace: "toolkit"
     name: "scroll_feedback_api"
+    is_exported: true
     description: "Enable the scroll feedback APIs"
     bug: "239594271"
 }

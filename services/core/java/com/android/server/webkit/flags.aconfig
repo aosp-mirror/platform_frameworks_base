@@ -2,6 +2,7 @@ package: "android.webkit"
 
 flag {
     name: "update_service_v2"
+    is_exported: true
     namespace: "webview"
     description: "Using a new version of the WebView update service"
     bug: "308907090"

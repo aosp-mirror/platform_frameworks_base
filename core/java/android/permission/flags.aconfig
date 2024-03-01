@@ -2,6 +2,7 @@ package: "android.permission.flags"
 
 flag {
   name: "device_aware_permission_apis_enabled"
+  is_exported: true
   is_fixed_read_only: true
   namespace: "permissions"
   description: "enable device aware permission APIs"
@@ -10,6 +11,7 @@ flag {
 
 flag {
   name: "voice_activation_permission_apis"
+  is_exported: true
   namespace: "permissions"
   description: "enable voice activation permission APIs"
   bug: "287264308"
@@ -17,6 +19,7 @@ flag {
 
 flag {
     name: "system_server_role_controller_enabled"
+    is_exported: true
     is_fixed_read_only: true
     namespace: "permissions"
     description: "enable role controller in system server"
@@ -25,6 +28,7 @@ flag {
 
 flag {
   name: "set_next_attribution_source"
+  is_exported: true
   namespace: "permissions"
   description: "enable AttributionSource.setNextAttributionSource"
   bug: "304478648"
@@ -32,6 +36,7 @@ flag {
 
 flag {
     name: "should_register_attribution_source"
+    is_exported: true
     namespace: "permissions"
     description: "enable the shouldRegisterAttributionSource API"
     bug: "305057691"
@@ -39,6 +44,7 @@ flag {
 
 flag {
   name: "attribution_source_constructor"
+  is_exported: true
   namespace: "permissions"
   description: "enable AttributionSource(int, int, String, String, IBinder, String[], AttributionSource)"
   bug: "304478648"
@@ -46,6 +52,7 @@ flag {
 
 flag {
     name: "enhanced_confirmation_mode_apis_enabled"
+    is_exported: true
     is_fixed_read_only: true
     namespace: "permissions"
     description: "enable enhanced confirmation mode apis"
@@ -54,6 +61,7 @@ flag {
 
 flag {
   name: "op_enable_mobile_data_by_user"
+  is_exported: true
   namespace: "permissions"
   description: "enables logging of the OP_ENABLE_MOBILE_DATA_BY_USER"
   bug: "222650148"
@@ -61,6 +69,7 @@ flag {
 
 flag {
   name: "factory_reset_prep_permission_apis"
+  is_exported: true
   namespace: "wallet_integration"
   description: "enable Permission PREPARE_FACTORY_RESET."
   bug: "302016478"
@@ -68,6 +77,7 @@ flag {
 
 flag {
     name: "retail_demo_role_enabled"
+    is_exported: true
     namespace: "permissions"
     description: "default retail demo role holder"
     bug: "274132354"
@@ -82,6 +92,7 @@ flag {
 
 flag {
     name: "wallet_role_enabled"
+    is_exported: true
     namespace: "wallet_integration"
     description: "This flag is used to enabled the Wallet Role for all users on the device"
     bug: "283989236"
@@ -114,6 +125,7 @@ flag {
 
 flag {
      name: "get_emergency_role_holder_api_enabled"
+     is_exported: true
      is_fixed_read_only: true
      namespace: "permissions"
      description: "Enables the getEmergencyRoleHolder API."

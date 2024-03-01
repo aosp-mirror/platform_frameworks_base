@@ -2,6 +2,7 @@ package: "android.service.chooser"
 
 flag {
   name: "chooser_album_text"
+  is_exported: true
   namespace: "intentresolver"
   description: "Flag controlling the album text subtype hint for sharesheet"
   bug: "323380224"
@@ -9,6 +10,7 @@ flag {
 
 flag {
     name: "enable_sharesheet_metadata_extra"
+    is_exported: true
     namespace: "intentresolver"
     description: "This flag enables sharesheet metadata to be displayed to users."
     bug: "318942069"
@@ -16,6 +18,7 @@ flag {
 
 flag {
   name: "chooser_payload_toggling"
+  is_exported: true
   namespace: "intentresolver"
   description: "This flag controls content toggling in Chooser"
   bug: "302691505"
@@ -23,6 +26,7 @@ flag {
 
 flag {
   name: "enable_chooser_result"
+  is_exported: true
   namespace: "intentresolver"
   description: "Provides additional callbacks with information about user actions in ChooserResult"
   bug: "263474465"

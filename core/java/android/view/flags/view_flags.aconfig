@@ -28,6 +28,7 @@ flag {
 
 flag {
   name: "sensitive_content_app_protection_api"
+  is_exported: true
   namespace: "permissions"
   description: "This flag controls the new sensitive content protection API,"
     " The API will be used by other ui toolkits (i.e. compose, webview, custom virtual views)."

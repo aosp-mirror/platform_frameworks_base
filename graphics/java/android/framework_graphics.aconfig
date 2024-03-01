@@ -2,6 +2,7 @@ package: "com.android.graphics.flags"
 
 flag {
      name: "exact_compute_bounds"
+     is_exported: true
      namespace: "core_graphics"
      description: "Add a function without unused exact param for computeBounds."
      bug: "304478551"
@@ -9,6 +10,7 @@ flag {
 
 flag {
      name: "yuv_image_compress_to_ultra_hdr"
+     is_exported: true
      namespace: "core_graphics"
      description: "Feature flag for YUV image compress to Ultra HDR."
      bug: "308978825"

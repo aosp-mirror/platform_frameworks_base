@@ -10,6 +10,7 @@ flag {
 
 flag {
     name: "enable_crashrecovery"
+    is_exported: true
     namespace: "crashrecovery"
     description: "Enables various dependencies of crashrecovery module"
     bug: "289203818"

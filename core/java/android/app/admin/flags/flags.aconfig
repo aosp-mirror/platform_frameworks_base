@@ -5,6 +5,7 @@ package: "android.app.admin.flags"
 
 flag {
   name: "policy_engine_migration_v2_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "V2 of the policy engine migrations for Android V"
   bug: "289520697"
@@ -12,6 +13,7 @@ flag {
 
 flag {
   name: "device_policy_size_tracking_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "Add feature to track the total policy size and have a max threshold - public API changes"
   bug: "281543351"
@@ -26,6 +28,7 @@ flag {
 
 flag {
   name: "onboarding_bugreport_v2_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "Add feature to track required changes for enabled V2 of auto-capturing of onboarding bug reports."
   bug: "302517677"
@@ -47,6 +50,7 @@ flag {
 
 flag {
   name: "dedicated_device_control_api_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "(API) Allow the device management role holder to control which platform features are available on dedicated devices."
   bug: "281964214"
@@ -54,6 +58,7 @@ flag {
 
 flag {
   name: "permission_migration_for_zero_trust_api_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "(API) Migrate existing APIs to permission based, and enable DMRH to call them to collect Zero Trust signals."
   bug: "289520697"
@@ -68,6 +73,7 @@ flag {
 
 flag {
   name: "device_theft_api_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "Add new API for theft detection."
   bug: "325073410"
@@ -89,6 +95,7 @@ flag {
 
 flag {
   name: "security_log_v2_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "Improve access to security logging in the context of Zero Trust."
   bug: "295324350"
@@ -103,6 +110,7 @@ flag {
 
 flag {
     name: "allow_querying_profile_type"
+    is_exported: true
     namespace: "enterprise"
     description: "Public APIs to query if a user is a profile and what kind of profile type it is."
     bug: "323001115"
@@ -117,6 +125,7 @@ flag {
 
 flag {
   name: "assist_content_user_restriction_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "Prevent work data leakage by sending assist content to privileged apps."
   bug: "322975406"
@@ -134,6 +143,7 @@ flag {
 
 flag {
   name: "backup_service_security_log_event_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "Emit a security log event when DPM.setBackupServiceEnabled is called"
   bug: "304999634"
@@ -141,6 +151,7 @@ flag {
 
 flag {
   name: "esim_management_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "Enable APIs to provision and manage eSIMs"
   bug: "295301164"
@@ -148,6 +159,7 @@ flag {
 
 flag {
   name: "headless_device_owner_single_user_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "Add Headless DO support."
   bug: "289515470"
@@ -155,6 +167,7 @@ flag {
 
 flag {
   name: "is_mte_policy_enforced"
+  is_exported: true
   namespace: "enterprise"
   description: "Allow to query whether MTE is enabled or not to check for compliance for enterprise policy"
   bug: "322777918"

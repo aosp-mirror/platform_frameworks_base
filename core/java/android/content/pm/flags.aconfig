@@ -2,6 +2,7 @@ package: "android.content.pm"
 
 flag {
     name: "quarantined_enabled"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag for Quarantined state"
     bug: "269127435"
@@ -9,6 +10,7 @@ flag {
 
 flag {
     name: "archiving"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to enable the archiving feature."
     bug: "278553670"
@@ -24,6 +26,7 @@ flag {
 
 flag {
     name: "stay_stopped"
+    is_exported: true
     namespace: "backstage_power"
     description: "Feature flag to improve stopped state enforcement"
     bug: "296644915"
@@ -39,6 +42,7 @@ flag {
 
 flag {
     name: "get_package_info"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to enable the feature to retrieve package info without installation."
     bug: "269149275"
@@ -54,6 +58,7 @@ flag {
 
 flag {
     name: "sdk_lib_independence"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to keep app working even if its declared sdk-library dependency is unavailable."
     bug: "295827951"
@@ -78,6 +83,7 @@ flag {
 
 flag {
     name: "get_resolved_apk_path"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to retrieve resolved path of the base APK during an app install."
     bug: "269728874"
@@ -92,6 +98,7 @@ flag {
 
 flag {
     name: "read_install_info"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to read install related information from an APK."
     bug: "275658500"
@@ -113,6 +120,7 @@ flag {
 
 flag {
     name: "relative_reference_intent_filters"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to enable relative reference intent filters"
     bug: "307556883"
@@ -121,6 +129,7 @@ flag {
 
 flag {
     name: "fix_duplicated_flags"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to fix duplicated PackageManager flag values"
     bug: "314815969"
@@ -128,6 +137,7 @@ flag {
 
 flag {
     name: "provide_info_of_apk_in_apex"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to provide the information of APK-in-APEX"
     bug: "306329516"
@@ -144,6 +154,7 @@ flag {
 
 flag {
     name: "introduce_media_processing_type"
+    is_exported: true
     namespace: "backstage_power"
     description: "Add a new FGS type for media processing use cases."
     bug: "317788011"
@@ -182,6 +193,7 @@ flag {
 
 flag {
     name: "emergency_install_permission"
+    is_exported: true
     namespace: "permissions"
     description: "Feature flag to enable permission EMERGENCY_INSTALL_PACKAGES"
     bug: "321080601"
@@ -189,6 +201,7 @@ flag {
 
 flag {
     name: "asl_in_apk_app_metadata_source"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to allow to know if the Android Safety Label (ASL) of an app is provided by the app's APK itself, or provided by an installer."
     bug: "287487923"
@@ -205,6 +218,7 @@ flag {
 
 flag {
     name: "set_pre_verified_domains"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to enable pre-verified domains"
     bug: "307327678"

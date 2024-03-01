@@ -10,6 +10,7 @@ flag {
 
 flag {
     name: "fsverity_api"
+    is_exported: true
     namespace: "hardware_backed_security"
     description: "Feature flag for fs-verity API"
     bug: "285185747"
@@ -64,6 +65,7 @@ flag {
 
 flag {
     name: "frp_enforcement"
+    is_exported: true
     namespace: "hardware_backed_security"
     description: "This flag controls whether PDB enforces FRP"
     bug: "290312729"
