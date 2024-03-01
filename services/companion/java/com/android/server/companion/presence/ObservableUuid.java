@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.presence;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;

@@ -1,6 +1,8 @@
 package com.android.systemui.biometrics.data.repository
 
+import android.hardware.biometrics.Flags
 import android.hardware.biometrics.PromptInfo
+import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.shared.model.PromptKind
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +27,9 @@ class FakePromptRepository : PromptRepository {
 
     private val _isConfirmationRequired = MutableStateFlow(false)
     override val isConfirmationRequired = _isConfirmationRequired.asStateFlow()
+
+    private val _showBpWithoutIconForCredential = MutableStateFlow(false)
+    override val showBpWithoutIconForCredential = _showBpWithoutIconForCredential.asStateFlow()
 
     private val _opPackageName: MutableStateFlow<String?> = MutableStateFlow(null)
     override val opPackageName = _opPackageName.asStateFlow()
@@ -67,6 +72,16 @@ class FakePromptRepository : PromptRepository {
         _challenge.value = null
         _kind.value = PromptKind.Biometric()
         _isConfirmationRequired.value = false
+    }
+
+    override fun setShouldShowBpWithoutIconForCredential(promptInfo: PromptInfo) {
+        val hasCredentialViewShown = kind.value !is PromptKind.Biometric
+        val showBpForCredential =
+            Flags.customBiometricPrompt() &&
+                !Utils.isBiometricAllowed(promptInfo) &&
+                Utils.isDeviceCredentialAllowed(promptInfo) &&
+                promptInfo.contentView != null
+        _showBpWithoutIconForCredential.value = showBpForCredential && !hasCredentialViewShown
     }
 
     fun setIsShowing(showing: Boolean) {

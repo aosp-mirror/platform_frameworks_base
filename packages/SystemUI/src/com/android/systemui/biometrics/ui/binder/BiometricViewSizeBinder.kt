@@ -21,7 +21,6 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.graphics.Outline
 import android.graphics.Rect
-import android.hardware.biometrics.Flags
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.view.Surface
@@ -55,6 +54,7 @@ import com.android.systemui.biometrics.ui.viewmodel.isNullOrNotSmall
 import com.android.systemui.biometrics.ui.viewmodel.isRight
 import com.android.systemui.biometrics.ui.viewmodel.isSmall
 import com.android.systemui.biometrics.ui.viewmodel.isTop
+import com.android.systemui.keyguard.ui.view.layout.sections.setVisibility
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import kotlin.math.abs
@@ -111,14 +111,9 @@ object BiometricViewSizeBinder {
 
             val smallConstraintSet = ConstraintSet()
             smallConstraintSet.clone(mediumConstraintSet)
-            viewsToHideWhenSmall.forEach { smallConstraintSet.setVisibility(it.id, View.GONE) }
 
             val largeConstraintSet = ConstraintSet()
             largeConstraintSet.clone(mediumConstraintSet)
-            viewsToHideWhenSmall.forEach { largeConstraintSet.setVisibility(it.id, View.GONE) }
-            largeConstraintSet.setVisibility(iconHolderView.id, View.GONE)
-            largeConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
-            largeConstraintSet.setVisibility(R.id.indicator, View.GONE)
             largeConstraintSet.setGuidelineBegin(leftGuideline.id, 0)
             largeConstraintSet.setGuidelineEnd(rightGuideline.id, 0)
             largeConstraintSet.setGuidelineEnd(bottomGuideline.id, 0)
@@ -219,13 +214,18 @@ object BiometricViewSizeBinder {
                     }
                 }
 
-                view.repeatWhenAttached {
-                    var currentSize: PromptSize? = null
-                    val modalities = viewModel.modalities.first()
-                    // TODO(b/288175072): Move all visibility settings together.
-                    //  If there is no biometrics available, biometric prompt is showing just for
-                    // displaying content, no authentication needed.
-                    if (Flags.customBiometricPrompt() && modalities.isEmpty) {
+                fun setConstraintSetVisibility() {
+                    viewsToHideWhenSmall.forEach {
+                        mediumConstraintSet.setVisibility(it.id, it.showContentOrHide())
+                        largeConstraintSet.setVisibility(it.id, View.GONE)
+                        smallConstraintSet.setVisibility(it.id, View.GONE)
+                    }
+
+                    largeConstraintSet.setVisibility(iconHolderView.id, View.GONE)
+                    largeConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
+                    largeConstraintSet.setVisibility(R.id.indicator, View.GONE)
+
+                    if (viewModel.showBpWithoutIconForCredential.value) {
                         smallConstraintSet.setVisibility(iconHolderView.id, View.GONE)
                         smallConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                         smallConstraintSet.setVisibility(R.id.indicator, View.GONE)
@@ -233,12 +233,17 @@ object BiometricViewSizeBinder {
                         mediumConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                         mediumConstraintSet.setVisibility(R.id.indicator, View.GONE)
                     }
+                }
+
+                view.repeatWhenAttached {
+                    var currentSize: PromptSize? = null
+
                     lifecycleScope.launch {
                         combine(viewModel.position, viewModel.size, ::Pair).collect {
                             (position, size) ->
                             view.doOnAttach {
                                 measureBounds(position)
-
+                                setConstraintSetVisibility()
                                 when {
                                     size.isSmall -> {
                                         val ratio =
@@ -313,7 +318,6 @@ object BiometricViewSizeBinder {
                 // TODO(b/251476085): migrate the legacy panel controller and simplify this
                 view.repeatWhenAttached {
                     var currentSize: PromptSize? = null
-                    val modalities = viewModel.modalities.first()
                     lifecycleScope.launch {
                         /**
                          * View is only set visible in BiometricViewSizeBinder once PromptSize is
@@ -331,11 +335,13 @@ object BiometricViewSizeBinder {
 
                             // prepare for animated size transitions
                             for (v in viewsToHideWhenSmall) {
-                                v.showContentOrHide(forceHide = size.isSmall)
+                                v.visibility = v.showContentOrHide(forceHide = size.isSmall)
                             }
-                            if (Flags.customBiometricPrompt() && modalities.isEmpty) {
+
+                            if (viewModel.showBpWithoutIconForCredential.value) {
                                 iconHolderView.visibility = View.GONE
                             }
+
                             if (currentSize == null && size.isSmall) {
                                 iconHolderView.alpha = 0f
                             }
@@ -344,9 +350,9 @@ object BiometricViewSizeBinder {
                             }
 
                             // TODO(b/302735104): Fix wrong height due to the delay of
-                            // PromptContentView. addOnLayoutChangeListener() will cause crash when
-                            // showing credential view, since |PromptIconViewModel| won't release
-                            // the flow.
+                            // PromptContentView. addOnLayoutChangeListener() will cause crash
+                            // when showing credential view, since |PromptIconViewModel| won't
+                            // release the flow.
                             // propagate size changes to legacy panel controller and animate
                             // transitions
                             view.doOnLayout {
@@ -460,15 +466,14 @@ private fun View.isLandscape(): Boolean {
     return r == Surface.ROTATION_90 || r == Surface.ROTATION_270
 }
 
-private fun View.showContentOrHide(forceHide: Boolean = false) {
+private fun View.showContentOrHide(forceHide: Boolean = false): Int {
     val isTextViewWithBlankText = this is TextView && this.text.isBlank()
     val isImageViewWithoutImage = this is ImageView && this.drawable == null
-    visibility =
-        if (forceHide || isTextViewWithBlankText || isImageViewWithoutImage) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
+    return if (forceHide || isTextViewWithBlankText || isImageViewWithoutImage) {
+        View.GONE
+    } else {
+        View.VISIBLE
+    }
 }
 
 private fun View.centerX(): Int {

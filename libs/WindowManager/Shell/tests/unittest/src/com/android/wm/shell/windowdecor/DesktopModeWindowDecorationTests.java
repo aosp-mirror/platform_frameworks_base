@@ -16,6 +16,10 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.any;
@@ -166,6 +170,57 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* shouldSetTaskPositionAndCrop */ false);
 
         assertThat(relayoutParams.mCornerRadius).isGreaterThan(0);
+    }
+
+    @Test
+    public void updateRelayoutParams_freeformAndTransparent_allowsInputFallthrough() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        taskInfo.taskDescription.setStatusBarAppearance(
+                APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mAllowCaptionInputFallthrough).isTrue();
+    }
+
+    @Test
+    public void updateRelayoutParams_freeformButOpaque_disallowsInputFallthrough() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        taskInfo.taskDescription.setStatusBarAppearance(0);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mAllowCaptionInputFallthrough).isFalse();
+    }
+
+    @Test
+    public void updateRelayoutParams_fullscreen_disallowsInputFallthrough() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
+
+        assertThat(relayoutParams.mAllowCaptionInputFallthrough).isFalse();
     }
 
     private void fillRoundedCornersResources(int fillValue) {

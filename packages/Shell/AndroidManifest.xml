@@ -210,6 +210,7 @@
     <uses-permission android:name="android.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS" />
     <uses-permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.WHITELIST_RESTRICTED_PERMISSIONS" />
+    <uses-permission android:name="android.permission.EMERGENCY_INSTALL_PACKAGES" />
     <!-- Permission required for processes that don't own the focused window to switch
          touch mode state -->
     <uses-permission android:name="android.permission.MODIFY_TOUCH_MODE_STATE" />

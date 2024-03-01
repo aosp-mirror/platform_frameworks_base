@@ -126,7 +126,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
             keyguardRepository.setKeyguardDismissible(true)
             runCurrent()
             shadeRepository.setCurrentFling(
-                FlingInfo(expand = true) // Not a dismiss fling (expand = true).
+                FlingInfo(expand = false) // Is a dismiss fling upward (expand = false).
             )
             runCurrent()
 
@@ -149,6 +149,24 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
             shadeRepository.setCurrentFling(
                 FlingInfo(expand = true) // Not a dismiss fling (expand = true).
             )
+            runCurrent()
+
+            assertThatRepository(transitionRepository).noTransitionsStarted()
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testDoesNotTransitionToGone_whenDismissFling_emitsNull() =
+        testScope.runTest {
+            underTest.start()
+            verify(transitionRepository, never()).startTransition(any())
+
+            keyguardRepository.setKeyguardDismissible(true)
+            runCurrent()
+
+            // The fling is null when it a) initializes b) ends and in either case we should not
+            // swipe to unlock.
+            shadeRepository.setCurrentFling(null)
             runCurrent()
 
             assertThatRepository(transitionRepository).noTransitionsStarted()

@@ -355,7 +355,7 @@ public class RemoteViewsAdapterTest {
         }
 
         @Override
-        public RemoteViews.RemoteCollectionItems getRemoteCollectionItems() {
+        public RemoteViews.RemoteCollectionItems getRemoteCollectionItems(int capSize) {
             RemoteViews.RemoteCollectionItems.Builder itemsBuilder =
                     new RemoteViews.RemoteCollectionItems.Builder();
             itemsBuilder.setHasStableIds(hasStableIds())

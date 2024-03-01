@@ -39,7 +39,6 @@ import com.android.systemui.keyguard.ui.composable.modifier.onTopPlacementChange
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
-import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import javax.inject.Inject
 
 /** Provides small clock and large clock composables for the default clock face. */
@@ -49,7 +48,6 @@ constructor(
     private val viewModel: KeyguardClockViewModel,
     private val clockInteractor: KeyguardClockInteractor,
     private val aodBurnInViewModel: AodBurnInViewModel,
-    private val lockscreenSmartspaceController: LockscreenSmartspaceController,
 ) {
 
     @Composable
@@ -62,12 +60,8 @@ constructor(
         val currentClock by viewModel.currentClock.collectAsState()
         viewModel.clock = currentClock
 
-        if (clockSize != KeyguardClockSwitch.SMALL) {
+        if (clockSize != KeyguardClockSwitch.SMALL || currentClock?.smallClock?.view == null) {
             onTopChanged(null)
-            return
-        }
-
-        if (currentClock?.smallClock?.view == null) {
             return
         }
 

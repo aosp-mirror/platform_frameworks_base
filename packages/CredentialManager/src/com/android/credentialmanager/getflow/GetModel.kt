@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.getflow
 
+import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.graphics.drawable.Drawable
 import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.model.EntryInfo
@@ -133,7 +134,7 @@ fun toProviderDisplayInfo(
 
         providerInfo.credentialEntryList.forEach {
             userNameToCredentialEntryMap.compute(
-                it.userName
+                if (selectorUiImprovementsEnabled()) it.entryGroupId else it.userName
             ) { _, v ->
                 if (v == null) {
                     mutableListOf(it)

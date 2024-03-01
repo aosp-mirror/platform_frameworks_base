@@ -18,11 +18,16 @@ package com.android.keyguard;
 
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.hardware.biometrics.BiometricSourceType;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -39,6 +44,16 @@ import javax.inject.Inject;
  */
 public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
         extends ViewController<T> {
+    /**
+     * Pair representing:
+     *   first - BiometricSource the currently displayed message is associated with.
+     *   second - Timestamp the biometric message came in uptimeMillis.
+     * This Pair can be null if the message is not associated with a biometric.
+     */
+    @Nullable
+    private Pair<BiometricSourceType, Long> mMessageBiometricSource = null;
+    private static final Long SKIP_SHOWING_FACE_MESSAGE_AFTER_FP_MESSAGE_MS = 3500L;
+
     /**
      * Delay before speaking an accessibility announcement. Used to prevent
      * lift-to-type from interrupting itself.
@@ -149,10 +164,40 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
      * Sets a message to the underlying text view.
      */
     public void setMessage(CharSequence s, boolean animate) {
+        setMessage(s, animate, null);
+    }
+
+    /**
+     * Sets a message to the underlying text view.
+     */
+    public void setMessage(CharSequence s, BiometricSourceType biometricSourceType) {
+        setMessage(s, true, biometricSourceType);
+    }
+
+    private void setMessage(
+            CharSequence s,
+            boolean animate,
+            BiometricSourceType biometricSourceType) {
+        final long uptimeMillis = SystemClock.uptimeMillis();
+        if (skipShowingFaceMessage(biometricSourceType, uptimeMillis)) {
+            Log.d("KeyguardMessageAreaController", "Skip showing face message \"" + s + "\"");
+            return;
+        }
+        mMessageBiometricSource =  new Pair<>(biometricSourceType, uptimeMillis);
         if (mView.isDisabled()) {
             return;
         }
         mView.setMessage(s, animate);
+    }
+
+    private boolean skipShowingFaceMessage(
+            BiometricSourceType biometricSourceType, Long currentUptimeMillis
+    ) {
+        return mMessageBiometricSource != null
+                && biometricSourceType == BiometricSourceType.FACE
+                && mMessageBiometricSource.first == BiometricSourceType.FINGERPRINT
+                && (currentUptimeMillis - mMessageBiometricSource.second)
+                    < SKIP_SHOWING_FACE_MESSAGE_AFTER_FP_MESSAGE_MS;
     }
 
     public void setMessage(int resId) {

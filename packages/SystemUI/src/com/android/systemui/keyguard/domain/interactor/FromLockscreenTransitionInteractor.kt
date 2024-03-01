@@ -44,6 +44,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -287,7 +288,7 @@ constructor(
         if (KeyguardWmStateRefactor.isEnabled) {
             // When the refactor is enabled, we no longer use isKeyguardGoingAway.
             scope.launch {
-                swipeToDismissInteractor.dismissFling.collect { _ ->
+                swipeToDismissInteractor.dismissFling.filterNotNull().collect { _ ->
                     startTransitionTo(KeyguardState.GONE)
                 }
             }

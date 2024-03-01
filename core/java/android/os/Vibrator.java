@@ -534,10 +534,12 @@ public abstract class Vibrator {
      *          {@code false} if the vibration for the haptic feedback should respect the applicable
      *          vibration intensity settings.
      * @param reason the reason for this haptic feedback.
+     * @param fromIme the haptic feedback is performed from an IME.
      *
      * @hide
      */
-    public void performHapticFeedback(int constant, boolean always, String reason) {
+    public void performHapticFeedback(int constant, boolean always, String reason,
+            boolean fromIme) {
         Log.w(TAG, "performHapticFeedback is not supported");
     }
 

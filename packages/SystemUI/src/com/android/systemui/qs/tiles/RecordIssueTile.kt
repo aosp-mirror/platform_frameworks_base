@@ -85,7 +85,13 @@ constructor(
 
     override fun getTileLabel(): CharSequence = mContext.getString(R.string.qs_record_issue_label)
 
-    override fun isAvailable(): Boolean = recordIssueQsTile()
+    /**
+     * There are SELinux constraints that are stopping this tile from reaching production builds.
+     * Once those are resolved, this condition will be removed, but the solution (of properly
+     * creating a distince SELinux context for com.android.systemui) is complex and will take time
+     * to implement.
+     */
+    override fun isAvailable(): Boolean = android.os.Build.IS_DEBUGGABLE && recordIssueQsTile()
 
     override fun newTileState(): QSTile.BooleanState =
         QSTile.BooleanState().apply {

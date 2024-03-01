@@ -97,6 +97,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import com.google.common.truth.Truth;
 
@@ -222,7 +223,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
                         () -> mock(KeyguardDismissActionInteractor.class),
                         mSelectedUserInteractor,
-                        () -> mock(KeyguardSurfaceBehindInteractor.class)) {
+                        () -> mock(KeyguardSurfaceBehindInteractor.class),
+                        mock(JavaAdapter.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -730,7 +732,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         () -> mock(WindowManagerLockscreenVisibilityInteractor.class),
                         () -> mock(KeyguardDismissActionInteractor.class),
                         mSelectedUserInteractor,
-                        () -> mock(KeyguardSurfaceBehindInteractor.class)) {
+                        () -> mock(KeyguardSurfaceBehindInteractor.class),
+                        mock(JavaAdapter.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;

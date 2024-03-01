@@ -24,8 +24,6 @@ import android.util.Slog;
 
 /**
  * Holder class for {@link IVibratorController}.
- *
- * @hide
  */
 public final class VibratorControllerHolder implements IBinder.DeathRecipient {
     private static final String TAG = "VibratorControllerHolder";

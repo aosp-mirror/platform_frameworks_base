@@ -16,27 +16,13 @@
 
 package com.android.mediaframeworktest.functional.audio;
 
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.MediaNames;
-import com.android.mediaframeworktest.functional.EnergyProbe;
-import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-import android.media.audiofx.AudioEffect;
-import android.media.AudioManager;
 import android.media.audiofx.BassBoost;
-import android.media.audiofx.Visualizer;
-import android.media.MediaPlayer;
-
-import android.os.Looper;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
-import java.nio.ByteOrder;
-import java.nio.ByteBuffer;
-import java.util.UUID;
+import androidx.test.filters.LargeTest;
+
+import com.android.mediaframeworktest.MediaFrameworkTest;
 
 /**
  * Junit / Instrumentation test case for the media AudioTrack api

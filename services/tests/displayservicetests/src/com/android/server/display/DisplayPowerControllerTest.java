@@ -1694,6 +1694,39 @@ public final class DisplayPowerControllerTest {
                 /* ignoreAnimationLimits= */ anyBoolean());
     }
 
+    @Test
+    public void testInitialDozeBrightness_AbcIsNull() {
+        when(mDisplayManagerFlagsMock.areAutoBrightnessModesEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, false);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID, /* isEnabled= */ true,
+                /* isAutoBrightnessAvailable= */ false);
+        mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
+        float brightness = 0.277f;
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.automaticBrightnessController
+                .getAutomaticScreenBrightnessBasedOnLastObservedLux(any(BrightnessEvent.class)))
+                .thenReturn(brightness);
+        when(mHolder.hbmController.getCurrentBrightnessMax())
+                .thenReturn(PowerManager.BRIGHTNESS_MAX);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        // Automatic Brightness Controller is null so no initial doze brightness should be set and
+        // we should not crash
+        verify(mHolder.animator, never()).animateTo(eq(brightness),
+                /* linearSecondTarget= */ anyFloat(), /* rate= */ anyFloat(),
+                /* ignoreAnimationLimits= */ anyBoolean());
+    }
+
     /**
      * Creates a mock and registers it to {@link LocalServices}.
      */
@@ -1778,6 +1811,12 @@ public final class DisplayPowerControllerTest {
 
     private DisplayPowerControllerHolder createDisplayPowerController(int displayId,
             String uniqueId, boolean isEnabled) {
+        return createDisplayPowerController(displayId, uniqueId, isEnabled,
+                /* isAutoBrightnessAvailable= */ true);
+    }
+
+    private DisplayPowerControllerHolder createDisplayPowerController(int displayId,
+            String uniqueId, boolean isEnabled, boolean isAutoBrightnessAvailable) {
         final DisplayPowerState displayPowerState = mock(DisplayPowerState.class);
         final DualRampAnimator<DisplayPowerState> animator = mock(DualRampAnimator.class);
         final AutomaticBrightnessController automaticBrightnessController =
@@ -1812,6 +1851,7 @@ public final class DisplayPowerControllerTest {
         final DisplayDeviceConfig config = mock(DisplayDeviceConfig.class);
 
         setUpDisplay(displayId, uniqueId, display, device, config, isEnabled);
+        when(config.isAutoBrightnessAvailable()).thenReturn(isAutoBrightnessAvailable);
 
         final DisplayPowerController dpc = new DisplayPowerController(
                 mContext, injector, mDisplayPowerCallbacksMock, mHandler,

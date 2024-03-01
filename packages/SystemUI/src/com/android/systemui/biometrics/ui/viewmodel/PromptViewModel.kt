@@ -47,6 +47,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -122,6 +123,9 @@ constructor(
 
     /** The kind of credential the user has. */
     val credentialKind: Flow<PromptKind> = promptSelectorInteractor.credentialKind
+
+    val showBpWithoutIconForCredential: StateFlow<Boolean> =
+        promptSelectorInteractor.showBpWithoutIconForCredential
 
     /** The label to use for the cancel button. */
     val negativeButtonText: Flow<String> =

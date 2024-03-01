@@ -51,7 +51,7 @@ public class ProtoLogController implements ShellCommandHandler.ShellCommandActio
         final ILogger logger = pw::println;
         switch (args[0]) {
             case "status": {
-                if (android.tracing.Flags.perfettoProtolog()) {
+                if (android.tracing.Flags.perfettoProtologTracing()) {
                     pw.println("(Deprecated) legacy command. Use Perfetto commands instead.");
                     return false;
                 }
@@ -59,7 +59,7 @@ public class ProtoLogController implements ShellCommandHandler.ShellCommandActio
                 return true;
             }
             case "start": {
-                if (android.tracing.Flags.perfettoProtolog()) {
+                if (android.tracing.Flags.perfettoProtologTracing()) {
                     pw.println("(Deprecated) legacy command. Use Perfetto commands instead.");
                     return false;
                 }
@@ -67,7 +67,7 @@ public class ProtoLogController implements ShellCommandHandler.ShellCommandActio
                 return true;
             }
             case "stop": {
-                if (android.tracing.Flags.perfettoProtolog()) {
+                if (android.tracing.Flags.perfettoProtologTracing()) {
                     pw.println("(Deprecated) legacy command. Use Perfetto commands instead.");
                     return false;
                 }
@@ -101,7 +101,7 @@ public class ProtoLogController implements ShellCommandHandler.ShellCommandActio
                 return mShellProtoLog.stopLoggingToLogcat(groups, logger) == 0;
             }
             case "save-for-bugreport": {
-                if (android.tracing.Flags.perfettoProtolog()) {
+                if (android.tracing.Flags.perfettoProtologTracing()) {
                     pw.println("(Deprecated) legacy command");
                     return false;
                 }

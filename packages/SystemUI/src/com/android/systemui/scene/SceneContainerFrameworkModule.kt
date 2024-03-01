@@ -17,6 +17,7 @@
 package com.android.systemui.scene
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlagsModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.flag.SceneContainerFlagsModule
@@ -34,6 +35,7 @@ import dagger.multibindings.IntoMap
         [
             BouncerSceneModule::class,
             CommunalSceneModule::class,
+            ComposeBouncerFlagsModule::class,
             EmptySceneModule::class,
             GoneSceneModule::class,
             LockscreenSceneModule::class,

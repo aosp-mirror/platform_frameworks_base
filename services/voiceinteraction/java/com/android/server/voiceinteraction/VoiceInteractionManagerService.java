@@ -181,10 +181,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 LocalServices.getService(ActivityManagerInternal.class));
         mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
-        mWmInternal = Objects.requireNonNull(
-                LocalServices.getService(WindowManagerInternal.class));
-        mDpmInternal = Objects.requireNonNull(
-                LocalServices.getService(DevicePolicyManagerInternal.class));
+        mWmInternal = LocalServices.getService(WindowManagerInternal.class);
+        mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         LegacyPermissionManagerInternal permissionManagerInternal = LocalServices.getService(
                 LegacyPermissionManagerInternal.class);
         permissionManagerInternal.setVoiceInteractionPackagesProvider(
@@ -2750,11 +2748,17 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (isAssistDataAllowed) {
                     visiblePackageNames.add(record.getComponentName().getPackageName());
                 }
-                if (mDpmInternal.isUserOrganizationManaged(record.getUserId())) {
+                if (mDpmInternal != null
+                        && mDpmInternal.isUserOrganizationManaged(record.getUserId())) {
                     isManagedProfileVisible = true;
                 }
             }
-            final ScreenCapture.ScreenshotHardwareBuffer shb = mWmInternal.takeAssistScreenshot();
+            final ScreenCapture.ScreenshotHardwareBuffer shb;
+            if (mWmInternal != null) {
+                shb = mWmInternal.takeAssistScreenshot();
+            } else {
+                shb = null;
+            }
             final Bitmap bm = shb != null ? shb.asBitmap() : null;
             // Now that everything is fetched, putting it in the launchIntent.
             if (bm != null) {

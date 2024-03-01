@@ -367,7 +367,8 @@ class TaskFragmentContainer {
         if (activities == null) {
             return null;
         }
-        return new ActivityStack(activities, isEmpty(), mToken, mOverlayTag);
+        return new ActivityStack(activities, isEmpty(),
+                ActivityStack.Token.createFromBinder(mToken), mOverlayTag);
     }
 
     /** Adds the activity that will be reparented to this container. */

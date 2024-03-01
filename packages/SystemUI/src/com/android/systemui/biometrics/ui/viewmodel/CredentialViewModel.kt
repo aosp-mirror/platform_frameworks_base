@@ -4,13 +4,13 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.text.InputType
 import com.android.internal.widget.LockPatternView
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.interactor.CredentialStatus
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
 import com.android.systemui.biometrics.shared.model.BiometricUserInfo
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.Flow
@@ -32,14 +32,16 @@ constructor(
 
     /** Top level information about the prompt. */
     val header: Flow<CredentialHeaderViewModel> =
-        credentialInteractor.prompt.filterIsInstance<BiometricPromptRequest.Credential>().map {
-            request ->
+        combine(
+            credentialInteractor.prompt.filterIsInstance<BiometricPromptRequest.Credential>(),
+            credentialInteractor.showBpWithoutIconForCredential
+        ) { request, showBpWithoutIconForCredential ->
             BiometricPromptHeaderViewModelImpl(
                 request,
                 user = request.userInfo,
                 title = request.title,
-                subtitle = request.subtitle,
-                description = request.description,
+                subtitle = if (showBpWithoutIconForCredential) "" else request.subtitle,
+                description = if (showBpWithoutIconForCredential) "" else request.description,
                 icon = applicationContext.asLockIcon(request.userInfo.deviceCredentialOwnerId),
                 showEmergencyCallButton = request.showEmergencyCallButton
             )
@@ -145,7 +147,7 @@ constructor(
                 .createLaunchEmergencyDialerIntent(null)
                 .setFlags(
                     android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
-                            android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
                 )
         context.startActivity(intent)
     }

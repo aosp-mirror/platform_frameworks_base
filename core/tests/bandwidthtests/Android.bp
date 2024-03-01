@@ -31,6 +31,9 @@ android_test {
         "org.apache.http.legacy",
         "android.test.base",
     ],
-    static_libs: ["junit"],
+    static_libs: [
+        "junit",
+        "androidx.test.rules",
+    ],
     platform_apis: true,
 }

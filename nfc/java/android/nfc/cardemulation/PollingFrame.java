@@ -201,7 +201,7 @@ public final class PollingFrame implements Parcelable{
 
     /**
      * Returns the timestamp of when the polling loop frame was observed in milliseconds. These
-     * timestamps are relative and not absolute and should only be used fro comparing the timing of
+     * timestamps are relative and not absolute and should only be used for comparing the timing of
      * frames relative to each other.
      * @return the timestamp in milliseconds
      */

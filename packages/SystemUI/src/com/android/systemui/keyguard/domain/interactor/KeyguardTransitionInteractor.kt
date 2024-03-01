@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,6 +47,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business-logic related to the keyguard transitions. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -204,6 +206,21 @@ constructor(
         startedKeyguardTransitionStep
             .map { step -> step.to }
             .shareIn(scope, SharingStarted.Eagerly, replay = 1)
+
+    /**
+     * A pair of the most recent STARTED step, and the transition step immediately preceding it. The
+     * transition framework enforces that the previous step is either a CANCELED or FINISHED step,
+     * and that the previous step was *to* the state the STARTED step is *from*.
+     *
+     * This flow can be used to access the previous step to determine whether it was CANCELED or
+     * FINISHED. In the case of a CANCELED step, we can also figure out which state we were coming
+     * from when we were canceled.
+     */
+    val startedStepWithPrecedingStep =
+        transitions
+            .pairwise()
+            .filter { it.newValue.transitionState == TransitionState.STARTED }
+            .stateIn(scope, SharingStarted.Eagerly, null)
 
     /**
      * The last [KeyguardState] to which we [TransitionState.FINISHED] a transition.

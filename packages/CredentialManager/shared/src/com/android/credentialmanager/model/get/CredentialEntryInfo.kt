@@ -40,6 +40,8 @@ class CredentialEntryInfo(
     val shouldTintIcon: Boolean,
     val lastUsedTimeMillis: Instant?,
     val isAutoSelectable: Boolean,
+    val entryGroupId: String, // Used for deduplication, and displayed as the grouping title
+                              // "For <value-of-entryGroupId>" on the more-option screen.
 ) : EntryInfo(
     providerId,
     entryKey,

@@ -471,6 +471,21 @@ public final class Settings {
             "android.settings.ACCESSIBILITY_COLOR_MOTION_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of accessibility color contrast.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ACCESSIBILITY_COLOR_CONTRAST_SETTINGS =
+            "android.settings.ACCESSIBILITY_COLOR_CONTRAST_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of Reduce Bright Colors.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you

@@ -29,8 +29,9 @@ import android.os.Environment;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
+
+import androidx.test.filters.LargeTest;
 
 import com.android.connectivitymanagertest.ConnectivityManagerStressTestRunner;
 import com.android.connectivitymanagertest.ConnectivityManagerTestBase;

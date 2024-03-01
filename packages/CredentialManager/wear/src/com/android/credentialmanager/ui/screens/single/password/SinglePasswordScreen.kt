@@ -18,8 +18,6 @@
 
 package com.android.credentialmanager.ui.screens.single.password
 
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -28,9 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.R
-import com.android.credentialmanager.TAG
-import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
-import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.ui.components.PasswordRow
 import com.android.credentialmanager.ui.components.ContinueChip
 import com.android.credentialmanager.ui.components.DismissChip
@@ -57,11 +52,7 @@ fun SinglePasswordScreen(
     modifier: Modifier = Modifier,
     flowEngine: FlowEngine,
 ) {
-    val launcher = rememberLauncherForActivityResult(
-        StartBalIntentSenderForResultContract()
-    ) {
-        flowEngine.sendSelectionResult(entry, it.resultCode, it.data)
-    }
+    val selectEntry = flowEngine.getEntrySelector()
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
@@ -80,11 +71,7 @@ fun SinglePasswordScreen(
     ) {
         item {
             Column {
-                ContinueChip {
-                    entry.getIntentSenderRequest()?.let {
-                        launcher.launch(it)
-                    } ?: Log.w(TAG, "Cannot parse IntentSenderRequest")
-                }
+                ContinueChip { selectEntry(entry, false) }
                 SignInOptionsChip{ flowEngine.openSecondaryScreen() }
                 DismissChip { flowEngine.cancel() }
             }
