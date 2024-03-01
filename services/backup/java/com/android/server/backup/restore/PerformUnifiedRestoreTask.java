@@ -667,12 +667,23 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                                             backupManagerService.getContext().getContentResolver(),
                                             Settings.Secure.V_TO_U_RESTORE_DENYLIST,
                                             mUserId));
+                        logVToUListsToBMM();
                         mAreVToUListsSet = true;
                     }
                     if (isPackageEligibleForVToURestore(mCurrentPackage)) {
+                        mBackupManagerMonitorEventSender.monitorEvent(
+                                BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_PKG_ELIGIBLE,
+                                mCurrentPackage,
+                                BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                addRestoreOperationTypeToEvent(/* extras= */null));
                         Slog.i(TAG, "Package " + pkgName
                                 + " is eligible for V to U downgrade scenario");
                     } else {
+                        mBackupManagerMonitorEventSender.monitorEvent(
+                                BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_PKG_NOT_ELIGIBLE,
+                                mCurrentPackage,
+                                BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                addRestoreOperationTypeToEvent(/* extras= */null));
                         String message = "Package not eligible for V to U downgrade scenario";
                         Slog.i(TAG, pkgName + " : " + message);
                         EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, pkgName, message);
@@ -1703,14 +1714,25 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         //      (and not in the denylist)
         //    - The package has restoreAnyVersion set to true and is not part of the denylist
         if (mVToUDenylist.contains(mCurrentPackage.packageName)){
+            if (DEBUG) {
+                Slog.i(TAG, mCurrentPackage.packageName + " : Package is in V to U denylist");
+            }
             return false;
         } else if ((mCurrentPackage.applicationInfo.flags
                 & ApplicationInfo.FLAG_RESTORE_ANY_VERSION)
                 == 0) {
             // package has restoreAnyVersion set to false
+            if (DEBUG) {
+                Slog.i(TAG, mCurrentPackage.packageName
+                        + " : Package has restoreAnyVersion=false and is in V to U allowlist");
+            }
             return mVToUAllowlist.contains(mCurrentPackage.packageName);
         } else {
             // package has restoreAnyVersion set to true and is nor in denylist
+            if (DEBUG) {
+                Slog.i(TAG, mCurrentPackage.packageName
+                        + " : Package has restoreAnyVersion=true and is not in V to U denylist");
+            }
             return true;
         }
     }
@@ -1753,6 +1775,33 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 mCurrentPackage,
                 BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                 monitoringExtras);
+    }
+
+    private void logVToUListsToBMM() {
+        // send a BMM event with the allowlist
+        Bundle monitoringExtrasAllowlist =
+                mBackupManagerMonitorEventSender.putMonitoringExtra(
+                        null,
+                        BackupManagerMonitor.EXTRA_LOG_V_TO_U_ALLOWLIST,
+                        mVToUAllowlist.toString());
+        monitoringExtrasAllowlist = addRestoreOperationTypeToEvent(monitoringExtrasAllowlist);
+        mBackupManagerMonitorEventSender.monitorEvent(
+                BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_SET_LIST,
+                null,
+                BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                monitoringExtrasAllowlist);
+        // send a BMM event with the denylist
+        Bundle monitoringExtrasDenylist =
+                mBackupManagerMonitorEventSender.putMonitoringExtra(
+                        null,
+                        BackupManagerMonitor.EXTRA_LOG_V_TO_U_DENYLIST,
+                        mVToUDenylist.toString());
+        monitoringExtrasDenylist = addRestoreOperationTypeToEvent(monitoringExtrasDenylist);
+        mBackupManagerMonitorEventSender.monitorEvent(
+                BackupManagerMonitor.LOG_EVENT_ID_V_TO_U_RESTORE_SET_LIST,
+                null,
+                BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                monitoringExtrasDenylist);
     }
 
 }
