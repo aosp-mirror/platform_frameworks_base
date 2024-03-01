@@ -23,8 +23,9 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.view.IWindowManager;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 

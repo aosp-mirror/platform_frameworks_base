@@ -16,6 +16,9 @@
 
 package com.android.server.display.brightness;
 
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.policyToString;
+
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.config.DisplayBrightnessMappingConfig.autoBrightnessModeToString;
 
@@ -46,6 +49,7 @@ public final class BrightnessEvent {
     private int mDisplayId;
     private String mPhysicalDisplayId;
     private int mDisplayState;
+    private int mDisplayPolicy;
     private long mTime;
     private float mLux;
     private float mPreThresholdLux;
@@ -85,6 +89,7 @@ public final class BrightnessEvent {
         mDisplayId = that.getDisplayId();
         mPhysicalDisplayId = that.getPhysicalDisplayId();
         mDisplayState = that.mDisplayState;
+        mDisplayPolicy = that.mDisplayPolicy;
         mTime = that.getTime();
         // Lux values
         mLux = that.getLux();
@@ -117,6 +122,7 @@ public final class BrightnessEvent {
         mTime = SystemClock.uptimeMillis();
         mPhysicalDisplayId = "";
         mDisplayState = Display.STATE_UNKNOWN;
+        mDisplayPolicy = POLICY_OFF;
         // Lux values
         mLux = 0;
         mPreThresholdLux = 0;
@@ -155,6 +161,7 @@ public final class BrightnessEvent {
                 && mDisplayId == that.mDisplayId
                 && mPhysicalDisplayId.equals(that.mPhysicalDisplayId)
                 && mDisplayState == that.mDisplayState
+                && mDisplayPolicy == that.mDisplayPolicy
                 && Float.floatToRawIntBits(mLux) == Float.floatToRawIntBits(that.mLux)
                 && Float.floatToRawIntBits(mPreThresholdLux)
                 == Float.floatToRawIntBits(that.mPreThresholdLux)
@@ -191,6 +198,7 @@ public final class BrightnessEvent {
                 + "disp=" + mDisplayId
                 + ", physDisp=" + mPhysicalDisplayId
                 + ", displayState=" + Display.stateToString(mDisplayState)
+                + ", displayPolicy=" + policyToString(mDisplayPolicy)
                 + ", brt=" + mBrightness + ((mFlags & FLAG_USER_SET) != 0 ? "(user_set)" : "")
                 + ", initBrt=" + mInitialBrightness
                 + ", rcmdBrt=" + mRecommendedBrightness
@@ -249,6 +257,10 @@ public final class BrightnessEvent {
 
     public void setDisplayState(int state) {
         mDisplayState = state;
+    }
+
+    public void setDisplayPolicy(int policy) {
+        mDisplayPolicy = policy;
     }
 
     public float getLux() {

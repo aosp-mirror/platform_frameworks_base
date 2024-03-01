@@ -18,7 +18,7 @@ package com.android.server.companion;
 
 import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_SYNC;
 
-import static com.android.server.companion.PermissionsUtils.sanitizeWithCallerChecks;
+import static com.android.server.companion.utils.PermissionsUtils.sanitizeWithCallerChecks;
 
 import android.companion.AssociationInfo;
 import android.companion.ContextSyncMessage;
@@ -36,6 +36,7 @@ import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+import com.android.server.companion.presence.ObservableUuid;
 import com.android.server.companion.transport.CompanionTransportManager;
 
 import java.io.PrintWriter;

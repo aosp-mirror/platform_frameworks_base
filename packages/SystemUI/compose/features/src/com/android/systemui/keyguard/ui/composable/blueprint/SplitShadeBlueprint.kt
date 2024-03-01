@@ -41,6 +41,7 @@ import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSect
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
 import com.android.systemui.keyguard.ui.composable.section.DefaultClockSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
+import com.android.systemui.keyguard.ui.composable.section.MediaCarouselSection
 import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.SmartSpaceSection
@@ -70,6 +71,7 @@ constructor(
     private val ambientIndicationSectionOptional: Optional<AmbientIndicationSection>,
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
+    private val mediaCarouselSection: MediaCarouselSection,
     private val clockInteractor: KeyguardClockInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
 ) : ComposableLockscreenSceneBlueprint {
@@ -100,6 +102,14 @@ constructor(
                                 modifier = Modifier.fillMaxHeight().weight(weight = 1f),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
+                                with(clockSection) {
+                                    SmallClock(
+                                        burnInParams = burnIn.parameters,
+                                        onTopChanged = burnIn.onSmallClockTopChanged,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                }
+
                                 with(smartSpaceSection) {
                                     SmartSpace(
                                         burnInParams = burnIn.parameters,
@@ -121,9 +131,13 @@ constructor(
                                     )
                                 }
 
-                                Spacer(modifier = Modifier.weight(weight = 1f))
-                                with(clockSection) { LargeClock() }
-                                Spacer(modifier = Modifier.weight(weight = 1f))
+                                if (viewModel.isLargeClockVisible) {
+                                    Spacer(modifier = Modifier.weight(weight = 1f))
+                                    with(clockSection) { LargeClock() }
+                                    Spacer(modifier = Modifier.weight(weight = 1f))
+                                }
+
+                                with(mediaCarouselSection) { MediaCarousel() }
                             }
                             with(notificationSection) {
                                 val splitShadeTopMargin: Dp =

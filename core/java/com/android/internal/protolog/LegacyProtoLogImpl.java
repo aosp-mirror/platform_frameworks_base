@@ -61,7 +61,7 @@ public class LegacyProtoLogImpl implements IProtoLog {
     private static final int PER_CHUNK_SIZE = 1024;
     private static final String TAG = "ProtoLog";
     private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
-    static final String PROTOLOG_VERSION = "1.0.0";
+    static final String PROTOLOG_VERSION = "2.0.0";
     private static final int DEFAULT_PER_CHUNK_SIZE = 0;
 
     private final File mLogFile;

@@ -46,5 +46,5 @@ flag {
     name: "bal_respect_app_switch_state_when_check_bound_by_foreground_uid"
     namespace: "responsible_apis"
     description: "Prevent BAL based on it is bound by foreground Uid but the app switch is stopped."
-    bug: "171459802"
+    bug: "283801068"
 }

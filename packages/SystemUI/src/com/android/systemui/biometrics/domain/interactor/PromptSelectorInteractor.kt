@@ -32,6 +32,7 @@ import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -69,6 +70,18 @@ interface PromptSelectorInteractor {
 
     /** Fingerprint sensor type */
     val sensorType: Flow<FingerprintSensorType>
+
+    /**
+     * If biometric prompt without icon needs to show for displaying content prior to credential
+     * view.
+     */
+    val showBpWithoutIconForCredential: StateFlow<Boolean>
+
+    /**
+     * Update whether biometric prompt without icon needs to show for displaying content prior to
+     * credential view, which should be set before [PromptRepository.setPrompt].
+     */
+    fun setShouldShowBpWithoutIconForCredential(promptInfo: PromptInfo)
 
     /** Use biometrics for authentication. */
     fun useBiometricsForAuthentication(
@@ -153,6 +166,12 @@ constructor(
         }
 
     override val sensorType: Flow<FingerprintSensorType> = fingerprintPropertyRepository.sensorType
+
+    override val showBpWithoutIconForCredential = promptRepository.showBpWithoutIconForCredential
+
+    override fun setShouldShowBpWithoutIconForCredential(promptInfo: PromptInfo) {
+        promptRepository.setShouldShowBpWithoutIconForCredential(promptInfo)
+    }
 
     override fun useBiometricsForAuthentication(
         promptInfo: PromptInfo,

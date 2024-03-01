@@ -16,6 +16,8 @@
 
 package com.android.server.display.brightness;
 
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
+
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
 
 import static org.junit.Assert.assertEquals;
@@ -43,6 +45,7 @@ public final class BrightnessEventTest {
                 getReason(BrightnessReason.REASON_DOZE, BrightnessReason.MODIFIER_LOW_POWER));
         mBrightnessEvent.setPhysicalDisplayId("test");
         mBrightnessEvent.setDisplayState(Display.STATE_ON);
+        mBrightnessEvent.setDisplayPolicy(POLICY_BRIGHT);
         mBrightnessEvent.setLux(100.0f);
         mBrightnessEvent.setPreThresholdLux(150.0f);
         mBrightnessEvent.setTime(System.currentTimeMillis());
@@ -74,11 +77,12 @@ public final class BrightnessEventTest {
     public void testToStringWorksAsExpected() {
         String actualString = mBrightnessEvent.toString(false);
         String expectedString =
-                "BrightnessEvent: disp=1, physDisp=test, displayState=ON, brt=0.6, initBrt=25.0,"
-                + " rcmdBrt=0.6, preBrt=NaN, lux=100.0, preLux=150.0, hbmMax=0.62, hbmMode=off,"
-                + " rbcStrength=-1, thrmMax=0.65, powerFactor=0.2, wasShortTermModelActive=true,"
-                + " flags=, reason=doze [ low_pwr ], autoBrightness=true, strategy="
-                        + DISPLAY_BRIGHTNESS_STRATEGY_NAME + ", autoBrightnessMode=idle";
+                "BrightnessEvent: disp=1, physDisp=test, displayState=ON, displayPolicy=BRIGHT,"
+                + " brt=0.6, initBrt=25.0, rcmdBrt=0.6, preBrt=NaN, lux=100.0, preLux=150.0,"
+                + " hbmMax=0.62, hbmMode=off, rbcStrength=-1, thrmMax=0.65, powerFactor=0.2,"
+                + " wasShortTermModelActive=true, flags=, reason=doze [ low_pwr ],"
+                + " autoBrightness=true, strategy=" + DISPLAY_BRIGHTNESS_STRATEGY_NAME
+                + ", autoBrightnessMode=idle";
         assertEquals(expectedString, actualString);
     }
 

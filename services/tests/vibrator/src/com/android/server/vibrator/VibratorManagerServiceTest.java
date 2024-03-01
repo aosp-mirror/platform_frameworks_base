@@ -2526,7 +2526,7 @@ public class VibratorManagerServiceTest {
                 int constant, boolean always) throws InterruptedException {
         HalVibration vib =
                 service.performHapticFeedbackInternal(UID, Context.DEVICE_ID_DEFAULT, PACKAGE_NAME,
-                        constant, always, "some reason", service);
+                        constant, always, "some reason", service, false /* fromIme */);
         if (vib != null) {
             vib.waitForEnd();
         }

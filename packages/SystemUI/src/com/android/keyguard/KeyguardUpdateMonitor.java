@@ -34,6 +34,7 @@ import static android.hardware.biometrics.BiometricSourceType.FACE;
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.os.BatteryManager.CHARGING_POLICY_DEFAULT;
+import static android.telephony.SubscriptionManager.PROFILE_CLASS_PROVISIONING;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
@@ -437,7 +438,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     };
 
-    private final OnSubscriptionsChangedListener mSubscriptionListener =
+    @VisibleForTesting
+    final OnSubscriptionsChangedListener mSubscriptionListener =
             new OnSubscriptionsChangedListener() {
                 @Override
                 public void onSubscriptionsChanged() {
@@ -586,16 +588,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private void handleSimSubscriptionInfoChanged() {
         Assert.isMainThread();
         mLogger.v("onSubscriptionInfoChanged()");
-        List<SubscriptionInfo> sil = mSubscriptionManager
-                .getCompleteActiveSubscriptionInfoList();
-        if (sil != null) {
-            for (SubscriptionInfo subInfo : sil) {
+        List<SubscriptionInfo> subscriptionInfos = getSubscriptionInfo(true /* forceReload */);
+        if (!subscriptionInfos.isEmpty()) {
+            for (SubscriptionInfo subInfo : subscriptionInfos) {
                 mLogger.logSubInfo(subInfo);
             }
         } else {
             mLogger.v("onSubscriptionInfoChanged: list is null");
         }
-        List<SubscriptionInfo> subscriptionInfos = getSubscriptionInfo(true /* forceReload */);
 
         // Hack level over 9000: Because the subscription id is not yet valid when we see the
         // first update in handleSimStateChange, we need to force refresh all SIM states
@@ -658,18 +658,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     /**
      * @return List of SubscriptionInfo records, maybe empty but never null.
+     *
+     * Note that this method will filter out any subscription which is PROFILE_CLASS_PROVISIONING
      */
     public List<SubscriptionInfo> getSubscriptionInfo(boolean forceReload) {
         List<SubscriptionInfo> sil = mSubscriptionInfo;
         if (sil == null || forceReload) {
-            sil = mSubscriptionManager.getCompleteActiveSubscriptionInfoList();
+            mSubscriptionInfo = mSubscriptionManager.getCompleteActiveSubscriptionInfoList()
+                    .stream()
+                    .filter(subInfo -> subInfo.getProfileClass() != PROFILE_CLASS_PROVISIONING)
+                    .toList();
         }
-        if (sil == null) {
-            // getCompleteActiveSubscriptionInfoList was null callers expect an empty list.
-            mSubscriptionInfo = new ArrayList<>();
-        } else {
-            mSubscriptionInfo = sil;
-        }
+
         return new ArrayList<>(mSubscriptionInfo);
     }
 

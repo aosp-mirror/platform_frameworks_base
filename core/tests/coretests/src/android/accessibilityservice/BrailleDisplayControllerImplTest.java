@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.hardware.usb.UsbDevice;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -58,6 +59,7 @@ public class BrailleDisplayControllerImplTest {
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
+    private AccessibilityService mAccessibilityService;
     private BrailleDisplayController mBrailleDisplayController;
 
     @Mock
@@ -76,12 +78,13 @@ public class BrailleDisplayControllerImplTest {
     @Before
     public void test() {
         MockitoAnnotations.initMocks(this);
-        AccessibilityService accessibilityService = spy(new TestAccessibilityService());
-        doReturn((Executor) Runnable::run).when(accessibilityService).getMainExecutor();
-        doReturn(TEST_SERVICE_CONNECTION_ID).when(accessibilityService).getConnectionId();
+        mAccessibilityService = spy(new TestAccessibilityService());
+        doReturn((Executor) Runnable::run).when(mAccessibilityService).getMainExecutor();
+        doReturn(TEST_SERVICE_CONNECTION_ID).when(mAccessibilityService).getConnectionId();
         AccessibilityInteractionClient.addConnection(TEST_SERVICE_CONNECTION_ID,
                 mAccessibilityServiceConnection, /*initializeCache=*/false);
-        mBrailleDisplayController = accessibilityService.getBrailleDisplayController();
+        mBrailleDisplayController = new BrailleDisplayControllerImpl(
+                mAccessibilityService, new Object(), /*isHidrawSupported=*/true);
     }
 
     // Automated CTS tests only use the BluetoothDevice version of BrailleDisplayController#connect
@@ -103,5 +106,18 @@ public class BrailleDisplayControllerImplTest {
 
         assertThrows(IllegalStateException.class,
                 () -> mBrailleDisplayController.connect(usbDevice, mBrailleDisplayCallback));
+    }
+
+    @Test
+    public void connect_HidrawNotSupported_callsOnConnectionFailed() {
+        BrailleDisplayController controller = new BrailleDisplayControllerImpl(
+                mAccessibilityService, new Object(), /*isHidrawSupported=*/false);
+        UsbDevice usbDevice = Mockito.mock(UsbDevice.class);
+
+        controller.connect(usbDevice, mBrailleDisplayCallback);
+
+        verify(mBrailleDisplayCallback).onConnectionFailed(
+                BrailleDisplayController.BrailleDisplayCallback.FLAG_ERROR_CANNOT_ACCESS);
+        verifyZeroInteractions(mAccessibilityServiceConnection);
     }
 }

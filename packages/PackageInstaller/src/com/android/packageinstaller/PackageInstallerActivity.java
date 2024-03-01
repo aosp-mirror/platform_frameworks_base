@@ -51,6 +51,7 @@ import android.provider.Settings;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -174,6 +175,7 @@ public class PackageInstallerActivity extends Activity {
         }
 
         viewToEnable.setVisibility(View.VISIBLE);
+        viewToEnable.setMovementMethod(new ScrollingMovementMethod());
 
         mEnableOk = true;
         mOk.setEnabled(true);

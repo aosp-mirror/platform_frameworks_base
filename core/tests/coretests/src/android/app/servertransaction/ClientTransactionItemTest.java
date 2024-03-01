@@ -107,7 +107,7 @@ public class ClientTransactionItemTest {
     @Test
     public void testActivityConfigurationChangeItem_getContextToUpdate() {
         final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem
-                .obtain(mActivityToken, mConfiguration);
+                .obtain(mActivityToken, mConfiguration, new ActivityWindowInfo());
         final Context context = item.getContextToUpdate(mHandler);
 
         assertEquals(mActivity, context);

@@ -563,3 +563,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "media_controls_refactor"
+    namespace: "systemui"
+    description: "Refactors media code to follow the recommended architecture"
+    bug: "326408371"
+}

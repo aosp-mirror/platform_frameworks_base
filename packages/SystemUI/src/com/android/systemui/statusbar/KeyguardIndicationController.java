@@ -71,6 +71,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.text.format.Formatter;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
@@ -187,6 +188,7 @@ public class KeyguardIndicationController {
     private CharSequence mTransientIndication;
     private CharSequence mBiometricMessage;
     private CharSequence mBiometricMessageFollowUp;
+    private BiometricSourceType mBiometricMessageSource;
     protected ColorStateList mInitialTextColorState;
     private boolean mVisible;
     private boolean mOrganizationOwnedDevice;
@@ -206,7 +208,7 @@ public class KeyguardIndicationController {
     private int mBatteryLevel;
     private boolean mBatteryPresent = true;
     private long mChargingTimeRemaining;
-    private String mBiometricErrorMessageToShowOnScreenOn;
+    private Pair<String, BiometricSourceType> mBiometricErrorMessageToShowOnScreenOn;
     private final Set<Integer> mCoExFaceAcquisitionMsgIdsToShow;
     private final FaceHelpMessageDeferral mFaceAcquiredMessageDeferral;
     private boolean mInited;
@@ -225,15 +227,18 @@ public class KeyguardIndicationController {
                 mIsActiveDreamLockscreenHosted = isLockscreenHosted;
                 updateDeviceEntryIndication(false);
             };
-    private final ScreenLifecycle.Observer mScreenObserver =
-            new ScreenLifecycle.Observer() {
+    private final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
         @Override
         public void onScreenTurnedOn() {
             mHandler.removeMessages(MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON);
             if (mBiometricErrorMessageToShowOnScreenOn != null) {
                 String followUpMessage = mFaceLockedOutThisAuthSession
                         ? faceLockedOutFollowupMessage() : null;
-                showBiometricMessage(mBiometricErrorMessageToShowOnScreenOn, followUpMessage);
+                showBiometricMessage(
+                        mBiometricErrorMessageToShowOnScreenOn.first,
+                        followUpMessage,
+                        mBiometricErrorMessageToShowOnScreenOn.second
+                );
                 // We want to keep this message around in case the screen was off
                 hideBiometricMessageDelayed(DEFAULT_HIDE_DELAY_MS);
                 mBiometricErrorMessageToShowOnScreenOn = null;
@@ -879,8 +884,35 @@ public class KeyguardIndicationController {
         updateTransient();
     }
 
-    private void showBiometricMessage(CharSequence biometricMessage) {
-        showBiometricMessage(biometricMessage, null);
+    private void showSuccessBiometricMessage(
+            CharSequence biometricMessage,
+            @Nullable CharSequence biometricMessageFollowUp,
+            BiometricSourceType biometricSourceType
+    ) {
+        showBiometricMessage(biometricMessage, biometricMessageFollowUp, biometricSourceType, true);
+    }
+
+    private void showSuccessBiometricMessage(CharSequence biometricMessage,
+            BiometricSourceType biometricSourceType) {
+        showSuccessBiometricMessage(biometricMessage, null, biometricSourceType);
+    }
+
+    private void showBiometricMessage(CharSequence biometricMessage,
+            BiometricSourceType biometricSourceType) {
+        showBiometricMessage(biometricMessage, null, biometricSourceType, false);
+    }
+
+    private void showBiometricMessage(
+            CharSequence biometricMessage,
+            @Nullable CharSequence biometricMessageFollowUp,
+            BiometricSourceType biometricSourceType
+    ) {
+        showBiometricMessage(
+                biometricMessage,
+                biometricMessageFollowUp,
+                biometricSourceType,
+                false
+        );
     }
 
     /**
@@ -889,15 +921,33 @@ public class KeyguardIndicationController {
      * by {@link KeyguardIndicationRotateTextViewController}, see class for rotating message
      * logic.
      */
-    private void showBiometricMessage(CharSequence biometricMessage,
-            @Nullable CharSequence biometricMessageFollowUp) {
+    private void showBiometricMessage(
+            CharSequence biometricMessage,
+            @Nullable CharSequence biometricMessageFollowUp,
+            BiometricSourceType biometricSourceType,
+            boolean isSuccessMessage
+    ) {
         if (TextUtils.equals(biometricMessage, mBiometricMessage)
+                && biometricSourceType == mBiometricMessageSource
                 && TextUtils.equals(biometricMessageFollowUp, mBiometricMessageFollowUp)) {
+            return;
+        }
+
+        if (!isSuccessMessage
+                && mBiometricMessageSource == FINGERPRINT
+                && biometricSourceType != FINGERPRINT) {
+            // drop all non-fingerprint biometric messages if there's a fingerprint message showing
+            mKeyguardLogger.logDropNonFingerprintMessage(
+                    biometricMessage,
+                    biometricMessageFollowUp,
+                    biometricSourceType
+            );
             return;
         }
 
         mBiometricMessage = biometricMessage;
         mBiometricMessageFollowUp = biometricMessageFollowUp;
+        mBiometricMessageSource = biometricSourceType;
 
         mHandler.removeMessages(MSG_SHOW_ACTION_TO_UNLOCK);
         hideBiometricMessageDelayed(
@@ -914,6 +964,7 @@ public class KeyguardIndicationController {
         if (mBiometricMessage != null || mBiometricMessageFollowUp != null) {
             mBiometricMessage = null;
             mBiometricMessageFollowUp = null;
+            mBiometricMessageSource = null;
             mHideBiometricMessageHandler.cancel();
             updateBiometricMessage();
         }
@@ -1085,7 +1136,8 @@ public class KeyguardIndicationController {
                 } else {
                     message = mContext.getString(R.string.keyguard_retry);
                 }
-                mStatusBarKeyguardViewManager.setKeyguardMessage(message, mInitialTextColorState);
+                mStatusBarKeyguardViewManager.setKeyguardMessage(message, mInitialTextColorState,
+                        null);
             }
         } else {
             final boolean canSkipBouncer = mKeyguardUpdateMonitor.getUserCanSkipBouncer(
@@ -1097,34 +1149,40 @@ public class KeyguardIndicationController {
                         || mAccessibilityManager.isTouchExplorationEnabled();
                 if (udfpsSupported && faceAuthenticated) { // co-ex
                     if (a11yEnabled) {
-                        showBiometricMessage(
+                        showSuccessBiometricMessage(
                                 mContext.getString(R.string.keyguard_face_successful_unlock),
-                                mContext.getString(R.string.keyguard_unlock)
+                                mContext.getString(R.string.keyguard_unlock),
+                                FACE
                         );
                     } else {
-                        showBiometricMessage(
+                        showSuccessBiometricMessage(
                                 mContext.getString(R.string.keyguard_face_successful_unlock),
-                                mContext.getString(R.string.keyguard_unlock_press)
+                                mContext.getString(R.string.keyguard_unlock_press),
+                                FACE
                         );
                     }
                 } else if (faceAuthenticated) { // face-only
-                    showBiometricMessage(
+                    showSuccessBiometricMessage(
                             mContext.getString(R.string.keyguard_face_successful_unlock),
-                            mContext.getString(R.string.keyguard_unlock)
+                            mContext.getString(R.string.keyguard_unlock),
+                            FACE
                     );
                 } else if (udfpsSupported) { // udfps-only
                     if (a11yEnabled) {
-                        showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
+                        showSuccessBiometricMessage(
+                                mContext.getString(R.string.keyguard_unlock),
+                                null
+                        );
                     } else {
-                        showBiometricMessage(mContext.getString(
-                                R.string.keyguard_unlock_press));
+                        showSuccessBiometricMessage(mContext.getString(
+                                R.string.keyguard_unlock_press), null);
                     }
                 } else { // no security or unlocked by a trust agent
-                    showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
+                    showSuccessBiometricMessage(mContext.getString(R.string.keyguard_unlock), null);
                 }
             } else {
                 // suggest swiping up for the primary authentication bouncer
-                showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
+                showBiometricMessage(mContext.getString(R.string.keyguard_unlock), null);
             }
         }
     }
@@ -1228,6 +1286,13 @@ public class KeyguardIndicationController {
                     && msgId != BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
             final boolean faceAuthFailed = biometricSourceType == FACE
                     && msgId == BIOMETRIC_HELP_FACE_NOT_RECOGNIZED; // ran through matcher & failed
+            if (faceAuthFailed && mFaceLockedOutThisAuthSession) {
+                mKeyguardLogger.logBiometricMessage(
+                        "skipped showing faceAuthFailed message due to lockout",
+                        msgId,
+                        helpString);
+                return;
+            }
             final boolean fpAuthFailed = biometricSourceType == FINGERPRINT
                     && msgId == BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED; // ran matcher & failed
             final boolean isUnlockWithFingerprintPossible = canUnlockWithFingerprint();
@@ -1245,49 +1310,55 @@ public class KeyguardIndicationController {
                     mBouncerMessageInteractor.setFaceAcquisitionMessage(helpString);
                 }
                 mStatusBarKeyguardViewManager.setKeyguardMessage(helpString,
-                        mInitialTextColorState);
+                        mInitialTextColorState, biometricSourceType);
             } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
                 if (isCoExFaceAcquisitionMessage && msgId == FACE_ACQUIRED_TOO_DARK) {
                     showBiometricMessage(
                             helpString,
-                            mContext.getString(R.string.keyguard_suggest_fingerprint)
+                            mContext.getString(R.string.keyguard_suggest_fingerprint),
+                            biometricSourceType
                     );
                 } else if (faceAuthFailed && isUnlockWithFingerprintPossible) {
                     showBiometricMessage(
                             mContext.getString(R.string.keyguard_face_failed),
-                            mContext.getString(R.string.keyguard_suggest_fingerprint)
+                            mContext.getString(R.string.keyguard_suggest_fingerprint),
+                            biometricSourceType
                     );
                 } else if (fpAuthFailed
                         && mKeyguardUpdateMonitor.isCurrentUserUnlockedWithFace()) {
                     // face had already previously unlocked the device, so instead of showing a
                     // fingerprint error, tell them they have already unlocked with face auth
                     // and how to enter their device
-                    showBiometricMessage(
+                    showSuccessBiometricMessage(
                             mContext.getString(R.string.keyguard_face_successful_unlock),
-                            mContext.getString(R.string.keyguard_unlock)
+                            mContext.getString(R.string.keyguard_unlock),
+                            null
                     );
                 } else if (fpAuthFailed
                         && mKeyguardUpdateMonitor.getUserHasTrust(getCurrentUser())) {
-                    showBiometricMessage(
+                    showSuccessBiometricMessage(
                             getTrustGrantedIndication(),
-                            mContext.getString(R.string.keyguard_unlock)
+                            mContext.getString(R.string.keyguard_unlock),
+                            null
                     );
                 } else if (faceAuthUnavailable) {
                     showBiometricMessage(
                             helpString,
                             isUnlockWithFingerprintPossible
                                     ? mContext.getString(R.string.keyguard_suggest_fingerprint)
-                                    : mContext.getString(R.string.keyguard_unlock)
+                                    : mContext.getString(R.string.keyguard_unlock),
+                            biometricSourceType
                     );
                 } else {
-                    showBiometricMessage(helpString);
+                    showBiometricMessage(helpString, biometricSourceType);
                 }
             } else if (faceAuthFailed) {
                 // show action to unlock
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SHOW_ACTION_TO_UNLOCK),
                         TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
             } else {
-                mBiometricErrorMessageToShowOnScreenOn = helpString;
+                mBiometricErrorMessageToShowOnScreenOn =
+                        new Pair<>(helpString, biometricSourceType);
                 mHandler.sendMessageDelayed(
                         mHandler.obtainMessage(MSG_RESET_ERROR_MESSAGE_ON_SCREEN_ON),
                         1000);
@@ -1333,7 +1404,7 @@ public class KeyguardIndicationController {
             } else if (mIndicationHelper.isFaceLockoutErrorMsg(msgId)) {
                 handleFaceLockoutError(errString);
             } else {
-                showErrorMessageNowOrLater(errString, null);
+                showErrorMessageNowOrLater(errString, null, FACE);
             }
         }
 
@@ -1343,7 +1414,7 @@ public class KeyguardIndicationController {
                         msgId,
                         errString);
             } else {
-                showErrorMessageNowOrLater(errString, null);
+                showErrorMessageNowOrLater(errString, null, FINGERPRINT);
             }
         }
 
@@ -1371,7 +1442,7 @@ public class KeyguardIndicationController {
 
         @Override
         public void onTrustAgentErrorMessage(CharSequence message) {
-            showBiometricMessage(message);
+            showBiometricMessage(message, null);
         }
 
         @Override
@@ -1459,12 +1530,13 @@ public class KeyguardIndicationController {
         // had too many unsuccessful attempts.
         if (!mFaceLockedOutThisAuthSession) {
             mFaceLockedOutThisAuthSession = true;
-            showErrorMessageNowOrLater(errString, followupMessage);
+            showErrorMessageNowOrLater(errString, followupMessage, FACE);
         } else if (!mAuthController.isUdfpsFingerDown()) {
             // On subsequent lockouts, we show a more generic locked out message.
             showErrorMessageNowOrLater(
                     mContext.getString(R.string.keyguard_face_unlock_unavailable),
-                    followupMessage);
+                    followupMessage,
+                    FACE);
         }
     }
 
@@ -1484,7 +1556,8 @@ public class KeyguardIndicationController {
                     && !mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 showBiometricMessage(
                         deferredFaceMessage,
-                        mContext.getString(R.string.keyguard_suggest_fingerprint)
+                        mContext.getString(R.string.keyguard_suggest_fingerprint),
+                        FACE
                 );
             } else {
                 // otherwise, don't show any message
@@ -1496,7 +1569,8 @@ public class KeyguardIndicationController {
             // user to manually retry.
             showBiometricMessage(
                     deferredFaceMessage,
-                    mContext.getString(R.string.keyguard_unlock)
+                    mContext.getString(R.string.keyguard_unlock),
+                    FACE
             );
         } else {
             // Face-only
@@ -1510,13 +1584,15 @@ public class KeyguardIndicationController {
                 getCurrentUser()) && mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed();
     }
 
-    private void showErrorMessageNowOrLater(String errString, @Nullable String followUpMsg) {
+    private void showErrorMessageNowOrLater(String errString, @Nullable String followUpMsg,
+            BiometricSourceType biometricSourceType) {
         if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
-            mStatusBarKeyguardViewManager.setKeyguardMessage(errString, mInitialTextColorState);
+            mStatusBarKeyguardViewManager.setKeyguardMessage(errString, mInitialTextColorState,
+                    biometricSourceType);
         } else if (mScreenLifecycle.getScreenState() == SCREEN_ON) {
-            showBiometricMessage(errString, followUpMsg);
+            showBiometricMessage(errString, followUpMsg, biometricSourceType);
         } else {
-            mBiometricErrorMessageToShowOnScreenOn = errString;
+            mBiometricErrorMessageToShowOnScreenOn = new Pair<>(errString, biometricSourceType);
         }
     }
 

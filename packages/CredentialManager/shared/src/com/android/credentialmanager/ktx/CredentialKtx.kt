@@ -47,8 +47,9 @@ import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.credentialmanager.TAG
+import com.android.credentialmanager.model.EntryInfo
 
-fun CredentialEntryInfo.getIntentSenderRequest(
+fun EntryInfo.getIntentSenderRequest(
     isAutoSelected: Boolean = false
 ): IntentSenderRequest? {
     val entryIntent = fillInIntent?.putExtra(IS_AUTO_SELECTED_KEY, isAutoSelected)
@@ -132,6 +133,7 @@ private fun getCredentialOptionInfoList(
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
                 )
                 )
             }
@@ -155,6 +157,7 @@ private fun getCredentialOptionInfoList(
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
                 )
                 )
             }
@@ -177,6 +180,7 @@ private fun getCredentialOptionInfoList(
                     lastUsedTimeMillis = credentialEntry.lastUsedTime,
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
+                    entryGroupId = credentialEntry.entryGroupId.toString(),
                 )
                 )
             }

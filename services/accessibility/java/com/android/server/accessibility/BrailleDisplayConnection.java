@@ -116,6 +116,13 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
     }
 
     /**
+     * Used for `cmd accessibility` to check hidraw access.
+     */
+    static BrailleDisplayScanner createScannerForShell() {
+        return getDefaultNativeScanner(new DefaultNativeInterface());
+    }
+
+    /**
      * Interface to scan for properties of connected Braille displays.
      *
      * <p>Helps simplify testing Braille Display APIs using test data without requiring
@@ -125,7 +132,6 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
      * @see #getDefaultNativeScanner
      * @see #setTestData
      */
-    @VisibleForTesting
     interface BrailleDisplayScanner {
         Collection<Path> getHidrawNodePaths(@NonNull Path directory);
 
@@ -441,7 +447,7 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
      * from HIDRAW nodes and perform ioctls using the provided {@link NativeInterface}.
      */
     @VisibleForTesting
-    BrailleDisplayScanner getDefaultNativeScanner(@NonNull NativeInterface nativeInterface) {
+    static BrailleDisplayScanner getDefaultNativeScanner(@NonNull NativeInterface nativeInterface) {
         Objects.requireNonNull(nativeInterface);
         return new BrailleDisplayScanner() {
             private static final String HIDRAW_DEVICE_GLOB = "hidraw*";
@@ -576,7 +582,7 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
     }
 
     /** Native interface that actually calls native HIDRAW ioctls. */
-    private class DefaultNativeInterface implements NativeInterface {
+    private static class DefaultNativeInterface implements NativeInterface {
         @Override
         public int getHidrawDescSize(int fd) {
             return nativeGetHidrawDescSize(fd);
@@ -598,11 +604,11 @@ class BrailleDisplayConnection extends IBrailleDisplayConnection.Stub {
         }
     }
 
-    private native int nativeGetHidrawDescSize(int fd);
+    private static native int nativeGetHidrawDescSize(int fd);
 
-    private native byte[] nativeGetHidrawDesc(int fd, int descSize);
+    private static native byte[] nativeGetHidrawDesc(int fd, int descSize);
 
-    private native String nativeGetHidrawUniq(int fd);
+    private static native String nativeGetHidrawUniq(int fd);
 
-    private native int nativeGetHidrawBusType(int fd);
+    private static native int nativeGetHidrawBusType(int fd);
 }

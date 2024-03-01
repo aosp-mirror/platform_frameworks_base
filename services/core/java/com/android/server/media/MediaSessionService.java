@@ -128,6 +128,22 @@ public class MediaSessionService extends SystemService implements Monitor {
      */
     private static final String MEDIA_BUTTON_RECEIVER = "media_button_receiver";
 
+    /**
+     * Action reported to UsageStatsManager when a media session becomes active and user engaged
+     * for a given app. App is expected to show an ongoing notification after this.
+     */
+    private static final String USAGE_STATS_ACTION_START = "start";
+
+    /**
+     * Action reported to UsageStatsManager when a media session is no longer active and user
+     * engaged for a given app. If media session only pauses for a brief time the event will not
+     * necessarily be reported in case user is still "engaging" and will restart it momentarily.
+     * In such case, action may be reported after a short delay to ensure user is truly no longer
+     * engaging. Afterwards, the app is no longer expected to show an ongoing notification.
+     */
+    private static final String USAGE_STATS_ACTION_STOP = "stop";
+    private static final String USAGE_STATS_CATEGORY = "android.media";
+
     private final Context mContext;
     private final SessionManagerImpl mSessionManagerImpl;
     private final MessageHandler mHandler = new MessageHandler();
@@ -639,13 +655,15 @@ public class MediaSessionService extends SystemService implements Monitor {
         if (userEngaged) {
             if (!mUserEngagingSessions.contains(sessionUid)) {
                 mUserEngagingSessions.put(sessionUid, new HashSet<>());
-                reportUserInteractionEvent(/* action= */ "start", record.getUserId(), packageName);
+                reportUserInteractionEvent(
+                    USAGE_STATS_ACTION_START, record.getUserId(), packageName);
             }
             mUserEngagingSessions.get(sessionUid).add(token);
         } else if (mUserEngagingSessions.contains(sessionUid)) {
             mUserEngagingSessions.get(sessionUid).remove(token);
             if (mUserEngagingSessions.get(sessionUid).isEmpty()) {
-                reportUserInteractionEvent(/* action= */ "stop", record.getUserId(), packageName);
+                reportUserInteractionEvent(
+                    USAGE_STATS_ACTION_STOP, record.getUserId(), packageName);
                 mUserEngagingSessions.remove(sessionUid);
             }
         }
@@ -653,7 +671,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private void reportUserInteractionEvent(String action, int userId, String packageName) {
         PersistableBundle extras = new PersistableBundle();
-        extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, "android.media");
+        extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, USAGE_STATS_CATEGORY);
         extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION, action);
         mUsageStatsManagerInternal.reportUserInteractionEvent(packageName, userId, extras);
     }

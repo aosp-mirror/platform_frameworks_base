@@ -34,7 +34,7 @@ import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_MATCH_LOST;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_POWER;
 
 import static com.android.server.companion.presence.CompanionDevicePresenceMonitor.DEBUG;
-import static com.android.server.companion.presence.Utils.btDeviceToString;
+import static com.android.server.companion.utils.Utils.btDeviceToString;
 
 import static java.util.Objects.requireNonNull;
 

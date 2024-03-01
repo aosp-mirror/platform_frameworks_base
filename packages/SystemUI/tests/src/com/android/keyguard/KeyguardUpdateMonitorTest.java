@@ -26,6 +26,8 @@ import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_UDFPS_OPTICAL;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
+import static android.telephony.SubscriptionManager.PROFILE_CLASS_DEFAULT;
+import static android.telephony.SubscriptionManager.PROFILE_CLASS_PROVISIONING;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
@@ -187,6 +189,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             TEST_CARRIER, TEST_CARRIER_2, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
             DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", true, TEST_GROUP_UUID,
             TEST_CARRIER_ID, 0);
+    private static final SubscriptionInfo TEST_SUBSCRIPTION_PROVISIONING = new SubscriptionInfo(
+            1, "", 0,
+            TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
+            DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", false, TEST_GROUP_UUID,
+            TEST_CARRIER_ID, PROFILE_CLASS_PROVISIONING);
     private static final int FINGERPRINT_SENSOR_ID = 1;
 
     @Mock
@@ -1204,7 +1211,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.mSimDatas.get(TEST_SUBSCRIPTION.getSubscriptionId()))
                 .isNotNull();
 
-        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList()).thenReturn(null);
+        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList())
+                .thenReturn(new ArrayList<>());
         mKeyguardUpdateMonitor.mPhoneStateListener.onActiveDataSubscriptionIdChanged(
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
         mTestableLooper.processAllMessages();
@@ -1213,6 +1221,37 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 .isNull();
         assertThat(mKeyguardUpdateMonitor.mSimDatas.get(
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID)).isNull();
+    }
+
+    @Test
+    public void testActiveSubscriptionList_filtersProvisioningNetworks() {
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION_PROVISIONING);
+        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList()).thenReturn(list);
+        mKeyguardUpdateMonitor.mSubscriptionListener.onSubscriptionsChanged();
+
+        assertThat(mKeyguardUpdateMonitor.getSubscriptionInfo(true)).isEmpty();
+
+        SubscriptionInfo.Builder b = new SubscriptionInfo.Builder(TEST_SUBSCRIPTION_PROVISIONING);
+        b.setProfileClass(PROFILE_CLASS_DEFAULT);
+        SubscriptionInfo validInfo = b.build();
+
+        list.clear();
+        list.add(validInfo);
+        mKeyguardUpdateMonitor.mSubscriptionListener.onSubscriptionsChanged();
+
+        assertThat(mKeyguardUpdateMonitor.getSubscriptionInfo(true)).hasSize(1);
+    }
+
+    @Test
+    public void testActiveSubscriptionList_filtersProvisioningNetworks_untilValid() {
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION_PROVISIONING);
+        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList()).thenReturn(list);
+        mKeyguardUpdateMonitor.mSubscriptionListener.onSubscriptionsChanged();
+
+        assertThat(mKeyguardUpdateMonitor.getSubscriptionInfo(true)).isEmpty();
+
     }
 
     @Test

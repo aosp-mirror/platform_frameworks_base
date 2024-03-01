@@ -26,6 +26,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.PrivacyIndicatorBounds
 import android.view.RoundedCorners
+import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
@@ -50,6 +51,8 @@ import org.mockito.Mockito.verify
 class PhoneStatusBarViewTest : SysuiTestCase() {
 
     private lateinit var view: PhoneStatusBarView
+    private val systemIconsContainer: View
+        get() = view.requireViewById(R.id.system_icons)
 
     private val contentInsetsProvider = mock<StatusBarContentInsetsProvider>()
     private val windowController = mock<StatusBarWindowController>()
@@ -62,6 +65,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         )
         mDependency.injectTestDependency(DarkIconDispatcher::class.java, mock<DarkIconDispatcher>())
         mDependency.injectTestDependency(StatusBarWindowController::class.java, windowController)
+        context.ensureTestableResources()
         view = spy(createStatusBarView())
         whenever(view.rootWindowInsets).thenReturn(emptyWindowInsets())
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
@@ -217,7 +221,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
 
         val newInsets = Insets.NONE
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
-                .thenReturn(newInsets)
+            .thenReturn(newInsets)
         view.onConfigurationChanged(Configuration())
 
         assertThat(view.paddingLeft).isEqualTo(previousInsets.left)
@@ -239,7 +243,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
 
         val newInsets = Insets.NONE
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
-                .thenReturn(newInsets)
+            .thenReturn(newInsets)
         configuration.densityDpi = 456
         view.onConfigurationChanged(configuration)
 
@@ -262,7 +266,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
 
         val newInsets = Insets.NONE
         whenever(contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation())
-                .thenReturn(newInsets)
+            .thenReturn(newInsets)
         configuration.fontScale = 2f
         view.onConfigurationChanged(configuration)
 
@@ -270,6 +274,19 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         assertThat(view.paddingTop).isEqualTo(newInsets.top)
         assertThat(view.paddingRight).isEqualTo(newInsets.right)
         assertThat(view.paddingBottom).isEqualTo(0)
+    }
+
+    @Test
+    fun onConfigurationChanged_systemIconsHeightChanged_containerHeightIsUpdated() {
+        val newHeight = 123456
+        context.orCreateTestableResources.addOverride(
+            R.dimen.status_bar_system_icons_height,
+            newHeight
+        )
+
+        view.onConfigurationChanged(Configuration())
+
+        assertThat(systemIconsContainer.layoutParams.height).isEqualTo(newHeight)
     }
 
     @Test

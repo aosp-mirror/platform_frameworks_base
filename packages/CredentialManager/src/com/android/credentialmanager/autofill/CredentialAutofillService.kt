@@ -237,23 +237,14 @@ class CredentialAutofillService : AutofillService() {
         if (providerList.isEmpty()) {
             return false
         }
-        var totalEntryCount = 0
-        providerList.forEach { provider ->
-            totalEntryCount += provider.credentialEntryList.size
-        }
         val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerList)
+        var totalEntryCount = providerDisplayInfo.sortedUserNameToCredentialEntryList.size
         val inlineSuggestionsRequest = filLRequest.inlineSuggestionsRequest
-        val inlineMaxSuggestedCount = inlineSuggestionsRequest?.maxSuggestionCount ?: 0
         val inlinePresentationSpecs = inlineSuggestionsRequest?.inlinePresentationSpecs
         val inlinePresentationSpecsCount = inlinePresentationSpecs?.size ?: 0
-        val maxDropdownDisplayLimit = this.resources.getInteger(
+        val maxDatasetDisplayLimit = this.resources.getInteger(
                 com.android.credentialmanager.R.integer.autofill_max_visible_datasets)
-        var maxInlineItemCount = totalEntryCount
-        maxInlineItemCount = maxInlineItemCount.coerceAtMost(inlineMaxSuggestedCount)
-        val lastDropdownDatasetIndex = Settings.Global.getInt(this.contentResolver,
-                Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
-                (maxDropdownDisplayLimit - 1)).coerceAtMost(totalEntryCount)
-
+                .coerceAtMost(totalEntryCount)
         var i = 0
         var datasetAdded = false
 
@@ -278,7 +269,7 @@ class CredentialAutofillService : AutofillService() {
                 Log.e(TAG, "PendingIntent was missing from the entry.")
                 return@usernameLoop
             }
-            if (i >= maxInlineItemCount && i >= lastDropdownDatasetIndex) {
+            if (i >= maxDatasetDisplayLimit) {
                 return@usernameLoop
             }
             val icon: Icon = if (primaryEntry.icon == null) {
@@ -291,7 +282,7 @@ class CredentialAutofillService : AutofillService() {
             }
             // Create inline presentation
             var inlinePresentation: InlinePresentation? = null
-            if (inlinePresentationSpecs != null && i < maxInlineItemCount) {
+            if (inlinePresentationSpecs != null && i < maxDatasetDisplayLimit) {
                 val spec: InlinePresentationSpec? = if (i < inlinePresentationSpecsCount) {
                     inlinePresentationSpecs[i]
                 } else {
@@ -305,7 +296,7 @@ class CredentialAutofillService : AutofillService() {
                 }
             }
             var dropdownPresentation: RemoteViews? = null
-            if (i < lastDropdownDatasetIndex) {
+            if (i < maxDatasetDisplayLimit) {
                 dropdownPresentation = RemoteViewsFactory
                         .createDropdownPresentation(this, icon, primaryEntry)
             }
@@ -331,17 +322,15 @@ class CredentialAutofillService : AutofillService() {
                             .build())
             datasetAdded = true
             i++
-
-            if (i == lastDropdownDatasetIndex) {
-                addDropdownMoreOptionsPresentation(bottomSheetIntent, autofillId,
-                        fillResponseBuilder)
-            }
         }
         val pinnedSpec = getLastInlinePresentationSpec(inlinePresentationSpecs,
                 inlinePresentationSpecsCount)
-        if (datasetAdded && pinnedSpec != null) {
-            addPinnedInlineSuggestion(pinnedSpec, autofillId,
-                    fillResponseBuilder, bottomSheetIntent)
+        if (datasetAdded) {
+            addDropdownMoreOptionsPresentation(bottomSheetIntent, autofillId, fillResponseBuilder)
+            if (pinnedSpec != null) {
+                addPinnedInlineSuggestion(pinnedSpec, autofillId,
+                        fillResponseBuilder, bottomSheetIntent)
+            }
         }
         return datasetAdded
     }

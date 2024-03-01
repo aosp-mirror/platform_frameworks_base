@@ -46,9 +46,10 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.view.Surface;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.mediaframeworktest.MediaFrameworkIntegrationTestRunner;
 

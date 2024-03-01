@@ -81,7 +81,7 @@ ApkAssetsPtr ApkAssets::LoadOverlay(const std::string& idmap_path, package_prope
   std::string overlay_path(loaded_idmap->OverlayApkPath());
   auto fd = unique_fd(base::utf8::open(overlay_path.c_str(), O_RDONLY | O_CLOEXEC));
   std::unique_ptr<AssetsProvider> overlay_assets;
-  if (IsFabricatedOverlay(fd)) {
+  if (IsFabricatedOverlayName(overlay_path) && IsFabricatedOverlay(fd)) {
     // Fabricated overlays do not contain resource definitions. All of the overlay resource values
     // are defined inline in the idmap.
     overlay_assets = EmptyAssetsProvider::Create(std::move(overlay_path));
@@ -137,8 +137,7 @@ ApkAssetsPtr ApkAssets::LoadImpl(std::unique_ptr<Asset> resources_asset,
       return {};
     }
     loaded_arsc = LoadedArsc::Load(data, length, loaded_idmap.get(), property_flags);
-  } else if (loaded_idmap != nullptr &&
-      IsFabricatedOverlay(std::string(loaded_idmap->OverlayApkPath()))) {
+  } else if (loaded_idmap != nullptr && IsFabricatedOverlay(loaded_idmap->OverlayApkPath())) {
     loaded_arsc = LoadedArsc::Load(loaded_idmap.get());
   } else {
     loaded_arsc = LoadedArsc::CreateEmpty();

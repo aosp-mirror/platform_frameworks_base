@@ -21,8 +21,8 @@ import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
-import android.hardware.biometrics.Flags.customBiometricPrompt
 import android.hardware.biometrics.PromptInfo
+import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.os.Handler
@@ -40,7 +40,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
@@ -148,8 +147,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        mSetFlagsRule.disableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-        mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
         displayRepository = FakeDisplayRepository()
 
         displayStateInteractor =
@@ -388,9 +385,10 @@ open class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun testShowCredentialUI() {
+    fun testShowCredentialUI_withDescription() {
+        mSetFlagsRule.disableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         val container = initializeFingerprintContainer(
-            authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
         )
         waitForIdleSync()
 
@@ -399,16 +397,12 @@ open class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun testShowBiometricUIWhenCustomBpEnabledAndNoSensors() {
-        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+    fun testShowCredentialUI_withCustomBp() {
         val container = initializeFingerprintContainer(
-                authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+                isUsingContentView = true
         )
-        waitForIdleSync()
-
-        assertThat(customBiometricPrompt()).isTrue()
-        assertThat(container.hasBiometricPrompt()).isTrue()
-        assertThat(container.hasCredentialView()).isFalse()
+        checkBpShowsForCredentialAndGoToCredential(container)
     }
 
     @Test
@@ -512,11 +506,13 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     private fun initializeFingerprintContainer(
         authenticators: Int = BiometricManager.Authenticators.BIOMETRIC_WEAK,
-        addToView: Boolean = true
+        addToView: Boolean = true,
+        isUsingContentView: Boolean = false,
     ) = initializeContainer(
         TestAuthContainerView(
             authenticators = authenticators,
-            fingerprintProps = fingerprintSensorPropertiesInternal()
+            fingerprintProps = fingerprintSensorPropertiesInternal(),
+                isUsingContentView = isUsingContentView,
         ),
         addToView
     )
@@ -549,7 +545,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
     private inner class TestAuthContainerView(
         authenticators: Int = BiometricManager.Authenticators.BIOMETRIC_WEAK,
         fingerprintProps: List<FingerprintSensorPropertiesInternal> = listOf(),
-        faceProps: List<FaceSensorPropertiesInternal> = listOf()
+        faceProps: List<FaceSensorPropertiesInternal> = listOf(),
+        isUsingContentView: Boolean = false,
     ) : AuthContainerView(
         Config().apply {
             mContext = this@AuthContainerViewTest.context
@@ -559,6 +556,9 @@ open class AuthContainerViewTest : SysuiTestCase() {
             mSkipAnimation = true
             mPromptInfo = PromptInfo().apply {
                 this.authenticators = authenticators
+                if (isUsingContentView) {
+                    this.contentView = PromptVerticalListContentView.Builder().build()
+                }
             }
             mOpPackageName = OP_PACKAGE_NAME
         },
@@ -613,6 +613,17 @@ open class AuthContainerViewTest : SysuiTestCase() {
     fun testLayoutParams_excludesSystemBarInsets() {
         val layoutParams = AuthContainerView.getLayoutParams(windowToken, "")
         assertThat((layoutParams.fitInsetsTypes and WindowInsets.Type.systemBars()) == 0).isTrue()
+    }
+
+    private fun checkBpShowsForCredentialAndGoToCredential(container: TestAuthContainerView) {
+        waitForIdleSync()
+        assertThat(container.hasBiometricPrompt()).isTrue()
+        assertThat(container.hasCredentialView()).isFalse()
+
+        container.animateToCredentialUI(false)
+        waitForIdleSync()
+        assertThat(container.hasBiometricPrompt()).isFalse()
+        assertThat(container.hasCredentialView()).isTrue()
     }
 }
 

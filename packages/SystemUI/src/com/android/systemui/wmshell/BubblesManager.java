@@ -28,6 +28,7 @@ import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_N
 import static com.android.server.notification.Flags.screenshareNotificationHiding;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -50,6 +51,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
@@ -97,6 +99,7 @@ public class BubblesManager {
     private final Context mContext;
     private final Bubbles mBubbles;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
+    private final KeyguardStateController mKeyguardStateController;
     private final ShadeController mShadeController;
     private final IStatusBarService mBarService;
     private final INotificationManager mNotificationManager;
@@ -109,6 +112,7 @@ public class BubblesManager {
     private final NotifPipeline mNotifPipeline;
     private final NotifPipelineFlags mNotifPipelineFlags;
     private final Executor mSysuiMainExecutor;
+    private final Executor mSysuiUiBgExecutor;
 
     private final Bubbles.SysuiProxy mSysuiProxy;
     // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
@@ -116,6 +120,8 @@ public class BubblesManager {
     private final StatusBarWindowCallback mStatusBarWindowCallback;
     private final Runnable mSensitiveStateChangedListener;
     private boolean mPanelExpanded;
+    private boolean mKeyguardShowing;
+    private boolean mDreamingOrInPreview;
 
     /**
      * Creates {@link BubblesManager}, returns {@code null} if Optional {@link Bubbles} not present
@@ -140,7 +146,8 @@ public class BubblesManager {
             SysUiState sysUiState,
             FeatureFlags featureFlags,
             NotifPipelineFlags notifPipelineFlags,
-            Executor sysuiMainExecutor) {
+            Executor sysuiMainExecutor,
+            Executor sysuiUiBgExecutor) {
         if (bubblesOptional.isPresent()) {
             return new BubblesManager(context,
                     bubblesOptional.get(),
@@ -160,7 +167,8 @@ public class BubblesManager {
                     sysUiState,
                     featureFlags,
                     notifPipelineFlags,
-                    sysuiMainExecutor);
+                    sysuiMainExecutor,
+                    sysuiUiBgExecutor);
         } else {
             return null;
         }
@@ -185,10 +193,12 @@ public class BubblesManager {
             SysUiState sysUiState,
             FeatureFlags featureFlags,
             NotifPipelineFlags notifPipelineFlags,
-            Executor sysuiMainExecutor) {
+            Executor sysuiMainExecutor,
+            Executor sysuiUiBgExecutor) {
         mContext = context;
         mBubbles = bubbles;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mKeyguardStateController = keyguardStateController;
         mShadeController = shadeController;
         mNotificationManager = notificationManager;
         mDreamManager = dreamManager;
@@ -200,6 +210,7 @@ public class BubblesManager {
         mNotifPipeline = notifPipeline;
         mNotifPipelineFlags = notifPipelineFlags;
         mSysuiMainExecutor = sysuiMainExecutor;
+        mSysuiUiBgExecutor = sysuiUiBgExecutor;
 
         mBarService = statusBarService == null
                 ? IStatusBarService.Stub.asInterface(
@@ -208,12 +219,11 @@ public class BubblesManager {
 
         setupNotifPipeline();
 
-        keyguardStateController.addCallback(new KeyguardStateController.Callback() {
+        // TODO(b/327410864): use KeyguardTransitionInteractor to listen for keyguard changes
+        mKeyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardShowingChanged() {
-                boolean isUnlockedShade = !keyguardStateController.isShowing()
-                        && !isDreamingOrInPreview();
-                bubbles.onStatusBarStateChanged(isUnlockedShade);
+                updateKeyguardAndDreamingState();
             }
         });
 
@@ -255,6 +265,14 @@ public class BubblesManager {
                     if (panelExpanded != mPanelExpanded) {
                         mPanelExpanded = panelExpanded;
                         mBubbles.onNotificationPanelExpandedChanged(panelExpanded);
+                    }
+                    if (!mKeyguardShowing && mDreamingOrInPreview && !isDreaming) {
+                        // We check for dreaming state changes when keyguard status changes.
+                        // This causes us to miss events if dreaming state changes after keyguard.
+                        // Add a check here for the case where keyguard is dismissed before
+                        // dreaming state changes. Otherwise bubbles remain invisible.
+                        // TODO(b/327410864): use KeyguardTransitionInteractor for dreaming changes
+                        updateKeyguardAndDreamingState();
                     }
                 };
         notificationShadeWindowController.registerCallback(mStatusBarWindowCallback);
@@ -393,6 +411,19 @@ public class BubblesManager {
             }
         };
         mBubbles.setSysuiProxy(mSysuiProxy);
+    }
+
+    private void updateKeyguardAndDreamingState() {
+        mSysuiUiBgExecutor.execute(() -> {
+            mKeyguardShowing = mKeyguardStateController.isShowing();
+            mDreamingOrInPreview = isDreamingOrInPreview();
+            boolean isUnlockedShade = !mKeyguardShowing && !mDreamingOrInPreview;
+            ProtoLog.d(WM_SHELL_BUBBLES,
+                    "handleKeyguardOrDreamChange isUnlockedShade=%b keyguardShowing=%b "
+                            + "dreamingOrInPreview=%b",
+                    isUnlockedShade, mKeyguardShowing, mDreamingOrInPreview);
+            mBubbles.onStatusBarStateChanged(isUnlockedShade);
+        });
     }
 
     private boolean isDreamingOrInPreview() {

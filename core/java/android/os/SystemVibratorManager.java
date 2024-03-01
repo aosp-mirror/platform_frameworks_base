@@ -147,14 +147,15 @@ public class SystemVibratorManager extends VibratorManager {
     }
 
     @Override
-    public void performHapticFeedback(int constant, boolean always, String reason) {
+    public void performHapticFeedback(int constant, boolean always, String reason,
+            boolean fromIme) {
         if (mService == null) {
             Log.w(TAG, "Failed to perform haptic feedback; no vibrator manager service.");
             return;
         }
         try {
             mService.performHapticFeedback(
-                    mUid, mContext.getDeviceId(), mPackageName, constant, always, reason);
+                    mUid, mContext.getDeviceId(), mPackageName, constant, always, reason, fromIme);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to perform haptic feedback.", e);
         }
@@ -244,8 +245,9 @@ public class SystemVibratorManager extends VibratorManager {
         }
 
         @Override
-        public void performHapticFeedback(int effectId, boolean always, String reason) {
-            SystemVibratorManager.this.performHapticFeedback(effectId, always, reason);
+        public void performHapticFeedback(int effectId, boolean always, String reason,
+                boolean fromIme) {
+            SystemVibratorManager.this.performHapticFeedback(effectId, always, reason, fromIme);
         }
 
         @Override

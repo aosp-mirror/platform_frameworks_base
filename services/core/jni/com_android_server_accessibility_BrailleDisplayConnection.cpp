@@ -40,7 +40,7 @@ constexpr int UNIQ_SIZE_MAX = 64;
 } // anonymous namespace
 
 static jint com_android_server_accessibility_BrailleDisplayConnection_getHidrawDescSize(
-        JNIEnv* env, jobject thiz, int fd) {
+        JNIEnv* env, jclass /*clazz*/, int fd) {
     int size = 0;
     if (ioctl(fd, HIDIOCGRDESCSIZE, &size) < 0) {
         return -1;
@@ -49,7 +49,7 @@ static jint com_android_server_accessibility_BrailleDisplayConnection_getHidrawD
 }
 
 static jbyteArray com_android_server_accessibility_BrailleDisplayConnection_getHidrawDesc(
-        JNIEnv* env, jobject thiz, int fd, int descSize) {
+        JNIEnv* env, jclass /*clazz*/, int fd, int descSize) {
     struct hidraw_report_descriptor desc;
     desc.size = descSize;
     if (ioctl(fd, HIDIOCGRDESC, &desc) < 0) {
@@ -63,9 +63,8 @@ static jbyteArray com_android_server_accessibility_BrailleDisplayConnection_getH
     return result;
 }
 
-static jstring com_android_server_accessibility_BrailleDisplayConnection_getHidrawUniq(JNIEnv* env,
-                                                                                       jobject thiz,
-                                                                                       int fd) {
+static jstring com_android_server_accessibility_BrailleDisplayConnection_getHidrawUniq(
+        JNIEnv* env, jclass /*clazz*/, int fd) {
     char buf[UNIQ_SIZE_MAX];
     if (ioctl(fd, HIDIOCGRAWUNIQ(UNIQ_SIZE_MAX), buf) < 0) {
         return nullptr;
@@ -74,9 +73,8 @@ static jstring com_android_server_accessibility_BrailleDisplayConnection_getHidr
     return env->NewStringUTF(buf);
 }
 
-static jint com_android_server_accessibility_BrailleDisplayConnection_getHidrawBusType(JNIEnv* env,
-                                                                                       jobject thiz,
-                                                                                       int fd) {
+static jint com_android_server_accessibility_BrailleDisplayConnection_getHidrawBusType(
+        JNIEnv* env, jclass /*clazz*/, int fd) {
     struct hidraw_devinfo info;
     if (ioctl(fd, HIDIOCGRAWINFO, &info) < 0) {
         return -1;

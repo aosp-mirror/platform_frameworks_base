@@ -95,8 +95,11 @@ public class TransactionParcelTests {
     @Test
     public void testActivityConfigChange() {
         // Write to parcel
+        final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
+        activityWindowInfo.set(true /* isEmbedded */, new Rect(0, 0, 500, 1000),
+                new Rect(0, 0, 500, 500));
         ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(
-                mActivityToken, config());
+                mActivityToken, config(), activityWindowInfo);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -300,7 +303,7 @@ public class TransactionParcelTests {
         // Write to parcel
         NewIntentItem callback1 = NewIntentItem.obtain(mActivityToken, new ArrayList<>(), true);
         ActivityConfigurationChangeItem callback2 = ActivityConfigurationChangeItem.obtain(
-                mActivityToken, config());
+                mActivityToken, config(), new ActivityWindowInfo());
 
         StopActivityItem lifecycleRequest = StopActivityItem.obtain(mActivityToken,
                 78 /* configChanges */);
@@ -327,7 +330,7 @@ public class TransactionParcelTests {
         // Write to parcel
         NewIntentItem callback1 = NewIntentItem.obtain(mActivityToken, new ArrayList<>(), true);
         ActivityConfigurationChangeItem callback2 = ActivityConfigurationChangeItem.obtain(
-                mActivityToken, config());
+                mActivityToken, config(), new ActivityWindowInfo());
 
         ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
         transaction.addTransactionItem(callback1);

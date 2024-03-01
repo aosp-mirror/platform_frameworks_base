@@ -16,12 +16,11 @@
 
 package android.security.keystore2;
 
-import android.security.KeyStore;
 import android.security.KeyStoreException;
 
 /**
- * Helper for streaming a crypto operation's input and output via {@link KeyStore} service's
- * {@code update} and {@code finish} operations.
+ * Helper for streaming a crypto operation's input and output via KeyStore service's {@code update}
+ * and {@code finish} operations.
  *
  * <p>The helper abstracts away to issues that need to be solved in most code that uses KeyStore's
  * update and finish operations. Firstly, KeyStore's update operation can consume only a limited

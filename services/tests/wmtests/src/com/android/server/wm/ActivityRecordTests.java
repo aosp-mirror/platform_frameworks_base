@@ -527,7 +527,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // The configuration change is still sent to the activity, even if it doesn't relaunch.
         final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
+                ActivityConfigurationChangeItem.obtain(activity.token, newConfig,
+                        activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(
                 eq(activity.app.getThread()), eq(expected));
     }
@@ -599,7 +600,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Configuration currentConfig = activity.getConfiguration();
         assertEquals(expectedOrientation, currentConfig.orientation);
         final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, currentConfig);
+                ActivityConfigurationChangeItem.obtain(activity.token, currentConfig,
+                        activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(activity.app.getThread(), expected);
         verify(displayRotation).onSetRequestedOrientation();
     }
@@ -818,7 +820,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
             final ActivityConfigurationChangeItem expected =
                     ActivityConfigurationChangeItem.obtain(activity.token,
-                            activity.getConfiguration());
+                            activity.getConfiguration(), activity.getActivityWindowInfo());
             verify(mClientLifecycleManager).scheduleTransactionItem(
                     activity.app.getThread(), expected);
         } finally {

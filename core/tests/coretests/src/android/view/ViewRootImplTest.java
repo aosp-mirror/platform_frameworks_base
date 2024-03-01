@@ -451,7 +451,7 @@ public class ViewRootImplTest {
         ViewRootImpl viewRootImpl = new ViewRootImpl(sContext, display);
 
         boolean result = viewRootImpl.performHapticFeedback(
-                HapticFeedbackConstants.CONTEXT_CLICK, true);
+                HapticFeedbackConstants.CONTEXT_CLICK, true, false /* fromIme */);
 
         assertThat(result).isFalse();
     }

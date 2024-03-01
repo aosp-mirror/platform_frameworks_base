@@ -124,6 +124,7 @@ import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.ColorUtilKt;
+import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
 
 import com.google.errorprone.annotations.CompileTimeConstant;
@@ -150,6 +151,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
     private static final boolean SPEW = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG_UPDATE_SIDE_PADDING = Compile.IS_DEBUG;
 
     private boolean mShadeNeedsToClose = false;
 
@@ -218,6 +220,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     int mBottomInset = 0;
     private float mQsExpansionFraction;
     private final int mSplitShadeMinContentHeight;
+    private String mLastUpdateSidePaddingDumpString;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -1106,15 +1109,28 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     void updateSidePadding(int viewWidth) {
+        final boolean portrait =
+                getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+
+        mLastUpdateSidePaddingDumpString = "viewWidth=" + viewWidth
+                + " skinnyNotifsInLandscape=" + mSkinnyNotifsInLandscape
+                + " portrait=" + portrait;
+
+        if (DEBUG_UPDATE_SIDE_PADDING) {
+            Log.v(TAG, "updateSidePadding: " + mLastUpdateSidePaddingDumpString);
+        }
+
         if (viewWidth == 0 || !mSkinnyNotifsInLandscape) {
             mSidePaddings = mMinimumPaddings;
             return;
         }
+
         // Portrait is easy, just use the dimen for paddings
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (portrait) {
             mSidePaddings = mMinimumPaddings;
             return;
         }
+
         final int innerWidth = viewWidth - mMinimumPaddings * 2;
         final int qsTileWidth = (innerWidth - mQsTilePadding * 3) / 4;
         mSidePaddings = mMinimumPaddings + qsTileWidth + mQsTilePadding;
@@ -5294,6 +5310,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             println(pw, "translationX", getTranslationX());
             println(pw, "translationY", getTranslationY());
             println(pw, "translationZ", getTranslationZ());
+            println(pw, "skinnyNotifsInLandscape", mSkinnyNotifsInLandscape);
+            println(pw, "minimumPaddings", mMinimumPaddings);
+            println(pw, "qsTilePadding", mQsTilePadding);
+            println(pw, "sidePaddings", mSidePaddings);
+            println(pw, "lastUpdateSidePadding", mLastUpdateSidePaddingDumpString);
             mNotificationStackSizeCalculator.dump(pw, args);
         });
         pw.println();

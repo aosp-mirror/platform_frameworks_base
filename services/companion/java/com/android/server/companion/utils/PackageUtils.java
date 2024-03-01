@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.utils;
 
 import static android.content.pm.PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
 import static android.content.pm.PackageManager.GET_CONFIGURATIONS;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.os.Binder.getCallingUid;
-
-import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
-import static com.android.server.companion.CompanionDeviceManagerService.TAG;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -44,13 +41,11 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.os.Binder;
 import android.os.Process;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,16 +53,22 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Utility methods for working with {@link PackageInfo}-s.
+ * Utility methods for working with {@link PackageInfo}.
  */
 public final class PackageUtils {
+
+    private static final String TAG = "CDM_PackageUtils";
+
     private static final Intent COMPANION_SERVICE_INTENT =
             new Intent(CompanionDeviceService.SERVICE_INTERFACE);
     private static final String PROPERTY_PRIMARY_TAG =
             "android.companion.PROPERTY_PRIMARY_COMPANION_DEVICE_SERVICE";
 
+    /**
+     * Get package info
+     */
     @Nullable
-    static PackageInfo getPackageInfo(@NonNull Context context,
+    public static PackageInfo getPackageInfo(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName) {
         final PackageManager pm = context.getPackageManager();
         final PackageInfoFlags flags = PackageInfoFlags.of(GET_PERMISSIONS | GET_CONFIGURATIONS);
@@ -81,26 +82,32 @@ public final class PackageUtils {
         });
     }
 
-    static void enforceUsesCompanionDeviceFeature(@NonNull Context context,
+    /**
+     * Require the app to declare the companion device feature.
+     */
+    public static void enforceUsesCompanionDeviceFeature(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName) {
         // Allow system server to create CDM associations without FEATURE_COMPANION_DEVICE_SETUP
         if (getCallingUid() == Process.SYSTEM_UID) {
             return;
         }
 
-        String requiredFeature = FEATURE_COMPANION_DEVICE_SETUP;
+        PackageInfo packageInfo = getPackageInfo(context, userId, packageName);
+        if (packageInfo == null) {
+            throw new IllegalArgumentException("Package " + packageName + " doesn't exist.");
+        }
 
-        FeatureInfo[] requestedFeatures = getPackageInfo(context, userId, packageName).reqFeatures;
+        FeatureInfo[] requestedFeatures = packageInfo.reqFeatures;
         if (requestedFeatures != null) {
-            for (int i = 0; i < requestedFeatures.length; i++) {
-                if (requiredFeature.equals(requestedFeatures[i].name)) {
+            for (FeatureInfo requestedFeature : requestedFeatures) {
+                if (FEATURE_COMPANION_DEVICE_SETUP.equals(requestedFeature.name)) {
                     return;
                 }
             }
         }
 
         throw new IllegalStateException("Must declare uses-feature "
-                + requiredFeature
+                + FEATURE_COMPANION_DEVICE_SETUP
                 + " in manifest to use this API");
     }
 
@@ -109,7 +116,7 @@ public final class PackageUtils {
      *         Services marked as "primary" would always appear at the head of the lists, *before*
      *         all non-primary services.
      */
-    static @NonNull Map<String, List<ComponentName>> getCompanionServicesForUser(
+    public static @NonNull Map<String, List<ComponentName>> getCompanionServicesForUser(
             @NonNull Context context, @UserIdInt int userId) {
         final PackageManager pm = context.getPackageManager();
         final List<ResolveInfo> companionServices = pm.queryIntentServicesAsUser(
@@ -179,9 +186,7 @@ public final class PackageUtils {
         final String[] allowlistedPackages = context.getResources()
                 .getStringArray(com.android.internal.R.array.config_companionDevicePackages);
         if (!ArrayUtils.contains(allowlistedPackages, packageName)) {
-            if (DEBUG) {
-                Log.d(TAG, packageName + " is not allowlisted.");
-            }
+            Slog.d(TAG, packageName + " is not allowlisted.");
             return false;
         }
 
@@ -212,13 +217,6 @@ public final class PackageUtils {
 
         if (!requestingPackageSignatureAllowlisted) {
             Slog.w(TAG, "Certificate mismatch for allowlisted package " + packageName);
-            if (DEBUG) {
-                Log.d(TAG, "  > allowlisted signatures for " + packageName + ": ["
-                        + String.join(", ", allowlistedSignatureDigestsForRequestingPackage)
-                        + "]");
-                Log.d(TAG, "  > actual signatures for " + packageName + ": "
-                        + Arrays.toString(requestingPackageSignatureDigests));
-            }
         }
 
         return requestingPackageSignatureAllowlisted;

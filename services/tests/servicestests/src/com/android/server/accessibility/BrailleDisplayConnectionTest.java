@@ -103,7 +103,7 @@ public class BrailleDisplayConnectionTest {
                 }
 
                 BrailleDisplayConnection.BrailleDisplayScanner scanner =
-                        mBrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
+                        BrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
 
                 assertThat(scanner.getHidrawNodePaths(testDir.toPath()))
                         .containsExactly(hidrawNode0, hidrawNode1);
@@ -123,7 +123,7 @@ public class BrailleDisplayConnectionTest {
                     descriptor);
 
             BrailleDisplayConnection.BrailleDisplayScanner scanner =
-                    mBrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
+                    BrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
 
             assertThat(scanner.getDeviceReportDescriptor(NULL_PATH)).isEqualTo(descriptor);
         }
@@ -133,7 +133,7 @@ public class BrailleDisplayConnectionTest {
             when(mNativeInterface.getHidrawDescSize(anyInt())).thenReturn(0);
 
             BrailleDisplayConnection.BrailleDisplayScanner scanner =
-                    mBrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
+                    BrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
 
             assertThat(scanner.getDeviceReportDescriptor(NULL_PATH)).isNull();
         }
@@ -144,7 +144,7 @@ public class BrailleDisplayConnectionTest {
             when(mNativeInterface.getHidrawUniq(anyInt())).thenReturn(macAddress);
 
             BrailleDisplayConnection.BrailleDisplayScanner scanner =
-                    mBrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
+                    BrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
 
             assertThat(scanner.getUniqueId(NULL_PATH)).isEqualTo(macAddress);
         }
@@ -155,7 +155,7 @@ public class BrailleDisplayConnectionTest {
                     .thenReturn(BrailleDisplayConnection.BUS_USB);
 
             BrailleDisplayConnection.BrailleDisplayScanner scanner =
-                    mBrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
+                    BrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
 
             assertThat(scanner.getDeviceBusType(NULL_PATH))
                     .isEqualTo(BrailleDisplayConnection.BUS_USB);
@@ -167,7 +167,7 @@ public class BrailleDisplayConnectionTest {
                     .thenReturn(BrailleDisplayConnection.BUS_BLUETOOTH);
 
             BrailleDisplayConnection.BrailleDisplayScanner scanner =
-                    mBrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
+                    BrailleDisplayConnection.getDefaultNativeScanner(mNativeInterface);
 
             assertThat(scanner.getDeviceBusType(NULL_PATH))
                     .isEqualTo(BrailleDisplayConnection.BUS_BLUETOOTH);

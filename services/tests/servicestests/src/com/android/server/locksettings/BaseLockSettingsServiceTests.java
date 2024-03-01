@@ -48,7 +48,6 @@ import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
-import android.security.KeyStore;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -102,7 +101,6 @@ public abstract class BaseLockSettingsServiceTests {
     IActivityManager mActivityManager;
     DevicePolicyManager mDevicePolicyManager;
     DevicePolicyManagerInternal mDevicePolicyManagerInternal;
-    KeyStore mKeyStore;
     MockSyntheticPasswordManager mSpManager;
     IAuthSecret mAuthSecretService;
     WindowManagerInternal mMockWindowManager;
@@ -165,7 +163,6 @@ public abstract class BaseLockSettingsServiceTests {
                 new LockSettingsServiceTestable.MockInjector(
                         mContext,
                         mStorage,
-                        mKeyStore,
                         mActivityManager,
                         setUpStorageManagerMock(),
                         mSpManager,

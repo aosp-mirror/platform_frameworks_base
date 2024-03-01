@@ -277,7 +277,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 }
 
                 @Override
-                public void onAnimationEnd(@androidx.annotation.NonNull Animator animation) {
+                public void onAnimationEnd(@NonNull Animator animation) {
                     mRunningAnimationCount--;
                     animT.remove(mScreenshot);
                     animT.apply();
