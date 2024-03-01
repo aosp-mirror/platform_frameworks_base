@@ -3521,7 +3521,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>When the key is present, only a PRIVATE/YUV output of the specified size is guaranteed
      * to be supported by the camera HAL in the secure camera mode. Any other format or
      * resolutions might not be supported. Use
-     * {@link CameraManager#isSessionConfigurationWithParametersSupported }
+     * {@link CameraDevice#isSessionConfigurationSupported }
      * API to query if a secure session configuration is supported if the device supports this
      * API.</p>
      * <p>If this key returns null on a device with SECURE_IMAGE_DATA capability, the application
@@ -5046,18 +5046,18 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>The version of the session configuration query
-     * {@link android.hardware.camera2.CameraManager#isSessionConfigurationWithParametersSupported }
+     * {@link android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported }
      * API</p>
      * <p>The possible values in this key correspond to the values defined in
      * android.os.Build.VERSION_CODES. Each version defines a set of feature combinations the
      * camera device must reliably report whether they are supported via
-     * {@link android.hardware.camera2.CameraManager#isSessionConfigurationWithParametersSupported }
+     * {@link android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported }
      * API. And the version is always less or equal to android.os.Build.VERSION.SDK_INT.</p>
      * <p>If set to UPSIDE_DOWN_CAKE, this camera device doesn't support
-     * {@link android.hardware.camera2.CameraManager#isSessionConfigurationWithParametersSupported }.
+     * {@link android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported }.
      * Calling the method for this camera ID throws an UnsupportedOperationException.</p>
      * <p>If set to VANILLA_ICE_CREAM, the application can call
-     * {@link android.hardware.camera2.CameraManager#isSessionConfigurationWithParametersSupported }
+     * {@link android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported }
      * to check if the combinations of below features are supported.</p>
      * <ul>
      * <li>A subset of LIMITED-level device stream combinations.</li>
@@ -6082,11 +6082,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Minimum and maximum padding zoom factors supported by this camera device for
-     * {@link android.hardware.camera2.ExtensionCaptureRequest#EFV_PADDING_ZOOM_FACTOR } used for the
+     * android.efv.paddingZoomFactor used for the
      * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
      * extension.</p>
      * <p>The minimum and maximum padding zoom factors supported by the device for
-     * {@link android.hardware.camera2.ExtensionCaptureRequest#EFV_PADDING_ZOOM_FACTOR } used as part of the
+     * android.efv.paddingZoomFactor used as part of the
      * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
      * extension feature. This extension specific camera characteristic can be queried using
      * {@link android.hardware.camera2.CameraExtensionCharacteristics#get }.</p>
