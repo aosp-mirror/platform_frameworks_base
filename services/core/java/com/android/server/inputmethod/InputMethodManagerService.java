@@ -1408,29 +1408,24 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 String curInputMethodId = mSettings.getSelectedInputMethod();
                 final List<InputMethodInfo> methodList = mSettings.getMethodList();
                 final int numImes = methodList.size();
-                if (curInputMethodId != null) {
-                    for (int i = 0; i < numImes; i++) {
-                        InputMethodInfo imi = methodList.get(i);
-                        final String imiId = imi.getId();
-                        if (imiId.equals(curInputMethodId)) {
-                            curIm = imi;
-                        }
+                for (int i = 0; i < numImes; i++) {
+                    InputMethodInfo imi = methodList.get(i);
+                    final String imiId = imi.getId();
+                    if (imiId.equals(curInputMethodId)) {
+                        curIm = imi;
+                    }
 
-                        int change = isPackageDisappearing(imi.getPackageName());
-                        if (change == PACKAGE_TEMPORARY_CHANGE
-                                || change == PACKAGE_PERMANENT_CHANGE) {
-                            Slog.i(TAG, "Input method uninstalled, disabling: "
-                                    + imi.getComponent());
-                            setInputMethodEnabledLocked(imi.getId(), false);
-                        } else if (change == PACKAGE_UPDATING) {
-                            Slog.i(TAG,
-                                    "Input method reinstalling, clearing additional subtypes: "
-                                            + imi.getComponent());
-                            mAdditionalSubtypeMap =
-                                    mAdditionalSubtypeMap.cloneWithRemoveOrSelf(imi.getId());
-                            AdditionalSubtypeUtils.save(mAdditionalSubtypeMap,
-                                    mSettings.getMethodMap(), mSettings.getUserId());
-                        }
+                    int change = isPackageDisappearing(imi.getPackageName());
+                    if (change == PACKAGE_TEMPORARY_CHANGE || change == PACKAGE_PERMANENT_CHANGE) {
+                        Slog.i(TAG, "Input method uninstalled, disabling: " + imi.getComponent());
+                        setInputMethodEnabledLocked(imi.getId(), false);
+                    } else if (change == PACKAGE_UPDATING) {
+                        Slog.i(TAG, "Input method reinstalling, clearing additional subtypes: "
+                                + imi.getComponent());
+                        mAdditionalSubtypeMap =
+                                mAdditionalSubtypeMap.cloneWithRemoveOrSelf(imi.getId());
+                        AdditionalSubtypeUtils.save(mAdditionalSubtypeMap,
+                                mSettings.getMethodMap(), mSettings.getUserId());
                     }
                 }
 
