@@ -153,12 +153,12 @@ public class CompanionTransportManager {
 
     public void detachSystemDataTransport(String packageName, int userId, int associationId) {
         synchronized (mTransports) {
-            final Transport transport = mTransports.get(associationId);
-            if (transport != null) {
-                mTransports.delete(associationId);
-                transport.stop();
+            final Transport transport = mTransports.removeReturnOld(associationId);
+            if (transport == null) {
+                return;
             }
 
+            transport.stop();
             notifyOnTransportsChanged();
         }
     }

@@ -244,13 +244,14 @@ public class CompanionDeviceManagerService extends SystemService {
                 context, mAssociationStore, mObservableUuidStore, mDevicePresenceMonitor,
                 mPowerManagerInternal);
 
+        mTransportManager = new CompanionTransportManager(context, mAssociationStore);
+
         mAssociationRevokeProcessor = new AssociationRevokeProcessor(this, mAssociationStore,
                 mPackageManagerInternal, mDevicePresenceMonitor, mCompanionAppController,
-                mSystemDataTransferRequestStore);
+                mSystemDataTransferRequestStore, mTransportManager);
 
         loadAssociationsFromDisk();
 
-        mTransportManager = new CompanionTransportManager(context, mAssociationStore);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this,
                 mPackageManagerInternal, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
