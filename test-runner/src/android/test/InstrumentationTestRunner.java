@@ -16,9 +16,7 @@
 
 package android.test;
 
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.SmallTest;
-import com.android.internal.util.Predicate;
+import static android.test.suitebuilder.TestPredicates.hasAnnotation;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -29,16 +27,11 @@ import android.test.suitebuilder.TestMethod;
 import android.test.suitebuilder.TestPredicates;
 import android.test.suitebuilder.TestSuiteBuilder;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.PrintStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import com.android.internal.util.Predicate;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -49,7 +42,14 @@ import junit.framework.TestSuite;
 import junit.runner.BaseTestRunner;
 import junit.textui.ResultPrinter;
 
-import static android.test.suitebuilder.TestPredicates.hasAnnotation;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.PrintStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An {@link Instrumentation} that runs various types of {@link junit.framework.TestCase}s against
