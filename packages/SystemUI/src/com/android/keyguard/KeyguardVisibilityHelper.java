@@ -88,6 +88,10 @@ public class KeyguardVisibilityHelper {
             boolean keyguardFadingAway,
             boolean goingToFullShade,
             int oldStatusBarState) {
+        if (migrateClocksToBlueprint()) {
+            log("Ignoring all of KeyguardVisibilityelper");
+            return;
+        }
         Assert.isMainThread();
         PropertyAnimator.cancelAnimation(mView, AnimatableProperty.ALPHA);
         boolean isOccluded = mKeyguardStateController.isOccluded();
