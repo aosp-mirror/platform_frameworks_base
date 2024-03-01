@@ -102,6 +102,7 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
+import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
@@ -2918,6 +2919,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mShowingPublicInitialized && mShowingPublic == oldShowingPublic) {
             return;
         }
+        float oldAlpha = getContentView().getAlpha();
 
         if (!animated) {
             mPublicLayout.animate().cancel();
@@ -2928,6 +2930,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             resetAllContentAlphas();
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
             updateChildrenVisibility();
+            if (NotificationContentAlphaOptimization.isEnabled()) {
+                // We want to set the old alpha to the now-showing layout to avoid breaking an
+                // on-going animation
+                if (oldAlpha != 1f) {
+                    setAlphaAndLayerType(mShowingPublic ? mPublicLayout : mPrivateLayout, oldAlpha);
+                }
+            }
         } else {
             animateShowingPublic(delay, duration, mShowingPublic);
         }

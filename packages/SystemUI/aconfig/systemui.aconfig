@@ -76,6 +76,16 @@ flag {
 }
 
 flag {
+    name: "notification_content_alpha_optimization"
+    namespace: "systemui"
+    description: "Only reset alpha values of needed content views"
+    bug: "292024656"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "notifications_live_data_store_refactor"
     namespace: "systemui"
     description: "Replaces NotifLiveDataStore with ActiveNotificationListRepository, and updates consumers. "
