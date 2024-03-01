@@ -18,5 +18,22 @@ android_test {
         "java/**/*.kt",
     ],
 
+    defaults: ["framework-connectivity-test-defaults"],
     test_suites: ["device-tests"],
+    static_libs: [
+        "androidx.test.rules",
+        "frameworks-base-testutils",
+        "framework-protos",
+        "mockito-target-minus-junit4",
+        "net-tests-utils",
+        "platform-test-annotations",
+        "services.core",
+        "cts-net-utils",
+        "service-connectivity-tiramisu-pre-jarjar",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
 }
