@@ -51,8 +51,15 @@ class IdmapDaemon {
     // before stopping the service.
     private static final int SERVICE_TIMEOUT_MS = 10000;
 
-    // The amount of time in milliseconds to wait when attempting to connect to idmap service.
-    private static final int SERVICE_CONNECT_TIMEOUT_MS = 5000;
+    // The device may enter CPU sleep while waiting for the service startup, and in that mode
+    // the uptime doesn't increment. Thus, we need to have two timeouts: a smaller one for the
+    // uptime and a longer one for the wall time in case when the device never advances the uptime,
+    // so the watchdog won't get triggered.
+
+    // The amount of uptime in milliseconds to wait when attempting to connect to idmap service.
+    private static final int SERVICE_CONNECT_UPTIME_TIMEOUT_MS = 5000;
+    // The amount of wall time in milliseconds to wait.
+    private static final int SERVICE_CONNECT_WALLTIME_TIMEOUT_MS = 30000;
     private static final int SERVICE_CONNECT_INTERVAL_SLEEP_MS = 5;
 
     private static final String IDMAP_DAEMON = "idmap2d";
@@ -274,20 +281,29 @@ class IdmapDaemon {
             }
         }
 
-        final long endMillis = SystemClock.uptimeMillis() + SERVICE_CONNECT_TIMEOUT_MS;
+        long uptimeMillis = SystemClock.uptimeMillis();
+        final long endUptimeMillis = uptimeMillis + SERVICE_CONNECT_UPTIME_TIMEOUT_MS;
+        long walltimeMillis = SystemClock.elapsedRealtime();
+        final long endWalltimeMillis = walltimeMillis + SERVICE_CONNECT_WALLTIME_TIMEOUT_MS;
+
         do {
             final IBinder binder = ServiceManager.getService(IDMAP_SERVICE);
             if (binder != null) {
                 binder.linkToDeath(
-                        () -> Slog.w(TAG, String.format("service '%s' died", IDMAP_SERVICE)), 0);
+                        () -> Slog.w(TAG,
+                                TextUtils.formatSimple("service '%s' died", IDMAP_SERVICE)), 0);
                 return binder;
             }
             SystemClock.sleep(SERVICE_CONNECT_INTERVAL_SLEEP_MS);
-        } while (SystemClock.uptimeMillis() <= endMillis);
+        } while ((uptimeMillis = SystemClock.uptimeMillis()) <= endUptimeMillis
+                && (walltimeMillis = SystemClock.elapsedRealtime()) <= endWalltimeMillis);
 
         throw new TimeoutException(
-            String.format("Failed to connect to '%s' in %d milliseconds", IDMAP_SERVICE,
-                    SERVICE_CONNECT_TIMEOUT_MS));
+                TextUtils.formatSimple("Failed to connect to '%s' in %d/%d ms (spent %d/%d ms)",
+                        IDMAP_SERVICE, SERVICE_CONNECT_UPTIME_TIMEOUT_MS,
+                        SERVICE_CONNECT_WALLTIME_TIMEOUT_MS,
+                        uptimeMillis - endUptimeMillis + SERVICE_CONNECT_UPTIME_TIMEOUT_MS,
+                        walltimeMillis - endWalltimeMillis + SERVICE_CONNECT_WALLTIME_TIMEOUT_MS));
     }
 
     private static void stopIdmapService() {
