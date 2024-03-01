@@ -59,7 +59,7 @@ interface KeyguardClockRepository {
 
     val currentClock: StateFlow<ClockController?>
 
-    val previewClock: StateFlow<ClockController>
+    val previewClockPair: StateFlow<Pair<ClockController, ClockController>>
 
     val clockEventController: ClockEventController
     fun setClockSize(@ClockSize size: Int)
@@ -120,13 +120,14 @@ constructor(
                 initialValue = clockRegistry.createCurrentClock()
             )
 
-    override val previewClock: StateFlow<ClockController> =
+    override val previewClockPair: StateFlow<Pair<ClockController, ClockController>> =
         currentClockId
-            .map { clockRegistry.createCurrentClock() }
+            .map { Pair(clockRegistry.createCurrentClock(), clockRegistry.createCurrentClock()) }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = clockRegistry.createCurrentClock()
+                initialValue =
+                    Pair(clockRegistry.createCurrentClock(), clockRegistry.createCurrentClock())
             )
 
     @VisibleForTesting
