@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.captioning
+package android.ravenwood.example;
 
-import dagger.Module
+import android.annotation.SystemService;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 
-@Module interface CaptioningModule
+@SystemService(BlueManager.SERVICE_NAME)
+public class BlueManager {
+    public static final String SERVICE_NAME = "example_blue";
+
+    public String getInterfaceDescriptor() {
+        try {
+            return ServiceManager.getService(SERVICE_NAME).getInterfaceDescriptor();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+}

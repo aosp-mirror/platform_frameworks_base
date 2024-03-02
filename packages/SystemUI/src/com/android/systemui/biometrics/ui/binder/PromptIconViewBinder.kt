@@ -37,6 +37,7 @@ import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Sub-binder for [BiometricPromptLayout.iconView]. */
@@ -62,6 +63,12 @@ object PromptIconViewBinder {
 
                     iconOverlayView.layoutParams.width = iconViewLayoutParamSizeOverride.first
                     iconOverlayView.layoutParams.height = iconViewLayoutParamSizeOverride.second
+                } else {
+                    iconView.layoutParams.width = viewModel.fingerprintIconWidth.first()
+                    iconView.layoutParams.height = viewModel.fingerprintIconWidth.first()
+
+                    iconOverlayView.layoutParams.width = viewModel.fingerprintIconWidth.first()
+                    iconOverlayView.layoutParams.height = viewModel.fingerprintIconWidth.first()
                 }
 
                 var faceIcon: AnimatedVectorDrawable? = null
@@ -77,15 +84,12 @@ object PromptIconViewBinder {
                     }
 
                 launch {
-                    var width: Int
-                    var height: Int
+                    var width = 0
+                    var height = 0
                     viewModel.activeAuthType.collect { activeAuthType ->
                         when (activeAuthType) {
                             AuthType.Fingerprint,
                             AuthType.Coex -> {
-                                width = viewModel.fingerprintIconWidth
-                                height = viewModel.fingerprintIconHeight
-
                                 /**
                                  * View is only set visible in BiometricViewSizeBinder once
                                  * PromptSize is determined that accounts for iconView size, to
@@ -113,7 +117,7 @@ object PromptIconViewBinder {
                             }
                         }
 
-                        if (iconViewLayoutParamSizeOverride == null) {
+                        if (width != 0 && height != 0) {
                             iconView.layoutParams.width = width
                             iconView.layoutParams.height = height
                             iconOverlayView.layoutParams.width = width

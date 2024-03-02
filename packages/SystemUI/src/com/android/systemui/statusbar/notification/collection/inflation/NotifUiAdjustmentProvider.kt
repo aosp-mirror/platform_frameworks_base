@@ -123,6 +123,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
         isSnoozeEnabled = isSnoozeSettingsEnabled && !entry.isCanceled,
         isMinimized = isEntryMinimized(entry),
         needsRedaction = lockscreenUserManager.needsRedaction(entry),
-        isChildInGroup = groupMembershipManager.isChildInGroup(entry),
+        isChildInGroup = entry.sbn.isAppOrSystemGroupChild,
+        isGroupSummary = entry.sbn.isAppOrSystemGroupSummary,
     )
 }

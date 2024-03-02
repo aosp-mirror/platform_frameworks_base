@@ -457,7 +457,8 @@
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ഉപയോഗിച്ച് അസാധുവാക്കി"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - ബാറ്ററി പരിരക്ഷിക്കാൻ ചാർജിംഗ് ഹോൾഡിലാണ്"</string>
-    <string name="power_incompatible_charging_settings_home_page" msgid="1261756225093962684">"<xliff:g id="LEVEL">%1$s</xliff:g> - ചാർജിംഗ് ആക്സസറി പരിശോധിക്കുന്നു"</string>
+    <!-- no translation found for power_incompatible_charging_settings_home_page (1322050766135126880) -->
+    <skip />
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"ഏതാണ്ട് <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"ഏതാണ്ട് <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ശേഷിക്കുന്നു (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"നിങ്ങളുടെ ഉപയോഗത്തെ അടിസ്ഥാനമാക്കി ഏതാണ്ട് <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
@@ -478,8 +479,7 @@
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"പൂർണ്ണമാകാൻ <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - പൂർണ്ണമാകാൻ <xliff:g id="TIME">%2$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - ചാർജിംഗ് ഒപ്റ്റിമൈസ് ചെയ്തു"</string>
-    <!-- no translation found for power_charging_future_paused (1809543660923642799) -->
-    <skip />
+    <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"അജ്ഞാതം"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"അതിവേഗ ചാർജിംഗ്"</string>

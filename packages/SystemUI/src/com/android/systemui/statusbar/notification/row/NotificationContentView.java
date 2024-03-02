@@ -238,7 +238,10 @@ public class NotificationContentView extends FrameLayout implements Notification
         mMinContractedHeight = getResources().getDimensionPixelSize(
                 R.dimen.min_notification_layout_height);
         if (AsyncHybridViewInflation.isEnabled()) {
-            //TODO: set the height with a more reasonable min single-line height
+            //TODO (b/217799515): single-line view height is the greater of two heights: text view
+            // height and icon height (when there's an icon). icon height is fixed to be
+            // conversation_single_line_face_pile_size (24dp), the text view's height is 16sp,
+            // its pixel height changes with the system's font scaling factor.
             mMinSingleLineHeight = getResources().getDimensionPixelSize(
                     R.dimen.conversation_single_line_face_pile_size);
         }
@@ -843,7 +846,7 @@ public class NotificationContentView extends FrameLayout implements Notification
                 if (mSingleLineView != null) {
                     return getViewHeight(VISIBLE_TYPE_SINGLELINE);
                 } else {
-                    Log.wtf(TAG, "getMinHeight: mSingleLineView == null");
+                    //TODO(b/217799515): investigate the impact of min-height value
                     return mMinSingleLineHeight;
                 }
             } else {

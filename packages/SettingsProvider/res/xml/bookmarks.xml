@@ -23,7 +23,7 @@
        'c': Contacts
        'e': Email
        'g': GMail
-       'l': Calendar
+       'k': Calendar
        'm': Maps
        'p': Music
        's': SMS
@@ -33,7 +33,7 @@
 -->
 <bookmarks>
     <bookmark
-        category="android.intent.category.APP_BROWSER"
+        role="android.app.role.BROWSER"
         shortcut="b" />
     <bookmark
         category="android.intent.category.APP_CONTACTS"
@@ -51,7 +51,7 @@
         category="android.intent.category.APP_MUSIC"
         shortcut="p" />
     <bookmark
-        category="android.intent.category.APP_MESSAGING"
+        role="android.app.role.SMS"
         shortcut="s" />
     <bookmark
         category="android.intent.category.APP_CALCULATOR"

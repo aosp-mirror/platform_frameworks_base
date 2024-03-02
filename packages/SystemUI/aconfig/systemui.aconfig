@@ -76,6 +76,16 @@ flag {
 }
 
 flag {
+    name: "notification_content_alpha_optimization"
+    namespace: "systemui"
+    description: "Only reset alpha values of needed content views"
+    bug: "292024656"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "notifications_live_data_store_refactor"
     namespace: "systemui"
     description: "Replaces NotifLiveDataStore with ActiveNotificationListRepository, and updates consumers. "
@@ -447,6 +457,13 @@ flag {
 }
 
 flag {
+    name: "hearing_aids_qs_tile_dialog"
+    namespace: "systemui"
+    description: "Show a dialog when clicking on hearing aids quick settings tile."
+    bug: "291423171"
+}
+
+flag {
     name: "notification_row_user_context"
     namespace: "systemui"
     description: "Create a user-specific Context for the ImageResolver in ExpandableNotificationRow"
@@ -542,6 +559,9 @@ flag {
     namespace: "systemui"
     description: "Binds Keyguard Media Controller Visibility to MediaContainerView"
     bug: "298213983"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

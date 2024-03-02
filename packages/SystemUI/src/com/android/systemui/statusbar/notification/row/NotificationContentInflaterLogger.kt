@@ -27,6 +27,8 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_SINGLE_LINE
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_GROUP_SUMMARY_HEADER
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import javax.inject.Inject
 
@@ -144,6 +146,12 @@ constructor(@NotifInflationLog private val buffer: LogBuffer) {
             }
             if (flag and FLAG_CONTENT_VIEW_SINGLE_LINE != 0) {
                 l.add("SINGLE_LINE")
+            }
+            if (flag and FLAG_GROUP_SUMMARY_HEADER != 0) {
+                l.add("GROUP_SUMMARY_HEADER")
+            }
+            if (flag and FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER != 0) {
+                l.add("LOW_PRIORITY_GROUP_SUMMARY_HEADER")
             }
             return l.joinToString("|")
         }

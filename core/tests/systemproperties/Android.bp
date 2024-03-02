@@ -14,9 +14,9 @@ android_test {
     dxflags: ["--core-library"],
     static_libs: [
         "android-common",
-        "frameworks-core-util-lib",
         "androidx.test.rules",
         "androidx.test.ext.junit",
+        "frameworks-core-util-lib",
         "ravenwood-junit",
     ],
     libs: [

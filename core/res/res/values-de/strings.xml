@@ -477,9 +477,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Ermöglicht der App, die Anrufliste deines Android TV-Geräts zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Du solltest wissen, dass dies von schädlichen Apps genutzt werden kann, um Einträge in der Anrufliste zu löschen oder zu ändern."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Ermöglicht der App, die Anrufliste deines Telefons zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so die Einträge in der Anrufliste löschen oder sie ändern."</string>
     <string name="permlab_bodySensors" msgid="662918578601619569">"Zugriff auf Daten des Körpersensors, etwa Herzfrequenz, wenn in Benutzung"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zum Blutsauerstoffanteil, während die App in Benutzung ist."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zur Sauerstoffsättigung, während die App in Benutzung ist."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Zugriff auf Daten des Körpersensors, etwa Herzfrequenz, wenn im Hintergrund"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zum Blutsauerstoffanteil, während die App im Hintergrund ist."</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Ermöglicht der App den Zugriff auf Daten des Körpersensors, etwa solche zur Herzfrequenz, zur Temperatur und zur Sauerstoffsättigung, während die App im Hintergrund ist."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Kalendertermine und Details lesen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Diese App kann alle auf deinem Tablet gespeicherten Kalendertermine lesen und deine Kalenderdaten teilen oder speichern."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Diese App kann alle auf deinem Android TV-Gerät gespeicherten Kalendertermine lesen und die Kalenderdaten teilen oder speichern."</string>
@@ -1986,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Geschäftliche Apps nicht mehr pausieren?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Nicht mehr pausieren"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Notruf"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Displaysperre einrichten"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Displaysperre einrichten"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Richte zur Nutzung des privaten Bereichs auf dem Gerät die Displaysperre ein"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App ist nicht verfügbar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ist derzeit nicht verfügbar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nicht verfügbar"</string>

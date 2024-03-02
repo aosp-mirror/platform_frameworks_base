@@ -103,7 +103,7 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
     public static boolean isEsimLocked(Context context, int subId) {
         EuiccManager euiccManager =
                 (EuiccManager) context.getSystemService(Context.EUICC_SERVICE);
-        if (!euiccManager.isEnabled()) {
+        if (euiccManager == null || !euiccManager.isEnabled()) {
             return false;
         }
         SubscriptionInfo sub = SubscriptionManager.from(context).getActiveSubscriptionInfo(subId);
@@ -118,6 +118,10 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+        if (mEuiccManager == null) {
+            Log.e(TAG, "EuiccManager not present");
+            return;
+        }
         SubscriptionInfo sub = SubscriptionManager.from(mContext)
                 .getActiveSubscriptionInfo(mSubscriptionId);
         if (sub == null) {

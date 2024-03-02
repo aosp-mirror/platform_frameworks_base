@@ -1170,6 +1170,7 @@ final class InstallPackageHelper {
 
     @GuardedBy("mPm.mInstallLock")
     private void preparePackageLI(InstallRequest request) throws PrepareFailure {
+        final int[] allUsers =  mPm.mUserManager.getUserIds();
         final int installFlags = request.getInstallFlags();
         final boolean onExternal = request.getVolumeUuid() != null;
         final boolean instantApp = ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0);
@@ -1445,7 +1446,7 @@ final class InstallPackageHelper {
 
                 systemApp = ps.isSystem();
                 request.setOriginUsers(ps.queryUsersInstalledOrHasData(
-                        mPm.mUserManager.getUserIds()));
+                        allUsers));
             }
 
             final int numGroups = ArrayUtils.size(parsedPackage.getPermissionGroups());
@@ -1703,7 +1704,6 @@ final class InstallPackageHelper {
 
                 final boolean isInstantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
 
-                final int[] allUsers;
                 final int[] installedUsers;
                 final int[] uninstalledUsers;
 
@@ -1796,7 +1796,6 @@ final class InstallPackageHelper {
                     }
 
                     // In case of rollback, remember per-user/profile install state
-                    allUsers = mPm.mUserManager.getUserIds();
                     installedUsers = ps.queryInstalledUsers(allUsers, true);
                     uninstalledUsers = ps.queryInstalledUsers(allUsers, false);
 
@@ -2220,7 +2219,7 @@ final class InstallPackageHelper {
             final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
             if (ps != null) {
                 installRequest.setNewUsers(
-                        ps.queryInstalledUsers(mPm.mUserManager.getUserIds(), true));
+                        ps.queryInstalledUsers(allUsers, true));
                 ps.setUpdateAvailable(false /*updateAvailable*/);
 
                 File appMetadataFile = new File(ps.getPath(), APP_METADATA_FILE_NAME);
@@ -2327,7 +2326,7 @@ final class InstallPackageHelper {
                 // Retrieve the overlays for shared libraries of the package.
                 if (!ps.getPkgState().getUsesLibraryInfos().isEmpty()) {
                     for (SharedLibraryWrapper sharedLib : ps.getPkgState().getUsesLibraryInfos()) {
-                        for (int currentUserId : UserManagerService.getInstance().getUserIds()) {
+                        for (int currentUserId : allUsers) {
                             if (sharedLib.getType() != SharedLibraryInfo.TYPE_DYNAMIC) {
                                 // TODO(146804378): Support overlaying static shared libraries
                                 continue;
@@ -2416,9 +2415,8 @@ final class InstallPackageHelper {
                 }
 
                 // Set install reason for users that are having the package newly installed.
-                final int[] allUsersList = mPm.mUserManager.getUserIds();
                 if (userId == UserHandle.USER_ALL) {
-                    for (int currentUserId : allUsersList) {
+                    for (int currentUserId : allUsers) {
                         if (!previousUserIds.contains(currentUserId)
                                 && ps.getInstalled(currentUserId)) {
                             ps.setInstallReason(installReason, currentUserId);
@@ -2438,7 +2436,7 @@ final class InstallPackageHelper {
                 }
 
                 // Ensure that the uninstall reason is UNKNOWN for users with the package installed.
-                for (int currentUserId : allUsersList) {
+                for (int currentUserId : allUsers) {
                     if (ps.getInstalled(currentUserId)) {
                         ps.setUninstallReason(UNINSTALL_REASON_UNKNOWN, currentUserId);
                     }

@@ -547,17 +547,24 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void setContentAlpha(float contentAlpha) {
-        View contentView = getContentView();
-        if (contentView.hasOverlappingRendering()) {
-            int layerType = contentAlpha == 0.0f || contentAlpha == 1.0f ? LAYER_TYPE_NONE
-                    : LAYER_TYPE_HARDWARE;
-            contentView.setLayerType(layerType, null);
-        }
-        contentView.setAlpha(contentAlpha);
+        setAlphaAndLayerType(getContentView(), contentAlpha);
         // After updating the current view, reset all views.
         if (contentAlpha == 1f) {
             resetAllContentAlphas();
         }
+    }
+
+    /**
+     * Set a content view's alpha value and hardware layer type for fluent animations
+     * @param contentView the view to set
+     * @param alpha the alpha value to set
+     */
+    protected void setAlphaAndLayerType(View contentView, float alpha) {
+        if (contentView.hasOverlappingRendering()) {
+            int layerType = alpha == 0.0f || alpha == 1.0f ? LAYER_TYPE_NONE : LAYER_TYPE_HARDWARE;
+            contentView.setLayerType(layerType, null);
+        }
+        contentView.setAlpha(alpha);
     }
 
     /**

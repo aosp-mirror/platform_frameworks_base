@@ -71,7 +71,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 
         MockitoAnnotations.initMocks(this)
-        whenever(burnInInteractor.keyguardBurnIn).thenReturn(burnInFlow)
+        whenever(burnInInteractor.burnIn(anyInt(), anyInt())).thenReturn(burnInFlow)
         kosmos.burnInInteractor = burnInInteractor
         whenever(goneToAodTransitionViewModel.enterFromTopTranslationY(anyInt()))
             .thenReturn(emptyFlow())

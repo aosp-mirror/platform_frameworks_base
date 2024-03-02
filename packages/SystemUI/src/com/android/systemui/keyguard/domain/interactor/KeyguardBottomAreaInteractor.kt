@@ -22,6 +22,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Encapsulates business-logic specifically related to the keyguard bottom area. */
 @SysUISingleton
@@ -35,10 +37,12 @@ constructor(
     /** The amount of alpha for the UI components of the bottom area. */
     val alpha: Flow<Float> = repository.bottomAreaAlpha
     /** The position of the keyguard clock. */
-    val clockPosition: Flow<Position> = repository.clockPosition
+    private val _clockPosition = MutableStateFlow(Position(0, 0))
+    @Deprecated("with migrateClocksToBlueprint()")
+    val clockPosition: Flow<Position> = _clockPosition.asStateFlow()
 
     fun setClockPosition(x: Int, y: Int) {
-        repository.setClockPosition(x, y)
+        _clockPosition.value = Position(x, y)
     }
 
     fun setAlpha(alpha: Float) {

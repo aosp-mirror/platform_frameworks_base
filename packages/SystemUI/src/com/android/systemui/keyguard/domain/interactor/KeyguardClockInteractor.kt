@@ -44,7 +44,8 @@ constructor(
 
     val currentClock: StateFlow<ClockController?> = keyguardClockRepository.currentClock
 
-    val previewClock: StateFlow<ClockController> = keyguardClockRepository.previewClock
+    val previewClockPair: StateFlow<Pair<ClockController, ClockController>> =
+        keyguardClockRepository.previewClockPair
 
     var clock: ClockController? by keyguardClockRepository.clockEventController::clock
 

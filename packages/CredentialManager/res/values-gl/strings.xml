@@ -17,7 +17,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="4539824758261855508">"Xestor de credenciais"</string>
+    <string name="app_name" msgid="4539824758261855508">"Credential Manager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Cancelar"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuar"</string>
     <string name="string_more_options" msgid="2763852250269945472">"Gardar doutro xeito"</string>
@@ -39,8 +39,10 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Durante este percorrido cara a un futuro sen contrasinais, estes seguirán estando dispoñibles a canda as claves de acceso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolle onde queres gardar: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un xestor de contrasinais para gardar a túa información e iniciar sesión máis rápido a próxima vez"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Queres crear unha clave de acceso para <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Queres gardar o contrasinal de <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
+    <skip />
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Queres gardar a información de inicio de sesión de <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"clave de acceso"</string>
     <string name="password" msgid="6738570945182936667">"contrasinal"</string>

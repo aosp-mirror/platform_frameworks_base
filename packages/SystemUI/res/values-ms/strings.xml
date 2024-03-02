@@ -429,6 +429,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Tambahkan lagi widget"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Tekan lama untuk menyesuaikan widget"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Sesuaikan widget"</string>
+    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"Edit widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Alih keluar"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Tambahkan widget"</string>
@@ -573,11 +575,14 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Dering"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Getar"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Redam"</string>
+    <string name="media_device_cast" msgid="4786241789687569892">"Hantar"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Tidak tersedia kerana deringan diredam"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Ketik untuk menyahredam."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Ketik untuk menetapkan pada getar. Perkhidmatan kebolehaksesan mungkin diredamkan."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Ketik untuk meredam. Perkhidmatan kebolehaksesan mungkin diredamkan."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Ketik untuk menetapkan pada getar."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Ketik untuk meredam."</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Kawalan Hingar"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Ketik untuk menukar mod pendering"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"redam"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"nyahredam"</string>
@@ -832,6 +837,10 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu kuasa"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Halaman <xliff:g id="ID_1">%1$d</xliff:g> daripada <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Kunci skrin"</string>
+    <!-- no translation found for finder_active (7907846989716941952) -->
+    <skip />
+    <!-- no translation found for shutdown_progress (5464239146561542178) -->
+    <skip />
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Lihat langkah penjagaan"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Lihat langkah penjagaan"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Cabut palam peranti anda"</string>
@@ -1186,6 +1195,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"Pengambilan nota"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"Pengambilan nota, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"Perkongsian audio"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Menyiarkan"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Hentikan siaran <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Jika anda siarkan <xliff:g id="SWITCHAPP">%1$s</xliff:g> atau tukarkan output, siaran semasa anda akan berhenti"</string>

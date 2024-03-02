@@ -429,6 +429,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"ଅଧିକ ୱିଜେଟ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ୱିଜେଟଗୁଡ଼ିକୁ କଷ୍ଟମାଇଜ କରିବା ପାଇଁ ଅଧିକ ସମୟ ଦବାନ୍ତୁ"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ୱିଜେଟଗୁଡ଼ିକୁ କଷ୍ଟମାଇଜ କରନ୍ତୁ"</string>
+    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"ୱିଜେଟକୁ ଏଡିଟ କରନ୍ତୁ"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ୱିଜେଟ ଯୋଗ କରନ୍ତୁ"</string>
@@ -573,11 +575,16 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"ରିଙ୍ଗ"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"ଭାଇବ୍ରେଟ୍‌"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"ମ୍ୟୁଟ"</string>
+    <!-- no translation found for media_device_cast (4786241789687569892) -->
+    <skip />
+    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s। ଅନମ୍ୟୁଟ୍‍ କରିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s। ଭାଇବ୍ରେଟ୍‍ ସେଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ। ଆକ୍ସେସିବିଲିଟୀ ସର୍ଭିସ୍‌ ମ୍ୟୁଟ୍‍ କରାଯାଇପାରେ।"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। ମ୍ୟୁଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ। ଆକ୍ସେସିବିଲିଟୀ ସର୍ଭିସ୍‌ ମ୍ୟୁଟ୍‍ କରାଯାଇପାରେ।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s। ଭାଇବ୍ରେଟରେ ସେଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s। ମ୍ୟୁଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ନଏଜ କଣ୍ଟ୍ରୋଲ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ରିଙ୍ଗର୍ ମୋଡ୍ ବଦଳାଇବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ମ୍ୟୁଟ"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ଅନ୍‍-ମ୍ୟୁଟ୍ କରନ୍ତୁ"</string>
@@ -832,6 +839,10 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ପାୱାର ମେନୁ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ପୃଷ୍ଠା <xliff:g id="ID_1">%1$d</xliff:g> ମୋଟ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ଲକ ସ୍କ୍ରିନ"</string>
+    <!-- no translation found for finder_active (7907846989716941952) -->
+    <skip />
+    <!-- no translation found for shutdown_progress (5464239146561542178) -->
+    <skip />
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ଯତ୍ନ ନେବା ପାଇଁ ଷ୍ଟେପଗୁଡ଼ିକ ଦେଖନ୍ତୁ"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ଯତ୍ନ ନେବା ପାଇଁ ଷ୍ଟେପଗୁଡ଼ିକ ଦେଖନ୍ତୁ"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନପ୍ଲଗ କରନ୍ତୁ"</string>
@@ -1186,6 +1197,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"ନୋଟ-ଟେକିଂ"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"ନୋଟ-ଟେକିଂ, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"ଅଡିଓ ସେୟାର କରାଯାଉଛି"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ବ୍ରଡକାଷ୍ଟ କରୁଛି"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବ୍ରଡକାଷ୍ଟ କରିବା ବନ୍ଦ କରିବେ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"ଯଦି ଆପଣ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ବ୍ରଡକାଷ୍ଟ କରନ୍ତି କିମ୍ବା ଆଉଟପୁଟ ବଦଳାନ୍ତି, ତେବେ ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ବ୍ରଡକାଷ୍ଟ ବନ୍ଦ ହୋଇଯିବ"</string>

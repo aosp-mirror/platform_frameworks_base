@@ -31,7 +31,6 @@ import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Base64;
 import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
@@ -39,6 +38,7 @@ import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;

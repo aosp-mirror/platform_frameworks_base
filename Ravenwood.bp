@@ -149,6 +149,7 @@ java_library {
     installable: false,
     srcs: [":services.fakes-sources"],
     libs: [
+        "ravenwood-framework",
         "services.core.ravenwood",
     ],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
@@ -204,6 +205,7 @@ android_ravenwood_libgroup {
         // Provide runtime versions of utils linked in below
         "junit",
         "truth",
+        "ravenwood-framework",
         "ravenwood-junit-impl",
         "mockito-ravenwood-prebuilt",
         "inline-mockito-ravenwood-prebuilt",
@@ -218,6 +220,7 @@ android_ravenwood_libgroup {
     libs: [
         "junit",
         "truth",
+        "ravenwood-framework",
         "ravenwood-junit",
         "mockito-ravenwood-prebuilt",
         "inline-mockito-ravenwood-prebuilt",

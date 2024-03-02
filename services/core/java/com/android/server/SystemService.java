@@ -39,7 +39,9 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The base class for services running in the system process. Override and implement
@@ -135,6 +137,7 @@ public abstract class SystemService {
     public @interface BootPhase {}
 
     private final Context mContext;
+    private final List<Class<?>> mDependencies;
 
     /**
      * Class representing user in question in the lifecycle callbacks.
@@ -332,7 +335,28 @@ public abstract class SystemService {
      * @param context The system server context.
      */
     public SystemService(@NonNull Context context) {
+        this(context, Collections.emptyList());
+    }
+
+    /**
+     * Initializes the system service.
+     * <p>
+     * Subclasses must define a single argument constructor that accepts the context
+     * and passes it to super.
+     * </p>
+     *
+     * @param context The system server context.
+     * @param dependencies The list of dependencies that this service requires to operate.
+     *                     Currently only used by the Ravenwood deviceless testing environment to
+     *                     understand transitive dependencies needed to support a specific test.
+     *                     For example, including {@code PowerManager.class} here indicates that
+     *                     this service requires the {@code PowerManager} and/or {@code
+     *                     PowerManagerInternal} APIs to function.
+     * @hide
+     */
+    public SystemService(@NonNull Context context, @NonNull List<Class<?>> dependencies) {
         mContext = context;
+        mDependencies = Objects.requireNonNull(dependencies);
     }
 
     /**
@@ -353,6 +377,22 @@ public abstract class SystemService {
     public final Context getUiContext() {
         // This has already been set up by the time any SystemServices are created.
         return ActivityThread.currentActivityThread().getSystemUiContext();
+    }
+
+    /**
+     * Get the list of dependencies that this service requires to operate.
+     *
+     * Currently only used by the Ravenwood deviceless testing environment to understand transitive
+     * dependencies needed to support a specific test.
+     *
+     * For example, including {@code PowerManager.class} here indicates that this service
+     * requires the {@code PowerManager} and/or {@code PowerManagerInternal} APIs to function.
+     *
+     * @hide
+     */
+    @NonNull
+    public final List<Class<?>> getDependencies() {
+        return mDependencies;
     }
 
     /**
