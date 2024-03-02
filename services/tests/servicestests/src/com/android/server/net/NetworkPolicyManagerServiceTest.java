@@ -2404,6 +2404,45 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
+    public void testObsoleteHandleUidGone() throws Exception {
+        callAndWaitOnUidStateChanged(UID_A, PROCESS_STATE_TOP, 51);
+        assertFalse(mService.isUidNetworkingBlocked(UID_A, false));
+
+        clearInvocations(mNetworkManager);
+
+        // In the service, handleUidGone is only called from mUidEventHandler. Then a call to it may
+        // be rendered obsolete by a newer uid change posted on the handler. The latest uid state
+        // change is always reflected in the current UidStateChangeCallbackInfo for the uid, so to
+        // simulate an obsolete call for test, we directly call handleUidGone and leave the state in
+        // UidStateChangeCallbackInfo set by the previous call to onUidStateChanged(TOP). This call
+        // should then do nothing.
+        mService.handleUidGone(UID_A);
+
+        verify(mNetworkManager, times(0)).setFirewallUidRule(anyInt(), anyInt(), anyInt());
+        assertFalse(mService.isUidNetworkingBlocked(UID_A, false));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
+    public void testObsoleteHandleUidChanged() throws Exception {
+        callAndWaitOnUidGone(UID_A);
+        assertTrue(mService.isUidNetworkingBlocked(UID_A, false));
+
+        clearInvocations(mNetworkManager);
+
+        // In the service, handleUidChanged is only called from mUidEventHandler. Then a call to it
+        // may be rendered obsolete by an immediate uid-gone posted on the handler. The latest uid
+        // state change is always reflected in the current UidStateChangeCallbackInfo for the uid,
+        // so to simulate an obsolete call for test, we directly call handleUidChanged and leave the
+        // state in UidStateChangeCallbackInfo as null as it would get removed by the previous call
+        // to onUidGone(). This call should then do nothing.
+        mService.handleUidChanged(UID_A);
+
+        verify(mNetworkManager, times(0)).setFirewallUidRule(anyInt(), anyInt(), anyInt());
+        assertTrue(mService.isUidNetworkingBlocked(UID_A, false));
+    }
+
+    @Test
     public void testLowPowerStandbyAllowlist() throws Exception {
         // Chain background is also enabled but these procstates are important enough to be exempt.
         callAndWaitOnUidStateChanged(UID_A, PROCESS_STATE_TOP, 0);
