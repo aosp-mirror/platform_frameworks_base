@@ -1252,7 +1252,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (isUidStateChangeRelevant(callbackInfo, procState, procStateSeq, capability)) {
                     callbackInfo.update(uid, procState, procStateSeq, capability);
                     if (!callbackInfo.isPending) {
-                        mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED, callbackInfo)
+                        mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED, uid, 0)
                                 .sendToTarget();
                         callbackInfo.isPending = true;
                     }
@@ -1264,7 +1264,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mUidStateCallbackInfos) {
                 mUidStateCallbackInfos.remove(uid);
             }
-            // TODO: b/327058756 - Remove any pending UID_MSG_STATE_CHANGED on the handler.
             mUidEventHandler.obtainMessage(UID_MSG_GONE, uid, 0).sendToTarget();
         }
     };
@@ -5870,13 +5869,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final Handler.Callback mUidEventHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
+            final int uid = msg.arg1;
             switch (msg.what) {
                 case UID_MSG_STATE_CHANGED: {
-                    handleUidChanged((UidStateCallbackInfo) msg.obj);
+                    handleUidChanged(uid);
                     return true;
                 }
                 case UID_MSG_GONE: {
-                    final int uid = msg.arg1;
                     handleUidGone(uid);
                     return true;
                 }
@@ -5887,23 +5886,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     };
 
-    void handleUidChanged(@NonNull UidStateCallbackInfo uidStateCallbackInfo) {
+    void handleUidChanged(int uid) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidStateChanged");
         try {
-            boolean updated;
-            final int uid;
             final int procState;
             final long procStateSeq;
             final int capability;
-            synchronized (mUidRulesFirstLock) {
-                synchronized (mUidStateCallbackInfos) {
-                    uid = uidStateCallbackInfo.uid;
-                    procState = uidStateCallbackInfo.procState;
-                    procStateSeq = uidStateCallbackInfo.procStateSeq;
-                    capability = uidStateCallbackInfo.capability;
-                    uidStateCallbackInfo.isPending = false;
+            synchronized (mUidStateCallbackInfos) {
+                final UidStateCallbackInfo uidStateCallbackInfo = mUidStateCallbackInfos.get(uid);
+                if (uidStateCallbackInfo == null) {
+                    // This can happen if UidObserver#onUidGone gets called before we reach
+                    // here. In this case, there is no point in processing this change as this
+                    // will immediately be followed by a call to handleUidGone anyway.
+                    return;
                 }
-
+                procState = uidStateCallbackInfo.procState;
+                procStateSeq = uidStateCallbackInfo.procStateSeq;
+                capability = uidStateCallbackInfo.capability;
+                uidStateCallbackInfo.isPending = false;
+            }
+            final boolean updated;
+            synchronized (mUidRulesFirstLock) {
                 // We received a uid state change callback, add it to the history so that it
                 // will be useful for debugging.
                 mLogger.uidStateChanged(uid, procState, procStateSeq, capability);
@@ -5926,6 +5929,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     void handleUidGone(int uid) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidGone");
         try {
+            synchronized (mUidStateCallbackInfos) {
+                if (mUidStateCallbackInfos.contains(uid)) {
+                    // This can happen if UidObserver#onUidStateChanged gets called before we
+                    // reach here. In this case, there is no point in processing this change as this
+                    // will immediately be followed by a call to handleUidChanged anyway.
+                    return;
+                }
+            }
             final boolean updated;
             synchronized (mUidRulesFirstLock) {
                 updated = removeUidStateUL(uid);

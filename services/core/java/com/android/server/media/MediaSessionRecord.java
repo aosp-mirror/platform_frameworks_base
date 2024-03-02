@@ -96,7 +96,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * MediaSession wrapper class instead.
  */
 // TODO(jaewan): Do not call service method directly -- introduce listener instead.
-public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionRecordImpl {
+public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinder.DeathRecipient {
 
     /**
      * {@link android.media.session.MediaSession#setMediaButtonBroadcastReceiver(
@@ -173,7 +173,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     private final int mUserId;
     private final String mPackageName;
     private final String mTag;
-    private final int mUniqueId;
     private final Bundle mSessionInfo;
     private final ControllerStub mController;
     private final MediaSession.Token mSessionToken;
@@ -231,18 +230,17 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             String ownerPackageName,
             ISessionCallback cb,
             String tag,
-            int uniqueId,
             Bundle sessionInfo,
             MediaSessionService service,
             Looper handlerLooper,
             int policies)
             throws RemoteException {
+        mUniqueId = sNextMediaSessionRecordId.getAndIncrement();
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
         mPackageName = ownerPackageName;
         mTag = tag;
-        mUniqueId = uniqueId;
         mSessionInfo = sessionInfo;
         mController = new ControllerStub();
         mSessionToken = new MediaSession.Token(ownerUid, mController);
@@ -300,16 +298,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
      */
     public MediaSession.Token getSessionToken() {
         return mSessionToken;
-    }
-
-    /**
-     * Get the unique id of this session record.
-     *
-     * @return a unique id of this session record.
-     */
-    @Override
-    public int getUniqueId() {
-        return mUniqueId;
     }
 
     /**
@@ -724,7 +712,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
     @Override
     public String toString() {
-        return mPackageName + "/" + mTag + "/" + mUniqueId + " (userId=" + mUserId + ")";
+        return mPackageName + "/" + mTag + "/" + getUniqueId() + " (userId=" + mUserId + ")";
     }
 
     @Override

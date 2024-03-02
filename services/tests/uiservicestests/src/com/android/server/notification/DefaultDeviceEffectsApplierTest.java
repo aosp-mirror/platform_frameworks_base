@@ -29,9 +29,11 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
@@ -103,8 +105,10 @@ public class DefaultDeviceEffectsApplierTest {
         mContext.addMockSystemService(ColorDisplayManager.class, mColorDisplayManager);
         mContext.addMockSystemService(UiModeManager.class, mUiModeManager);
         mContext.addMockSystemService(WallpaperManager.class, mWallpaperManager);
+        when(mWallpaperManager.isWallpaperSupported()).thenReturn(true);
 
         mApplier = new DefaultDeviceEffectsApplier(mContext);
+        verify(mWallpaperManager).isWallpaperSupported();
     }
 
     @Test
@@ -184,6 +188,26 @@ public class DefaultDeviceEffectsApplierTest {
 
         verify(mPowerManager).suppressAmbientDisplay(anyString(), eq(true));
         // (And no crash from missing services).
+    }
+
+    @Test
+    public void apply_disabledWallpaperService_dimWallpaperNotApplied() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        WallpaperManager disabledWallpaperService = mock(WallpaperManager.class);
+        when(mWallpaperManager.isWallpaperSupported()).thenReturn(false);
+        mContext.addMockSystemService(WallpaperManager.class, disabledWallpaperService);
+        mApplier = new DefaultDeviceEffectsApplier(mContext);
+        verify(mWallpaperManager).isWallpaperSupported();
+
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder()
+                .setShouldSuppressAmbientDisplay(true)
+                .setShouldDimWallpaper(true)
+                .setShouldDisplayGrayscale(true)
+                .setShouldUseNightMode(true)
+                .build();
+        mApplier.apply(effects, UPDATE_ORIGIN_USER);
+
+        verifyNoMoreInteractions(mWallpaperManager);
     }
 
     @Test

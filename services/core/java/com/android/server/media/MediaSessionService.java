@@ -106,7 +106,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * System implementation of MediaSessionManager
@@ -172,8 +171,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     /* Maps uid with all user engaging session tokens associated to it */
     private final SparseArray<Set<MediaSession.Token>> mUserEngagingSessions = new SparseArray<>();
 
-    private final AtomicInteger mNextMediaSessionRecordId = new AtomicInteger(1);
-
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
     private FullUserRecord mCurrentFullUserRecord;
@@ -212,8 +209,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     MediaSessionService.this,
                                     mRecordThread.getLooper(),
                                     pid,
-                                    /* policies= */ 0,
-                                    /* uniqueId= */ mNextMediaSessionRecordId.getAndIncrement());
+                                    /* policies= */ 0);
                     synchronized (mLock) {
                         FullUserRecord user = getFullUserRecordLocked(record.getUserId());
                         if (user != null) {
@@ -824,7 +820,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                                 callerPackageName,
                                 cb,
                                 tag,
-                                /* uniqueId= */ mNextMediaSessionRecordId.getAndIncrement(),
                                 sessionInfo,
                                 this,
                                 mRecordThread.getLooper(),
