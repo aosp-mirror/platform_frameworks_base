@@ -32,13 +32,13 @@ import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.test.TestLooper;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableResources;
 import android.view.Window;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 

@@ -1489,7 +1489,7 @@
     <string name="permdesc_requestDeletePackages" msgid="6133633516423860381">"Tillåter att en app begär paketborttagning."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="7646611326036631439">"får be om tillstånd att ignorera batterioptimering"</string>
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Appen får be om tillstånd att ignorera batterioptimering."</string>
-    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"fråga alla paket"</string>
+    <string name="permlab_queryAllPackages" msgid="2928450604653281650">"sök efter alla paket"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Tillåter att en app ser alla installerade paket."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Peka två gånger för zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Det gick inte att lägga till widgeten."</string>
@@ -1986,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Vill du återuppta jobbappar?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Återuppta"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Nödsituation"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ställ in ett skärmlås"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ställ in skärmlås"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ställ in ett skärmlås för enheten om du vill använda ditt privata område."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Appen är inte tillgänglig"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> är inte tillgängligt just nu."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> är inte tillgänglig"</string>

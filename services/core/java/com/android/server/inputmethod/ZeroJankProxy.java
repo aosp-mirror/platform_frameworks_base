@@ -72,6 +72,7 @@ import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.view.IInputMethodManager;
 
 import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -402,6 +403,13 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
             @NonNull ResultReceiver resultReceiver) throws RemoteException {
         ((InputMethodManagerService) mInner).onShellCommand(
                 in, out, err, args, callback, resultReceiver);
+    }
+
+    @Override
+    protected void dump(@NonNull FileDescriptor fd,
+            @NonNull PrintWriter fout,
+            @Nullable String[] args) {
+        ((InputMethodManagerService) mInner).dump(fd, fout, args);
     }
 
     private void sendOnStartInputResult(

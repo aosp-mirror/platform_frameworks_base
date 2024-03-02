@@ -100,6 +100,8 @@ object BiometricViewSizeBinder {
             val leftGuideline = view.requireViewById<Guideline>(R.id.leftGuideline)
             val rightGuideline = view.requireViewById<Guideline>(R.id.rightGuideline)
             val bottomGuideline = view.requireViewById<Guideline>(R.id.bottomGuideline)
+            val topGuideline = view.requireViewById<Guideline>(R.id.topGuideline)
+            val midGuideline = view.findViewById<Guideline>(R.id.midGuideline)
 
             val iconHolderView = view.requireViewById<View>(R.id.biometric_icon)
             val panelView = view.requireViewById<View>(R.id.panel)
@@ -118,6 +120,23 @@ object BiometricViewSizeBinder {
             largeConstraintSet.setGuidelineEnd(rightGuideline.id, 0)
             largeConstraintSet.setGuidelineEnd(bottomGuideline.id, 0)
 
+            // TODO: Investigate better way to handle 180 rotations
+            val flipConstraintSet = ConstraintSet()
+            flipConstraintSet.clone(mediumConstraintSet)
+            flipConstraintSet.connect(
+                R.id.scrollView,
+                ConstraintSet.START,
+                R.id.midGuideline,
+                ConstraintSet.START
+            )
+            flipConstraintSet.connect(
+                R.id.scrollView,
+                ConstraintSet.END,
+                R.id.rightGuideline,
+                ConstraintSet.END
+            )
+            flipConstraintSet.setHorizontalBias(R.id.biometric_icon, .2f)
+
             // Round the panel outline
             panelView.outlineProvider =
                 object : ViewOutlineProvider() {
@@ -133,70 +152,51 @@ object BiometricViewSizeBinder {
                         .getInsets(WindowInsets.Type.navigationBars())
                         .bottom
 
+                // TODO: Move to viewmodel
                 fun measureBounds(position: PromptPosition) {
-                    val width = min(windowBounds.height(), windowBounds.width())
+                    val density = windowManager.currentWindowMetrics.density
+                    val width = min((640 * density).toInt(), windowBounds.width())
 
                     var left = -1
-                    var top = -1
                     var right = -1
                     var bottom = -1
+                    var mid = -1
 
                     when {
                         position.isTop -> {
                             left = windowBounds.centerX() - width / 2 + viewModel.promptMargin
-                            top = viewModel.promptMargin
                             right = windowBounds.centerX() - width / 2 + viewModel.promptMargin
                             bottom = iconHolderView.centerY() * 2 - iconHolderView.centerY() / 4
                         }
                         position.isBottom -> {
-                            if (view.isLandscape()) {
-                                left = windowBounds.centerX() - width / 2 + viewModel.promptMargin
-                                top = iconHolderView.centerY()
-                                right = windowBounds.centerX() - width / 2 + viewModel.promptMargin
-                                bottom = bottomInset + viewModel.promptMargin
-                            } else {
-                                left = windowBounds.centerX() - width / 2 + viewModel.promptMargin
-                                top =
-                                    windowBounds.height() -
-                                        (windowBounds.height() - iconHolderView.centerY()) * 2 +
-                                        viewModel.promptMargin
-                                right = windowBounds.centerX() - width / 2 + viewModel.promptMargin
-                                bottom = viewModel.promptMargin
-                            }
+                            left = windowBounds.centerX() - width / 2 + viewModel.promptMargin
+                            right = windowBounds.centerX() - width / 2 + viewModel.promptMargin
+                            bottom = viewModel.promptMargin
                         }
-
-                        // For Udfps exclusive left and right, measure guideline to center
-                        // icon in BP
                         position.isLeft -> {
                             left = viewModel.promptMargin
-                            top =
-                                windowBounds.height() -
-                                    (windowBounds.height() - iconHolderView.centerY()) * 2 +
-                                    viewModel.promptMargin
-                            right =
+                            mid =
                                 abs(
                                     windowBounds.width() - iconHolderView.centerX() * 2 +
                                         viewModel.promptMargin
                                 )
+                            right = windowBounds.width() - (windowBounds.width() * .85).toInt()
                             bottom = bottomInset + viewModel.promptMargin
                         }
                         position.isRight -> {
-                            left =
+                            left = windowBounds.width() - (windowBounds.width() * .85).toInt()
+                            right = viewModel.promptMargin
+                            bottom = bottomInset + viewModel.promptMargin
+                            mid =
                                 abs(
                                     iconHolderView.centerX() -
                                         (windowBounds.width() - iconHolderView.centerX()) -
                                         viewModel.promptMargin
                                 )
-                            top =
-                                windowBounds.height() -
-                                    (windowBounds.height() - iconHolderView.centerY()) * 2 +
-                                    viewModel.promptMargin
-                            right = viewModel.promptMargin
-                            bottom = bottomInset + viewModel.promptMargin
                         }
                     }
 
-                    val bounds = Rect(left, top, right, bottom)
+                    val bounds = Rect(left, mid, right, bottom)
                     if (bounds.shouldAdjustLeftGuideline()) {
                         leftGuideline.setGuidelineBegin(bounds.left)
                         smallConstraintSet.setGuidelineBegin(leftGuideline.id, bounds.left)
@@ -211,6 +211,18 @@ object BiometricViewSizeBinder {
                         bottomGuideline.setGuidelineEnd(bounds.bottom)
                         smallConstraintSet.setGuidelineEnd(bottomGuideline.id, bounds.bottom)
                         mediumConstraintSet.setGuidelineEnd(bottomGuideline.id, bounds.bottom)
+                    }
+
+                    if (position.isBottom) {
+                        topGuideline.setGuidelinePercent(.25f)
+                        mediumConstraintSet.setGuidelinePercent(topGuideline.id, .25f)
+                    } else {
+                        topGuideline.setGuidelinePercent(0f)
+                        mediumConstraintSet.setGuidelinePercent(topGuideline.id, 0f)
+                    }
+
+                    if (mid != -1 && midGuideline != null) {
+                        midGuideline.setGuidelineBegin(mid)
                     }
                 }
 
@@ -242,6 +254,12 @@ object BiometricViewSizeBinder {
                         combine(viewModel.position, viewModel.size, ::Pair).collect {
                             (position, size) ->
                             view.doOnAttach {
+                                if (position.isLeft) {
+                                    flipConstraintSet.applyTo(view)
+                                } else if (position.isRight) {
+                                    mediumConstraintSet.applyTo(view)
+                                }
+
                                 measureBounds(position)
                                 setConstraintSetVisibility()
                                 when {
@@ -462,8 +480,14 @@ object BiometricViewSizeBinder {
 }
 
 private fun View.isLandscape(): Boolean {
-    val r = context.display?.rotation
-    return r == Surface.ROTATION_90 || r == Surface.ROTATION_270
+    val r = context.display.rotation
+    return if (
+        context.resources.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
+    ) {
+        r == Surface.ROTATION_0 || r == Surface.ROTATION_180
+    } else {
+        r == Surface.ROTATION_90 || r == Surface.ROTATION_270
+    }
 }
 
 private fun View.showContentOrHide(forceHide: Boolean = false): Int {

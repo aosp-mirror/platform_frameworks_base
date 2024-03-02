@@ -52,6 +52,11 @@ internal fun ConstraintSet.setVisibility(
     visibility: Int,
 ) = views.forEach { view -> this.setVisibility(view.id, visibility) }
 
+internal fun ConstraintSet.setAlpha(
+    views: Iterable<View>,
+    alpha: Float,
+) = views.forEach { view -> this.setAlpha(view.id, alpha) }
+
 open class ClockSection
 @Inject
 constructor(
@@ -101,6 +106,8 @@ constructor(
         return constraintSet.apply {
             setVisibility(getTargetClockFace(clock).views, VISIBLE)
             setVisibility(getNonTargetClockFace(clock).views, GONE)
+            setAlpha(getTargetClockFace(clock).views, 1F)
+            setAlpha(getNonTargetClockFace(clock).views, 0F)
             if (!keyguardClockViewModel.useLargeClock) {
                 connect(sharedR.id.bc_smartspace_view, TOP, sharedR.id.date_smartspace_view, BOTTOM)
             }
@@ -179,7 +186,7 @@ constructor(
                 context.resources.getDimensionPixelSize(customizationR.dimen.clock_padding_start) +
                     context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
             )
-            var smallClockTopMargin =
+            val smallClockTopMargin =
                 if (splitShadeStateController.shouldUseSplitNotificationShade(context.resources)) {
                     context.resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
                 } else {

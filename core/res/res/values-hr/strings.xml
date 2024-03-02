@@ -1987,6 +1987,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"Pokrenuti poslovne aplikacije?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Ponovno pokreni"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Hitni slučaj"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Postavite zaključavanje zaslona"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Postavi zaključavanje zaslona"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Za upotrebu privatnog prostora postavite zaključavanje zaslona na ovom uređaju"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija nije dostupna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutačno nije dostupna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – nije dostupno"</string>

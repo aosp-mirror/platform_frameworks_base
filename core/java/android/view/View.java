@@ -10405,7 +10405,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Sets content sensitivity mode to determine whether this view displays sensitive content.
+     * Sets content sensitivity mode to determine whether this view displays sensitive content
+     * (e.g. username, password etc.). The system may improve user privacy i.e. hide content
+     * drawn by a sensitive view from screen sharing and recording.
      *
      * @param mode {@link #CONTENT_SENSITIVITY_AUTO}, {@link #CONTENT_SENSITIVITY_NOT_SENSITIVE}
      *                                            or {@link #CONTENT_SENSITIVITY_SENSITIVE}
@@ -33780,8 +33782,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
         mMinusOneFrameIntervalMillis = timeIntervalMillis;
 
-        if (mMinusOneFrameIntervalMillis - mMinusTwoFrameIntervalMillis >= 30
-                && timeIntervalMillis < 2) {
+        mLastUpdateTimeMillis = currentTimeMillis;
+        if (mMinusTwoFrameIntervalMillis >= 30 && timeIntervalMillis < 2) {
             return;
         }
         if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {

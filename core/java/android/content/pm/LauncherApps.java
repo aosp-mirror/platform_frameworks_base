@@ -899,6 +899,28 @@ public class LauncherApps {
     }
 
     /**
+     * Returns {@link IntentSender} which can be used to start the Private Space Settings Activity.
+     *
+     * <p> Caller should have {@link android.app.role.RoleManager.ROLE_HOME} and either of the
+     * permissions required.</p>
+     *
+     * @return {@link IntentSender} object which launches the Private Space Settings Activity, if
+     * successful, null otherwise.
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @RequiresPermission(conditional = true,
+            anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
+    public IntentSender getPrivateSpaceSettingsIntent() {
+        try {
+            return mService.getPrivateSpaceSettingsIntent();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the activity info for a given intent and user handle, if it resolves. Otherwise it
      * returns null.
      *

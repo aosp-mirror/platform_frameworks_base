@@ -100,7 +100,9 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
+import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
@@ -218,6 +220,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mShowingPublic;
     private boolean mSensitive;
     private boolean mSensitiveHiddenInGeneral;
+    private boolean mShowPublicExpander = true;
     private boolean mShowingPublicInitialized;
     private boolean mHideSensitiveForIntrinsicHeight;
     private float mHeaderVisibleAmount = DEFAULT_HEADER_VISIBLE_AMOUNT;
@@ -586,7 +589,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mMenuRow.setAppName(mAppName);
         }
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.recreateNotificationHeader(mExpandClickListener, isConversation());
+            if (!AsyncGroupHeaderViewInflation.isEnabled()) {
+                // We create the header from the background thread instead
+                mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
+                        isConversation());
+            }
             mChildrenContainer.onNotificationUpdated();
         }
         if (mAnimationRunning) {
@@ -599,8 +606,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mNotificationParent.updateChildrenAppearance();
         }
         onAttachedChildrenCountChanged();
-        // The public layouts expand button is always visible
-        mPublicLayout.updateExpandButtons(true);
+        mPublicLayout.updateExpandButtons(mShowPublicExpander);
         updateLimits();
         updateShelfIconColor();
         if (mUpdateSelfBackgroundOnUpdate) {
@@ -668,7 +674,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public int getOriginalIconColor() {
         if (mIsSummaryWithChildren && !shouldShowPublic()) {
-            return mChildrenContainer.getVisibleWrapper().getOriginalIconColor();
+            if (!AsyncGroupHeaderViewInflation.isEnabled()) {
+                return mChildrenContainer.getVisibleWrapper().getOriginalIconColor();
+            }
         }
         int color = getShowingLayout().getOriginalIconColor();
         if (color != Notification.COLOR_INVALID) {
@@ -1513,6 +1521,40 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mChildrenContainer;
     }
 
+    /**
+     * @return An non-null instance of mChildrenContainer, inflate it if not yet.
+     */
+    public @NonNull NotificationChildrenContainer getChildrenContainerNonNull() {
+        if (mChildrenContainer == null) {
+            mChildrenContainerStub.inflate();
+        }
+        return mChildrenContainer;
+    }
+
+    /**
+     * Set the group notification header view
+     * @param headerView header view to set
+     */
+    public void setGroupHeader(NotificationHeaderView headerView) {
+        NotificationChildrenContainer childrenContainer = getChildrenContainerNonNull();
+        childrenContainer.setGroupHeader(
+                /* headerView= */ headerView,
+                /* onClickListener= */ mExpandClickListener
+        );
+    }
+
+    /**
+     * Set the low-priority group notification header view
+     * @param headerView header view to set
+     */
+    public void setLowPriorityGroupHeader(NotificationHeaderView headerView) {
+        NotificationChildrenContainer childrenContainer = getChildrenContainerNonNull();
+        childrenContainer.setLowPriorityGroupHeader(
+                /* headerViewLowPriority= */ headerView,
+                /* onClickListener= */ mExpandClickListener
+        );
+    }
+
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
         boolean wasAboveShelf = isAboveShelf();
         boolean changed = headsUpAnimatingAway != mHeadsupDisappearRunning;
@@ -1565,7 +1607,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public View getShelfTransformationTarget() {
         if (mIsSummaryWithChildren && !shouldShowPublic()) {
-            return mChildrenContainer.getVisibleWrapper().getShelfTransformationTarget();
+            NotificationViewWrapper viewWrapper = mChildrenContainer.getVisibleWrapper();
+            if (AsyncGroupHeaderViewInflation.isEnabled() && viewWrapper == null) {
+                return null;
+            }
+            return viewWrapper.getShelfTransformationTarget();
         }
         return getShowingLayout().getShelfTransformationTarget();
     }
@@ -2710,10 +2756,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 && mChildrenContainer.getNotificationChildCount() > 0;
         if (mIsSummaryWithChildren) {
             Trace.beginSection("ExpNotRow#onChildCountChanged (summary)");
-            NotificationViewWrapper wrapper = mChildrenContainer.getNotificationViewWrapper();
-            if (wrapper == null || wrapper.getNotificationHeader() == null) {
-                mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
-                        isConversation());
+            if (!AsyncGroupHeaderViewInflation.isEnabled()) {
+                NotificationViewWrapper wrapper = mChildrenContainer.getNotificationViewWrapper();
+                if (wrapper == null || wrapper.getNotificationHeader() == null) {
+                    mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
+                            isConversation());
+                }
             }
         }
         if (!mIsSummaryWithChildren && wasSummary) {
@@ -2837,6 +2885,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    /** Sets whether this notification row should show the notification expander or not */
+    public void setPublicExpanderVisible(boolean showPublicExpander) {
+        if (mShowPublicExpander != showPublicExpander) {
+            mShowPublicExpander = showPublicExpander;
+            mPublicLayout.updateExpandButtons(mShowPublicExpander);
+        }
+    }
+
     @Override
     public void setHideSensitiveForIntrinsicHeight(boolean hideSensitive) {
         mHideSensitiveForIntrinsicHeight = hideSensitive;
@@ -2863,6 +2919,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mShowingPublicInitialized && mShowingPublic == oldShowingPublic) {
             return;
         }
+        float oldAlpha = getContentView().getAlpha();
 
         if (!animated) {
             mPublicLayout.animate().cancel();
@@ -2873,6 +2930,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             resetAllContentAlphas();
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
             updateChildrenVisibility();
+            if (NotificationContentAlphaOptimization.isEnabled()) {
+                // We want to set the old alpha to the now-showing layout to avoid breaking an
+                // on-going animation
+                if (oldAlpha != 1f) {
+                    setAlphaAndLayerType(mShowingPublic ? mPublicLayout : mPrivateLayout, oldAlpha);
+                }
+            }
         } else {
             animateShowingPublic(delay, duration, mShowingPublic);
         }

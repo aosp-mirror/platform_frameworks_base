@@ -38,9 +38,12 @@ import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -156,14 +159,35 @@ class MobileIconsViewModelTest : SysuiTestCase() {
             val model2 = underTest.viewModelForSub(2, StatusBarLocation.QS)
 
             // Both impls are cached
-            assertThat(underTest.mobileIconSubIdCache)
-                .containsExactly(1, model1.commonImpl, 2, model2.commonImpl)
+            assertThat(underTest.reuseCache.keys).containsExactly(1, 2)
 
             // SUB_1 is removed from the list...
             interactor.filteredSubscriptions.value = listOf(SUB_2)
 
             // ... and dropped from the cache
-            assertThat(underTest.mobileIconSubIdCache).containsExactly(2, model2.commonImpl)
+            assertThat(underTest.reuseCache.keys).containsExactly(2)
+        }
+
+    @Test
+    fun caching_invalidatedViewModelsAreCanceled() =
+        testScope.runTest {
+            // Retrieve models to trigger caching
+            val model1 = underTest.viewModelForSub(1, StatusBarLocation.HOME)
+            val model2 = underTest.viewModelForSub(2, StatusBarLocation.QS)
+
+            var scope1 = underTest.reuseCache[1]?.second
+            var scope2 = underTest.reuseCache[2]?.second
+
+            // Scopes are not canceled
+            assertTrue(scope1!!.isActive)
+            assertTrue(scope2!!.isActive)
+
+            // SUB_1 is removed from the list...
+            interactor.filteredSubscriptions.value = listOf(SUB_2)
+
+            // scope1 is canceled
+            assertFalse(scope1!!.isActive)
+            assertTrue(scope2!!.isActive)
         }
 
     @Test

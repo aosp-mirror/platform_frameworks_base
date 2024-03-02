@@ -429,6 +429,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"더 많은 위젯 추가"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"위젯을 맞춤설정하려면 길게 누르기"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"위젯 맞춤설정"</string>
+    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"위젯 수정"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"삭제"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"위젯 추가"</string>
@@ -573,11 +575,16 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"벨소리"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"진동"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"음소거"</string>
+    <!-- no translation found for media_device_cast (4786241789687569892) -->
+    <skip />
+    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. 탭하여 음소거를 해제하세요."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. 탭하여 진동으로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. 탭하여 음소거로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. 탭하여 진동으로 설정하세요."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. 탭하여 음소거로 설정하세요."</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"소음 제어"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"탭하여 벨소리 장치 모드 변경"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"음소거"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"음소거 해제"</string>
@@ -832,6 +839,10 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"전원 메뉴"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>페이지 중 <xliff:g id="ID_1">%1$d</xliff:g>페이지"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"잠금 화면"</string>
+    <!-- no translation found for finder_active (7907846989716941952) -->
+    <skip />
+    <!-- no translation found for shutdown_progress (5464239146561542178) -->
+    <skip />
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"해결 방법 확인하기"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"해결 방법 확인하기"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"기기 분리하기"</string>
@@ -1186,6 +1197,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"메모"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"메모, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"오디오 공유 중"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"방송 중"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> 방송을 중지하시겠습니까?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> 앱을 방송하거나 출력을 변경하면 기존 방송이 중단됩니다"</string>

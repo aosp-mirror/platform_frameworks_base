@@ -16,9 +16,6 @@
 package com.android.server.notification;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -27,8 +24,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;

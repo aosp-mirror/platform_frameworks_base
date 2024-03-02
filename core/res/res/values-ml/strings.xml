@@ -1986,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"വർക്ക് ആപ്പുകൾ പുനരാരംഭിക്കണോ?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"പുനരാരംഭിക്കുക"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"അടിയന്തരം"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"സ്‌ക്രീൻ ലോക്ക് സജ്ജീകരിക്കൂ"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"സ്‌ക്രീൻ ലോക്ക് സജ്ജീകരിക്കൂ"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"സ്വകാര്യ സ്പേസിന്, ഇതിൽ സ്ക്രീൻ ലോക്ക് സജ്ജീകരിക്കൂ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ആപ്പ് ലഭ്യമല്ല"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ഇപ്പോൾ ലഭ്യമല്ല."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ലഭ്യമല്ല"</string>

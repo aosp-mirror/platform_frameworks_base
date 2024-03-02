@@ -35,6 +35,8 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -127,7 +129,7 @@ public class RavenwoodRule implements TestRule {
 
     final RavenwoodSystemProperties mSystemProperties = new RavenwoodSystemProperties();
 
-    final ArraySet<Class<?>> mServicesRequired = new ArraySet<>();
+    final List<Class<?>> mServicesRequired = new ArrayList<>();
 
     volatile Context mContext;
     volatile Instrumentation mInstrumentation;

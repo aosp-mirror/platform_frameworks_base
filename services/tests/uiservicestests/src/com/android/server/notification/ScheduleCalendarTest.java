@@ -23,9 +23,9 @@ import static org.junit.Assert.assertTrue;
 
 import android.service.notification.ScheduleCalendar;
 import android.service.notification.ZenModeConfig;
-import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;

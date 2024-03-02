@@ -29,9 +29,10 @@ import android.os.PowerSaveState;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.ArrayMap;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.filters.Suppress;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.annotations.VisibleForTesting;

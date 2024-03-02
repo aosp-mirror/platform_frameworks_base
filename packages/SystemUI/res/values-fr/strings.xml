@@ -385,8 +385,8 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Ouvrir les paramètres"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Autre appareil"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'écran Récents"</string>
-    <string name="zen_priority_introduction" msgid="3159291973383796646">"Vous ne serez dérangé par aucun son ni aucune vibration, hormis ceux des alarmes, des rappels, des événements et des appels des contacts de votre choix. Le son continuera de fonctionner notamment pour la musique, les vidéos et les jeux."</string>
-    <string name="zen_alarms_introduction" msgid="3987266042682300470">"Vous ne serez dérangé par aucun son ni aucune vibration, hormis ceux des alarmes. Le son continuera de fonctionner notamment pour la musique, les vidéos et les jeux."</string>
+    <string name="zen_priority_introduction" msgid="3159291973383796646">"Vous ne serez pas dérangé par des sons ou des vibrations, hormis ceux des alarmes, des rappels, des événements et des appelants de votre choix. Vous entendrez encore les sons que vous choisirez de jouer, notamment la musique, les vidéos et les jeux."</string>
+    <string name="zen_alarms_introduction" msgid="3987266042682300470">"Vous ne serez pas dérangé par des sons ou des vibrations, hormis ceux des alarmes. Vous entendrez encore les sons que vous choisirez de jouer, notamment la musique, les vidéos et les jeux."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personnaliser"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Cette option permet de bloquer TOUS les sons et les vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux. Vous pourrez encore passer des appels téléphoniques."</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Cette option permet de bloquer TOUS les sons et les vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux."</string>
@@ -429,6 +429,8 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Ajouter des widgets"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Appuyez de manière prolongée pour personnaliser les widgets"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Personnaliser les widgets"</string>
+    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
+    <skip />
     <string name="edit_widget" msgid="9030848101135393954">"Modifier le widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Supprimer"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Ajouter un widget"</string>
@@ -573,11 +575,16 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Sonnerie"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibreur"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Couper le son"</string>
+    <!-- no translation found for media_device_cast (4786241789687569892) -->
+    <skip />
+    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Appuyez pour ne plus ignorer."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Appuyez pour mettre en mode vibreur. Vous pouvez ignorer les services d\'accessibilité."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Appuyez pour ignorer. Vous pouvez ignorer les services d\'accessibilité."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Appuyez pour mettre en mode vibreur."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Appuyez pour ignorer."</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Contrôle du bruit"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Appuyez pour changer le mode de la sonnerie"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"couper le son"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"réactiver le son"</string>
@@ -832,6 +839,10 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu Marche/Arrêt"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Page <xliff:g id="ID_1">%1$d</xliff:g> sur <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Écran de verrouillage"</string>
+    <!-- no translation found for finder_active (7907846989716941952) -->
+    <skip />
+    <!-- no translation found for shutdown_progress (5464239146561542178) -->
+    <skip />
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Afficher les étapes d\'entretien"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Afficher les étapes d\'entretien"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Débrancher votre appareil"</string>
@@ -1186,6 +1197,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"Prise de notes"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"Prise de notes, <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"Audio partagé"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Diffusion…"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou que vous modifiez le résultat, votre annonce actuelle s\'arrêtera"</string>

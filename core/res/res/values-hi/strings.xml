@@ -1986,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"वर्क ऐप्लिकेशन चालू करने हैं?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"चालू करें"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"आपातकालीन कॉल"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"स्क्रीन लॉक सेट करें"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"स्क्रीन लॉक सेट करें"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"प्राइवेट स्पेस के लिए, इस डिवाइस पर स्क्रीन लॉक सेट करें"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ऐप्लिकेशन उपलब्ध नहीं है"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> इस समय उपलब्ध नहीं है."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध नहीं है"</string>
@@ -2359,9 +2362,9 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"इससे साथी ऐप्लिकेशन को बैकग्राउंड में फ़ोरग्राउंड सेवाएं चलाने की अनुमति मिलती है."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"माइक्रोफ़ोन इस्तेमाल किया जा सकता है"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"माइक्रोफ़ोन को ब्लॉक किया गया है"</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"कॉन्टेंट डिसप्ले नहीं किया जा सकता"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"स्क्रीन शेयर नहीं की जा सकती"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"कोई दूसरा केबल इस्तेमाल करके फिर से कोशिश करें"</string>
-    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"आपका डिवाइस बहुत गर्म हो गया है. जब तक यह ठंडा नहीं हो जाता, तब तक दूसरे डिवाइस पर इसकी स्क्रीन डिसप्ले नहीं की जा सकती"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"आपका डिवाइस बहुत गर्म हो गया है. जब तक यह ठंडा नहीं हो जाता, तब तक दूसरे डिवाइस पर इसकी स्क्रीन शेयर नहीं की जा सकती"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen की सुविधा चालू है"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, कॉन्टेंट दिखाने के लिए दोनों स्क्रीन का इस्तेमाल कर रहा है"</string>

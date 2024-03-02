@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.mediaoutput
+package android.ravenwood.example;
 
-import dagger.Module
+import android.annotation.SystemService;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 
-@Module interface MediaOutputModule
+@SystemService(RedManager.SERVICE_NAME)
+public class RedManager {
+    public static final String SERVICE_NAME = "example_red";
+
+    public String getInterfaceDescriptor() {
+        try {
+            return ServiceManager.getService(SERVICE_NAME).getInterfaceDescriptor();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+}
