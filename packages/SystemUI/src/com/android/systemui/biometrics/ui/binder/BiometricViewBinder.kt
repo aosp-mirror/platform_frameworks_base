@@ -32,7 +32,7 @@ import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.ScrollView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -100,7 +100,7 @@ object BiometricViewBinder {
         val subtitleView = view.requireViewById<TextView>(R.id.subtitle)
         val descriptionView = view.requireViewById<TextView>(R.id.description)
         val customizedViewContainer =
-            view.requireViewById<ScrollView>(R.id.customized_view_container)
+            view.requireViewById<LinearLayout>(R.id.customized_view_container)
 
         // set selected to enable marquee unless a screen reader is enabled
         logoView.isSelected =
@@ -118,7 +118,7 @@ object BiometricViewBinder {
 
         val iconSizeOverride =
             if (constraintBp()) {
-                viewModel.fingerprintAffordanceSize
+                null
             } else {
                 (view as BiometricPromptLayout).updatedFingerprintAffordanceSize
             }
@@ -651,6 +651,8 @@ class Spaghetti(
     }
 
     fun isCoex() = modalities.hasFaceAndFingerprint
+
+    fun isFaceOnly() = modalities.hasFaceOnly
 
     fun asView() = view
 }

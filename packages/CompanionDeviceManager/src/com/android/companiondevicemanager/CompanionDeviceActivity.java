@@ -27,13 +27,13 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState;
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState.FINISHED_TIMEOUT;
-import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_PERMISSIONS;
-import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_NAMES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_ICONS;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_NAMES;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_PERMISSIONS;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_SUMMARIES;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_TITLES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_PROFILES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_SELF_MANAGED_PROFILES;
-import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_TITLES;
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.getIcon;
@@ -68,6 +68,7 @@ import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -697,14 +698,15 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         disableButtons();
 
+        LinearLayoutManager permissionListLayoutManager =
+                (LinearLayoutManager) mPermissionListRecyclerView
+                        .getLayoutManager();
+
         // Enable buttons once users scroll down to the bottom of the permission list.
         mPermissionListRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (!recyclerView.canScrollVertically(1)) {
-                    enableButtons();
-                }
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                enableAllowButtonIfNeeded(permissionListLayoutManager);
             }
         });
         // Enable buttons if last item in the permission list is visible to the users when
@@ -713,24 +715,34 @@ public class CompanionDeviceActivity extends FragmentActivity implements
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        LinearLayoutManager layoutManager =
-                                (LinearLayoutManager) mPermissionListRecyclerView
-                                        .getLayoutManager();
-                        int lastVisibleItemPosition =
-                                layoutManager.findLastCompletelyVisibleItemPosition();
-                        int numItems = mPermissionListRecyclerView.getAdapter().getItemCount();
-
-                        if (lastVisibleItemPosition >= numItems - 1) {
-                            enableButtons();
-                        }
-
+                        enableAllowButtonIfNeeded(permissionListLayoutManager);
                         mPermissionListRecyclerView.getViewTreeObserver()
                                 .removeOnGlobalLayoutListener(this);
                     }
                 });
 
+        // Set accessibility for the recyclerView that to be able scroll up/down for voice access.
+        mPermissionListRecyclerView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP);
+            }
+        });
+
         mConstraintList.setVisibility(View.VISIBLE);
         mPermissionListRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    // Enable the Allow button if the last element in the PermissionListRecyclerView is reached.
+    private void enableAllowButtonIfNeeded(LinearLayoutManager layoutManager) {
+        int lastVisibleItemPosition =
+                layoutManager.findLastCompletelyVisibleItemPosition();
+        int numItems = mPermissionListRecyclerView.getAdapter().getItemCount();
+
+        if (lastVisibleItemPosition >= numItems - 1) {
+            enableButtons();
+        }
     }
 
     // Disable and grey out the Allow and Don't allow buttons if the last permission in the

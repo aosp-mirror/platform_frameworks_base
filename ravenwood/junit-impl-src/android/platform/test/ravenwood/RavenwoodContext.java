@@ -26,6 +26,8 @@ import android.os.Looper;
 import android.os.PermissionEnforcer;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.ravenwood.example.BlueManager;
+import android.ravenwood.example.RedManager;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
 import android.util.Singleton;
@@ -53,16 +55,23 @@ public class RavenwoodContext extends MockContext {
         mPackageName = packageName;
         mMainThread = mainThread;
 
+        // Services provided by a typical shipping device
         registerService(ClipboardManager.class,
-                Context.CLIPBOARD_SERVICE, asSingleton(() ->
+                Context.CLIPBOARD_SERVICE, memoize(() ->
                         new ClipboardManager(this, getMainThreadHandler())));
         registerService(PermissionEnforcer.class,
                 Context.PERMISSION_ENFORCER_SERVICE, () -> mEnforcer);
         registerService(SerialManager.class,
-                Context.SERIAL_SERVICE, asSingleton(() ->
+                Context.SERIAL_SERVICE, memoize(() ->
                         new SerialManager(this, ISerialManager.Stub.asInterface(
                                 ServiceManager.getService(Context.SERIAL_SERVICE)))
                 ));
+
+        // Additional services we provide for testing purposes
+        registerService(BlueManager.class,
+                BlueManager.SERVICE_NAME, memoize(() -> new BlueManager()));
+        registerService(RedManager.class,
+                RedManager.SERVICE_NAME, memoize(() -> new RedManager()));
     }
 
     @Override
@@ -143,9 +152,12 @@ public class RavenwoodContext extends MockContext {
     }
 
     /**
-     * Wrap the given {@link Supplier} to become a memoized singleton.
+     * Wrap the given {@link Supplier} to become memoized.
+     *
+     * The underlying {@link Supplier} will only be invoked once, and that result will be cached
+     * and returned for any future requests.
      */
-    private static <T> Supplier<T> asSingleton(ThrowingSupplier<T> supplier) {
+    private static <T> Supplier<T> memoize(ThrowingSupplier<T> supplier) {
         final Singleton<T> singleton = new Singleton<>() {
             @Override
             protected T create() {

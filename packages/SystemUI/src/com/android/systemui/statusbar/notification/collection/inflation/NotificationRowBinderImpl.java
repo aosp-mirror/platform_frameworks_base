@@ -21,6 +21,8 @@ import static com.android.systemui.statusbar.notification.row.NotificationRowCon
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_SINGLE_LINE;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_GROUP_SUMMARY_HEADER;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER;
 
 import static java.util.Objects.requireNonNull;
 
@@ -50,6 +52,7 @@ import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 
@@ -271,6 +274,17 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             }
         }
 
+        if (AsyncGroupHeaderViewInflation.isEnabled()) {
+            if (inflaterParams.isGroupSummary()) {
+                params.requireContentViews(FLAG_GROUP_SUMMARY_HEADER);
+                if (isLowPriority) {
+                    params.requireContentViews(FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER);
+                }
+            } else {
+                params.markContentViewsFreeable(FLAG_GROUP_SUMMARY_HEADER);
+                params.markContentViewsFreeable(FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER);
+            }
+        }
         params.rebindAllContentViews();
         mLogger.logRequestingRebind(entry, inflaterParams);
         mRowContentBindStage.requestRebind(entry, en -> {

@@ -7878,9 +7878,9 @@ public class AudioManager {
      */
     @FlaggedApi(FLAG_SUPPORTED_DEVICE_TYPES_API)
     public @NonNull Set<Integer>
-            getSupportedDeviceTypes(int direction) {
+            getSupportedDeviceTypes(@AudioDeviceRole int direction) {
         if (direction != GET_DEVICES_OUTPUTS && direction != GET_DEVICES_INPUTS) {
-            throw new IllegalArgumentException("AudioManager.getSupportedDeviceTypes("
+            throw new IllegalArgumentException("AudioManager.getSupportedDeviceTypes(0x"
                     + Integer.toHexString(direction) + ") - Invalid.");
         }
 

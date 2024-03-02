@@ -85,14 +85,15 @@ constructor(
     val faceIconHeight: Int =
         context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_face_icon_size)
 
-    val fingerprintSensorDiameter: Int =
-        (udfpsOverlayInteractor.udfpsOverlayParams.value.sensorBounds.width() *
-                udfpsOverlayInteractor.udfpsOverlayParams.value.scaleFactor)
-            .toInt()
-    val fingerprintAffordanceSize: Pair<Int, Int>? =
-        if (fingerprintSensorDiameter != 0)
-            Pair(fingerprintSensorDiameter, fingerprintSensorDiameter)
-        else null
+    val fingerprintSensorDiameter: Flow<Int> =
+        combine(modalities, udfpsOverlayInteractor.udfpsOverlayParams) { modalities, overlayParams
+            ->
+            if (modalities.hasUdfps) {
+                overlayParams.sensorBounds.width()
+            } else {
+                fingerprintIconWidth
+            }
+        }
 
     private val _accessibilityHint = MutableSharedFlow<String>()
 
@@ -157,12 +158,13 @@ constructor(
 
     /** The current position of the prompt */
     val position: Flow<PromptPosition> =
-        combine(_forceLargeSize, modalities, displayStateInteractor.currentRotation) {
-                forceLarge,
-                modalities,
-                rotation ->
+        combine(
+                _forceLargeSize,
+                displayStateInteractor.isLargeScreen,
+                displayStateInteractor.currentRotation
+            ) { forceLarge, isLargeScreen, rotation ->
                 when {
-                    forceLarge || !modalities.hasUdfps -> PromptPosition.Bottom
+                    forceLarge || isLargeScreen -> PromptPosition.Bottom
                     rotation == DisplayRotation.ROTATION_90 -> PromptPosition.Right
                     rotation == DisplayRotation.ROTATION_270 -> PromptPosition.Left
                     rotation == DisplayRotation.ROTATION_180 -> PromptPosition.Top
@@ -344,22 +346,22 @@ constructor(
     /** If the indicator (help, error) message should be shown. */
     val isIndicatorMessageVisible: Flow<Boolean> =
         combine(
-                size,
-                message,
-            ) { size, message ->
-                size.isNotSmall && message.message.isNotBlank()
-            }
-            .distinctUntilChanged()
+            size,
+            position,
+            message,
+        ) { size, _, message ->
+            size.isNotSmall && message.message.isNotBlank()
+        }
 
     /** If the auth is pending confirmation and the confirm button should be shown. */
     val isConfirmButtonVisible: Flow<Boolean> =
         combine(
-                size,
-                isPendingConfirmation,
-            ) { size, isPendingConfirmation ->
-                size.isNotSmall && isPendingConfirmation
-            }
-            .distinctUntilChanged()
+            size,
+            position,
+            isPendingConfirmation,
+        ) { size, _, isPendingConfirmation ->
+            size.isNotSmall && isPendingConfirmation
+        }
 
     /** If the icon can be used as a confirmation button. */
     val isIconConfirmButton: Flow<Boolean> = size.map { it.isNotSmall }.distinctUntilChanged()
@@ -367,28 +369,25 @@ constructor(
     /** If the negative button should be shown. */
     val isNegativeButtonVisible: Flow<Boolean> =
         combine(
-                size,
-                isAuthenticated,
-                promptSelectorInteractor.isCredentialAllowed,
-            ) { size, authState, credentialAllowed ->
-                size.isNotSmall && authState.isNotAuthenticated && !credentialAllowed
-            }
-            .distinctUntilChanged()
+            size,
+            position,
+            isAuthenticated,
+            promptSelectorInteractor.isCredentialAllowed,
+        ) { size, _, authState, credentialAllowed ->
+            size.isNotSmall && authState.isNotAuthenticated && !credentialAllowed
+        }
 
     /** If the cancel button should be shown (. */
     val isCancelButtonVisible: Flow<Boolean> =
         combine(
-                size,
-                isAuthenticated,
-                isNegativeButtonVisible,
-                isConfirmButtonVisible,
-            ) { size, authState, showNegativeButton, showConfirmButton ->
-                size.isNotSmall &&
-                    authState.isAuthenticated &&
-                    !showNegativeButton &&
-                    showConfirmButton
-            }
-            .distinctUntilChanged()
+            size,
+            position,
+            isAuthenticated,
+            isNegativeButtonVisible,
+            isConfirmButtonVisible,
+        ) { size, _, authState, showNegativeButton, showConfirmButton ->
+            size.isNotSmall && authState.isAuthenticated && !showNegativeButton && showConfirmButton
+        }
 
     private val _canTryAgainNow = MutableStateFlow(false)
     /**
@@ -397,35 +396,34 @@ constructor(
      */
     val canTryAgainNow: Flow<Boolean> =
         combine(
-                _canTryAgainNow,
-                size,
-                isAuthenticated,
-                isRetrySupported,
-            ) { readyToTryAgain, size, authState, supportsRetry ->
-                readyToTryAgain && size.isNotSmall && supportsRetry && authState.isNotAuthenticated
-            }
-            .distinctUntilChanged()
+            _canTryAgainNow,
+            size,
+            position,
+            isAuthenticated,
+            isRetrySupported,
+        ) { readyToTryAgain, size, _, authState, supportsRetry ->
+            readyToTryAgain && size.isNotSmall && supportsRetry && authState.isNotAuthenticated
+        }
 
     /** If the try again button show be shown (only the button, see [canTryAgainNow]). */
     val isTryAgainButtonVisible: Flow<Boolean> =
         combine(
-                canTryAgainNow,
-                modalities,
-            ) { tryAgainIsPossible, modalities ->
-                tryAgainIsPossible && modalities.hasFaceOnly
-            }
-            .distinctUntilChanged()
+            canTryAgainNow,
+            modalities,
+        ) { tryAgainIsPossible, modalities ->
+            tryAgainIsPossible && modalities.hasFaceOnly
+        }
 
     /** If the credential fallback button show be shown. */
     val isCredentialButtonVisible: Flow<Boolean> =
         combine(
-                size,
-                isAuthenticated,
-                promptSelectorInteractor.isCredentialAllowed,
-            ) { size, authState, credentialAllowed ->
-                size.isNotSmall && authState.isNotAuthenticated && credentialAllowed
-            }
-            .distinctUntilChanged()
+            size,
+            position,
+            isAuthenticated,
+            promptSelectorInteractor.isCredentialAllowed,
+        ) { size, _, authState, credentialAllowed ->
+            size.isNotSmall && authState.isNotAuthenticated && credentialAllowed
+        }
 
     private val history = PromptHistoryImpl()
     private var messageJob: Job? = null

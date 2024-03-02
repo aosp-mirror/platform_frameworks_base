@@ -45,8 +45,15 @@ class FakeKeyguardClockRepository @Inject constructor() : KeyguardClockRepositor
     private val _currentClock = MutableStateFlow(null)
     override val currentClock = _currentClock
 
-    private val _previewClock = MutableStateFlow(Mockito.mock(ClockController::class.java))
-    override val previewClock: StateFlow<ClockController> = _previewClock
+    private val _previewClockPair =
+        MutableStateFlow(
+            Pair(
+                Mockito.mock(ClockController::class.java),
+                Mockito.mock(ClockController::class.java)
+            )
+        )
+    override val previewClockPair: StateFlow<Pair<ClockController, ClockController>> =
+        _previewClockPair
     override val clockEventController: ClockEventController
         get() = mock()
 

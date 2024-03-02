@@ -16,8 +16,8 @@
 
 package com.android.server.biometrics.sensors.face.hidl;
 
-import static com.android.server.biometrics.sensors.face.hidl.HidlToAidlSessionAdapter.ENROLL_TIMEOUT_SEC;
 import static com.android.server.biometrics.sensors.face.hidl.FaceGenerateChallengeClient.CHALLENGE_TIMEOUT_SEC;
+import static com.android.server.biometrics.sensors.face.hidl.HidlToAidlSessionAdapter.ENROLL_TIMEOUT_SEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -45,9 +45,9 @@ import android.hardware.keymaster.HardwareAuthToken;
 import android.hardware.keymaster.Timestamp;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContext;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.biometrics.HardwareAuthTokenUtils;

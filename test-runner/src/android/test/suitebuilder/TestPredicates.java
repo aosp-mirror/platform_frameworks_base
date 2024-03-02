@@ -19,7 +19,9 @@ package android.test.suitebuilder;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.Smoke;
 import android.test.suitebuilder.annotation.Suppress;
+
 import com.android.internal.util.Predicate;
+
 import java.lang.annotation.Annotation;
 
 /**

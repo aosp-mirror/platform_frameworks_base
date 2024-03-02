@@ -122,7 +122,13 @@ class BurnInInteractorTest : SysuiTestCase() {
         testScope.runTest {
             whenever(burnInHelperWrapper.burnInScale()).thenReturn(0.5f)
 
-            val burnInModel by collectLastValue(underTest.keyguardBurnIn)
+            val burnInModel by
+                collectLastValue(
+                    underTest.burnIn(
+                        xDimenResourceId = R.dimen.burn_in_prevention_offset_x,
+                        yDimenResourceId = R.dimen.burn_in_prevention_offset_y
+                    )
+                )
 
             // After time tick, returns the configured values
             fakeKeyguardRepository.dozeTimeTick(10)

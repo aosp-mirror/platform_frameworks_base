@@ -134,6 +134,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.PublicKey;
@@ -639,9 +640,10 @@ public class ParsingPackageUtils {
                 pkg.setSigningDetails(SigningDetails.UNKNOWN);
             }
 
-            if (Flags.aslInApkAppMetadataSource()
-                    && ArrayUtils.contains(assets.list(""), APP_METADATA_FILE_NAME)) {
-                pkg.setAppMetadataFileInApk(true);
+            if (Flags.aslInApkAppMetadataSource()) {
+                try (InputStream in = assets.open(APP_METADATA_FILE_NAME)) {
+                    pkg.setAppMetadataFileInApk(true);
+                } catch (Exception e) { }
             }
 
             return input.success(pkg);

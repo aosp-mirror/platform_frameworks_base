@@ -753,20 +753,7 @@ public final class CameraManager {
     @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
     public CameraDevice.CameraDeviceSetup getCameraDeviceSetup(@NonNull String cameraId)
             throws CameraAccessException {
-        if (cameraId == null) {
-            throw new IllegalArgumentException("cameraId was null");
-        }
-
-        if (CameraManagerGlobal.sCameraServiceDisabled) {
-            throw new CameraAccessException(CameraAccessException.CAMERA_DISABLED,
-                    "No cameras available on device");
-        }
-
-        if (!Arrays.asList(CameraManagerGlobal.get().getCameraIdList()).contains(cameraId)) {
-            throw new IllegalArgumentException(
-                    "Camera ID '" + cameraId + "' not available on device.");
-        }
-
+        // isCameraDeviceSetup does all the error checking we need.
         if (!isCameraDeviceSetupSupported(cameraId)) {
             throw new UnsupportedOperationException(
                     "CameraDeviceSetup is not supported for Camera ID: " + cameraId);
@@ -819,12 +806,8 @@ public final class CameraManager {
             throw new IllegalArgumentException("Camera ID was null");
         }
 
-        if (CameraManagerGlobal.sCameraServiceDisabled) {
-            throw new CameraAccessException(CameraAccessException.CAMERA_DISABLED,
-                    "No cameras available on device");
-        }
-
-        if (!Arrays.asList(CameraManagerGlobal.get().getCameraIdList()).contains(cameraId)) {
+        if (CameraManagerGlobal.sCameraServiceDisabled
+                || !Arrays.asList(CameraManagerGlobal.get().getCameraIdList()).contains(cameraId)) {
             throw new IllegalArgumentException(
                     "Camera ID '" + cameraId + "' not available on device.");
         }

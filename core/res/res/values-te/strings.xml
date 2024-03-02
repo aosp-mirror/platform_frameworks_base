@@ -1986,6 +1986,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"వర్క్ యాప్స్ అన్‌పాజ్ చేయాలా?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"అన్‌పాజ్ చేయండి"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ఎమర్జెన్సీ"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"స్క్రీన్ లాక్‌ను సెట్ చేయండి"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"స్క్రీన్ లాక్‌ను సెట్ చేయండి"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"మీ ప్రైవేట్ స్పేస్‌ను ఉపయోగించడానికి, ఈ పరికరంలో స్క్రీన్ లాక్ సెట్ చేయండి"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"యాప్ అందుబాటులో లేదు"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> అందుబాటులో లేదు"</string>
