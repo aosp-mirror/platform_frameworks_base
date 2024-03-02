@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Klingeln lassen"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibrieren"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Stummschalten"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"Stream"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Nicht verfügbar, da Klingelton stumm"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Zum Aufheben der Stummschaltung tippen."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tippen, um Vibrieren festzulegen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Zum Stummschalten tippen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
