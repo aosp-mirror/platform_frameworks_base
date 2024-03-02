@@ -94,6 +94,17 @@ flag {
 }
 
 flag {
+   name: "pss_app_selector_abrupt_exit_fix"
+   namespace: "systemui"
+   description: "Fixes the app selector abruptly disappearing without an animation, when the"
+        "selected task is the foreground task."
+   bug: "314385883"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
     name: "notifications_background_media_icons"
     namespace: "systemui"
     description: "Updates icons for media notifications in the background."
