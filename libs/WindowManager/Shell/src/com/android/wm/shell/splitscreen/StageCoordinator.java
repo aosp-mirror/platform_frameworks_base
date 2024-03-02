@@ -3515,7 +3515,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     return;
                 }
 
-                final int stageType = isMainStage ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
+                // If visible, we preserve the app and keep it running. If an app becomes
+                // unsupported in the bg, break split without putting anything on top
+                boolean splitScreenVisible = isSplitScreenVisible();
+                int stageType = STAGE_TYPE_UNDEFINED;
+                if (splitScreenVisible) {
+                    stageType = isMainStage ? STAGE_TYPE_MAIN : STAGE_TYPE_SIDE;
+                }
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 prepareExitSplitScreen(stageType, wct);
                 clearSplitPairedInRecents(EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW);
@@ -3524,7 +3530,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 Log.w(TAG, splitFailureMessage("onNoLongerSupportMultiWindow",
                         "app package " + taskInfo.baseActivity.getPackageName()
                         + " does not support splitscreen, or is a controlled activity type"));
-                mSplitUnsupportedToast.show();
+                if (splitScreenVisible) {
+                    mSplitUnsupportedToast.show();
+                }
             }
         }
 

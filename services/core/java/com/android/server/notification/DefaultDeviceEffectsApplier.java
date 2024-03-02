@@ -65,7 +65,9 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
         mColorDisplayManager = context.getSystemService(ColorDisplayManager.class);
         mPowerManager = context.getSystemService(PowerManager.class);
         mUiModeManager = context.getSystemService(UiModeManager.class);
-        mWallpaperManager = context.getSystemService(WallpaperManager.class);
+        WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
+        mWallpaperManager = wallpaperManager != null && wallpaperManager.isWallpaperSupported()
+                ? wallpaperManager : null;
     }
 
     @Override
