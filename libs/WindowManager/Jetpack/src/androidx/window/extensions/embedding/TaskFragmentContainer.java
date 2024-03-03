@@ -748,6 +748,10 @@ class TaskFragmentContainer {
         }
     }
 
+    @NonNull Rect getLastRequestedBounds() {
+        return mLastRequestedBounds;
+    }
+
     /**
      * Checks if last requested windowing mode is equal to the provided value.
      * @see WindowContainerTransaction#setWindowingMode

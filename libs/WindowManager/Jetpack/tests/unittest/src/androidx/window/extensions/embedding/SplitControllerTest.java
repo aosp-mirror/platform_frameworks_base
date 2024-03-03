@@ -642,7 +642,7 @@ public class SplitControllerTest {
                 false /* isOnReparent */);
 
         assertTrue(result);
-        verify(mSplitPresenter).expandTaskFragment(mTransaction, container.getTaskFragmentToken());
+        verify(mSplitPresenter).expandTaskFragment(mTransaction, container);
     }
 
     @Test

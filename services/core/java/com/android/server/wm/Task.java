@@ -6823,8 +6823,8 @@ class Task extends TaskFragment {
      * A decor surface is requested by a {@link TaskFragmentOrganizer} and is placed below children
      * windows in the Task except for own Activities and TaskFragments in fully trusted mode. The
      * decor surface is created and shared with the client app with
-     * {@link android.window.TaskFragmentOperation#OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE} and
-     * be removed with
+     * {@link android.window.TaskFragmentOperation#OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE}
+     * and be removed with
      * {@link android.window.TaskFragmentOperation#OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE}.
      *
      * When boosted with

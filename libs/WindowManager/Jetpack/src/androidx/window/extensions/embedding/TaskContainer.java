@@ -77,6 +77,9 @@ class TaskContainer {
 
     private boolean mHasDirectActivity;
 
+    @Nullable
+    private TaskFragmentParentInfo mTaskFragmentParentInfo;
+
     /**
      * TaskFragments that the organizer has requested to be closed. They should be removed when
      * the organizer receives
@@ -85,14 +88,17 @@ class TaskContainer {
      */
     final Set<IBinder> mFinishedContainer = new ArraySet<>();
 
+    // TODO(b/293654166): move DividerPresenter to SplitController.
+    @NonNull
+    final DividerPresenter mDividerPresenter;
+
     /**
      * The {@link TaskContainer} constructor
      *
-     * @param taskId The ID of the Task, which must match {@link Activity#getTaskId()} with
-     *               {@code activityInTask}.
+     * @param taskId         The ID of the Task, which must match {@link Activity#getTaskId()} with
+     *                       {@code activityInTask}.
      * @param activityInTask The {@link Activity} in the Task with {@code taskId}. It is used to
      *                       initialize the {@link TaskContainer} properties.
-     *
      */
     TaskContainer(int taskId, @NonNull Activity activityInTask) {
         if (taskId == INVALID_TASK_ID) {
@@ -107,6 +113,7 @@ class TaskContainer {
         // the host task is visible and has an activity in the task.
         mIsVisible = true;
         mHasDirectActivity = true;
+        mDividerPresenter = new DividerPresenter();
     }
 
     int getTaskId() {
@@ -136,10 +143,12 @@ class TaskContainer {
     }
 
     void updateTaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
+        // TODO(b/293654166): cache the TaskFragmentParentInfo and remove these fields.
         mConfiguration.setTo(info.getConfiguration());
         mDisplayId = info.getDisplayId();
         mIsVisible = info.isVisible();
         mHasDirectActivity = info.hasDirectActivity();
+        mTaskFragmentParentInfo = info;
     }
 
     /**
@@ -161,8 +170,8 @@ class TaskContainer {
      * Returns the windowing mode for the TaskFragments below this Task, which should be split with
      * other TaskFragments.
      *
-     * @param taskFragmentBounds    Requested bounds for the TaskFragment. It will be empty when
-     *                              the pair of TaskFragments are stacked due to the limited space.
+     * @param taskFragmentBounds Requested bounds for the TaskFragment. It will be empty when
+     *                           the pair of TaskFragments are stacked due to the limited space.
      */
     @WindowingMode
     int getWindowingModeForTaskFragment(@Nullable Rect taskFragmentBounds) {
@@ -228,7 +237,7 @@ class TaskContainer {
 
     @Nullable
     TaskFragmentContainer getTopNonFinishingTaskFragmentContainer(boolean includePin,
-                                                                  boolean includeOverlay) {
+            boolean includeOverlay) {
         for (int i = mContainers.size() - 1; i >= 0; i--) {
             final TaskFragmentContainer container = mContainers.get(i);
             if (!includePin && isTaskFragmentContainerPinned(container)) {
@@ -283,7 +292,7 @@ class TaskContainer {
         return mContainers.indexOf(child);
     }
 
-    /** Whether the Task is in an intermediate state waiting for the server update.*/
+    /** Whether the Task is in an intermediate state waiting for the server update. */
     boolean isInIntermediateState() {
         for (TaskFragmentContainer container : mContainers) {
             if (container.isInIntermediateState()) {
@@ -387,6 +396,26 @@ class TaskContainer {
     @NonNull
     List<TaskFragmentContainer> getTaskFragmentContainers() {
         return mContainers;
+    }
+
+    void updateDivider(@NonNull WindowContainerTransaction wct) {
+        if (mTaskFragmentParentInfo != null) {
+            // Update divider only if TaskFragmentParentInfo is available.
+            mDividerPresenter.updateDivider(
+                    wct, mTaskFragmentParentInfo, getTopNonFinishingSplitContainer());
+        }
+    }
+
+    @Nullable
+    private SplitContainer getTopNonFinishingSplitContainer() {
+        for (int i = mSplitContainers.size() - 1; i >= 0; i--) {
+            final SplitContainer splitContainer = mSplitContainers.get(i);
+            if (!splitContainer.getPrimaryContainer().isFinished()
+                    && !splitContainer.getSecondaryContainer().isFinished()) {
+                return splitContainer;
+            }
+        }
+        return null;
     }
 
     private void onTaskFragmentContainerUpdated() {
