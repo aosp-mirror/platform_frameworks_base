@@ -294,7 +294,10 @@ public class SplitControllerTest {
         doReturn(tf).when(splitContainer).getPrimaryContainer();
         doReturn(tf).when(splitContainer).getSecondaryContainer();
         doReturn(createTestTaskContainer()).when(splitContainer).getTaskContainer();
-        doReturn(createSplitRule(mActivity, mActivity)).when(splitContainer).getSplitRule();
+        final SplitRule splitRule = createSplitRule(mActivity, mActivity);
+        doReturn(splitRule).when(splitContainer).getSplitRule();
+        doReturn(splitRule.getDefaultSplitAttributes())
+                .when(splitContainer).getDefaultSplitAttributes();
         taskContainer = mSplitController.getTaskContainer(TASK_ID);
         taskContainer.addSplitContainer(splitContainer);
         // Add a mock SplitContainer on top of splitContainer
