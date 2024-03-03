@@ -48,6 +48,7 @@ class CredentialEntryInfo(
     val entryGroupId: String, // Used for deduplication, and displayed as the grouping title
                               // "For <value-of-entryGroupId>" on the more-option screen.
     val isDefaultIconPreferredAsSingleProvider: Boolean,
+    val affiliatedDomain: String?,
 ) : EntryInfo(
     providerId,
     entryKey,

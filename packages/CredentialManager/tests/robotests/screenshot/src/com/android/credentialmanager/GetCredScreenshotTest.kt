@@ -151,6 +151,7 @@ class GetCredScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                                 entryGroupId = "username",
                                 isDefaultIconPreferredAsSingleProvider = false,
                                 rawCredentialType = "unknown-type",
+                                affiliatedDomain = null,
                         )
                 ),
                 authenticationEntryList = emptyList(),
