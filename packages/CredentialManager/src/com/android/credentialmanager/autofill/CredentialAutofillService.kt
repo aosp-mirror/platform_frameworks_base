@@ -21,8 +21,6 @@ import android.app.assist.AssistStructure
 import android.content.Context
 import android.credentials.CredentialManager
 import android.credentials.GetCredentialRequest
-import android.credentials.GetCredentialResponse
-import android.credentials.GetCredentialException
 import android.credentials.GetCandidateCredentialsResponse
 import android.credentials.GetCandidateCredentialsException
 import android.credentials.CredentialOption
@@ -33,7 +31,6 @@ import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
-import android.provider.Settings
 import android.service.autofill.AutofillService
 import android.service.autofill.Dataset
 import android.service.autofill.Field
@@ -124,13 +121,10 @@ class CredentialAutofillService : AutofillService() {
         // TODO(b/324635774): Use callback for validating. If the request is coming
         // directly from the view, there should be a corresponding callback, otherwise
         // we should fail fast,
-        val getCredCallback = getCredManCallback(structure)
         if (getCredRequest == null) {
             Log.i(TAG, "No credential manager request found")
             callback.onFailure("No credential manager request found")
             return
-        } else if (getCredCallback == null) {
-            Log.i(TAG, "No credential manager callback found")
         }
         val credentialManager: CredentialManager =
                 getSystemService(Context.CREDENTIAL_SERVICE) as CredentialManager
@@ -522,42 +516,6 @@ class CredentialAutofillService : AutofillService() {
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
         TODO("Not yet implemented")
-    }
-
-    private fun getCredManCallback(structure: AssistStructure): OutcomeReceiver<
-            GetCredentialResponse, GetCredentialException>? {
-        return traverseStructureForCallback(structure)
-    }
-
-    private fun traverseStructureForCallback(
-            structure: AssistStructure
-    ): OutcomeReceiver<GetCredentialResponse, GetCredentialException>? {
-        val windowNodes: List<AssistStructure.WindowNode> =
-                structure.run {
-                    (0 until windowNodeCount).map { getWindowNodeAt(it) }
-                }
-
-        windowNodes.forEach { windowNode: AssistStructure.WindowNode ->
-            return traverseNodeForCallback(windowNode.rootViewNode)
-        }
-        return null
-    }
-
-    private fun traverseNodeForCallback(
-            viewNode: AssistStructure.ViewNode
-    ): OutcomeReceiver<GetCredentialResponse, GetCredentialException>? {
-        val children: List<AssistStructure.ViewNode> =
-                viewNode.run {
-                    (0 until childCount).map { getChildAt(it) }
-                }
-
-        children.forEach { childNode: AssistStructure.ViewNode ->
-            if (childNode.isFocused() && childNode.credentialManagerCallback != null) {
-                return childNode.credentialManagerCallback
-            }
-            return traverseNodeForCallback(childNode)
-        }
-        return null
     }
 
     private fun getCredManRequest(
