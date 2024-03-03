@@ -148,6 +148,7 @@ class GetCredScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                                 lastUsedTimeMillis = null,
                                 isAutoSelectable = false,
                                 entryGroupId = "username",
+                                isDefaultIconPreferredAsSingleProvider = false,
                         )
                 ),
                 authenticationEntryList = emptyList(),
