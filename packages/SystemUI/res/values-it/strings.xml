@@ -97,7 +97,7 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> e altre app aperte hanno rilevato questo screenshot."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Aggiungi alla nota"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Registrazione dello schermo"</string>
-    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Elaboraz. registraz. schermo"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Elaborazione registrazione…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifica costante per una sessione di registrazione dello schermo"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Iniziare a registrare?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Quando registri, Android ha accesso a qualsiasi elemento visibile sul tuo schermo o in riproduzione sul tuo dispositivo. Presta quindi attenzione a password, dettagli sui pagamenti, messaggi, foto, audio e video."</string>
@@ -109,7 +109,7 @@
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Microfono"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio del dispositivo e microfono"</string>
     <string name="screenrecord_continue" msgid="4055347133700593164">"Inizia"</string>
-    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Registrazione schermo"</string>
+    <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Registrazione schermo in corso…"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Registrazione schermo e audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostra tocchi sullo schermo"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Interrompi"</string>
