@@ -342,8 +342,8 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Ouvrir les paramètres"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Autre appareil"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'écran Récents"</string>
-    <string name="zen_priority_introduction" msgid="3159291973383796646">"Vous ne serez dérangé par aucun son ni aucune vibration, hormis ceux des alarmes, des rappels, des événements et des appels des contacts de votre choix. Le son continuera de fonctionner notamment pour la musique, les vidéos et les jeux."</string>
-    <string name="zen_alarms_introduction" msgid="3987266042682300470">"Vous ne serez dérangé par aucun son ni aucune vibration, hormis ceux des alarmes. Le son continuera de fonctionner notamment pour la musique, les vidéos et les jeux."</string>
+    <string name="zen_priority_introduction" msgid="3159291973383796646">"Vous ne serez pas dérangé par des sons ou des vibrations, hormis ceux des alarmes, des rappels, des événements et des appelants de votre choix. Vous entendrez encore les sons que vous choisirez de jouer, notamment la musique, les vidéos et les jeux."</string>
+    <string name="zen_alarms_introduction" msgid="3987266042682300470">"Vous ne serez pas dérangé par des sons ou des vibrations, hormis ceux des alarmes. Vous entendrez encore les sons que vous choisirez de jouer, notamment la musique, les vidéos et les jeux."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personnaliser"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Cette option permet de bloquer TOUS les sons et les vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux. Vous pourrez encore passer des appels téléphoniques."</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Cette option permet de bloquer TOUS les sons et les vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux."</string>
