@@ -28,8 +28,6 @@ import javax.inject.Inject
 /** Empty implementation of ShadeViewController for variants with no shade. */
 class ShadeViewControllerEmptyImpl @Inject constructor() :
     ShadeViewController, ShadeBackActionInteractor, ShadeLockscreenInteractor {
-    override fun expand(animate: Boolean) {}
-    override fun expandToQs() {}
     override fun expandToNotifications() {}
     override val isExpandingOrCollapsing: Boolean = false
     override val isExpanded: Boolean = false

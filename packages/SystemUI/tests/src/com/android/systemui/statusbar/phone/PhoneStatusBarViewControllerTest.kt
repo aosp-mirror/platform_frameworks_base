@@ -243,7 +243,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         statusContainer.dispatchTouchEvent(
             getActionUpEventFromSource(InputDevice.SOURCE_MOUSE)
         )
-        verify(shadeViewController).expand(any())
+        verify(shadeControllerImpl).animateExpandShade()
     }
 
     @Test
@@ -272,7 +272,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             controller = createAndInitController(view)
         }
         view.performClick()
-        verify(shadeViewController, never()).expand(any())
+        verify(shadeControllerImpl, never()).animateExpandShade()
     }
 
     private fun getCommandQueueCallback(): CommandQueue.Callbacks {

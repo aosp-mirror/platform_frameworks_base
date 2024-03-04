@@ -2045,7 +2045,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mView.animate().cancel();
     }
 
-    @Override
     public void expandToQs() {
         if (mQsController.isExpansionEnabled()) {
             mQsController.setExpandImmediate(true);
@@ -2812,7 +2811,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mQsController.setListening(listening);
     }
 
-    @Override
     public void expand(boolean animate) {
         if (isFullyCollapsed() || isCollapsing()) {
             mInstantExpanding = true;
