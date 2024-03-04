@@ -16,11 +16,11 @@
 
 package com.android.systemui.mediaprojection.taskswitcher.data.model
 
-import android.app.TaskInfo
+import android.app.ActivityManager.RunningTaskInfo
 
 /** Represents the state of media projection. */
 sealed interface MediaProjectionState {
     object NotProjecting : MediaProjectionState
     object EntireScreen : MediaProjectionState
-    data class SingleTask(val task: TaskInfo) : MediaProjectionState
+    data class SingleTask(val task: RunningTaskInfo) : MediaProjectionState
 }
