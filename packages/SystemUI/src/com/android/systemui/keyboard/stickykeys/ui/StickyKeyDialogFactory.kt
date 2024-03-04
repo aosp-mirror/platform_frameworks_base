@@ -45,7 +45,7 @@ constructor(
     }
 
     private fun createStickyKeyIndicator(viewModel: StickyKeysIndicatorViewModel): Dialog {
-        return ComponentDialog(context, R.style.Theme_SystemUI_Dialog).apply {
+        return ComponentDialog(context, R.style.Theme_SystemUI_Dialog_StickyKeys).apply {
             // because we're requesting window feature it must be called before setting content
             window?.setStickyKeyWindowAttributes()
             setContentView(ComposeFacade.createStickyKeysIndicatorContent(context, viewModel))

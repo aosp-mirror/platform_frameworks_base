@@ -1572,4 +1572,8 @@
     <style name="Theme.PrivacyDialog" parent="@style/Theme.SystemUI.Dialog">
         <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainer</item>
     </style>
+
+    <style name="Theme.SystemUI.Dialog.StickyKeys" parent="@style/Theme.SystemUI.Dialog">
+        <item name="android:colorBackground">@color/transparent</item>
+    </style>
 </resources>
