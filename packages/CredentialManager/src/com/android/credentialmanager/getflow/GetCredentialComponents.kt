@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
@@ -399,6 +400,10 @@ fun PrimarySelectionCardVImpl(
     )
     SheetContainerCard {
         val preferTopBrandingContent = requestDisplayInfo.preferTopBrandingContent
+        val singleProviderId = findSingleProviderIdForPrimaryPage(
+                primaryPageCredentialEntryList,
+                primaryPageLockedEntryList
+        )
         if (preferTopBrandingContent != null) {
             item {
                 HeadlineProviderIconAndName(
@@ -409,10 +414,6 @@ fun PrimarySelectionCardVImpl(
         } else {
             // When only one provider's entries will be displayed on the primary page, display that
             // provider's icon + name up top.
-            val singleProviderId = findSingleProviderIdForPrimaryPage(
-                primaryPageCredentialEntryList,
-                primaryPageLockedEntryList
-            )
             if (singleProviderId != null) {
                 // First should always work but just to be safe.
                 val providerInfo = providerInfoList.firstOrNull { it.id == singleProviderId }
@@ -479,14 +480,17 @@ fun PrimarySelectionCardVImpl(
             CredentialContainerCard {
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     primaryPageCredentialEntryList.forEach {
+                        val entry = it.sortedCredentialEntryList.first()
                         CredentialEntryRow(
-                                credentialEntryInfo = it.sortedCredentialEntryList.first(),
+                                credentialEntryInfo = entry,
                                 onEntrySelected = onEntrySelected,
                                 enforceOneLine = true,
                                 onTextLayout = {
                                     showMoreForTruncatedEntry.value = it.hasVisualOverflow
                                 },
                                 hasSingleEntry = hasSingleEntry,
+                                shouldOverrideIcon = entry.isDefaultIconPreferredAsSingleProvider &&
+                                        (singleProviderId != null),
                         )
                     }
                     primaryPageLockedEntryList.forEach {
@@ -750,18 +754,35 @@ fun CredentialEntryRow(
     onTextLayout: (TextLayoutResult) -> Unit = {},
     // Make optional since the secondary page doesn't care about this value.
     hasSingleEntry: Boolean? = null,
+    // For primary page only, if all display entries come from the same provider AND if that
+    // provider has opted in via isDefaultIconPreferredAsSingleProvider, then we override the
+    // display icon to the default icon for the given credential type.
+    shouldOverrideIcon: Boolean = false,
 ) {
     val (username, displayName) = if (credentialEntryInfo.credentialType == CredentialType.PASSKEY)
         userAndDisplayNameForPasskey(
             credentialEntryInfo.userName, credentialEntryInfo.displayName ?: "")
     else Pair(credentialEntryInfo.userName, credentialEntryInfo.displayName)
+
+    // For primary page, if
+    val overrideIcon: Painter? =
+        if (shouldOverrideIcon) {
+            when (credentialEntryInfo.credentialType) {
+                CredentialType.PASSKEY -> painterResource(R.drawable.ic_passkey_24)
+                CredentialType.PASSWORD -> painterResource(R.drawable.ic_password_24)
+                else -> painterResource(R.drawable.ic_other_sign_in_24)
+            }
+        } else null
+
     Entry(
         onClick = { onEntrySelected(credentialEntryInfo) },
-        iconImageBitmap = credentialEntryInfo.icon?.toBitmap()?.asImageBitmap(),
+        iconImageBitmap =
+        if (overrideIcon == null) credentialEntryInfo.icon?.toBitmap()?.asImageBitmap() else null,
         shouldApplyIconImageBitmapTint = credentialEntryInfo.shouldTintIcon,
         // Fall back to iconPainter if iconImageBitmap isn't available
         iconPainter =
-        if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
+        if (overrideIcon != null) overrideIcon
+        else if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
         else null,
         entryHeadlineText = username,
         entrySecondLineText =

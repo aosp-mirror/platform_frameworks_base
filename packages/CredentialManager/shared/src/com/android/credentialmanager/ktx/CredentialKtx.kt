@@ -134,6 +134,8 @@ private fun getCredentialOptionInfoList(
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
                     entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
                 )
                 )
             }
@@ -158,6 +160,8 @@ private fun getCredentialOptionInfoList(
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
                     entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
                 )
                 )
             }
@@ -181,6 +185,8 @@ private fun getCredentialOptionInfoList(
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
                     entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
                 )
                 )
             }
