@@ -482,11 +482,30 @@ public final class KeyboardShortcutListSearch {
                         context.getString(R.string.keyboard_shortcut_group_system),
                         new ArrayList<>());
         List<ShortcutKeyGroupMultiMappingInfo> infoList = Arrays.asList(
-                /* Access notification shade: Meta + N */
+                /* Access list of all apps and search (i.e. Search/Launcher): Meta */
                 new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_access_notification_shade),
+                        context.getString(R.string.group_system_access_all_apps_search),
                         Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_N, KeyEvent.META_META_ON))),
+                                Pair.create(KeyEvent.KEYCODE_UNKNOWN, KeyEvent.META_META_ON))),
+                /* Access home screen: Meta + H, Meta + Enter */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_access_home_screen),
+                        Arrays.asList(
+                                Pair.create(KeyEvent.KEYCODE_H, KeyEvent.META_META_ON),
+                                Pair.create(KeyEvent.KEYCODE_ENTER, KeyEvent.META_META_ON))),
+                /* Overview of open apps: Meta + Tab */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_overview_open_apps),
+                        Arrays.asList(
+                                Pair.create(KeyEvent.KEYCODE_TAB, KeyEvent.META_META_ON))),
+                /* Back: go back to previous state (back button) */
+                /* Meta + Escape, Meta + backspace, Meta + left arrow */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_go_back),
+                        Arrays.asList(
+                                Pair.create(KeyEvent.KEYCODE_ESCAPE, KeyEvent.META_META_ON),
+                                Pair.create(KeyEvent.KEYCODE_DEL, KeyEvent.META_META_ON),
+                                Pair.create(KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.META_META_ON))),
                 /* Take a full screenshot: Meta + Ctrl + S */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_full_screenshot),
@@ -499,25 +518,6 @@ public final class KeyboardShortcutListSearch {
                         context.getString(R.string.group_system_access_system_app_shortcuts),
                         Arrays.asList(
                                 Pair.create(KeyEvent.KEYCODE_SLASH, KeyEvent.META_META_ON))),
-                /* Back: go back to previous state (back button) */
-                /* Meta + Escape, Meta + Grave, Meta + backspace, Meta + left arrow */
-                new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_go_back),
-                        Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_ESCAPE, KeyEvent.META_META_ON),
-                                Pair.create(KeyEvent.KEYCODE_DEL, KeyEvent.META_META_ON),
-                                Pair.create(KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.META_META_ON))),
-                /* Access home screen: Meta + H, Meta + Enter */
-                new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_access_home_screen),
-                        Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_H, KeyEvent.META_META_ON),
-                                Pair.create(KeyEvent.KEYCODE_ENTER, KeyEvent.META_META_ON))),
-                /* Overview of open apps: Meta + Tab */
-                new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_overview_open_apps),
-                        Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_TAB, KeyEvent.META_META_ON))),
                 /* Cycle through recent apps (forward): Alt + Tab */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_cycle_forward),
@@ -530,26 +530,16 @@ public final class KeyboardShortcutListSearch {
                                 Pair.create(
                                         KeyEvent.KEYCODE_TAB,
                                         KeyEvent.META_SHIFT_ON | KeyEvent.META_ALT_ON))),
-                /* Access list of all apps and search (i.e. Search/Launcher): Meta */
-                new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_access_all_apps_search),
-                        Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_UNKNOWN, KeyEvent.META_META_ON))),
                 /* Hide and (re)show taskbar: Meta + T */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_hide_reshow_taskbar),
                         Arrays.asList(
                                 Pair.create(KeyEvent.KEYCODE_T, KeyEvent.META_META_ON))),
-                /* Access system settings: Meta + I */
+                /* Access notification shade: Meta + N */
                 new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_access_system_settings),
+                        context.getString(R.string.group_system_access_notification_shade),
                         Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_I, KeyEvent.META_META_ON))),
-                /* Access Google Assistant: Meta + A */
-                new ShortcutKeyGroupMultiMappingInfo(
-                        context.getString(R.string.group_system_access_google_assistant),
-                        Arrays.asList(
-                                Pair.create(KeyEvent.KEYCODE_A, KeyEvent.META_META_ON))),
+                                Pair.create(KeyEvent.KEYCODE_N, KeyEvent.META_META_ON))),
                 /*  Lock screen: Meta + L */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_lock_screen),
@@ -561,7 +551,17 @@ public final class KeyboardShortcutListSearch {
                         Arrays.asList(
                                 Pair.create(
                                         KeyEvent.KEYCODE_N,
-                                        KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON)))
+                                        KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON))),
+                /* Access system settings: Meta + I */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_access_system_settings),
+                        Arrays.asList(
+                                Pair.create(KeyEvent.KEYCODE_I, KeyEvent.META_META_ON))),
+                /* Access Google Assistant: Meta + A */
+                new ShortcutKeyGroupMultiMappingInfo(
+                        context.getString(R.string.group_system_access_google_assistant),
+                        Arrays.asList(
+                                Pair.create(KeyEvent.KEYCODE_A, KeyEvent.META_META_ON)))
         );
         for (ShortcutKeyGroupMultiMappingInfo info : infoList) {
             systemGroup.addItem(info.getShortcutMultiMappingInfo());
