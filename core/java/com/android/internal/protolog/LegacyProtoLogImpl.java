@@ -55,37 +55,38 @@ import java.util.stream.Collectors;
  * A service for the ProtoLog logging system.
  */
 public class LegacyProtoLogImpl implements IProtoLog {
-    private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
-
     private static final int BUFFER_CAPACITY = 1024 * 1024;
     private static final int PER_CHUNK_SIZE = 1024;
     private static final String TAG = "ProtoLog";
     private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
     static final String PROTOLOG_VERSION = "2.0.0";
-    private static final int DEFAULT_PER_CHUNK_SIZE = 0;
 
     private final File mLogFile;
     private final String mLegacyViewerConfigFilename;
     private final TraceBuffer mBuffer;
     private final LegacyProtoLogViewerConfigReader mViewerConfig;
+    private final TreeMap<String, IProtoLogGroup> mLogGroups;
     private final int mPerChunkSize;
 
     private boolean mProtoLogEnabled;
     private boolean mProtoLogEnabledLockFree;
     private final Object mProtoLogEnabledLock = new Object();
 
-    public LegacyProtoLogImpl(String outputFile, String viewerConfigFilename) {
+    public LegacyProtoLogImpl(String outputFile, String viewerConfigFilename,
+            TreeMap<String, IProtoLogGroup> logGroups) {
         this(new File(outputFile), viewerConfigFilename, BUFFER_CAPACITY,
-                new LegacyProtoLogViewerConfigReader(), PER_CHUNK_SIZE);
+                new LegacyProtoLogViewerConfigReader(), PER_CHUNK_SIZE, logGroups);
     }
 
     public LegacyProtoLogImpl(File file, String viewerConfigFilename, int bufferCapacity,
-            LegacyProtoLogViewerConfigReader viewerConfig, int perChunkSize) {
+            LegacyProtoLogViewerConfigReader viewerConfig, int perChunkSize,
+            TreeMap<String, IProtoLogGroup> logGroups) {
         mLogFile = file;
         mBuffer = new TraceBuffer(bufferCapacity);
         mLegacyViewerConfigFilename = viewerConfigFilename;
         mViewerConfig = viewerConfig;
         mPerChunkSize = perChunkSize;
+        this.mLogGroups = logGroups;
     }
 
     /**

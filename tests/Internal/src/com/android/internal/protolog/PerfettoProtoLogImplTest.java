@@ -64,6 +64,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeMap;
 
 import perfetto.protos.Protolog;
 import perfetto.protos.ProtologCommon;
@@ -152,7 +153,8 @@ public class PerfettoProtoLogImplTest {
                 .thenAnswer(it -> new ProtoInputStream(mViewerConfigBuilder.build().toByteArray()));
 
         mReader = Mockito.spy(new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
-        mProtoLog = new PerfettoProtoLogImpl(viewerConfigInputStreamProvider, mReader);
+        mProtoLog =
+                new PerfettoProtoLogImpl(viewerConfigInputStreamProvider, mReader, new TreeMap<>());
     }
 
     @After

@@ -22,7 +22,9 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface ProtoLogToolInjected {
-    enum Value { VIEWER_CONFIG_PATH, LEGACY_OUTPUT_FILE_PATH, LEGACY_VIEWER_CONFIG_PATH }
+    enum Value {
+        VIEWER_CONFIG_PATH, LEGACY_OUTPUT_FILE_PATH, LEGACY_VIEWER_CONFIG_PATH, LOG_GROUPS
+    }
 
     Value value();
 }
