@@ -19,12 +19,13 @@ package com.android.systemui.communal.ui.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +44,7 @@ constructor(
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         MutableStateFlow<Map<UserAction, UserActionResult>>(
                 mapOf(
-                    UserAction.Swipe(Direction.RIGHT) to UserActionResult(Scenes.Lockscreen),
+                    Swipe(SwipeDirection.Right) to UserActionResult(Scenes.Lockscreen),
                 )
             )
             .asStateFlow()

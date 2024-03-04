@@ -37,11 +37,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
-import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 
 /**
@@ -116,14 +116,10 @@ fun SceneContainer(
                     key = sceneKey,
                     userActions =
                         if (sceneKey == currentSceneKey) {
-                                currentDestinations
-                            } else {
-                                composableScene.destinationScenes.value
-                            }
-                            .map { (userAction, userActionResult) ->
-                                userAction.asComposeAware() to userActionResult
-                            }
-                            .toMap(),
+                            currentDestinations
+                        } else {
+                            composableScene.destinationScenes.value
+                        },
                 ) {
                     with(composableScene) {
                         this@scene.Content(

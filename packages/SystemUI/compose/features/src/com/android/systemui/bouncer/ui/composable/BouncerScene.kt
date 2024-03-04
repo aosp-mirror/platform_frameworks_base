@@ -22,15 +22,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,8 +59,8 @@ constructor(
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         MutableStateFlow(
                 mapOf(
-                    UserAction.Back to UserActionResult(Scenes.Lockscreen),
-                    UserAction.Swipe(Direction.DOWN) to UserActionResult(Scenes.Lockscreen),
+                    Back to UserActionResult(Scenes.Lockscreen),
+                    Swipe(SwipeDirection.Down) to UserActionResult(Scenes.Lockscreen),
                 )
             )
             .asStateFlow()
