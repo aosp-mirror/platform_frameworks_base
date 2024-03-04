@@ -650,7 +650,11 @@ void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
             mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
             break;
         case ColorMode::Hdr:
-            if (DeviceInfo::get()->isSupportFp16ForHdr()) {
+            if (DeviceInfo::get()->isSupportRgba10101010ForHdr()) {
+                mSurfaceColorType = SkColorType::kRGBA_10x6_SkColorType;
+                mSurfaceColorSpace = SkColorSpace::MakeRGB(
+                        GetExtendedTransferFunction(mTargetSdrHdrRatio), SkNamedGamut::kDisplayP3);
+            } else if (DeviceInfo::get()->isSupportFp16ForHdr()) {
                 mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;
                 mSurfaceColorSpace = SkColorSpace::MakeSRGB();
             } else {
@@ -675,7 +679,8 @@ void SkiaPipeline::setTargetSdrHdrRatio(float ratio) {
     if (mColorMode == ColorMode::Hdr || mColorMode == ColorMode::Hdr10) {
         mTargetSdrHdrRatio = ratio;
 
-        if (mColorMode == ColorMode::Hdr && DeviceInfo::get()->isSupportFp16ForHdr()) {
+        if (mColorMode == ColorMode::Hdr && DeviceInfo::get()->isSupportFp16ForHdr() &&
+            !DeviceInfo::get()->isSupportRgba10101010ForHdr()) {
             mSurfaceColorSpace = SkColorSpace::MakeSRGB();
         } else {
             mSurfaceColorSpace = SkColorSpace::MakeRGB(

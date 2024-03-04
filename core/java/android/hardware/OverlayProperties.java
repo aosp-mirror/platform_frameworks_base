@@ -70,19 +70,6 @@ public final class OverlayProperties implements Parcelable {
     }
 
     /**
-     * @return True if the device can support fp16, false otherwise.
-     * TODO: Move this to isCombinationSupported once the flag flips
-     * @hide
-     */
-    public boolean isFp16SupportedForHdr() {
-        if (mNativeObject == 0) {
-            return false;
-        }
-        return nIsCombinationSupported(
-                mNativeObject, DataSpace.DATASPACE_SCRGB, HardwareBuffer.RGBA_FP16);
-    }
-
-    /**
      * Indicates that hardware composition of a buffer encoded with the provided {@link DataSpace}
      * and {@link HardwareBuffer.Format} is supported on the device.
      *
