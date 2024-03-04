@@ -1239,7 +1239,7 @@ public class RootTaskTests extends WindowTestsBase {
         final ActivityRecord activity1 = finishTopActivity(rootTask1);
         assertEquals(DESTROYING, activity1.getState());
         verify(mRootWindowContainer).ensureVisibilityAndConfig(eq(null) /* starting */,
-                eq(display.mDisplayId), anyBoolean());
+                eq(display), anyBoolean());
     }
 
     private ActivityRecord finishTopActivity(Task task) {

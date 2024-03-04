@@ -1625,7 +1625,7 @@ class ActivityStarter {
         final ActivityRecord currentTop = startedActivityRootTask.topRunningActivity();
         if (currentTop != null && currentTop.shouldUpdateConfigForDisplayChanged()) {
             mRootWindowContainer.ensureVisibilityAndConfig(
-                    currentTop, currentTop.getDisplayId(), false /* deferResume */);
+                    currentTop, currentTop.mDisplayContent, false /* deferResume */);
         }
 
         if (!avoidMoveToFront() && mDoResume && mRootWindowContainer
