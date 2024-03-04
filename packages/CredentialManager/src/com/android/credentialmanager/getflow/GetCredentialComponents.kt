@@ -376,6 +376,7 @@ fun PrimarySelectionCard(
 }
 
 internal const val MAX_ENTRY_FOR_PRIMARY_PAGE = 4
+
 /** Draws the primary credential selection page, used starting from android V. */
 @Composable
 fun PrimarySelectionCardVImpl(
@@ -805,6 +806,7 @@ fun CredentialEntryRow(
         },
         enforceOneLine = enforceOneLine,
         onTextLayout = onTextLayout,
+        affiliatedDomainText = credentialEntryInfo.affiliatedDomain,
     )
 }
 

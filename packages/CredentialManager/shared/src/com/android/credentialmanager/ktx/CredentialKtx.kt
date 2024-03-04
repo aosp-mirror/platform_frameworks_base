@@ -138,6 +138,7 @@ private fun getCredentialOptionInfoList(
                     entryGroupId = credentialEntry.entryGroupId.toString(),
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
                 )
                 )
             }
@@ -165,6 +166,7 @@ private fun getCredentialOptionInfoList(
                     entryGroupId = credentialEntry.entryGroupId.toString(),
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
                 )
                 )
             }
@@ -191,6 +193,7 @@ private fun getCredentialOptionInfoList(
                     entryGroupId = credentialEntry.entryGroupId.toString(),
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
                 )
                 )
             }

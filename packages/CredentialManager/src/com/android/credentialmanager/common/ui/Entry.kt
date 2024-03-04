@@ -78,6 +78,8 @@ fun Entry(
     isLockedAuthEntry: Boolean = false,
     enforceOneLine: Boolean = false,
     onTextLayout: (TextLayoutResult) -> Unit = {},
+    /** Get flow only, if present, where be drawn as a line above the headline. */
+    affiliatedDomainText: String? = null,
 ) {
     val iconPadding = Modifier.wrapContentSize().padding(
         // Horizontal padding should be 16dp, but the suggestion chip itself
@@ -102,6 +104,13 @@ fun Entry(
             ) {
                 // Apply weight so that the trailing icon can always show.
                 Column(modifier = Modifier.wrapContentHeight().fillMaxWidth().weight(1f)) {
+                    if (!affiliatedDomainText.isNullOrBlank()) {
+                        BodySmallText(
+                            text = affiliatedDomainText,
+                            enforceOneLine = enforceOneLine,
+                            onTextLayout = onTextLayout,
+                        )
+                    }
                     SmallTitleText(
                         text = entryHeadlineText,
                         enforceOneLine = enforceOneLine,
