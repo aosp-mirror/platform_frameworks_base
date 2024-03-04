@@ -71,22 +71,20 @@ constructor(
             AudioStream(AudioManager.STREAM_MUSIC) to R.string.stream_media_unavailable,
         )
 
-    private var value = 0f
     override val slider: StateFlow<SliderState> =
         combine(
                 audioVolumeInteractor.getAudioStream(audioStream),
                 audioVolumeInteractor.canChangeVolume(audioStream),
                 audioVolumeInteractor.ringerMode,
             ) { model, isEnabled, ringerMode ->
-                model.toState(value, isEnabled, ringerMode)
+                model.toState(isEnabled, ringerMode)
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, EmptyState)
 
-    override fun onValueChangeFinished(state: SliderState, newValue: Float) {
+    override fun onValueChanged(state: SliderState, newValue: Float) {
         val audioViewModel = state as? State
         audioViewModel ?: return
         coroutineScope.launch {
-            value = newValue
             val volume =
                 volumeSliderInteractor.translateValueToVolume(
                     newValue,
@@ -96,19 +94,20 @@ constructor(
         }
     }
 
+    override fun toggleMuted(state: SliderState) {
+        val audioViewModel = state as? State
+        audioViewModel ?: return
+        coroutineScope.launch {
+            audioVolumeInteractor.setMuted(audioStream, !audioViewModel.audioStreamModel.isMuted)
+        }
+    }
+
     private fun AudioStreamModel.toState(
-        value: Float,
         isEnabled: Boolean,
         ringerMode: RingerMode,
     ): State {
         return State(
-            value =
-                volumeSliderInteractor.processVolumeToValue(
-                    volume,
-                    volumeRange,
-                    value,
-                    isMuted,
-                ),
+            value = volumeSliderInteractor.processVolumeToValue(volume, volumeRange, isMuted),
             valueRange = volumeSliderInteractor.displayValueRange,
             icon = getIcon(ringerMode),
             label = labelsByStream[audioStream]?.let(context::getString)

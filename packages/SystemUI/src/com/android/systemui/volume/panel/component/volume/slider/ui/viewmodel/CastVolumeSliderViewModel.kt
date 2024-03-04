@@ -27,7 +27,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -46,17 +45,13 @@ constructor(
 ) : SliderViewModel {
 
     private val volumeRange = 0..routingSession.routingSessionInfo.volumeMax
-    private val value = MutableStateFlow(0f)
 
     override val slider: StateFlow<SliderState> =
-        combine(value, mediaOutputInteractor.currentConnectedDevice) { value, _ ->
-                getCurrentState(value)
-            }
-            .stateIn(coroutineScope, SharingStarted.Eagerly, getCurrentState(value.value))
+        combine(mediaOutputInteractor.currentConnectedDevice) { _ -> getCurrentState() }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, getCurrentState())
 
-    override fun onValueChangeFinished(state: SliderState, newValue: Float) {
+    override fun onValueChanged(state: SliderState, newValue: Float) {
         coroutineScope.launch {
-            value.value = newValue
             castVolumeInteractor.setVolume(
                 routingSession,
                 volumeSliderInteractor.translateValueToVolume(newValue, volumeRange),
@@ -64,13 +59,16 @@ constructor(
         }
     }
 
-    private fun getCurrentState(value: Float): State {
-        return State(
+    override fun toggleMuted(state: SliderState) {
+        // do nothing because this action isn't supported for Cast sliders.
+    }
+
+    private fun getCurrentState(): State =
+        State(
             value =
                 volumeSliderInteractor.processVolumeToValue(
                     volume = routingSession.routingSessionInfo.volume,
                     volumeRange = volumeRange,
-                    currentValue = value,
                     isMuted = false,
                 ),
             valueRange = volumeSliderInteractor.displayValueRange,
@@ -78,7 +76,6 @@ constructor(
             label = context.getString(R.string.media_device_cast),
             isEnabled = true,
         )
-    }
 
     private data class State(
         override val value: Float,

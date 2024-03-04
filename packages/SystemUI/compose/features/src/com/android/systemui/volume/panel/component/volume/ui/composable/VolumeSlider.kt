@@ -18,19 +18,21 @@ package com.android.systemui.volume.panel.component.volume.ui.composable
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.android.compose.PlatformSlider
 import com.android.compose.PlatformSliderColors
@@ -40,23 +42,37 @@ import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.Sl
 @Composable
 fun VolumeSlider(
     state: SliderState,
-    onValueChangeFinished: (Float) -> Unit,
+    onValueChange: (newValue: Float) -> Unit,
+    onIconTapped: () -> Unit,
     modifier: Modifier = Modifier,
     sliderColors: PlatformSliderColors,
 ) {
-    var value by remember(state.value) { mutableFloatStateOf(state.value) }
+    val value by
+        animateFloatAsState(targetValue = state.value, label = "VolumeSliderValueAnimation")
     PlatformSlider(
         modifier = modifier,
         value = value,
         valueRange = state.valueRange,
-        onValueChange = { value = it },
-        onValueChangeFinished = { onValueChangeFinished(value) },
+        onValueChange = onValueChange,
         enabled = state.isEnabled,
         icon = { isDragging ->
             if (isDragging) {
-                Text(text = value.toInt().toString())
+                Text(text = value.toInt().toString(), color = LocalContentColor.current)
             } else {
-                state.icon?.let { Icon(modifier = Modifier.size(24.dp), icon = it) }
+                state.icon?.let {
+                    IconButton(
+                        onClick = onIconTapped,
+                        colors =
+                            IconButtonColors(
+                                contentColor = LocalContentColor.current,
+                                containerColor = Color.Transparent,
+                                disabledContentColor = LocalContentColor.current,
+                                disabledContainerColor = Color.Transparent,
+                            )
+                    ) {
+                        Icon(modifier = Modifier.size(24.dp), icon = it)
+                    }
+                }
             }
         },
         colors = sliderColors,
@@ -66,19 +82,21 @@ fun VolumeSlider(
                     modifier = Modifier.basicMarquee(),
                     text = state.label,
                     style = MaterialTheme.typography.titleMedium,
+                    color = LocalContentColor.current,
                     maxLines = 1,
                 )
 
                 state.disabledMessage?.let { message ->
                     AnimatedVisibility(
                         !state.isEnabled,
-                        enter = expandVertically { it },
-                        exit = shrinkVertically { it },
+                        enter = slideInVertically { it },
+                        exit = slideOutVertically { it },
                     ) {
                         Text(
                             modifier = Modifier.basicMarquee(),
                             text = message,
                             style = MaterialTheme.typography.bodySmall,
+                            color = LocalContentColor.current,
                             maxLines = 1,
                         )
                     }

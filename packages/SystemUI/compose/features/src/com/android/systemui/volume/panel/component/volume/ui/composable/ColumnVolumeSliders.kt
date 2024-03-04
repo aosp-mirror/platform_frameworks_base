@@ -76,7 +76,10 @@ fun ColumnVolumeSliders(
             VolumeSlider(
                 modifier = Modifier.weight(1f),
                 state = sliderState,
-                onValueChangeFinished = { sliderViewModel.onValueChangeFinished(sliderState, it) },
+                onValueChange = { newValue: Float ->
+                    sliderViewModel.onValueChanged(sliderState, newValue)
+                },
+                onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                 sliderColors = sliderColors,
             )
 
@@ -114,9 +117,10 @@ fun ColumnVolumeSliders(
                         VolumeSlider(
                             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                             state = sliderState,
-                            onValueChangeFinished = {
-                                sliderViewModel.onValueChangeFinished(sliderState, it)
+                            onValueChange = { newValue: Float ->
+                                sliderViewModel.onValueChanged(sliderState, newValue)
                             },
+                            onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                             sliderColors = sliderColors,
                         )
                     }

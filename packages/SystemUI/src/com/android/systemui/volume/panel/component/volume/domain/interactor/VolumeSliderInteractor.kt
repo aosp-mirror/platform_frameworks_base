@@ -37,24 +37,18 @@ class VolumeSliderInteractor @Inject constructor() {
     fun processVolumeToValue(
         volume: Int,
         volumeRange: ClosedRange<Int>,
-        currentValue: Float?,
         isMuted: Boolean,
     ): Float {
         if (isMuted) {
             return 0f
         }
-        val changedVolume: Int? = currentValue?.let { translateValueToVolume(it, volumeRange) }
-        return if (volume != volumeRange.start && volume == changedVolume) {
-            currentValue
-        } else {
-            translateToRange(
-                currentValue = volume.toFloat(),
-                currentRangeStart = volumeRange.start.toFloat(),
-                currentRangeEnd = volumeRange.endInclusive.toFloat(),
-                targetRangeStart = displayValueRange.start,
-                targetRangeEnd = displayValueRange.endInclusive,
-            )
-        }
+        return translateToRange(
+            currentValue = volume.toFloat(),
+            currentRangeStart = volumeRange.start.toFloat(),
+            currentRangeEnd = volumeRange.endInclusive.toFloat(),
+            targetRangeStart = displayValueRange.start,
+            targetRangeEnd = displayValueRange.endInclusive,
+        )
     }
 
     /** Translates [value] from [displayValueRange] to volume that has [volumeRange]. */

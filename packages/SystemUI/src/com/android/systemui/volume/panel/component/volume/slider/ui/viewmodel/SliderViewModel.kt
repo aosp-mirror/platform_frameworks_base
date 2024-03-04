@@ -23,5 +23,7 @@ interface SliderViewModel {
 
     val slider: StateFlow<SliderState>
 
-    fun onValueChangeFinished(state: SliderState, newValue: Float)
+    fun onValueChanged(state: SliderState, newValue: Float)
+
+    fun toggleMuted(state: SliderState)
 }
