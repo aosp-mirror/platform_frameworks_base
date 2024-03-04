@@ -24,50 +24,53 @@ import com.android.systemui.user.data.repository.UserRepository
 /** Utilities related to user management actions. */
 object UserActionsUtil {
 
-    /** Returns `true` if it's possible to add a guest user to the device; `false` otherwise. */
+    /**
+     * Returns `true` if it's possible for the given user to add a guest user to the device; `false`
+     * otherwise.
+     */
     fun canCreateGuest(
         manager: UserManager,
         repository: UserRepository,
         isUserSwitcherEnabled: Boolean,
-        isAddUsersFromLockScreenEnabled: Boolean,
+        canAddUsersWhenLockedOrDeviceUnlocked: Boolean,
     ): Boolean {
-        if (!isUserSwitcherEnabled) {
-            return false
-        }
-
-        return currentUserCanCreateUsers(manager, repository) ||
-            anyoneCanCreateUsers(manager, isAddUsersFromLockScreenEnabled)
+        return canAddMoreUsers(
+            manager,
+            repository,
+            isUserSwitcherEnabled,
+            canAddUsersWhenLockedOrDeviceUnlocked,
+            UserManager.USER_TYPE_FULL_GUEST
+        )
     }
 
-    /** Returns `true` if it's possible to add a user to the device; `false` otherwise. */
+    /**
+     * Returns `true` if it's possible for the given user to add a user to the device; `false`
+     * otherwise.
+     */
     fun canCreateUser(
         manager: UserManager,
         repository: UserRepository,
         isUserSwitcherEnabled: Boolean,
-        isAddUsersFromLockScreenEnabled: Boolean,
+        canAddUsersWhenLockedOrDeviceUnlocked: Boolean,
     ): Boolean {
-        if (!isUserSwitcherEnabled) {
-            return false
-        }
-
-        if (
-            !currentUserCanCreateUsers(manager, repository) &&
-                !anyoneCanCreateUsers(manager, isAddUsersFromLockScreenEnabled)
-        ) {
-            return false
-        }
-
-        return manager.canAddMoreUsers(UserManager.USER_TYPE_FULL_SECONDARY)
+        return canAddMoreUsers(
+            manager,
+            repository,
+            isUserSwitcherEnabled,
+            canAddUsersWhenLockedOrDeviceUnlocked,
+            UserManager.USER_TYPE_FULL_SECONDARY
+        )
     }
 
     /**
-     * Returns `true` if it's possible to add a supervised user to the device; `false` otherwise.
+     * Returns `true` if it's possible to add a supervised user to the device given the current
+     * user; false` otherwise.
      */
     fun canCreateSupervisedUser(
         manager: UserManager,
         repository: UserRepository,
         isUserSwitcherEnabled: Boolean,
-        isAddUsersFromLockScreenEnabled: Boolean,
+        canAddUsersWhenLockedOrDeviceUnlocked: Boolean,
         supervisedUserPackageName: String?
     ): Boolean {
         if (supervisedUserPackageName.isNullOrEmpty()) {
@@ -78,17 +81,30 @@ object UserActionsUtil {
             manager,
             repository,
             isUserSwitcherEnabled,
-            isAddUsersFromLockScreenEnabled
+            canAddUsersWhenLockedOrDeviceUnlocked
         )
     }
 
-    fun canManageUsers(
+    fun canManageUsers(repository: UserRepository, isUserSwitcherEnabled: Boolean): Boolean {
+        return isUserSwitcherEnabled && repository.getSelectedUserInfo().isAdmin
+    }
+
+    /**
+     * Returns `true` if it's possible to add a user to the device for the given user type; false
+     * otherwise.
+     */
+    private fun canAddMoreUsers(
+        manager: UserManager,
         repository: UserRepository,
         isUserSwitcherEnabled: Boolean,
-        isAddUsersFromLockScreenEnabled: Boolean,
+        canAddUsersWhenLockedOrDeviceUnlocked: Boolean,
+        userType: String
     ): Boolean {
-        return isUserSwitcherEnabled &&
-            (repository.getSelectedUserInfo().isAdmin || isAddUsersFromLockScreenEnabled)
+        if (!isUserSwitcherEnabled || !canAddUsersWhenLockedOrDeviceUnlocked) {
+            return false
+        }
+
+        return currentUserCanCreateUsers(manager, repository) && manager.canAddMoreUsers(userType)
     }
 
     /**
@@ -96,28 +112,15 @@ object UserActionsUtil {
      */
     private fun currentUserCanCreateUsers(
         manager: UserManager,
-        repository: UserRepository,
+        repository: UserRepository
     ): Boolean {
         val currentUser = repository.getSelectedUserInfo()
         if (!currentUser.isAdmin && currentUser.id != UserHandle.USER_SYSTEM) {
             return false
         }
-
-        return systemCanCreateUsers(manager)
-    }
-
-    /** Returns `true` if the system can add users to the device; `false` otherwise. */
-    private fun systemCanCreateUsers(
-        manager: UserManager,
-    ): Boolean {
-        return !manager.hasBaseUserRestriction(UserManager.DISALLOW_ADD_USER, UserHandle.SYSTEM)
-    }
-
-    /** Returns `true` if it's allowed to add users to the device at all; `false` otherwise. */
-    private fun anyoneCanCreateUsers(
-        manager: UserManager,
-        isAddUsersFromLockScreenEnabled: Boolean,
-    ): Boolean {
-        return systemCanCreateUsers(manager) && isAddUsersFromLockScreenEnabled
+        return !manager.hasUserRestrictionForUser(
+            UserManager.DISALLOW_ADD_USER,
+            UserHandle.of(currentUser.id)
+        ) && !manager.hasUserRestrictionForUser(UserManager.DISALLOW_ADD_USER, UserHandle.SYSTEM)
     }
 }
