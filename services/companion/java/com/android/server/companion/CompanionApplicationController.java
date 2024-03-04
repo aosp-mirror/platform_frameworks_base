@@ -37,6 +37,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.PerUser;
+import com.android.server.companion.association.AssociationStore;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
 import com.android.server.companion.presence.ObservableUuid;
 import com.android.server.companion.presence.ObservableUuidStore;

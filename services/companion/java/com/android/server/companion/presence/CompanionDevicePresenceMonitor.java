@@ -44,7 +44,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.companion.AssociationStore;
+import com.android.server.companion.association.AssociationStore;
 
 import java.io.PrintWriter;
 import java.util.HashSet;

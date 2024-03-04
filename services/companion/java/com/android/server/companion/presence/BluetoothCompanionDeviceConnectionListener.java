@@ -39,7 +39,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.companion.AssociationStore;
+import com.android.server.companion.association.AssociationStore;
 
 import java.util.Arrays;
 import java.util.Collections;

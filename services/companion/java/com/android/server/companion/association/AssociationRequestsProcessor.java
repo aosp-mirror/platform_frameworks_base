@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.association;
 
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
@@ -24,7 +24,6 @@ import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
 import static android.content.ComponentName.createRelative;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 
-import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
 import static com.android.server.companion.utils.MetricUtils.logCreateAssociation;
 import static com.android.server.companion.utils.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.utils.PermissionsUtils.enforcePermissionForCreatingAssociation;
@@ -59,6 +58,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.server.companion.CompanionDeviceManagerService;
 import com.android.server.companion.utils.PackageUtils;
 
 import java.util.List;
@@ -107,7 +107,7 @@ import java.util.List;
  * ResultReceiver, MacAddress)
  */
 @SuppressLint("LongLogTag")
-class AssociationRequestsProcessor {
+public class AssociationRequestsProcessor {
     private static final String TAG = "CDM_AssociationRequestsProcessor";
 
     // AssociationRequestsProcessor <-> UI
@@ -130,12 +130,12 @@ class AssociationRequestsProcessor {
     private final @NonNull Context mContext;
     private final @NonNull CompanionDeviceManagerService mService;
     private final @NonNull PackageManagerInternal mPackageManager;
-    private final @NonNull AssociationStoreImpl mAssociationStore;
+    private final @NonNull AssociationStore mAssociationStore;
     @NonNull
     private final ComponentName mCompanionDeviceActivity;
 
-    AssociationRequestsProcessor(@NonNull CompanionDeviceManagerService service,
-            @NonNull AssociationStoreImpl associationStore) {
+    public AssociationRequestsProcessor(@NonNull CompanionDeviceManagerService service,
+            @NonNull AssociationStore associationStore) {
         mContext = service.getContext();
         mService = service;
         mPackageManager = service.mPackageManagerInternal;
@@ -149,7 +149,7 @@ class AssociationRequestsProcessor {
      * Handle incoming {@link AssociationRequest}s, sent via
      * {@link android.companion.ICompanionDeviceManager#associate(AssociationRequest, IAssociationRequestCallback, String, int)}
      */
-    void processNewAssociationRequest(@NonNull AssociationRequest request,
+    public void processNewAssociationRequest(@NonNull AssociationRequest request,
             @NonNull String packageName, @UserIdInt int userId,
             @NonNull IAssociationRequestCallback callback) {
         requireNonNull(request, "Request MUST NOT be null");
@@ -161,11 +161,8 @@ class AssociationRequestsProcessor {
         requireNonNull(callback, "Callback MUST NOT be null");
 
         final int packageUid = mPackageManager.getPackageUid(packageName, 0, userId);
-        if (DEBUG) {
-            Slog.d(TAG, "processNewAssociationRequest() "
-                    + "request=" + request + ", "
-                    + "package=u" + userId + "/" + packageName + " (uid=" + packageUid + ")");
-        }
+        Slog.d(TAG, "processNewAssociationRequest() " + "request=" + request + ", " + "package=u"
+                + userId + "/" + packageName + " (uid=" + packageUid + ")");
 
         // 1. Enforce permissions and other requirements.
         enforcePermissionForCreatingAssociation(mContext, request, packageUid);
@@ -223,7 +220,7 @@ class AssociationRequestsProcessor {
     /**
      * Process another AssociationRequest in CompanionDeviceActivity to cancel current dialog.
      */
-    PendingIntent buildAssociationCancellationIntent(@NonNull String packageName,
+    public PendingIntent buildAssociationCancellationIntent(@NonNull String packageName,
             @UserIdInt int userId) {
         requireNonNull(packageName, "Package name MUST NOT be null");
 
@@ -247,13 +244,6 @@ class AssociationRequestsProcessor {
         final String packageName = request.getPackageName();
         final int userId = request.getUserId();
         final int packageUid = mPackageManager.getPackageUid(packageName, 0, userId);
-
-        if (DEBUG) {
-            Slog.d(TAG, "processAssociationRequestApproval()\n"
-                    + "   package=u" + userId + "/" + packageName + " (uid=" + packageUid + ")\n"
-                    + "   request=" + request + "\n"
-                    + "   macAddress=" + macAddress + "\n");
-        }
 
         // 1. Need to check permissions again in case something changed, since we first received
         // this request.
@@ -288,6 +278,9 @@ class AssociationRequestsProcessor {
         }
     }
 
+    /**
+     * Create an association.
+     */
     public void createAssociation(@UserIdInt int userId, @NonNull String packageName,
             @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
             @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
@@ -309,6 +302,9 @@ class AssociationRequestsProcessor {
         // that there are other devices with the same profile, so the role holder won't be removed.
     }
 
+    /**
+     * Grant a role if specified and add an association to store.
+     */
     public void maybeGrantRoleAndStoreAssociation(@NonNull AssociationInfo association,
             @Nullable IAssociationRequestCallback callback,
             @Nullable ResultReceiver resultReceiver) {
@@ -331,6 +327,9 @@ class AssociationRequestsProcessor {
         });
     }
 
+    /**
+     * Enable system data sync.
+     */
     public void enableSystemDataSync(int associationId, int flags) {
         AssociationInfo association = mAssociationStore.getAssociationById(associationId);
         AssociationInfo updated = (new AssociationInfo.Builder(association))
@@ -338,6 +337,9 @@ class AssociationRequestsProcessor {
         mAssociationStore.updateAssociation(updated);
     }
 
+    /**
+     * Disable system data sync.
+     */
     public void disableSystemDataSync(int associationId, int flags) {
         AssociationInfo association = mAssociationStore.getAssociationById(associationId);
         AssociationInfo updated = (new AssociationInfo.Builder(association))
@@ -350,7 +352,8 @@ class AssociationRequestsProcessor {
 
         mAssociationStore.addAssociation(association);
 
-        mService.updateSpecialAccessPermissionForAssociatedPackage(association);
+        mService.updateSpecialAccessPermissionForAssociatedPackage(association.getUserId(),
+                association.getPackageName());
 
         logCreateAssociation(association.getDeviceProfile());
     }
@@ -431,38 +434,37 @@ class AssociationRequestsProcessor {
 
     private final ResultReceiver mOnRequestConfirmationReceiver =
             new ResultReceiver(Handler.getMain()) {
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle data) {
-            if (DEBUG) {
-                Slog.d(TAG, "mOnRequestConfirmationReceiver.onReceiveResult() "
-                        + "code=" + resultCode + ", " + "data=" + data);
-            }
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle data) {
+                    if (resultCode != RESULT_CODE_ASSOCIATION_APPROVED) {
+                        Slog.w(TAG, "Unknown result code:" + resultCode);
+                        return;
+                    }
 
-            if (resultCode != RESULT_CODE_ASSOCIATION_APPROVED) {
-                Slog.w(TAG, "Unknown result code:" + resultCode);
-                return;
-            }
+                    final AssociationRequest request = data.getParcelable(EXTRA_ASSOCIATION_REQUEST,
+                            android.companion.AssociationRequest.class);
+                    final IAssociationRequestCallback callback = IAssociationRequestCallback.Stub
+                            .asInterface(data.getBinder(EXTRA_APPLICATION_CALLBACK));
+                    final ResultReceiver resultReceiver = data.getParcelable(EXTRA_RESULT_RECEIVER,
+                            android.os.ResultReceiver.class);
 
-            final AssociationRequest request = data.getParcelable(EXTRA_ASSOCIATION_REQUEST, android.companion.AssociationRequest.class);
-            final IAssociationRequestCallback callback = IAssociationRequestCallback.Stub
-                    .asInterface(data.getBinder(EXTRA_APPLICATION_CALLBACK));
-            final ResultReceiver resultReceiver = data.getParcelable(EXTRA_RESULT_RECEIVER, android.os.ResultReceiver.class);
+                    requireNonNull(request);
+                    requireNonNull(callback);
+                    requireNonNull(resultReceiver);
 
-            requireNonNull(request);
-            requireNonNull(callback);
-            requireNonNull(resultReceiver);
+                    final MacAddress macAddress;
+                    if (request.isSelfManaged()) {
+                        macAddress = null;
+                    } else {
+                        macAddress = data.getParcelable(EXTRA_MAC_ADDRESS,
+                                android.net.MacAddress.class);
+                        requireNonNull(macAddress);
+                    }
 
-            final MacAddress macAddress;
-            if (request.isSelfManaged()) {
-                macAddress = null;
-            } else {
-                macAddress = data.getParcelable(EXTRA_MAC_ADDRESS, android.net.MacAddress.class);
-                requireNonNull(macAddress);
-            }
-
-            processAssociationRequestApproval(request, callback, resultReceiver, macAddress);
-        }
-    };
+                    processAssociationRequestApproval(request, callback, resultReceiver,
+                            macAddress);
+                }
+            };
 
     private boolean mayAssociateWithoutPrompt(@NonNull String packageName, @UserIdInt int userId) {
         // Throttle frequent associations

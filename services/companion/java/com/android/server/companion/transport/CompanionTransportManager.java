@@ -32,7 +32,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.companion.AssociationStore;
+import com.android.server.companion.association.AssociationStore;
 
 import java.io.FileDescriptor;
 import java.io.IOException;

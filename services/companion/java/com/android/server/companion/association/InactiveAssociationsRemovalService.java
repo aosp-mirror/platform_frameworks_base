@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
-
-import static com.android.server.companion.CompanionDeviceManagerService.TAG;
+package com.android.server.companion.association;
 
 import static java.util.concurrent.TimeUnit.DAYS;
 
@@ -29,13 +27,17 @@ import android.content.Context;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
+import com.android.server.companion.CompanionDeviceManagerServiceInternal;
 
 /**
- * A Job Service responsible for clean up the Association.
+ * A Job Service responsible for clean up idle self-managed associations.
+ *
  * The job will be executed only if the device is charging and in idle mode due to the application
- * will be killed if association/role are revoked.
+ * will be killed if association/role are revoked. See {@link AssociationRevokeProcessor}
  */
 public class InactiveAssociationsRemovalService extends JobService {
+
+    private static final String TAG = "CDM_InactiveAssociationsRemovalService";
     private static final String JOB_NAMESPACE = "companion";
     private static final int JOB_ID = 1;
     private static final long ONE_DAY_INTERVAL = DAYS.toMillis(1);
@@ -60,7 +62,10 @@ public class InactiveAssociationsRemovalService extends JobService {
         return false;
     }
 
-    static void schedule(Context context) {
+    /**
+     * Schedule this job.
+     */
+    public static void schedule(Context context) {
         Slog.i(TAG, "Scheduling the Association Removal job");
         final JobScheduler jobScheduler =
                 context.getSystemService(JobScheduler.class).forNamespace(JOB_NAMESPACE);
