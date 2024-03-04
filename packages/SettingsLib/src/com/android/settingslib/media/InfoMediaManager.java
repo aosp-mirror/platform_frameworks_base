@@ -74,6 +74,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,6 +85,7 @@ public abstract class InfoMediaManager extends MediaManager {
 
     private static final String TAG = "InfoMediaManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    protected final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
 
     /** Checked exception that signals the specified package is not present in the system. */
     public static class PackageNotAvailableException extends Exception {
@@ -225,6 +227,16 @@ public abstract class InfoMediaManager extends MediaManager {
     protected final void notifyRouteListingPreferenceUpdated(
             RouteListingPreference routeListingPreference) {
         Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference, mPreferenceItemMap);
+    }
+
+    protected final MediaDevice findMediaDevice(@NonNull String id) {
+        for (MediaDevice mediaDevice : mMediaDevices) {
+            if (mediaDevice.getId().equals(id)) {
+                return mediaDevice;
+            }
+        }
+        Log.e(TAG, "findMediaDevice() can't find device with id: " + id);
+        return null;
     }
 
     /**
@@ -433,7 +445,7 @@ public abstract class InfoMediaManager extends MediaManager {
 
     protected final synchronized void refreshDevices() {
         rebuildDeviceList();
-        dispatchDeviceListAdded();
+        dispatchDeviceListAdded(mMediaDevices);
     }
 
     // MediaRoute2Info.getType was made public on API 34, but exists since API 30.

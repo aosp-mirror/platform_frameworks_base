@@ -15,9 +15,9 @@
  */
 package com.android.settingslib.media;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.content.Context;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,10 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public abstract class MediaManager {
 
-    private static final String TAG = "MediaManager";
-
     protected final Collection<MediaDeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
-    protected final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
 
     protected Context mContext;
     protected Notification mNotification;
@@ -54,19 +51,9 @@ public abstract class MediaManager {
         }
     }
 
-    protected MediaDevice findMediaDevice(String id) {
-        for (MediaDevice mediaDevice : mMediaDevices) {
-            if (mediaDevice.getId().equals(id)) {
-                return mediaDevice;
-            }
-        }
-        Log.e(TAG, "findMediaDevice() can't found device");
-        return null;
-    }
-
-    protected void dispatchDeviceListAdded() {
+    protected void dispatchDeviceListAdded(@NonNull List<MediaDevice> devices) {
         for (MediaDeviceCallback callback : getCallbacks()) {
-            callback.onDeviceListAdded(new ArrayList<>(mMediaDevices));
+            callback.onDeviceListAdded(new ArrayList<>(devices));
         }
     }
 
