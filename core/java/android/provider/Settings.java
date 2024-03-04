@@ -997,6 +997,21 @@ public final class Settings {
             "android.settings.BLUETOOTH_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of Hearing Devices.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_HEARING_DEVICES_SETTINGS =
+            "android.settings.HEARING_DEVICES_SETTINGS";
+
+    /**
      * Activity action: Show Settings app search UI when this action is available for device.
      * <p>
      * Input: Nothing.

@@ -899,6 +899,9 @@
     <!-- QuickSettings: Contrast tile description: high [CHAR LIMIT=NONE] -->
     <string name="quick_settings_contrast_high">High</string>
 
+    <!-- QuickSettings: Hearing devices [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hearing_devices_label">Hearing devices</string>
+
     <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
     <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
