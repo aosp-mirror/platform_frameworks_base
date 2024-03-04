@@ -154,6 +154,11 @@ public class DisplayManagerFlags {
             Flags::useFusionProxSensor
     );
 
+    private final FlagState mOffloadControlsDozeAutoBrightness = new FlagState(
+            Flags.FLAG_OFFLOAD_CONTROLS_DOZE_AUTO_BRIGHTNESS,
+            Flags::offloadControlsDozeAutoBrightness
+    );
+
     private final FlagState mPeakRefreshRatePhysicalLimit = new FlagState(
             Flags.FLAG_ENABLE_PEAK_REFRESH_RATE_PHYSICAL_LIMIT,
             Flags::enablePeakRefreshRatePhysicalLimit
@@ -327,6 +332,13 @@ public class DisplayManagerFlags {
         return mUseFusionProxSensor.getName();
     }
 
+    /**
+     * @return Whether DisplayOffload should control auto-brightness in doze
+     */
+    public boolean offloadControlsDozeAutoBrightness() {
+        return mOffloadControlsDozeAutoBrightness.isEnabled();
+    }
+
     public boolean isPeakRefreshRatePhysicalLimitEnabled() {
         return mPeakRefreshRatePhysicalLimit.isEnabled();
     }
@@ -373,6 +385,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mRefactorDisplayPowerController);
         pw.println(" " + mResolutionBackupRestore);
         pw.println(" " + mUseFusionProxSensor);
+        pw.println(" " + mOffloadControlsDozeAutoBrightness);
         pw.println(" " + mPeakRefreshRatePhysicalLimit);
         pw.println(" " + mIgnoreAppPreferredRefreshRate);
         pw.println(" " + mSynthetic60hzModes);

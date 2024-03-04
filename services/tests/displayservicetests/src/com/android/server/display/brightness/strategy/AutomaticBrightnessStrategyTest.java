@@ -18,6 +18,7 @@ package com.android.server.display.brightness.strategy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -273,7 +274,8 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy, lastUserSetBrightness,
                 userSetBrightnessChanged);
-        verify(mAutomaticBrightnessController, never()).switchMode(anyInt());
+        verify(mAutomaticBrightnessController, never())
+                .switchMode(anyInt(), /* sendUpdate= */ anyBoolean());
 
         // Validate interaction when automaticBrightnessController is in non-idle mode, and display
         // state is ON
@@ -282,7 +284,8 @@ public class AutomaticBrightnessStrategyTest {
                 allowAutoBrightnessWhileDozing, brightnessReason, policy, lastUserSetBrightness,
                 userSetBrightnessChanged);
         verify(mAutomaticBrightnessController).switchMode(
-                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT);
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT,
+                /* sendUpdate= */ false);
 
         // Validate interaction when automaticBrightnessController is in non-idle mode, and display
         // state is DOZE
@@ -290,7 +293,8 @@ public class AutomaticBrightnessStrategyTest {
                 allowAutoBrightnessWhileDozing, brightnessReason, policy, lastUserSetBrightness,
                 userSetBrightnessChanged);
         verify(mAutomaticBrightnessController).switchMode(
-                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE);
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE,
+                /* sendUpdate= */ false);
     }
 
     @Test
@@ -388,17 +392,11 @@ public class AutomaticBrightnessStrategyTest {
                 AutomaticBrightnessController.class);
         when(automaticBrightnessController.getAutomaticScreenBrightness(any(BrightnessEvent.class)))
                 .thenReturn(automaticScreenBrightness);
-        when(automaticBrightnessController.getAutomaticScreenBrightnessBasedOnLastUsedLux(
-                any(BrightnessEvent.class)))
-                .thenReturn(automaticScreenBrightness);
         mAutomaticBrightnessStrategy.setAutomaticBrightnessController(
                 automaticBrightnessController);
         assertEquals(automaticScreenBrightness,
                 mAutomaticBrightnessStrategy.getAutomaticScreenBrightness(
                         new BrightnessEvent(DISPLAY_ID), false), 0.0f);
-        assertEquals(automaticScreenBrightness,
-                mAutomaticBrightnessStrategy.getAutomaticScreenBrightnessBasedOnLastUsedLux(
-                        new BrightnessEvent(DISPLAY_ID)), 0.0f);
     }
 
     @Test

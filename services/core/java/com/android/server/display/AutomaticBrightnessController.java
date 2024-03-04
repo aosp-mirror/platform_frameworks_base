@@ -206,7 +206,7 @@ public class AutomaticBrightnessController {
     private float mScreenBrighteningThreshold;
     private float mScreenDarkeningThreshold;
     // The most recent light sample.
-    private float mLastObservedLux = INVALID_LUX;
+    private float mLastObservedLux;
 
     // The time of the most light recent sample.
     private long mLastObservedLuxTime;
@@ -427,34 +427,6 @@ public class AutomaticBrightnessController {
 
     public float getRawAutomaticScreenBrightness() {
         return mRawScreenAutoBrightness;
-    }
-
-    /**
-     * Get the automatic screen brightness based on the last observed lux reading. Used e.g. when
-     * entering doze - we disable the light sensor, invalidate the lux, but we still need to set
-     * the initial brightness in doze mode.
-     */
-    public float getAutomaticScreenBrightnessBasedOnLastUsedLux(
-            BrightnessEvent brightnessEvent) {
-        float lastUsedLux = mAmbientLux;
-        if (lastUsedLux == INVALID_LUX) {
-            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        }
-
-        float brightness = mCurrentBrightnessMapper.getBrightness(lastUsedLux,
-                mForegroundAppPackageName, mForegroundAppCategory);
-        if (shouldApplyDozeScaleFactor()) {
-            brightness *= mDozeScaleFactor;
-        }
-
-        if (brightnessEvent != null) {
-            brightnessEvent.setLux(lastUsedLux);
-            brightnessEvent.setRecommendedBrightness(brightness);
-            brightnessEvent.setFlags(brightnessEvent.getFlags()
-                    | (shouldApplyDozeScaleFactor() ? BrightnessEvent.FLAG_DOZE_SCALE : 0));
-            brightnessEvent.setAutoBrightnessMode(getMode());
-        }
-        return brightness;
     }
 
     public boolean hasValidAmbientLux() {
@@ -1185,15 +1157,13 @@ public class AutomaticBrightnessController {
             }
             mPausedShortTermModel.copyFrom(tempShortTermModel);
         }
-
-        update();
     }
 
     /**
      * Responsible for switching the AutomaticBrightnessMode of the associated display. Also takes
      * care of resetting the short term model wherever required
      */
-    public void switchMode(@AutomaticBrightnessMode int mode) {
+    public void switchMode(@AutomaticBrightnessMode int mode, boolean sendUpdate) {
         if (!mBrightnessMappingStrategyMap.contains(mode)) {
             return;
         }
@@ -1207,6 +1177,11 @@ public class AutomaticBrightnessController {
         } else {
             resetShortTermModel();
             mCurrentBrightnessMapper = mBrightnessMappingStrategyMap.get(mode);
+        }
+        if (sendUpdate) {
+            update();
+        } else {
+            updateAutoBrightness(/* sendUpdate= */ false, /* isManuallySet= */ false);
         }
     }
 

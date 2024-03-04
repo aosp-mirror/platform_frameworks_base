@@ -1246,6 +1246,11 @@ public class LocalDisplayAdapterTest {
 
             @Override
             public void onBlockingScreenOn(Runnable unblocker) {}
+
+            @Override
+            public boolean allowAutoBrightnessInDoze() {
+                return true;
+            }
         });
 
         mDisplayOffloadSession = new DisplayOffloadSessionImpl(mDisplayOffloader,

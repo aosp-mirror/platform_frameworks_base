@@ -15,8 +15,6 @@
  */
 package com.android.server.display.brightness.strategy;
 
-import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
-
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.BrightnessConfiguration;
@@ -110,7 +108,7 @@ public class AutomaticBrightnessStrategy2 {
             boolean allowAutoBrightnessWhileDozingConfig, int brightnessReason, int policy,
             float lastUserSetScreenBrightness, boolean userSetBrightnessChanged) {
         final boolean autoBrightnessEnabledInDoze =
-                allowAutoBrightnessWhileDozingConfig && policy == POLICY_DOZE;
+                allowAutoBrightnessWhileDozingConfig && Display.isDozeState(targetDisplayState);
         mIsAutoBrightnessEnabled = shouldUseAutoBrightness()
                 && (targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze)
                 && brightnessReason != BrightnessReason.REASON_OVERRIDE
@@ -267,23 +265,6 @@ public class AutomaticBrightnessStrategy2 {
     public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
         float brightness = (mAutomaticBrightnessController != null)
                 ? mAutomaticBrightnessController.getAutomaticScreenBrightness(brightnessEvent)
-                : PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        adjustAutomaticBrightnessStateIfValid(brightness);
-        return brightness;
-    }
-
-    /**
-     * Get the automatic screen brightness based on the last observed lux reading. Used e.g. when
-     * entering doze - we disable the light sensor, invalidate the lux, but we still need to set
-     * the initial brightness in doze mode.
-     * @param brightnessEvent Event object to populate with details about why the specific
-     *                        brightness was chosen.
-     */
-    public float getAutomaticScreenBrightnessBasedOnLastUsedLux(
-            BrightnessEvent brightnessEvent) {
-        float brightness = (mAutomaticBrightnessController != null)
-                ? mAutomaticBrightnessController
-                .getAutomaticScreenBrightnessBasedOnLastUsedLux(brightnessEvent)
                 : PowerManager.BRIGHTNESS_INVALID_FLOAT;
         adjustAutomaticBrightnessStateIfValid(brightness);
         return brightness;

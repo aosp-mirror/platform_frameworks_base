@@ -1021,6 +1021,36 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
+    public void testAutoBrightnessEnabled_DisplayIsInDoze_OffloadAllows() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, true);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.offloadControlsDozeAutoBrightness()).thenReturn(true);
+        when(mDisplayOffloadSession.allowAutoBrightnessInDoze()).thenReturn(true);
+        mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController).configure(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED,
+                /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_DOZE,
+                Display.STATE_DOZE, /* shouldResetShortTermModel= */ false
+        );
+        verify(mHolder.hbmController)
+                .setAutoBrightnessEnabled(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED);
+    }
+
+    @Test
     public void testAutoBrightnessDisabled_ManualBrightnessMode() {
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
@@ -1067,13 +1097,43 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
-    public void testAutoBrightnessDisabled_DisplayIsInDoze() {
+    public void testAutoBrightnessDisabled_DisplayIsInDoze_ConfigDoesNotAllow() {
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, false);
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController).configure(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE,
+                /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
+                /* userChangedBrightness= */ false, /* adjustment= */ 0,
+                /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_DOZE,
+                Display.STATE_DOZE, /* shouldResetShortTermModel= */ false
+        );
+        verify(mHolder.hbmController).setAutoBrightnessEnabled(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE);
+    }
+
+    @Test
+    public void testAutoBrightnessDisabled_DisplayIsInDoze_OffloadDoesNotAllow() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, true);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.offloadControlsDozeAutoBrightness()).thenReturn(true);
+        when(mDisplayOffloadSession.allowAutoBrightnessInDoze()).thenReturn(false);
+        mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_DOZE;
@@ -1668,7 +1728,8 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        verify(mHolder.automaticBrightnessController).switchMode(AUTO_BRIGHTNESS_MODE_DOZE);
+        verify(mHolder.automaticBrightnessController)
+                .switchMode(AUTO_BRIGHTNESS_MODE_DOZE, /* sendUpdate= */ false);
 
         // Back to default mode
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
@@ -1676,7 +1737,8 @@ public final class DisplayPowerControllerTest {
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
         advanceTime(1); // Run updatePowerState
 
-        verify(mHolder.automaticBrightnessController).switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT);
+        verify(mHolder.automaticBrightnessController)
+                .switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT, /* sendUpdate= */ false);
     }
 
     @Test
@@ -1690,7 +1752,7 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
 
         verify(mHolder.automaticBrightnessController, never())
-                .switchMode(AUTO_BRIGHTNESS_MODE_DOZE);
+                .switchMode(eq(AUTO_BRIGHTNESS_MODE_DOZE), /* sendUpdate= */ anyBoolean());
     }
 
     @Test
@@ -1703,7 +1765,7 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
 
         verify(mHolder.automaticBrightnessController, never())
-                .switchMode(AUTO_BRIGHTNESS_MODE_DOZE);
+                .switchMode(eq(AUTO_BRIGHTNESS_MODE_DOZE), /* sendUpdate= */ anyBoolean());
     }
 
     @Test
@@ -1764,37 +1826,7 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
-    public void testInitialDozeBrightness_AutoBrightnessEnabled() {
-        when(mDisplayManagerFlagsMock.areAutoBrightnessModesEnabled()).thenReturn(true);
-        when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
-        mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
-        mContext.getOrCreateTestableResources().addOverride(
-                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, false);
-        float brightness = 0.277f;
-        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
-        when(mHolder.automaticBrightnessController
-                .getAutomaticScreenBrightnessBasedOnLastUsedLux(any(BrightnessEvent.class)))
-                .thenReturn(brightness);
-        when(mHolder.hbmController.getCurrentBrightnessMax())
-                .thenReturn(PowerManager.BRIGHTNESS_MAX);
-        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
-
-        DisplayPowerRequest dpr = new DisplayPowerRequest();
-        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
-        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
-        advanceTime(1); // Run updatePowerState
-
-        verify(mHolder.animator).animateTo(eq(brightness),
-                /* linearSecondTarget= */ anyFloat(), /* rate= */ anyFloat(),
-                /* ignoreAnimationLimits= */ anyBoolean());
-        verify(mHolder.brightnessSetting).setBrightness(brightness);
-    }
-
-    @Test
-    public void testInitialDozeBrightness_AutoBrightnessDisabled() {
+    public void testDozeManualBrightness() {
         when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
         Settings.System.putInt(mContext.getContentResolver(),
@@ -1827,22 +1859,17 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
-    public void testInitialDozeBrightness_AbcIsNull() {
-        when(mDisplayManagerFlagsMock.areAutoBrightnessModesEnabled()).thenReturn(true);
+    public void testDozeManualBrightness_AbcIsNull() {
         when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
-        mContext.getOrCreateTestableResources().addOverride(
-                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, false);
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID, /* isEnabled= */ true,
                 /* isAutoBrightnessAvailable= */ false);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
         float brightness = 0.277f;
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
-        when(mHolder.automaticBrightnessController
-                .getAutomaticScreenBrightnessBasedOnLastUsedLux(any(BrightnessEvent.class)))
-                .thenReturn(brightness);
+        when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
         when(mHolder.hbmController.getCurrentBrightnessMax())
                 .thenReturn(PowerManager.BRIGHTNESS_MAX);
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
@@ -1850,13 +1877,20 @@ public final class DisplayPowerControllerTest {
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_DOZE;
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
-        advanceTime(1); // Run updatePowerState
+        advanceTime(1); // Run updatePowerState, initialize
 
-        // Automatic Brightness Controller is null so no initial doze brightness should be set and
-        // we should not crash
-        verify(mHolder.animator, never()).animateTo(eq(brightness),
+        ArgumentCaptor<BrightnessSetting.BrightnessSettingListener> listenerCaptor =
+                ArgumentCaptor.forClass(BrightnessSetting.BrightnessSettingListener.class);
+        verify(mHolder.brightnessSetting).registerListener(listenerCaptor.capture());
+        BrightnessSetting.BrightnessSettingListener listener = listenerCaptor.getValue();
+        listener.onBrightnessChanged(brightness);
+        advanceTime(1); // Send messages, run updatePowerState
+
+        verify(mHolder.animator).animateTo(eq(brightness * DOZE_SCALE_FACTOR),
                 /* linearSecondTarget= */ anyFloat(), /* rate= */ anyFloat(),
                 /* ignoreAnimationLimits= */ anyBoolean());
+        assertEquals(brightness * DOZE_SCALE_FACTOR, mHolder.dpc.getDozeBrightnessForOffload(),
+                /* delta= */ 0);
     }
 
     @Test
@@ -1864,6 +1898,8 @@ public final class DisplayPowerControllerTest {
         float brightness = 0.121f;
         when(mPowerManagerMock.getBrightnessConstraint(
                 PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE)).thenReturn(brightness);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, false);
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
         when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness(
@@ -1879,6 +1915,31 @@ public final class DisplayPowerControllerTest {
 
         verify(mHolder.animator).animateTo(eq(brightness), /* linearSecondTarget= */ anyFloat(),
                 eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE), eq(false));
+    }
+
+    @Test
+    public void testDefaultDozeBrightness_ShouldNotBeUsedIfAutoBrightnessAllowedInDoze() {
+        float brightness = 0.121f;
+        when(mPowerManagerMock.getBrightnessConstraint(
+                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE)).thenReturn(brightness);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing, true);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness(
+                any(BrightnessEvent.class))).thenReturn(PowerManager.BRIGHTNESS_INVALID_FLOAT);
+        when(mHolder.hbmController.getCurrentBrightnessMax())
+                .thenReturn(PowerManager.BRIGHTNESS_MAX);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator, never()).animateTo(eq(brightness),
+                /* linearSecondTarget= */ anyFloat(), /* rate= */ anyFloat(),
+                /* ignoreAnimationLimits= */ anyBoolean());
     }
 
     /**
