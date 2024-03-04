@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.policy.SmartReplyStateInflaterKt;
 import com.android.systemui.statusbar.policy.SmartReplyView;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.Compile;
+import com.android.systemui.util.DumpUtilsKt;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -96,6 +97,8 @@ public class NotificationContentView extends FrameLayout implements Notification
     private static final int VISIBLE_TYPE_NONE = -1;
 
     private static final int UNDEFINED = -1;
+
+    protected static final boolean INCLUDE_HEIGHTS_TO_DUMP = true;
 
     private final Rect mClipBounds = new Rect();
 
@@ -2196,6 +2199,11 @@ public class NotificationContentView extends FrameLayout implements Notification
             pw.print("null");
         }
         pw.println();
+
+        if (INCLUDE_HEIGHTS_TO_DUMP) {
+            dumpContentDimensions(DumpUtilsKt.asIndenting(pw));
+        }
+
         pw.println("mBubblesEnabledForUser: " + mBubblesEnabledForUser);
 
         pw.print("RemoteInputViews { ");
@@ -2214,6 +2222,69 @@ public class NotificationContentView extends FrameLayout implements Notification
             pw.print(", expandedRemoteInputController: null");
         }
         pw.println(" }");
+    }
+
+    private String visibleTypeToString(int visibleType) {
+        return switch (visibleType) {
+            case VISIBLE_TYPE_CONTRACTED -> "CONTRACTED";
+            case VISIBLE_TYPE_EXPANDED -> "EXPANDED";
+            case VISIBLE_TYPE_HEADSUP -> "HEADSUP";
+            case VISIBLE_TYPE_SINGLELINE -> "SINGLELINE";
+            default -> "NONE";
+        };
+    }
+
+    /** Add content views to dump */
+    private void dumpContentDimensions(IndentingPrintWriter pw) {
+        pw.print("ContentDimensions: ");
+        pw.print("visibleType(String)", visibleTypeToString(mVisibleType));
+        pw.print("measured width", getMeasuredWidth());
+        pw.print("measured height", getMeasuredHeight());
+        pw.print("maxHeight", getMaxHeight());
+        pw.print("minHeight", getMinHeight());
+        pw.println();
+        pw.println("ChildViews:");
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            final View contractedChild = mContractedChild;
+            if (contractedChild != null) {
+                dumpChildViewDimensions(pw, contractedChild, "Contracted Child:");
+                pw.println();
+            }
+
+            final View expandedChild = mExpandedChild;
+            if (expandedChild != null) {
+                dumpChildViewDimensions(pw, expandedChild, "Expanded Child:");
+                pw.println();
+            }
+
+            final View headsUpChild = mHeadsUpChild;
+            if (headsUpChild != null) {
+                dumpChildViewDimensions(pw, headsUpChild, "HeadsUp Child:");
+                pw.println();
+            }
+            final View singleLineView = mSingleLineView;
+            if (singleLineView != null) {
+                dumpChildViewDimensions(pw, singleLineView, "Single Line  View:");
+                pw.println();
+            }
+
+        });
+        final int expandedRemoteInputHeight = getExtraRemoteInputHeight(mExpandedRemoteInput);
+        final int headsUpRemoteInputHeight = getExtraRemoteInputHeight(mHeadsUpRemoteInput);
+        pw.print("expandedRemoteInputHeight", expandedRemoteInputHeight);
+        pw.print("headsUpRemoteInputHeight", headsUpRemoteInputHeight);
+        pw.println();
+    }
+
+    private void dumpChildViewDimensions(IndentingPrintWriter pw, View view,
+            String name) {
+        pw.print(name + " ");
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            pw.print("width", view.getWidth());
+            pw.print("height", view.getHeight());
+            pw.print("measuredWidth", view.getMeasuredWidth());
+            pw.print("measuredHeight", view.getMeasuredHeight());
+        });
     }
 
     /** Add any existing SmartReplyView to the dump */
