@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -277,8 +278,9 @@ public class InputMethodManagerServiceTestBase {
                     .setCurrentMethodVisible();
         }
         verify(mMockInputMethod, times(showSoftInput ? 1 : 0))
-                .showSoftInput(any(), any(),
-                        showFlags != NO_VERIFY_SHOW_FLAGS ? eq(showFlags) : anyInt(), any());
+                .showSoftInput(any() /* showInputToken */ , notNull() /* statsToken */,
+                        showFlags != NO_VERIFY_SHOW_FLAGS ? eq(showFlags) : anyInt() /* flags*/,
+                        any() /* resultReceiver */);
     }
 
     protected void verifyHideSoftInput(boolean setNotVisible, boolean hideSoftInput)
@@ -288,6 +290,7 @@ public class InputMethodManagerServiceTestBase {
                     .setCurrentMethodNotVisible();
         }
         verify(mMockInputMethod, times(hideSoftInput ? 1 : 0))
-                .hideSoftInput(any(), any(), anyInt(), any());
+                .hideSoftInput(any() /* hideInputToken */, notNull() /* statsToken */,
+                        anyInt() /* flags */, any() /* resultReceiver */);
     }
 }

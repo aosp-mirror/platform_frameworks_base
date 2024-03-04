@@ -17,7 +17,6 @@
 package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.view.inputmethod.ImeTracker;
@@ -34,12 +33,12 @@ interface ImeVisibilityApplier {
      * Performs showing IME on top of the given window.
      *
      * @param showInputToken A token that represents the requester to show IME.
-     * @param statsToken     A token that tracks the progress of an IME request.
+     * @param statsToken     The token tracking the current IME request.
      * @param resultReceiver If non-null, this will be called back to the caller when
      *                       it has processed request to tell what it has done.
      * @param reason         The reason for requesting to show IME.
      */
-    default void performShowIme(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
+    default void performShowIme(IBinder showInputToken, @NonNull ImeTracker.Token statsToken,
             @InputMethod.ShowFlags int showFlags, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {}
 
@@ -47,12 +46,12 @@ interface ImeVisibilityApplier {
      * Performs hiding IME to the given window
      *
      * @param hideInputToken A token that represents the requester to hide IME.
-     * @param statsToken     A token that tracks the progress of an IME request.
+     * @param statsToken     The token tracking the current IME request.
      * @param resultReceiver If non-null, this will be called back to the caller when
      *                       it has processed request to tell what it has done.
      * @param reason         The reason for requesting to hide IME.
      */
-    default void performHideIme(IBinder hideInputToken, @Nullable ImeTracker.Token statsToken,
+    default void performHideIme(IBinder hideInputToken, @NonNull ImeTracker.Token statsToken,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {}
 
     /**
@@ -60,10 +59,10 @@ interface ImeVisibilityApplier {
      * according to the given visibility state.
      *
      * @param windowToken The token of a window for applying the IME visibility
-     * @param statsToken  A token that tracks the progress of an IME request.
+     * @param statsToken  The token tracking the current IME request.
      * @param state       The new IME visibility state for the applier to handle
      */
-    default void applyImeVisibility(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
+    default void applyImeVisibility(IBinder windowToken, @NonNull ImeTracker.Token statsToken,
             @ImeVisibilityStateComputer.VisibilityState int state) {}
 
     /**
@@ -84,11 +83,9 @@ interface ImeVisibilityApplier {
      *
      * @param windowToken The token of a window to show the IME screenshot.
      * @param displayId The unique id to identify the display
-     * @param statsToken  A token that tracks the progress of an IME request.
      * @return {@code true} if success, {@code false} otherwise.
      */
-    default boolean showImeScreenshot(@NonNull IBinder windowToken, int displayId,
-            @Nullable ImeTracker.Token statsToken) {
+    default boolean showImeScreenshot(@NonNull IBinder windowToken, int displayId) {
         return false;
     }
 

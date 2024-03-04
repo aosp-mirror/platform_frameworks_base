@@ -212,9 +212,11 @@ public final class ImeVisibilityStateComputer {
                     boolean visibleRequested, boolean removed) {
                 if (mCurVisibleImeInputTarget == imeInputTarget && (!visibleRequested || removed)
                         && mCurVisibleImeLayeringOverlay != null) {
-                    mService.onApplyImeVisibilityFromComputer(imeInputTarget,
-                            new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT,
-                                    SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE));
+                    final int reason = SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE;
+                    final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
+                            ImeTracker.ORIGIN_SERVER, reason, false /* fromUser */);
+                    mService.onApplyImeVisibilityFromComputer(imeInputTarget, statsToken,
+                            new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT, reason));
                 }
                 mCurVisibleImeInputTarget = (visibleRequested && !removed) ? imeInputTarget : null;
             }
@@ -224,7 +226,7 @@ public final class ImeVisibilityStateComputer {
     /**
      * Called when {@link InputMethodManagerService} is processing the show IME request.
      *
-     * @param statsToken The token for tracking this show request.
+     * @param statsToken The token tracking the current IME request.
      * @return {@code true} when the show request can proceed.
      */
     boolean onImeShowFlags(@NonNull ImeTracker.Token statsToken,
@@ -250,7 +252,7 @@ public final class ImeVisibilityStateComputer {
     /**
      * Called when {@link InputMethodManagerService} is processing the hide IME request.
      *
-     * @param statsToken The token for tracking this hide request.
+     * @param statsToken The token tracking the current IME request.
      * @return {@code true} when the hide request can proceed.
      */
     boolean canHideIme(@NonNull ImeTracker.Token statsToken,

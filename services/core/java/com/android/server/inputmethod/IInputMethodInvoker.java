@@ -201,7 +201,7 @@ final class IInputMethodInvoker {
 
     // TODO(b/192412909): Convert this back to void method
     @AnyThread
-    boolean showSoftInput(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
+    boolean showSoftInput(IBinder showInputToken, @NonNull ImeTracker.Token statsToken,
             @InputMethod.ShowFlags int flags, ResultReceiver resultReceiver) {
         try {
             mTarget.showSoftInput(showInputToken, statsToken, flags, resultReceiver);
@@ -214,8 +214,8 @@ final class IInputMethodInvoker {
 
     // TODO(b/192412909): Convert this back to void method
     @AnyThread
-    boolean hideSoftInput(IBinder hideInputToken, @Nullable ImeTracker.Token statsToken, int flags,
-            ResultReceiver resultReceiver) {
+    boolean hideSoftInput(IBinder hideInputToken, @NonNull ImeTracker.Token statsToken,
+            int flags, ResultReceiver resultReceiver) {
         try {
             mTarget.hideSoftInput(hideInputToken, statsToken, flags, resultReceiver);
         } catch (RemoteException e) {

@@ -137,6 +137,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     }
 
     @Override
+    @Nullable
     public ImeTracker.Token getStatsToken() {
         return mControl.getStatsToken();
     }
