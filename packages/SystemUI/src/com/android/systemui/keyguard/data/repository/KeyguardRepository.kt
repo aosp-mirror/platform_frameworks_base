@@ -24,6 +24,7 @@ import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -77,6 +78,12 @@ interface KeyguardRepository {
     val bottomAreaAlpha: StateFlow<Float>
 
     val keyguardAlpha: StateFlow<Float>
+
+    /**
+     * Observable of the relative offset of the lock-screen clock from its natural position on the
+     * screen.
+     */
+    val clockPosition: StateFlow<Position>
 
     /**
      * Observable for whether the keyguard is showing.
@@ -233,6 +240,11 @@ interface KeyguardRepository {
     fun setKeyguardAlpha(alpha: Float)
 
     /**
+     * Sets the relative offset of the lock-screen clock from its natural position on the screen.
+     */
+    fun setClockPosition(x: Int, y: Int)
+
+    /**
      * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
      */
     fun isUdfpsSupported(): Boolean
@@ -310,6 +322,9 @@ constructor(
 
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha = _keyguardAlpha.asStateFlow()
+
+    private val _clockPosition = MutableStateFlow(Position(0, 0))
+    override val clockPosition = _clockPosition.asStateFlow()
 
     private val _clockShouldBeCentered = MutableStateFlow(true)
     override val clockShouldBeCentered: Flow<Boolean> = _clockShouldBeCentered.asStateFlow()
@@ -660,6 +675,10 @@ constructor(
 
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
+    }
+
+    override fun setClockPosition(x: Int, y: Int) {
+        _clockPosition.value = Position(x, y)
     }
 
     override fun isUdfpsSupported(): Boolean = keyguardUpdateMonitor.isUdfpsSupported

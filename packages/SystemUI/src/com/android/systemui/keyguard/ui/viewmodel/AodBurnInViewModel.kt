@@ -18,7 +18,6 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.util.Log
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardClockSwitch
@@ -63,8 +62,6 @@ constructor(
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     private val keyguardClockViewModel: KeyguardClockViewModel,
 ) {
-    private val TAG = "AodBurnInViewModel"
-
     /** Horizontal translation for elements that need to apply anti-burn-in tactics. */
     fun translationX(
         params: BurnInParameters,
@@ -74,17 +71,8 @@ constructor(
 
     /** Vertical translation for elements that need to apply anti-burn-in tactics. */
     fun translationY(
-        burnInParams: BurnInParameters,
+        params: BurnInParameters,
     ): Flow<Float> {
-        val params =
-            if (burnInParams.minViewY < burnInParams.topInset) {
-                // minViewY should never be below the inset. Correct it if needed
-                Log.w(TAG, "minViewY is below topInset: $burnInParams")
-                burnInParams.copy(minViewY = burnInParams.topInset)
-            } else {
-                burnInParams
-            }
-
         return configurationInteractor
             .dimensionPixelSize(R.dimen.keyguard_enter_from_top_translation_y)
             .flatMapLatest { enterFromTopAmount ->
@@ -137,10 +125,7 @@ constructor(
             keyguardTransitionInteractor.dozeAmountTransition.map {
                 Interpolators.FAST_OUT_SLOW_IN.getInterpolation(it.value)
             },
-            burnInInteractor.burnIn(
-                xDimenResourceId = R.dimen.burn_in_prevention_offset_x,
-                yDimenResourceId = R.dimen.burn_in_prevention_offset_y
-            )
+            burnInInteractor.keyguardBurnIn,
         ) { interpolated, burnIn ->
             val useScaleOnly =
                 (clockController(params.clockControllerProvider)
