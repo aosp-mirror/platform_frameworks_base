@@ -36,7 +36,7 @@ open class WifiUtils {
     /**
      * Wrapper the [.getInternetIconResource] for testing compatibility.
      */
-    class InternetIconInjector(protected val context: Context) {
+    open class InternetIconInjector(protected val context: Context) {
         /**
          * Returns the Internet icon for a given RSSI level.
          *
