@@ -329,15 +329,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                         deferred);
                                 wctApplied.meet();
                                 if (needsSetReady) {
-                                    // TODO(b/294925498): Remove this once we have accurate ready
-                                    //                    tracking.
-                                    if (hasActivityLaunch(wct) && !mService.mRootWindowContainer
-                                            .allPausedActivitiesComplete()) {
-                                        // WCT is launching an activity, so we need to wait for its
-                                        // lifecycle events.
-                                        return;
-                                    }
-                                    nextTransition.setAllReady();
+                                    setAllReadyIfNeeded(nextTransition, wct);
                                 }
                             });
                     return nextTransition.getToken();
@@ -390,13 +382,53 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
     }
 
-    private static boolean hasActivityLaunch(WindowContainerTransaction wct) {
+    private static boolean hasActivityLaunch(@NonNull WindowContainerTransaction wct) {
         for (int i = 0; i < wct.getHierarchyOps().size(); ++i) {
             if (wct.getHierarchyOps().get(i).getType() == HIERARCHY_OP_TYPE_LAUNCH_TASK) {
                 return true;
             }
         }
         return false;
+    }
+
+    private boolean isCreatedTaskFragmentReady(@NonNull WindowContainerTransaction wct) {
+        for (int i = 0; i < wct.getHierarchyOps().size(); ++i) {
+            final WindowContainerTransaction.HierarchyOp op = wct.getHierarchyOps().get(i);
+            if (op.getType() != HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION
+                    || op.getTaskFragmentOperation().getOpType()
+                    != OP_TYPE_CREATE_TASK_FRAGMENT) {
+                continue;
+            }
+            final IBinder tfToken = op.getTaskFragmentOperation()
+                    .getTaskFragmentCreationParams().getFragmentToken();
+            final TaskFragment taskFragment = getTaskFragment(tfToken);
+            if (taskFragment != null && !taskFragment.isReadyToTransit()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void setAllReadyIfNeeded(@NonNull Transition transition,
+            @NonNull WindowContainerTransaction wct) {
+        // TODO(b/294925498): Remove this once we have accurate ready tracking.
+        if (hasActivityLaunch(wct) && !mService.mRootWindowContainer
+                .allPausedActivitiesComplete()) {
+            // WCT is launching an activity, so we need to wait for its
+            // lifecycle events.
+            return;
+        }
+        if (!isCreatedTaskFragmentReady(wct)) {
+            // When the organizer intercepts a #startActivity, it will create an empty TaskFragment
+            // for that specific incoming starting activity. We don't want to set all ready here,
+            // because we requires that #startActivity to be included in this transition, and NOT be
+            // in its own transition.
+            // TODO(b/232042367): explicitly ensure the #startActivity and this transaction are in
+            // the same transition instead of relying on this possible racing condition.
+            return;
+        }
+
+        transition.setAllReady();
     }
 
     @Override
@@ -529,7 +561,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 mTransitionController.requestStartTransition(transition, null /* startTask */,
                         remoteTransition, null /* displayChange */);
-                transition.setAllReady();
+                setAllReadyIfNeeded(transition, wct);
             };
             mTransitionController.startCollectOrQueue(transition, doApply);
         } finally {
