@@ -1933,8 +1933,8 @@ class Task extends TaskFragment {
                 td.setEnsureStatusBarContrastWhenTransparent(
                         atd.getEnsureStatusBarContrastWhenTransparent());
             }
-            if (td.getStatusBarAppearance() == 0) {
-                td.setStatusBarAppearance(atd.getStatusBarAppearance());
+            if (td.getSystemBarsAppearance() == 0) {
+                td.setSystemBarsAppearance(atd.getSystemBarsAppearance());
             }
             if (td.getNavigationBarColor() == 0) {
                 td.setNavigationBarColor(atd.getNavigationBarColor());

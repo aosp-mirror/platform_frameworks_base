@@ -1126,8 +1126,8 @@ public class Activity extends ContextThemeWrapper
          * @hide
          */
         @Override
-        public void updateStatusBarAppearance(int appearance) {
-            mTaskDescription.setStatusBarAppearance(appearance);
+        public void updateSystemBarsAppearance(int appearance) {
+            mTaskDescription.setSystemBarsAppearance(appearance);
             setTaskDescription(mTaskDescription);
         }
 

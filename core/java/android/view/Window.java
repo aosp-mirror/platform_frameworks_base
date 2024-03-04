@@ -666,7 +666,7 @@ public abstract class Window {
          * Update the status bar appearance.
          */
 
-        void updateStatusBarAppearance(int appearance);
+        void updateSystemBarsAppearance(int appearance);
 
         /**
          * Update the navigation bar color to a forced one.
@@ -1051,7 +1051,7 @@ public abstract class Window {
             mDecorCallback.onSystemBarAppearanceChanged(appearance);
         }
         if (mWindowControllerCallback != null) {
-            mWindowControllerCallback.updateStatusBarAppearance(appearance);
+            mWindowControllerCallback.updateSystemBarsAppearance(appearance);
         }
     }
 
