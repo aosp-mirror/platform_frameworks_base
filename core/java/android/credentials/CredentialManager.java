@@ -23,6 +23,7 @@ import android.annotation.Hide;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -31,6 +32,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -57,6 +59,7 @@ import java.util.concurrent.Executor;
  * to authenticate to the app.
  */
 @SystemService(Context.CREDENTIAL_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_CREDENTIALS)
 public final class CredentialManager {
     private static final String TAG = "CredentialManager";
     private static final Bundle OPTIONS_SENDER_BAL_OPTIN = ActivityOptions.makeBasic()
