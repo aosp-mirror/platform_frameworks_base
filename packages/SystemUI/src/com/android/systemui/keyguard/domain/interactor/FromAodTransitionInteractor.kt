@@ -93,14 +93,22 @@ constructor(
                     startedKeyguardTransitionStep,
                     keyguardInteractor.isKeyguardOccluded,
                     keyguardInteractor.biometricUnlockState,
+                    keyguardInteractor.primaryBouncerShowing,
                 )
-                .collect { (_, isKeyguardShowing, lastStartedStep, occluded, biometricUnlockState)
-                    ->
+                .collect {
+                    (
+                        _,
+                        isKeyguardShowing,
+                        lastStartedStep,
+                        occluded,
+                        biometricUnlockState,
+                        primaryBouncerShowing) ->
                     if (
                         lastStartedStep.to == KeyguardState.AOD &&
                             !occluded &&
                             !isWakeAndUnlock(biometricUnlockState) &&
-                            isKeyguardShowing
+                            isKeyguardShowing &&
+                            !primaryBouncerShowing
                     ) {
                         val modeOnCanceled =
                             if (lastStartedStep.from == KeyguardState.LOCKSCREEN) {

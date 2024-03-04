@@ -31,6 +31,8 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
@@ -59,6 +61,14 @@ constructor(
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
+    private val canDismissLockScreen: Flow<Boolean> =
+        combine(
+            keyguardInteractor.isKeyguardShowing,
+            keyguardInteractor.isKeyguardDismissible,
+        ) { isKeyguardShowing, isKeyguardDismissible ->
+            isKeyguardDismissible && !isKeyguardShowing
+        }
+
     private fun listenForDozingToAny() {
         scope.launch {
             powerInteractor.isAwake
@@ -68,8 +78,8 @@ constructor(
                     startedKeyguardTransitionStep,
                     keyguardInteractor.isKeyguardOccluded,
                     communalInteractor.isIdleOnCommunal,
-                    keyguardInteractor.isKeyguardShowing,
-                    keyguardInteractor.isKeyguardDismissible,
+                    canDismissLockScreen,
+                    keyguardInteractor.primaryBouncerShowing,
                 )
                 .collect {
                     (
@@ -78,16 +88,18 @@ constructor(
                         lastStartedTransition,
                         occluded,
                         isIdleOnCommunal,
-                        isKeyguardShowing,
-                        isKeyguardDismissible) ->
+                        canDismissLockScreen,
+                        primaryBouncerShowing) ->
                     if (!(isAwake && lastStartedTransition.to == KeyguardState.DOZING)) {
                         return@collect
                     }
                     startTransitionTo(
                         if (isWakeAndUnlock(biometricUnlockState)) {
                             KeyguardState.GONE
-                        } else if (isKeyguardDismissible && !isKeyguardShowing) {
+                        } else if (canDismissLockScreen) {
                             KeyguardState.GONE
+                        } else if (primaryBouncerShowing) {
+                            KeyguardState.PRIMARY_BOUNCER
                         } else if (occluded) {
                             KeyguardState.OCCLUDED
                         } else if (isIdleOnCommunal) {

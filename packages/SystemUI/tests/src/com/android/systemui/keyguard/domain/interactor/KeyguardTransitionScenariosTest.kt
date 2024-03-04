@@ -654,6 +654,30 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             coroutineContext.cancelChildren()
         }
 
+    @Test
+    fun dozingToPrimaryBouncer() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DOZING
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DOZING)
+            runCurrent()
+
+            // WHEN awaked by a request to show the primary bouncer, as can happen if SPFS is
+            // touched after boot
+            powerInteractor.setAwakeForTest()
+            bouncerRepository.setPrimaryShow(true)
+            advanceTimeBy(60L)
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                    from = KeyguardState.DOZING,
+                    ownerName = "FromDozingTransitionInteractor",
+                    animatorAssertion = { it.isNotNull() }
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
     /** This handles security method NONE and screen off with lock timeout */
     @Test
     fun dozingToGoneWithKeyguardNotShowing() =
