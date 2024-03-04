@@ -559,8 +559,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (ev.getAction() == ACTION_HOVER_EXIT) {
                 if (!decoration.isMaximizeMenuActive() && id == R.id.maximize_window) {
                     decoration.onMaximizeWindowHoverExit();
-                } else if (id == R.id.maximize_window
-                        || MaximizeMenu.Companion.isMaximizeMenuView(id)) {
+                } else if (id == R.id.maximize_window || id == R.id.maximize_menu) {
                     // Close menu if not hovering over maximize menu or maximize button after a
                     // delay to give user a chance to re-enter view or to move from one maximize
                     // menu view to another.
