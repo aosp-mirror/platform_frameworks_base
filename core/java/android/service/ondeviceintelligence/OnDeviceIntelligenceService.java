@@ -18,6 +18,7 @@ package android.service.ondeviceintelligence;
 
 import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,11 +48,18 @@ import android.util.Slog;
 
 import com.android.internal.infra.AndroidFuture;
 
+import androidx.annotation.IntDef;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
@@ -64,6 +72,10 @@ import java.util.function.LongConsumer;
  * {@code config_defaultOnDeviceIntelligenceService}. If this config has no value, a stub is
  * returned.
  *
+ * <p> Similar to {@link OnDeviceIntelligenceManager} class, the contracts in this service are
+ * defined to be open-ended in general, to allow interoperability. Therefore, it is recommended
+ * that implementations of this system-service expose this API to the clients via a library which
+ * has more defined contract.</p>
  * <pre>
  * {@literal
  * <service android:name=".SampleOnDeviceIntelligenceService"
@@ -78,6 +90,8 @@ import java.util.function.LongConsumer;
 public abstract class OnDeviceIntelligenceService extends Service {
     private static final String TAG = OnDeviceIntelligenceService.class.getSimpleName();
 
+    private volatile IRemoteProcessingService mRemoteProcessingService;
+
     /**
      * The {@link Intent} that must be declared as handled by the service. To be supported, the
      * service must also require the
@@ -87,6 +101,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE =
             "android.service.ondeviceintelligence.OnDeviceIntelligenceService";
+
 
     /**
      * @hide
@@ -167,10 +182,56 @@ public abstract class OnDeviceIntelligenceService extends Service {
                                 remoteCallback.sendResult(bundle);
                             });
                 }
+
+                @Override
+                public void registerRemoteServices(
+                        IRemoteProcessingService remoteProcessingService) {
+                    mRemoteProcessingService = remoteProcessingService;
+                }
             };
         }
         Slog.w(TAG, "Incorrect service interface, returning null.");
         return null;
+    }
+
+    /**
+     * Invoked by the {@link OnDeviceIntelligenceService} inorder to send updates to the inference
+     * service if there is a state change to be performed.
+     *
+     * @param processingState  the updated state to be applied.
+     * @param callbackExecutor executor to the run status callback on.
+     * @param statusReceiver   receiver to get status of the update state operation.
+     */
+    public final void updateProcessingState(@NonNull Bundle processingState,
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull OutcomeReceiver<PersistableBundle, OnDeviceUpdateProcessingException> statusReceiver) {
+        Objects.requireNonNull(callbackExecutor);
+        if (mRemoteProcessingService == null) {
+            throw new IllegalStateException("Remote processing service is unavailable.");
+        }
+        try {
+            mRemoteProcessingService.updateProcessingState(processingState,
+                    new IProcessingUpdateStatusCallback.Stub() {
+                        @Override
+                        public void onSuccess(PersistableBundle result) {
+                            Binder.withCleanCallingIdentity(() -> {
+                                callbackExecutor.execute(
+                                        () -> statusReceiver.onResult(result));
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(int errorCode, String errorMessage) {
+                            Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                                    () -> statusReceiver.onError(
+                                            new OnDeviceUpdateProcessingException(
+                                                    errorCode, errorMessage))));
+                        }
+                    });
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error in updateProcessingState: " + e);
+            throw new RuntimeException(e);
+        }
     }
 
     private OutcomeReceiver<Feature,
@@ -197,7 +258,6 @@ public abstract class OnDeviceIntelligenceService extends Service {
                 }
             }
         };
-
     }
 
     private OutcomeReceiver<List<Feature>,
@@ -380,4 +440,60 @@ public abstract class OnDeviceIntelligenceService extends Service {
      * @param versionConsumer consumer to populate the version.
      */
     public abstract void onGetVersion(@NonNull LongConsumer versionConsumer);
+
+
+    /**
+     * Exception type to be populated when calls to {@link #updateProcessingState} fail.
+     */
+    public static class OnDeviceUpdateProcessingException extends
+            OnDeviceIntelligenceServiceException {
+        /**
+         * The connection to remote service failed and the processing state could not be updated.
+         */
+        public static final int PROCESSING_UPDATE_STATUS_CONNECTION_FAILED = 1;
+
+
+        /**
+         * @hide
+         */
+        @IntDef(value = {
+                PROCESSING_UPDATE_STATUS_CONNECTION_FAILED
+        }, open = true)
+        @Target({ElementType.TYPE_USE, ElementType.METHOD, ElementType.PARAMETER,
+                ElementType.FIELD})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ErrorCode {
+        }
+
+        public OnDeviceUpdateProcessingException(@ErrorCode int errorCode) {
+            super(errorCode);
+        }
+
+        public OnDeviceUpdateProcessingException(@ErrorCode int errorCode,
+                @NonNull String errorMessage) {
+            super(errorCode, errorMessage);
+        }
+    }
+
+    /**
+     * Exception type to be used for surfacing errors to service implementation.
+     */
+    public abstract static class OnDeviceIntelligenceServiceException extends Exception {
+        private final int mErrorCode;
+
+        public OnDeviceIntelligenceServiceException(int errorCode) {
+            this.mErrorCode = errorCode;
+        }
+
+        public OnDeviceIntelligenceServiceException(int errorCode,
+                @NonNull String errorMessage) {
+            super(errorMessage);
+            this.mErrorCode = errorCode;
+        }
+
+        public int getErrorCode() {
+            return mErrorCode;
+        }
+
+    }
 }
