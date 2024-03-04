@@ -349,7 +349,6 @@ public class TvInteractiveAppManagerService extends SystemService {
             }
         }
 
-        userState.mIAppMap.clear();
         userState.mAdServiceMap = adServiceMap;
     }
 
