@@ -79,6 +79,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.anyBoolean;
@@ -6774,6 +6775,74 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(NotificationManagerService.MAX_PACKAGE_TOASTS, mService.mToastQueue.size());
     }
 
+    @Test
+    public void testPrioritizeSystemToasts() throws Exception {
+        // Insert non-system toasts
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+        mService.isSystemAppId = false;
+        setToastRateIsWithinQuota(true);
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        // Enqueue maximum number of toasts for test package
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_TOASTS; i++) {
+            nmService.enqueueTextToast(testPackage, new Binder(), "Text", 2000, 0, null);
+        }
+
+        // Enqueue system toast
+        final String testPackageSystem = "testPackageNameSystem";
+        mService.isSystemUid = true;
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackageSystem, false);
+        when(mPackageManager.isPackageSuspendedForUser(testPackageSystem, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        nmService.enqueueToast(testPackageSystem, new Binder(), new TestableToastCallback(), 2000, 0);
+
+        // System toast is inserted at the front of the queue, behind current showing toast
+        assertEquals(testPackageSystem, mService.mToastQueue.get(1).pkg);
+    }
+
+    @Test
+    public void testPrioritizeSystemToasts_enqueueAfterExistingSystemToast() throws Exception {
+        // Insert system toasts
+        final String testPackageSystem1 = "testPackageNameSystem1";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = true;
+        setToastRateIsWithinQuota(true);
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackageSystem1, false);
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackageSystem1, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        // Enqueue maximum number of toasts for test package
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_TOASTS; i++) {
+            nmService.enqueueTextToast(testPackageSystem1, new Binder(), "Text", 2000, 0, null);
+        }
+
+        // Enqueue another system toast
+        final String testPackageSystem2 = "testPackageNameSystem2";
+        mService.isSystemUid = true;
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackageSystem2, false);
+        when(mPackageManager.isPackageSuspendedForUser(testPackageSystem2, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        nmService.enqueueToast(testPackageSystem2, new Binder(), new TestableToastCallback(), 2000, 0);
+
+        // System toast is inserted at the back of the queue, after the other system toasts
+        assertEquals(testPackageSystem2,
+                mService.mToastQueue.get(mService.mToastQueue.size() - 1).pkg);
+    }
+
     private void setAppInForegroundForToasts(int uid, boolean inForeground) {
         int importance = (inForeground) ? IMPORTANCE_FOREGROUND : IMPORTANCE_NONE;
         when(mActivityManager.getUidImportance(mUid)).thenReturn(importance);
@@ -9322,6 +9391,40 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // hypothetical other user untouched
         assertTrue(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 10000)));
+    }
+
+    @Test
+    public void testMigrateNotificationFilter_invalidPackage() throws Exception {
+        int[] userIds = new int[] {UserHandle.getUserId(mUid), 1000};
+        when(mUm.getProfileIds(anyInt(), anyBoolean())).thenReturn(userIds);
+        List<String> disallowedApps = ImmutableList.of("apples", "bananas", "cherries");
+        for (int userId : userIds) {
+            when(mPackageManager.getPackageUid("apples", 0, userId)).thenThrow(
+                    new RemoteException(""));
+            when(mPackageManager.getPackageUid("bananas", 0, userId)).thenReturn(9000);
+            when(mPackageManager.getPackageUid("cherries", 0, userId)).thenReturn(9001);
+        }
+
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(
+                new NotificationListenerFilter());
+
+        mBinderService.migrateNotificationFilter(null,
+                FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ONGOING,
+                disallowedApps);
+
+        ArgumentCaptor<NotificationListenerFilter> captor =
+                ArgumentCaptor.forClass(NotificationListenerFilter.class);
+        verify(mListeners).setNotificationListenerFilter(any(), captor.capture());
+
+        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ONGOING,
+                captor.getValue().getTypes());
+        // valid values stay
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("bananas", 9000)));
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("cherries", 9001)));
+        // don't store invalid values
+        for (VersionedPackage vp : captor.getValue().getDisallowedPackages()) {
+            assertNotEquals("apples", vp.getPackageName());
+        }
     }
 
     @Test

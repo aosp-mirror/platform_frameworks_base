@@ -271,6 +271,43 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         XmlUtils.writeMapXml(mMap, out, this);
     }
 
+    /**
+     * Checks whether all keys and values are within the given character limit.
+     * Note: Maximum character limit of String that can be saved to XML as part of bundle is 65535.
+     * Otherwise IOException is thrown.
+     * @param limit length of String keys and values in the PersistableBundle, including nested
+     *                    PersistableBundles to check against.
+     *
+     * @hide
+     */
+    public boolean isBundleContentsWithinLengthLimit(int limit) {
+        unparcel();
+        if (mMap == null) {
+            return true;
+        }
+        for (int i = 0; i < mMap.size(); i++) {
+            if (mMap.keyAt(i) != null && mMap.keyAt(i).length() > limit) {
+                return false;
+            }
+            final Object value = mMap.valueAt(i);
+            if (value instanceof String && ((String) value).length() > limit) {
+                return false;
+            } else if (value instanceof String[]) {
+                String[] stringArray =  (String[]) value;
+                for (int j = 0; j < stringArray.length; j++) {
+                    if (stringArray[j] != null
+                            && stringArray[j].length() > limit) {
+                        return false;
+                    }
+                }
+            } else if (value instanceof PersistableBundle
+                    && !((PersistableBundle) value).isBundleContentsWithinLengthLimit(limit)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /** @hide */
     static class MyReadMapCallback implements  XmlUtils.ReadMapCallback {
         @Override
