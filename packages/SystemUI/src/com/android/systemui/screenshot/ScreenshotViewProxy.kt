@@ -28,18 +28,18 @@ import android.view.View.OnKeyListener
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.WindowInsets
-import android.window.OnBackInvokedDispatcher
+import android.window.OnBackInvokedCallback
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.flags.FeatureFlags
 
 /** Abstraction of the surface between ScreenshotController and ScreenshotView */
 interface ScreenshotViewProxy {
     val view: ViewGroup
-    val internalInsetsListener: ViewTreeObserver.OnComputeInternalInsetsListener
     val screenshotPreview: View
 
     var defaultDisplay: Int
     var defaultTimeoutMillis: Long
+    var onBackInvokedCallback: OnBackInvokedCallback
     var onKeyListener: OnKeyListener?
     var flags: FeatureFlags?
     var packageName: String
@@ -78,8 +78,6 @@ interface ScreenshotViewProxy {
     fun stopInputListening()
     fun requestFocus()
     fun announceForAccessibility(string: String)
-    fun addOnAttachStateChangeListener(listener: View.OnAttachStateChangeListener)
-    fun findOnBackInvokedDispatcher(): OnBackInvokedDispatcher?
     fun getViewTreeObserver(): ViewTreeObserver
     fun post(runnable: Runnable)
 

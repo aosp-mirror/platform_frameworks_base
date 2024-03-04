@@ -76,8 +76,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
-import android.window.OnBackInvokedCallback;
-import android.window.OnBackInvokedDispatcher;
 import android.window.WindowContext;
 
 import com.android.internal.app.ChooserActivity;
@@ -264,13 +262,6 @@ public class ScreenshotController {
     private final ActionIntentExecutor mActionExecutor;
     private final UserManager mUserManager;
     private final AssistContentRequester mAssistContentRequester;
-
-    private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
-        if (DEBUG_INPUT) {
-            Log.d(TAG, "Predictive Back callback dispatched");
-        }
-        respondToKeyDismissal();
-    };
 
     private final MessageContainerController mMessageContainerController;
     private Bitmap mScreenBitmap;
@@ -594,27 +585,13 @@ public class ScreenshotController {
         }
 
         mMessageContainerController.setView(mViewProxy.getView());
-        mViewProxy.addOnAttachStateChangeListener(
-                new View.OnAttachStateChangeListener() {
-                    @Override
-                    public void onViewAttachedToWindow(@NonNull View v) {
-                        if (DEBUG_INPUT) {
-                            Log.d(TAG, "Registering Predictive Back callback");
-                        }
-                        mViewProxy.findOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback);
-                    }
-
-                    @Override
-                    public void onViewDetachedFromWindow(@NonNull View v) {
-                        if (DEBUG_INPUT) {
-                            Log.d(TAG, "Unregistering Predictive Back callback");
-                        }
-                        mViewProxy.findOnBackInvokedDispatcher()
-                                .unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
-                    }
-                });
         mViewProxy.setLogger(mUiEventLogger);
+        mViewProxy.setOnBackInvokedCallback(() -> {
+            if (DEBUG_INPUT) {
+                Log.d(TAG, "Predictive Back callback dispatched");
+            }
+            respondToKeyDismissal();
+        });
         mViewProxy.setCallbacks(new ScreenshotView.ScreenshotViewCallback() {
             @Override
             public void onUserInteraction() {
@@ -656,11 +633,6 @@ public class ScreenshotController {
             return false;
         });
 
-        if (DEBUG_WINDOW) {
-            Log.d(TAG, "adding OnComputeInternalInsetsListener");
-        }
-        mViewProxy.getViewTreeObserver().addOnComputeInternalInsetsListener(
-                mViewProxy.getInternalInsetsListener());
         if (DEBUG_WINDOW) {
             Log.d(TAG, "setContentView: " + mViewProxy.getView());
         }
