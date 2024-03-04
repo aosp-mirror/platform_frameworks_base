@@ -20,6 +20,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.credentials.GetCredentialRequest
 import android.credentials.selection.CreateCredentialProviderData
 import android.credentials.selection.DisabledProviderData
 import android.credentials.selection.Entry
@@ -44,6 +45,9 @@ import androidx.credentials.CreateCredentialRequest
 import androidx.credentials.CreateCustomCredentialRequest
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CreatePublicKeyCredentialRequest
+import androidx.credentials.PasswordCredential
+import androidx.credentials.PriorityHints
+import androidx.credentials.PublicKeyCredential
 import androidx.credentials.provider.CreateEntry
 import androidx.credentials.provider.RemoteEntry
 import org.json.JSONObject
@@ -162,6 +166,25 @@ private fun getPackageInfo(
 /** Utility functions for converting CredentialManager data structures to or from UI formats. */
 class GetFlowUtils {
     companion object {
+        fun extractTypePriorityMap(request: GetCredentialRequest): Map<String, Int> {
+            val typePriorityMap = mutableMapOf<String, Int>()
+            request.credentialOptions.forEach {option ->
+                // TODO(b/280085288) - use jetpack conversion method when exposed, rather than
+                // parsing from the raw Bundle
+                val priority = option.candidateQueryData.getInt(
+                        "androidx.credentials.BUNDLE_KEY_TYPE_PRIORITY_VALUE",
+                        when (option.type) {
+                            PasswordCredential.TYPE_PASSWORD_CREDENTIAL ->
+                                PriorityHints.PRIORITY_PASSWORD_OR_SIMILAR
+                            PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL -> 100
+                            else -> PriorityHints.PRIORITY_DEFAULT
+                        }
+                )
+                typePriorityMap[option.type] = priority
+            }
+            return typePriorityMap
+        }
+
         // Returns the list (potentially empty) of enabled provider.
         fun toProviderList(
             providerDataList: List<GetCredentialProviderData>,
@@ -193,6 +216,9 @@ class GetFlowUtils {
                         null
                     }
                 }
+
+            val typePriorityMap = extractTypePriorityMap(getCredentialRequest)
+
             return com.android.credentialmanager.getflow.RequestDisplayInfo(
                 appName = originName?.ifEmpty { null }
                     ?: getAppLabel(context.packageManager, requestInfo.packageName)
@@ -203,6 +229,7 @@ class GetFlowUtils {
                     // exposed.
                     "androidx.credentials.BUNDLE_KEY_PREFER_IDENTITY_DOC_UI"),
                 preferTopBrandingContent = preferTopBrandingContent,
+                typePriorityMap = typePriorityMap,
             )
         }
     }
