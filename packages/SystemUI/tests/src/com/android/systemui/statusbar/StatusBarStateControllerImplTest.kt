@@ -54,7 +54,6 @@ import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -87,6 +86,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
+import com.android.systemui.scene.shared.model.Scenes
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -313,48 +313,48 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
             kosmos.fakeDeviceEntryRepository.setUnlocked(false)
             runCurrent()
             kosmos.sceneInteractor.changeScene(
-                toScene = SceneKey.Lockscreen,
+                toScene = Scenes.Lockscreen,
                 loggingReason = "reason"
             )
             runCurrent()
             assertThat(kosmos.deviceUnlockedInteractor.isDeviceUnlocked.value).isFalse()
-            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
             // Call start to begin hydrating based on the scene framework:
             underTest.start()
 
-            kosmos.sceneInteractor.changeScene(toScene = SceneKey.Bouncer, loggingReason = "reason")
+            kosmos.sceneInteractor.changeScene(toScene = Scenes.Bouncer, loggingReason = "reason")
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
             assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
 
-            kosmos.sceneInteractor.changeScene(toScene = SceneKey.Shade, loggingReason = "reason")
+            kosmos.sceneInteractor.changeScene(toScene = Scenes.Shade, loggingReason = "reason")
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.Shade)
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
             assertThat(statusBarState).isEqualTo(StatusBarState.SHADE_LOCKED)
 
             kosmos.sceneInteractor.changeScene(
-                toScene = SceneKey.QuickSettings,
+                toScene = Scenes.QuickSettings,
                 loggingReason = "reason"
             )
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.QuickSettings)
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
             assertThat(statusBarState).isEqualTo(StatusBarState.SHADE_LOCKED)
 
             kosmos.sceneInteractor.changeScene(
-                toScene = SceneKey.Communal,
+                toScene = Scenes.Communal,
                 loggingReason = "reason"
             )
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.Communal)
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
             assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
 
             kosmos.sceneInteractor.changeScene(
-                toScene = SceneKey.Lockscreen,
+                toScene = Scenes.Lockscreen,
                 loggingReason = "reason"
             )
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
             assertThat(statusBarState).isEqualTo(StatusBarState.KEYGUARD)
         }
 
@@ -377,25 +377,25 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
             )
             kosmos.fakeDeviceEntryRepository.setUnlocked(true)
             runCurrent()
-            kosmos.sceneInteractor.changeScene(toScene = SceneKey.Gone, loggingReason = "reason")
+            kosmos.sceneInteractor.changeScene(toScene = Scenes.Gone, loggingReason = "reason")
             runCurrent()
             assertThat(kosmos.deviceUnlockedInteractor.isDeviceUnlocked.value).isTrue()
-            assertThat(currentScene).isEqualTo(SceneKey.Gone)
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
 
             // Call start to begin hydrating based on the scene framework:
             underTest.start()
 
-            kosmos.sceneInteractor.changeScene(toScene = SceneKey.Shade, loggingReason = "reason")
+            kosmos.sceneInteractor.changeScene(toScene = Scenes.Shade, loggingReason = "reason")
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.Shade)
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
             assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
 
             kosmos.sceneInteractor.changeScene(
-                toScene = SceneKey.QuickSettings,
+                toScene = Scenes.QuickSettings,
                 loggingReason = "reason"
             )
             runCurrent()
-            assertThat(currentScene).isEqualTo(SceneKey.QuickSettings)
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
             assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
         }
 }

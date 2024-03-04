@@ -17,14 +17,14 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import androidx.lifecycle.LifecycleOwner
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.UserAction
-import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import java.util.concurrent.atomic.AtomicBoolean
@@ -46,12 +46,12 @@ constructor(
         qsSceneAdapter.isCustomizing.map { customizing ->
             if (customizing) {
                 mapOf<UserAction, UserActionResult>(
-                    UserAction.Back to UserActionResult(SceneKey.QuickSettings)
+                    UserAction.Back to UserActionResult(Scenes.QuickSettings)
                 )
             } else {
                 mapOf(
-                    UserAction.Back to UserActionResult(SceneKey.Shade),
-                    UserAction.Swipe(Direction.UP) to UserActionResult(SceneKey.Shade),
+                    UserAction.Back to UserActionResult(Scenes.Shade),
+                    UserAction.Swipe(Direction.UP) to UserActionResult(Scenes.Shade),
                 )
             }
         }

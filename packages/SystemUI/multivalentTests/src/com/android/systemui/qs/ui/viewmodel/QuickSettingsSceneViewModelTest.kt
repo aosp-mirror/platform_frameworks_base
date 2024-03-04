@@ -18,6 +18,7 @@ package com.android.systemui.qs.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
@@ -27,9 +28,8 @@ import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.UserAction
-import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
@@ -121,8 +121,8 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
-                        UserAction.Back to UserActionResult(SceneKey.Shade),
-                        UserAction.Swipe(Direction.UP) to UserActionResult(SceneKey.Shade),
+                        UserAction.Back to UserActionResult(Scenes.Shade),
+                        UserAction.Swipe(Direction.UP) to UserActionResult(Scenes.Shade),
                     )
                 )
         }
@@ -136,7 +136,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(
-                        UserAction.Back to UserActionResult(SceneKey.QuickSettings),
+                        UserAction.Back to UserActionResult(Scenes.QuickSettings),
                     )
                 )
         }

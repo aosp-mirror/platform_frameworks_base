@@ -25,7 +25,7 @@ import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -81,9 +81,9 @@ constructor(
     val isDeviceEntered: StateFlow<Boolean> =
         sceneInteractor.currentScene
             .filter { currentScene ->
-                currentScene == SceneKey.Gone || currentScene == SceneKey.Lockscreen
+                currentScene == Scenes.Gone || currentScene == Scenes.Lockscreen
             }
-            .map { it == SceneKey.Gone }
+            .map { it == Scenes.Gone }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -148,12 +148,12 @@ constructor(
         applicationScope.launch {
             if (isAuthenticationRequired()) {
                 sceneInteractor.changeScene(
-                    toScene = SceneKey.Bouncer,
+                    toScene = Scenes.Bouncer,
                     loggingReason = "request to unlock device while authentication required",
                 )
             } else {
                 sceneInteractor.changeScene(
-                    toScene = SceneKey.Gone,
+                    toScene = Scenes.Gone,
                     loggingReason = "request to unlock device while authentication isn't required",
                 )
             }

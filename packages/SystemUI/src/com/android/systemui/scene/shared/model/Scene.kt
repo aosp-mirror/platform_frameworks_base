@@ -16,6 +16,8 @@
 
 package com.android.systemui.scene.shared.model
 
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.UserActionResult
 import kotlinx.coroutines.flow.StateFlow
 
 /**

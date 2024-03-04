@@ -28,7 +28,7 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -514,7 +514,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
             kosmos.setCommunalAvailable(true)
             runCurrent()
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            communalInteractor.onSceneChanged(CommunalScenes.Communal)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
@@ -526,7 +526,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 )
             clearInvocations(mediaCarouselController)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            communalInteractor.onSceneChanged(CommunalScenes.Blank)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
@@ -549,7 +549,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
             whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
 
             // UMO goes to communal even over the lock screen.
-            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            communalInteractor.onSceneChanged(CommunalScenes.Communal)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
@@ -571,7 +571,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
             // Device is on lock screen.
             whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+            communalInteractor.onSceneChanged(CommunalScenes.Communal)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(

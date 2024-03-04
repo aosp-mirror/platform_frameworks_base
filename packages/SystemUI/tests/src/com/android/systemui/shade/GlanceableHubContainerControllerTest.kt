@@ -26,6 +26,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
@@ -33,7 +34,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
@@ -152,7 +153,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_communalClosed_doesNotIntercept() {
         // Communal is closed.
-        goToScene(CommunalSceneKey.Blank)
+        goToScene(CommunalScenes.Blank)
 
         assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
     }
@@ -160,7 +161,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_openGesture_interceptsTouches() {
         // Communal is closed.
-        goToScene(CommunalSceneKey.Blank)
+        goToScene(CommunalScenes.Blank)
 
         // Initial touch down is intercepted, and so are touches outside of the region, until an
         // up event is received.
@@ -173,7 +174,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_communalOpen_interceptsTouches() {
         // Communal is open.
-        goToScene(CommunalSceneKey.Communal)
+        goToScene(CommunalScenes.Communal)
 
         // Touch events are intercepted outside of any gesture areas.
         assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
@@ -184,7 +185,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_topSwipeWhenCommunalOpen_doesNotIntercept() {
         // Communal is open.
-        goToScene(CommunalSceneKey.Communal)
+        goToScene(CommunalScenes.Communal)
 
         // Touch event in the top swipe reqgion is not intercepted.
         assertThat(underTest.onTouchEvent(DOWN_IN_TOP_SWIPE_REGION_EVENT)).isFalse()
@@ -193,7 +194,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_bottomSwipeWhenCommunalOpen_doesNotIntercept() {
         // Communal is open.
-        goToScene(CommunalSceneKey.Communal)
+        goToScene(CommunalScenes.Communal)
 
         // Touch event in the bottom swipe reqgion is not intercepted.
         assertThat(underTest.onTouchEvent(DOWN_IN_BOTTOM_SWIPE_REGION_EVENT)).isFalse()
@@ -202,7 +203,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_communalAndBouncerShowing_doesNotIntercept() {
         // Communal is open.
-        goToScene(CommunalSceneKey.Communal)
+        goToScene(CommunalScenes.Communal)
 
         // Bouncer is visible.
         bouncerShowingFlow.value = true
@@ -217,7 +218,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_communalAndShadeShowing_doesNotIntercept() {
         // Communal is open.
-        goToScene(CommunalSceneKey.Communal)
+        goToScene(CommunalScenes.Communal)
 
         shadeShowingFlow.value = true
         testableLooper.processAllMessages()
@@ -229,7 +230,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Test
     fun onTouchEvent_containerViewDisposed_doesNotIntercept() {
         // Communal is open.
-        goToScene(CommunalSceneKey.Communal)
+        goToScene(CommunalScenes.Communal)
 
         // Touch events are intercepted.
         assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
@@ -262,7 +263,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         wm.updateViewLayout(parentView, lp)
     }
 
-    private fun goToScene(scene: CommunalSceneKey) {
+    private fun goToScene(scene: SceneKey) {
         communalRepository.setDesiredScene(scene)
         testableLooper.processAllMessages()
     }

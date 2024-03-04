@@ -35,15 +35,14 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.UserAction
-import com.android.systemui.scene.shared.model.UserActionResult
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import kotlinx.coroutines.flow.map
 
 /**
  * Renders a container of a collection of "scenes" that the user can switch between using certain
@@ -77,8 +76,8 @@ fun SceneContainer(
         currentScene.destinationScenes.collectAsState()
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
-            initialScene = currentSceneKey.asComposeAware(),
-            canChangeScene = { toScene -> viewModel.canChangeScene(toScene.asComposeUnaware()) },
+            initialScene = currentSceneKey,
+            canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
             transitions = SceneContainerTransitions,
         )
     }
@@ -90,9 +89,7 @@ fun SceneContainer(
     }
 
     DisposableEffect(viewModel, state) {
-        viewModel.setTransitionState(
-            state.observableTransitionState().map { it.asComposeUnaware() }
-        )
+        viewModel.setTransitionState(state.observableTransitionState())
         onDispose { viewModel.setTransitionState(null) }
     }
 
@@ -116,7 +113,7 @@ fun SceneContainer(
         ) {
             sceneByKey.forEach { (sceneKey, composableScene) ->
                 scene(
-                    key = sceneKey.asComposeAware(),
+                    key = sceneKey,
                     userActions =
                         if (sceneKey == currentSceneKey) {
                                 currentDestinations
@@ -124,15 +121,13 @@ fun SceneContainer(
                                 composableScene.destinationScenes.value
                             }
                             .map { (userAction, userActionResult) ->
-                                userAction.asComposeAware() to userActionResult.asComposeAware()
+                                userAction.asComposeAware() to userActionResult
                             }
                             .toMap(),
                 ) {
                     with(composableScene) {
                         this@scene.Content(
-                            modifier =
-                                Modifier.element(sceneKey.asComposeAware().rootElementKey)
-                                    .fillMaxSize(),
+                            modifier = Modifier.element(sceneKey.rootElementKey).fillMaxSize(),
                         )
                     }
                 }

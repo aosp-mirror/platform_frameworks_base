@@ -16,41 +16,37 @@
 
 package com.android.systemui.scene.shared.model
 
+import com.android.compose.animation.scene.SceneKey
+
 /**
  * Keys of all known scenes.
  *
  * PLEASE KEEP THE KEYS SORTED ALPHABETICALLY.
  */
-sealed class SceneKey(
-    private val loggingName: String,
-) {
+object Scenes {
     /**
      * The bouncer is the scene that displays authentication challenges like PIN, password, or
      * pattern.
      */
-    object Bouncer : SceneKey("bouncer")
+    @JvmField val Bouncer = SceneKey("bouncer")
 
     /** The communal scene shows the glanceable hub when device is locked and docked. */
-    object Communal : SceneKey("communal")
+    @JvmField val Communal = SceneKey("communal")
 
     /**
      * "Gone" is not a real scene but rather the absence of scenes when we want to skip showing any
      * content from the scene framework.
      */
-    object Gone : SceneKey("gone")
+    @JvmField val Gone = SceneKey("gone")
 
     /** The lockscreen is the scene that shows when the device is locked. */
-    object Lockscreen : SceneKey("lockscreen")
+    @JvmField val Lockscreen = SceneKey("lockscreen")
 
     /** The quick settings scene shows the quick setting tiles. */
-    object QuickSettings : SceneKey("quick_settings")
+    @JvmField val QuickSettings = SceneKey("quick_settings")
 
     /**
      * The shade is the scene whose primary purpose is to show a scrollable list of notifications.
      */
-    object Shade : SceneKey("shade")
-
-    override fun toString(): String {
-        return loggingName
-    }
+    @JvmField val Shade = SceneKey("shade")
 }

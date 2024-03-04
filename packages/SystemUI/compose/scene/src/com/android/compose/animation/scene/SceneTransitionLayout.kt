@@ -391,7 +391,7 @@ interface SwipeSourceDetector {
 }
 
 /** The result of performing a [UserAction]. */
-class UserActionResult(
+data class UserActionResult(
     /** The scene we should be transitioning to during the [UserAction]. */
     val toScene: SceneKey,
 

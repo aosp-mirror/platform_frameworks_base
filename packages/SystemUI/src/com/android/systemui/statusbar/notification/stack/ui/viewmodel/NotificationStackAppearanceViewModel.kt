@@ -17,12 +17,12 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.util.kotlin.FlowDumperImpl
@@ -54,7 +54,7 @@ constructor(
             ) { shadeExpansion, transitionState ->
                 when (transitionState) {
                     is ObservableTransitionState.Idle -> {
-                        if (transitionState.scene == SceneKey.Lockscreen) {
+                        if (transitionState.scene == Scenes.Lockscreen) {
                             1f
                         } else {
                             shadeExpansion
@@ -62,10 +62,10 @@ constructor(
                     }
                     is ObservableTransitionState.Transition -> {
                         if (
-                            (transitionState.fromScene == SceneKey.Shade &&
-                                transitionState.toScene == SceneKey.QuickSettings) ||
-                                (transitionState.fromScene == SceneKey.QuickSettings &&
-                                    transitionState.toScene == SceneKey.Shade)
+                            (transitionState.fromScene == Scenes.Shade &&
+                                transitionState.toScene == Scenes.QuickSettings) ||
+                                (transitionState.fromScene == Scenes.QuickSettings &&
+                                    transitionState.toScene == Scenes.Shade)
                         ) {
                             1f
                         } else {

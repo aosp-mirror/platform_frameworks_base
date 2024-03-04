@@ -16,6 +16,8 @@
 
 package com.android.systemui.scene.shared.model
 
+import com.android.compose.animation.scene.SceneKey
+
 /** Models the configuration of the scene container. */
 data class SceneContainerConfig(
 

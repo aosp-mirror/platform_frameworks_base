@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.shared.model
+package com.android.systemui.communal.shared.model
 
-/**
- * Key for a transition. This can be used to specify which transition spec should be used when
- * starting the transition between two scenes.
- */
-data class TransitionKey(
-    val debugName: String,
-    val identity: Any = Object(),
-)
+import com.android.compose.animation.scene.SceneKey
+
+/** Definition of the possible scenes for the communal UI. */
+object CommunalScenes {
+    /** The default scene, shows nothing and is only there to allow swiping to communal. */
+    @JvmField val Blank = SceneKey("blank")
+
+    /** The communal scene containing the hub UI. */
+    @JvmField val Communal = SceneKey("communal")
+
+    @JvmField val Default = Blank
+}

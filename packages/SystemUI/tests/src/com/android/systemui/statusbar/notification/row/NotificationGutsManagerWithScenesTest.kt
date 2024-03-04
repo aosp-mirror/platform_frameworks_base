@@ -38,6 +38,7 @@ import android.util.ArraySet
 import android.view.View
 import android.view.accessibility.accessibilityManager
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.logging.metricsLogger
@@ -55,8 +56,7 @@ import com.android.systemui.scene.data.repository.WindowRootViewVisibilityReposi
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.shade.shadeControllerSceneImpl
 import com.android.systemui.statusbar.NotificationEntryHelper
@@ -602,9 +602,9 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
     private fun setIsLockscreenOrShadeVisible(isVisible: Boolean) {
         val key =
             if (isVisible) {
-                SceneKey.Lockscreen
+                Scenes.Lockscreen
             } else {
-                SceneKey.Bouncer
+                Scenes.Bouncer
             }
         sceneInteractor.changeScene(key, "test")
         sceneInteractor.setTransitionState(

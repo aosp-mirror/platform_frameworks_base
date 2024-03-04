@@ -20,7 +20,7 @@ import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTransitionProgress
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -55,9 +55,9 @@ constructor(
     ) {
         val toScene =
             if (fromState == KeyguardState.GLANCEABLE_HUB) {
-                CommunalSceneKey.Blank
+                CommunalScenes.Blank
             } else {
-                CommunalSceneKey.Communal
+                CommunalScenes.Communal
             }
         var transitionId: UUID? = null
 

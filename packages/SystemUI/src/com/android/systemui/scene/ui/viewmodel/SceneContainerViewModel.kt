@@ -17,13 +17,14 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -96,10 +97,10 @@ constructor(
     fun canChangeScene(toScene: SceneKey): Boolean {
         val interactionTypeOrNull =
             when (toScene) {
-                SceneKey.Bouncer -> Classifier.BOUNCER_UNLOCK
-                SceneKey.Gone -> Classifier.UNLOCK
-                SceneKey.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
-                SceneKey.QuickSettings -> Classifier.QUICK_SETTINGS
+                Scenes.Bouncer -> Classifier.BOUNCER_UNLOCK
+                Scenes.Gone -> Classifier.UNLOCK
+                Scenes.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
+                Scenes.QuickSettings -> Classifier.QUICK_SETTINGS
                 else -> null
             }
 
@@ -109,7 +110,7 @@ constructor(
             val isFalseTouch = falsingInteractor.isFalseTouch(interactionType)
 
             // Only enforce falsing if moving from the lockscreen scene to a new scene.
-            val fromLockscreenScene = currentScene.value == SceneKey.Lockscreen
+            val fromLockscreenScene = currentScene.value == Scenes.Lockscreen
 
             !fromLockscreenScene || !isFalseTouch
         }
