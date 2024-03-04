@@ -205,8 +205,10 @@ android_ravenwood_libgroup {
         // Provide runtime versions of utils linked in below
         "junit",
         "truth",
+        "flag-junit",
         "ravenwood-framework",
         "ravenwood-junit-impl",
+        "ravenwood-junit-impl-flag",
         "mockito-ravenwood-prebuilt",
         "inline-mockito-ravenwood-prebuilt",
     ],
@@ -220,6 +222,7 @@ android_ravenwood_libgroup {
     libs: [
         "junit",
         "truth",
+        "flag-junit",
         "ravenwood-framework",
         "ravenwood-junit",
         "mockito-ravenwood-prebuilt",
