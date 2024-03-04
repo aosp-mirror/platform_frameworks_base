@@ -41,6 +41,8 @@ import android.service.credentials.CredentialProviderService;
 import android.service.credentials.PermissionUtils;
 import android.util.Slog;
 
+import com.android.server.credentials.metrics.ApiStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -180,7 +182,7 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
         } else {
             Slog.w(TAG, "onUiCancellation called but finalResponseReceiver not found");
         }
-        finishSession(/*propagateCancellation=*/false);
+        finishSession(/*propagateCancellation=*/false, ApiStatus.FAILURE.getMetricCode());
     }
 
     @Override
@@ -221,9 +223,10 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
             resultData.putParcelable(
                     CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE, response);
             mFinalResponseReceiver.send(Constants.SUCCESS_CREDMAN_SELECTOR, resultData);
-            finishSession(/*propagateCancellation=*/ false);
+            finishSession(/*propagateCancellation=*/ false, ApiStatus.SUCCESS.getMetricCode());
         } else {
             Slog.w(TAG, "onFinalResponseReceived result receiver not found for pinned entry");
+            finishSession(/*propagateCancellation=*/ false, ApiStatus.FAILURE.getMetricCode());
         }
     }
 
