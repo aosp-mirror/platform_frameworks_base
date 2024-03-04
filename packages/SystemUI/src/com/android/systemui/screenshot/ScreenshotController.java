@@ -29,8 +29,6 @@ import static com.android.systemui.screenshot.LogConfig.logTag;
 import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER;
 import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_INTERACTION_TIMEOUT;
 
-import static java.util.Objects.requireNonNull;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.MainThread;
@@ -73,7 +71,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 import android.window.WindowContext;
 
@@ -81,6 +78,7 @@ import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.settingslib.applications.InterestingConfigChanges;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayController;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -218,17 +216,10 @@ public class ScreenshotController {
     // ScreenshotNotificationSmartActionsProvider.
     static final String EXTRA_ACTION_TYPE = "android:screenshot_action_type";
     static final String EXTRA_ID = "android:screenshot_id";
-    static final String ACTION_TYPE_DELETE = "Delete";
-    static final String ACTION_TYPE_SHARE = "Share";
-    static final String ACTION_TYPE_EDIT = "Edit";
     static final String EXTRA_SMART_ACTIONS_ENABLED = "android:smart_actions_enabled";
-    static final String EXTRA_OVERRIDE_TRANSITION = "android:screenshot_override_transition";
     static final String EXTRA_ACTION_INTENT = "android:screenshot_action_intent";
     static final String EXTRA_ACTION_INTENT_FILLIN = "android:screenshot_action_intent_fillin";
 
-    static final String SCREENSHOT_URI_ID = "android:screenshot_uri_id";
-    static final String EXTRA_CANCEL_NOTIFICATION = "android:screenshot_cancel_notification";
-    static final String EXTRA_DISALLOW_ENTER_PIP = "android:screenshot_disallow_enter_pip";
 
     // From WizardManagerHelper.java
     private static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
@@ -247,10 +238,10 @@ public class ScreenshotController {
     private final Executor mMainExecutor;
     private final ExecutorService mBgExecutor;
     private final BroadcastSender mBroadcastSender;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
-    private final AccessibilityManager mAccessibilityManager;
     @Nullable
     private final ScreenshotSoundController mScreenshotSoundController;
     private final ScrollCaptureClient mScrollCaptureClient;
@@ -278,7 +269,7 @@ public class ScreenshotController {
     private Animator mScreenshotAnimation;
     private RequestCallback mCurrentRequestCallback;
     private String mPackageName = "";
-    private BroadcastReceiver mCopyBroadcastReceiver;
+    private final BroadcastReceiver mCopyBroadcastReceiver;
 
     // When false, the screenshot is taken without showing the ui. Note that this only applies to
     // external displays, as on the default one the UI should **always** be shown.
@@ -300,6 +291,8 @@ public class ScreenshotController {
     @AssistedInject
     ScreenshotController(
             Context context,
+            DisplayManager displayManager,
+            WindowManager windowManager,
             FeatureFlags flags,
             ScreenshotViewProxy.Factory viewProxyFactory,
             ScreenshotActionsProvider.Factory actionsProviderFactory,
@@ -315,6 +308,7 @@ public class ScreenshotController {
             ActivityManager activityManager,
             TimeoutHandler timeoutHandler,
             BroadcastSender broadcastSender,
+            BroadcastDispatcher broadcastDispatcher,
             ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider,
             ActionIntentExecutor actionExecutor,
             UserManager userManager,
@@ -337,16 +331,17 @@ public class ScreenshotController {
         mScreenshotNotificationSmartActionsProvider = screenshotNotificationSmartActionsProvider;
         mBgExecutor = Executors.newSingleThreadExecutor();
         mBroadcastSender = broadcastSender;
+        mBroadcastDispatcher = broadcastDispatcher;
 
         mScreenshotHandler = timeoutHandler;
         mScreenshotHandler.setDefaultTimeoutMillis(SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS);
 
 
         mDisplayId = displayId;
-        mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
+        mDisplayManager = displayManager;
+        mWindowManager = windowManager;
         final Context displayContext = context.createDisplayContext(getDisplay());
         mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
-        mWindowManager = mContext.getSystemService(WindowManager.class);
         mFlags = flags;
         mActionExecutor = actionExecutor;
         mUserManager = userManager;
@@ -362,8 +357,6 @@ public class ScreenshotController {
             }
             mViewProxy.requestDismissal(SCREENSHOT_INTERACTION_TIMEOUT);
         });
-
-        mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
         // Setup the window that we are going to use
         mWindowLayoutParams = FloatingWindowUtil.getFloatingWindowParams();
@@ -390,9 +383,9 @@ public class ScreenshotController {
                 }
             }
         };
-        mContext.registerReceiver(mCopyBroadcastReceiver, new IntentFilter(
-                        ClipboardOverlayController.COPY_OVERLAY_ACTION),
-                ClipboardOverlayController.SELF_PERMISSION, null, Context.RECEIVER_NOT_EXPORTED);
+        mBroadcastDispatcher.registerReceiver(mCopyBroadcastReceiver, new IntentFilter(
+                        ClipboardOverlayController.COPY_OVERLAY_ACTION), null, null,
+                Context.RECEIVER_NOT_EXPORTED, ClipboardOverlayController.SELF_PERMISSION);
         mShowUIOnExternalDisplay = showUIOnExternalDisplay;
     }
 
@@ -567,7 +560,7 @@ public class ScreenshotController {
      * Release the constructed window context.
      */
     private void releaseContext() {
-        mContext.unregisterReceiver(mCopyBroadcastReceiver);
+        mBroadcastDispatcher.unregisterReceiver(mCopyBroadcastReceiver);
         mContext.release();
     }
 
@@ -615,7 +608,7 @@ public class ScreenshotController {
         if (DEBUG_WINDOW) {
             Log.d(TAG, "setContentView: " + mViewProxy.getView());
         }
-        setContentView(mViewProxy.getView());
+        mWindow.setContentView(mViewProxy.getView());
     }
 
     private void enqueueScrollCaptureRequest(UserHandle owner) {
@@ -697,10 +690,8 @@ public class ScreenshotController {
 
             final ScrollCaptureResponse response = mLastScrollCaptureResponse;
             mViewProxy.showScrollChip(response.getPackageName(), /* onClick */ () -> {
-                DisplayMetrics displayMetrics = new DisplayMetrics();
-                getDisplay().getRealMetrics(displayMetrics);
-                Bitmap newScreenshot = mImageCapture.captureDisplay(mDisplayId,
-                        new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels));
+                Bitmap newScreenshot =
+                        mImageCapture.captureDisplay(mDisplayId, getFullScreenRect());
 
                 if (newScreenshot != null) {
                     // delay starting scroll capture to make sure scrim is up before the app moves
@@ -795,10 +786,6 @@ public class ScreenshotController {
                     });
 
         }
-    }
-
-    private void setContentView(View contentView) {
-        mWindow.setContentView(contentView);
     }
 
     @MainThread
@@ -912,12 +899,10 @@ public class ScreenshotController {
                     public void onFinish() {
                     }
                 };
-        Pair<ActivityOptions, ExitTransitionCoordinator> transition =
-                ActivityOptions.startSharedElementAnimation(mWindow, callbacks, null,
-                        Pair.create(mViewProxy.getScreenshotPreview(),
-                                ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
 
-        return transition;
+        return ActivityOptions.startSharedElementAnimation(mWindow, callbacks, null,
+                Pair.create(mViewProxy.getScreenshotPreview(),
+                        ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
     }
 
     /** Reset screenshot view and then call onCompleteRunnable */
