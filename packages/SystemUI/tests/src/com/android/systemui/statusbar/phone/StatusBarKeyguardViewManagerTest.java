@@ -86,6 +86,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
@@ -224,7 +225,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         () -> mock(KeyguardDismissActionInteractor.class),
                         mSelectedUserInteractor,
                         () -> mock(KeyguardSurfaceBehindInteractor.class),
-                        mock(JavaAdapter.class)) {
+                        mock(JavaAdapter.class),
+                        () -> mock(SceneInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -733,7 +735,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         () -> mock(KeyguardDismissActionInteractor.class),
                         mSelectedUserInteractor,
                         () -> mock(KeyguardSurfaceBehindInteractor.class),
-                        mock(JavaAdapter.class)) {
+                        mock(JavaAdapter.class),
+                        () -> mock(SceneInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
