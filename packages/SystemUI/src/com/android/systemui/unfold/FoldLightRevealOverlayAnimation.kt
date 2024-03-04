@@ -16,8 +16,6 @@
 
 package com.android.systemui.unfold
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.BinderThread
 import android.content.Context
@@ -25,6 +23,7 @@ import android.os.Handler
 import android.os.SystemProperties
 import android.util.Log
 import android.view.animation.DecelerateInterpolator
+import androidx.core.animation.addListener
 import com.android.internal.foldables.FoldLockSettingAvailabilityProvider
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DeviceStateRepository
@@ -37,25 +36,17 @@ import com.android.systemui.unfold.FullscreenLightRevealAnimationController.Comp
 import com.android.systemui.unfold.dagger.UnfoldBg
 import com.android.systemui.util.animation.data.repository.AnimationStatusRepository
 import javax.inject.Inject
-import kotlin.coroutines.resume
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.android.asCoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class FoldLightRevealOverlayAnimation
 @Inject
 constructor(
@@ -70,9 +61,6 @@ constructor(
 
     private val revealProgressValueAnimator: ValueAnimator =
         ValueAnimator.ofFloat(ALPHA_OPAQUE, ALPHA_TRANSPARENT)
-    private val areAnimationEnabled: Flow<Boolean>
-        get() = animationStatusRepository.areAnimationsEnabled()
-
     private lateinit var controller: FullscreenLightRevealAnimationController
     @Volatile private var readyCallback: CompletableDeferred<Runnable>? = null
 
@@ -101,30 +89,33 @@ constructor(
 
         applicationScope.launch(bgHandler.asCoroutineDispatcher()) {
             deviceStateRepository.state
-                .map { it == DeviceStateRepository.DeviceState.FOLDED }
+                .map { it != DeviceStateRepository.DeviceState.FOLDED }
                 .distinctUntilChanged()
-                .flatMapLatest { isFolded ->
-                    flow<Nothing> {
-                            if (!areAnimationEnabled.first() || !isFolded) {
-                                return@flow
-                            }
-                            withTimeout(WAIT_FOR_ANIMATION_TIMEOUT_MS) {
-                                readyCallback = CompletableDeferred()
-                                val onReady = readyCallback?.await()
-                                readyCallback = null
-                                controller.addOverlay(ALPHA_OPAQUE, onReady)
-                                waitForScreenTurnedOn()
-                            }
+                .filter { isUnfolded -> isUnfolded }
+                .collect { controller.ensureOverlayRemoved() }
+        }
+
+        applicationScope.launch(bgHandler.asCoroutineDispatcher()) {
+            deviceStateRepository.state
+                .filter {
+                    animationStatusRepository.areAnimationsEnabled().first() &&
+                        it == DeviceStateRepository.DeviceState.FOLDED
+                }
+                .collect {
+                    try {
+                        withTimeout(WAIT_FOR_ANIMATION_TIMEOUT_MS) {
+                            readyCallback = CompletableDeferred()
+                            val onReady = readyCallback?.await()
+                            readyCallback = null
+                            controller.addOverlay(ALPHA_OPAQUE, onReady)
+                            waitForScreenTurnedOn()
                             playFoldLightRevealOverlayAnimation()
                         }
-                        .catchTimeoutAndLog()
-                        .onCompletion {
-                            val onReady = readyCallback?.takeIf { it.isCompleted }?.getCompleted()
-                            onReady?.run()
-                            readyCallback = null
-                        }
+                    } catch (e: TimeoutCancellationException) {
+                        Log.e(TAG, "Fold light reveal animation timed out")
+                        ensureOverlayRemovedInternal()
+                    }
                 }
-                .collect {}
         }
     }
 
@@ -137,34 +128,19 @@ constructor(
         powerInteractor.screenPowerState.filter { it == ScreenPowerState.SCREEN_ON }.first()
     }
 
-    private suspend fun playFoldLightRevealOverlayAnimation() {
+    private fun ensureOverlayRemovedInternal() {
+        revealProgressValueAnimator.cancel()
+        controller.ensureOverlayRemoved()
+    }
+
+    private fun playFoldLightRevealOverlayAnimation() {
         revealProgressValueAnimator.duration = ANIMATION_DURATION
         revealProgressValueAnimator.interpolator = DecelerateInterpolator()
         revealProgressValueAnimator.addUpdateListener { animation ->
             controller.updateRevealAmount(animation.animatedFraction)
         }
-        revealProgressValueAnimator.startAndAwaitCompletion()
-    }
-
-    private suspend fun ValueAnimator.startAndAwaitCompletion(): Unit =
-        suspendCancellableCoroutine { continuation ->
-            val listener =
-                object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        continuation.resume(Unit)
-                        removeListener(this)
-                    }
-                }
-            addListener(listener)
-            continuation.invokeOnCancellation { removeListener(listener) }
-            start()
-        }
-
-    private fun <T> Flow<T>.catchTimeoutAndLog() = catch { exception ->
-        when (exception) {
-            is TimeoutCancellationException -> Log.e(TAG, "Fold light reveal animation timed out")
-            else -> throw exception
-        }
+        revealProgressValueAnimator.addListener(onEnd = { controller.ensureOverlayRemoved() })
+        revealProgressValueAnimator.start()
     }
 
     private companion object {
