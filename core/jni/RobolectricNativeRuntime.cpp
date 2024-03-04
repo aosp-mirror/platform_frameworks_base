@@ -1,12 +1,23 @@
 #include <unicode/putil.h>
 
 #include <string>
+#include <vector>
 
 #include <android/graphics/jni_runtime.h>
 #include <sys/stat.h>
+#include <unicode/putil.h>
+#include <unicode/udata.h>
 #include "core_jni_helpers.h"
 #include "jni.h"
 #include "unicode/locid.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#endif
 
 static JavaVM* javaVM;
 
@@ -87,6 +98,68 @@ int fileExists(const char* filename) {
     return (stat(filename, &buffer) == 0);
 }
 
+static void* mmapFile(const char* dataFilePath) {
+#ifdef _WIN32
+    // Windows needs file path in wide chars to handle unicode file paths
+    int size = MultiByteToWideChar(CP_UTF8, 0, dataFilePath, -1, NULL, 0);
+    std::vector<wchar_t> wideDataFilePath(size);
+    MultiByteToWideChar(CP_UTF8, 0, dataFilePath, -1, wideDataFilePath.data(), size);
+    HANDLE file =
+            CreateFileW(wideDataFilePath.data(), GENERIC_READ, FILE_SHARE_READ, nullptr,
+                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, nullptr);
+    if ((HANDLE)INVALID_HANDLE_VALUE == file) {
+        return nullptr;
+    }
+    struct CloseHandleWrapper {
+        void operator()(HANDLE h) { CloseHandle(h); }
+    };
+    std::unique_ptr<void, CloseHandleWrapper> mmapHandle(
+            CreateFileMapping(file, nullptr, PAGE_READONLY, 0, 0, nullptr));
+    if (!mmapHandle) {
+        return nullptr;
+    }
+    return MapViewOfFile(mmapHandle.get(), FILE_MAP_READ, 0, 0, 0);
+#else
+    int fd = open(dataFilePath, O_RDONLY);
+    if (fd == -1) {
+        return nullptr;
+    }
+    struct stat sb;
+    if (fstat(fd, &sb) == -1) {
+        close(fd);
+        return nullptr;
+    }
+    void* addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (addr == MAP_FAILED) {
+        close(fd);
+        return nullptr;
+    }
+    close(fd);
+    return addr;
+#endif
+}
+
+static bool init_icu(const char* dataPath, const char* defaultLocaleLanguageTag) {
+    void* addr = mmapFile(dataPath);
+    UErrorCode err = U_ZERO_ERROR;
+    udata_setCommonData(addr, &err);
+    if (err != U_ZERO_ERROR) {
+        return false;
+    }
+    if (defaultLocaleLanguageTag != nullptr && defaultLocaleLanguageTag[0] != '\0') {
+        UErrorCode status = U_ZERO_ERROR;
+        icu::Locale locale = icu::Locale::forLanguageTag(defaultLocaleLanguageTag, status);
+        if (U_SUCCESS(status)) {
+            icu::Locale::setDefault(locale, status);
+        }
+        if (U_FAILURE(status)) {
+            fprintf(stderr, "Failed to set the ICU default locale to '%s' (error code %d)\n",
+                    defaultLocaleLanguageTag, status);
+        }
+    }
+    return true;
+}
+
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     javaVM = vm;
     JNIEnv* env = nullptr;
@@ -121,36 +194,29 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
             GetStaticMethodIDOrDie(env, system, "getProperty",
                                    "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
-    // Set the location of ICU data
+    // Get the path to the icu dat file
     auto stringPath = (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
                                                            env->NewStringUTF("icu.data.path"),
                                                            env->NewStringUTF(""));
-    const char* path = env->GetStringUTFChars(stringPath, 0);
-    if (!fileExists(path)) {
-        fprintf(stderr, "Invalid ICU dat file path '%s'\n", path);
+    const char* icuPath = env->GetStringUTFChars(stringPath, 0);
+    if (!fileExists(icuPath)) {
+        fprintf(stderr, "Invalid ICU dat file path '%s'\n", icuPath);
         return JNI_ERR;
     }
-    u_setDataDirectory(path);
-    env->ReleaseStringUTFChars(stringPath, path);
 
-    // Set the default locale, which is required for e.g. SQLite's 'COLLATE UNICODE'.
+    // Get the default language tag
     auto stringLanguageTag =
             (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
                                                  env->NewStringUTF("icu.locale.default"),
                                                  env->NewStringUTF(""));
-    int languageTagLength = env->GetStringLength(stringLanguageTag);
     const char* languageTag = env->GetStringUTFChars(stringLanguageTag, 0);
-    if (languageTagLength > 0) {
-        UErrorCode status = U_ZERO_ERROR;
-        icu::Locale locale = icu::Locale::forLanguageTag(languageTag, status);
-        if (U_SUCCESS(status)) {
-            icu::Locale::setDefault(locale, status);
-        }
-        if (U_FAILURE(status)) {
-            fprintf(stderr, "Failed to set the ICU default locale to '%s' (error code %d)\n",
-                    languageTag, status);
-        }
+
+    bool icuInitialized = init_icu(icuPath, languageTag);
+    if (!icuInitialized) {
+        fprintf(stderr, "Failed to initialize ICU\n");
+        return JNI_ERR;
     }
+    env->ReleaseStringUTFChars(stringPath, icuPath);
     env->ReleaseStringUTFChars(stringLanguageTag, languageTag);
     return JNI_VERSION_1_6;
 }
