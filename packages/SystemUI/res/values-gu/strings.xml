@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"રિંગ કરો"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"વાઇબ્રેટ"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"મ્યૂટ કરો"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"કાસ્ટ કરો"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"રિંગ મ્યૂટ કરી હોવાના કારણે અનુપલબ્ધ છે"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. અનમ્યૂટ કરવા માટે ટૅપ કરો."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. વાઇબ્રેટ પર સેટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. મ્યૂટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>

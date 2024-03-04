@@ -287,7 +287,7 @@
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ମିଡିଆ ଡିଭାଇସ୍‌"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ୟୁଜର"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"ୱାଇ-ଫାଇ"</string>
-    <string name="quick_settings_internet_label" msgid="6603068555872455463">"ଇଣ୍ଟରନେଟ"</string>
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"ଇଣ୍ଟର୍ନେଟ"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"ନେଟୱାର୍କଗୁଡ଼ିକ ଉପଲବ୍ଧ"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ନେଟୱାର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"କୌଣସି ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"ରିଙ୍ଗ"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"ଭାଇବ୍ରେଟ୍‌"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"ମ୍ୟୁଟ"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"କାଷ୍ଟ କରନ୍ତୁ"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"ରିଂକୁ ମ୍ୟୁଟ କରାଯାଇଥିବା ଯୋଗୁଁ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s। ଅନମ୍ୟୁଟ୍‍ କରିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s। ଭାଇବ୍ରେଟ୍‍ ସେଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ। ଆକ୍ସେସିବିଲିଟୀ ସର୍ଭିସ୍‌ ମ୍ୟୁଟ୍‍ କରାଯାଇପାରେ।"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। ମ୍ୟୁଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ। ଆକ୍ସେସିବିଲିଟୀ ସର୍ଭିସ୍‌ ମ୍ୟୁଟ୍‍ କରାଯାଇପାରେ।"</string>

@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Sonnerie"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibreur"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Couper le son"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"Caster"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Indisponible, car la sonnerie est coupée"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Appuyez pour ne plus ignorer."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Appuyez pour mettre en mode vibreur. Vous pouvez ignorer les services d\'accessibilité."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Appuyez pour ignorer. Vous pouvez ignorer les services d\'accessibilité."</string>
