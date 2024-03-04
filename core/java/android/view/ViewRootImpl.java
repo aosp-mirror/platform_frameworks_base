@@ -1210,6 +1210,9 @@ public final class ViewRootImpl implements ViewParent,
             mSensitiveContentProtectionService =
                     ISensitiveContentProtectionManager.Stub.asInterface(
                         ServiceManager.getService(Context.SENSITIVE_CONTENT_PROTECTION_SERVICE));
+            if (mSensitiveContentProtectionService == null) {
+                Log.e(TAG, "SensitiveContentProtectionService shouldn't be null");
+            }
         } else {
             mSensitiveContentProtectionService = null;
         }
@@ -4179,6 +4182,9 @@ public final class ViewRootImpl implements ViewParent,
      */
     void notifySensitiveContentAppProtection(boolean showSensitiveContent) {
         try {
+            if (mSensitiveContentProtectionService == null) {
+                return;
+            }
             // The window would be blocked during screen share if it shows sensitive content.
             mSensitiveContentProtectionService.setSensitiveContentProtection(
                     getWindowToken(), mContext.getPackageName(), showSensitiveContent);
