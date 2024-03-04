@@ -78,7 +78,7 @@ private fun BackupRestoreFileStorage.toBackupRestoreEntity() =
 
         override fun backup(
             backupContext: BackupContext,
-            outputStream: OutputStream
+            outputStream: OutputStream,
         ): EntityBackupResult {
             if (!enableBackup(backupContext)) {
                 Log.i(LOG_TAG, "[$name] $key backup disabled")
