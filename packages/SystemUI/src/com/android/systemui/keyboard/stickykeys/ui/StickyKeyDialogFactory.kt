@@ -20,6 +20,7 @@ import android.app.Dialog
 import android.content.Context
 import android.view.Gravity
 import android.view.Window
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND
 import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -61,6 +62,9 @@ constructor(
         attributes =
             WindowManager.LayoutParams().apply {
                 copyFrom(attributes)
+                // needed because we're above system bars windows, see [TYPE_STATUS_BAR_SUB_PANEL]
+                receiveInsetsIgnoringZOrder = true
+                fitInsetsTypes = WindowInsets.Type.systemBars()
                 title = "StickyKeysIndicator"
             }
     }
