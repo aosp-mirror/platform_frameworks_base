@@ -25,7 +25,7 @@ using namespace android;
 #define CHECK_NOT_NULL(name) \
     LOG_ALWAYS_FATAL_IF(name == nullptr, "nullptr passed as " #name " argument");
 
-void InputTransferToken_acquire(InputTransferToken* inputTransferToken) {
+extern void InputTransferToken_acquire(InputTransferToken* inputTransferToken) {
     // incStrong/decStrong token must be the same, doesn't matter what it is
     inputTransferToken->incStrong((void*)InputTransferToken_acquire);
 }
@@ -52,7 +52,7 @@ jobject AInputTransferToken_toJava(JNIEnv* _Nonnull env,
     CHECK_NOT_NULL(aInputTransferToken);
     const InputTransferToken* inputTransferToken =
             reinterpret_cast<const InputTransferToken*>(aInputTransferToken);
-    return android_window_InputTransferToken_getJavaInputTransferToken(env, inputTransferToken);
+    return android_window_InputTransferToken_getJavaInputTransferToken(env, *inputTransferToken);
 }
 
 void AInputTransferToken_release(AInputTransferToken* aInputTransferToken) {

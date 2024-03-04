@@ -164,6 +164,7 @@ cc_library_shared_for_libandroid_runtime {
                 "android_view_Surface.cpp",
                 "android_view_SurfaceControl.cpp",
                 "android_view_SurfaceControlHdrLayerInfoListener.cpp",
+                "android_view_WindowManagerGlobal.cpp",
                 "android_graphics_BLASTBufferQueue.cpp",
                 "android_view_SurfaceSession.cpp",
                 "android_view_TextureView.cpp",

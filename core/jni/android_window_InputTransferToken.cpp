@@ -83,14 +83,10 @@ InputTransferToken* android_window_InputTransferToken_getNativeInputTransferToke
 }
 
 jobject android_window_InputTransferToken_getJavaInputTransferToken(
-        JNIEnv* env, const InputTransferToken* inputTransferToken) {
-    if (inputTransferToken == nullptr || env == nullptr) {
-        return nullptr;
-    }
-
-    inputTransferToken->incStrong((void*)nativeCreate);
+        JNIEnv* env, const InputTransferToken& inputTransferToken) {
+    inputTransferToken.incStrong((void*)nativeCreate);
     return env->NewObject(gInputTransferTokenClassInfo.clazz, gInputTransferTokenClassInfo.ctor,
-                          reinterpret_cast<jlong>(inputTransferToken));
+                          reinterpret_cast<jlong>(&inputTransferToken));
 }
 
 static void release(InputTransferToken* inputTransferToken) {
