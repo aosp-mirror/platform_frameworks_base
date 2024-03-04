@@ -50,13 +50,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApexStagedEvent;
 import android.content.pm.Flags;
+import android.content.pm.IPackageManagerNative;
+import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -1054,6 +1058,10 @@ public final class DexOptHelper {
                 artManager.scheduleBackgroundDexoptJob();
             }
         }, new IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED));
+
+        if (Flags.useArtServiceV2()) {
+            StagedApexObserver.registerForStagedApexUpdates(artManager);
+        }
     }
 
     /**
@@ -1167,5 +1175,33 @@ public final class DexOptHelper {
                 && (!onIncremental)
                 && dexoptOptions.isCompilationEnabled()
                 && !isApex;
+    }
+
+    private static class StagedApexObserver extends IStagedApexObserver.Stub {
+        private final @NonNull ArtManagerLocal mArtManager;
+
+        static void registerForStagedApexUpdates(@NonNull ArtManagerLocal artManager) {
+            IPackageManagerNative packageNative = IPackageManagerNative.Stub.asInterface(
+                    ServiceManager.getService("package_native"));
+            if (packageNative == null) {
+                Log.e(TAG, "No IPackageManagerNative");
+                return;
+            }
+
+            try {
+                packageNative.registerStagedApexObserver(new StagedApexObserver(artManager));
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to register staged apex observer", e);
+            }
+        }
+
+        private StagedApexObserver(@NonNull ArtManagerLocal artManager) {
+            mArtManager = artManager;
+        }
+
+        @Override
+        public void onApexStaged(@NonNull ApexStagedEvent event) {
+            mArtManager.onApexStaged(event.stagedApexModuleNames);
+        }
     }
 }
