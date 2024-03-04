@@ -22,6 +22,7 @@ import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -179,6 +180,22 @@ class ClientLifecycleManager {
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
+    /** Executes the pending transaction for the given client process. */
+    void dispatchPendingTransaction(@NonNull IApplicationThread client) {
+        if (!Flags.bundleClientTransactionFlag()) {
+            return;
+        }
+        final ClientTransaction pendingTransaction = mPendingTransactions.remove(client.asBinder());
+        if (pendingTransaction != null) {
+            try {
+                scheduleTransaction(pendingTransaction);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to deliver pending transaction", e);
+                // TODO(b/323801078): apply cleanup for individual transaction item if needed.
+            }
+        }
+    }
+
     /**
      * Called to when {@link WindowSurfacePlacer#continueLayout}.
      * Dispatches all pending transactions unless there is an ongoing/scheduled layout, in which
@@ -232,5 +249,18 @@ class ClientLifecycleManager {
         return !mWms.mWindowPlacerLocked.isLayoutDeferred()
                 && !mWms.mWindowPlacerLocked.isTraversalScheduled()
                 && !mWms.mWindowPlacerLocked.isInLayout();
+    }
+
+    /**
+     * Guards the bundleClientTransactionFlag feature with targetSDK on Android 15+.
+     *
+     * Suppressing because it can't guard with @EnabledSince on VANILLA_ICE_CREAM yet since the
+     * version is not published.
+     *
+     * TODO(b/324203798): update in V
+     */
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    static boolean shouldDispatchCompatClientTransactionIndependently(int appTargetSdk) {
+        return appTargetSdk <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
     }
 }
