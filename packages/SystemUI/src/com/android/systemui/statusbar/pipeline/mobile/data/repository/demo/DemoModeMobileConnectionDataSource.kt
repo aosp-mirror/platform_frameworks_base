@@ -71,7 +71,7 @@ constructor(
         val dataType = getString("datatype")?.toDataType()
         val slot = getString("slot")?.toInt()
         val carrierId = getString("carrierid")?.toInt()
-        val inflateStrength = getString("inflate")?.toBoolean()
+        val inflateStrength = getString("inflate").toBoolean()
         val activity = getString("activity")?.toActivity()
         val carrierNetworkChange = getString("carriernetworkchange") == "show"
         val roaming = getString("roam") == "show"
