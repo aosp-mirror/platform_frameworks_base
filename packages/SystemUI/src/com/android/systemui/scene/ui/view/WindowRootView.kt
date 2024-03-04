@@ -25,7 +25,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.core.view.updateMargins
-import com.android.systemui.compose.ComposeFacade
+import com.android.systemui.compose.ComposeInitializer
 import com.android.systemui.res.R
 
 /** A view that can serve as the root of the main SysUI window. */
@@ -45,16 +45,16 @@ open class WindowRootView(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        if (ComposeFacade.isComposeAvailable() && isRoot()) {
-            ComposeFacade.composeInitializer().onAttachedToWindow(this)
+        if (isRoot()) {
+            ComposeInitializer.onAttachedToWindow(this)
         }
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
-        if (ComposeFacade.isComposeAvailable() && isRoot()) {
-            ComposeFacade.composeInitializer().onDetachedFromWindow(this)
+        if (isRoot()) {
+            ComposeInitializer.onDetachedFromWindow(this)
         }
     }
 

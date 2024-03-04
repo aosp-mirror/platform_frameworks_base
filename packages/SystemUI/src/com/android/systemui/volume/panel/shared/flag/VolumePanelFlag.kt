@@ -17,23 +17,18 @@
 package com.android.systemui.volume.panel.shared.flag
 
 import com.android.systemui.Flags
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.flags.RefactorFlagUtils
 import javax.inject.Inject
 
 /** Provides a flag to check for the new Compose based Volume Panel availability. */
 class VolumePanelFlag @Inject constructor() {
 
-    /**
-     * Returns true when the new Volume Panel is available and false the otherwise. The new panel
-     * can only be available when [ComposeFacade.isComposeAvailable] is true.
-     */
+    /** Returns true when the new Volume Panel is available and false the otherwise. */
     fun canUseNewVolumePanel(): Boolean {
-        return ComposeFacade.isComposeAvailable() && Flags.newVolumePanel()
+        return Flags.newVolumePanel()
     }
 
     fun assertNewVolumePanel() {
-        require(ComposeFacade.isComposeAvailable())
         RefactorFlagUtils.assertInNewMode(Flags.newVolumePanel(), Flags.FLAG_NEW_VOLUME_PANEL)
     }
 }
