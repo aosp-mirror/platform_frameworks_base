@@ -26,13 +26,12 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.util.kotlin.Utils.Companion.toQuad
-import com.android.systemui.util.kotlin.sample
+import com.android.systemui.util.kotlin.Utils.Companion.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -56,50 +55,47 @@ constructor(
     ) {
 
     override fun start() {
-        listenForDozingToLockscreenHubOrOccluded()
-        listenForDozingToGone()
+        listenForDozingToAny()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private fun listenForDozingToLockscreenHubOrOccluded() {
+    private fun listenForDozingToAny() {
         scope.launch {
             powerInteractor.isAwake
+                .debounce(50L)
                 .sample(
-                    combine(
-                        startedKeyguardTransitionStep,
-                        keyguardInteractor.isKeyguardOccluded,
-                        communalInteractor.isIdleOnCommunal,
-                        ::Triple
-                    ),
-                    ::toQuad
+                    keyguardInteractor.biometricUnlockState,
+                    startedKeyguardTransitionStep,
+                    keyguardInteractor.isKeyguardOccluded,
+                    communalInteractor.isIdleOnCommunal,
+                    keyguardInteractor.isKeyguardShowing,
+                    keyguardInteractor.isKeyguardDismissible,
                 )
-                .collect { (isAwake, lastStartedTransition, occluded, isIdleOnCommunal) ->
-                    if (isAwake && lastStartedTransition.to == KeyguardState.DOZING) {
-                        startTransitionTo(
-                            if (occluded) {
-                                KeyguardState.OCCLUDED
-                            } else if (isIdleOnCommunal) {
-                                KeyguardState.GLANCEABLE_HUB
-                            } else {
-                                KeyguardState.LOCKSCREEN
-                            }
-                        )
+                .collect {
+                    (
+                        isAwake,
+                        biometricUnlockState,
+                        lastStartedTransition,
+                        occluded,
+                        isIdleOnCommunal,
+                        isKeyguardShowing,
+                        isKeyguardDismissible) ->
+                    if (!(isAwake && lastStartedTransition.to == KeyguardState.DOZING)) {
+                        return@collect
                     }
-                }
-        }
-    }
-
-    private fun listenForDozingToGone() {
-        scope.launch {
-            keyguardInteractor.biometricUnlockState
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { (biometricUnlockState, lastStartedTransition) ->
-                    if (
-                        lastStartedTransition.to == KeyguardState.DOZING &&
-                            isWakeAndUnlock(biometricUnlockState)
-                    ) {
-                        startTransitionTo(KeyguardState.GONE)
-                    }
+                    startTransitionTo(
+                        if (isWakeAndUnlock(biometricUnlockState)) {
+                            KeyguardState.GONE
+                        } else if (isKeyguardDismissible && !isKeyguardShowing) {
+                            KeyguardState.GONE
+                        } else if (occluded) {
+                            KeyguardState.OCCLUDED
+                        } else if (isIdleOnCommunal) {
+                            KeyguardState.GLANCEABLE_HUB
+                        } else {
+                            KeyguardState.LOCKSCREEN
+                        }
+                    )
                 }
         }
     }
