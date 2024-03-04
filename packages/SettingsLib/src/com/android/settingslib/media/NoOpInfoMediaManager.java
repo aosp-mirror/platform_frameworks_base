@@ -16,7 +16,6 @@
 
 package com.android.settingslib.media;
 
-import android.app.Notification;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.RouteListingPreference;
@@ -42,9 +41,8 @@ import java.util.List;
     NoOpInfoMediaManager(
             Context context,
             @NonNull String packageName,
-            Notification notification,
             LocalBluetoothManager localBluetoothManager) {
-        super(context, packageName, notification, localBluetoothManager);
+        super(context, packageName, localBluetoothManager);
     }
 
     @Override

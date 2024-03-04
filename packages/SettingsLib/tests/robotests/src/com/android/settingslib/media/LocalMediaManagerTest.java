@@ -26,6 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -35,7 +36,6 @@ import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
 
 import com.android.settingslib.bluetooth.A2dpProfile;
@@ -75,8 +75,6 @@ public class LocalMediaManagerTest {
     private static final String TEST_ADDRESS = "00:01:02:03:04:05";
 
     @Mock
-    private InfoMediaManager mInfoMediaManager;
-    @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
     @Mock
     private LocalMediaManager.DeviceCallback mCallback;
@@ -87,8 +85,6 @@ public class LocalMediaManagerTest {
     @Mock
     private LocalBluetoothProfileManager mLocalProfileManager;
     @Mock
-    private MediaRouter2Manager mMediaRouter2Manager;
-    @Mock
     private MediaRoute2Info mRouteInfo1;
     @Mock
     private MediaRoute2Info mRouteInfo2;
@@ -97,6 +93,7 @@ public class LocalMediaManagerTest {
 
     private Context mContext;
     private LocalMediaManager mLocalMediaManager;
+    private InfoMediaManager mInfoMediaManager;
     private ShadowBluetoothAdapter mShadowBluetoothAdapter;
     private InfoMediaDevice mInfoMediaDevice1;
     private InfoMediaDevice mInfoMediaDevice2;
@@ -116,10 +113,16 @@ public class LocalMediaManagerTest {
         when(mLocalProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
         when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
 
+        // Need to call constructor to initialize final fields.
+        mInfoMediaManager = mock(
+                InfoMediaManager.class,
+                withSettings().useConstructor(mContext, TEST_PACKAGE_NAME, mLocalBluetoothManager));
+
         mInfoMediaDevice1 = spy(new InfoMediaDevice(mContext, mRouteInfo1));
         mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2);
-        mLocalMediaManager = new LocalMediaManager(mContext, mLocalBluetoothManager,
-                mInfoMediaManager, "com.test.packagename");
+        mLocalMediaManager =
+                new LocalMediaManager(
+                        mContext, mLocalBluetoothManager, mInfoMediaManager, TEST_PACKAGE_NAME);
         mLocalMediaManager.mAudioManager = mAudioManager;
     }
 
@@ -146,7 +149,6 @@ public class LocalMediaManagerTest {
 
         mLocalMediaManager.registerCallback(mCallback);
         assertThat(mLocalMediaManager.connectDevice(device)).isTrue();
-
         verify(mInfoMediaManager).connectToDevice(device);
     }
 

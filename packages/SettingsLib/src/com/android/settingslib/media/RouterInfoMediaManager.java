@@ -17,7 +17,6 @@
 package com.android.settingslib.media;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
@@ -71,10 +70,9 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
     /* package */ RouterInfoMediaManager(
             Context context,
             @NonNull String packageName,
-            Notification notification,
             LocalBluetoothManager localBluetoothManager)
             throws PackageNotAvailableException {
-        super(context, packageName, notification, localBluetoothManager);
+        super(context, packageName, localBluetoothManager);
 
         MediaRouter2 router = null;
 
