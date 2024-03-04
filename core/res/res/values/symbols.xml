@@ -2285,6 +2285,7 @@
   <java-symbol type="bool" name="config_powerDecoupleAutoSuspendModeFromDisplay" />
   <java-symbol type="bool" name="config_powerDecoupleInteractiveModeFromDisplay" />
   <java-symbol type="integer" name="config_minimumScreenOffTimeout" />
+  <java-symbol type="integer" name="config_screenTimeoutOverride" />
   <java-symbol type="integer" name="config_maximumScreenDimDuration" />
   <java-symbol type="fraction" name="config_maximumScreenDimRatio" />
   <java-symbol type="integer" name="config_attentiveTimeout" />

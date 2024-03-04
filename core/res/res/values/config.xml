@@ -2883,6 +2883,13 @@
     -->
     <integer name="config_minimumScreenOffTimeout">10000</integer>
 
+    <!-- User activity timeout: Screen timeout override in milliseconds.
+
+         This value must be greater than 0, otherwise the invalid value will not apply to
+         the screen timeout override policy.
+    -->
+    <integer name="config_screenTimeoutOverride">-1</integer>
+
     <!-- User activity timeout: Maximum screen dim duration in milliseconds.
 
          Sets an upper bound for how long the screen will dim before the device goes
