@@ -39,6 +39,7 @@ import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -113,6 +114,7 @@ class CommunalViewModelTest : SysuiTestCase() {
                 kosmos.communalInteractor,
                 kosmos.communalTutorialInteractor,
                 kosmos.shadeInteractor,
+                kosmos.deviceEntryInteractor,
                 mediaHost,
                 logcatLogBuffer("CommunalViewModelTest"),
             )
