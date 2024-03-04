@@ -19,12 +19,14 @@ package android.telephony;
 import android.annotation.NonNull;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.TelephonyServiceManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsManager;
 import android.telephony.satellite.SatelliteManager;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.util.Preconditions;
 
 
@@ -55,6 +57,11 @@ public class TelephonyFrameworkInitializer {
         sTelephonyServiceManager = Preconditions.checkNotNull(telephonyServiceManager);
     }
 
+    private static boolean hasSystemFeature(Context context, String feature) {
+        if (!Flags.minimalTelephonyManagersConditionalOnFeatures()) return true;
+        return context.getPackageManager().hasSystemFeature(feature);
+    }
+
     /**
      * Called by {@link SystemServiceRegistry}'s static initializer and registers all telephony
      * services to {@link Context}, so that {@link Context#getSystemService} can return them.
@@ -76,33 +83,39 @@ public class TelephonyFrameworkInitializer {
         SystemServiceRegistry.registerContextAwareService(
                 Context.CARRIER_CONFIG_SERVICE,
                 CarrierConfigManager.class,
-                context -> new CarrierConfigManager(context)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+                        ? new CarrierConfigManager(context) : null
         );
         SystemServiceRegistry.registerContextAwareService(
                 Context.EUICC_SERVICE,
                 EuiccManager.class,
-                context -> new EuiccManager(context)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_EUICC)
+                        ? new EuiccManager(context) : null
         );
         SystemServiceRegistry.registerContextAwareService(
                 Context.EUICC_CARD_SERVICE,
                 EuiccCardManager.class,
-                context -> new EuiccCardManager(context)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_EUICC)
+                        ? new EuiccCardManager(context) : null
         );
         SystemServiceRegistry.registerContextAwareService(
                 Context.TELEPHONY_IMS_SERVICE,
                 ImsManager.class,
-                context -> new ImsManager(context)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_IMS)
+                        ? new ImsManager(context) : null
         );
         SystemServiceRegistry.registerContextAwareService(
                 Context.SMS_SERVICE,
                 SmsManager.class,
-                context -> SmsManager.getSmsManagerForContextAndSubscriptionId(context,
-                        SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_MESSAGING)
+                        ? SmsManager.getSmsManagerForContextAndSubscriptionId(context,
+                                SubscriptionManager.DEFAULT_SUBSCRIPTION_ID) : null
         );
         SystemServiceRegistry.registerContextAwareService(
                 Context.SATELLITE_SERVICE,
                 SatelliteManager.class,
-                context -> new SatelliteManager(context)
+                context -> hasSystemFeature(context, PackageManager.FEATURE_TELEPHONY_SATELLITE)
+                        ? new SatelliteManager(context) : null
         );
     }
 
