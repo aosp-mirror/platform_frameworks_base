@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.WindowInsetsController.APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -64,7 +65,11 @@ public class InsetsFlags {
             @ViewDebug.FlagToString(
                     mask = APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS,
                     equals = APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS,
-                    name = "SEMI_TRANSPARENT_NAVIGATION_BARS")
+                    name = "SEMI_TRANSPARENT_NAVIGATION_BARS"),
+            @ViewDebug.FlagToString(
+                    mask = APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS,
+                    equals = APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS,
+                    name = "FORCE_LIGHT_NAVIGATION_BARS")
     })
     public @Appearance int appearance;
 

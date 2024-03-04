@@ -1876,11 +1876,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public @Appearance int getSystemBarsAppearance() {
+        @Appearance int appearance = mHost.getSystemBarsAppearance();
+
+        // We only return the requested appearance, not the implied one.
+        appearance &= ~APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
         if (!mHost.isSystemBarsAppearanceControlled()) {
-            // We only return the requested appearance, not the implied one.
-            return 0;
+            appearance &= ~COMPATIBLE_APPEARANCE_FLAGS;
         }
-        return mHost.getSystemBarsAppearance();
+
+        return appearance;
     }
 
     @Override

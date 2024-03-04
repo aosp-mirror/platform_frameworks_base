@@ -25,6 +25,7 @@ import static android.view.InsetsFrameProvider.SOURCE_DISPLAY;
 import static android.view.InsetsFrameProvider.SOURCE_FRAME;
 import static android.view.ViewRootImpl.CLIENT_IMMERSIVE_CONFIRMATION;
 import static android.view.ViewRootImpl.CLIENT_TRANSIENT;
+import static android.view.WindowInsetsController.APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -983,6 +984,9 @@ public class DisplayPolicy {
                             + " attrs=" + attrs);
                 }
                 break;
+        }
+        if ((attrs.insetsFlags.appearance & APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS) != 0) {
+            attrs.insetsFlags.appearance |= APPEARANCE_LIGHT_NAVIGATION_BARS;
         }
 
         if (LayoutParams.isSystemAlertWindowType(attrs.type)) {
