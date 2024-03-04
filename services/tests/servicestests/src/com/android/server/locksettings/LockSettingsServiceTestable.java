@@ -28,7 +28,6 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.storage.IStorageManager;
-import android.security.KeyStore;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.service.gatekeeper.IGateKeeperService;
 
@@ -39,13 +38,13 @@ import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreMa
 import com.android.server.pm.UserManagerInternal;
 
 import java.io.FileNotFoundException;
+import java.security.KeyStore;
 
 public class LockSettingsServiceTestable extends LockSettingsService {
 
     public static class MockInjector extends LockSettingsService.Injector {
 
         private LockSettingsStorage mLockSettingsStorage;
-        private KeyStore mKeyStore;
         private IActivityManager mActivityManager;
         private IStorageManager mStorageManager;
         private SyntheticPasswordManager mSpManager;
@@ -57,14 +56,13 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         public boolean mIsHeadlessSystemUserMode = false;
         public boolean mIsMainUserPermanentAdmin = false;
 
-        public MockInjector(Context context, LockSettingsStorage storage, KeyStore keyStore,
-                IActivityManager activityManager,
-                IStorageManager storageManager, SyntheticPasswordManager spManager,
-                FakeGsiService gsiService, RecoverableKeyStoreManager recoverableKeyStoreManager,
+        public MockInjector(Context context, LockSettingsStorage storage,
+                IActivityManager activityManager, IStorageManager storageManager,
+                SyntheticPasswordManager spManager, FakeGsiService gsiService,
+                RecoverableKeyStoreManager recoverableKeyStoreManager,
                 UserManagerInternal userManagerInternal, DeviceStateCache deviceStateCache) {
             super(context);
             mLockSettingsStorage = storage;
-            mKeyStore = keyStore;
             mActivityManager = activityManager;
             mStorageManager = storageManager;
             mSpManager = spManager;
@@ -105,11 +103,6 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
-        public KeyStore getKeyStore() {
-            return mKeyStore;
-        }
-
-        @Override
         public IStorageManager getStorageManager() {
             return mStorageManager;
         }
@@ -140,8 +133,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
-        public UnifiedProfilePasswordCache getUnifiedProfilePasswordCache(
-                java.security.KeyStore ks) {
+        public UnifiedProfilePasswordCache getUnifiedProfilePasswordCache(KeyStore ks) {
             return mock(UnifiedProfilePasswordCache.class);
         }
 

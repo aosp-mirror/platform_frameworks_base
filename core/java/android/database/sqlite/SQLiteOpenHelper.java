@@ -377,8 +377,7 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
                     if (writable) {
                         throw ex;
                     }
-                    Log.e(TAG, "Couldn't open " + mName
-                            + " for writing (will try read-only):", ex);
+                    Log.e(TAG, "Couldn't open database for writing (will try read-only):", ex);
                     params = params.toBuilder().addOpenFlags(SQLiteDatabase.OPEN_READONLY).build();
                     db = SQLiteDatabase.openDatabase(filePath, params);
                 }
@@ -425,11 +424,6 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
             }
 
             onOpen(db);
-
-            if (db.isReadOnly()) {
-                Log.w(TAG, "Opened " + mName + " in read-only mode");
-            }
-
             mDatabase = db;
             return db;
         } finally {

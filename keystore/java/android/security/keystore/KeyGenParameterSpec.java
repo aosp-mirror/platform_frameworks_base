@@ -910,7 +910,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     /**
      * Returns whether this key is critical to the device encryption flow.
      *
-     * @see android.security.KeyStore#FLAG_CRITICAL_TO_DEVICE_ENCRYPTION
+     * @see Builder#setCriticalToDeviceEncryption(boolean)
      * @hide
      */
     public boolean isCriticalToDeviceEncryption() {
