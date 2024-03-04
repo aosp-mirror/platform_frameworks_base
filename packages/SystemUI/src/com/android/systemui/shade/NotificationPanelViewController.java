@@ -111,8 +111,6 @@ import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.animation.ActivityTransitionAnimator;
-import com.android.systemui.animation.TransitionAnimator;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
@@ -219,7 +217,6 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
-import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
@@ -259,10 +256,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private static final boolean DEBUG_DRAWABLE = false;
     /** The parallax amount of the quick settings translation when dragging down the panel. */
     public static final float QS_PARALLAX_AMOUNT = 0.175f;
-    private static final long ANIMATION_DELAY_ICON_FADE_IN =
-            ActivityTransitionAnimator.TIMINGS.getTotalDuration()
-                    - CollapsedStatusBarFragment.FADE_IN_DURATION
-                    - CollapsedStatusBarFragment.FADE_IN_DELAY - 48;
     private static final int NO_FIXED_DURATION = -1;
     private static final long SHADE_OPEN_SPRING_OUT_DURATION = 350L;
     private static final long SHADE_OPEN_SPRING_BACK_DURATION = 400L;
@@ -463,7 +456,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
      */
     private float mLinearDarkAmount;
     private boolean mPulsing;
-    private boolean mHideIconsDuringLaunchAnimation = true;
     private int mStackScrollerMeasuringPass;
     /** Non-null if a heads-up notification's position is being tracked. */
     @Nullable
@@ -3159,10 +3151,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return mUnlockedScreenOffAnimationController.isAnimationPlaying();
     }
 
-    @Override
     public boolean shouldHideStatusBarIconsWhenExpanded() {
         if (isLaunchingActivity()) {
-            return mHideIconsDuringLaunchAnimation;
+            return false;
         }
         if (mHeadsUpAppearanceController != null
                 && mHeadsUpAppearanceController.shouldBeVisible()) {
@@ -3257,18 +3248,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     void setStatusAccessibilityImportance(int mode) {
         mKeyguardStatusViewController.setStatusAccessibilityImportance(mode);
-    }
-
-    @Override
-    public void applyLaunchAnimationProgress(float linearProgress) {
-        boolean hideIcons = TransitionAnimator.getProgress(ActivityTransitionAnimator.TIMINGS,
-                linearProgress, ANIMATION_DELAY_ICON_FADE_IN, 100) == 0.0f;
-        if (hideIcons != mHideIconsDuringLaunchAnimation) {
-            mHideIconsDuringLaunchAnimation = hideIcons;
-            if (!hideIcons) {
-                mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
-            }
-        }
     }
 
     @Override
@@ -3482,7 +3461,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ipw.print("mInterpolatedDarkAmount="); ipw.println(mInterpolatedDarkAmount);
         ipw.print("mLinearDarkAmount="); ipw.println(mLinearDarkAmount);
         ipw.print("mPulsing="); ipw.println(mPulsing);
-        ipw.print("mHideIconsDuringLaunchAnimation="); ipw.println(mHideIconsDuringLaunchAnimation);
         ipw.print("mStackScrollerMeasuringPass="); ipw.println(mStackScrollerMeasuringPass);
         ipw.print("mPanelAlpha="); ipw.println(mPanelAlpha);
         ipw.print("mBottomAreaShadeAlpha="); ipw.println(mBottomAreaShadeAlpha);
@@ -4174,7 +4152,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return mShadeRepository.getLegacyIsClosing().getValue();
     }
 
-    @Override
     public void collapseWithDuration(int animationDuration) {
         mFixedDuration = animationDuration;
         collapse(false /* delayed */, 1.0f /* speedUpFactor */);

@@ -37,7 +37,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override val isShadeFullyExpanded: Boolean = false
     override fun collapse(delayed: Boolean, speedUpFactor: Float) {}
     override fun collapse(animate: Boolean, delayed: Boolean, speedUpFactor: Float) {}
-    override fun collapseWithDuration(animationDuration: Int) {}
     override fun instantCollapse() {}
     override fun animateCollapseQs(fullyCollapse: Boolean) {}
     override fun canBeCollapsed(): Boolean = false
@@ -55,7 +54,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override fun dozeTimeTick() {}
     override fun resetViews(animate: Boolean) {}
     override val barState: Int = 0
-    override fun applyLaunchAnimationProgress(linearProgress: Float) {}
     override fun closeUserSwitcherIfOpen(): Boolean {
         return false
     }

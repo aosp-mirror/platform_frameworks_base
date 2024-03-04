@@ -58,9 +58,6 @@ interface ShadeViewController {
     /** Collapses the shade. */
     fun collapse(animate: Boolean, delayed: Boolean, speedUpFactor: Float)
 
-    /** Collapses the shade with an animation duration in milliseconds. */
-    fun collapseWithDuration(animationDuration: Int)
-
     /** Collapses the shade instantly without animation. */
     fun instantCollapse()
 
@@ -101,9 +98,6 @@ interface ShadeViewController {
 
     /** Returns the StatusBarState. */
     val barState: Int
-
-    /** Sets the amount of progress in the status bar launch animation. */
-    fun applyLaunchAnimationProgress(linearProgress: Float)
 
     /** Sets the alpha value of the shade to a value between 0 and 255. */
     fun setAlpha(alpha: Int, animate: Boolean)

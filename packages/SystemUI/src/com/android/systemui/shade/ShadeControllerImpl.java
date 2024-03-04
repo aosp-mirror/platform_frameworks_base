@@ -147,6 +147,11 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     }
 
     @Override
+    public void collapseWithDuration(int animationDuration) {
+        mNpvc.get().collapseWithDuration(animationDuration);
+    }
+
+    @Override
     protected void expandToNotifications() {
         getNpvc().expandToNotifications();
     }
@@ -220,7 +225,6 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
             return false;
         }
     }
-
 
     @Override
     public void collapseShade(boolean animate) {
