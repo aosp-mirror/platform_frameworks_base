@@ -52,6 +52,7 @@ class OpenAppFromIntentColdAfterCameraTest(flicker: LegacyFlickerTest) :
                 // Can't use TAPL due to Recents not showing in 3 Button Nav in full screen mode
                 device.pressHome()
                 tapl.getWorkspace()
+                wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
             }
             teardown { testApp.exit(wmHelper) }
             transitions { testApp.launchViaIntent(wmHelper) }
