@@ -618,7 +618,7 @@ public class HwParcel {
      */
     @FastNative
     @NonNull
-    public native final @Nullable
+    public native final
     HidlMemory readEmbeddedHidlMemory(long fieldHandle, long parentHandle, long offset);
 
     /**

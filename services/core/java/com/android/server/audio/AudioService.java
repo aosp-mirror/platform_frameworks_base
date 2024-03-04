@@ -3577,7 +3577,7 @@ public class AudioService extends IAudioService.Stub
                     && AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
-                    Log.d(TAG, "adjustSreamVolume: postSetAvrcpAbsoluteVolumeIndex index="
+                    Log.d(TAG, "adjustStreamVolume: postSetAvrcpAbsoluteVolumeIndex index="
                             + newIndex + "stream=" + streamType);
                 }
                 mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(newIndex / 10);
@@ -3591,7 +3591,7 @@ public class AudioService extends IAudioService.Stub
                     && streamType == getBluetoothContextualVolumeStream()
                     && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
-                    Log.d(TAG, "adjustSreamVolume postSetLeAudioVolumeIndex index="
+                    Log.d(TAG, "adjustStreamVolume postSetLeAudioVolumeIndex index="
                             + newIndex + " stream=" + streamType);
                 }
                 mDeviceBroker.postSetLeAudioVolumeIndex(newIndex,
@@ -3604,7 +3604,7 @@ public class AudioService extends IAudioService.Stub
                 // the one expected by the hearing aid
                 if (streamType == getBluetoothContextualVolumeStream()) {
                     if (DEBUG_VOL) {
-                        Log.d(TAG, "adjustSreamVolume postSetHearingAidVolumeIndex index="
+                        Log.d(TAG, "adjustStreamVolume postSetHearingAidVolumeIndex index="
                                 + newIndex + " stream=" + streamType);
                     }
                     mDeviceBroker.postSetHearingAidVolumeIndex(newIndex, streamType);
@@ -4544,7 +4544,7 @@ public class AudioService extends IAudioService.Stub
                 && streamType == getBluetoothContextualVolumeStream()
                 && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
             if (DEBUG_VOL) {
-                Log.d(TAG, "adjustSreamVolume postSetLeAudioVolumeIndex index="
+                Log.d(TAG, "setStreamVolume postSetLeAudioVolumeIndex index="
                         + index + " stream=" + streamType);
             }
             mDeviceBroker.postSetLeAudioVolumeIndex(index, mStreamStates[streamType].getMaxIndex(),
