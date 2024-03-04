@@ -24,18 +24,15 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dock.DockManager
-import com.android.systemui.dock.retrieveIsDocked
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
@@ -66,19 +63,21 @@ constructor(
             .onEach { nextScene -> communalInteractor.onSceneChanged(nextScene) }
             .launchIn(applicationScope)
 
+        // TODO(b/322787129): re-enable once custom animations are in place
         // Handle automatically switching to communal when docked.
-        dockManager
-            .retrieveIsDocked()
-            // Allow some time after docking to ensure the dream doesn't start. If the dream
-            // starts, then we don't want to automatically transition to glanceable hub.
-            .debounce(DOCK_DEBOUNCE_DELAY)
-            .sample(keyguardTransitionInteractor.startedKeyguardState, ::Pair)
-            .onEach { (docked, lastStartedState) ->
-                if (docked && lastStartedState == KeyguardState.LOCKSCREEN) {
-                    communalInteractor.onSceneChanged(CommunalScenes.Communal)
-                }
-            }
-            .launchIn(bgScope)
+        //        dockManager
+        //            .retrieveIsDocked()
+        //            // Allow some time after docking to ensure the dream doesn't start. If the
+        // dream
+        //            // starts, then we don't want to automatically transition to glanceable hub.
+        //            .debounce(DOCK_DEBOUNCE_DELAY)
+        //            .sample(keyguardTransitionInteractor.startedKeyguardState, ::Pair)
+        //            .onEach { (docked, lastStartedState) ->
+        //                if (docked && lastStartedState == KeyguardState.LOCKSCREEN) {
+        //                    communalInteractor.onSceneChanged(CommunalScenes.Communal)
+        //                }
+        //            }
+        //            .launchIn(bgScope)
     }
 
     private suspend fun determineSceneAfterTransition(
@@ -89,7 +88,7 @@ constructor(
         val docked = dockManager.isDocked
 
         return when {
-            docked && to == KeyguardState.LOCKSCREEN && from != KeyguardState.GLANCEABLE_HUB -> {
+            docked && to == KeyguardState.LOCKSCREEN && from == KeyguardState.DREAMING -> {
                 CommunalScenes.Communal
             }
             to == KeyguardState.GONE -> CommunalScenes.Blank
