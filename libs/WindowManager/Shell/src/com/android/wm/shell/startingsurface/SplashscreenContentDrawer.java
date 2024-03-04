@@ -417,7 +417,7 @@ public class SplashscreenContentDrawer {
         final SplashViewBuilder builder = new SplashViewBuilder(context, ai);
         final SplashScreenView view = builder
                 .setWindowBGColor(themeBGColor)
-                .chooseStyle(STARTING_WINDOW_TYPE_SPLASH_SCREEN)
+                .chooseStyle(STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN)
                 .build();
         view.setNotCopyable();
         return view;
